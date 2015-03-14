@@ -1,0 +1,122 @@
+# -*- mode: tcl -*-
+# Make input file makeStrawHitsHack_tcalm002.root
+#
+# $Id: makeStrawHitsHack_disk_670_360_670_tcalm002.fcl,v 1.3 2015/01/21 14:44:12 murat Exp $
+# $Author: murat $
+# $Date: 2015/01/21 14:44:12 $
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "murat/fcl/prolog.fcl"
+
+process_name : MakeStrawHitsHackTCalm002
+
+source : {
+    module_type :  RootInput
+    maxEvents   :  -1
+    firstRun    :  1
+}
+
+outputs: {
+    outfile : {
+	module_type : RootOutput
+	fileName    : "makeStrawHitsHack.root"
+    }
+}
+
+services : {
+    message               : @local::default_message
+    TFileService          : { fileName : "makeStrawHitsHack.hist"}
+    RandomNumberGenerator : { }
+    user : {
+	GeometryService        : { inputFile      : "murat/test/geom_01_disk_670_360_670.txt" }
+	ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"         }
+	GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"    }
+	G4Helper               : { }
+	SeedService            : @local::automaticSeeds
+    }
+}
+
+physics : {
+    producers: {
+	generate             : @local::generate
+	g4run                : @local::g4run
+#------------------------------------------------------------------------------
+# calorimeter reconstruction - pass T0 and EMax to MakeStrawHitsHack
+#------------------------------------------------------------------------------
+	CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
+	CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+#	MakeCaloCluster      : @local::MakeCaloCluster
+	MakeCaloCluster      : @local::MakeCaloClusterHack 
+#	makeSH               : @local::makeSH
+	MakeSHHack           : @local::MakeStrawHitsHack  
+	MakeStereoHits       : @local::MakeStereoHits
+	FlagStrawHits        : @local::FlagStrawHits
+	FlagBkgHits          : @local::FlagBkgHits
+#	TrkPatRec             : @local::TrkPatRec
+        TrkPatRec            : @local::TrkPatRecHack
+	TrkExtrapol          : @local::TrkExtrapol
+	CaloMatching         : @local::CaloMatching
+	PidDem               : @local::PidDem
+	TCalm002             : @local::TCalm002
+        MuHitDisplay         : @local::MuHitDisplay
+ 	randomsaver          : @local::randomsaver
+    }
+
+    analyzers: {
+    }
+#------------------------------------------------------------------------------
+# p1 : generate events on the fly
+#------------------------------------------------------------------------------
+    p1 : [generate,
+	  g4run, 
+	  CaloReadoutHitsMaker, CaloCrystalHitsMaker, MakeCaloCluster,
+	  MakeSHHack, MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec,
+	  TrkExtrapol, CaloMatching,
+	  PidDem, TCalm002,
+	  randomsaver ]
+#------------------------------------------------------------------------------
+#  p2 : read events from the input file
+#------------------------------------------------------------------------------
+    p2 : [MakeCaloCluster,
+	  MakeSHHack, MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec,
+	  TrkExtrapol, CaloMatching,
+	  PidDem, TCalm002,
+	  MuHitDisplay,
+	  randomsaver ]
+    
+    e1 : [] 
+
+    trigger_paths  : [p2]
+    end_paths      : []
+
+}
+
+services.user.SeedService.baseSeed         :   0
+services.user.SeedService.maxUniqueEngines :  20
+
+physics.producers.generate.inputfile  : "Mu2eG4/test/CE_01.txt"
+
+physics.producers.CaloReadoutHitsMaker.diagLevel     : 0
+physics.producers.CaloReadoutHitsMaker.maxFullPrint  : 0
+physics.producers.CaloCrystalHitsMaker.diagLevel     : 0
+physics.producers.CaloCrystalHitsMaker.maxFullPrint  : 0
+
+physics.producers.MakeSHHack.maxEemc  :  70.
+physics.producers.MakeSHHack.t1       : -80.
+physics.producers.MakeSHHack.t2       :  30.
+
+physics.producers.MakeStereoHits.StrawHitCollectionLabel : MakeSHHack
+physics.producers.FlagStrawHits.StrawHitCollectionLabel  : MakeSHHack
+physics.producers.FlagBkgHits.StrawHitCollectionLabel    : MakeSHHack
+physics.producers.TrkPatRec.StrawHitCollectionLabel      : MakeSHHack
+
+physics.producers.TCalm002.strawHitMaker                 : MakeSHHack
+physics.producers.TCalm002.histFileName                  : "makeStrawHitsHack_tcalm002.hist"
+physics.producers.TCalm002.debugBits                     : { bit5:1 }
+
+physics.producers.MuHitDisplay.strawHitMakerModuleLabel  : MakeSHHack
+#
+services.scheduler.wantSummary: true

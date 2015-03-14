@@ -1,0 +1,26 @@
+//
+// Run-time config info for the event generators.
+//
+// $Id: petgenconfig_01.txt,v 1.1 2013/11/04 23:37:47 murat Exp $
+// $Author: murat $
+// $Date: 2013/11/04 23:37:47 $
+//
+// Original author Rob Kutschke
+
+// Which generators to enable.
+bool petConversionGun.do    = false;
+bool petParticleGun.do      = true;
+
+// Limits on cos(polar angle):
+double conversionGun.czmin = -1.0;
+double conversionGun.czmax =  1.0;
+
+// Time limits in ns, relative to protons on target.
+double conversionGun.tmin  =    0.;
+double conversionGun.tmax  = 1694.;
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:
+

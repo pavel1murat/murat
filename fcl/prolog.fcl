@@ -1,0 +1,92 @@
+# -*- mode: tcl -*-
+BEGIN_PROLOG
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+TCalm002 : { 
+    module_type       : TCalm002
+
+    strawHitMaker     : makeSH
+    caloClusterMaker  : MakeCaloCluster
+    trkPatRecDem      : TrkPatRec
+    trkExtrapol       : TrkExtrapol
+    trkCalMatch       : CaloMatching
+    pidDem            : PidDem
+    
+    histFileName                 : "makeStrawHitsHack_tcalm002.hist"
+    minTActive                   : 0.
+    debugBits                    : { 
+	# bit0:1  
+	# bit1:1 
+    }
+}
+#------------------------------------------------------------------------------
+# filter on LLHR and EP
+#------------------------------------------------------------------------------
+MuratLLHRFilter : { 
+    module_type                  : LLHRFilter
+
+    g4ModuleLabel                : g4run
+    strawHitMakerModuleLabel     : makeSH
+    strawHitPosMakerModuleLabel  : MakeStereoHits
+    strawHitFlagMakerModuleLabel : FlagStrawHits
+    caloClusterModuleLabel       : MakeCaloCluster
+    trkExtrapol                  : TrkExtrapol
+    trkCalMatch                  : CaloMatching
+    trkPatRecModuleLabel         : TrkPatRec
+    pidModuleLabel               : ParticleID
+
+    minTActive                   : 0.
+    filterLLHRCal                : 0
+    filterEP                     : 0
+    debugBits                    : { 
+	# bit0:1  
+	# bit1:1 
+    }
+}
+#------------------------------------------------------------------------------
+# histogramming modules - filters
+#
+# track reco validation
+#------------------------------------------------------------------------------
+TrackerMCCheck: {
+    module_type                  : TrackerMCCheck # the class name
+    generatorModuleLabel         : generate
+    g4ModuleLabel                : g4run
+    strawHitMakerModuleLabel     : makeSH
+    strawHitPosMakerModuleLabel  : MakeStereoHits
+    flagBgrHitsModuleLabel       : FlagBkgHits
+
+    pdgCode                      : 11
+    generatorCode                : 28
+
+    debugBits                    : { 
+	# bit3:1 
+	# bit4:1 
+	# bit5:1 
+   }
+}
+
+
+TrackRecoCheck : { 
+    module_type                  : TrackRecoCheck
+
+    g4ModuleLabel                : g4run
+    strawHitPosMakerModuleLabel  : MakeStereoHits
+    trkPatRecModuleLabel         : TrkPatRec
+
+    debugBits                    : { 
+	bit11 : 1
+	# bit1:1 
+    }
+}
+
+TTrackRecoAna : { 
+    module_type         : TTrackRecoAna
+    module_name         : TTrackRecoAna
+    
+    diagLevel           : 0
+    trkPatRecLabel      : TrkPatRecDownstreameMinus
+}
+
+END_PROLOG

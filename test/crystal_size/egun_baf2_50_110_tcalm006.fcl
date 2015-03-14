@@ -1,0 +1,82 @@
+# -*- mode: tcl -*-
+# Example 1.
+#
+# $Id: egun_baf2_50_110_tcalm006.fcl,v 1.1 2013/11/04 23:37:46 murat Exp $
+# $Author: murat $
+# $Id: egun_baf2_50_110_tcalm006.fcl,v 1.1 2013/11/04 23:37:46 murat Exp $
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : EgunBaF250110TCalm006
+
+source : {
+  module_type : RootInput
+  fileNames   : [ "out/egun_baf2_50_110.root" ]
+  maxEvents   : -1
+}
+
+outputs: {
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "{DATASET}.{JOB}.strip.root"
+	SelectEvents  : { SelectEvents: [ p1 ] }
+	outputCommands : ['keep *_*_*_*'
+			  #                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
+			  #                   , 'drop mu2eSimParticles_*_*_*'
+			  # Uncomment the above line to reduce file size.
+			 ]  
+    }
+}
+
+services : {
+  message      : @local::default_message
+  TFileService : { fileName : "{DATASET}.trkpatrec.hist"}
+
+  user : {
+    GeometryService        : { inputFile      : "murat/test/crystal_size/geom_01_baf2_50_110.txt"}
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+  }
+
+}
+
+physics : {
+
+  filters : {
+#------------------------------------------------------------------------------
+# TCalm006 is a filter now, so it should be in trigger_paths
+#------------------------------------------------------------------------------
+      tcalm006 : { 
+	  module_type       : TCalm006
+#	  interactiveMode   : 1
+
+	  histFileName      : "egun_baf2_50_110_tcalm006.hist"
+	  debugBits         : { 
+	      # bit0:1  
+	      # bit1:1 
+	      # bit51:1
+	  }
+      }
+  }
+#------------------------------------------------------------------------------
+# analysis modules
+#
+# tcalm002 bit 51: write out events with matched tracks
+#------------------------------------------------------------------------------
+  analyzers : {
+  }
+  
+  p1 : [ tcalm006 ]
+  e1 : [ outfile  ]
+
+  trigger_paths  : [p1]
+  #  end_paths      : [e1]
+  end_paths      : []
+}
+
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true

@@ -1,0 +1,102 @@
+# -*- mode: tcl -*-
+###############################################################################
+# write GDML file - its name defined in Mu2eG4/test/geom_01_gdml.txt
+#
+# copy Mu2eG4/test/geom_01.txt into Mu2eG4/test/geom_01_gdml.txt 
+# and set writeGDML to true
+#
+# $Id: write_gdml.fcl,v 1.2 2015/01/23 22:11:30 murat Exp $
+# $Author: murat $
+# $Date: 2015/01/23 22:11:30 $
+###############################################################################
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : WriteGdml
+
+source : {
+  module_type : EmptyEvent
+  maxEvents   : 1
+  firstRun    : 1
+}
+
+services : {
+
+  message               : @local::default_message
+  TFileService          : { fileName : "write_gdml.hist" }
+  RandomNumberGenerator : { }
+
+  user : {
+    GeometryService        : { inputFile      : "Mu2eG4/test/geom_01_gdml.txt"          }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"         }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"    }
+    G4Helper               : { }
+    SeedService            : @local::automaticSeeds
+  }
+
+}
+
+physics : {
+
+  producers: {
+    generate             : @local::generate
+    g4run                : @local::g4run
+    makeSH               : @local::makeSH
+    CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
+    CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+    randomsaver          : @local::randomsaver
+  }
+
+  analyzers: {
+
+    checkhits: {
+      module_type            : ReadBack
+      generatorModuleLabel   : generate
+      g4ModuleLabel          : g4run
+      caloReadoutModuleLabel : CaloReadoutHitsMaker
+      diagLevel              : 0
+      minimumEnergy          : 0.000
+      maxFullPrint           : 0
+    }
+
+    readStrawHits: {
+      module_type      : ReadStrawHit
+      makerModuleLabel : makeSH
+      diagLevel        : 0
+      maxFullPrint     : 0
+    }
+
+  }
+
+  p1 : [generate, g4run, makeSH, CaloReadoutHitsMaker, CaloCrystalHitsMaker, randomsaver ]
+  e1 : [checkhits, readStrawHits, outfile]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}
+
+outputs: {
+
+  outfile : {
+    module_type : RootOutput
+    fileName    : "write_gdml.root"
+  }
+
+}
+
+services.user.SeedService.baseSeed         :   0
+services.user.SeedService.maxUniqueEngines :  20
+
+physics.producers.generate.inputfile  : "EventGenerator/defaultConfigs/conversionGun.txt"
+
+physics.producers.makeSH.diagLevel                   : 0
+physics.producers.makeSH.maxFullPrint                : 0
+physics.producers.CaloReadoutHitsMaker.diagLevel     : 0
+physics.producers.CaloReadoutHitsMaker.maxFullPrint  : 0
+physics.producers.CaloCrystalHitsMaker.diagLevel     : 0
+physics.producers.CaloCrystalHitsMaker.maxFullPrint  : 0
+
+physics.producers.g4run.visMacro               : "Mu2eG4/test/visyz.mac"

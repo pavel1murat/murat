@@ -1,0 +1,41 @@
+#!/bin/bash
+# -*- mode: bash -*-
+
+# dir_pattern like 4861
+dir_pattern=$1
+
+d0=/mu2e/data/outstagepro/ehrlich/heavy_concrete_6ft
+
+
+#  call: low_level dir_pattern
+
+low_level() {
+    for d1 in `ls $d0 | grep $dir_pattern` ; do 
+#	echo \# ------------ run = $d1
+#	for d2 in `ls $d0/$d1 | awk '{if (length($0) == 7) print $0}'` ; do
+	for d2 in `ls $d0/$d1 | awk '{if (length($0) == 5) print $0}'` ; do
+	    echo $d0/$d1/$d2/data_cosmic.root
+#
+# the output file name should be "c0000101.0${d2}0000"
+# the input file name whould be $d0/$d1/$d2/data_cosmic.root
+        done
+
+	for d2 in `ls $d0/$d1 | awk '{if (length($0) == 8) print $0}'` ; do
+	    echo $d0/$d1/$d2/data_cosmic.root
+        done
+    done
+}
+
+
+#for x in `seq 4861 4880` ; do
+for x in `seq 8174 8193` ; do
+    echo $x
+#    dir_pattern=$x
+    dir_pattern=base2a_bottom.$x
+    output_file=murat/test/strip_ralf_cosmics_mc_${x}.txt
+#    output_file=/dev/stdout
+    if [ -f $output_file ] ; then rm $output_file ; fi
+    low_level $x > $output_file
+done
+
+

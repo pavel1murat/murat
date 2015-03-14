@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+#
+# $Id: SConscript,v 1.2 2013/06/24 05:04:18 murat Exp $
+# $Author: murat $
+# $Date: 2013/06/24 05:04:18 $
+#
+# Original author Rob Kutschke.
+#
+import os, re, string
+Import('env')
+
+libname      = "murat_pet"
+tmp_dir_name = 'tmp/src/'+libname+'-shared'
+#------------------------------------------------------------------------------
+# Step 1: generate dictionaries
+# do not assume the source and target lists to have the same lengths
+# target : $*_dict.cxx file (rootcint also generates a $*_dict.h  file
+#------------------------------------------------------------------------------
+def gen_rootcint(source, target, env, for_signature):
+#    print "\n>>> gen_rootcint called:"
+#    print ">>> source = ",len(source),str(source[0]), str(source[1])
+#    print ">>> target = ",len(target),str(target[0])+'\n'
+
+    class_include = str(source[1]);
+    linkdef       = str(source[0]);
+    
+    cmd = 'if [ ! -d '+tmp_dir_name+' ] ; then mkdir -p '+tmp_dir_name+' ; fi ;';
+    cmd = cmd+"rootcint -f "+str(target[0])+" -c -DMU2E -I./include "+class_include+" "+linkdef+"; ";
+
+#    print ">>> cmd = %s"%cmd
+    return cmd
+
+my_rootcint = Builder(generator     = gen_rootcint,
+                      single_source = 0,
+                      suffix        = '.o',
+                      src_suffix    = '.h')
+
+env.Append(BUILDERS = {'RootCint' : my_rootcint})
+
+list_of_linkdef_files = Glob('dict/*_linkdef.h', strings=True)
+list_of_dict_files    = []
+
+for linkdef in list_of_linkdef_files:
+    f       = string.split(str(linkdef),'/');
+    clname  = string.replace(f[len(f)-1],"_linkdef.h","");
+    include = clname+'.hh';
+    
+    dict    = '#/'+tmp_dir_name+'/'+clname+'_dict.cxx';
+    list_of_dict_files.append(dict);
+
+    env.RootCint(dict,[linkdef,include]) 
+
+#------------------------------------------------------------------------------
+# step 2: compile dictionaries
+# dictionary files are located under $WORK_DIR/tmp
+#------------------------------------------------------------------------------
+for dict in list_of_dict_files:
+#    print ">>> cxx_file: "+dict
+    obj_file = string.replace(dict,".cxx",".o");
+    env.SharedObject(obj_file,dict)
+
+# print "fignya: "+ '#/tmp/%s/%s_dict.cxx'%(dd,ff)

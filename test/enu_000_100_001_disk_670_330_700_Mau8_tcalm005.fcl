@@ -1,0 +1,106 @@
+# -*- mode: tcl -*-
+# Run G4 simulation starting from saved hits.
+# Most of the configuration was copied from g4test_03.fcl
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name: tcalm005
+#------------------------------------------------------------------------------
+# inputs and outputs
+#------------------------------------------------------------------------------
+source: {
+    module_type: RootInput
+    fileNames: ["out/enu_000_100_001_disk_670_330_700_Mau8.root"]
+    maxEvents: -1
+}
+
+outputs: {
+
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "tcalm005_011.root"
+	fastCloning    : false
+#	SelectEvents   : { SelectEvents: [ p1 ] }
+	outputCommands : [ "keep *_*_*_*"
+			   ,"drop mu2e::*_*_*_CosmicFilter"
+			   ,"drop mu2e::*_*_*_aaaa"
+			   ,"drop art::*_*_*_Exercise01"
+			   ,"drop art::*_*_*_RunCosmic"
+			  ]
+    }
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services: {
+    message: @local::default_message
+
+    scheduler: { defaultExceptions : false }
+
+    TFileService          : { fileName : "tcalm005_tfileservice.root" }
+    RandomNumberGenerator : { }
+
+    user : {
+#        GeometryService   :      { inputFile      : "Mu2eG4/test/geom_01.txt" }
+	GeometryService        : { inputFile      : "murat/test/geom_01_disk_670_330_700_Mau8.txt" }
+        ConditionsService :      { conditionsfile : "Mu2eG4/test/conditions_01.txt"  }
+        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+        G4Helper          : { }
+        SeedService       : @local::automaticSeeds
+    }
+}
+#------------------------------------------------------------------------------
+# user modules
+#------------------------------------------------------------------------------
+physics: {
+    producers: {
+
+	tcalm005 : {
+	    module_type       : TCalm005
+	    g4RunModuleLabel  : g4run
+	    
+	    debugBits         : { 
+		                   bit11:1 
+	    }
+            histFileName      : "enu_000_100_001_disk_670_330_700_Mau8_tcalm005.hist"
+#	    interactiveMode   : 1
+	}
+
+        # Save state of the random number engines.
+        randomsaver : @local::randomsaver
+    }
+
+    analyzers: {
+    }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [ tcalm005 ]
+ 
+   
+
+    e1 : [ # eventdisplay 
+	   # outfile
+	   # , checkhits 
+	   # ,readStrawHits
+	  ]
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}
+
+#------------------------------------------------------------------------------
+# redefinitions
+#------------------------------------------------------------------------------
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20
+#------------------------------------------------------------------------------
+# timing printout
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true

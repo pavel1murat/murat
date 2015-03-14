@@ -1,0 +1,89 @@
+# -*- mode: tcl -*-
+# Run G4 simulation starting from saved hits.
+# Most of the configuration was copied from g4test_03.fcl
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name: petana001
+#------------------------------------------------------------------------------
+# input and output
+#------------------------------------------------------------------------------
+source: {
+    module_type: RootInput
+#    fileNames: ["results/2013-06-23-pet001/pet.root"]
+# first time with smearing
+#    fileNames: ["results/2013-06-24-pet001/pet.root"]
+# plus uniform on the spere
+#    fileNames: ["results/2013-06-24-pet001-sphere/pet.root"]
+# plus QGSP_BERT_HP
+    fileNames: ["results/2013-06-25-pet001-bert-hp/pet.root"]
+    maxEvents: -1
+}
+
+outputs: {
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "petana001.root"
+	fastCloning    : false
+	outputCommands : [ "keep *_*_*_*"
+#			   ,"drop mu2e::*_*_*_CosmicFilter"
+#			   ,"drop mu2e::*_*_*_aaaa"
+			  ]
+    }
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services: {
+    message: @local::default_message
+
+    scheduler: { defaultExceptions : false }
+
+    TFileService          : { fileName : "pet.hist" }
+    RandomNumberGenerator : { }
+
+    user : {
+        PetGeometryService     : { inputFile      : "murat/test/pet/geom_01_pet.txt" }
+        ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"  }
+        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+        PetG4Helper            : { }
+        SeedService            : @local::automaticSeeds
+    }
+}
+
+physics: {
+    producers: {
+    }
+
+    filters: {
+	PetAna001: @local::PetAna001
+    }
+
+#     analyzers: {
+#         eventdisplay: {
+# 	    module_type     : EventDisplay
+# 	    g4ModuleLabel   : "g4run1"
+# 	}
+#     }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [  PetAna001 ]
+ 
+    e1 : [ # eventdisplay 
+	  # outfile
+	  # , checkhits 
+	  # ,readStrawHits
+	 ]
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}
+#------------------------------------------------------------------------------
+# redefinitions
+#------------------------------------------------------------------------------
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20

@@ -1,0 +1,15 @@
+///////////////////////////////////////////////////////////////////////////////
+// 2014-01-14: generate flat spectrum, later use weighted events
+//-----------------------------------------------------------------------------
+#include "EventGenerator/defaultConfigs/decayInOrbitGun.txt"
+
+string decayinorbitGun.energySpectrum = "flat";
+
+// Limits on cos(polar angle):
+double decayinorbitGun.czmin = -0.6; // -1.0;  // 0.5;
+double decayinorbitGun.czmax =  0.8; //  1.0;  // 0.7;
+
+// Energy Ranges (MeV), default endpoint value is automatically calculated
+double decayinorbitGun.elow = 100.0;
+// double decayinorbitGun.ehi  = 104.96;
+

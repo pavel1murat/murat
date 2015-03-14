@@ -1,0 +1,11 @@
+//------------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+#include "Mu2eG4/test/geom_01.txt"
+
+// Write mu2e geometry into a GDML file
+// bool   writeGDML             = true;
+string GDMLFileName             = "mu2e_v4_2_7.gdml";
+
+string g4.physicsListName       = "QGSP_BERT";
+int  calorimeter.verbosityLevel = 1;

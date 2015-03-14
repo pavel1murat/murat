@@ -1,0 +1,269 @@
+// -*- mode: c++ -*-
+//
+// Main geometry file for Mu2e.
+//
+// $Id: geom_01_pet.txt,v 1.4 2014/01/19 18:52:38 murat Exp $
+// $Author: murat $
+// $Date: 2014/01/19 18:52:38 $
+//
+// Original author Rob Kutschke
+//
+// Warning:  do not write 10000. as 10,000.; it will be read as two numbers (10., 0.).
+
+string detector.name  = "g4geom_v00";
+
+bool hasBrainImager     = true;
+bool hasBrainPhantom    = true;
+                                      // 'true': Write PET geometry into a GDML file
+bool   writeGDML        = false;
+// bool   writeGDML        = true;
+string GDMLFileName     = "pet002.gdml";
+//-----------------------------------------------------------------------------
+// materials: add water
+//-----------------------------------------------------------------------------
+vector<string> mu2e.materials =
+  { "HeavyConcrete", "ShieldingConcrete", "IsoButane", "StrawGas",
+    "Kapton", "Scintillator", "WAGVacuum", "DSVacuum", "MBOverburden",
+    "ITGasHe_90Isob_10", "ITGasHe_90CF4_10", "ITGasMix", "ITGasHe_75Isob_25_400mbar",
+    "CarbonFiber_resin", "CarbonFiber", "PolypropyleneFoam", "CFoam", "CFoam_332", 
+    "CFoam_166", "CFoam_080", "KptFoam_030", "Polyethylene", 
+    "Polyethylene092B050d095", "Polyethylene092B300d119",
+    "Polyethylene092Li075d106", "Polyethylene092", "Polyethylene096", "StainlessSteel", "Lyso_01", 
+    "H2O", "BaF2", 
+    "A95083", "NbTi", "NbTiCu", "AL999Ni001", "C_19_H_20_O_4", "C_10_H_18_O_4",
+    "C_9_H_22_N_2", "Epotek301", "G10", "SCCableInsulation", "SCCable",
+    "ZirconiumHydridePolyethylene", "EGlass", "G10_FR4",
+    "Polyethylene0020", "StoppingTarget_Al", "CONCRETE_MARS", "BARITE", "Half_Poly"
+};
+
+// Uncomment to enable debug printout on a per event or per track basis.
+// vector<int> g4.steppingActionEventList = { 0, 1 };
+// vector<int> g4.steppingActionTrackList = { 1 };
+// vector<int> g4.strawSDEventList        = { 0, 1, 2, 3 };
+// vector<int> g4.itgaslayerSDEventList   = { 0, 1, 2, 3 };
+// vector<int> g4.trackingActionEventList = { 0, 1, 2, 3, 4, 5};
+
+// Some G4 controls which does not allow it to consume all the memory
+// or to spend all the time tracking one bad particle
+int    g4.steppingActionMaxSteps     = 10000;
+int    g4.stepsSizeLimit             = 10000;
+int    g4.particlesSizeLimit         = 10000;
+double g4.pointTrajectoryMomentumCut = 50.;
+
+
+// If the following number is not zero, G4 will kill all particles alive
+// at that time.
+double g4.steppingActionMaxGlobalTime = 0; //ns
+
+// The information (location, momentum) of all particles will be
+// recorded in the output files for particular moments in time
+//vector<double> g4.steppingActionTimeVD = { 500, 700, 1000 }; //ns
+
+// Enable/disable code that kills uninteresting tracks in SteppingAction,
+// Put a list of G4 volume names where the tracks should be killed,
+// for example { "HallAir" }.
+vector<string> g4SteppingAction.killInTheseVolumes = {};
+bool   g4SteppingAction.killerVerbose = false;
+
+// These are used in both SteppingAction and StackingAction.
+bool   g4.killLowEKine  = false;
+double g4.eKineMin      = 0.0;    // Kinetic energy in MeV
+
+// One can set this limit particle-specific:
+// vector<int>    g4.killLowEKinePDG = {211, -211,   13,  -13,   11,  -11};
+// vector<double> g4.eKineMinPDG     = {9.0,  9.0, 20.0, 20.0, 95.0, 95.0};
+
+// This setting is used for special studies (stored muons)
+// bool g4.killPitchToLowToStore = false;
+
+// current G4 stepper choices are shown below, extend Mu2eWorld.cc if more are needed
+// G4ClassicalRK4
+// G4ImplicitEuler
+// G4ExplicitEuler
+// G4SimpleRunge
+// G4SimpleHeum
+// G4HelixImplicitEuler
+// G4HelixSimpleRunge
+string g4.stepper = "G4ClassicalRK4";
+
+// Enable the Mu2e written version of the decay of muonic atoms.
+bool g4.doMuMinusConversionAtRest = false;
+
+// Define the value of B(pi-> e nu).
+// The allowed values are: { PDG, All, None, nnnnnn } where nnnnnn is any numerical value in the range [0,1]
+string g4.PiENuPolicy          = PDG;
+int    g4.PiENuPolicyVerbosity = 0;
+
+// List of PDG ids of particles for which to switch off decay.
+vector<int> g4.noDecay = {};
+
+// Choose a PhysicsList and set related parameters.
+// string g4.physicsListName = "QGSP_BERT_HP";
+string g4.physicsListName = "QGSP_BERT";
+double g4.minRangeCut     = 0.01;            // mm
+
+bool g4.printPhysicsProcessSummary = false;
+
+// Enable the code to kill low p secondaries from cosmics.
+bool   g4.doCosmicKiller = false;
+double g4.cosmicPcut = 0.;
+double g4.aboveDirtYmin = 0.;
+
+// Load other materials defined specifically for Mu2e.
+vector<string> mu2e.materials =
+  { "HeavyConcrete"               , "ShieldingConcrete"      , "IsoButane"           , "StrawGas",
+    "Kapton"                      , "Scintillator"           , "WAGVacuum"           , "DSVacuum", "MBOverburden",
+    "ITGasHe_90Isob_10"           , "ITGasHe_90CF4_10"       , "ITGasMix"            , "ITGasHe_75Isob_25_400mbar",
+    "CarbonFiber_resin"           , "CarbonFiber"            , "PolypropyleneFoam"   , "CFoam", "CFoam_332", 
+    "CFoam_166"                   , "CFoam_080"              , "KptFoam_030"         , 
+    "Polyethylene092B050d095"     , "Polyethylene092B300d119",
+    "Polyethylene092Li075d106"    , "Polyethylene092"        , "StainlessSteel"      , "Lyso_01",
+    "A95083"                      , "NbTi"                   , "NbTiCu", "AL999Ni001", "C_19_H_20_O_4"    , "C_10_H_18_O_4",
+    "C_9_H_22_N_2"                , "Epotek301"              , "G10"                 , "SCCableInsulation", "SCCable",
+    "ZirconiumHydridePolyethylene", "EGlass"                 , "G10_FR4",
+    "Polyethylene0020",
+    "H2O", "BaF2"
+};
+
+// Control printout of element and material lists.
+bool g4.printElements  = false;
+bool g4.printMaterials = false;
+
+// make detector volume structure visible where enabled
+bool g4.forceAuxEdgeVisible = true;
+// invoke volume overlap check where enabled (draws random numbers)
+bool g4.doSurfaceCheck = false;
+
+// The world volume contains a formal "hall" box that is surrounded by
+// dirt at the bottom and (part way) on the sides.  The rest is filled
+// with air.  The "margins" are the distances from the hall box to the
+// world boundaries.   We specify the minimal allowed margins; the actual
+// values may be increased to position Mu2e in the G4 world volume as
+// specified by world.mu2eOriginInWorld
+//
+double world.minimalMargin.top         = 200;
+double world.minimalMargin.bottom      = 200;
+double world.minimalMargin.xmin        = 200;
+double world.minimalMargin.xmax        = 200;
+double world.minimalMargin.zmin        = 200;
+double world.minimalMargin.zmax        = 200;
+
+vector<double> world.mu2eOriginInWorld = { 0, 0, 0}; // mm
+
+string world.materialName = "G4_AIR";
+bool   world.boxVisible   = true;
+bool   world.boxSolid     = false;
+int    world.verbosityLevel = 0;
+
+// Hall wall details
+double hall.floorThick   = 300.;
+double hall.ceilingThick = 914.4; // 3', docdb-472v5 p16 (section "E")
+double hall.wallThick    = 300.;
+double hall.wallExtMonUCIThick  = 600.;
+string hall.wallMaterialName = "G4_CONCRETE";
+string hall.ceilingMaterialName = "HeavyConcrete";
+string hall.insideMaterialName = "G4_AIR";
+
+bool   hall.formalBoxVisible        = false;
+bool   hall.formalBoxSolid          = false;
+
+bool   hall.floorVisible            = true;
+bool   hall.floorSolid              = true;
+bool   hall.ceilingVisible          = true;
+bool   hall.ceilingSolid            = false;
+bool   hall.wallsVisible            = true;
+bool   hall.wallsSolid              = false;
+
+double mu2e.solenoidOffset          = 0.;   // mm
+double mu2e.detectorSystemZ0        = 0.;   // mm  G4BL: (17730-7292=9801 mm)
+
+//-----------------------------------------------------------------------------
+// PET Brain imager 
+//-----------------------------------------------------------------------------
+double calorimeter.caloMotherRMin               =  110;   
+double calorimeter.caloMotherRMax               =  200;   
+double calorimeter.caloMotherZ0                 = -200;   
+double calorimeter.caloMotherZ1                 =  200;   
+
+double calorimeter.calorimeterZOrigin           = 0;      //in mu2e coordinates -- LEAVE 1 mm for virtual detectors
+string calorimeter.calorimeterFillMaterial      = "DSVacuum";
+string calorimeter.calorimeterDiskMaterial      = "DSVacuum";
+double calorimeter.caseThickness                = 0;  // mm
+
+//-----------------------------------------------------------------------------
+// brain imager description
+//-----------------------------------------------------------------------------
+int    calorimeter.numberOfVanes                =  36;
+int    calorimeter.nCrystalRSlices              =   4;
+int    calorimeter.nCrystalZSlices              =   8;
+double calorimeter.rInscribed                   = 120.; // ????
+
+string calorimeter.shieldMaterial               = "G4_Pb"; 
+string calorimeter.neutronAbsorberMaterial      = "Polyethylene092Li075d106";
+double calorimeter.shieldHalfThickness          = 0.0;
+double calorimeter.neutronAbsorberHalfThickness = 0.0;
+
+// crystal characteristics : 5x5x15mm^3
+
+double calorimeter.crystalHalfLong             = 7.5;   // total length - 15 mm
+double calorimeter.crystalHalfTrans            = 2.5;
+double calorimeter.crystalHexsize              = 2.5;    //mm  half distance across flats of hex crystal
+string calorimeter.crystalMaterial             = "Lyso_01"; //"G4_PbWO4";
+
+string calorimeter.crystalWrapper              = "Polyethylene092";
+double calorimeter.crystalWrapperThickness     = 0.01 ;
+
+string calorimeter.crystalReadoutMaterial      = "G4_Si";
+double calorimeter.crystalReadoutHalfTrans     = 2.2;
+double calorimeter.crystalReadoutHalfThickness = 1;
+int    calorimeter.crystalReadoutChannelCount  = 1; // APDs per crystal
+
+double calorimeter.crystalNonUniformity        = 0.0; // -2 to 2  (A(ro)-A(front))/A(middle)
+double calorimeter.timeGap                     = 30.0;  // ns
+double calorimeter.electronDepositionAPD       = 1000.0; // MeV
+double calorimeter.electronMinEnergyAPD        = 0.1;    // MeV
+
+// Control display and debug printout.
+
+bool calorimeter.calorimeterVisible            = true;
+bool calorimeter.calorimeterSolid              = false;
+bool calorimeter.vaneBoxVisible                = true;
+bool calorimeter.vaneBoxSolid                  = false;
+bool calorimeter.crystalVisible                = false;
+bool calorimeter.crystalSolid                  = false;
+bool calorimeter.absorberBoxVisible            = false;
+bool calorimeter.absorberBoxSolid              = false;
+
+// used by murat/pet/constructBrainImager.cc
+int  calorimeter.verbosityLevel                = 1;
+//------------------------------------------------------------------------------
+// brain phantom - so far, trivial
+//-----------------------------------------------------------------------------
+int    brainPhantom.verbosityLevel             = 1;
+bool   brainPhantom.calorimeterVisible         = true;
+bool   brainPhantom.calorimeterSolid           = false;
+
+double brainPhantom.motherRadius               =  300;   
+double brainPhantom.motherZ0                   = -950;   
+double brainPhantom.motherZ1                   =  100;   
+
+double brainPhantom.radius                     =  100;   
+double brainPhantom.dz                         =   50;
+double brainPhantom.brainZ0                    =    0;   
+string brainPhantom.material                   = "H2O";
+
+double brainPhantom.bodyRadius                 =  200;
+double brainPhantom.bodyDz                     =  350;
+double brainPhantom.bodyZ0                     = -500;   
+string brainPhantom.bodyMaterial               = "H2O";
+
+// End notes:
+//
+// 1) Sources of information:
+//
+//
+//
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

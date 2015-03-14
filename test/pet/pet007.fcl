@@ -1,0 +1,110 @@
+# -*- mode: tcl -*-
+# PET simulation : 32 5x5 crystals, default brain phantom, water
+# dose           : 1 mCi
+# readout window : 1024/5 ns
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+#include "murat/test/pet/petProducers.fcl"
+
+process_name: pet007
+#------------------------------------------------------------------------------
+# input and output
+#------------------------------------------------------------------------------
+source: {
+    module_type : EmptyEvent
+    maxEvents   : 20
+    firstRun    : 1
+}
+
+outputs: {
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "pet007.root"
+	fastCloning    : false
+	outputCommands : [ "keep *_*_*_*"
+			   #			   ,"drop mu2e::*_*_*_CosmicFilter"
+#			   ,"drop mu2e::*_*_*_aaaa"
+			  ]
+    }
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services: {
+    message: @local::default_message
+
+    scheduler: { defaultExceptions : false }
+
+    TFileService          : { fileName : "pet007.hist" }
+    RandomNumberGenerator : { }
+
+    user : {
+        PetGeometryService     : { inputFile      : "murat/test/pet/geom_pet006.txt" }
+        ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"  }
+        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+        PetG4Helper            : { }
+        SeedService            : @local::automaticSeeds
+    }
+}
+#------------------------------------------------------------------------------
+# modules
+#------------------------------------------------------------------------------
+physics: {
+    producers: {
+	PetGen                : @local::PetGen
+	PetG4                 : @local::PetG4
+	PetMakeCaloReadoutHits: @local::PetMakeCaloReadoutHits
+	PetMakeCaloCrystalHits: @local::PetMakeCaloCrystalHits
+	randomsaver           : @local::randomsaver
+    }
+
+    filters: {
+    }
+
+#     analyzers: {
+#         eventdisplay: {
+# 	    module_type     : EventDisplay
+# 	    g4ModuleLabel   : "g4run1"
+# 	}
+#     }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [  
+	  PetGen, 
+	  PetG4, 
+	  PetMakeCaloReadoutHits, 
+	  PetMakeCaloCrystalHits, 
+	  randomsaver
+	 ]
+
+    e1 : [ # eventdisplay 
+	  outfile
+	  # , checkhits 
+	  # ,readStrawHits
+	 ]
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}
+#------------------------------------------------------------------------------
+# redefinitions
+#------------------------------------------------------------------------------
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20
+#------------------------------------------------------------------------------
+# turn off debugging printout
+#------------------------------------------------------------------------------
+physics.producers.PetG4.trackingVerbosityLevel : 0
+#------------------------------------------------------------------------------
+# decays - in the brain phantom, dose = 1mCi, head
+#------------------------------------------------------------------------------
+physics.producers.PetGen.brainPhantomGun.use          : true
+physics.producers.PetGen.brainPhantomGun.dose         : 1.
+physics.producers.PetGen.brainPhantomGun.headFraction : 0.1
+#------------------------------------------------------------------------------
+# end
+#------------------------------------------------------------------------------

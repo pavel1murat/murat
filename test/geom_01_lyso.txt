@@ -1,0 +1,12 @@
+//------------------------------------------------------------------------------
+//  LYSO calorimeter - for comparison
+//-----------------------------------------------------------------------------
+#include "Mu2eG4/test/geom_01.txt"
+
+#include "Mu2eG4/test/calorimeter_LYSO.txt"
+
+// Write mu2e geometry into a GDML file
+// bool   writeGDML             = true;
+string GDMLFileName             = "mu2e_v4_0_6.gdml";
+
+int  calorimeter.verbosityLevel = 1;

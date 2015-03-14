@@ -1,0 +1,10 @@
+#!/bin/bash
+
+dsid=$1
+prefix="echo"
+
+if [ ."$2" != "." ] ; then prefix="" ; fi
+
+for f in ``ls $WORK_DIR/datasets/$dsid/$dsid.files.* ; do
+    $prefix murat/scripts/submit_mu2e_job -c murat/test/cosmicFilter.fcl -S $f -g fnal -F 2000 
+done

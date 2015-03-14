@@ -1,0 +1,13 @@
+//------------------------------------------------------------------------------
+//  BaF2 calorimeter with 180mm long crystals - for comparison
+//-----------------------------------------------------------------------------
+#include "Mu2eG4/test/geom_01.txt"
+
+#include "Mu2eG4/test/calorimeter_BaF2.txt"
+
+int  calorimeter.verbosityLevel    = 1;
+
+vector<double> calorimeter.diskInnerRadius     = {360.,360.}; //mm
+vector<double> calorimeter.diskOuterRadius     = {650.,640.}; //mm
+vector<double> calorimeter.diskRotationAngle   = {0.,0.};     //rad
+vector<double> calorimeter.diskSeparation      = {0.,700.};   //mm  separation w.r.t first disk

@@ -1,0 +1,114 @@
+# -*- mode: tcl -*-
+# Make input file DIO
+#
+# $Id: eph_000_007_001_disk_670_330_700_Mau8.fcl,v 1.5 2013/09/01 21:39:55 murat Exp $
+# $Author: murat $
+# $Date: 2013/09/01 21:39:55 $
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : eph000007001disk670330700Mau8
+
+source : {
+  module_type : EmptyEvent
+  maxEvents   : 5000
+  firstRun    : 1
+}
+
+outputs: {
+  outfile : {
+    module_type : RootOutput
+    fileName    : "eph_000_007_001_disk_670_330_700_Mau8.root"
+    SelectEvents : { SelectEvents : [ p1 ] }
+  }
+}
+
+services : {
+
+  message               : @local::default_message
+  TFileService          : { fileName : "eph_000_007_001_disk_670_330_700_Mau8.hist" }
+  RandomNumberGenerator : { }
+
+  user : {
+
+    GeometryService        : { inputFile      : "murat/test/geom_01_disk_670_330_700_Mau8.txt" }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"         }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"    }
+    G4Helper               : { }
+    SeedService            : @local::automaticSeeds
+  }
+
+}
+
+physics : {
+
+  producers: {
+    generate             : @local::generate
+    g4run                : @local::g4run
+    makeSH               : @local::makeSH
+    CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
+    CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+    randomsaver          : @local::randomsaver
+  }
+
+  filters : {
+
+    removeEmpty:{
+      module_type          : MinimumHits
+      mode                 : "trackerOrCalorimeter"
+      generatorModuleLabel : "generate"
+      g4ModuleLabel        : "g4run"
+      strawHitMakerLabel   : "makeSH"
+      crystalHitMakerLabel : "CaloCrystalHitsMaker"
+    }
+
+  }
+
+  analyzers: {
+
+    checkhits: {
+      module_type            : ReadBack
+      generatorModuleLabel   : generate
+      g4ModuleLabel          : g4run
+      caloReadoutModuleLabel : CaloReadoutHitsMaker
+      diagLevel              : 0
+      minimumEnergy          : 0.000
+      maxFullPrint           : 0
+    }
+
+    readStrawHits: {
+      module_type      : ReadStrawHit
+      makerModuleLabel : makeSH
+      diagLevel        : 0
+      maxFullPrint     : 0
+    }
+
+  }
+
+  p1 : [generate, g4run, makeSH, CaloReadoutHitsMaker, CaloCrystalHitsMaker, randomsaver, removeEmpty ]
+  e1 : [checkhits, readStrawHits, outfile]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}
+
+services.user.SeedService.baseSeed         :   0
+services.user.SeedService.maxUniqueEngines :  20
+
+# physics.producers.generate.inputfile  : "EventGenerator/defaultConfigs/decayInOrbitGun.txt"
+physics.producers.generate.inputfile  : "murat/test/eph_gun_000_007_001.txt"
+
+# physics.producers.makeSH.diagLevel                   : 0
+# physics.producers.makeSH.maxFullPrint                : 0
+# physics.producers.CaloReadoutHitsMaker.diagLevel     : 0
+# physics.producers.CaloReadoutHitsMaker.maxFullPrint  : 0
+# physics.producers.CaloCrystalHitsMaker.diagLevel     : 0
+# physics.producers.CaloCrystalHitsMaker.maxFullPrint  : 0
+
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true

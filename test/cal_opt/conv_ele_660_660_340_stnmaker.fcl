@@ -1,0 +1,190 @@
+# -*- mode: tcl -*-
+# Example 1.
+#
+# $Id: conv_ele_660_660_340_stnmaker.fcl,v 1.1 2014/02/12 15:09:56 murat Exp $
+# $Author: murat $
+# $Id: conv_ele_660_660_340_stnmaker.fcl,v 1.1 2014/02/12 15:09:56 murat Exp $
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : stnmaker
+
+source : {
+  module_type : RootInput
+  fileNames   : [ "out/conv_ele_660_660_340.root" ]
+#  fileNames   : [ "undefined" ]
+  maxEvents   : -1
+}
+
+outputs: {
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "{DATASET}.{JOB}.strip.root"
+	SelectEvents  : { SelectEvents: [ p1 ] }
+	outputCommands : ['keep *_*_*_*'
+			  #                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
+			  #                   , 'drop mu2eSimParticles_*_*_*'
+			  # Uncomment the above line to reduce file size.
+			 ]  
+    }
+}
+
+services : {
+  message      : @local::default_message
+  TFileService : { fileName : "{DATASET}.trkpatrec.hist"}
+
+  user : {
+    GeometryService        : { inputFile      : "murat/test/cal_opt/geom_01_660_660_340.txt"        }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+  }
+
+}
+
+physics : {
+
+  producers : {
+
+    MakeStereoHits : @local::MakeStereoHits
+    FlagStrawHits  : @local::FlagStrawHits
+    FlagBkgHits    : @local::FlagBkgHits
+      
+    TrkPatRec1 : @local::TrkPatRecDownstreameMinus
+#    trkPatRec2 : @local::TrkPatRecUpstreamePlus
+#    trkPatRec3 : @local::TrkPatRecDownstreammuMinus
+#    trkPatRec4 : @local::TrkPatRecUpstreammuPlus
+
+    makeCaloCluster: {
+      module_type                   : MakeCaloClusterNew
+      diagLevel                     : 0
+      generatorModuleLabel          : generate
+      caloCrystalModuleLabel        : CaloCrystalHitsMaker
+      g4ModuleLabel                 : g4run
+      #caloReadoutModuleLabel: CaloReadoutHitsMaker
+      caloClusterAlgorithm          : closest
+      caloClusterSeeding            : energy
+      #     caloClusterSeeding    : time
+      deltaTime                     : 10.0 #ns
+      nCryPerCrystal                : 1
+      EnoiseCut                     : 0.00 #MeV
+      EclusterCut                   : 0.00 #MeV  
+      maxFullPrint                  : 201
+    }
+
+    trkExtrapol : {
+	  module_type                  : TrkExtrapol
+	  diagLevel                    : 1
+	  fitterModuleLabel            : TrkPatRec1
+	  maxNumberStoresPoints        : 1
+	  # MC truth finder, analyzer configuration
+	  KalFitMC : {
+	  }        
+      }
+
+      caloMatching : {
+	  module_type                  : CaloMatching
+	  diagLevel                    : 1
+	  fitterModuleLabel            : TrkPatRec1
+	  trkToCaloExtrapolModuleLabel : trkExtrapol
+	  caloClusterModuleLabel       : makeCaloCluster
+	  outPutNtup                   : 0
+	  caloClusterAlgorithm         : closest
+	  caloClusterSeeding           : energy
+      }
+     PidDem : {
+	 module_type       : ParticleID
+	 fitterModuleLabel : TrkPatRec1
+	 fitparticle       : 11
+	 fitdirection      : 0
+	 verbosity         : 0
+	 diagLevel         : 1 
+	 doDisplay         : false
+     }
+  }
+  filters: {
+#------------------------------------------------------------------------------
+# Stntuple maker sequence
+#------------------------------------------------------------------------------
+      InitStntuple : { 
+	  module_type       : InitStntuple
+	  module_name       : InitStntuple
+
+	  histFileName      : "conv_ele_660_660_340.stn"
+	  splitLevel        : 0
+
+	  debugBits         : { 
+	      # bit0:1  
+	      # bit1:1 
+	      # bit51:1
+	  }
+      }
+
+      StntupleMaker : { 
+	  module_type       : StntupleMaker
+	  module_name       : StntupleMaker
+
+	  processName       : test
+
+	  strawHitMaker       : makeSH
+	  caloCrystalHitMaker : CaloCrystalHitsMaker
+	  caloClusterMaker    : makeCaloCluster
+	  trkPatRecDem        : TrkPatRec1
+	  trkExtrapol         : trkExtrapol
+	  trkCalMatch         : caloMatching
+	  pidDem              : PidDem
+
+	  makeCalData         : 1
+	  makeStrawData       : 1
+	  makeTracks          : 1
+	  makeClusters        : 1
+			      
+	  minTActive          : 0.
+	  debugBits           : { 
+	      # bit0:1  
+	      # bit1:1 
+	      # bit51:1
+	  }
+      }
+
+      FillStntuple : { 
+	  module_type       : FillStntuple
+	  module_name       : FillStntuple
+
+	  debugBits         : { 
+	      # bit0:1  
+	      # bit1:1 
+	      # bit51:1
+	  }
+      }
+  }
+#------------------------------------------------------------------------------
+# analysis modules
+#
+# tcalm002 bit 51: write out events with matched tracks
+#------------------------------------------------------------------------------
+  analyzers : {
+  }
+  
+  p1 : [ makeCaloCluster, 
+         MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec1, 
+         trkExtrapol, caloMatching, 
+	 PidDem,
+         InitStntuple, StntupleMaker, FillStntuple
+       ]
+
+#  e1 : [ outfile ]
+#  e1 : [  ]
+
+  trigger_paths  : [p1]
+  #  trigger_paths  : []
+  #  end_paths      : [e1]
+  end_paths      : []
+}
+
+
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true

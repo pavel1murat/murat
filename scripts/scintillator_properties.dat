@@ -1,0 +1,5 @@
+#
+# name       density     light_yield     decay_time 
+BaF2         4.88           2000.           0.8
+LYSO         7.14          26000.           40.
+LaBr3        5.15          61000            16.

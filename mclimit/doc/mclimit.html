@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>Production mclimit_csm.C</title>
+</head>
+<body>
+<h2>Production mclimit_csm.C</h2>
+
+<h3>Program</h3>
+<ul>
+<li> <a href="mclimit_csm.C">mclimit_csm.C</a>
+<li> <a href="mclimit_csm.h">mclimit_csm.h</a>
+</ul>
+<p>
+<h3>Documentation</h3>
+<a href="../mclimit_csm.pdf">CDF 8128</a> a note describing mclimit_csm.C<br>
+<a href="../chisquare.pdf">CDF 7904</a> a note describing the chisquare/fit function inside mclimti_csm.C<br>
+<a href="../genlimit.pdf">CDF 7587</a> a note describing Joel Heinrich's Bayesian calculator, genlimit.<br>
+<p>
+<h3>Examples</h3>
+<a href="../tchanlc.C">tchanlc.C</a> Example (single top) which does a Bayesian limit calculation<br>
+<a href="../preparetchan.h">preparetchan.h</a> Example (single top) preparation of model hypotheses<br>
+<a href="../tchan_cls.C">tchan_cls.C</a> Example (single top) of computing p-values and CLs limits<br>
+<a href="../Makefile">Makefile</a> Building these as standalone programs linked with Root libraries<br>
+<a href="../Makefile.arch">Makefile.arch</a> Building these as standalone programs linked with Root libraries<br>
+<a href="ptohtml.pl">ptohtml.pl</a> Perl script for taking the output of csm_model::print() from stdin and writing
+a web page to stdout containing the same information.
+<p>
+
+<h3>Release Notes -- May 4, 2008</h3>
+<ul>
+<li> Added a new type of bin-by-bin independent error -- Gaussian.
+The "Poisson flag" for each template now can be one of these three options:
+<ul>
+<li> 0 = CSM_NOBINERR  --   No bin-by-bin uncorrelated uncertainty
+<li> 1 = CSM_POISSON_BINERR --  Assumes histogram is filled with integer-weight
+events and uses Poisson statistics in each bin.  Histograms must be scaled so that
+sqrt(n) is the error in each bin.  To scale a histogram back to match the data prediction,
+use the scale factor argument provided to add_template.  This option ignores the
+error bars supplied with the histogram and uses sqrt(contents) to estimate the Poisson error.
+<li> 2 = CSM_GAUSSIAN_BINERR -- New option for this release.  Pay attention to
+the error bars provided with the histogram.  Pseudoexperiments are generated with
+Gaussian fluctuations around the central value (truncated so they do not go negative).
+The fits are done with the same Poisson likelihood as before, but the contents for
+each template are scaled bin-by-bin so that they have the same fractional error as
+specified by the bin errors, and then scaled back.
+</ul>
+<li>  Updated the interpolation routines to approximate interpolation of the uncertainties
+<li>  Removed the older interpolation routines (originally Fortran and f2c'd; they had been
+recoded anyhow and the originals were there just for inspection.  The Fortran originals gave
+wrong answers when the optimization flag was turned on, and so did the f2c'd versions.  The new
+versions work much better.)
+<li> November 8, 2007:  Many thanks to Kevin Lannon for spotting a memory leak in the fitter --
+deleting the csm instance did not delete the memory allocated for the covariance matrix.
+It tends to build up after a lot of pseudoexperiments.  Now it cleans up better after that.  Other small
+fixes as suggested by Kevin's valgrind run were made Nov. 8 -- none should change any answers.
+<li>  Dec. 9 Update -- speed up histogram interpolation routines by avoiding TH1::Clone
+<li>  Dec. 11 Update -- put text tags on the pseudoexperiment results for easy grepping
+<li> I now recommend MINOS be called whenever MINUIT is -- problems seen in a small fraction of fits
+just failing.  Problem is, MINOS prints out some text to stdout that cannot be switched off.  So
+the pseudoexperiment outputs now have some distinctive text to help separate it from the MINOS stuff.
+<li>  Bugfix -- undo_nuisance_response has to reset the errors to their standard values too.
+<li>  Bugfix December 12, 2007 -- independent errors in each bin in the pseudoexperiments chose the
+wrong option -- fixed.
+<li> Bugfix December 18, 2007 -- Interpolating contents and errors separately tripped up if the same histogram pointer
+was passed in twice -- it swapped contents and errors twice, and now only does it as many times as needed.
+<li> Feb. 6, 2008:  make sure MINOS knows about maxcalls.
+<li> Feb. 7, 2008 -- split the parameters for the maximum number of function calls for MINIMIZE and MINOS.
+Now have setminosmaxcalls() and getminosmaxcalls() methods of csm and mclimit_csm to control MINOS's maxcalls
+separately.  Also move the interpolator which omits the error interpolation when not needed (pflag=0 or 1) 
+to production.
+<li> Feb. 11, 2008 -- call IMPROVE after calling MINIMIZE in TMinuit
+<li> Feb. 12, 2008 -- gracefully handle zero scale factors in fits with Poisson bin errors or Gaussian bin errors
+<li> May 4, 2008 -- Copy over the development version of mclimit_csm.C and mclimit_csm.h.  Many additions/
+improvements.  Bug fixed in the nuisance parameter constraint code.  Bayesian cross-section fitters
+added, with pseudoexperiment simulation.  Alternate integration technique (simpler) added to the
+Bayesian limit code.
+<p>
+
+</ul>
+</body>
+</html>

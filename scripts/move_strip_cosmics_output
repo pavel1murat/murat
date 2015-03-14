@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# example: move_strip_cosmics_output cb000002 cb000012
+
+
+
+ input_dataset=$1
+output_dataset=$2
+          doit=$3
+#
+        prefix=echo
+
+echo doit=$doit
+
+if [ ".$doit" != "." ] ; then prefix="" ; fi
+#------------------------------------------------------------------------------
+# process_one_dir input_dataset idir odir  
+# 'jn' = 'job_number'
+#------------------------------------------------------------------------------
+process_one_dir() {
+     # parameters
+     idir=$1
+    idset=$2
+     odir=$3
+    odset=$4
+
+# find grid 'cluster number' of the original GRID job
+
+#    jn=`cat $idir/${idset}_cosmicFilter.log | grep command: | awk -F . '{print $NF}'`
+
+# grid version:
+    jn=`cat $idir/mu2eRemoteInputFiles.txt | tail -n 1 | awk -F / '{print $7}' | awk -F . '{print $NF}'`
+
+    echo [move_strip_cosmics_output:$LINENO] : $jn
+
+    fn=$idir/${idset}_cosmicFilter.output.root ;
+    if  [ -f $fn ] ; then $prefix mv $fn $odir/${idset}_cosmicFilter.root.$jn ; fi
+
+    fn=$idir/${idset}_cosmicFilter.hist ;
+    if  [ -f $fn ] ; then $prefix mv $fn $odir/hist/${idset}_cosmicFilter.hist.$jn ; fi
+
+    $prefix mv $idir/mu2e.log                          $odir/log/${idset}_cosmicFilter.log.$jn
+
+    fcl=`ls $idir | grep fcl`
+
+    for f in $fcl ; do
+	$prefix mv $idir/$f $odir/log/${idset}_$f.$jn
+    done
+
+    echo [move_strip_cosmics_output:$LINENO] : done... 
+}
+
+#------------------------------------------------------------------------------
+# here main starts
+#------------------------------------------------------------------------------
+odir=/mu2e/data/users/murat/datasets/$output_dataset
+
+if [ ! -d $odir      ] ; then mkdir $odir      ; fi
+if [ ! -d $odir/hist ] ; then mkdir $odir/hist ; fi
+if [ ! -d $odir/log  ] ; then mkdir $odir/log  ; fi
+
+list_of_dirs=`ls /mu2e/data/outstage/murat | grep cosmicFilter`;
+# list_of_dirs=cosmicFilter.6948.16859694
+
+for d in $list_of_dirs ; do
+    idir=/mu2e/data/outstage/murat/$d/00000
+    if [ -f $idir/${input_dataset}_cosmicFilter.hist ] ; then
+	echo ----------------- $idir
+	ls -al $idir
+	process_one_dir $idir $input_dataset $odir $output_dataset
+#	break
+    fi
+done

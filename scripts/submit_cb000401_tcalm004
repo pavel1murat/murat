@@ -1,0 +1,34 @@
+#!/bin/bash
+# -*- mode: bash -*-
+
+# dir_pattern like 4861
+dir_pattern=$1
+
+list_of_runs="04861x0000 04862x0000 04863x0000 04865x0000 04866x0000 \
+              04867x0000 04868x0000 04869x0000 04872x0000 04873x0000 \
+              04876x0000 04877x0000 04878x0000 04879x0000 08174x0000 \
+              08176x0000 08179x0000 08180x0000 08192x0000 08193x0000"
+
+template_fcl=$WORK_DIR/murat/test/cb000401_tcalm004.fcl
+
+for run in $list_of_runs ; do
+    ifile="/mu2e/data/outstage/murat/datasets/cb000401/cb000101."${run}"_MergeStepPoints"
+    echo $ifile
+
+    log_file=cb000101_${run}_MergeStepPoints_tcalm004.log
+       ofile=cb000101_${run}_MergeStepPoints.tcalm004_011.root
+       hfile=cb000101_${run}_MergeStepPoints_tcalm004.hist
+
+     tmp_fcl=/tmp/murat.$$.fcl
+
+     cat $template_fcl | \
+	 awk -v v1=TCALM004_HIST_FILE_NAME -v v2=\"$hfile\"  '{sub(v1,v2);print}'  \
+	 > $tmp_fcl
+     
+     cat $tmp_fcl
+
+     mu2e -c $tmp_fcl -s $ifile -o $ofile >| $log_file 2>&1 
+done
+
+
+exit 0

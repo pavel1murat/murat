@@ -1,0 +1,24 @@
+// -*- mode: c++ -*-
+///////////////////////////////////////////////////////////////////////////////
+// geometry file for PET imager
+//
+// 1. describe a point source, no scattering
+//
+// $Id: geom_pet002.txt,v 1.1 2014/01/19 18:52:38 murat Exp $
+// $Author: murat $
+// $Date: 2014/01/19 18:52:38 $
+///////////////////////////////////////////////////////////////////////////////
+#include "murat/test/pet/geom_01_pet.txt"
+
+double brainPhantom.radius                     =  0.01;   
+double brainPhantom.dz                         =  0.01;
+double brainPhantom.brainZ0                    =    0;   
+string brainPhantom.material                   = "DSVacuum";
+
+double brainPhantom.bodyRadius                 =  200;
+double brainPhantom.bodyDz                     =  350;
+double brainPhantom.bodyZ0                     = -500;   
+string brainPhantom.bodyMaterial               = "DSVacuum";
+//-----------------------------------------------------------------------------
+// end
+//-----------------------------------------------------------------------------

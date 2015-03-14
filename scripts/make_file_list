@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ dir=/mu2e/data/tdr/cosmic/reco
+dsid=cb000002
+
+for name in `ls $dir` ; do 
+    subdir=`echo $name | awk -F / '{print $NF}'`; 
+    x=`echo $subdir | awk -F . '{print $NF}'`; 
+    echo subdir=$subdir x=$x ; 
+    ls -l $dir/$subdir/good/0*/data_cosmic_s3.root | awk '{print $9}' >| datasets/$dsid/$dsid.files.$x
+done

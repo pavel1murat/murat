@@ -1,0 +1,16 @@
+// -*- mode: c++ -*-
+//
+// Main geometry file for the PET imager
+//
+// $Id: geom_pet_lyso_32_05_15_phantom_water.txt,v 1.2 2014/01/19 18:52:38 murat Exp $
+// $Author: murat $
+// $Date: 2014/01/19 18:52:38 $
+//
+#include "murat/test/pet/geom_01_pet.txt"
+
+// bool   writeGDML        = true;
+string GDMLFileName     = "geom_pet_lyso_32_05_15_phantom_water.gdml";
+//-----------------------------------------------------------------------------
+// PET Brain imager : 16cm FOV - 32 5x5mm crystals
+//-----------------------------------------------------------------------------
+int    calorimeter.nCrystalZSlices              =  32;

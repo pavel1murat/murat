@@ -1,0 +1,117 @@
+# -*- mode: tcl -*- 
+# Example of running event mixing.
+#
+# $Id: mixing_01_vane.fcl,v 1.1 2013/06/12 06:17:17 murat Exp $
+# $Author: murat $
+# $Date: 2013/06/12 06:17:17 $
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+# Give this job a name.
+process_name : MixedEvents01
+#------------------------------------------------------------------------------
+# input and output
+#------------------------------------------------------------------------------
+source : {
+  module_type : RootInput
+  fileNames   : [ "/grid/fermiapp/mu2e/DataFiles/ExampleDataFiles/Workbook/conversionOnly_04_data.root" ]
+  maxEvents   : 2000
+}
+
+outputs: {
+  outfile : {
+    module_type   :   RootOutput
+    fileName      :   "out/mixedEvents_01_data.root"
+  }
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services : {
+  message               : @local::default_message
+  TFileService          : { fileName : "out/mixedEvents_01.root" }
+  RandomNumberGenerator : { }
+
+  user : {
+    GeometryService        : { inputFile      : "murat/test/geom_01_vane.txt"        }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+    SeedService            : @local::automaticSeeds
+  }
+
+}
+
+physics : {
+
+  producers: {
+
+    dioMixer             : @local::dioMixer
+    neutronMixer         : @local::neutronMixer
+    protonMixer          : @local::protonMixer
+    photonMixer          : @local::photonMixer
+
+    makeSH               : @local::makeSH
+    CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
+    CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+    randomsaver          : @local::randomsaver
+
+  }
+
+  analyzers: {
+
+    checkhits: {
+      module_type            : ReadBack
+      generatorModuleLabel   : generate
+      g4ModuleLabel          : g4run
+      caloReadoutModuleLabel : CaloReadoutHitsMaker
+      diagLevel              : 0
+      minimumEnergy          : 0.000
+      maxFullPrint           : 0
+      nCrystalNbins          : 100
+    }
+
+    readStrawHits: {
+      module_type      : ReadStrawHit
+      makerModuleLabel : makeSH
+      diagLevel        : 0
+      maxFullPrint     : 0
+      nHitsUpperLimit  : 4000
+    }
+
+  }
+
+  p1 : [ dioMixer, neutronMixer, protonMixer, photonMixer,
+         makeSH, CaloReadoutHitsMaker, CaloCrystalHitsMaker, randomsaver ]
+  e1 : [ checkhits, readStrawHits, outfile ]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}
+
+// Mixing input files and multiplicities: Mu2e-doc-2351-v1
+# physics.producers.dioMixer.fileNames     : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOnly/dioBG_Tracker_data.root" ]
+# physics.producers.neutronMixer.fileNames : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOnly/neutronBG_Tracker_data.root" ]
+# physics.producers.protonMixer.fileNames  : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOnly/protonBG_Tracker_data.root" ]
+# physics.producers.photonMixer.fileNames  : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOnly/photonBG_Tracker_data.root" ]
+# physics.producers.dioMixer.mean     :   9.8
+# physics.producers.neutronMixer.mean :  17.9
+# physics.producers.protonMixer.mean  :  14.0
+# physics.producers.photonMixer.mean  :  47.8
+//-------------------------------------------------------------------------------
+// Mixing input files and multiplicities for the calorimeter studies: Mu2e-doc-2351-v1
+//-------------------------------------------------------------------------------
+physics.producers.dioMixer.fileNames     : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOrCalo/dioBG_data.root"     ]
+physics.producers.neutronMixer.fileNames : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOrCalo/neutronBG_data.root" ]
+physics.producers.protonMixer.fileNames  : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOrCalo/protonBG_data.root"  ]
+physics.producers.photonMixer.fileNames  : [ "/mu2e/data/users/kutschke/MixTest_08/TrackerOrCalo/photonBG_data.root"  ]
+physics.producers.dioMixer.mean          :   60.7
+physics.producers.neutronMixer.mean      :  118.0
+physics.producers.protonMixer.mean       :   15.5
+physics.producers.photonMixer.mean       :  162.3
+
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20

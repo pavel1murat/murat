@@ -1,0 +1,22 @@
+# -*- mode: tcl -*-
+//
+// electron gun, P = 105 MeV, for single crystal studies
+
+#include "EventGenerator/defaultConfigs/particleGun.txt"
+
+// enable process
+bool particleGun.do = true;
+
+vector<double> particleGun.point = {-3904., 0., 11800};   // {-3904., 0., 10200.} tracker center
+
+// Limits on cos(polar angle):
+double particleGun.czmin =   1.;
+double particleGun.czmax =   1.;
+
+// Limits on momentum:
+double particleGun.pmin = 105.0.;
+double particleGun.pmax = 105.0;
+
+// Particle Id
+int particleGun.id = 11;
+

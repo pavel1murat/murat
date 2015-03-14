@@ -1,0 +1,82 @@
+# -*- mode: tcl -*-
+BEGIN_PROLOG
+
+PetGen : { 
+    module_type          : PetEventGenerator
+    inputfile            : "murat/test/pet/petgenconfig_01.txt"
+    allowReplacement     : true
+    messageOnReplacement : true
+    verbose              : 1
+    particleGun          : {
+	use              : false
+    }
+    conversionGun        :  {
+	use              : false
+    }
+    brainPhantomGun      : {
+	use              : false
+	dose             : -1.
+	nMean            : -1.
+	headFraction     : 0.1
+	# by default,  'dz' and 'radius' are defined by the phantom size, 
+	# don't set them here
+    }
+}
+
+PetG4 : {
+    module_type            : PetG4
+    generatorModuleLabel   : PetGen
+    #	    diagLevel              : 10
+    #       trackingVerbosityLevel : 1
+    #	    visMacro               : "murat/test/visxy.mac"
+    # Can selectively enable sensitive detectors here
+    SDConfig : {  
+	# enableAllSDs : true  // this will activate all SDs listed in StepInstanceName enum
+	enableSD : [ calorimeter, calorimeterRO ] // activate just the explicitly listed SDs
+	
+	// // Make arbitrary LogicalVolumes sensitive:
+	// sensitiveVolumes: [ ToyDS3Vacuum ]
+    }
+}
+
+PetMakeCaloReadoutHits   : {
+    module_type          : PetMakeCaloReadoutHits
+    g4ModuleLabel        : PetG4
+    diagLevel            : 0
+    caloLRUcorrection    : false
+    caloNonLinCorrection : false
+    maxFullPrint         : 0
+}
+
+PetMakeCaloCrystalHits : {
+    module_type          	: PetMakeCaloCrystalHits
+    g4ModuleLabel        	: PetG4
+    caloReadoutModuleLabel      : PetMakeCaloReadoutHits
+    diagLevel            	: 0
+    caloChargeProductionEffects	: false
+    caloROnoiseEffect    	: false
+    maxFullPrint         	: 0
+    minimumEnergy       	: 0.0
+    maximumEnergy       	: 1000.0
+    minimumTimeGap      	: 100.0
+}
+
+PetAna001: {
+    module_type           : PetAna001
+    histFileName          : "petana001.hist"
+    crystalHitMaker       : PetMakeCaloCrystalHits
+    genParticleMaker      : PetGen
+    minPhotopeakE         : 0.420
+    maxPhotopeakE         : 0.600
+    debugBits             : {}
+}
+
+PetAna002: {
+    module_type           : PetAna002
+    histFileName          : "petana002.hist"
+    crystalHitMaker       : PetMakeCaloCrystalHits
+    genParticleMaker      : PetGen
+    debugBits             : {}
+}
+
+END_PROLOG

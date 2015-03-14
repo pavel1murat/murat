@@ -1,0 +1,27 @@
+// mode: -*- c++ -*-
+//
+// geometry file for Mu2e.
+//
+// $Id: geom_01_disk_670_360_670.txt,v 1.2 2014/01/07 23:15:42 murat Exp $
+// $Author: murat $
+// $Date: 2014/01/07 23:15:42 $
+//
+// Original author Rob Kutschke
+//
+#include "Mu2eG4/test/geom_01.txt"
+
+// Write mu2e geometry into a GDML file
+bool   writeGDML        = false;
+// bool   writeGDML        = true;
+string GDMLFileName     = "mu2e_dev2.gdml";
+
+string g4.physicsListName = "QGSP_BERT";
+
+// redefined calorimeter parameters
+
+vector<double> calorimeter.diskInnerRadius     = {360.,360.};  // mm
+vector<double> calorimeter.diskOuterRadius     = {670.,670.};  // mm
+vector<double> calorimeter.diskRotationAngle   = {0. ,0.};     // rad
+vector<double> calorimeter.diskSeparation      = {300.,970.};  // mm, offset w.r.t calorimeterZOrigin
+
+//

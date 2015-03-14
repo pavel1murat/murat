@@ -1,0 +1,14 @@
+#!/bin/bash
+
+bgr_dir="/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good"
+
+for i in {0..6} ; do 
+    index=`printf "%05i" $i`
+    echo $index
+    murat/scripts/submit_local_job JobConfig/TDR/digiMixConversion_interactive.fcl \
+        "-n 1000 $bgr_dir/$index/data_mixBG.root" 
+
+    mv dataDigiMixConversion.root dataDigiMixConversion.root.$index
+    mv histDigiMixConversion.root histDigiMixConversion.root.$index
+
+done

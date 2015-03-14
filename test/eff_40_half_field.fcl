@@ -1,0 +1,43 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate 20 DIO electrons per microbunch, full spectru
+# make STNTUPLE in one go, without creating an intermediate file
+#------------------------------------------------------------------------------
+# $Id: eff_40_half_field.fcl,v 1.1 2014/07/16 23:23:55 murat Exp $
+# $Author: murat $
+# $Date: 2014/07/16 23:23:55 $
+
+//test: // This must be commented out for grid production.
+BEGIN_PROLOG
+#  muStops    : [ "/mu2e/data/tdr/beam/g4s3p5/mergedMuonStops/mustops.1025a_1426a_1504a.15318715.root" ]
+#  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+#  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3-test/tdr.beam.mix.bgonly-test.1516a.15405463/good/00000/data_mixBG.root"]
+END_PROLOG
+
+#include "Stntuple/test/generate_mergePatRec_stnmaker.fcl"
+
+process_name : E40HalfField
+
+# for 105 MeV/c electron : E = 105.00124           MeV
+# for 105 MeV/c muon     : E = 148.9584269653785   MeV
+
+physics.producers.generate.mean                       : -1
+physics.producers.generate.physics.spectrumShape      : "flat"
+physics.producers.generate.physics.spectrumResolution : 0.1
+physics.producers.generate.physics.pdgId              : 11
+physics.producers.generate.physics.elow               : 40.
+physics.producers.generate.physics.ehi                : 40.001
+physics.producers.generate.diagLevel                  : 1      # fill histograms
+physics.producers.CalPatRec.minClusterEnergy          : 30.
+
+services.TFileService.fileName                        : "eff_40_half_field_stnmaker.hist"
+services.user.GeometryService.inputFile               : "murat/test/geom_tdr_half_field.txt"
+
+physics.filters.InitStntuple.histFileName             : "eff_40_half_field_stnmaker.stn" 
+
+outputs.detectorOutput.fileName                       : "eff_40_half_field_stnmaker.root"
+# outputs.detectorOutput.SelectEvents.SelectEvents      : []
+outputs.detectorOutput.SelectEvents                   : {}
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

@@ -1,0 +1,33 @@
+// -*- mode: c++ -*-
+///////////////////////////////////////////////////////////////////////////////
+// geometry file for PET imager
+//
+// 1. describe a point source, no scattering
+//
+// $Id: geom_pet006.txt,v 1.1 2014/01/19 18:52:38 murat Exp $
+// $Author: murat $
+// $Date: 2014/01/19 18:52:38 $
+///////////////////////////////////////////////////////////////////////////////
+#include "murat/test/pet/geom_01_pet.txt"
+
+// bool   writeGDML        = true;
+string GDMLFileName     = "geom_pet_lyso_32_05_15_phantom_water.gdml";
+//-----------------------------------------------------------------------------
+// PET Brain imager : 16cm FOV - 32 5x5mm crystals
+//-----------------------------------------------------------------------------
+int    calorimeter.nCrystalZSlices              =  32;
+//------------------------------------------------------------------------------
+// phantom
+//-----------------------------------------------------------------------------
+double brainPhantom.radius                     =  100.;   
+double brainPhantom.dz                         =   50.;
+double brainPhantom.brainZ0                    =    0;   
+string brainPhantom.material                   = "H2O";
+
+double brainPhantom.bodyRadius                 =  200;
+double brainPhantom.bodyDz                     =  350;
+double brainPhantom.bodyZ0                     = -500;   
+string brainPhantom.bodyMaterial               = "H2O";
+//-----------------------------------------------------------------------------
+// end
+//-----------------------------------------------------------------------------

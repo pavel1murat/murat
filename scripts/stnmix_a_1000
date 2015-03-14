@@ -1,0 +1,44 @@
+#!/bin/bash
+
+i1=$1
+i2=$2
+
+echo i1=$i1 i2=$i2
+#------------------------------------------------------------------------------
+# prepare input dataset
+#------------------------------------------------------------------------------
+bgr_dir="/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good"
+
+export DATASET=tmp/fcl/input_list.$$
+if [ -f $DATASET ] ; then rm $DATASET ; fi
+touch $DATASET
+for i in $(seq $i1 $i2) ; do
+    index=`printf "%05i" $i`
+    echo $index
+    ls $bgr_dir/$index/data_mixBG.root >> $DATASET
+done
+
+export NJOBS=`cat $DATASET | grep -v "#" | wc -l`
+echo NJOBS=$NJOBS
+#------------------------------------------------------------------------------
+# prepare input FCL file
+#------------------------------------------------------------------------------
+TMP_FCL=$WORK_DIR/tmp/fcl/fcl_input.$$.fcl
+cp Stntuple/test/defsDigiMix_mergePatRec_stnmaker.fcl $TMP_FCL
+
+list="INPUT_DATA_FILE=@nil"
+list=$list" ART_HIST_FILE=art.hist"
+list=$list" OUTPUT_STNTUPLE=mu2e.stn"
+
+echo list=$list
+for x in $list ; do
+    var=`echo $x | awk -F = '{print $1}'`
+    val=`echo $x | awk -F = '{print $2}'`
+    echo var=$var  val=$val
+    cat $TMP_FCL | awk -v v1={$var} -v v2=$val '{sub(v1,v2);print}' > $TMP_FCL.1
+    mv $TMP_FCL.1 $TMP_FCL
+done
+
+cmd="mu2eart --setup=./setup.sh --fcl=$TMP_FCL --inputs=$DATASET --njobs=$NJOBS --verbose"
+
+echo $cmd

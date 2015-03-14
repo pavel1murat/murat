@@ -1,0 +1,166 @@
+# -*- mode: tcl -*-
+# Example 1.
+#
+# $Id: egun_095_095_001_disk_670_330_700_tcalm002.fcl,v 1.1 2013/09/20 15:00:18 murat Exp $
+# $Author: murat $
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : tcalm002
+
+source : {
+  module_type : RootInput
+  fileNames   : [ "/mu2e/data/users/murat/dev2/egun_095_095_001_disk_670_330_700.root" ]
+#  fileNames   : [ "undefined" ]
+  maxEvents   : -1
+}
+
+outputs: {
+  outfile : {
+      module_type    : RootOutput
+      fileName       : "egun_095_095_001_disk_670_330_700_tcalm002_bit_52.root"
+      SelectEvents  : { SelectEvents: [ p1 ] }
+      outputCommands : ['keep *_*_*_*'
+#                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
+#                   , 'drop mu2eSimParticles_*_*_*'
+# Uncomment the above line to reduce file size.
+                     ]  
+  }
+}
+
+services : {
+  message               : @local::default_message
+  TFileService          : { fileName : "{DATASET}.trkpatrec.hist"}
+  RandomNumberGenerator : { }
+
+  user : {
+      GeometryService        : { inputFile      : "murat/test/geom_01_disk_670_330_700.txt"        }
+      ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+      GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+      G4Helper               : { }
+      SeedService            : @local::automaticSeeds
+  }
+
+}
+
+physics : {
+
+  producers : {
+
+      MakeStereoHits : @local::MakeStereoHits
+      FlagStrawHits  : @local::FlagStrawHits
+      FlagBkgHits    : @local::FlagBkgHits
+      
+      TrkPatRecDem   : @local::TrkPatRecDownstreameMinus
+
+#    trkPatRec2 : @local::TrkPatRecUpstreamePlus
+#    trkPatRec3 : @local::TrkPatRecDownstreammuMinus
+#    trkPatRec4 : @local::TrkPatRecUpstreammuPlus
+
+     CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+
+      makeCaloCluster: {
+	  module_type                   : MakeCaloClusterNew
+	  diagLevel                     : 0
+	  generatorModuleLabel          : generate
+	  caloCrystalModuleLabel        : CaloCrystalHitsMaker
+	  g4ModuleLabel                 : g4run
+	  #caloReadoutModuleLabel: CaloReadoutHitsMaker
+	  caloClusterAlgorithm          : closest
+	  caloClusterSeeding            : energy
+	  #     caloClusterSeeding    : time
+	  deltaTime                     : 10.0 #ns
+	  nCryPerCrystal                : 1
+	  EnoiseCut                     : 0.00 #MeV
+	  EclusterCut                   : 0.00 #MeV  
+	  maxFullPrint                  : 201
+      }
+
+      trkExtrapol : {
+	  module_type                  : TrkExtrapol
+	  diagLevel                    : 1
+	  fitterModuleLabel            : TrkPatRecDem
+	  maxNumberStoresPoints        : 1
+	  # MC truth finder, analyzer configuration
+	  KalFitMC : {
+	  }        
+      }
+
+      caloMatching : {
+	  module_type                  : CaloMatching
+	  diagLevel                    : 1
+	  fitterModuleLabel            : TrkPatRecDem
+	  trkToCaloExtrapolModuleLabel : trkExtrapol
+	  caloClusterModuleLabel       : makeCaloCluster
+	  outPutNtup                   : 0
+	  caloClusterAlgorithm         : closest
+	  caloClusterSeeding           : energy
+      }
+      
+      PidDem : {
+	  module_type       : ParticleID
+	  fitterModuleLabel : TrkPatRecDem
+	  fitparticle       : 11
+	  fitdirection      : 0
+	  verbosity         : 0
+	  diagLevel         : 1 
+	  doDisplay         : false
+      }
+#------------------------------------------------------------------------------
+# TCalm002 is a filter now, so it should be in trigger_paths
+#------------------------------------------------------------------------------
+      tcalm002 : { 
+	  module_type                  : TCalm002
+	  strawHitMaker                : makeSH
+	  trkExtrapol                  : trkExtrapol
+	  trkPatRecDem                 : TrkPatRecDem
+	  pidDem                       : PidDem
+	  histFileName                 : "egun_095_095_001_disk_670_330_700_tcalm002.hist"
+	  minTActive                   : 0.
+	  debugBits                    : { 
+	      # bit0:1  
+	      # bit1:1
+	      # bit51:1
+	      ## bit52:1
+	  }
+      }
+  }
+#------------------------------------------------------------------------------
+# analysis modules
+#
+# tcalm002 bit 51: write out events with matched tracks
+#------------------------------------------------------------------------------
+  analyzers : {
+  }
+  
+  #  p1 : [ trkPatRec, trkPatRec2, trkPatRec3, trkPatRec4 ]
+  p1 : [ CaloCrystalHitsMaker, makeCaloCluster, 
+         MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRecDem, 
+         trkExtrapol, caloMatching, PidDem, 
+         tcalm002 
+       ]
+
+  #  e1 : [ outfile ]
+  e1 : [  ] 
+
+  trigger_paths  : [p1]
+  #  trigger_paths  : []
+
+  # end_paths      : [e1]
+  end_paths      : []
+}
+
+#------------------------------------------------------------------------------
+# redefinitions
+# --------------
+# 1. Initialze seeding of random engines, mu2eart redefines the seed service data
+#------------------------------------------------------------------------------
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true
+physics.producers.CaloCrystalHitsMaker.minimumEnergy : 0

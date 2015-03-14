@@ -1,0 +1,56 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate 105 MeV/c electrons
+# make STNTUPLE in one go, without creating an intermediate file
+#------------------------------------------------------------------------------
+# $Id: mgun_mixp3_x3_stnmaker.fcl,v 1.1 2014/08/27 22:04:49 murat Exp $
+# $Author: murat $
+# $Date: 2014/08/27 22:04:49 $
+
+//test: // This must be commented out for grid production.
+BEGIN_PROLOG
+#------------------------------------------------------------------------------
+# note: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+# for grid jobs       : --fclinput=1:@bgHitFiles:datasets/mixp3-x050-dcache
+# for local debug jobs: --fclinput=1:@bgHitFiles:datasets/mixp3-x050-local
+# also use --fclinput=@muStops:datasets/mustops_grid for grid submission 
+# and      --fclinput=@muStops:datasets/mustops for local submission 
+#------------------------------------------------------------------------------
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+#
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3-test/tdr.beam.mix.bgonly-test.1516a.15405463/good/00000/data_mixBG.root"]
+END_PROLOG
+
+#include "Stntuple/test/generate_mix_mergePatRec_stnmaker.fcl"
+
+process_name : MgunMixP3X3Stnmaker
+
+# for 105 MeV/c electron : E = 105.00124           MeV
+# for 105 MeV/c muon     : E = 148.9584269653785   MeV
+
+physics.producers.generate.physics.pdgId  : 13
+physics.producers.generate.physics.elow   : 148.953
+physics.producers.generate.physics.ehi    : 148.963
+
+# 6*0.5 = 3
+physics.filters.flashMixer.detail.mean   : -6
+physics.filters.ootMixer.detail.mean     : -6
+physics.filters.dioMixer.detail.mean     : -6
+physics.filters.neutronMixer.detail.mean : -6
+physics.filters.photonMixer.detail.mean  : -6
+physics.filters.protonMixer.detail.mean  : -6
+
+services.TFileService.fileName            : "mgun_mixp3_x3_stnmaker.hist"
+physics.filters.InitStntuple.histFileName : "mgun_mixp3_x3_stnmaker.stn"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physcs.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "mgun_mixp3_x3_stnmaker.root"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

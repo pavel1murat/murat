@@ -1,0 +1,32 @@
+#!/bin/bash
+
+jobid=$1
+
+stage_dir="/mu2e/data/outstage/murat/"`ls /mu2e/data/outstage/murat | grep $1`;
+
+echo $stage_dir; 
+
+#exit
+
+nsections=0
+for d in `ls $stage_dir` ; do 
+#    echo $d
+#------------------------------------------------------------------------------
+# skip directories corresponding to non-completed sections like '00015.wuue'
+#------------------------------------------------------------------------------
+    nf=`echo $d | awk -F . '{print NF}'` 
+    if [ $nf == 1 ] ; then
+	x=`cat $stage_dir/$d/mu2e.log | grep "mu2egrid exit status"`; 
+	rc=`echo $x | awk '{print $4}'`
+	host=`cat $stage_dir/$d/sysinfo.log | grep "Starting on host" | awk '{print $5}'`;
+	
+	y=`cat $stage_dir/$d/mu2e.log | grep "TrigReport Events total"`
+	
+	printf " %5s : section %-10s was running on %-20s , mu2egrid exit status: %3i $y\n" $nsections $d $host $rc
+	nsections=$((nsections+1))
+    else
+	printf " %10s : GRID ERROR, job not completed\n" $d
+    fi
+done
+
+echo the total of $nsections sections have been checked

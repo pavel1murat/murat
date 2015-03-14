@@ -1,0 +1,150 @@
+# -*- mode: tcl -*-
+#------------------------------------------------------------------------------
+# optimization of the distance between the two disks
+# tcalm002_800: default disk geometry (disks 800 cm apart)
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : tcalm002x650
+
+source : {
+  module_type : RootInput
+  fileNames   : [ "/grid/data/mu2e/outstage/murat/out/conversionOnly_01_800.root" ]
+  maxEvents   : 10000000
+}
+
+services : {
+  message      : @local::default_message
+    TFileService : { fileName : "{DATASET}.trkpatrec.hist"}
+
+  user : {
+    GeometryService        : { inputFile      : "Mu2eG4/test/geom_01_disk_680_Mau8.txt"   }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+  }
+
+}
+
+physics : {
+
+  producers : {
+
+    MakeStereoHits : @local::MakeStereoHits
+    FlagStrawHits  : @local::FlagStrawHits
+    FlagBkgHits    : @local::FlagBkgHits
+      
+    TrkPatRec1 : @local::TrkPatRecDownstreameMinus
+#    trkPatRec2 : @local::TrkPatRecUpstreamePlus
+#    trkPatRec3 : @local::TrkPatRecDownstreammuMinus
+#    trkPatRec4 : @local::TrkPatRecUpstreammuPlus
+
+    makeCaloCluster: {
+      module_type                   : MakeCaloClusterNew
+      diagLevel                     : 0
+      generatorModuleLabel          : generate
+      caloCrystalModuleLabel        : CaloCrystalHitsMaker
+      g4ModuleLabel                 : g4run
+      #caloReadoutModuleLabel: CaloReadoutHitsMaker
+      caloClusterAlgorithm          : closest
+      caloClusterSeeding            : energy
+      #     caloClusterSeeding    : time
+      deltaTime                     : 10.0 #ns
+      nCryPerCrystal                : 1
+      EnoiseCut                     : 0.00 #MeV
+      EclusterCut                   : 0.00 #MeV  
+      maxFullPrint                  : 201
+    }
+
+    trkExtrapol : {
+	  module_type                  : TrkExtrapol
+	  diagLevel                    : 1
+	  fitterModuleLabel            : TrkPatRec1
+	  maxNumberStoresPoints        : 1
+	  # MC truth finder, analyzer configuration
+	  KalFitMC : {
+	  }        
+      }
+
+      caloMatching : {
+	  module_type                  : CaloMatching
+	  diagLevel                    : 1
+	  fitterModuleLabel            : TrkPatRec1
+	  trkToCaloExtrapolModuleLabel : trkExtrapol
+	  caloClusterModuleLabel       : makeCaloCluster
+	  outPutNtup                   : 0
+	  caloClusterAlgorithm         : closest
+	  caloClusterSeeding           : energy
+      }
+     PidDem : {
+	 module_type       : ParticleID
+	 fitterModuleLabel : TrkPatRec1
+	 fitparticle       : 11
+	 fitdirection      : 0
+	 verbosity         : 0
+	 diagLevel         : 1 
+	 doDisplay         : false
+     }
+#------------------------------------------------------------------------------
+# TCalm002 is a filter now, so it should be in trigger_paths
+#------------------------------------------------------------------------------
+      tcalm002 : { 
+	  module_type       : TCalm002
+	  strawHitMaker     : makeSH
+	  trkPatRecDem      : TrkPatRec1
+	  trkExtrapol       : trkExtrapol
+	  trkCalMatch       : caloMatching
+	  pidDem            : PidDem
+	  histFileName                 : "{DATASET}.{JOB}.hist"
+	  minTActive                   : 0.
+	  debugBits                    : { 
+	                                   # bit0:1  
+	                                   # bit1:1 
+	                                   bit51:1
+	  }
+      }
+  }
+#------------------------------------------------------------------------------
+# analysis modules
+#
+# tcalm002 bit 51: write out events with matched tracks
+#------------------------------------------------------------------------------
+  analyzers : {
+  }
+  
+  #  p1 : [ trkPatRec, trkPatRec2, trkPatRec3, trkPatRec4 ]
+  p1 : [ makeCaloCluster, 
+         MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec1, 
+         trkExtrapol, caloMatching, 
+	 pidDem,
+         tcalm002 
+       ]
+
+  e1 : [ outfile ]
+#  e1 : [  ]
+
+  trigger_paths  : [p1]
+  #  trigger_paths  : []
+  #  end_paths      : [e1]
+  end_paths      : []
+}
+
+
+outputs: {
+  outfile : {
+    module_type    : RootOutput
+      fileName       : "{DATASET}.{JOB}.strip.root"
+    SelectEvents  : { SelectEvents: [ p1 ] }
+    outputCommands : ['keep *_*_*_*'
+#                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
+#                   , 'drop mu2eSimParticles_*_*_*'
+# Uncomment the above line to reduce file size.
+                     ]  
+  }
+}
+
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true

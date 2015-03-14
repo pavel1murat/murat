@@ -1,0 +1,67 @@
+# -*- mode: tcl -*-
+# Example 1.
+#
+# $Id: event_dump.fcl,v 1.5 2013/11/14 17:41:58 murat Exp $
+# $Author: murat $
+# $Id: event_dump.fcl,v 1.5 2013/11/14 17:41:58 murat Exp $
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name : Exercise02
+
+source : {
+  module_type : RootInput
+  fileNames   : [ "/grid/fermiapp/mu2e/DataFiles/ExampleDataFiles/Workbook/conversionOnly_01_data.root" ]
+  maxEvents   : 10000000
+}
+
+services : {
+  message      : @local::default_message
+  TFileService : { fileName : "{DATASET}.trkpatrec.hist"}
+
+  user : {
+    GeometryService        : { inputFile      : "Mu2eG4/test/geom_01.txt"            }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+  }
+
+}
+
+physics : {
+
+  filters : {
+      AnaEventDump : { 
+	  module_type     : TAnaEventDump
+	  interactiveMode : 1
+	  debugBits       : { }
+      }
+  }
+  
+  analyzers : {
+  }
+  
+  p1 : [ AnaEventDump ]
+
+  e1 : [ ]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+  
+}
+
+
+outputs: {
+  outfile : {
+    module_type    : RootOutput
+    fileName       : "AAAAAAAAAA.tcalm002.root"
+    SelectEvents  : { SelectEvents: [ ] }
+    outputCommands : ['keep *_*_*_*'
+#                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
+#                   , 'drop mu2eSimParticles_*_*_*'
+# Uncomment the above line to reduce file size.
+                     ]  
+  }
+}
+

@@ -1,0 +1,209 @@
+# -*- mode: tcl -*-
+// 2014-06-02: run local, write output file
+//
+// Andrei Gaponenko, 2014
+#------------------------------------------------------------------------------
+# quick comments: reads signal MC and also background MC inputs with steppoints
+# so need to define input and 
+#------------------------------------------------------------------------------
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+
+#include "Stntuple/fcl/prolog.fcl"
+
+
+process_name : RecoOnly
+
+source : { 
+    #    module_type : EmptyEvent
+    module_type : RootInput
+    #    fileNames : ["/mu2e/app/users/youzy/mu2e_batch/pbar_20140508/dataDSVacuumToTracker.root"]
+    fileNames : ["/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+    maxEvents : -1
+    #    fileNames   : [ {INPUT_DATA_FILE} ]
+    #    fileNames : ["/mu2e/data/tdr/beam/g4s4p7/tdr.beam.g4s4.flat.1812b.16762780/good/00000/dsStopsToHitsFlat.root"]
+    #    maxEvents   : 100
+
+    #    inputCommands : ['keep *_*_*_*'
+    #		     , 'drop *_g4filter_*_*'
+    #		     , 'drop *_protonTimeMap_*_*'
+    #		     , 'drop mu2eStrawDigis_*_*_*'
+    #		     , 'drop mu2eStrawHits_*_*_*'
+    #		     , 'drop *_CaloReadoutHitsMaker_*_*'
+    #		     , 'drop *_CaloCrystalHitsMaker_*_*'
+    # Uncomment the above lines to reduce file size.
+    #		    ]  
+}
+
+services : {
+    message               : @local::default_message
+    TFileService          : { fileName : "hist_pbar_s8.root" }
+    RandomNumberGenerator : { }
+
+    user :
+    {
+	GeometryService   : { inputFile : "JobConfig/TDR/geom_MothersToHits.txt"}
+	ConditionsService : { conditionsfile : "Mu2eG4/test/conditions_01.txt" }
+	GlobalConstantsService : { inputFile : "Mu2eG4/test/globalConstants_01.txt" }
+	G4Helper          : { }
+	SeedService       : @local::automaticSeeds
+    }
+}
+
+physics : {
+
+    producers: {
+	generate             : @local:generate
+	g4run                : @local::g4run
+#-------------------------------------------------------------------------------
+# hit makers
+#------------------------------------------------------------------------------
+        protonTimeMap        : { module_type : GenerateProtonTimes }
+        muonTimeMap          : { module_type : GenerateMuonLife }
+	CaloReadoutHitsMaker : @local::MakeCaloReadoutHits
+	CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+        makeSD               : @local::makeSD
+        makeSH               : @local::makeSHfromSD
+#------------------------------------------------------------------------------
+#  default tracking
+#------------------------------------------------------------------------------
+	FSHPreStereo         : @local::FSHPreStereo
+	MakeStereoHits       : @local::MakeStereoHits
+	FlagStrawHits        : @local::FlagStrawHits
+	FlagBkgHits          : @local::FlagBkgHits
+	TrkPatRec            : @local::TrkPatRecDownstreameMinus
+#------------------------------------------------------------------------------
+# clustering and CalPatRec 
+#------------------------------------------------------------------------------
+	MakeCaloCluster                 : @local::MakeCaloCluster
+
+	CalPatRecFSHP                   : @local::CalPatRecFSHP
+	CalPatRecMakeStrawHitPositions  : @local::CalPatRecMakeStrawHitPositions
+	CalPatRecMakeStereoHits         : @local::CalPatRecMakeStereoHits
+	CalPatRecFlagStrawHits          : @local::CalPatRecFlagStrawHits
+	CalPatRecFlagBkgHits            : @local::CalPatRecFlagBkgHits
+	CalPatRec                       : @local::CalPatRec
+#------------------------------------------------------------------------------
+# merge tracking results
+#------------------------------------------------------------------------------
+	MergePatRec                     : @local::MergePatRec
+#------------------------------------------------------------------------------
+# high-level reconstruction - track-cluster matching and PID
+#------------------------------------------------------------------------------
+	CaloMatching         : @local::TrackCaloMatching
+	TrkExtrapol          : @local::TrkExtrapol
+	ParticleID           : @local::ParticleID
+    }
+#------------------------------------------------------------------------------
+# event display
+#------------------------------------------------------------------------------
+    filters: {
+	MuHitDisplay         : @local::MuHitDisplay
+    }
+#------------------------------------------------------------------------------
+# paths
+# write out ntuple only, so don't need compression modules...
+#------------------------------------------------------------------------------
+    p1 : [ # generate
+	   # , g4run# g4filter
+#	  , dioMixer, protonMixer, neutronMixer, photonMixer, ootMixer, flashMixer	  #	  , FilterStepPointMomentum
+	  #	  , dioMixer, protonMixer, neutronMixer, photonMixer, ootMixer, flashMixer,
+	  # , protonTimeMap, muonTimeMap 
+	  # , makeSD, makeSH
+	  # , CaloReadoutHitsMaker, CaloCrystalHitsMaker
+	  # 
+	  , FSHPreStereo, MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec 
+	  #
+	  , MakeCaloCluster
+# preliminary hit flagging used by MeakeStereoHits
+	  , CalPatRecFSHP
+# MakeStereoHits does its own flagging
+	  , CalPatRecMakeStereoHits
+	  , CalPatRecFlagStrawHits, CalPatRecFlagBkgHits 
+	  , CalPatRec
+	  , MergePatRec
+	  #	  
+	  , TrkExtrapol, CaloMatching, ParticleID
+#------------------------------------------------------------------------------
+# ntuple maker
+#------------------------------------------------------------------------------
+	  #	  , InitStntuple, StntupleMaker, FillStntuple
+#------------------------------------------------------------------------------
+# event display
+#------------------------------------------------------------------------------
+	  #	  , MuHitDisplay
+	 ]
+
+    trigger_paths  : [p1]
+    
+    #    out : [detectorOutput]
+    out : []
+    #    an  : [genCountLogger]
+    end_paths      : [out]
+}
+#------------------------------------------------------------------------------
+# output module
+#------------------------------------------------------------------------------
+outputs: {
+    detectorOutput : {
+        module_type : RootOutput
+	#        SelectEvents: { SelectEvents: [p1] }
+        outputCommands:   [ "keep *_*_*_*",
+                            "drop uintmu2e::PhysicalVolumeInfomvstd::pairs_g4run_*_*"
+			   ]
+        fileName    : "pbar_hits.root"
+    }
+}
+#------------------------------------------------------------------------------
+# redefinitions
+#------------------------------------------------------------------------------
+# 1. only for interactive submission
+#------------------------------------------------------------------------------
+services.user.SeedService.baseSeed             :  0
+services.user.SeedService.maxUniqueEngines     :  20
+
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true
+services.TFileService.fileName            : "mixp3RecoOnly.hist"
+
+# Apply the time offsets in tracker digitization
+#physics.producers.makeSD.TimeOffsets               : { inputs : [ "protonTimeMap", "muonTimeMap" ] }
+#physics.producers.CaloReadoutHitsMaker.TimeOffsets : { inputs : [ "protonTimeMap", "muonTimeMap" ] }
+#physics.producers.makeSD.g4ModuleLabel               :detectorFilter
+#physics.producers.makeSH.g4ModuleLabel               : detectorFilter
+#physics.producers.CaloReadoutHitsMaker.g4ModuleLabel : detectorFilter
+
+physics.producers.TrkExtrapol.fitterModuleLabel             : MergePatRec
+physics.producers.CaloMatching.fitterModuleLabel            : MergePatRec
+physics.producers.ParticleID.fitterModuleLabel              : MergePatRec
+physics.producers.CalPatRec.HelixFitHack.debugLevel         : 0
+physics.producers.CalPatRec.KalFitHack.debugLevel           : 0
+physics.producers.CalPatRec.debugLevel                      : 0
+physics.producers.CalPatRec.useDoublets                     : 1
+physics.producers.CalPatRec.KalFitHack.iLoopMarkDoublets    : 8
+physics.producers.CalPatRec.KalFitHack.scaleErrDoublet      : 5.
+
+#physics.producers.CalPatRec.HelixFitHack.chi2xyMax   : 500
+# physics.producers.CalPatRec.SeedFitHack.hiterr             : [ 2.5, 1 ]
+# physics.producers.CalPatRec.SeedFitHack.ambiguityStrategy  : [ 0 ]
+# physics.producers.CalPatRec.SeedFitHack.t0Tolerance        : [ 5 ]   
+
+# physics.producers.CalPatRec.KalFitHack.hiterr              : [ 5,   0.5,  0.25, 0  ]
+# physics.producers.CalPatRec.KalFitHack.ambiguityStrategy   : [ 0,     0,  4   , 4  ]
+# physics.producers.CalPatRec.KalFitHack.t0Tolerance         : [ 2.0,  1., 0.25 , 0.1]   
+
+#physics.producers.CalPatRec.KalFitHack.debugLevel    : 0
+
+physics.filters.MuHitDisplay.strawHitPosMakerModuleLabel : CalPatRecMakeStereoHits
+physics.filters.MuHitDisplay.strawHitFlagMakerModuleLabel: CalPatRecFlagBkgHits
+
+
+physics.producers.FlagStrawHits.minimumTime : 400.
+physics.producers.CalPatRecFlagStrawHits.minimumTime : 400.
+physics.producers.TrkPatRec.tmin            : 400.
+physics.producers.CalPatRec.tmin            : 400.

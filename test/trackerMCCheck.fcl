@@ -1,0 +1,99 @@
+# -*- mode: tcl -*-
+# $Id: trackerMCCheck.fcl,v 1.3 2015/01/21 14:44:12 murat Exp $
+# $Author: murat $
+# $Date: 2015/01/21 14:44:12 $
+#
+# Original author Rob Kutschke
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "murat/fcl/prolog.fcl"
+
+#                             Give this process a name
+process_name : trackerMCCheck
+
+# Read events from a file (made by example 3)
+source : {
+    module_type : EmptyEvent
+    maxEvents   : 100
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services : {
+    message : @local::mf_debugging
+
+    # Adjust configuration of message logger:
+    # Load the standard message logger configuration:
+    # Threshold=Info (from using mf_interactive). 
+    # Limit of 5 per category; then exponential backoff.
+    #  message.destinations.log.default.limit : 5
+    
+    
+    TFileService : { fileName   : "trackerMCCheck.root" }
+    RandomNumberGenerator : { }
+
+    user : {
+	
+	GeometryService        : { inputFile      : "murat/test/geom_01_qgsp_bert.txt" }
+	ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt" }
+	GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+	G4Helper : { }
+	
+	SeedService : @local::automaticSeeds
+    }
+}
+#------------------------------------------------------------------------------
+# physics
+#------------------------------------------------------------------------------
+physics : {
+    producers : {
+	generate      : @local::generate
+	g4run         : @local::g4run
+	protonTimeMap : { module_type : GenerateProtonTimes }
+	muonTimeMap   : { module_type : GenerateMuonLife }
+	makeSD        : @local::makeSD
+	makeSH        : @local::makeSHfromSD
+	makeStereoHits: @local::MakeStereoHits
+    }
+
+    filters : {  
+	TrackerMCCheck : @local::TrackerMCCheck
+    }
+
+    analyzers: { 
+    }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [generate, g4run, protonTimeMap, muonTimeMap
+	  , makeSD, makeSH, makeStereoHits
+	  , TrackerMCCheck
+	 ]
+
+    e1 : []
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+    
+}
+
+services.scheduler.wantSummary: true
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+#------------------------------------------------------------------------------
+#     services.Timing: { }
+#------------------------------------------------------------------------------
+# print timing summary
+#------------------------------------------------------------------------------
+# services.scheduler.wantSummary: true
+source.firstRun                            :  1 
+services.user.SeedService.baseSeed         :  1
+services.user.SeedService.maxUniqueEngines :  20
+
+physics.producers.generate.inputfile  : "Mu2eG4/test/genconfig_DownstreameMinus.txt"
+physics.producers.makeSD.TimeOffsets  :  { inputs : [ "protonTimeMap", "muonTimeMap" ] }
+
+physics.filters.TrackerMCCheck.debugBits : { bit5:1}

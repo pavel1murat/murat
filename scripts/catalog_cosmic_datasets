@@ -1,0 +1,41 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# example: murat/scripts/catalog_tdc_cosmic_datasets cosmic_target1 cb000003
+#
+# Ralf's TDR datasets are located on detsim at 
+#                                                          DSID
+# - general:    
+#               /mu2e/data/tdr/cosmic/reco          ---> cb000002
+# - targeted:   
+#               /mu2e/data/tdr/cosmic_target1/reco  ---> cb000003
+#               /mu2e/data/tdr/cosmic_target2/reco  ---> cb000004
+#               /mu2e/data/tdr/cosmic_target3/reco  ---> cb000005
+#
+# this script helps to catalog them and store catalogs in 
+#   /grid/fermiapp/mu2e/users/murat/datasets/$DSID
+#------------------------------------------------------------------------------
+# input_dir=cosmic_target1
+# dataset=cb000003
+
+input_dir=$1
+  dataset=$2
+
+dir=/mu2e/data/tdr/$input_dir/digi-reco-p1
+
+# list=`ls -l $dir | grep 16476 | awk '{print $9}'`
+# list=`ls -l $dir | grep 16476434 | awk '{print $9}'`
+list=`ls -l $dir | awk '{print $9}'`
+
+echo $list
+
+for d in $list ; do
+    d1=$dir/$d
+    job_number=`echo $d | awk -F . '{print $NF}'`
+    output_file=/mu2e/app/users/murat/v4_2_1/datasets/$dataset/$dataset.files.$job_number
+    echo ------------------------------------------- $d1 $job_number
+    ls -al $d1/good/*/data_cosmic_s3.root | awk '{print $9}' >| $output_file
+done
+
+
+
+

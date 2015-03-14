@@ -1,0 +1,127 @@
+# -*- mode: tcl -*-
+# Run G4 simulation starting from saved hits.
+# Most of the configuration was copied from g4test_03.fcl
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name: pet
+
+source: {
+    module_type : EmptyEvent
+    maxEvents   : 20
+    firstRun    : 1
+}
+
+services: {
+    message: @local::default_message
+
+    scheduler: { defaultExceptions : false }
+
+    TFileService          : { fileName : "pet.hist" }
+    RandomNumberGenerator : { }
+
+    user : {
+        PetGeometryService     : { inputFile      : "murat/test/geom_01_pet.txt" }
+        ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"  }
+        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+        PetG4Helper            : { }
+        SeedService            : @local::automaticSeeds
+    }
+}
+
+physics: {
+    producers: {
+	petgen : { 
+	    module_type          : PetEventGenerator
+	    inputfile            : "murat/test/petgenconfig_01.txt"
+	    allowReplacement     : true
+	    messageOnReplacement : true
+	}
+	petg4run : {
+	    module_type            : PetG4
+	    generatorModuleLabel   : petgen
+#	    diagLevel              : 10
+	    trackingVerbosityLevel : 1
+#	    visMacro               : "murat/test/visxy.mac"
+	    # Can selectively enable sensitive detectors here
+	    SDConfig : {  
+		# enableAllSDs : true  // this will activate all SDs listed in StepInstanceName enum
+		enableSD : [ calorimeter, calorimeterRO ] // activate just the explicitly listed SDs
+
+		// // Make arbitrary LogicalVolumes sensitive:
+		// sensitiveVolumes: [ ToyDS3Vacuum ]
+	    }
+	}
+	petMakeCaloReadoutHits   : {
+	    module_type          : PetMakeCaloReadoutHits
+	    g4ModuleLabel        : petg4run
+	    diagLevel            : 0
+	    caloLRUcorrection    : false
+	    caloNonLinCorrection : false
+	    maxFullPrint         : 0
+	}
+	petMakeCaloCrystalHits : {
+	    module_type          	: PetMakeCaloCrystalHits
+	    g4ModuleLabel        	: petg4run
+	    caloReadoutModuleLabel      : petMakeCaloReadoutHits
+	    diagLevel            	: 0
+	    caloChargeProductionEffects	: false
+	    caloROnoiseEffect    	: false
+	    maxFullPrint         	: 0
+	    minimumEnergy       	: 0.0
+	    maximumEnergy       	: 1000.0
+	    minimumTimeGap      	: 100.0
+	}
+	randomsaver          : @local::randomsaver
+    }
+
+#     analyzers: {
+#         eventdisplay: {
+# 	    module_type     : EventDisplay
+# 	    g4ModuleLabel   : "g4run1"
+# 	}
+#     }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [  petgen, 
+	    petg4run, 
+	    petMakeCaloReadoutHits, 
+	    petMakeCaloCrystalHits, 
+	    randomsaver
+	 ]
+ 
+   
+
+    e1 : [ # eventdisplay 
+	   outfile
+	   # , checkhits 
+	   # ,readStrawHits
+	  ]
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}
+
+outputs: {
+
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "pet.root"
+	fastCloning    : false
+	outputCommands : [ "keep *_*_*_*"
+#			   ,"drop mu2e::*_*_*_CosmicFilter"
+#			   ,"drop mu2e::*_*_*_aaaa"
+			  ]
+    }
+}
+
+
+#------------------------------------------------------------------------------
+# redefinitions
+#------------------------------------------------------------------------------
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20

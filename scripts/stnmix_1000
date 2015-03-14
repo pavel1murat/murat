@@ -1,0 +1,19 @@
+#!/bin/bash
+
+i1=$1
+i2=$2
+
+echo i1=$i1 i2=$i2
+
+bgr_dir="/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good"
+
+for i in {0..0} ; do 
+    index=`printf "%05i" $i`
+    echo $index
+    murat/scripts/submit_local_job Stntuple/test/defsDigiMix_mergePatRec_stnmaker.fcl \
+        "-n 1000 $bgr_dir/$index/data_mixBG.root" 
+
+    mv dataDigiMixConversion.root dataDigiMixConversion.root.$index
+    mv histDigiMixConversion.root histDigiMixConversion.root.$index
+
+done

@@ -1,0 +1,197 @@
+# -*- mode: tcl -*-
+# $Id: muHitDisplay_02.fcl,v 1.1 2014/02/27 21:31:40 murat Exp $
+# $Author: murat $
+# $Date: 2014/02/27 21:31:40 $
+#
+# Original author Rob Kutschke
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#                             Give this process a name
+process_name : hackStrip
+
+# Read events from a file (made by example 3)
+source : {
+    module_type : RootInput
+    fileNames   :  ["/mu2e/data/personal/murat/dev2/mixing_geom_01_disk_670_360_670.root"]
+    maxEvents : 500
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services : {
+    message : @local::mf_debugging
+
+    # Adjust configuration of message logger:
+    # Load the standard message logger configuration:
+    # Threshold=Info (from using mf_interactive). 
+    # Limit of 5 per category; then exponential backoff.
+    #  message.destinations.log.default.limit : 5
+    
+    
+    TFileService : { fileName   : "test_hack_stnmaker.root" }
+    RandomNumberGenerator : { }
+
+    user : {
+	GeometryService        : { inputFile      : "murat/test/geom_01.txt" }
+	ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt" }
+	GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+	G4Helper               : { }
+	SeedService            : @local::automaticSeeds
+    }
+
+} # close of services block
+#------------------------------------------------------------------------------
+# physics
+#------------------------------------------------------------------------------
+physics : {
+    # sequence: e-, e+, mu-, mu+
+    producers : {
+	CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
+	CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
+
+	makeSH               : @local::makeSH
+	MakeStereoHits       : @local::MakeStereoHits
+	FlagStrawHits        : @local::FlagStrawHits
+	FlagBkgHits          : @local::FlagBkgHits
+	TrkPatRec            : @local::TrkPatRecDownstreameMinus
+#------------------------------------------------------------------------------
+# CalPatRec
+#------------------------------------------------------------------------------
+	makeCaloCluster: {
+	    module_type            : MakeCaloClusterNew
+	    diagLevel              : 0
+	    generatorModuleLabel   : generate
+	    caloCrystalModuleLabel : CaloCrystalHitsMaker
+	    g4ModuleLabel          : g4run
+	    #caloReadoutModuleLabel: CaloReadoutHitsMaker
+	    caloClusterAlgorithm   : closest
+	    caloClusterSeeding     : energy
+	    #     caloClusterSeeding    : time
+	    #      deltaTime              : 10.0 #ns
+	    nCryPerCrystal         : 1
+	    EnoiseCut              : 0.00 #MeV
+	    EclusterCut            : 0.00 #MeV  
+	    maxFullPrint           : 201
+	}
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+	trkExtrapol : {
+	    module_type                  : TrkExtrapol
+	    diagLevel                    : 1
+	    fitterModuleLabel            : TrkPatRec
+	    maxNumberStoresPoints        : 1
+	    # MC truth finder, analyzer configuration
+	    KalFitMC : {
+	    }        
+	}
+
+	caloMatching : {
+	    module_type                  : CaloMatching
+	    diagLevel                    : 1
+	    fitterModuleLabel            : TrkPatRec
+	    trkToCaloExtrapolModuleLabel : trkExtrapol
+	    caloClusterModuleLabel       : makeCaloCluster
+	    outPutNtup                   : 0
+	    caloClusterAlgorithm         : closest
+	    caloClusterSeeding           : energy
+	}
+
+	pidDem : {
+	    module_type       : ParticleID
+	    fitterModuleLabel : TrkPatRec
+	    fitparticle       : 11
+	    fitdirection      : 0
+	    verbosity         : 0
+	    diagLevel         : 1 
+	    doDisplay         : false
+	}
+    }
+#------------------------------------------------------------------------------
+# event display (optional)
+#------------------------------------------------------------------------------
+    filters : {
+	muHitDisplay: {
+	    module_type                  : MuHitDisplay # the class name
+	    debugBits                    : { }          # need for TAnaModule
+	    interactiveMode              : 1
+	    
+	    generatorModuleLabel         : generate
+	    g4ModuleLabel                : g4run
+	    strawHitMakerModuleLabel     : makeSH
+	    strawHitPosMakerModuleLabel  : MakeStereoHits
+	    strawHitFlagMakerModuleLabel : FlagStrawHits
+	    trkPatRecModuleLabel         : TrkPatRec
+	    trkExtrapol                  : trkExtrapol
+	    trkCalMatch                  : caloMatching
+	    # if set to true, all hits will be displayed unconditionally
+	    # otherwise, display only hits with right flags
+	    displayBackgroundHits        : false
+	    useStereoHits                : true
+
+	    #      goodHitMask                 : ["EnergySelection","RadiusSelection","TimeSelection"]
+	    goodHitMask                  : ["EnergySelection", "RadiusSelection"]
+	    badHitMask                   : ["DeltaRay", "Isolated"]
+	    
+	    trackerStepPoints            : tracker
+	    minHits                      : 5
+	    clickToAdvance               : true
+	    printHits                    : false
+	    timeWindow                   : 100000.
+	    #	timeWindow           : 50.
+	}
+    }
+
+    analyzers: {
+	# Look at the hits from G4.
+    }
+    #------------------------------------------------------------------------------
+    # paths
+    #------------------------------------------------------------------------------
+    reco : [
+	  CaloReadoutHitsMaker, CaloCrystalHitsMaker, makeCaloCluster, 
+#
+#	  makeSH,
+	  MakeStereoHits, FlagStrawHits, FlagBkgHits, 
+	  TrkPatRec,
+#
+	  trkExtrapol, caloMatching,
+	  pidDem,
+	  muHitDisplay
+	 ]
+
+    #  e1 : [hitDisplay]
+    e1 : [outfile]
+
+    trigger_paths  : [reco]
+    end_paths      : []
+    
+}
+
+outputs: {
+  outfile : {
+    module_type    : RootOutput
+      fileName       : "test_Hack_1.strip.root"
+    SelectEvents  : { SelectEvents: [ p2 ] }
+    outputCommands : ['keep *_*_*_*'
+#                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
+#                   , 'drop mu2eSimParticles_*_*_*'
+# Uncomment the above line to reduce file size.
+                     ]  
+  }
+}
+services.scheduler.wantSummary: true
+
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+#------------------------------------------------------------------------------
+#     services.Timing: { }
+#------------------------------------------------------------------------------
+# print timing summary
+#------------------------------------------------------------------------------
+# services.scheduler.wantSummary: true
+services.user.SeedService.baseSeed         :   0
+services.user.SeedService.maxUniqueEngines :  20

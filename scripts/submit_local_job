@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# FCL files from murat/test
+
+       fcl=$1
+parameters=$2
+
+job=`echo $fcl | awk -F / '{print $NF}'`;
+
+LOGFILE=$WORK_DIR/results/`date +'%Y-%m-%d-%H-%M'`-$job.log
+
+cmd="mu2e -c $fcl $parameters "
+
+echo \#--------------------------------------------------- >| $LOGFILE
+echo \# host: `uname -a`                                   >> $LOGFILE
+echo \# submission time: `date +'%Y-%m-%d-%H-%M'`          >> $LOGFILE
+echo \# command: $*                                        >> $LOGFILE
+echo \# cmd    : $cmd \>\> $LOGFILE 2\>\&1                 >> $LOGFILE
+echo \#--------------------------------------------------- >> $LOGFILE
+
+
+$cmd >> $LOGFILE 2>&1 
+
+#JobConfig/TDR/digiMixConversion_interactive.fcl /mu2e/data/tdr/beam/mixp2/tdr.beam.mix.bg.1316b.14615792/good/00000/data_mixBG.root  -n 1000 >| results/2014-03-08-digiMixConversion_interactive.log 2>& 1 & 
+

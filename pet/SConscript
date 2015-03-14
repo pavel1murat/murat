@@ -1,0 +1,196 @@
+#!/usr/bin/env python
+#
+#
+# $Id: SConscript,v 1.7 2014/02/04 04:28:02 murat Exp $
+# $Author: murat $
+# $Date: 2014/02/04 04:28:02 $
+#
+# Original author Rob Kutschke.
+#
+
+import os, re, subprocess, string
+Import('env')
+
+def murat_pet():
+
+    dir = os.environ['WORK_DIR']+'/include/murat/pet'
+
+    cmd=' if [ ! -e '+dir+' ] ; then ln -s ../../murat/pet/pet '+dir+' ; fi'  ; # print "cmd=", cmd  # DEBUG
+
+    x = subprocess.call(cmd,shell=True);
+
+    rootlibs = [ 'Core', 'Cint', 'RIO', 'Net', 'Hist', 'Spectrum', 'MLP', 'Graf', 'Graf3d', 'Gpad', 'Tree',
+                 'Rint', 'Postscript', 'Matrix', 'Physics', 'MathCore', 'Thread', 'Gui', 'm', 'dl' ]
+
+    xercesc_root   = os.environ['XERCESCROOT']
+
+    g4inc    = os.environ['G4INCLUDE'] + '/Geant4'
+    g4futureinc = '../inc'
+    g4libdir = os.environ['G4LIBDIR']
+    g4_version = os.environ['GEANT4_VERSION']
+    g4_version=g4_version.replace('_','')
+    g4_version = g4_version[1:4]
+
+    # Compiler switches needed by the default G4 build.
+    G4CPPFLAGS = [ '-DG4OPTIMISE',           '-DG4VERBOSE',
+               '-DG4_STORE_TRAJECTORY',  '-DG4UI_USE_TCSH ',
+               '-DG4UI_USE',             '-DG4VIS_USE_DAWNFILE',
+               '-DG4VIS_USE_HEPREPFILE', '-DG4VIS_USE_RAYTRACER',
+               '-DG4VIS_USE_VRMLFILE',   '-DG4VIS_USE_ASCIITREE',
+               '-DG4VIS_USE_GAGTREE',    '-DG4VIS_USE',
+               '-DG4VERSION='+g4_version
+                   ]
+
+# Compiler switches if we want to build G4 with OPENGL
+    G4OGL_CPPFLAGS = [ '-DG4VIS_USE_OPENGLX',    '-DG4VIS_USE_OPENGL' ]
+
+    G4GLOBALIBS = [
+        'libG4analysis',
+        'libG4digits_hits',
+        'libG4error_propagation',
+        'libG4event',
+        'libG4FR',
+        'libG4geometry',
+        'libG4gl2ps',
+        'libG4global',
+        'libG4GMocren',
+        'libG4graphics_reps',
+        'libG4intercoms',
+        'libG4interfaces',
+        'libG4materials',
+        'libG4modeling',
+        'libG4OpenGL',
+        'libG4parmodels',
+        'libG4particles',
+        'libG4persistency',
+        'libG4physicslists',
+        'libG4processes',
+        'libG4RayTracer',
+        'libG4readout',
+        'libG4run',
+        'libG4track',
+        'libG4tracking',
+        'libG4Tree',
+        'libG4visHepRep',
+        'libG4vis_management',
+        'libG4visXXX',
+        'libG4VRML',
+        'libG4zlib'
+        ];
+
+    G4LIBS = G4GLOBALIBS;
+
+# Link libraries needed to build G4 with OPENGL.
+    OPENGL_LIBS = [ 'GLU', 'GL' ]
+
+# Link libraries needed to build G4 with XERCESC
+    XERCESC_LIBS = [ 'xerces-c' ]
+
+    libs     = [ 'murat_ana',
+                 'murat_gui',
+                 'murat_alg',
+                 'murat_obj',
+                 'murat_pet',
+#                 'Stntuple_gui',
+                 'Stntuple_obj',
+                 'mu2e_Mu2eG4',
+                 'art_Framework_Core',
+                 'art_Framework_Services_Optional_TFileService_service',
+                 'mu2e_GeometryService',
+                 'mu2e_ConditionsService',
+                 'mu2e_SeedService_SeedService_service',
+                 'mu2e_G4Helper_G4Helper_service',
+                 'mu2e_Mu2eUtilities',
+                 'mu2e_GeneralUtilities',
+                 'mu2e_CaloCluster',
+                 'mu2e_EventGenerator',
+                 'mu2e_MCDataProducts',
+                 'mu2e_RecoDataProducts',
+                 G4LIBS,
+                 'CLHEP',
+                 OPENGL_LIBS,
+                 XERCESC_LIBS
+                 ];
+
+# Import('mu2e_helper')
+
+    dirname = "murat/pet"
+    libname = "murat_pet"
+    tmp_dir_name = 'tmp/src/'+libname+'-shared'
+#------------------------------------------------------------------------------
+# last two components of the path. Ex: /not/this/but/THIS/AND_THIS
+#                                      "AND_THIS" is usually "src"
+#------------------------------------------------------------------------------
+    dd=re.search('[^/]*/[^/]*$',env.Dir('.').abspath).group(0)
+    ff=os.path.dirname(dd)   # THIS
+
+    # print "dd = "+dd
+    # print "ff = "+ff
+#------------------------------------------------------------------------------
+# just compile .cc files
+#------------------------------------------------------------------------------
+    list_of_skip_files = []
+    list_of_cc_files   = [];
+    list_of_obj_files  = [];
+    list_of_modules    = [];
+
+    for f in Glob('*.cc', strings=True):
+        if (not f in list_of_skip_files):
+            list_of_cc_files.append(f)
+
+    for cc_file in list_of_cc_files:
+        #    print ".cc file: "+cc_file
+        o_file = '#/tmp/src/'+libname+'-shared/'+string.split(cc_file,'.')[0]+'.o'
+        env.SharedObject(o_file,cc_file)
+#------------------------------------------------------------------------------
+# dictionary files are located under $WORK_DIR/tmp
+# build several shared libraries: one for all source files,
+# and then a library per module
+#------------------------------------------------------------------------------
+    for f in Glob('*.cc', strings=True):
+        obj = '#/tmp/src/'+libname+'-shared/'+re.sub('\.cc?','.o',f)
+    #    print ">>> obj_file: "+obj
+        if ((string.find(obj,'_module.o') < 0) and (string.find(obj,'_service.o') < 0)):
+            list_of_obj_files.append(obj);
+        else:
+            list_of_modules.append(obj);
+
+    for f in Glob('pet/dict/*_linkdef.h', strings=True):
+        oo = re.sub('pet/dict/','',f);
+        obj = '#/tmp/src/'+libname+'-shared/'+re.sub('_linkdef.h','_dict.o',oo);
+    #    print ">>> obj_file: "+obj
+        list_of_obj_files.append(obj);
+#------------------------------------------------------------------------------
+# build the shared library with non-module code
+#------------------------------------------------------------------------------
+    lib_name=os.environ['MU2E_BASE_RELEASE']+'/lib/'+libname+'.so';
+
+    g4libdir = os.environ['G4LIBDIR'];
+    g4inc    = os.environ['G4INCLUDE'] + '/Geant4'
+
+    env['CCFLAGS'].append('-I'+g4inc);
+    for flag in G4CPPFLAGS :
+        env['CCFLAGS'].append(flag)
+
+    for flag in G4OGL_CPPFLAGS:
+        env['CCFLAGS'].append(flag)
+    
+# print "list_of_obj_files:" , list_of_obj_files
+    env.SharedLibrary(lib_name,list_of_obj_files)
+#------------------------------------------------------------------------------
+# build modules
+#------------------------------------------------------------------------------
+    for mod in list_of_modules:
+        m  = string.split(mod,'/');
+        mm = m[len(m)-1];
+        lib_name='#/lib/libmu2e_murat_'+mm[:mm.find('.o')];
+    #    print ">>> module : " , mod, "lib_name = ", lib_name
+        env.SharedLibrary(lib_name,mod,
+                          LIBS       = [libs, rootlibs],
+                          parse_flags=['-L'+g4libdir], 
+                          CPPFLAGS   =[G4CPPFLAGS, G4OGL_CPPFLAGS]);
+#------------------------------------------------------------------------------
+# done, end of murat_pet()
+#------------------------------------------------------------------------------
+if (os.getenv("BUILD_PET") != None):
+    murat_pet()

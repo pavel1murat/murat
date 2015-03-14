@@ -1,0 +1,206 @@
+# -*- mode: tcl -*-
+# Run G4 simulation starting from saved hits.
+# Most of the configuration was copied from g4test_03.fcl
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+process_name: tcalm004
+#------------------------------------------------------------------------------
+# inputs and outputs
+#------------------------------------------------------------------------------
+source: {
+    module_type: RootInput
+    fileNames: ["/grid/data/mu2e/outstage/murat/cb000401/cb000101.04861x0000_MergeStepPoints"]
+    maxEvents: -1
+}
+
+outputs: {
+
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "cb000401.04861x0000.tcalm004_011.root"
+	fastCloning    : false
+	SelectEvents   : { SelectEvents: [ p1 ] }
+	outputCommands : [ "keep *_*_*_*"
+			   ,"drop mu2e::*_*_*_CosmicFilter"
+			   ,"drop mu2e::*_*_*_aaaa"
+			   ,"drop art::*_*_*_Exercise01"
+			   ,"drop art::*_*_*_RunCosmic"
+			  ]
+    }
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services: {
+    message: @local::default_message
+
+    scheduler: { defaultExceptions : false }
+
+    TFileService          : { fileName : "cosmicresimdisplay.root" }
+    RandomNumberGenerator : { }
+
+    user : {
+        GeometryService   :      { inputFile      : "murat/test/geom_01_vane.txt" }
+        ConditionsService :      { conditionsfile : "Mu2eG4/test/conditions_01.txt"  }
+        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+        G4Helper          : { }
+        SeedService       : @local::automaticSeeds
+    }
+}
+#------------------------------------------------------------------------------
+# user modules
+#------------------------------------------------------------------------------
+physics: {
+    producers: {
+
+	MakeStereoHits : @local::MakeStereoHits
+
+        FlagStrawHits  : @local::FlagStrawHits
+        FlagBkgHits    : @local::FlagBkgHits
+        TrkPatRecDem   : @local::TrkPatRecDownstreameMinus
+        TrkPatRecUem   : @local::TrkPatRecUpstreameMinus
+
+	TrkExtrapolDem : {
+	    module_type       : TrkExtrapol
+	    fitterModuleLabel : TrkPatRecDem
+	    KalFitMC : {
+	    }        
+	}
+    
+	CaloMatchingDem : {
+	    module_type                  : CaloMatching
+	    fitterModuleLabel            : TrkPatRecDem
+	    trkToCaloExtrapolModuleLabel : TrkExtrapolDem
+	    caloClusterModuleLabel       : makeCaloCluster1
+	    diagLevel                    : 0
+	    #	    outPutNtup                   : 1
+	    #	    caloClusterAlgorithm         : closest
+	    #	    caloClusterSeeding           : energy
+	}
+
+	TrkExtrapolUem : {
+	    module_type       : TrkExtrapol
+	    fitterModuleLabel : TrkPatRecUem
+	    fitparticle       : 11
+	    fitdirection      : 1 
+	    KalFitMC : { 
+	    }        
+	}
+    
+    
+	CaloMatchingUem : {
+	    module_type                  : CaloMatching
+	    fitterModuleLabel            : TrkPatRecUem
+	    trkToCaloExtrapolModuleLabel : TrkExtrapolUem
+	    caloClusterModuleLabel       : makeCaloCluster1
+	    # tell the module that the reconstructed particle is an electron
+	    fitparticle                  : 11
+	    #tell the module that the particle moves upstream
+	    fitdirection                 : 1 
+	    diagLevel                    : 0
+	    #	    outPutNtup                   : 1
+	    #	    caloClusterAlgorithm         : closest
+	    #	    caloClusterSeeding           : energy
+	}
+
+	PidDem : {
+	    module_type       : ParticleID
+	    fitterModuleLabel : TrkPatRecDem
+	    fitparticle       : 11
+	    fitdirection      : 0
+	    verbosity         : 0
+	    diagLevel         : 1 
+	    doDisplay         : false
+	}
+
+	tcalm004 : {
+	    module_type       : TCalm004
+	    strawHitMaker     : makeSH1
+	    clusterMaker      : makeCaloCluster1
+	    
+	    # downstream track matching
+	    trkPatRecDem      : TrkPatRecDem
+	    caloMatchingDem   : CaloMatchingDem
+	    trkExtrapolUem    : TrkExtrapolUem
+	    # upstream track matching
+	    trkPatRecUem      : TrkPatRecUem
+	    trkExtrapolDem    : TrkExtrapolDem
+	    caloMatchingUem   : CaloMatchingUem
+	    pidDem            : PidDem
+	    debugBits         : { 
+		                   bit11:1 
+	    }
+            histFileName      : "tcalm004.hist"
+	}
+
+        # Save state of the random number engines.
+        randomsaver : @local::randomsaver
+    }
+
+    analyzers: {
+        eventdisplay: {
+	    module_type     : EventDisplay
+	    g4ModuleLabel   : "g4run1"
+	}
+    }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [MakeStereoHits
+	  , FlagStrawHits
+	  , FlagBkgHits
+	  , TrkPatRecUem
+	  , TrkPatRecDem
+	  , TrkExtrapolDem
+	  , CaloMatchingDem
+	  , TrkExtrapolUem
+	  , CaloMatchingUem
+	  , PidDem
+	  , tcalm004
+	 ]
+ 
+   
+
+    e1 : [ # eventdisplay 
+	   outfile
+	   # , checkhits 
+	   # ,readStrawHits
+	  ]
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}
+
+#------------------------------------------------------------------------------
+# redefinitions
+#------------------------------------------------------------------------------
+physics.producers.MakeStereoHits.StrawHitCollectionLabel        : makeSH1
+
+physics.producers.FlagStrawHits.StrawHitCollectionLabel         : makeSH1
+physics.producers.FlagStrawHits.StrawHitPositionCollectionLabel : MakeStereoHits
+
+physics.producers.FlagBkgHits.StrawHitCollectionLabel           : makeSH1
+physics.producers.FlagBkgHits.StrawHitFlagCollectionLabel       : FlagStrawHits
+physics.producers.FlagBkgHits.StrawHitPositionCollectionLabel   : MakeStereoHits
+
+physics.producers.TrkPatRecUem.StrawHitCollectionLabel          : makeSH1
+physics.producers.TrkPatRecUem.StrawHitPositionCollectionLabel  : MakeStereoHits
+physics.producers.TrkPatRecUem.StrawHitFlagCollectionLabel      : FlagBkgHits
+
+physics.producers.TrkPatRecDem.StrawHitCollectionLabel          : makeSH1
+physics.producers.TrkPatRecDem.StrawHitPositionCollectionLabel  : MakeStereoHits
+physics.producers.TrkPatRecDem.StrawHitFlagCollectionLabel      : FlagBkgHits
+
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20
+#------------------------------------------------------------------------------
+# timing printout
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+# services.Timing: { }
+# print 
+services.scheduler.wantSummary: true

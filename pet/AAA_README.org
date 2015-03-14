@@ -1,0 +1,59 @@
+
+* job submission: 
+
+  today=`date +%Y-%m-%d`; job=pet006
+  mu2e -c murat/test/pet/$job.fcl  >| results/${today}-$job.log 2>&1 &
+
+|--------+----------------+------------+-------------------+---------+---------------+---------------|
+| name   | scintillator   | resolution | phantom           | source  | dose          | comments      |
+|        |                |     (FWHM) |                   |         |               |               |
+|--------+----------------+------------+-------------------+---------+---------------+---------------|
+| pet001 |                |            |                   |         |               | unknown....   |
+| pet002 | LYSO  8 5x5x15 |        15% | vacuum  R=10 H=10 | point   | 1 event/frame |               |
+| pet003 | LYSO  8 5x5x15 |        15% | vacuum, R=10 H=10 | phantom | 1 event/frame |               |
+| pet004 | LYSO  8 5x5x15 |        15% | water , R=10 H=10 | point   | 1 event/frame |               |
+| pet005 | LYSO  8 5x5x15 |        15% | water , R=10 H=10 | phantom | 1 event/frame |               |
+| pet006 | LYSO 32 5x5x15 |        15% | water , R=10 H=10 | phantom | 1 event/frame |               |
+| pet007 | LYSO 32 5x5x15 |        15% | water , R=10 H=10 | phantom | 1  mCi        | 200 ns window |
+| pet008 | LYSO 32 5x5x15 |        15% | water , R=10 H=10 | phantom | 10 mCi        | 200 ns window |
+| pet009 | BaF2 32 5x5x25 |        15% | water , R=10 H=10 | phantom | 1 event/frame |               |
+| pet010 | BaF2 32 5x5x25 |        15% | water , R=10 H=10 | phantom | 1  mCi        | 200 ns window |
+|--------+----------------+------------+-------------------+---------+---------------+---------------|
+
+ petana.* jobs are the analysis jobs corresponding to pet.* jobs
+
+* code structure: 
+
+GeometryService/src/DetectorSystemMaker.cc:
+
+needs mu2e.detectorSystemZ0 and such...
+
+
+>> when PetGeometryService is initialized, 
+
+   PetGeometryService::preBeginRun creates 
+
+   - BrainPhantomMaker
+   - BrainImagerMaker
+
+   and (??) adds them to the list of detectors - detectors ??
+
+   PetGeometryService::addWorldG4 calls PetWorldG4Maker::make which describes 
+   all detectors for G4
+
+
+>>> PetG4::beginRun(), once, calls PetG4::initializeG4 
+    which creates PetWordMaker<PetWorld>.
+
+    that creates PetWorld
+
+
+>>> routines with names like 'constructXXX' build the G4 geometry
+
+  - they are called from PetWorld:construct() 
+
+  - PetWorld:construct() is called from PetWorldMaker::Construct()
+
+  - the question then boils down to who calls PetWordMaker::Construct
+
+

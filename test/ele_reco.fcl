@@ -1,0 +1,158 @@
+# -*- mode: tcl -*-
+# $Id: ele_reco.fcl,v 1.3 2015/01/23 22:11:31 murat Exp $
+#------------------------------------------------------------------------------
+#  mergePatRec02: read input data, remake all hits, do not regenereate events
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  pdgCode   : 13
+END_PROLOG
+
+#                             Give this process a name
+process_name : EmuDoubletPID
+#------------------------------------------------------------------------------
+# Read events from a file (made by example 3)
+#------------------------------------------------------------------------------
+source : {
+#    module_type : EmptyEvent
+    module_type : RootInput
+    fileNames   : [ "define_your_file" ]
+    maxEvents   : 10000
+
+    inputCommands : ['keep *_*_*_*'
+#		     , 'drop *_muonTimeMap_*_*'
+#		     , 'drop *_protonTimeMap_*_*'
+#		     , 'drop mu2eStrawDigis_*_*_*'
+#		     , 'drop mu2eStrawHits_*_*_*'
+#		     , 'drop *_CaloReadoutHitsMaker_*_*'
+#		     , 'drop *_CaloCrystalHitsMaker_*_*'
+		     , 'drop *_MergePatRec_*_*'
+		     ]  
+}
+#------------------------------------------------------------------------------
+# services
+#------------------------------------------------------------------------------
+services : {
+    message : @local::mf_debugging
+
+    # Adjust configuration of message logger:
+    # Load the standard message logger configuration:
+    # Threshold=Info (from using mf_interactive). 
+    # Limit of 5 per category; then exponential backoff.
+    #  message.destinations.log.default.limit : 5
+    
+    TFileService : { fileName   : "ele_reco.root"  }
+
+    RandomNumberGenerator : { }
+
+    user : {
+	GeometryService        : { inputFile      : "Mu2eG4/test/geom_01.txt" }
+	ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt" }
+	GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+	G4Helper               : { }
+	SeedService            : @local::automaticSeeds
+    }
+}
+#------------------------------------------------------------------------------
+# physics
+#------------------------------------------------------------------------------
+physics : {
+    producers : {
+#------------------------------------------------------------------------------
+# MC event generation and simulation
+#------------------------------------------------------------------------------
+	generate             : @local::generate
+	g4run                : @local::g4run
+	protonTimeMap        : { module_type : GenerateProtonTimes }
+	muonTimeMap          : { module_type : GenerateMuonLife }
+#------------------------------------------------------------------------------
+# hit makers
+#------------------------------------------------------------------------------
+	makeSD               : @local::makeSD
+	makeSH               : @local::makeSHfromSD
+	CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
+	CaloCrystalHitsMaker : @local::MakeCaloCrystalHitsNew
+#------------------------------------------------------------------------------
+# TrkPatRec modules
+#------------------------------------------------------------------------------
+	FSHPreStereo         : @local::FSHPreStereo
+	MakeStereoHits       : @local::MakeStereoHits
+	FlagStrawHits        : @local::FlagStrawHits
+	FlagBkgHits          : @local::FlagBkgHits
+	TrkPatRecDem         : @local::TrkPatRecDownstreameMinus
+	TrkPatRecDmm         : @local::TrkPatRecDownstreammuMinus
+#------------------------------------------------------------------------------
+# CalPatRec modules
+#------------------------------------------------------------------------------
+	MakeCaloCluster      : @local::MakeCaloCluster
+#	MakeStrawHitPositions: @local::MakeStrawHitPositions
+#	CalPatRec            : @local::CalPatRec
+#	MergePatRec          : @local::MergePatRec
+#------------------------------------------------------------------------------
+#  tracker-calorimeter matching, high-level analysis
+#------------------------------------------------------------------------------
+	CaloMatching         : @local::TrackCaloMatching
+	TrkExtrapol          : @local::TrkExtrapol
+    }
+
+    filters : {  
+#------------------------------------------------------------------------------
+# event display (defined in murat/mod package)
+#------------------------------------------------------------------------------
+	MuHitDisplay         : @local::MuHitDisplay
+    }
+
+    analyzers: {  
+	TTrackRecoAna        : @local::TTrackRecoAna
+    }
+#------------------------------------------------------------------------------
+# paths - remake hits, but not regenerate the events
+#------------------------------------------------------------------------------
+    p1 : [
+#	  generate, g4run, 
+#         protonTimeMap, muonTimeMap, 
+#	  makeSD, makeSH,
+#	  CaloReadoutHitsMaker, CaloCrystalHitsMaker,
+#
+	  FSHPreStereo, MakeStereoHits, FlagStrawHits, FlagBkgHits
+          , TrkPatRecDem
+#	  , TrkPatRecDmm
+	 ]
+
+    e1 : [   TTrackRecoAna ]
+
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+    
+}
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+#------------------------------------------------------------------------------
+#     services.Timing: { }
+#------------------------------------------------------------------------------
+# print timing summary
+#------------------------------------------------------------------------------
+services.scheduler.wantSummary             : true
+source.firstRun                            :  1 
+services.user.SeedService.baseSeed         :  1
+services.user.SeedService.maxUniqueEngines :  20
+
+physics.analyzers.TTrackRecoAna.diagLevel       :  1
+physics.analyzers.TTrackRecoAna.trkPatRecLabel  :  TrkPatRecDem
+#------------------------------------------------------------------------------
+# single particle gun, CE : g4run
+# Andrei's  MC            : detectorFilter
+# Ralf's cosmics          : g4filter
+#------------------------------------------------------------------------------
+# physics.filters.MuHitDisplay.g4ModuleLabel                       : g4run
+# physics.filters.MuHitDisplay.g4ModuleLabel                       : g4filter
+# physics.filters.MuHitDisplay.g4ModuleLabel                       : detectorFilter
+#------------------------------------------------------------------------------
+# the end
+#------------------------------------------------------------------------------

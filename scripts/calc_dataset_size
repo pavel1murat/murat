@@ -1,0 +1,13 @@
+#!/bin/bash
+# this is for Ralf's cosmic dataset
+
+# 48???/48???_*              : 14137836326,  14 GBytes,  ~235,630 events
+# base2a_bottom.81?????/00???:  4682538355,  4.7 GBytes,  ~78,000 events
+
+# dir="/mu2e/data/outstagepro/ehrlich/heavy_concrete_6ft/48???/48???_*"
+dir="/mu2e/data/outstagepro/ehrlich/heavy_concrete_6ft/base2a_bottom.81?????/00???"
+
+for f in `ls $dir/data_cosmic.root` ; do 
+  ls -al $f ; 
+done | \
+awk 'BEGIN{n=0} {n=n+$5} END{print n}'

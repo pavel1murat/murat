@@ -1,0 +1,379 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# setup , assume in WORK_DIR
+# example: murat/scripts/submit_mu2e_job -v -d dio00202 -j stnmaker -g fnal
+# will use 
+#------------------------------------------------------------------------------
+export            JOB="undefined"    # tcalm001
+export           DSID="undefined"    # tcalm001
+export        DATASET="undefined"
+export    DATASET_DIR="undefined_dataset_dir"
+export    DATASET_FCL="undefined"
+export        EXEFILE=`which mu2e`
+export        FCLFILE="undefined"
+export       FCLINPUT=""
+export   GRID_CLUSTER="local"   # local submission  by default
+export     INPUT_FILE="undefined"
+export  INPUT_DATASET="undefined"
+export            NEVENTS=-1
+export NFILES_PER_SEGMENT=-1
+export              NJOBS=-1
+export     OUTPUT_DIR="undefined"
+
+export  val_INPUT_DATA_FILE=""
+export    val_ART_HIST_FILE=""
+export  val_OUTPUT_STNTUPLE=""
+
+export LIST_OF_REP="INPUT_DATA_FILE ART_HIST_FILE OUTPUT_STNTUPLE OUTPUT_DATA_FILE"
+
+export         NEVENTS="-1";
+export SUBMISSION_TIME=`date +'%Y-%m-%d-%H:%M'`
+export    VERBOSE="no"
+export         DRY_RUN="no"
+export    PARAMETERS=""
+#-----------------------------------------------------------------------
+#  # used to print with timestamp, call: tsecho my_script message
+#-----------------------------------------------------------------------
+tsecho() {
+  echo `date "+%Y/%m/%d %H:%M:%S"`" [ $1 ] " $2
+}
+
+#------------------------------------------------------------------------------
+usage() {
+    echo "usage:   submit_mu2e_job -d dsid -j job -n nevents[:d] -e exec "
+    exit
+}
+
+export OPTIND=1
+while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
+
+    case $OPT in
+        c)                                          # dataset ID
+            export FCLFILE=${OPTARG}
+	    export JOB=`basename $FCLFILE | sed 's/.fcl//'`
+            if [ $VERBOSE != "no" ] ; then echo FCLFILE=$FCLFILE ; fi
+            ;;
+        d)                                          # dataset ID
+            export DSID=${OPTARG}
+	    export DATASET=/grid/fermiapp/mu2e/personal/murat/$DSID
+	    if [ -d $DATASET ]      ; then 
+		export DATASET=$DATASET/$DSID.filelist ; 
+		export DATASET_DIR=$DATASET
+	    else
+		export DATASET_DIR=`dirname $DATASET`
+	    fi
+
+            if [ $VERBOSE != "no" ] ; then echo DSID=$DSID ; fi
+            ;;
+        e)                                          # dataset ID
+            export EXEFILE=${OPTARG}
+            if [ $VERBOSE != "no" ] ; then echo EXEFILE=$EXEFILE ; fi
+            ;;
+        f)                                          # dataset ID
+            x=${OPTARG}
+	    FCLINPUT=$FCLINPUT"--fclinput=$x "
+            if [ $VERBOSE != "no" ] ; then echo FCLINPUT=$FCLINPUT ; fi
+            ;;
+        F)                                          # dataset ID
+	    NFILES_PER_SEGMENT=$OPTARG
+            if [ $VERBOSE != "no" ] ; then echo NFILES_PER_SEGMENT=$NFILES_PER_SEGMENT ; fi
+            ;;
+        g)                                          # dataset ID
+            export GRID_CLUSTER=${OPTARG}
+            if [ $VERBOSE != "no" ] ; then echo GRID_CLUSTER=$GRID_CLUSTER ; fi
+            ;;
+        j)                                          # job name
+            export JOB=${OPTARG}
+            if [ $VERBOSE != "no" ] ; then echo JOB=$JOB ; fi
+            ;;
+        n)                                          # nevents per job
+            export NEVENTS=$OPTARG
+	    if [ .$OPTARG != "." ] ; then
+		export  NEVENTS=`echo $OPTARG | sed 's/:/ /g' | awk '{print $1}'`
+		export DEBUGGER=`echo $OPTARG | sed 's/:/ /g' | awk '{print $2}'`
+            fi
+            if [ $VERBOSE != "no" ] ; then echo   NEVENTS=$NEVENTS ; fi
+            ;;
+        N)                                          # N(jobs) , for grid submission
+            export NJOBS=$OPTARG
+            if [ $VERBOSE != "no" ] ; then echo   NJOBS=$NJOBS ; fi
+            ;;
+        o)                                          # OUTPUT_DIR
+            export OUTPUT_DIR=${OPTARG}
+            if [ $VERBOSE != "no" ] ; then echo OUTPUT_DIR=$OUTPUT_DIR ; fi
+            ;;
+        p)                                          # job name
+            export PARAMETERS=${OPTARG}
+            if [ $VERBOSE != "no" ] ; then echo PARAMETERS=$PARAMETERS ; fi
+            ;;
+        r)                                          # job name
+	          var=`echo $OPTARG | awk -F = '{print $1}'`
+	     val_$var=`echo $OPTARG | awk -F = '{print $2}'`
+
+            export LIST_OF_REP=$LIST_OF_REP" "$var
+
+            if [ $VERBOSE != "no" ] ; then 
+		echo var=$var ; val=${!val_$var}
+		echo LIST_OF_REP=$LIST_OF_REP ; 
+	    fi
+            ;;
+        s)                                          # input file
+            export INPUT_FILE=$OPTARG
+            if [ $VERBOSE != "no" ] ; then echo INPUT_FILE=$INPUT_FILE ; 	    fi
+            ;;
+#------------------------------------------------------------------------------
+# in the Mu2e language, a 'dataset' is a file list, one filename per line
+#------------------------------------------------------------------------------
+        S)                                          # dataset
+            export DATASET=$OPTARG
+	    export DSID=`echo $DATASET | awk -F / '{print $NF}' | awk -F . '{print $1}'`
+	    if [ -d $DATASET ]      ; then 
+		export DATASET=$DATASET/$DSID.filelist ; 
+		export DATASET_DIR=$DATASET
+	    else
+		export DATASET_DIR=`dirname $DATASET`
+	    fi
+
+            if [ $VERBOSE != "no" ] ; then echo DATASET=$DATASET DSID=$DSID ; 	    fi
+            ;;
+        v)                                          # debug script, 
+                                                    # should go first
+	    export  VERBOSE="yes"
+	    ;;
+        x)                                          # export
+            export       $OPTARG
+            REDEFINED_ENV_VARS=${REDEFINED_ENV_VARS}" -x "$OPTARG
+           if [ $VERBOSE != "no" ] ; then 
+              echo  export $OPTARG
+            fi
+	    ;;
+        *)
+	   echo "**** wrong input parameter": $OPTARG
+	   usage
+	   exit -1
+           ;;
+     esac
+done
+#------------------------------------------------------------------------------
+# done with parsing the parameters
+#------------------------------------------------------------------------------
+if [ -f $DATASET_DIR/$DSID.fcl ] ; then
+    export DATASET_FCL=$DATASET_DIR/$DSID.fcl;
+fi
+
+if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: DATASET=$DATASET DSID=$DSID; fi
+
+export   WORK_DIR=$PWD
+
+if [ $OUTPUT_DIR == "undefined" ] ; then 
+    export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${DSID}_${JOB}.`echo $$`
+fi
+
+export    NAME_STUB=${DSID}_$JOB
+export    LOGFILE=$NAME_STUB.log
+#------------------------------------------------------------------------------
+# handle input .FCL file
+#------------------------------------------------------------------------------
+if [ ".$GRID_CLUSTER" == ".local" ] ; then 
+    if [ ! -d $OUTPUT_DIR ] ; then mkdir -p $OUTPUT_DIR ; fi
+    export TMP_FCL=$OUTPUT_DIR/$JOB.$$.fcl
+else  
+    export TMP_FCL=$WORK_DIR/tmp/fcl/$JOB.$$.fcl
+fi
+
+if [ $FCLFILE == "undefined" ] ; then template_fcl_file=$WORK_DIR/murat/test/$JOB.fcl
+else                                  template_fcl_file=$FCLFILE
+fi
+
+if [ $VERBOSE != "no" ] ; then 
+    echo [submit_mu2e_job:$LINENO]: TMP_FCL=$TMP_FCL template_fcl_file=$template_fcl_file ; 
+fi
+
+if [ -f $TMP_FCL ] ; then rm $TMP_FCL ; fi
+#------------------------------------------------------------------------------
+# substitute variables, if requested
+#------------------------------------------------------------------------------
+cp $template_fcl_file $TMP_FCL
+chmod u+w $TMP_FCL
+
+for x in $LIST_OF_REP ; do
+    var=`echo $x`
+    n=val_$var
+
+    val=${!n}
+
+    if [ ".$val" == "." ] ; then
+	if [ $var == "INPUT_DATA_FILE"    ] ; then
+	    val="$NAME_STUB.root"
+	elif [ $var == "ART_HIST_FILE"    ] ; then
+	    val="$NAME_STUB.hist"
+	elif [ $var == "OUTPUT_STNTUPLE"  ] ; then
+	    val="$NAME_STUB.stn"
+	elif [ $var == "OUTPUT_DATA_FILE" ] ; then
+	    val="$NAME_STUB.output.root"
+	fi
+    fi
+
+    cat $TMP_FCL | awk -v v1={$var} -v v2=\"$val\" '{sub(v1,v2);print}' > $TMP_FCL.1
+    mv $TMP_FCL.1 $TMP_FCL
+done
+#------------------------------------------------------------------------------
+# replace whats left
+#------------------------------------------------------------------------------
+cat $TMP_FCL | \
+    awk -v v1='{DATASET}' -v v2="$DSID"    '{sub(v1,v2);print}' | \
+    awk -v v1='{JOB}'     -v v2="$JOB"     '{sub(v1,v2);print}'   \
+    > $TMP_FCL.1
+
+mv $TMP_FCL.1 $TMP_FCL
+
+#------------------------------------------------------------------------------
+#  append dataset-specific settings to the job FCL file
+#------------------------------------------------------------------------------
+if [ $DATASET_FCL != "undefined" ] ; then
+    cat $DATASET_FCL >>  $TMP_FCL
+fi
+
+if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: $TMP_FCL created ; fi
+
+#####################################
+#cmd='source /grid/fermiapp/products/mu2e/setupmu2e-art.sh ; source setup.sh ;'
+#cmd=;
+cmd="$EXEFILE -c $TMP_FCL"
+
+if [ $DATASET != "undefined" ] ; then 
+    cmd=$cmd" -S $DATASET" ; 
+elif [ $INPUT_FILE != "undefined" ] ; then
+    cmd=$cmd" -s $INPUT_FILE" ; 
+fi
+if [ $NEVENTS     != "-1"    ] ; then cmd=$cmd" -n $NEVENTS" ; fi
+
+if [ $VERBOSE != "no" ] ; then 
+    echo [submit_mu2e_job:$LINENO]: cmd=$cmd ; 
+    echo [submit_mu2e_job:$LINENO]: GRID_CLUSTER=$GRID_CLUSTER ;
+fi
+
+if [ ".$GRID_CLUSTER" == ".local" ] ; then
+#------------------------------------------------------------------------------
+# local job submission by default
+#------------------------------------------------------------------------------
+    cd $OUTPUT_DIR
+
+    if [ ".$FCLINPUT" != "." ] ; then
+#------------------------------------------------------------------------------
+# redefine prolog, strip '@'
+#------------------------------------------------------------------------------
+	if [ $VERBOSE != "no" ] ; then echo " line:$LINENO : FCLINPUT= $FCLINPUT" ; fi
+	echo "BEGIN_PROLOG"  >| $TMP_FCL.1
+	for x in $FCLINPUT ; do
+	    xxx=`echo $x   | awk -F = '{print $2}'`
+	    nf=`echo $xxx | awk -F : '{print NF}'`
+	    if [ $VERBOSE != "no" ] ; then echo $LINENO : xxx=$xxx nf=$nf ; fi
+
+	    if [ $nf == 2 ] ; then
+		par=`echo $xxx | awk -F : '{print $1}' | awk -F @ '{print $2}'`
+		val=`echo $xxx | awk -F : '{print $2}'`
+	    elif [ $nf == 3 ] ; then
+		par=`echo $xxx | awk -F : '{print $2}' | awk -F @ '{print $2}'`
+		val=`echo $xxx | awk -F : '{print $3}'`
+	    fi
+
+	    if [ $VERBOSE != "no" ] ; then echo $LINENO : "   $par : [ \"$val\" ] " ; fi
+	    if [ $VERBOSE != "no" ] ; then echo $LINENO : ---- $WORK_DIR/$val ; fi
+
+	    echo "   $par : [ "   >> $TMP_FCL.1 
+            for l in `cat $WORK_DIR/$val` ; do 
+		if [ $VERBOSE != "no" ] ; then echo $LINENO : l=$l ; fi
+		if [ $VERBOSE != "no" ] ; then echo $LINENO : l:0:1=${l:0:1} ; fi
+		if [ ${l:0:1} != '#' ] ; then
+		    if [ $VERBOSE != "no" ] ; then echo $LINENO : writing \"${l}\"  ; fi
+		    echo "     " \"${l}\"      >> $TMP_FCL.1
+                fi
+	    done
+	    echo "    ]"         >> $TMP_FCL.1
+	done
+ 
+	echo "END_PROLOG  "  >> $TMP_FCL.1
+	echo "#"             >> $TMP_FCL.1
+	cat $TMP_FCL         >> $TMP_FCL.1
+
+	mv  $TMP_FCL.1 $TMP_FCL 
+    fi
+
+    if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: cd $OUTPUT_DIR ; fi
+
+    PREFIX=""
+    if [ .$DEBUGGER == ".d" ] ; then
+	PREFIX='gdb'
+	cmd="emacs -bg lightskyblue -fn lucidasanstypewriter-12 -geometry 80x50 -fn fixed"
+    fi
+
+    if [ $VERBOSE != "no" ] ; then 
+	echo [submit_mu2e_job:$LINENO]: PWD=$PWD, submitting "$cmd >>$LOGFILE 2>&1";
+    fi
+
+    if [ $DRY_RUN != "yes" ] ; then
+	echo  "#-----------------------------------------------------------------------------------" >| $LOGFILE
+	echo  \# node   : `uname -a`                                                                 >> $LOGFILE
+	echo  \# `cat /proc/cpuinfo | sort | uniq`                                                   >> $LOGFILE
+	echo  \# time   : $SUBMISSION_TIME                                                           >> $LOGFILE
+	echo  \# command: $0 $*                                                                      >> $LOGFILE
+	echo  \# fcl    : $TMP_FCL                                                                   >> $LOGFILE
+	echo  \#-----------------------------------------------------------------------------------  >> $LOGFILE
+	cat   $TMP_FCL                                                                               >> $LOGFILE
+	echo "\#-----------------------------------------------------------------------------------" >> $LOGFILE
+	echo  \# to be executed: $cmd                                                                >> $LOGFILE
+	echo "\#-----------------------------------------------------------------------------------" >> $LOGFILE
+	$cmd                                                                                         >> $LOGFILE 2>&1 
+	RC=$? 
+	echo "RC=$RC"                                                                                >> $LOGFILE
+    fi
+  
+    cd $WORK_DIR
+else 
+#------------------------------------------------------------------------------
+# grid submission: 
+# if NJOBS is not defined, assume that input comes from a dataset,
+# in this case, enforce 1 file per job
+#------------------------------------------------------------------------------
+# assume it is setup    setup mu2egrid
+    cmd="mu2eart --setup=./setup.sh --fcl=$TMP_FCL";
+    if [ $DATASET != "undefined" ] ; then 
+	cmd=$cmd" --inputs=$DATASET" ; 
+
+	if [ $NJOBS -eq -1 ] ; then
+	    nfiles=`cat $DATASET | grep -v "#" | wc -l` ;
+	    if [ $NFILES_PER_SEGMENT -eq -1 ] ; then
+		export NJOBS=$nfiles
+	    else
+		let "nj=$nfiles / $NFILES_PER_SEGMENT"
+		let "last=$nfiles % $NFILES_PER_SEGMENT"
+		if [ $last -ne 0 ] ; then let "nj=$nj+1" ; fi
+		export NJOBS=$nj
+	    fi
+		
+	fi
+    fi
+
+    cmd=$cmd" --njobs=$NJOBS"
+#------------------------------------------------------------------------------
+# in GRID case, FCLINPUT is handled by mu2eart
+#------------------------------------------------------------------------------
+    if [ ".$FCLINPUT" != "." ] ; then cmd=$cmd" $FCLINPUT"; fi
+
+    if [ $NEVENTS -ne "-1"   ] ; then cmd=$cmd" --events-per-job=$NEVENTS" ; fi
+
+    cmd=$cmd" --verbose"
+
+    if [ $VERBOSE != "no" ] ; then 
+	echo [submit_mu2e_job:$LINENO]: GRID submission DRY_RUN=$DRY_RUN NJOBS=$NJOBS; 
+	echo [submit_mu2e_job:$LINENO]: cmd = $cmd
+    fi
+
+    if [ $DRY_RUN != "no" ] ; then
+	$cmd --dry-run
+    else 
+	echo $cmd
+	$cmd
+    fi
+fi

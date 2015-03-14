@@ -1,0 +1,10 @@
+
+mclimit_csm.C package
+
+The code is in mclimit_csm.C and mclimit_csm.h.  The other
+code files, preparetchan.h, tchanlc.C, and tchan_cls.C
+are old examples of how to prepare inputs for it, and do not
+function fully as they require external root files. 
+ptohtml.pl takes the output of csm_model::print() and makes
+a web page of template names and systematic sources that apply
+to each template.

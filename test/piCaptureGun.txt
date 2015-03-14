@@ -1,0 +1,5 @@
+//-----------------------------------------------------------------------------
+// -*- Mode: c++ -*-
+// leave an option to redefine the generator parameters
+//-----------------------------------------------------------------------------
+#include "EventGenerator/defaultConfigs/piCaptureGun.txt"

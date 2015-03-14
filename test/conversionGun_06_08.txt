@@ -1,0 +1,7 @@
+//
+
+#include "EventGenerator/defaultConfigs/conversionGun.txt"
+
+// Limits on cos(polar angle):
+double conversionGun.czmin = -0.6;  // -1.0
+double conversionGun.czmax =  0.8;  // 1.0;

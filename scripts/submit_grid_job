@@ -1,0 +1,5 @@
+#!/bin/bash
+
+setup mu2eart
+
+mu2eart --setup=./setup.sh --fcl=your-config.fcl --inputs=./inputs.list --njobs=5

@@ -1,0 +1,42 @@
+# -*- mode: tcl -*-
+# Print information about all data products in a file.
+#
+# $Id: EventDump.fcl,v 1.4 2015/01/23 22:11:31 murat Exp $
+# $Author: murat $
+# $Date: 2015/01/23 22:11:31 $
+#
+# Original author Rob Kutschke
+
+#include "minimalMessageService.fcl"
+
+# Give this process a name.
+process_name : DumpEvents
+
+# Read events from a file (made by example 3)
+source : {
+  module_type : RootInput
+  fileNames : ["/prj/mu2e/users/kutschke/beamlineData_01.root"]
+  maxEvents : 1
+}
+
+services : {
+  message : @local::mf_debugging
+  user : { }
+} # close of services block
+
+physics : {
+  producers: {}
+
+  p1 : []
+  e1 : [dump]
+
+#  trigger_paths  : [p1]
+  end_paths      : [e1]
+}
+
+outputs: {
+  # Print info about all data products in the file.
+  dump: {
+    module_type   : EventDump
+  }
+}

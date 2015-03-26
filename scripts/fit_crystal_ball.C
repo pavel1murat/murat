@@ -34,7 +34,6 @@ Double_t CrystalBall(Double_t *x,Double_t *par) {
 // P[5] = tail fraction
 // P[6] = tail exponential slope
 //-----------------------------------------------------------------------------
-
 double f_crystal_ball(double* X, double* P) {
   double f, alpha, abs_alpha, n, a, b;
   double dx = (X[0]-P[1])/P[2];
@@ -47,6 +46,9 @@ double f_crystal_ball(double* X, double* P) {
     if (dx < 0) {
       f = P[0]*TMath::Exp(-dx*dx/2.);
     }
+    else if (dx < 0.4) {
+      f = P[0]*(1-P[5])*TMath::Exp(-dx*dx/2.);
+    }
     else {
       f = P[0]*((1-P[5])*TMath::Exp(-dx*dx/2.)+P[5]*TMath::Exp(-dx/P[6]));
     }
@@ -56,7 +58,7 @@ double f_crystal_ball(double* X, double* P) {
     b = n/abs_alpha-abs_alpha;
     f = P[0]*a*TMath::Power((b-dx),-n);
   }
-
+  
   return f;
 }
 
@@ -101,10 +103,36 @@ void fit_crystal_ball(const char* File, const char* Module, const char* Hist,
   f->SetParName(4,"N");
   f->SetParName(5,"tail_frac");
   f->SetParName(6,"tail_lamb");
-
+  
   f->SetParLimits(2,0.,1.);
   f->SetParLimits(5,0.,0.5);
+  
+  double anorm = h->GetEntries()/10;
+  cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit(XMin,XMax);
 
+  // h->Draw();
+  // f->Draw("same");
+}
+
+//-----------------------------------------------------------------------------
+void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
+
+  h = (TH1F*) Hist;
+
+  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
+
+  f->SetParName(0,"anorm");
+  f->SetParName(1,"mean");
+  f->SetParName(2,"sigma");
+  f->SetParName(3,"alpha");
+  f->SetParName(4,"N");
+  f->SetParName(5,"tail_frac");
+  f->SetParName(6,"tail_lamb");
+  
+  f->SetParLimits(2,0.,1.);
+  f->SetParLimits(5,0.,0.5);
+  
   double anorm = h->GetEntries()/10;
   cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
   cb_fit(XMin,XMax);
@@ -139,6 +167,35 @@ void fit_crystal_ball_norm(const char* File, const char* Module, const char* His
   cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
   cb_fit(XMin,XMax);
 
+  // h->Draw();
+  // f->Draw("same");
+}
+
+//-----------------------------------------------------------------------------
+// fit a histogram, normalized to a unit area
+//-----------------------------------------------------------------------------
+void fit_crystal_ball_norm(TH1* Hist, double X0, double XMin, double XMax) {
+
+  h = (TH1F*) Hist;
+  h->Scale(1./h->Integral());
+
+  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
+
+  f->SetParName(0,"anorm");
+  f->SetParName(1,"mean");
+  f->SetParName(2,"sigma");
+  f->SetParName(3,"alpha");
+  f->SetParName(4,"N");
+  f->SetParName(5,"tail_frac");
+  f->SetParName(6,"tail_lamb");
+  
+  f->SetParLimits(2,0.,1.);
+  f->SetParLimits(5,0.,0.5);
+  
+  double anorm = h->Integral()/10;
+  cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit(XMin,XMax);
+  
   // h->Draw();
   // f->Draw("same");
 }

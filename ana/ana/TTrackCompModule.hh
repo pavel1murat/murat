@@ -77,6 +77,7 @@ public:
     TH1F*    fP[3];			// total momentum, 3 hists with different binning
     TH1F*    fP0;
     TH1F*    fP2;
+    TH1D*    fPDio;
     TH1F*    fPt;
     TH1F*    fFitMomErr;
     TH1F*    fPFront;

@@ -5,8 +5,10 @@
 //  0  : all events
 //  1  : passed events
 //  2  : rejected events
-//  3  : events with CalPatRec tracks with DFF > 5
+//  3  : events with CalPatRec tracks with DPF > 5
 //  4  : events with TrkPatRec track and a cluster, but with no CalPatRec track
+//  5  : events with CalPatRec tracks with P > 106
+//  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -55,8 +57,8 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
 
-  //  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  90  ,110. ,Folder);
-  //  Hist->fPDio->Sumw2(kTRUE);
+  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  90  ,110. ,Folder);
+  Hist->fPDio->Sumw2(kTRUE);
 
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
@@ -251,6 +253,8 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fP[2]->Fill (Track->fP);
   Hist->fP0->  Fill (Track->fP0);
   Hist->fP2->  Fill (Track->fP2);
+
+  Hist->fPDio->Fill(Track->fP,Tp->fDioWt);
 
   Hist->fFitMomErr->Fill(Track->fFitMomErr);
 
@@ -473,6 +477,8 @@ int TTrackCompModule::Event(int ientry) {
       tp->fDp0   = track->fP0    -track->fPFront;
       tp->fDp2   = track->fP2    -track->fPFront;
       tp->fDpFSt = track->fPFront-track->fPStOut;
+
+      tp->fDioWt = TStntuple::DioWeightAl(fEleE);
     }
   }
 
@@ -485,6 +491,8 @@ int TTrackCompModule::Event(int ientry) {
 
 //-----------------------------------------------------------------------------
 // looking mostly at the CalPatRec tracks
+//-----------------------------------------------------------------------------
+// diagnostics is related to CalPatRec
 //-----------------------------------------------------------------------------
 void TTrackCompModule::Debug() {
 
@@ -514,15 +522,7 @@ void TTrackCompModule::Debug() {
     }
   }
 //-----------------------------------------------------------------------------
-// bit 4: events with TrkPatRec track and no CalPatRec track
-//-----------------------------------------------------------------------------
-  if (GetDebugBit(0) == 1) {
-    sprintf(text,"TTrackCompModule bit004: N(TPR) = %i N(CPR) = %i E(cl) = %10.3f",
-	    fNTracks[0],fNTracks[1],fEclMax);
-    GetHeaderBlock()->Print(text);
-  }
-//-----------------------------------------------------------------------------
-// bit 4: events with TrkPatRec track and no CalPatRec track
+// bit 4: events with TrkPatRec track, a 60 MeV+ cluster and no CalPatRec track
 //-----------------------------------------------------------------------------
   if (GetDebugBit(4) == 1) {
     if ((fNTracks[0] > 0) && (fNClusters > 0) && (fNTracks[1] == 0)) {
@@ -530,8 +530,29 @@ void TTrackCompModule::Debug() {
 	sprintf(text,"TTrackCompModule bit004: N(TPR) = %i N(CPR) = %i E(cl) = %10.3f",
 		fNTracks[0],fNTracks[1],fEclMax);
 	GetHeaderBlock()->Print(text);
-	
       }
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit 5: Set C CALPATREC tracks with P > 106
+//-----------------------------------------------------------------------------
+  if ((GetDebugBit(5) == 1) && (ntrk > 0)) {
+    trk = cprb->Track(0);
+
+    if ((trk->fIDWord == 0) && (trk->fP > 106.)) {
+      GetHeaderBlock()->Print(Form("TTrackCompModule bit005: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
+				   tp->fDpF, trk->fP,trk->fPFront));
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit 6: Set C CALPATREC tracks with 1.5 < tp->fDFp < 5
+//-----------------------------------------------------------------------------
+  if ((GetDebugBit(6) == 1) && (ntrk > 0)) {
+    trk = cprb->Track(0);
+
+    if ((trk->fIDWord == 0) && (tp->fDpF >= 1.5) && (tp->fDpF < 5)) {
+      GetHeaderBlock()->Print(Form("TTrackCompModule bit006: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
+				   tp->fDpF, trk->fP,trk->fPFront));
     }
   }
 }

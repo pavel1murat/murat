@@ -14,8 +14,6 @@ BEGIN_PROLOG
 # mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
 # for grid jobs       : --fclinput=1:@bgHitFiles:datasets/mixp3-x050-dcache
 # for local debug jobs: --fclinput=1:@bgHitFiles:datasets/mixp3-x050-local
-# also use --fclinput=@muStops:datasets/mustops_grid for grid submission 
-# and      --fclinput=@muStops:datasets/mustops for local submission 
 #------------------------------------------------------------------------------
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 # bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]

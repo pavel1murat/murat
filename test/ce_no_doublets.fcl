@@ -1,0 +1,7 @@
+# -*- mode: tcl -*-
+#------------------------------------------------------------------------------
+# cross check: run calPatRec , but don't use doublet-based ambig resolution
+#------------------------------------------------------------------------------
+#include "Stntuple/test/generate_mergePatRec_stnmaker.fcl"
+
+physics.producers.CalPatRec.useDoublets : 0

@@ -93,6 +93,7 @@ public:
     TH1F*    fChi2Dof;
     TH1F*    fChi2DofC;
     TH1F*    fNActive;
+    TH1F*    fNWrong;
     TH1F*    fT0;
     TH1F*    fT0Err;
     TH1F*    fQ;

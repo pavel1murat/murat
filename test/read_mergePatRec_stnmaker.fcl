@@ -1,0 +1,13 @@
+# -*- mode: tcl -*- 
+#
+
+#include "Stntuple/test/generate_mergePatRec_stnmaker.fcl"
+
+process_name : readMergePatRecStnmaker
+
+source.module_type    : RootInput
+physics.trigger_paths : [ readMergePatRec ] 
+physics.out           : []
+
+physics.producers.MakeCaloProtoCluster.caloCrystalModuleLabel : CaloCrystalHitsMaker
+

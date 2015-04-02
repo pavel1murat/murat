@@ -38,7 +38,6 @@
 #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
-#include "CaloCluster/inc/CaloClusterUtilities.hh"
 #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
 #include "Mu2eUtilities/inc/SortedStepPoints.hh"
 #include "Mu2eUtilities/inc/TrackTool.hh"

@@ -389,8 +389,8 @@ namespace mu2e {
 
     const CaloCluster* cl = Cluster->fCaloCluster;
 
-    row = cl->cogRow();
-    col = cl->cogColumn();
+    row = -999; // cl->cogRow();
+    col = -999; // cl->cogColumn();
     x   = cl->cog3Vector().x();
     y   = cl->cog3Vector().y();
     z   = cl->cog3Vector().z();
@@ -399,7 +399,7 @@ namespace mu2e {
     if ((row < 0) || (row > 9999)) row = -9999;
     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(cl->vaneId());
+    Hist->fVaneID->Fill(cl->sectionId());
     Hist->fEnergy->Fill(cl->energyDep());
     Hist->fT0->Fill(cl->time());
     Hist->fRow->Fill(row);

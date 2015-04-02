@@ -163,14 +163,17 @@ fi
 
 if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: DATASET=$DATASET DSID=$DSID; fi
 
-export   WORK_DIR=$PWD
+export     WORK_DIR=$PWD
+if [ $DSID == "undefined" ] ; then export NAME_STUB=$JOB
+else                                      NAME_STUB=${DSID}_$JOB
+fi
+
+export      LOGFILE=$NAME_STUB.log
 
 if [ $OUTPUT_DIR == "undefined" ] ; then 
     export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${DSID}_${JOB}.`echo $$`
 fi
 
-export    NAME_STUB=${DSID}_$JOB
-export    LOGFILE=$NAME_STUB.log
 #------------------------------------------------------------------------------
 # handle input .FCL file
 #------------------------------------------------------------------------------

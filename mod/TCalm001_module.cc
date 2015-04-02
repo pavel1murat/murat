@@ -338,16 +338,16 @@ namespace mu2e {
     int   row, col;
     float  x, y, z;
 
-    row = Cluster->cogRow();
-    col = Cluster->cogColumn();
+    row = -999; // Cluster->cogRow();
+    col = -999; // Cluster->cogColumn();
     x   = Cluster->cog3Vector().x();
     y   = Cluster->cog3Vector().y();
     z   = Cluster->cog3Vector().z();
 
-    if ((row < 0) || (row > 9999)) row = -9999;
-    if ((col < 0) || (col > 9999)) col = -9999;
+//     if ((row < 0) || (row > 9999)) row = -9999;
+//     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(Cluster->vaneId());
+    Hist->fVaneID->Fill(Cluster->sectionId());
     Hist->fEnergy->Fill(Cluster->energyDep());
     Hist->fT0->Fill(Cluster->time());
     Hist->fRow->Fill(row);

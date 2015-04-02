@@ -543,9 +543,13 @@ namespace mu2e {
 
     const CaloCluster* cl = Cluster->fCaloCluster;
 
-    row = cl->cogRow();
-    col = cl->cogColumn();
-    x   = cl->cog3Vector().x()+3904.;
+    row = -999; // cl->cogRow();
+    col = -999; // cl->cogColumn();
+//-----------------------------------------------------------------------------
+// starting from v5_3 the cluster coordinates are reconstructed in the local 
+// coordinate system of the disk
+//-----------------------------------------------------------------------------
+    x   = cl->cog3Vector().x(); // +3904.;
     y   = cl->cog3Vector().y();
     z   = cl->cog3Vector().z();
     r   = sqrt(x*x+y*y);
@@ -553,7 +557,7 @@ namespace mu2e {
     if ((row < 0) || (row > 9999)) row = -9999;
     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(cl->vaneId());
+    Hist->fVaneID->Fill(cl->sectionId());
     Hist->fEnergy->Fill(cl->energyDep());
     Hist->fT0->Fill(cl->time());
     Hist->fRow->Fill(row);

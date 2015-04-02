@@ -912,9 +912,9 @@ void TCosmicsAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track)
 
   Hist->fCosTh->Fill(Track->Momentum()->CosTheta());
   Hist->fChi2->Fill (Track->fChi2);
-  Hist->fNDof->Fill(Track->fNActive-5.);
-  Hist->fChi2Dof->Fill(Track->fChi2/(Track->fNActive-5.));
-  Hist->fNActive->Fill(Track->fNActive);
+  Hist->fNDof->Fill(Track->NActive()-5.);
+  Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.));
+  Hist->fNActive->Fill(Track->NActive());
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
   //  printf("TCosmicsAnaModule::FillTrackHistograms: track charge is not defined yet\n");
@@ -927,7 +927,7 @@ void TCosmicsAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track)
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fAlgMask->Fill(Track->AlgMask());
 
-  chi2c = Track->fChi2C/(Track->fNActive-5.);
+  chi2c = Track->fChi2C/(Track->NActive()-5.);
   Hist->fChi2DofC->Fill(chi2c);
 
   //  int nh, nst_with_nh[10];
@@ -1058,7 +1058,7 @@ void TCosmicsAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track)
   Hist->fLogLHR->Fill(llhr);
 
   Hist->fPdgCode->Fill(Track->fPdgCode);
-  Hist->fFrGH->Fill(Track->fNGoodMcHits/(Track->fNActive+1.e-5));
+  Hist->fFrGH->Fill(Track->fNGoodMcHits/(Track->NActive()+1.e-5));
 
   Hist->fNEPlVsNHPl->Fill(tp->fNEPl,tp->fNHPl);
   Hist->fNDPlVsNHPl->Fill(tp->fNDPl,tp->fNHPl);
@@ -1238,7 +1238,7 @@ void TCosmicsAnaModule::FillHistograms() {
 	  reco_pitch = trk->fTanDip;
 	  sigp       = trk->fFitMomErr;
 	  sigt       = trk->fT0Err;
-	  nactive    = trk->fNActive;
+	  nactive    = trk->NActive();
 	  p          = trk->fP;
 					// fit quality
 	  if ((nactive > 25) && (fcons > 2.e-3) && (sigp < 0.25) && (sigt < 1.0))  {

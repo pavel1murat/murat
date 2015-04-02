@@ -271,9 +271,9 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
 
   Hist->fCosTh->Fill(Track->Momentum()->CosTheta());
   Hist->fChi2->Fill (Track->fChi2);
-  Hist->fNDof->Fill(Track->fNActive-5.);
-  Hist->fChi2Dof->Fill(Track->fChi2/(Track->fNActive-5.));
-  Hist->fNActive->Fill(Track->fNActive);
+  Hist->fNDof->Fill(Track->NActive()-5.);
+  Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.));
+  Hist->fNActive->Fill(Track->NActive());
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
   Hist->fQ->Fill(-1);
@@ -285,7 +285,7 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fAlgMask->Fill(Track->AlgMask());
 
-//   chi2c = Track->fChi2C/(Track->fNActive-5.);
+//   chi2c = Track->fChi2C/(Track->NActive()-5.);
 //   Hist->fChi2DofC->Fill(chi2c);
 //-----------------------------------------------------------------------------
 // there is an inconsistency in the SIMP block filling - in Mu2e offline 

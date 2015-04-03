@@ -171,7 +171,12 @@ fi
 export      LOGFILE=$NAME_STUB.log
 
 if [ $OUTPUT_DIR == "undefined" ] ; then 
-    export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${DSID}_${JOB}.`echo $$`
+    dsid=$DSID
+    if [ $dsid == "undefined" ] ; then 
+	export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${JOB}.`echo $$`
+    else
+	export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${DSID}_${JOB}.`echo $$`
+    fi
 fi
 
 #------------------------------------------------------------------------------

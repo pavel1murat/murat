@@ -27,13 +27,7 @@ process_name : DioMixP3X1MergePatRecStnmaker
 # for 105 MeV/c electron : E = 105.00124           MeV
 # for 105 MeV/c muon     : E = 148.9584269653785   MeV
 
-physics.producers.generate : { @table::StoppedParticleReactionGun 
-    physics : { @table::StoppedParticleReactionGun.physics 
-	pdgId  : 11
-	elow   : 101.0010
-	ehi    : 105.0015
-    }
-}
+physics.producers.generate : { @table::StoppedMuonConversionGun }
 
 # 2*0.5 = 1
 flashMixer.flashMixer.detail.mean        : -2
@@ -44,6 +38,7 @@ physics.filters.photonMixer.detail.mean  : -2
 physics.filters.protonMixer.detail.mean  : -2
 
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+physics.out : [ detectorOutput ]
 
 services.TFileService.fileName                     : "dio_mixp3_x1_mergepatrec_stnmaker.hist"
 physics.filters.InitStntuple.histFileName          : "dio_mixp3_x1_mergepatrec_stnmaker.stn" 

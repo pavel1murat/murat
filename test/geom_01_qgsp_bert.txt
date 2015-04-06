@@ -1,11 +1,12 @@
 //------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-#include "Mu2eG4/test/geom_01.txt"
+// #include "Mu2eG4/test/geom_01.txt"
 
+#include "JobConfig/TDR/geom_MothersToHits.txt"
 // Write mu2e geometry into a GDML file
 // bool   writeGDML             = true;
-string GDMLFileName             = "mu2e_v4_2_7.gdml";
+string GDMLFileName             = "mu2e_v5_3_0.gdml";
 
 string g4.physicsListName       = "QGSP_BERT";
 int  calorimeter.verbosityLevel = 1;

@@ -189,9 +189,11 @@ void TTrackCompModule::BookHistograms() {
 
   book_track_histset[  0] = 1;		// TrkPatRec all tracks 
   book_track_histset[  1] = 1;		// TrkPatRec all tracks 
+  book_track_histset[  2] = 1;		// TrkPatRec-not-CalPatRec Set C tracks 
 
   book_track_histset[100] = 1;		// CalPatRec all tracks 
   book_track_histset[101] = 1;		// CalPatRec Set "C" tracks
+  book_track_histset[102] = 1;		// CalPatRec-not-TrkPatRec Set C tracks 
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -342,7 +344,7 @@ void TTrackCompModule::FillHistograms() {
 
   TStnTrack*   trk;
   TrackPar_t*  tp;
-  int          ihist;
+  int          ihist, n_setc_tracks[2];
 //-----------------------------------------------------------------------------
 // event histograms
 //-----------------------------------------------------------------------------
@@ -357,7 +359,8 @@ void TTrackCompModule::FillHistograms() {
 // TrkPatRec histograms, ihist defines the offset
 //-----------------------------------------------------------------------------
   for (int i=0; i<2; i++) {
-    ihist = 100*i;
+    n_setc_tracks[i] = 0;
+    ihist            = 100*i;
     for (int itrk=0; itrk<fNTracks[i]; itrk++) {
       trk = fTrackBlock[i]->Track(itrk);
       tp  = fTrackPar[i]+itrk;
@@ -371,9 +374,43 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+1: Set C selection
 //-----------------------------------------------------------------------------
 	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp);
+	n_setc_tracks[i] += 1;
       }
     }
   }
+//-----------------------------------------------------------------------------
+// CalPatRec-not-TrkPatRec tracks 
+//-----------------------------------------------------------------------------
+  if (n_setc_tracks[0] == 0) {
+    ihist = 100;
+    for (int itrk=0; itrk<fNTracks[1]; itrk++) {
+      trk = fTrackBlock[1]->Track(itrk);
+      tp  = fTrackPar[1]+itrk;
+      if (trk->fIDWord == 0) {
+//-----------------------------------------------------------------------------
+// IHIST+1: Set C selection
+//-----------------------------------------------------------------------------
+	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// TrkPatRec-not-CalPatRec tracks 
+//-----------------------------------------------------------------------------
+  if (n_setc_tracks[1] == 0) {
+    ihist = 0;
+    for (int itrk=0; itrk<fNTracks[0]; itrk++) {
+      trk = fTrackBlock[0]->Track(itrk);
+      tp  = fTrackPar[1]+itrk;
+      if (trk->fIDWord == 0) {
+//-----------------------------------------------------------------------------
+// IHIST+1: Set C selection
+//-----------------------------------------------------------------------------
+	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
+      }
+    }
+  }
+
 }
 
 

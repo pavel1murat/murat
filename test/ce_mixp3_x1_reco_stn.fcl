@@ -40,9 +40,9 @@ physics.filters.protonMixer.detail.mean  : -2
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
 physics.out : [ detectorOutput ]
 
-services.TFileService.fileName                     : "dio_mixp3_x1_mergepatrec_stnmaker.hist"
-physics.filters.InitStntuple.histFileName          : "dio_mixp3_x1_mergepatrec_stnmaker.stn" 
-outputs.detectorOutput.fileName                    : "dio_mixp3_x1_mergepatrec_stnmaker.art"
+services.TFileService.fileName                     : "ce_mixp3_x1_mergepatrec_stnmaker.hist"
+physics.filters.InitStntuple.histFileName          : "ce_mixp3_x1_mergepatrec_stnmaker.stn" 
+outputs.detectorOutput.fileName                    : "ce_mixp3_x1_mergepatrec_stnmaker.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

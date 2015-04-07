@@ -6,12 +6,20 @@
 #------------------------------------------------------------------------------
 #include "Stntuple/test/gen_reco_stn_template.fcl"
 
-process_name : CERecoStn
+process_name : CERecoStnT0UpdateMode1
 
-physics.producers.generate : { @table::StoppedMuonConversionGun }
+source.module_type : RootInput
+source.maxEvents   : -1
+
+physics.trigger_paths : [reco]
+
+# physics.producers.generate : { @table::StoppedMuonConversionGun }
+
+physics.producers.CalPatRec.KalFitHack.T0UpdateMode : 1
 
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
-physics.out : [ detectorOutput ]
+
+# physics.out : [ detectorOutput ]
 
 services.TFileService.fileName                     : "ce_reco_stnmaker.hist"
 physics.filters.InitStntuple.histFileName          : "ce_reco_stnmaker.stn" 

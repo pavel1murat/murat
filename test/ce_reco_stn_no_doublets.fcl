@@ -6,12 +6,16 @@
 #------------------------------------------------------------------------------
 #include "Stntuple/test/gen_reco_stn_template.fcl"
 
-process_name : CERecoStn
+process_name : CERecoStnNoDoublets
 
-physics.producers.generate : { @table::StoppedMuonConversionGun }
+source.module_type : RootInput
+source.maxEvents   : -1
 
-physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
-physics.out : [ detectorOutput ]
+physics.trigger_paths : [reco]
+
+physics.producers.CalPatRec.useDoublets : 0
+
+# physics.out : [ detectorOutput ]
 
 services.TFileService.fileName                     : "ce_reco_stnmaker.hist"
 physics.filters.InitStntuple.histFileName          : "ce_reco_stnmaker.stn" 

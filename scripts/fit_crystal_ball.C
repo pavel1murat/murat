@@ -89,86 +89,66 @@ void cb_fit(double XMin, double XMax) {
 }
 
 //-----------------------------------------------------------------------------
+void create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
+
+  F = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
+
+  F->SetParName(0,"anorm");
+  F->SetParName(1,"mean");
+  F->SetParName(2,"sigma");
+  F->SetParName(3,"alpha");
+  F->SetParName(4,"N");
+  F->SetParName(5,"tail_frac");
+  F->SetParName(6,"tail_lamb");
+
+  F->SetParLimits(2,0.,1.);
+  F->SetParLimits(5,0.,0.5);
+  F->SetLineWidth(1);
+ 
+}
+
+//-----------------------------------------------------------------------------
 void fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
 		      double X0, double XMin, double XMax) {
 
   h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
 
-  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
+  TF1*  f;
+  create_fit_function(f,X0,XMin,XMax);
 
-  f->SetParName(0,"anorm");
-  f->SetParName(1,"mean");
-  f->SetParName(2,"sigma");
-  f->SetParName(3,"alpha");
-  f->SetParName(4,"N");
-  f->SetParName(5,"tail_frac");
-  f->SetParName(6,"tail_lamb");
-  
-  f->SetParLimits(2,0.,1.);
-  f->SetParLimits(5,0.,0.5);
-  
   double anorm = h->GetEntries()/10;
   cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
   cb_fit(XMin,XMax);
-
-  // h->Draw();
-  // f->Draw("same");
 }
 
 //-----------------------------------------------------------------------------
 void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
-
   h = (TH1F*) Hist;
 
-  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
-
-  f->SetParName(0,"anorm");
-  f->SetParName(1,"mean");
-  f->SetParName(2,"sigma");
-  f->SetParName(3,"alpha");
-  f->SetParName(4,"N");
-  f->SetParName(5,"tail_frac");
-  f->SetParName(6,"tail_lamb");
-  
-  f->SetParLimits(2,0.,1.);
-  f->SetParLimits(5,0.,0.5);
-  
+  TF1*  f;
+  create_fit_function(F,X0,XMin,XMax);
   double anorm = h->GetEntries()/10;
   cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
   cb_fit(XMin,XMax);
-
-  // h->Draw();
-  // f->Draw("same");
 }
+
 
 //-----------------------------------------------------------------------------
 // fit a histogram, normalized to a unit area
 //-----------------------------------------------------------------------------
 void fit_crystal_ball_norm(const char* File, const char* Module, const char* Hist, 
 			   double X0, double XMin, double XMax) {
+  TF1* F;
 
   h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
   h->Scale(1./h->Integral());
-
-  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
-
-  f->SetParName(0,"anorm");
-  f->SetParName(1,"mean");
-  f->SetParName(2,"sigma");
-  f->SetParName(3,"alpha");
-  f->SetParName(4,"N");
-  f->SetParName(5,"tail_frac");
-  f->SetParName(6,"tail_lamb");
-
-  f->SetParLimits(2,0.,1.);
-  f->SetParLimits(5,0.,0.5);
-
   double anorm = h->Integral()/10;
-  cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
-  cb_fit(XMin,XMax);
 
-  // h->Draw();
-  // f->Draw("same");
+  TF1*  f;
+  create_fit_function(f,X0,XMin,XMax);
+
+  cb_init_parameters(F,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit(XMin,XMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -176,26 +156,13 @@ void fit_crystal_ball_norm(const char* File, const char* Module, const char* His
 //-----------------------------------------------------------------------------
 void fit_crystal_ball_norm(TH1* Hist, double X0, double XMin, double XMax) {
 
-  h = (TH1F*) Hist;
+  TH1F* h = (TH1F*) Hist;
   h->Scale(1./h->Integral());
 
-  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
+  TF1*  f;
+  create_fit_function(f,X0,XMin,XMax);
 
-  f->SetParName(0,"anorm");
-  f->SetParName(1,"mean");
-  f->SetParName(2,"sigma");
-  f->SetParName(3,"alpha");
-  f->SetParName(4,"N");
-  f->SetParName(5,"tail_frac");
-  f->SetParName(6,"tail_lamb");
-  
-  f->SetParLimits(2,0.,1.);
-  f->SetParLimits(5,0.,0.5);
-  
   double anorm = h->Integral()/10;
   cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
   cb_fit(XMin,XMax);
-  
-  // h->Draw();
-  // f->Draw("same");
 }

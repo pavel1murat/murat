@@ -89,4 +89,9 @@ TTrackRecoAna : {
     trkPatRecLabel      : TrkPatRecDownstreameMinus
 }
 
+DumpEventNumber : { 
+    module_type         : DumpEventNumber
+    module_name         : DumpEventNumber
+}
+
 END_PROLOG

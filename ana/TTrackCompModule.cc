@@ -9,6 +9,7 @@
 //  4  : events with TrkPatRec track and a cluster, but with no CalPatRec track
 //  5  : events with CalPatRec tracks with P > 106
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
+//  7  : events with N(set "C" CalPatRec tracks)  > 0
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -538,8 +539,14 @@ void TTrackCompModule::Debug() {
   TStnTrack* trk;
   TrackPar_t* tp;
   char        text[500];
+  int         calpatrec(1);
 
-  int calpatrec(1);
+//-----------------------------------------------------------------------------
+// bit 0: All Events
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(0) == 1) {
+    GetHeaderBlock()->Print(Form("TTrackCompModule :bit000:"));
+  }
 
   TStnTrackBlock* cprb = fTrackBlock[calpatrec];
 
@@ -594,6 +601,14 @@ void TTrackCompModule::Debug() {
 				   tp->fDpF, trk->fP,trk->fPFront));
     }
   }
+//-----------------------------------------------------------------------------
+// bit 7: events with N(Set C CalPatRec tracks) > 0
+//-----------------------------------------------------------------------------
+  if ((GetDebugBit(7) == 1) && (fNGoodTracks[calpatrec] > 0)) {
+    GetHeaderBlock()->Print(Form("TTrackCompModule :bit007:"));
+  }
+
+
 }
 
 //_____________________________________________________________________________

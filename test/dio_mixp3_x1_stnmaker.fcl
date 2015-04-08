@@ -45,6 +45,9 @@ physics.filters.protonMixer.detail.mean  : -2
 
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
 
+# physics.out : []
+physics.out : [detectorOutput]
+
 services.TFileService.fileName                     : "dio_mixp3_x1_mergepatrec_stnmaker.hist"
 physics.filters.InitStntuple.histFileName          : "dio_mixp3_x1_mergepatrec_stnmaker.stn" 
 outputs.detectorOutput.fileName                    : "dio_mixp3_x1_mergepatrec_stnmaker.art"

@@ -5,7 +5,11 @@
 
 process_name : readMergePatRecStnmaker
 
-source.module_type    : RootInput
+source : { @table::source
+    module_type    : RootInput
+    maxEvents      : -1
+}
+
 physics.trigger_paths : [ readMergePatRec ] 
 physics.out           : []
 

@@ -1,24 +1,18 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
-# generate 105 MeV/c electrons
+# generate 100-105 MeV/c electrons
 # make STNTUPLE in one go, without creating an intermediate file
 #------------------------------------------------------------------------------
-# $Id: dio_mixp3_x1_stnmaker.fcl,v 1.2 2014/06/17 04:32:03 murat Exp $
-# $Author: murat $
-# $Date: 2014/06/17 04:32:03 $
-
-//test: // This must be commented out for grid production.
 BEGIN_PROLOG
 #------------------------------------------------------------------------------
 # note: MixP3 files are about 9.3 GBytes large
 # mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
-# for grid jobs       : --fclinput=1:@bgHitFiles:datasets/mixp3-x050-dcache
-# for local debug jobs: --fclinput=1:@bgHitFiles:datasets/mixp3-x050-local
+# for grid jobs       : --fclinput=1:@bgrHitFiles:datasets/mixp3-x050-dcache
+# for local debug jobs: --fclinput=1:@bgrHitFiles:datasets/mixp3-x050-local
 #------------------------------------------------------------------------------
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 END_PROLOG
 
-#  #include "Stntuple/test/generate_mix_mergePatRec_stnmaker.fcl"
 #include "Stntuple/test/gen_mix_reco_stn.fcl"
 
 process_name : DioMixP3X1MergePatRecStnmaker
@@ -44,8 +38,8 @@ physics.filters.protonMixer.detail.mean  : -2
 
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
 
-# physics.out : []
-physics.out : [detectorOutput]
+physics.out : []
+# physics.out : [detectorOutput]
 
 services.TFileService.fileName                     : "dio_mixp3_x1_mergepatrec_stnmaker.hist"
 physics.filters.InitStntuple.histFileName          : "dio_mixp3_x1_mergepatrec_stnmaker.stn" 

@@ -19,10 +19,9 @@ BEGIN_PROLOG
 # bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 END_PROLOG
 
-#  #include "Stntuple/test/generate_mix_mergePatRec_stnmaker.fcl"
 #include "Stntuple/test/gen_mix_reco_stn.fcl"
 
-process_name : DioMixP3X1MergePatRecStnmaker
+process_name : CEMixP3X1MergePatRecStnmaker
 
 # for 105 MeV/c electron : E = 105.00124           MeV
 # for 105 MeV/c muon     : E = 148.9584269653785   MeV
@@ -38,11 +37,12 @@ physics.filters.photonMixer.detail.mean  : -2
 physics.filters.protonMixer.detail.mean  : -2
 
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
-physics.out : [ detectorOutput ]
+# physics.out : [ detectorOutput ]
+physics.out : [ ]
 
-services.TFileService.fileName                     : "ce_mixp3_x1_mergepatrec_stnmaker.hist"
-physics.filters.InitStntuple.histFileName          : "ce_mixp3_x1_mergepatrec_stnmaker.stn" 
-outputs.detectorOutput.fileName                    : "ce_mixp3_x1_mergepatrec_stnmaker.art"
+services.TFileService.fileName                     : "ce_mixp3_x1.hist"
+physics.filters.InitStntuple.histFileName          : "ce_mixp3_x1.stn" 
+outputs.detectorOutput.fileName                    : "ce_mixp3_x1.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

@@ -1,0 +1,28 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate conversion electrons
+# make STNTUPLE in one go, without creating an intermediate file
+# to write a DST output file, uncomment the 'physics.out' line
+#------------------------------------------------------------------------------
+#include "Stntuple/test/gen_reco_stn_template.fcl"
+
+process_name : DIORecoStn
+
+physics.producers.generate : { @table::StoppedParticleReactionGun 
+    physics : { @table::StoppedParticleReactionGun.physics 
+	pdgId  : 11
+	elow   : 101.0010
+	ehi    : 105.0015
+    }
+}
+
+physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+# physics.out : [ detectorOutput ]
+physics.out : [ ]
+
+services.TFileService.fileName                     : "dio_reco.hist"
+physics.filters.InitStntuple.histFileName          : "dio_reco.stn" 
+outputs.detectorOutput.fileName                    : "dio_reco.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

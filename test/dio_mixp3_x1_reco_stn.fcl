@@ -1,0 +1,49 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate 100-105 MeV/c electrons
+# make STNTUPLE in one go, without creating an intermediate file
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+#------------------------------------------------------------------------------
+# note: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+# for grid jobs       : --fclinput=1:@bgrHitFiles:datasets/mixp3-x050-dcache
+# for local debug jobs: --fclinput=1:@bgrHitFiles:datasets/mixp3-x050-local
+#------------------------------------------------------------------------------
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+END_PROLOG
+
+#include "Stntuple/test/gen_mix_reco_stn.fcl"
+
+process_name : DioMixP3X1MergePatRecStnmaker
+
+# for 105 MeV/c electron : E = 105.00124           MeV
+# for 105 MeV/c muon     : E = 148.9584269653785   MeV
+
+physics.producers.generate : { @table::StoppedParticleReactionGun 
+    physics : { @table::StoppedParticleReactionGun.physics 
+	pdgId  : 11
+	elow   : 101.0010
+	ehi    : 105.0015
+    }
+}
+
+# 2*0.5 = 1
+flashMixer.flashMixer.detail.mean        : -2
+physics.filters.ootMixer.detail.mean     : -2
+physics.filters.dioMixer.detail.mean     : -2
+physics.filters.neutronMixer.detail.mean : -2
+physics.filters.photonMixer.detail.mean  : -2
+physics.filters.protonMixer.detail.mean  : -2
+
+physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+
+physics.out : []
+# physics.out : [detectorOutput]
+
+services.TFileService.fileName                     : "dio_mixp3_x1_reco.hist"
+physics.filters.InitStntuple.histFileName          : "dio_mixp3_x1_reco.stn" 
+outputs.detectorOutput.fileName                    : "dio_mixp3_x1_reco.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

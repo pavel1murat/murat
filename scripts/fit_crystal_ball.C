@@ -83,9 +83,9 @@ void cb_init_parameters(TF1* F,
 }
 
 //-----------------------------------------------------------------------------
-void cb_fit(double XMin, double XMax) {
-  h->GetXaxis()->SetRangeUser(XMin,XMax);
-  h->Fit(f,"","",XMin,XMax);
+void cb_fit(TH1F* Hist, TF1* F, double XMin, double XMax) {
+  Hist->GetXaxis()->SetRangeUser(XMin,XMax);
+  Hist->Fit(F,"","",XMin,XMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -111,25 +111,25 @@ void create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 void fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
 		      double X0, double XMin, double XMax) {
 
-  h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
+  TH1F* h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
+  double anorm = h->GetEntries()/10;
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-
-  double anorm = h->GetEntries()/10;
-  cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
-  cb_fit(XMin,XMax);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit             (h,f,XMin,XMax);
 }
 
 //-----------------------------------------------------------------------------
 void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
-  h = (TH1F*) Hist;
+
+  TH1F* h = (TH1F*) Hist;
+  double anorm = h->GetEntries()/10;
 
   TF1*  f;
-  create_fit_function(F,X0,XMin,XMax);
-  double anorm = h->GetEntries()/10;
-  cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
-  cb_fit(XMin,XMax);
+  create_fit_function(f,X0,XMin,XMax);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit             (h,f,XMin,XMax);
 }
 
 
@@ -138,17 +138,15 @@ void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 //-----------------------------------------------------------------------------
 void fit_crystal_ball_norm(const char* File, const char* Module, const char* Hist, 
 			   double X0, double XMin, double XMax) {
-  TF1* F;
 
-  h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
+  TH1F* h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
   h->Scale(1./h->Integral());
   double anorm = h->Integral()/10;
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-
-  cb_init_parameters(F,anorm,X0,0.15,3.,1.,0.01,0.1);
-  cb_fit(XMin,XMax);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit             (h,f,XMin,XMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -158,11 +156,10 @@ void fit_crystal_ball_norm(TH1* Hist, double X0, double XMin, double XMax) {
 
   TH1F* h = (TH1F*) Hist;
   h->Scale(1./h->Integral());
+  double anorm = h->Integral()/10;
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-
-  double anorm = h->Integral()/10;
-  cb_init_parameters(f,anorm,X0,0.15,3.,1.,0.01,0.1);
-  cb_fit(XMin,XMax);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_fit             (h,f,XMin,XMax);
 }

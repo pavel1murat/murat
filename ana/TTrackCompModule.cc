@@ -10,6 +10,7 @@
 //  5  : events with CalPatRec tracks with P > 106
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 //  7  : events with N(set "C" CalPatRec tracks)  > 0
+//  8  : events with CalPatRec tracks with P > 105
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -88,6 +89,7 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
+  HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
 
   //  HBook1F(Hist->fZ1         ,"z1"       ,Form("%s: track Z1      "    ,Folder), 200,-2000,2000,Folder);
   //  HBook2F(Hist->fNHVsStation,"nh_vs_st" ,Form("%s: N(hits) Vs Station",Folder),  50, 0,50,10,-0.5,9.5,Folder);
@@ -289,6 +291,7 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fAlgMask->Fill(Track->AlgMask());
+  Hist->fFConsVsNActive->Fill(Track->NActive(),Track->fFitCons);
 
 //   chi2c = Track->fChi2C/(Track->NActive()-5.);
 //   Hist->fChi2DofC->Fill(chi2c);
@@ -606,6 +609,17 @@ void TTrackCompModule::Debug() {
 //-----------------------------------------------------------------------------
   if ((GetDebugBit(7) == 1) && (fNGoodTracks[calpatrec] > 0)) {
     GetHeaderBlock()->Print(Form("TTrackCompModule :bit007:"));
+  }
+//-----------------------------------------------------------------------------
+// bit 8: Set C CALPATREC tracks with P > 105
+//-----------------------------------------------------------------------------
+  if ((GetDebugBit(8) == 1) && (ntrk > 0)) {
+    trk = cprb->Track(0);
+
+    if ((trk->fIDWord == 0) && (trk->fP > 105.)) {
+      GetHeaderBlock()->Print(Form("TTrackCompModule :bit008: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
+				   tp->fDpF, trk->fP,trk->fPFront));
+    }
   }
 
 

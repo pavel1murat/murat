@@ -31,7 +31,7 @@ od=$output_dir/$dsname
 
 echo job=$job jobname=$jobname od=$od
 #------------------------------------------------------------------------------
-# create output directories
+# create output directories, if they didn't exist
 #------------------------------------------------------------------------------
 if [ ! -d $od      ] ; then mkdir $od      ; fi
 if [ ! -d $od/log  ] ; then mkdir $od/log  ; fi

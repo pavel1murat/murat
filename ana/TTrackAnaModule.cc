@@ -59,7 +59,7 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   fCalorimeterType = 2;
   fFillDioHist     = 1;
 
-  fMinT0 = 0; // do not cut on time by default
+  fMinT0 = 700; 
 
   fTrackID = new TStnTrackID();
   fLogLH   = new TEmuLogLH();
@@ -147,7 +147,7 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  80  ,120. ,Folder);
+  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  90  ,110. ,Folder);
   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
@@ -158,6 +158,9 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
   HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder), 200,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fXDpF       ,"xdpf"     ,Form("%s: DpF/momErr"        ,Folder),1000, -50. , 50. ,Folder);
+  HBook1F(Hist->fDpFDio     ,"dpfdio"   ,Form("%s: Track DpF(DIO Wt)" ,Folder), 200,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fXDpFDio    ,"xdpfdio"  ,Form("%s: DpF/momErr DioWt"  ,Folder),1000, -50. , 50. ,Folder);
   HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder), 200,  -5. ,  5. ,Folder);
   HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder), 200,  -5. ,  5. ,Folder);
   HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
@@ -340,7 +343,7 @@ void TTrackAnaModule::BookHistograms() {
   book_event_histset[ 7] = 1;	        // events with E(cluster) > 60 MeV
   book_event_histset[ 8] = 1;	        // events with the highest energy cluster on the 1st disk
   book_event_histset[ 9] = 1;	        // events with the highest energy cluster on the 2nd disk
-  book_event_histset[10] = 0;	        // 
+  book_event_histset[10] = 1;	        // events with SetC tracks 103.5 < p < 105.
   book_event_histset[11] = 1;	        // selection cuts
   book_event_histset[12] = 1;	        // 
   book_event_histset[13] = 1;	        // 
@@ -441,6 +444,16 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 60] = 1;		// all tracks, alg_mask = 3
   book_track_histset[ 61] = 1;		// Set "C" tracks, alg_mask = 3
   book_track_histset[ 62] = 1;		// Set "C" tracks, alg_mask = 3, T > 700
+  book_track_histset[ 63] = 0;
+  book_track_histset[ 64] = 0;
+  book_track_histset[ 65] = 0;
+  book_track_histset[ 66] = 0;
+  book_track_histset[ 67] = 0;
+  book_track_histset[ 68] = 0;
+  book_track_histset[ 69] = 0;
+  book_track_histset[ 70] = 0;
+
+  book_track_histset[ 71] = 1;		// Set "C" tracks   103.5 < P < 105 : interesting for DIO
 
   
 
@@ -917,6 +930,9 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 					// dp: Tracker-only resolution
 
   Hist->fDpFront ->Fill(tp->fDpF);
+  Hist->fXDpF    ->Fill(tp->fDpF/Track->fFitMomErr);
+  Hist->fDpFDio  ->Fill(tp->fDpF,tp->fDioWt);
+  Hist->fXDpFDio ->Fill(tp->fDpF/Track->fFitMomErr,tp->fDioWt);
   Hist->fDpFront0->Fill(tp->fDp0);
   Hist->fDpFront2->Fill(tp->fDp2);
   Hist->fDpFSt   ->Fill(tp->fDpFSt);
@@ -1241,6 +1257,16 @@ void TTrackAnaModule::FillHistograms() {
 
   if      (disk_id == 0) FillEventHistograms(fHist.fEvent[8]);
   else if (disk_id == 1) FillEventHistograms(fHist.fEvent[9]);
+//-----------------------------------------------------------------------------
+// EVT_10: events with SetC tracks 103.5 < p < 105.0
+//-----------------------------------------------------------------------------
+  if (fNGoodTracks > 0) {
+    TStnTrack* trk = fTrackBlock->Track(0);
+    p              = trk->fP;
+    if ((p >= 103.5) && (p < 105.)) {
+      FillEventHistograms(fHist.fEvent[10]);
+    }
+  }
 //-----------------------------------------------------------------------------
 // Dave's ladder for all tracks
 // 1. N(straw hits) > 20
@@ -1605,6 +1631,12 @@ void TTrackAnaModule::FillHistograms() {
 	FillTrackHistograms(fHist.fTrack[61],trk);
 	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[62],trk);
       }
+    }
+//-----------------------------------------------------------------------------
+// TRK_71: SetC tracks  103.5 < p < 105 : DIO studies
+//-----------------------------------------------------------------------------
+    if ((trk->fIDWord == 0) && (trk->fP > 103.5) && (trk->fP < 105.)) {
+      FillTrackHistograms(fHist.fTrack[71],trk);
     }
   }
 //-----------------------------------------------------------------------------

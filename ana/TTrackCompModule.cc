@@ -11,6 +11,8 @@
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 //  7  : events with N(set "C" CalPatRec tracks)  > 0
 //  8  : events with CalPatRec tracks with P > 105
+//
+//
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -34,14 +36,27 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 {
   fTrackNumber.Set(100);
 
-  fMinT0 = 0; // do not cut on time by default
+  fMinT0 = 700; 
 
-  fTrackID = new TStnTrackID();
+  fTrackID      = new TStnTrackID();
+					// 20 <= N(active) < 25 slice
+  fTrackID_2025 = new TStnTrackID();
+  fTrackID_2025->SetMinNActive(20);
+  fTrackID_2025->SetMaxNActive(25);
+					// N(active) > 30
+  fTrackID_30   = new TStnTrackID();
+  fTrackID_30->SetMinNActive(30);
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
   fPdgCode       = 11;
   fGeneratorCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
+
+  fDebugCut[5].fXMin   = 106.;
+  fDebugCut[5].fXMax   = 200.;
+
+  fDebugCut[6].fXMin   = 1.5;
+  fDebugCut[6].fXMax   = 10.0;
 }
 
 //-----------------------------------------------------------------------------
@@ -59,12 +74,14 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
 
-  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  90  ,110. ,Folder);
+  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  80  ,120. ,Folder);
   Hist->fPDio->Sumw2(kTRUE);
 
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
   HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder), 200,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fXDpF       ,"xdpf"     ,Form("%s: DpF/momErr"        ,Folder),1000, -50. , 50. ,Folder);
+  HBook1F(Hist->fDpFDio     ,"dpfdio"   ,Form("%s: Track DpF(DIO Wt)" ,Folder), 200,  -5. ,  5. ,Folder);
   HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder), 200,  -5. ,  5. ,Folder);
   HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder), 200,  -5. ,  5. ,Folder);
   HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
@@ -191,12 +208,20 @@ void TTrackCompModule::BookHistograms() {
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
   book_track_histset[  0] = 1;		// TrkPatRec all tracks 
-  book_track_histset[  1] = 1;		// TrkPatRec all tracks 
-  book_track_histset[  2] = 1;		// TrkPatRec-not-CalPatRec Set C tracks 
+  book_track_histset[  1] = 1;		// TrkPatRec SetC tracks 
+  book_track_histset[  2] = 1;		// TrkPatRec-not-CalPatRec SetC tracks 
+  book_track_histset[  3] = 1;		// TrkPatRec Set C2025 tracks 
+  book_track_histset[  4] = 1;		// TrkPatRec-not-CalPatRec Set C2025 tracks 
+  book_track_histset[  5] = 1;		// TrkPatRec Set C30 tracks 
+  book_track_histset[  6] = 1;		// TrkPatRec-not-CalPatRec Set C30 tracks 
 
   book_track_histset[100] = 1;		// CalPatRec all tracks 
-  book_track_histset[101] = 1;		// CalPatRec Set "C" tracks
-  book_track_histset[102] = 1;		// CalPatRec-not-TrkPatRec Set C tracks 
+  book_track_histset[101] = 1;		// CalPatRec SetC tracks
+  book_track_histset[102] = 1;		// CalPatRec-not-TrkPatRec SetC tracks 
+  book_track_histset[103] = 1;		// CalPatRec SetC2025 tracks
+  book_track_histset[104] = 1;		// CalPatRec-not-TrkPatRec SetC2025 tracks 
+  book_track_histset[105] = 1;		// CalPatRec Set C30 tracks 
+  book_track_histset[106] = 1;		// CalPatRec-not-TrkPatRec Set C30 tracks 
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -270,6 +295,8 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
 					// dp: Tracker-only resolution
 
   Hist->fDpFront ->Fill(Tp->fDpF);
+  Hist->fXDpF    ->Fill(Tp->fDpF/Track->fFitMomErr);
+  Hist->fDpFDio  ->Fill(Tp->fDpF,Tp->fDioWt);
   Hist->fDpFront0->Fill(Tp->fDp0);
   Hist->fDpFront2->Fill(Tp->fDp2);
   Hist->fDpFSt   ->Fill(Tp->fDpFSt);
@@ -293,22 +320,6 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fAlgMask->Fill(Track->AlgMask());
   Hist->fFConsVsNActive->Fill(Track->NActive(),Track->fFitCons);
 
-//   chi2c = Track->fChi2C/(Track->NActive()-5.);
-//   Hist->fChi2DofC->Fill(chi2c);
-//-----------------------------------------------------------------------------
-// there is an inconsistency in the SIMP block filling - in Mu2e offline 
-// the particle momentumis is kept in MeV/c, while the PDG mass  -in GeV/c^2..
-// thus the energy is screwed up... kludge around
-// assign muon mass
-//-----------------------------------------------------------------------------
-//   double ekin(-1.);
-//   if (fSimp) {
-//     double p, m;
-//     //    p    = fSimp->fStartMom.P();
-//     p = Track->fP;
-//     m    = 105.658; // in MeV
-//     ekin = sqrt(p*p+m*m)-m;
-//   }
 }
 
 
@@ -348,7 +359,7 @@ void TTrackCompModule::FillHistograms() {
 
   TStnTrack*   trk;
   TrackPar_t*  tp;
-  int          ihist, n_setc_tracks[2];
+  int          ihist, n_setc_tracks[2], n_setc2025_tracks[2], n_setc30_tracks[2];
 //-----------------------------------------------------------------------------
 // event histograms
 //-----------------------------------------------------------------------------
@@ -372,46 +383,79 @@ void TTrackCompModule::FillHistograms() {
 // set IHIST+0: all tracks
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp);
-
-      if (trk->fIDWord == 0) {
 //-----------------------------------------------------------------------------
 // IHIST+1: Set C selection
 //-----------------------------------------------------------------------------
+      if (trk->fIDWord == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp);
 	n_setc_tracks[i] += 1;
+      }
+//-----------------------------------------------------------------------------
+// IHIST+3: SetC2025 selection
+//-----------------------------------------------------------------------------
+      if (tp->fIDWord_2025 == 0) {
+	FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp);
+	n_setc2025_tracks[i] += 1;
+      }
+//-----------------------------------------------------------------------------
+// IHIST+5: SetC30 selection
+//-----------------------------------------------------------------------------
+      if (tp->fIDWord_30 == 0) {
+	FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp);
+	n_setc30_tracks[i] += 1;
       }
     }
   }
 //-----------------------------------------------------------------------------
 // CalPatRec-not-TrkPatRec tracks 
 //-----------------------------------------------------------------------------
-  if (n_setc_tracks[0] == 0) {
-    ihist = 100;
-    for (int itrk=0; itrk<fNTracks[1]; itrk++) {
-      trk = fTrackBlock[1]->Track(itrk);
-      tp  = fTrackPar[1]+itrk;
-      if (trk->fIDWord == 0) {
+  ihist = 100;
+  for (int itrk=0; itrk<fNTracks[1]; itrk++) {
+    trk = fTrackBlock[1]->Track(itrk);
+    tp  = fTrackPar  [1]+itrk;
 //-----------------------------------------------------------------------------
-// IHIST+1: Set C selection
+// IHIST+2: SetC selection
 //-----------------------------------------------------------------------------
-	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
-      }
+    if ((trk->fIDWord == 0) && (n_setc_tracks[0] == 0)) {
+      FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
+    }
+//-----------------------------------------------------------------------------
+// IHIST+4: SetC2025 selection
+//-----------------------------------------------------------------------------
+    if ((tp->fIDWord_2025 == 0) && (n_setc2025_tracks[0] == 0)) {
+      FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp);
+    }
+//-----------------------------------------------------------------------------
+// IHIST+6: SetC30 selection
+//-----------------------------------------------------------------------------
+    if ((tp->fIDWord_30 == 0) && (n_setc30_tracks[0] == 0)) {
+      FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp);
     }
   }
 //-----------------------------------------------------------------------------
 // TrkPatRec-not-CalPatRec tracks 
 //-----------------------------------------------------------------------------
-  if (n_setc_tracks[1] == 0) {
-    ihist = 0;
-    for (int itrk=0; itrk<fNTracks[0]; itrk++) {
-      trk = fTrackBlock[0]->Track(itrk);
-      tp  = fTrackPar[1]+itrk;
-      if (trk->fIDWord == 0) {
+  ihist = 0;
+  for (int itrk=0; itrk<fNTracks[0]; itrk++) {
+    trk = fTrackBlock[0]->Track(itrk);
+    tp  = fTrackPar  [0]+itrk;
 //-----------------------------------------------------------------------------
-// IHIST+1: Set C selection
+// IHIST+2: Set C selection
 //-----------------------------------------------------------------------------
-	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
-      }
+    if ((trk->fIDWord == 0) && (n_setc_tracks[1] == 0)) {
+      FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
+    }
+//-----------------------------------------------------------------------------
+// IHIST+4: SetC2025 selection
+//-----------------------------------------------------------------------------
+    if ((tp->fIDWord_2025 == 0) && (n_setc2025_tracks[1] == 0)) {
+      FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp);
+    }
+//-----------------------------------------------------------------------------
+// IHIST+6: SetC30 selection
+//-----------------------------------------------------------------------------
+    if ((tp->fIDWord_30 == 0) && (n_setc30_tracks[1] == 0)) {
+      FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp);
     }
   }
 
@@ -487,11 +531,14 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // assume less 20 tracks
 //-----------------------------------------------------------------------------
-      tp             = fTrackPar[i]+itrk;
-      track          = fTrackBlock[i]->Track(itrk);
+      tp               = fTrackPar[i]+itrk;
+      track            = fTrackBlock[i]->Track(itrk);
 
-      id_word        = fTrackID->IDWord(track);
-      track->fIDWord = id_word;
+      id_word          = fTrackID->IDWord(track);
+      tp->fIDWord_2025 = fTrackID_2025->IDWord(track);
+      tp->fIDWord_30   = fTrackID_30->IDWord(track);
+      track->fIDWord   = id_word;
+
       if (id_word == 0) {
 	fNGoodTracks[i] += 1;
       }
@@ -588,7 +635,7 @@ void TTrackCompModule::Debug() {
   if ((GetDebugBit(5) == 1) && (ntrk > 0)) {
     trk = cprb->Track(0);
 
-    if ((trk->fIDWord == 0) && (trk->fP > 106.)) {
+    if ((trk->fIDWord == 0) && (trk->fP > fDebugCut[5].fXMin) && (trk->fP < fDebugCut[5].fXMax)) {
       GetHeaderBlock()->Print(Form("TTrackCompModule bit005: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
 				   tp->fDpF, trk->fP,trk->fPFront));
     }
@@ -599,7 +646,7 @@ void TTrackCompModule::Debug() {
   if ((GetDebugBit(6) == 1) && (ntrk > 0)) {
     trk = cprb->Track(0);
 
-    if ((trk->fIDWord == 0) && (tp->fDpF >= 1.5) && (tp->fDpF < 5)) {
+    if ((trk->fIDWord == 0) && (tp->fDpF >= fDebugCut[6].fXMin) && (tp->fDpF < fDebugCut[6].fXMax)) {
       GetHeaderBlock()->Print(Form("TTrackCompModule bit006: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
 				   tp->fDpF, trk->fP,trk->fPFront));
     }

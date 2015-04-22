@@ -84,7 +84,7 @@ void plot_sensitivity() {
   c_sens = new TCanvas("mu2e_sens","Mu2e Sensitivity",1200,800);
   c_sens->cd();
 
-  TH2F* h2 = new TH2F("h2","",1,101,106,1,0,0.4);
+  TH2F* h2 = new TH2F("h2","",1,101,106,1,0,0.6);
 
   h2->SetStats(0);
   h2->GetYaxis()->SetTitle(Form("N /%5.3f MeV/c",bin_width));
@@ -93,7 +93,7 @@ void plot_sensitivity() {
 //-----------------------------------------------------------------------------
 // draw "signal" box"
 //-----------------------------------------------------------------------------
-  PMin= 103.65; // for BGR 
+  PMin= 103.60; // for BGR 
 
   TPave* pave = new TPave(0.1,0.1,0.9,0.9,1);
   pave->SetX1(PMin);
@@ -278,10 +278,10 @@ void dio(const char* Folder = "trk_1") {
   d5331.fDioNGen = 980000.; 
   d5331.fCnvNGen = 980000.;
 
-  d5331.fCnvMom = (TH1F*) gh1("hist/cnvs5331.track_ana.hist","TrackAna",Form("%s/p"   ,Folder))->Clone("d5331_fCnvMom");
-  d5331.fDioMom = (TH1F*) gh1("hist/dios5331.track_ana.hist","TrackAna",Form("%s/pdio",Folder))->Clone("d5331_fDioMom");
-  //  d5331.fCnvMom = (TH1F*) gh1("hist/cnvs5331.track_comp.hist","TrackComp",Form("%s/p"   ,Folder))->Clone("d5331_fCnvMom");
-  //  d5331.fDioMom = (TH1F*) gh1("hist/dios5331.track_comp.hist","TrackComp",Form("%s/pdio",Folder))->Clone("d5331_fDioMom");
+  //  d5331.fCnvMom = (TH1F*) gh1("hist/cnvs5331.track_ana.hist","TrackAna",Form("%s/p"   ,Folder))->Clone("d5331_fCnvMom");
+  //  d5331.fDioMom = (TH1F*) gh1("hist/dios5331.track_ana.hist","TrackAna",Form("%s/pdio",Folder))->Clone("d5331_fDioMom");
+  d5331.fCnvMom = (TH1F*) gh1("hist/cnvs5331.track_comp.hist","TrackComp",Form("%s/p"   ,Folder))->Clone("d5331_fCnvMom");
+  d5331.fDioMom = (TH1F*) gh1("hist/dios5331.track_comp.hist","TrackComp",Form("%s/pdio",Folder))->Clone("d5331_fDioMom");
 
   //  d5331.fDioMom->Rebin(2);
 

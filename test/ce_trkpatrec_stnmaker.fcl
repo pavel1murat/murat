@@ -1,12 +1,7 @@
 # -*- mode: tcl -*-
 # generate conversion electrons, 
-# use /mu2e/data/tdr/beam/g4s3p5/mergedMuonStops for muon stops
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
-
-#include "Stntuple/fcl/prolog.fcl"
+#include "Stntuple/test/gen_reco_stn_template.fcl"
 
 process_name : conversionMergePatRecStnmaker
 

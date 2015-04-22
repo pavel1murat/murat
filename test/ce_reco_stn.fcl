@@ -4,13 +4,20 @@
 # make STNTUPLE in one go, without creating an intermediate file
 # to write a DST output file, uncomment the 'physics.out' line
 #------------------------------------------------------------------------------
+BEGIN_PROLOG
+  activePath : all
+END_PROLOG
+
 #include "Stntuple/test/gen_reco_stn_template.fcl"
 
 process_name : CERecoStn
 
+# services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+
 physics.producers.generate : { @table::StoppedMuonConversionGun }
 
 physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+physics.trigger_paths : [ @local::activePath]
 # physics.out : [ detectorOutput ]
 physics.out : [ ]
 

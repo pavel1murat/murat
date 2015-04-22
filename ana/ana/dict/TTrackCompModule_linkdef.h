@@ -4,6 +4,8 @@
 #pragma link off all   functions;
 
 #pragma link C++ class TTrackCompModule;
+#pragma link C++ class TTrackCompModule::Hist_t;
+#pragma link C++ class TTrackCompModule::Cut_t;
 
 #endif
 

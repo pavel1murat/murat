@@ -1,0 +1,37 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate conversion electrons
+# make STNTUPLE in one go, without creating an intermediate file
+# to write a DST output file, uncomment the 'physics.out' line
+#------------------------------------------------------------------------------
+#include "Stntuple/test/gen_reco_stn_template.fcl"
+
+process_name : CECalPatRecRecoStn
+
+services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+
+physics.producers.generate : { @table::StoppedMuonConversionGun }
+
+physics.producers.CalPatRec.KalFit.ambiguityStrategy : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
+physics.producers.CalPatRec.KalFit.hiterr            : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
+physics.producers.CalPatRec.KalFit.t0Tolerance       : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
+
+physics.trigger_paths                                : [ gen_calpatrec_reco_stnmaker ]
+outputs.detectorOutput.SelectEvents : { SelectEvents : [ gen_calpatrec_reco_stnmaker ] }
+
+physics.filters.StntupleMaker: { @table::StntupleMaker
+    generatorModuleLabel : "generate" 
+    trackBlockName       : [ "TrackBlock" ]
+}
+
+# physics.out : [ detectorOutput ]
+physics.out : [ ]
+#------------------------------------------------------------------------------
+# output files - make sure they all have the same name stub
+#------------------------------------------------------------------------------
+services.TFileService.fileName                     : "ce_calpatrec_reco_stnmaker_4.hist"
+physics.filters.InitStntuple.histFileName          : "ce_calpatrec_reco_stnmaker_4.stn" 
+outputs.detectorOutput.fileName                    : "ce_calpatrec_reco_stnmaker_4.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

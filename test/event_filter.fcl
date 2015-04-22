@@ -1,0 +1,20 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate conversion electrons
+# make STNTUPLE in one go, without creating an intermediate file
+# to write a DST output file, uncomment the 'physics.out' line
+#------------------------------------------------------------------------------
+#include "Stntuple/fcl/templates.fcl"
+
+process_name                        : EventFilter
+
+source.module_type                  : RootInput
+source.maxEvents                    : -1
+physics.trigger_paths               : [ event_filter ]
+physics.out                         : [ detectorOutput ]
+outputs.detectorOutput.SelectEvents : { SelectEvents : [ event_filter ] }
+outputs.detectorOutput.fileName     : "event_filter.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------
+physics.filters.EventFilter.eventList : [1436102, 10572, 94, 1436102, 35031, 94, 1436102, 36740, 94]

@@ -85,7 +85,23 @@ void  cal_ana() {
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
 //-----------------------------------------------------------------------------
-void  track_comp(int GeneratorCode,int DebugBit) {
+void  track_comp(int GeneratorCode,int DebugBit = -1, double XMin=1,double XMax = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
+  m_tcm->SetPdgCode      (11);
+  m_tcm->SetGeneratorCode(GeneratorCode);
+  if (DebugBit >= 0) {
+    m_tcm->SetDebugBit(DebugBit,1);
+    if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+//-----------------------------------------------------------------------------
+void  track_comp_debug(int GeneratorCode, double PMin = 106.) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
@@ -93,5 +109,5 @@ void  track_comp(int GeneratorCode,int DebugBit) {
   m_tcm->SetPdgCode      (11);
   m_tcm->SetGeneratorCode(GeneratorCode);
   m_tcm->GetTrackID()->SetMaxT0Err(1.5);
-  m_tcm->SetDebugBit(DebugBit,1);
+  m_tcm->SetDebugBit(6,1);
 }

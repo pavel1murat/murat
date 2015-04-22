@@ -138,6 +138,9 @@ public:
     TH1F*    fFitMomErr;
     TH1F*    fPFront;
     TH1F*    fDpFront;
+    TH1F*    fXDpF;
+    TH1F*    fDpFDio;
+    TH1F*    fXDpFDio;
     TH1F*    fDpFront0;
     TH1F*    fDpFront2;
     TH2F*    fDpFVsZ1;

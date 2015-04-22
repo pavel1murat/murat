@@ -31,7 +31,11 @@ public:
     int     fNHPl;
     int     fNEPl;
     int     fNDPl;
-    float   fDpF ;    // tracker-only resolution
+
+    int     fIDWord_2025;		// ID word for 20 <= N(active) < 25 tracks
+    int     fIDWord_30;	                // ID word for 30 <= N(active)
+
+    float   fDpF ;                      // tracker-only resolution
     float   fDp0 ;
     float   fDp2 ;
     float   fDpFSt;
@@ -82,6 +86,8 @@ public:
     TH1F*    fFitMomErr;
     TH1F*    fPFront;
     TH1F*    fDpFront;
+    TH1F*    fXDpF;                     // DpF/MomErr
+    TH1F*    fDpFDio;
     TH1F*    fDpFront0;
     TH1F*    fDpFront2;
     TH2F*    fDpFVsZ1;
@@ -125,6 +131,12 @@ public:
     TrackHist_t*   fTrack  [kNTrackHistSets];
     SimpHist_t*    fSimp   [kNSimpHistSets];
   };
+
+
+  struct Cut_t {
+    double fXMin;
+    double fXMax;
+  };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
@@ -140,6 +152,8 @@ public:
   Hist_t            fHist;
 					// cut values
   double            fPtMin;
+
+  Cut_t             fDebugCut[100];
 
   TGenParticle*     fParticle;		// electron or muon
   int               fPdgCode;		// determines which one
@@ -159,6 +173,8 @@ public:
 
   TStnTrack*        fTrack;
   TStnTrackID*      fTrackID;
+  TStnTrackID*      fTrackID_2025;
+  TStnTrackID*      fTrackID_30;
 
   double            fMinT0;
 
@@ -177,10 +193,14 @@ public:
   Hist_t*            GetHist      () { return &fHist;      }
   TStnTrackID*       GetTrackID   () { return fTrackID; }
 //-----------------------------------------------------------------------------
-// accessors
+// modifiers
 //-----------------------------------------------------------------------------
   void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
+  void               SetDebugCut(int I, double XMin, double XMax) {
+    fDebugCut[I].fXMin = XMin;
+    fDebugCut[I].fXMax = XMax;
+  }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

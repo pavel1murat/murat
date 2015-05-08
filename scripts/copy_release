@@ -1,0 +1,25 @@
+#!/bin/bash
+# crate a copy of a test release for batch submission purposes 
+
+dir1=$1
+dir2=$2
+
+prefix=echo ; if [ .$3  != "." ] ; then prefix="" ; fi
+
+for f1 in `find $dir1 -name "*" -print |\
+           grep -v "\.os$" | grep -v ".so$"  |\
+           grep -v "/.git" | grep -v "/.svn" |\
+           grep -v "\.root$" | grep -v "\~$"|\
+           grep -v "\.sconsign.dblite$" | grep -v "\~$"`|\
+    ;  do
+
+    f2=$dir2/$f1
+
+    if [ -d $f1 ] ; then
+	if [ ! -d $f2 ]  ; then mkdir -p $f2 ; fi
+    else
+	cp -vupP $f1 $f2 
+    fi
+
+done 
+

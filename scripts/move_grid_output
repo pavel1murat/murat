@@ -58,12 +58,14 @@ for subdir in `ls $dir` ; do
        x=`cat $sd/mu2e.log | grep "mu2egrid exit status"`; 
        rc=`echo $x | awk '{print $4}'`
 
+       rc=0
+
        if [ ".$rc" == ".0" ] ; then
 	   if [ ${dsname:3:1} != "s" ] ; then 
 #------------------------------------------------------------------------------
 # PRODUCTION dataset: move stntuple files
 #------------------------------------------------------------------------------
-	       $cmd_prefix mv $sd/$jobname.root $od/$dsname.000001$index
+	       $cmd_prefix mv $sd/$jobname.stn  $od/$dsname.000001$index
 	       $cmd_prefix mv $sd/$jobname.hist $od/hist/$jobname.$index.hist
 	   else 
 #------------------------------------------------------------------------------

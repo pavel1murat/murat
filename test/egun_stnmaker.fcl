@@ -23,9 +23,15 @@ process_name : EgunMergePatRecStnmaker
 # for 105 MeV/c electron : E = 105.00124           MeV
 # for 105 MeV/c muon     : E = 148.9584269653785   MeV
 
-physics.producers.generate.physics.pdgId  : 11
-physics.producers.generate.physics.elow   : 105.0010
-physics.producers.generate.physics.ehi    : 105.0015
+physics.producers.generate                : { @table::StoppedParticleReactionGun 
+    physics : {
+	pdgId            : 11
+	elow             : 105.0010
+	ehi              : 105.0015
+	spectrumVariable : "totalEnergy"
+	spectrumShape    : "flat"
+    }
+}
 
 services.TFileService.fileName            : "egun_stnmaker.hist"
 physics.filters.InitStntuple.histFileName : "egun_stnmaker.stn" 

@@ -18,7 +18,7 @@
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
 
-#include "KalmanTrack/KalRep.hh"
+#include "BTrk/KalmanTrack/KalRep.hh"
 #include "KalmanTests/inc/TrkStrawHit.hh"
 #include "KalmanTests/inc/KalRepPtrCollection.hh"
 #include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"

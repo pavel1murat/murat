@@ -50,9 +50,9 @@
 #include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 #include "MCDataProducts/inc/VirtualDetectorId.hh"
 
-#include "TrkBase/HelixParams.hh"
-#include "TrkBase/TrkHotList.hh"
-#include "KalmanTrack/KalHit.hh"
+#include "BTrk/TrkBase/HelixParams.hh"
+#include "BTrk/TrkBase/TrkHotList.hh"
+#include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"

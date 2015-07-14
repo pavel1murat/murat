@@ -11,14 +11,16 @@
 #define murat_inc_TCalm003_module_hh
 
 // Mu2e includes.
-#include "CLHEP/Geometry/HepPoint.h"
+// #include "CLHEP/Geometry/HepPoint.h"
+#include "BTrk/BbrGeom/HepPoint.h"
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Matrix/SymMatrix.h"
 #include "CLHEP/Matrix/Vector.h"
 
-#include "TrkBase/TrkHelixUtils.hh"
-#include "TrkBase/HelixParams.hh"
-#include "KalmanTrack/KalHit.hh"
+#include "BTrk/TrkBase/TrkHelixUtils.hh"
+#include "BTrk/TrkBase/HelixParams.hh"
+#include "BTrk/KalmanTrack/KalHit.hh"
+
 #include "KalmanTests/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
 #include "RecoDataProducts/inc/StrawHitCollection.hh"

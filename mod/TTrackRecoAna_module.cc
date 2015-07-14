@@ -39,7 +39,7 @@
 #include "MCDataProducts/inc/StrawHitMCTruth.hh"
 #include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 
-#include "KalmanTrack/KalHit.hh"
+#include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "KalmanTests/inc/TrkStrawHit.hh"
 #include "KalmanTests/inc/KalRepCollection.hh"

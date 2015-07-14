@@ -5,10 +5,11 @@
 int load_stnana_scripts_murat() {
   char        macro[200];
   const char* script[] = { 
-#    "global_vars.cc",
-#    "init_geometry.C",
+    //    "global_vars.cc",
+    //    "init_geometry.C",
     "cosmics.C",
     "dio_calib.C",
+    "pid.C",
     "reco_eff_ana.C",
     "track.C",
     "vdet.C",

@@ -1278,7 +1278,7 @@ void TCosmicsAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // track reconstructed with CalPatRec, but not with TrkPatRec
 //-----------------------------------------------------------------------------
-	    int x=0;
+//	    int x=0;
 	  }
 	}
       }

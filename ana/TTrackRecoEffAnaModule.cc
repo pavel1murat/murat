@@ -273,7 +273,7 @@ void TTrackRecoEffAnaModule::BookHistograms() {
   book_recoeff_histset[0] = 1;		// all tracks
 
   for (int i=0; i<kNRecoEffHistSets; i++) {
-    if (book_track_histset[i] != 0) {
+    if (book_recoeff_histset[i] != 0) {
       sprintf(folder_name,"eff_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);

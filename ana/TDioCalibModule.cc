@@ -591,9 +591,9 @@ void TDioCalibModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 // crystals - count crystals with E > 1MeV
 //-----------------------------------------------------------------------------
-  TCalHitData* cch;
+//  TCalHitData* cch;
 
-  int n_cch_1mev = 0;
+//  int n_cch_1mev = 0;
 
 //-----------------------------------------------------------------------------
 // disk calorimeter
@@ -1228,7 +1228,7 @@ void TDioCalibModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // track reconstructed with CalPatRec, but not with TrkPatRec
 //-----------------------------------------------------------------------------
-	    int x=0;
+//	    int x=0;
 	  }
 	}
       }

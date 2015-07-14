@@ -74,7 +74,7 @@ void TClusterAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* F
 
 //-----------------------------------------------------------------------------
 void TClusterAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
-  char name [200];
+  //  char name [200];
   //  char title[200];
 
   HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 200,Folder);
@@ -354,7 +354,7 @@ int TClusterAnaModule::BeginJob() {
 //_____________________________________________________________________________
 void TClusterAnaModule::FillHistograms() {
 
-  static int first_entry(1);
+  //  static int first_entry(1);
 //-----------------------------------------------------------------------------
 // event histograms
 //
@@ -397,7 +397,7 @@ void TClusterAnaModule::FillHistograms() {
     }
   }
 
-  first_entry = 0;
+  //  first_entry = 0;
 }
 
 
@@ -413,7 +413,7 @@ int TClusterAnaModule::BeginRun() {
 //_____________________________________________________________________________
 int TClusterAnaModule::Event(int ientry) {
 
-  double                p;
+  //  double                p;
   //  TEmuLogLH::CalData_t  dat;
   //  TStnTrack*            track;
   //  int                   id_word;
@@ -448,7 +448,7 @@ int TClusterAnaModule::Event(int ientry) {
     fDiskCalorimeter->Init(&disk_geom);
   }
 
-  TStnCluster* cl;
+  //  TStnCluster* cl;
   fNClusters  = fClusterBlock->NClusters();
 
   if (fNClusters == 0) fCluster = 0;
@@ -458,7 +458,7 @@ int TClusterAnaModule::Event(int ientry) {
 //   fNCl50      = 0;
 //   fNCl70      = 0;
   for (int i=0; i<fNClusters; ++i ) {
-    cl = fClusterBlock->Cluster(i);
+    //    cl = fClusterBlock->Cluster(i);
 //     if (cl->Energy() > 20.) fNCl20 += 1;
 //     if (cl->Energy() > 50.) fNCl50 += 1;
 //     if (cl->Energy() > 70.) fNCl70 += 1;

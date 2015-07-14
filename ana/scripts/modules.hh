@@ -9,6 +9,7 @@ TDioCalibModule*         m_dio   = NULL;
 // TStrawHitAnaModule*      m_str   = NULL;
 TTrackAnaModule*         m_trk   = NULL;
 TTrackCompModule*        m_tcm   = NULL;
+TTrackPidAnaModule*      m_pid   = NULL;
 TTrackRecoEffAnaModule*  m_eff   = NULL;
 TValCalPatRecModule*     m_vcpr  = NULL;
 TVdetAnaModule*          m_vdt   = NULL;

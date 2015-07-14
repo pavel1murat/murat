@@ -1,0 +1,175 @@
+# -*- mode: tcl -*-
+# $Id: MergePatRec_ele.fcl,v 1.2 2015/07/06 19:01:44 aviklaha Exp $
+#------------------------------------------------------------------------------
+#  mergePatRec02: read input data, remake all hits, do not regenereate events
+#------------------------------------------------------------------------------
+#include "aviklaha/fcl/prolog.fcl"
+#include "ParticleID/fcl/prolog.fcl"
+#include "Stntuple/fcl/templates.fcl"
+
+#                             Give this process a name
+process_name : AvikPid
+#------------------------------------------------------------------------------
+# Read events from a file (made by example 3)
+#------------------------------------------------------------------------------
+source : {
+#    module_type : EmptyEvent
+    module_type : RootInput
+    fileNames   : [ "define_your_file" ]
+    maxEvents   : 10000
+
+    inputCommands : ['keep *_*_*_*'
+		     , 'drop mu2eStrawDigis_*_*_*'
+		     , 'drop mu2eStrawHits_*_*_*'
+		     , 'drop *_CaloReadoutHitsMaker_*_*'
+		     , 'drop *_CaloCrystalHitsMaker_*_*'
+		     , 'drop *_MergePatRec_*_*'
+		     ]  
+}
+
+TrkPatRecKalFit : { @table::TrkPatRec.KalFit     
+    ambiguityStrategy    : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
+    #		ambiguityStrategy    : [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2   ]
+    hiterr               : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
+    t0Tolerance          : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
+    #	    final                    : 0
+    DoubletAmbigResolver : { @table::TrkPatRec.KalFit.DoubletAmbigResolver
+	debugLevel                          : 0
+	HitAmbigPenalty                     : false
+	HitMinDrift			    : 0.2
+	ZeroDriftPenalty 		    : 0.05
+	scaleErrDoublet                     : 5.   # external error scale factor
+	maxDoubletChi2                      : 10.  # to account for 1+4+4, not quite rigorous mathematically
+	sigmaSlope                          : 0.025
+	minDriftDoublet                     : 0.3
+	deltaDriftDoublet                   : 0.3
+	excludeBothHits                     : 1
+    }
+}
+
+CalPatRecKalFit : { @table::CalPatRec.KalFitHack }
+#------------------------------------------------------------------------------
+# physics
+#------------------------------------------------------------------------------
+physics.producers : { @table::physics.producers 
+
+    TrkPatRecDem         : { @table::TrkPatRec
+	KalFit           : @local::TrkPatRecKalFit
+    }
+
+    CalPatRecDem         : { @table::CalPatRec
+	KalFitHack       : { @table::CalPatRec.KalFitHack
+	    ambiguityStrategy    : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
+	    #		ambiguityStrategy    : [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2   ]
+	    hiterr               : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
+	    t0Tolerance          : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
+	    #	    final                    : 0
+	    DoubletAmbigResolver : { @table::CalPatRec.KalFitHack.DoubletAmbigResolver
+		debugLevel                          : 0
+		HitAmbigPenalty 		    : false
+		HitMinDrift			    : 0.2
+		ZeroDriftPenalty 		    : 0.05
+		scaleErrDoublet                     : 5.   # external error scale factor
+		maxDoubletChi2                      : 10.  # to account for 1+4+4, not quite rigorous mathematically
+		sigmaSlope                          : 0.025
+		minDriftDoublet                     : 0.3
+		deltaDriftDoublet                   : 0.3
+		excludeBothHits                     : 1
+	    }
+	} 
+    }
+
+    TrkPatRecDmm         : { @table::TrkPatRec
+	fitparticle  	 : 13
+	fitdirection     : 0
+	KalFit           : @local::TrkPatRecKalFit
+    }
+
+    CalPatRecDmm         : { @table::CalPatRec
+	fitparticle  	 : 13
+	fitdirection     : 0
+	KalFitHack           : { @table::CalPatRec.KalFitHack
+	    ambiguityStrategy    : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
+	    #		ambiguityStrategy    : [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2   ]
+	    hiterr               : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
+	    t0Tolerance          : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
+	    #	    final                    : 0
+	    DoubletAmbigResolver : { @table::CalPatRec.KalFitHack.DoubletAmbigResolver
+		debugLevel                          : 0
+		HitAmbigPenalty 	            : false
+		HitMinDrift			    : 0.2
+		ZeroDriftPenalty 		    : 0.05
+		scaleErrDoublet                     : 5.   # external error scale factor
+		maxDoubletChi2                      : 10.  # to account for 1+4+4, not quite rigorous mathematically 
+		sigmaSlope                          : 0.025
+		minDriftDoublet                     : 0.3
+		deltaDriftDoublet                   : 0.3
+		excludeBothHits                     : 1
+	    }
+	} 
+    }
+
+    MergePatRecDem       : { @table::MergePatRec
+	trkPatReclabel   : TrkPatRecDem
+	calPatReclabel   : CalPatRecDem
+	fitparticle      : 11     # 11:electron, -11:positron, 13:mu-, -13: mu+
+	fitdirection     : 0      # 0:downstream, 1:upstream
+    }	
+
+    MergePatRecDmm       : { @table::MergePatRec
+	trkPatReclabel   : TrkPatRecDmm
+	calPatReclabel   : CalPatRecDmm
+	fitparticle      : 13     
+	fitdirection     : 0      
+    }
+
+    AvikPID:  @local::AvikPID 
+}
+
+physics.filters: { @table::physics.filters
+    StntupleMaker        : { @table::StntupleMaker
+#------------------------------------------------------------------------------
+# make 3 track blocks, for the moment need to specify all other labels
+# default (in prolog): just one track block "TrackBlock" with output of MergePatRec
+#------------------------------------------------------------------------------
+	    trackBlockName          : [ "TrackBlockDem" , "TrackBlockDmm"   ] 
+	    trkRecoModuleLabel      : [ "MergePatRecDem", "MergePatRecDmm" ]
+	    trkExtrapolModuleLabel  : [            ""   ,               "" ]
+	    trkCaloMatchModuleLabel : [            ""   ,               "" ]
+	    pidModuleLabel          : [          AvikPID,          AvikPID ]
+	    fitParticle             : [               11,               13 ]
+	    fitDirection            : [                0,                0 ]
+    }
+}
+
+#------------------------------------------------------------------------------
+# paths - remake hits, but not regenerate the events
+#------------------------------------------------------------------------------
+
+physics.p1 : [ @sequence::trkMakeHitsSeq
+	       , @sequence::trkDemSeq
+	       , @sequence::trkDmmSeq
+	       , AvikPID
+	       , @sequence::stnmakerSeq
+	      ]
+
+physics.trigger_paths  : [p1]
+physics.end_paths      : []
+    
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+#------------------------------------------------------------------------------
+#     services.Timing: { }
+#------------------------------------------------------------------------------
+# print timing summary
+#------------------------------------------------------------------------------
+services.scheduler.wantSummary             : true
+source.firstRun                            :  1 
+services.user.SeedService.baseSeed         :  1
+services.user.SeedService.maxUniqueEngines :  20
+
+services.TFileService.fileName             : "avik_pid.hist"
+physics.filters.InitStntuple.histFileName  : "avik_pid.stn" 
+#------------------------------------------------------------------------------
+# the end
+#------------------------------------------------------------------------------

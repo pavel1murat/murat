@@ -53,7 +53,7 @@ Disk::Disk(double RMin, double RMax, double HexSize, double MinFraction) {
 
   for (int ir=0; ir<fNRings; ir++) {
     first = fFirst[ir];
-
+    ring  = -1;
     for (int ic=0; ic<fNCrystalsPerRing[ir]; ic++) {
       loc       = first+ic;
       hex_index = GetHexIndex(loc);
@@ -173,7 +173,7 @@ void Disk::GetPosition(int I, TVector2* Pos) {
 int Disk::IsInside(HexIndex* Index, double* Fraction) {
 
   int       inside, nvin(0), nbelow(0), nabove(0);
-  double    x0, y0, r, x, y, phi, s, s0, s1, r0, dr, adr;
+  double    x0, y0, r, x, y, phi, s, s0, /*s1,*/ r0, dr, adr;
   double    fr;
 
   x0 = fHexSize*(Index->fL+Index->fK)*sqrt(3.)/2.;
@@ -221,7 +221,7 @@ int Disk::IsInside(HexIndex* Index, double* Fraction) {
       if (adr > fHexSize/2) adr = fHexSize/2.;
 
       s   = fHexSize*fHexSize*sqrt(3)/2;
-      s1  = (2*fHexSize-adr)*adr/sqrt(3.);
+      //      s1  = (2*fHexSize-adr)*adr/sqrt(3.);
       s0  = (3*fHexSize-2*adr)*(fHexSize-2*adr)/4/sqrt(3);
 
       if (dr <= 0) {
@@ -239,7 +239,7 @@ int Disk::IsInside(HexIndex* Index, double* Fraction) {
       if (adr > fHexSize/2) adr = fHexSize/2.;
 
       s   = fHexSize*fHexSize*sqrt(3)/2;
-      s1  = (2*fHexSize-adr)*adr/sqrt(3.);
+      //      s1  = (2*fHexSize-adr)*adr/sqrt(3.);
       s0  = (3*fHexSize-2*adr)*(fHexSize-2*adr)/4/sqrt(3);
       if (dr > 0) {
 	fr = 1-s0/s;

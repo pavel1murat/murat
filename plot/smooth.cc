@@ -86,7 +86,7 @@ smooth::smooth(const TH1* Hist, double XMin, double XMax) {
 
     int nx = Hist->GetNbinsX();
 
-    double x1,x2,x3,y1,y2,y3;
+    double /*x1,x2,x3,*/y1,y2,y3;
 
     fP0   = new double[nx];
     fP1   = new double[nx];
@@ -104,9 +104,9 @@ smooth::smooth(const TH1* Hist, double XMin, double XMax) {
 
     double bin = Hist->GetBinWidth(1);
     for (int i=2; i<=nx-1; i++) {
-      x2 = Hist->GetBinCenter(i);
-      x1 = x2-bin;
-      x3 = x2+bin;
+      // x2 = Hist->GetBinCenter(i);
+      // x1 = x2-bin;
+      // x3 = x2+bin;
       
       y1 = Hist->GetBinContent(i-1);
       y2 = Hist->GetBinContent(i);

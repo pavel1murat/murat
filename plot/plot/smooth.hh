@@ -17,7 +17,7 @@ public:
 // constructiors and destructor
 //-----------------------------------------------------------------------------
   smooth(const TH1* Hist = 0, double XMin = 1., double XMax = -1.);
-  ~smooth();
+  virtual ~smooth();
 
   double Eval(double* X);
 

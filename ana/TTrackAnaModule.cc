@@ -1126,7 +1126,8 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+//  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+  RegisterDataBlock("TrkPatRec"    ,"TStnTrackBlock"   ,&fTrackBlock  );
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
   RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
@@ -1963,6 +1964,13 @@ void TTrackAnaModule::Debug() {
   for (int itrk=0; itrk<ntrk; itrk++) {
     trk = fTrackBlock->Track(itrk);
     tp  = &fTrackPar[itrk];
+//-----------------------------------------------------------------------------
+// bit 0: all tracks
+//-----------------------------------------------------------------------------
+    if (GetDebugBit(0) == 1) {
+	GetHeaderBlock()->Print(Form("bit_000: All p = %10.3f",
+				     trk->Momentum()->P()));
+    }
 //-----------------------------------------------------------------------------
 // bit 3: Set C tracks with large DX : 70mm < |DX| < 90mm
 //-----------------------------------------------------------------------------

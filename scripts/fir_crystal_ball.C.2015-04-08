@@ -34,8 +34,9 @@ Double_t CrystalBall(Double_t *x,Double_t *par) {
 // P[5] = tail fraction
 // P[6] = tail exponential slope
 //-----------------------------------------------------------------------------
-double f_crystal_ball_save(double* X, double* P) {
+double f_crystal_ball(double* X, double* P) {
   double f, alpha, abs_alpha, n, a, b;
+
   double dx = (X[0]-P[1])/P[2];
 
   alpha     = P[3];
@@ -43,51 +44,15 @@ double f_crystal_ball_save(double* X, double* P) {
   n         = P[4];
 
   if (dx > -abs_alpha) {
-    if (dx < 0) {
-      f = P[0]*TMath::Exp(-dx*dx/2.);
-    }
-    else if (dx < 0.4) {
-      f = P[0]*(1-P[5])*TMath::Exp(-dx*dx/2.);
-    }
-    else {
-      f = P[0]*((1-P[5])*TMath::Exp(-dx*dx/2.)+P[5]*TMath::Exp(-dx/P[6]));
-    }
-  }
-  else {
-    a = TMath::Power((n/abs_alpha),n)*TMath::Exp(-(alpha*alpha)/2);
-    b = n/abs_alpha-abs_alpha;
-    f = P[0]*a*TMath::Power((b-dx),-n);
-  }
-  
-  return f;
-}
-
-//-----------------------------------------------------------------------------
-// A1*exp((x-x0)^2/2sig^2 for (x-x0)/sig > -alp
-// A1*A2*(B-(x-x0)/sig)^{-n}
-// A2 = 
-// P[0] = N
-// P[1] = x[0]
-// P[2] = sigma
-// P[3] = alpha  (> 0)
-// P[4] = n
-// P[5] = tail fraction
-// P[6] = tail exponential slope
-//-----------------------------------------------------------------------------
-double f_crystal_ball(double* X, double* P) {
-  double f, fg, fe, alpha, abs_alpha, n, a, b;
-
-  double dx  = (X[0]-P[1]);
-
-  alpha     = P[3];
-  abs_alpha = fabs(alpha);
-  n         = P[4];
-
-  if (dx/P[2] > -abs_alpha) {
-    double dxn = dx/P[2];
-    fg = P[0]*TMath::Exp(-dxn*dxn/2.);
-    fe = P[0]*P[5]*dx*TMath::Exp(-dx/P[6])/(P[6]*P[6]);
-    f = fg+fe;
+//     if (dx < 0) {
+//       f = P[0]*TMath::Exp(-dx*dx/2.);
+//     }
+//     else if (dx < 0.) {
+//       f = P[0]*(1-P[5])*TMath::Exp(-dx*dx/2.);
+//     }
+//    else {
+    f = P[0]*(TMath::Exp(-dx*dx/2.)+P[5]*TMath::Exp(-(X[0]-P[1])/P[6])*(X[0]-P[1])/(P[6]*P[6]));
+    //    }
   }
   else {
     a = TMath::Power((n/abs_alpha),n)*TMath::Exp(-(alpha*alpha)/2);
@@ -139,6 +104,7 @@ void create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 
   F->SetParLimits(2,0.,1.);
   F->SetParLimits(5,0.,0.5);
+  F->SetParLimits(6,1.e-3,10);
   F->SetLineWidth(1);
  
 }
@@ -164,7 +130,7 @@ void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-  cb_init_parameters (f,anorm,X0,0.13,3.,1.,0.01,0.1);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
   cb_fit             (h,f,XMin,XMax);
 }
 

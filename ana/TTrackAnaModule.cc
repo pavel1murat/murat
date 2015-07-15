@@ -1198,7 +1198,7 @@ void TTrackAnaModule::FillHistograms() {
   double       cos_th (-2.),  cl_e(-1.);
   int          disk_id(-1), alg_mask, nsh, nactive;
   float        pfront, ce_pitch, reco_pitch, fcons, t0, sigt, sigp, p; 
-  TStnCluster  *cl0;
+  TStnCluster  *cl0(NULL);
 
   //  cos_th = fEle->momentum().pz()/fEle->momentum().vect().mag();
 
@@ -1342,7 +1342,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // track reconstructed with CalPatRec, but not with TrkPatRec
 //-----------------------------------------------------------------------------
-	    int x=0;
+//	    int x=0;
 	  }
 	}
       }

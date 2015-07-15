@@ -130,7 +130,7 @@ void TCalAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 
 //-----------------------------------------------------------------------------
 void TCalAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
-  char name [200];
+  //  char name [200];
   //  char title[200];
 
   HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 200,Folder);

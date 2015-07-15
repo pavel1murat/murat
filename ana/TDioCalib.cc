@@ -5,6 +5,7 @@
 
 #include "ana/TDioCalib.hh"
 
+ClassImp(TDioCalib)
 
 //-----------------------------------------------------------------------------
 TDioCalib::TDioCalib(): TObject() {

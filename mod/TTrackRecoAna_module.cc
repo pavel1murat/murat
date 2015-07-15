@@ -227,8 +227,8 @@ namespace mu2e {
     double            s12, z, r0, r1;
     Doublet_t*        d;
 
-    double            sx(0), sy(0), sx2(0), sxy(0), sy2(0), sigxx(0), sigxy(0), sigyy(0);
-    double            xmean, ymean, x2mean, xymean, y2mean;
+    double            sx(0), sy(0), sx2(0), sxy(0), sy2(0), sigxx(0), sigxy(0); //, sigyy(0);
+    double            xmean, ymean, x2mean, xymean; //, y2mean;
 
     Tp->fChi2 = 0;
     for (int i=0; i<Tp->fNDoublets; i++) {
@@ -259,11 +259,11 @@ namespace mu2e {
       ymean    = sy /Tp->fNDoublets;
       x2mean   = sx2/Tp->fNDoublets;
       xymean   = sxy/Tp->fNDoublets;
-      y2mean   = sy2/Tp->fNDoublets;
+      //      y2mean   = sy2/Tp->fNDoublets;
       
       sigxx = x2mean-xmean*xmean;
       sigxy = xymean-xmean*ymean;
-      sigyy = y2mean-ymean*ymean;
+      //      sigyy = y2mean-ymean*ymean;
       
       Tp->fChi2  = Tp->fChi2/Tp->fNDoublets;
       Tp->fSlope = sigxy/sigxx;

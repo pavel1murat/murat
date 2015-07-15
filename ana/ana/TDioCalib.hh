@@ -55,6 +55,8 @@ public:
 
   void          InitDetectorResponseFunction();
 
+  ClassDef(TDioCalib,0)
+
 };
 
 

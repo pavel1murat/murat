@@ -231,7 +231,7 @@ namespace mu2e {
     double               x0, y0, z0, r0;
 
     art::ServiceHandle<mu2e::GeometryService> geom;
-    const mu2e::DiskCalorimeter* cal;
+    const mu2e::DiskCalorimeter* cal(NULL);
     const mu2e::Disk* disk;
     
     if (geom->hasElement<mu2e::DiskCalorimeter>() ) {

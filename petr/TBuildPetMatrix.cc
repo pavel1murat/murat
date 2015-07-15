@@ -239,7 +239,7 @@ int TBuildPetMatrix::Generate(int NEventsPerVoxel) {
 
   int rc = 0;
 
-  double x0, y0; // , z0; // , r2;
+  //  double x0, y0; // , z0; // , r2;
 
   if (fWriteVoxelData) {
     fFile      = new TFile("build_pet_matrix.root","recreate");
@@ -257,10 +257,10 @@ int TBuildPetMatrix::Generate(int NEventsPerVoxel) {
     //    z0 = -fPhantomMaxZ+(iz+0.5)*fVoxelDz;
 
     for (int ix=0; ix<fNVoxelsX; ix++) {
-      x0 = -fPhantomR+(ix+0.5)*fVoxelDx;
+      //      x0 = -fPhantomR+(ix+0.5)*fVoxelDx;
 
       for (int iy=0; iy<fNVoxelsY; iy++) {
-	y0 = -fPhantomR+(iy+0.5)*fVoxelDy;
+	//	y0 = -fPhantomR+(iy+0.5)*fVoxelDy;
 
 	//	double rho2 = x0*x0+y0*y0;
 	//	if (rho2 < r2) {

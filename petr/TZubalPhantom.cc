@@ -187,6 +187,7 @@ int TZubalPhantom::Parse3DMap(int IZMin, int IZMax) {
 
 	    while (fVol->fNAddedVoxels > 0) {
 	      nv = ExpandVolume(fVol);
+	      if (nv < 0) printf("ERROR: nv = %i",nv);
 	    }
 	  }
 	}

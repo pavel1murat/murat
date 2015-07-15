@@ -587,7 +587,7 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
 
   //  double                p;
   //  TLorentzVector        mom;
-  TStrawHitData*        hit;
+  TStrawHitData*        hit(NULL);
 
   fStrawDataBlock->GetEntry(ientry);
   fVdetDataBlock->GetEntry(ientry);

@@ -108,7 +108,7 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   // const char* fn_e = "/cdf/hist/mu2e/v4_2_1/e00s1212.track_ana.hist";
   // const char* fn_m = "/cdf/hist/mu2e/v4_2_1/m00s1212.track_ana.hist";
 
-  const char* fn_e, *fn_m;
+  const char* fn_e(NULL), *fn_m(NULL);
 
   if (HistSet == 1412) {
     fn_e = "/cdf/hist/mu2e/v4_2_1/e00s1412.track_ana.hist";
@@ -165,7 +165,7 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   h_llhr_cal_e = new TH1F("h_llhr_cal_e","LLHR(cal) Electrons",500,-100,100);
   h_llhr_cal_m = new TH1F("h_llhr_cal_m","LLHR(cal) Muons    ",500,-100,100);
 
-  double s, ep, dt, llhr_ep, llhr_dt, llhr_cal;
+  double llhr_ep, llhr_dt, llhr_cal;
 
   //  int nev = N100000;
 
@@ -253,7 +253,7 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 
   h_ep_vs_s_es->DrawNormalized("same",1);
 
-  TLegend* leg1, *leg2, *leg3;
+  TLegend  /* *leg1,*/ *leg2, *leg3;
 
   // leg1 = new TLegend(0.6,0.75,0.8,0.85);
   // leg1->AddEntry(h_ep_ms,"muons","f");

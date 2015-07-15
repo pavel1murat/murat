@@ -587,7 +587,7 @@ int TTrackCompModule::Event(int ientry) {
 void TTrackCompModule::Debug() {
 
   TStnTrack* trk;
-  TrackPar_t* tp;
+  TrackPar_t* tp(NULL);
   char        text[500];
   int         calpatrec(1);
 

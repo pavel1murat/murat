@@ -211,7 +211,7 @@ bool LLHRFilter::filter(AbsEvent& AnEvent) {
 
   double ep, llhr_cal;
 
-  int    id_word;
+  //  int    id_word;
 
   fTrackBlock = (TStnTrackBlock*) Event()->GetDataBlock("TrackBlock");
 
@@ -242,7 +242,7 @@ bool LLHRFilter::filter(AbsEvent& AnEvent) {
   if (fFilterEp != 0) {
     for (int i=0; i<nt; i++) {
       track   = fTrackBlock->Track(i);
-      id_word = fTrackID->IDWord(track);
+      //      id_word = fTrackID->IDWord(track);
       ep = track->Ep();
 
       if (ep > fMinEP) {

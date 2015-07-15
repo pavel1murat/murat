@@ -152,17 +152,17 @@ namespace mu2e {
 
 //-----------------------------------------------------------------------------
   void TCalm006::FillHistograms() {
-    const char oname[] = "TCalm006::FillHistograms";
+    //    const char oname[] = "TCalm006::FillHistograms";
 
 
     //    mu2e::StepPointMC*   step;
-    int                  ndisks;
+    //    int                  ndisks;
     //    double               rin[2], rout[2];
     //    int                  inside, pdg_code;
     //    double               x0, y0, z0, r0;
 
     art::ServiceHandle<mu2e::GeometryService> geom;
-    const mu2e::DiskCalorimeter* cal;
+    //    const mu2e::DiskCalorimeter* cal;
     //    const mu2e::Disk* disk;
     
     // if (geom->hasElement<mu2e::DiskCalorimeter>() ) {
@@ -207,7 +207,7 @@ namespace mu2e {
 
 //-----------------------------------------------------------------------------
   void TCalm006::Init(art::Event* Evt) {
-    const char oname[] = "TCalm006::Init";
+    //    const char oname[] = "TCalm006::Init";
 
     int             id, ring, l, k;
     CaloCrystalHit* hit;
@@ -243,7 +243,7 @@ namespace mu2e {
 
 //-----------------------------------------------------------------------------
   void TCalm006::Debug(art::Event* Evt) {
-    const char* oname = "TCalm006::Debug";
+    //    const char* oname = "TCalm006::Debug";
 //-----------------------------------------------------------------------------
 // bit 000: calorimeter step points
 //-----------------------------------------------------------------------------

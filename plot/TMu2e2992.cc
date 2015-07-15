@@ -673,7 +673,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
     fH1[0]->GetXaxis()->SetRangeUser(-25.,25.);
     fH1[0]->Draw();
 
-    TArrow* arr;
+    //    TArrow* arr;
 
     leg = new TLegend(0.15,0.7,0.40,0.8,"");
     leg->AddEntry(fH1[0],"identified electrons","f");
@@ -723,7 +723,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
     //    fH1[0]->GetXaxis()->SetRangeUser(-25.,25.);
     fH1[0]->Draw();
 
-    TArrow* arr;
+    //    TArrow* arr;
 
     leg = new TLegend(0.15,0.7,0.40,0.8,"");
     leg->AddEntry(fH1[0],"identified electrons","f");
@@ -741,7 +741,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 //           (d) trk_28/p                       - no cluster
 //-----------------------------------------------------------------------------
   if (Figure == 35) {
-    TArrow*      arr;
+    //    TArrow*      arr;
     TPaveLabel*  label;
     TLegend*     leg;
 
@@ -824,7 +824,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  41  (a) trk_1/xs for e0000001 and m0000001
 //-----------------------------------------------------------------------------
   if (Figure == 41) {
-    TArrow*      arr;
+    //    TArrow*      arr;
     TPaveLabel*  label;
     TLegend*     leg;
 
@@ -864,7 +864,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  42  (a) trk_1/llhr_dedx for e0000001 and m0000001
 //-----------------------------------------------------------------------------
   if (Figure == 42) {
-    TArrow*      arr;
+    //    TArrow*      arr;
     TPaveLabel*  label;
     TLegend*     leg;
 
@@ -902,7 +902,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  43  (a) trk_1/llhr_trk for e0000001 and m0000001
 //-----------------------------------------------------------------------------
   if (Figure == 43) {
-    TArrow*      arr;
+    //    TArrow*      arr;
     TPaveLabel*  label;
     TLegend*     leg;
 
@@ -997,7 +997,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  60: track reconstruction efficiencies vs luminosity
 //-----------------------------------------------------------------------------
   if (Figure == 60) {
-    TPaveLabel*  label;
+    //    TPaveLabel*  label;
     TLegend*     leg;
 
     fCanvas  = new_slide(name,title,2,2,1300,900);
@@ -1079,7 +1079,7 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  61: track reconstruction efficiencies [-0.2,0.2] vs luminosity
 //-----------------------------------------------------------------------------
   if (Figure == 61) {
-    TPaveLabel*  label;
+    //    TPaveLabel*  label;
     TLegend*     leg;
 
     double   x[4] = {0., 1., 2., 4.};
@@ -1155,13 +1155,13 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  62: LogLH_CAL selection efficiency vs luminosity
 //-----------------------------------------------------------------------------
   if (Figure == 62) {
-    TPaveLabel*  label;
+    //    TPaveLabel*  label;
     TLegend*     leg;
 
     double   x[4] = {0., 1., 2., 4.};
     double  ex[4] = {0., 0., 0., 0.};
     double  effe[4], effm[4], erre[4], errm[4];
-    double  q0, q1, q6;
+    double  q0, q1; //, q6;
 
     fCanvas  = new TCanvas(name,title,1000,700);
     fP1      = (TPad*) fCanvas->GetPad(0);
@@ -1253,13 +1253,13 @@ void TMu2e2992::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  63: LogLH_TRK selection efficiency vs luminosity
 //-----------------------------------------------------------------------------
   if (Figure == 63) {
-    TPaveLabel*  label;
+    //    TPaveLabel*  label;
     TLegend*     leg;
 
     double   x[4] = {0., 1., 2., 4.};
     double  ex[4] = {0., 0., 0., 0.};
     double  effe[4], effm[4], erre[4], errm[4];
-    double  q0, q1, q6;
+    double  q0, q1; //, q6;
 
     fCanvas  = new_slide(name,title,1,1,1000,700);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");

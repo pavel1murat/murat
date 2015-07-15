@@ -6,7 +6,7 @@
 int TMu2eLimits::InitTestChannel(TMu2eLimits* Tzz, csm_channel_model* Channel) {
 // test channel
 
-  TH1    *h11, *h12, *h15;  
+  TH1    *h11; //, *h12, *h15;  
   int    np;
 //-----------------------------------------------------------------------------
 // in 4L channel consider only SM ZZ process 
@@ -63,7 +63,7 @@ int TMu2eLimits::InitTestChannel(TMu2eLimits* Tzz, csm_channel_model* Channel) {
 //-----------------------------------------------------------------------------
 int   TMu2eLimits::AddTestSignal(csm_model*  Model) {
 
-  TH1             *h1(0), *h2(0), *h11(0), *h12, *h15;
+  TH1             /* *h1(0), *h2(0),*/ *h11(0); //, *h12, *h15;
   int              np;
   const char      *pnames [10];
   double           par_sf_lo    [10];
@@ -73,7 +73,7 @@ int   TMu2eLimits::AddTestSignal(csm_model*  Model) {
   TH1*             hist_shape_hi[10];
   double           nsig_shape_hi[10];
   double           hist_sf;
-  const char*      pname;
+  //  const char*      pname;
 
   //  channel_data_t*  ch_data;
   //  aprocess         *process, *signal;

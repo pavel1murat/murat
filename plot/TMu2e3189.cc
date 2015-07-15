@@ -278,7 +278,7 @@ void TMu2e3189::plot(Int_t Figure, const char* CanvasName) {
     
     fP1->cd(1);
     fH1[0] = gh1(dio_00_050_80c,"TCalm002","cls_4/r");
-    double q1 = fH1[0]->Integral();
+    //    double q1 = fH1[0]->Integral();
     
     double sf1 = (19931-1754.95)/160000.;
     fH1[0]->Scale(sf1);
@@ -298,7 +298,7 @@ void TMu2e3189::plot(Int_t Figure, const char* CanvasName) {
     
     fP1->cd(2);
     fH1[0] = gh1(dio_50_105_50b,"TCalm002","cls_4/r");
-    double q2 = fH1[0]->Integral();
+    //    double q2 = fH1[0]->Integral();
     
     double sf2 = (1754.95)/75000.;
     fH1[0]->Scale(sf2);

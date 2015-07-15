@@ -19,7 +19,7 @@ void plot_pbar_kinematics(float P0) {
   double e0 = sqrt(P0*P0+MP*MP);
 				// center of mass velocity
 
-  double v0 = P0/(e0+MP);
+  //  double v0 = P0/(e0+MP);
 
   double s = (e0+MP)*(e0+MP)-P0*P0;
 

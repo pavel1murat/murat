@@ -54,7 +54,7 @@ int TLHChannel::Init() {
     if (fProbHist == 0) {
       sprintf(name,"%s_channel_bgr_prob_hist",GetName());
 
-      while (o = gROOT->FindObject(name)) delete o;
+      while ((o = gROOT->FindObject(name))) delete o;
       fProbHist = (TH1*) h->Clone(name);
       fProbHist->Scale(nexp);
     }

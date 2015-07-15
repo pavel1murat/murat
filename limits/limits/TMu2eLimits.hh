@@ -78,6 +78,7 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
+  int   InitChannelData(channel_data_t*& ChannelData);
   int   AddSignal    (const char* ChannelName, csm_model* Model);
   int   AddTestSignal(csm_model* Model);
 

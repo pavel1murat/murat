@@ -39,6 +39,7 @@ int TLHCalculator::Init() {
     ch->Init();
     fLhData += ch->GetLhData();
   }
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -46,10 +47,11 @@ int TLHCalculator::Init() {
 // pseudoexperiment is greater than LHR(data)
 //-----------------------------------------------------------------------------
 int TLHCalculator::GeneratePseudoExperiment(double& Likelihood) {
-  TObject  *o; 
+  //  TObject  *o; 
   int       res, success;
-  TFile*    f;
-  double    lh, lhr;
+  TLHChannel* ch(NULL);
+  //  TFile*    f;
+  double    lh;
   
   res = 1; // default: passed
 
@@ -58,10 +60,9 @@ int TLHCalculator::GeneratePseudoExperiment(double& Likelihood) {
   Likelihood = 0;
 
   for (int i=0; i<nch; i++) {
-
-    TLHChannel* ch = (TLHChannel*) fListOfChannels->At(i);
-    success = ch->PseudoExperiment(lh);
-
+    ch          = (TLHChannel*) fListOfChannels->At(i);
+    success     = ch->PseudoExperiment(lh);
+    if (success < 0) printf("pseudoexperiment i=%10i failed\n",i);
     Likelihood += lh ;
   }
 
@@ -77,7 +78,7 @@ int TLHCalculator::GeneratePseudoExperiment(double& Likelihood) {
 //-----------------------------------------------------------------------------
 int TLHCalculator::GeneratePseudoExperiments(double NExp) {
 
-  double npassed, lh;
+  double lh;
   int    success;
 
   fNPassed = 0;

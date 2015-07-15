@@ -1812,7 +1812,7 @@ void TMu2e3280::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 203) {
     TPaveLabel* label;
-    TLegend*    leg;
+    //    TLegend*    leg;
 
     fCanvas  = new_slide(name,title,2,1,1250,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -1850,7 +1850,7 @@ void TMu2e3280::plot(Int_t Figure, const char* CanvasName) {
 // Fig.204: protons - distributions for the number of straw hits per event
 //-----------------------------------------------------------------------------
   if (Figure == 204) {
-    TPaveLabel* label;
+    //    TPaveLabel* label;
     TLegend*    leg;
 
     fCanvas  = new_slide(name,title,1,1,1200,700);

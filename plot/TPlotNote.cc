@@ -12,7 +12,7 @@ ClassImp(TPlotNote)
 //_____________________________________________________________________________
 TPlotNote::TPlotNote(int PlotMode, int BlessingMode) {
 
-  const char* hist_dir;
+  //  const char* hist_dir;
   
   fWorkDir      = gSystem->Getenv("WORK_DIR");
   fPlotMode     = PlotMode;
@@ -70,6 +70,8 @@ int TPlotNote::DrawPaveLabelNDC(TPaveLabel*& Label,
   Label->SetY2NDC(YMax);
 
   Label->Draw();
+
+  return 0;
 }
 
 //_____________________________________________________________________________

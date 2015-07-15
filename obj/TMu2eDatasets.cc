@@ -42,11 +42,6 @@ ClassImp(TMu2eDatasets)
 // it is obviously a very kludgy way to choose between different options....
 //-----------------------------------------------------------------------------
 namespace {
-  char* HelpText[] = {
-    "known versions: gpt000: s-channel production of the RS G*, PYTHIA signal",
-    "                gpt100: production of pp --> G* q/g. PT>100",
-    0
-  };
 };
 
 //-----------------------------------------------------------------------------
@@ -369,6 +364,16 @@ double TMu2eDatasets::GetCentralEtSF(const char* Process, int McFlag, int RunRan
 
 //-----------------------------------------------------------------------------
 void TMu2eDatasets::Help(int Mode) {
+
+  static char HelpText[3][100];
+  static int  initialized(0);
+
+  if (initialized == 0) {
+    strcpy(HelpText[0],"known versions: gpt000: s-channel production of the RS G*, PYTHIA signal");
+    strcpy(HelpText[1],"                gpt100: production of pp --> G* q/g. PT>100");
+    strcpy(HelpText[2],"");
+    initialized = 1;
+  };
 
   for (int i=0; HelpText[i]!=0; i++) {
     printf("%s\n",HelpText[i]);

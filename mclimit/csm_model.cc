@@ -74,12 +74,11 @@ void csm_model::nuisance_response(Int_t nparams,
 	}
       // Not a disaster if we didn't find a parameter on the list.  Sometimes we
       // only fit for a subset of parameters and they aren't on the list.
-      //  if (jfound == 0) 
-      //	{
-      //  cout << "Constraint equation found for nuisance parameter not on our list: " 
-      //       << npcm[icons].pnameoutput << endl;
+      if (jfound == 0) {
+	cout << "Constraint equation found for nuisance parameter not on our list: " 
+             << npcm[icons].pnameoutput << endl;
       //  exit(0);
-      //  }
+      }
     }
 
   nchans = (Int_t) channame.size();
@@ -110,7 +109,7 @@ void csm_model::undo_nuisance_response()
 //-----------------------------------------------------------------------------
 void csm_model::list_nparams(vector<char*> *npn, vector<Double_t> *nplb, vector<Double_t> *nphb) {
 
-  Int_t              i, j, k, ifound;
+  Int_t              ifound;
   csm_channel_model* cm;
   Double_t           nplb_tmp, nphb_tmp, a, b, c, disc, xp, xm, xht, xlt;
 
@@ -118,9 +117,9 @@ void csm_model::list_nparams(vector<char*> *npn, vector<Double_t> *nplb, vector<
   nplb->clear();
   nphb->clear();
 
-  for (i=0; i<channame.size(); i++) {
+  for (uint i=0; i<channame.size(); i++) {
     cm = chanmodel[i];
-    for (j=0; j<cm->syserr.size(); j++) {
+    for (uint j=0; j<cm->syserr.size(); j++) {
       //cout << "sys error item channel: " << i << 
       //" error index: " << j << " " << cm->syserr[j].sysname << " " <<
       //(cm->syserr[j].highshape != 0) << " " <<  
@@ -195,7 +194,7 @@ void csm_model::list_nparams(vector<char*> *npn, vector<Double_t> *nplb, vector<
       }
       
       ifound = -1;
-      for (k=0;k<(Int_t) npn->size();k++) {
+      for (uint k=0;k<npn->size();k++) {
 	if (strcmp(cm->syserr[j].sysname,(*npn)[k]) == 0) { 
 	  ifound = k; 
 	}
@@ -216,8 +215,8 @@ void csm_model::list_nparams(vector<char*> *npn, vector<Double_t> *nplb, vector<
   }
   // add in user-specified bounds (27 Feb 2008)
 
-  for (k=0; k<npbname.size(); k++) {
-    for (j=0; j< npn->size(); j++) {
+  for (uint k=0; k<npbname.size(); k++) {
+    for (uint j=0; j< npn->size(); j++) {
       if (strcmp(npbname[k],(*npn)[j])==0) {
 	(*nplb)[j] = max((*nplb)[j],npblow[k]);
 	(*nphb)[j] = min((*nphb)[j],npbhigh[k]); 
@@ -233,7 +232,6 @@ void csm_model::list_nparams(vector<char*> *npn, vector<Double_t> *nplb, vector<
 void csm_model::varysyst() {
   vector<Double_t> nplb;
   vector<Double_t> nphb;
-  Int_t i;
   Double_t xval;
 
  // systematically fluctuate our model
@@ -242,7 +240,7 @@ void csm_model::varysyst() {
   //cout << " in pe: npn.size " << npn.size() << endl;
   npvalp.clear();
 
-  for (i=0; i<npnp.size(); i++) {
+  for (uint i=0; i<npnp.size(); i++) {
     do {
       xval = fRandom->Gaus(0,1);
       //cout << i << " " << nplb[i] << " " << xval << " " << nphb[i] << endl;

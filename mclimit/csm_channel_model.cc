@@ -15,6 +15,7 @@ using namespace std;
 #include "TLegend.h"
 #include "TList.h"
 #include "TMath.h"
+#include "TMatrixT.h"
 
 ClassImp(csm_channel_model)
 
@@ -510,7 +511,7 @@ void csm_channel_model::nuisance_response(Int_t nparams,
                                           char *paramname[],
                                           Double_t paramvalue[])
 {
-  Int_t i,j,itpl,nsys,ntemplates;
+  Int_t i,j,itpl,nsys; //,ntemplates;
 
   /*
   cout << "in channel nuisance response: " << endl;
@@ -525,7 +526,7 @@ void csm_channel_model::nuisance_response(Int_t nparams,
   */
 
   undo_nuisance_response();
-  ntemplates = (Int_t) histotemplate.size();
+  //  ntemplates = (Int_t) histotemplate.size();
 
   TH1* hcl = 0;
 
@@ -736,8 +737,12 @@ void csm_channel_model::candcheck(TH1 *dh)
 
   Int_t ibinx,ibiny;
 
-  Double_t hcb[nbinsx][nbinsy];
-  Double_t hcs[nbinsx][nbinsy];
+  // Double_t hcb[nbinsx][nbinsy];
+  // Double_t hcs[nbinsx][nbinsy];
+
+  TMatrixT<double> hcb(nbinsy,nbinsx);
+  TMatrixT<double> hcs(nbinsy,nbinsx);
+
   for (ibinx=0;ibinx<nbinsx;ibinx++)
     {
       for (ibiny=0;ibiny<nbinsy;ibiny++)

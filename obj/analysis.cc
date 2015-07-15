@@ -128,14 +128,14 @@ void analysis::plot(const char* Module  ,
   // assume that we're not doing it...
   int         rc(0), nbgr_label;
   double      q_bgr(0), n_bgr(0);
-  TH1         *h_dat, *h_sig, *h_bgr, *h_label[100], *h_bgr_accumulate;
-  aprocess    *bgr, *sig;
-  char        hist_name[200], title[200];
+  TH1         *h_dat, /* *h_sig,*/ *h_bgr, *h_label[100]; // , *h_bgr_accumulate;
+  aprocess    *bgr; //, *sig;
+  char        hist_name[200]; //, title[200];
   const char  *name_label[100];
   double      _total_bgr_integral = 0;
 
-  int add_WW_WZ_ZZ = 0;
-  int add_Wjets_Wgamma = 0;
+  //  int add_WW_WZ_ZZ = 0;
+  //  int add_Wjets_Wgamma = 0;
   // if(CombineProcesses==1){
   //   add_WW_WZ_ZZ = 1;
   //   add_Wjets_Wgamma = 1;
@@ -289,7 +289,7 @@ void analysis::plot(const char* Module  ,
       nbgr_label += 1;
 
       fBgrHist->Add(h_bgr);
-      h_bgr_accumulate = 0;
+      //      h_bgr_accumulate = 0;
     }
   NEXT_PROCESS:;
   }
@@ -309,8 +309,8 @@ void analysis::plot(const char* Module  ,
 
   stk->SetTitle(h_dat->GetTitle());
 
-  const char* tit = h_dat->GetXaxis()->GetTitle();
-  TAxis* axis = stk->GetXaxis();
+  //  const char* tit = h_dat->GetXaxis()->GetTitle();
+  //  TAxis* axis = stk->GetXaxis();
   //  axis->SetTitle(tit);  // 'axis' is zero....
 
   if (XMin != -999.) {
@@ -377,6 +377,8 @@ void analysis::plot(const char* Module  ,
   double _total_data = h_dat->Integral();
   double _ratio = _total_bgr_integral>0.?_total_data/_total_bgr_integral:0.;
   if(verbose) printf(" Total bgr integral = %10.3f; data = %10.3f ; ratio = %10.3f\n",_total_bgr_integral,_total_data,_ratio);
+
+  if (rc < 0) printf(" RC = %i\n",rc);
   
 }
 
@@ -403,11 +405,11 @@ void analysis::plot_no_data(const char* Module  ,
   // assume that we're not doing it...
   int         rc(0), nbgr_label, first;
   double      q_bgr(0);
-  TH1         *h_dat(0), *h_sig(0), *h_bgr(0), *h_label[100], *h_bgr_accumulate(0);
-  aprocess    *bgr, *sig;
-  char        hist_name[200], title[200];
+  TH1         *h_dat(0), /**h_sig(0),*/ *h_bgr(0), *h_label[100], *h_bgr_accumulate(0);
+  aprocess    *bgr; //, *sig;
+  char        hist_name[200]; //, title[200];
   const char  *name_label[100];
-  const char  *tit, *hist_tit; 
+  const char  /* *tit,*/ *hist_tit(NULL); 
 
 //-----------------------------------------------------------------------------
 // stack backgrounds and signal... mmm it doesnt' work exactly this way
@@ -584,7 +586,7 @@ void analysis::plot_no_data(const char* Module  ,
 
   stk->SetTitle(hist_tit);
 
-  tit = h_dat->GetXaxis()->GetTitle();
+  //  tit = h_dat->GetXaxis()->GetTitle();
   TAxis* xa = h_dat->GetXaxis();
   //  axis->SetTitle(tit);  // 'axis' is zero....
 
@@ -625,6 +627,8 @@ void analysis::plot_no_data(const char* Module  ,
   }
 
   fDatHist  = h_dat;
+
+  if (rc < 0) printf(" RC = %i\n",rc);
 }
 
 //-----------------------------------------------------------------------------
@@ -662,8 +666,8 @@ void analysis::plot_dmboverb(const char* Module  ,
 			     int    SubtractSignal){
 
   TH1        *Hist(0);
-  TH1        *h_dat, *h_bgr, *hist, *h2;
-  aprocess   *bgr, *sig;
+  TH1        *h_dat, *h_bgr; //, *hist, *h2;
+  aprocess   *bgr; //, *sig;
   TObjArray  list_of_bgr_hist;
 
   // char    name[500];
@@ -803,8 +807,8 @@ int analysis::get_dmb(const char* Module        ,
 		      TH1*&       Hist          ) {
   //
 
-  TH1        *h_dat, *h_bgr, *hist, *h2;
-  aprocess   *bgr, *sig;
+  TH1        *h_dat, *h_bgr; // , *hist, *h2;
+  aprocess   *bgr; // , *sig;
   TObjArray  list_of_bgr_hist;
 
   // char    name[500];
@@ -904,8 +908,8 @@ int analysis::get_dmb_1(const char* Module        ,
 			TH1*&       Hist          ) {
   //
 
-  TH1        *h_dat, *h_bgr, *hist, *h2;
-  aprocess   *bgr, *sig;
+  TH1        *h_dat, *h_bgr; // , *hist, *h2;
+  aprocess   *bgr; // , *sig;
   TObjArray  list_of_bgr_hist;
 
   // char    name[500];
@@ -1035,12 +1039,12 @@ int analysis::GetBackgroundHistogram(const char* Module        ,
 				     int         Rebin         ,
 				     TH1*&       Hist          ) {
 
-  TH1        *h_dat, *h_bgr, *hist, *h2;
-  aprocess   *bgr, *sig;
+  TH1        *h_dat, *h_bgr; // , *hist, *h2;
+  aprocess   *bgr ; //, *sig;
   TObjArray  list_of_bgr_hist;
 
   int     nbins;
-  double  q, err, err2, qbgr, n_proc, np;
+  double  /*q,*/ err, err2, qbgr, n_proc, np;
 
   run_range_dat_t* rr = fRR+RunRange;
 

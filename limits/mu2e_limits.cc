@@ -28,7 +28,7 @@ int mu2e_limits(int         Mode  ,
 // 
 //  ana init    bit      name           Module    HistSet HistBin  HistName  xmin xmax Rebin
 //------------------------------------------------------------------------------------------
-    { 0,  0,   1<<0, "mu2e"      , "Mu2eLimits" ,  "trk" ,   1,   "p"   ,   101.,   106., 1},
+    // { 0,  0,   1<<0, "mu2e"      , "Mu2eLimits" ,  "trk" ,   1,   "p"   ,   101.,   106., 1},
     { 0,  0,      0,      0      , 0            ,  0     ,   0,        0,    0.,    -1.,  0}
   };
 

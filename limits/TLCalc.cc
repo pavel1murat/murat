@@ -42,7 +42,7 @@ void TLCalc::InitHistograms() {
 
   char   name[100];
   double qent;
-  TH2F*  h_pt_vs_m;
+  TH2F*  h_pt_vs_m(NULL);
   TFile* f;
 //-----------------------------------------------------------------------------
 // book histograms
@@ -95,9 +95,9 @@ void TLCalc::InitHistograms() {
 
 //-----------------------------------------------------------------------------
 int TLCalc::calc_lh_2d(int NMax) {
-  TObject  *o; 
-  double    qent;
-  TFile*    f;
+  //  TObject  *o; 
+  //  double    qent;
+  //  TFile*    f;
   TH2      *h1;
 
   h1 = fHist.fPtVsMass;
@@ -268,11 +268,11 @@ int TLCalc::calc_lh_2d(int NMax) {
 
 //-----------------------------------------------------------------------------
 int TLCalc::calc_lh_pt(int NMax) {
-  TObject  *o; 
-  double    qent;
+  //  TObject  *o; 
+  //  double    qent;
   int       npassed(0);
   TH1*      h1; 
-  TFile     *f;
+  //  TFile     *f;
 
   h1 = fHist.fPt;
 
@@ -345,11 +345,11 @@ int TLCalc::calc_lh_pt(int NMax) {
 }
 //-----------------------------------------------------------------------------
 int TLCalc::calc_lh_pt_hm(int NMax) {
-  TObject  *o; 
-  double    qent;
+  //  TObject  *o; 
+  //  double    qent;
   int       npassed(0);
   TH1*      h1; 
-  TFile     *f;
+  //  TFile     *f;
 
   h1 = fHist.fPt;
 
@@ -420,8 +420,8 @@ int TLCalc::calc_lh_pt_hm(int NMax) {
 
 //-----------------------------------------------------------------------------
 int TLCalc::calc_lh_mass(int NMax) {
-  TObject  *o; 
-  double    qent;
+  //  TObject  *o; 
+  //  double    qent;
   TH1*      h1;
 
   h1 = fHist.fMass;
@@ -439,7 +439,7 @@ int TLCalc::calc_lh_mass(int NMax) {
 //-----------------------------------------------------------------------------
   double  xw, xmin, m, mass[100], prob[100], p;
 
-  int     ix, nevents, nhm, nlm, nn, npassed(0);
+  int     ix, nevents, nhm, nlm, nn(-1), npassed(0);
 
   xw   = h1->GetXaxis()->GetBinWidth(1);  // all bins are the same
   xmin = h1->GetXaxis()->GetXmin();
@@ -577,20 +577,21 @@ int TLCalc::calc_lh_mass(int NMax) {
 
 //-----------------------------------------------------------------------------
 int TLCalc::calc_4l_prob(double MinMass, int NMax) {
-  TObject  *o; 
-  double    qent;
+  //  TObject  *o; 
+  //  double    qent;
   TH1*      h1;
 
   h1 = fHist.fMass;
 //-----------------------------------------------------------------------------
 // generate random numbers according to this histogram
 //-----------------------------------------------------------------------------
-  double  xw, xmin, m, mass[100], prob[100], p;
+//  double  xw, xmin;
+  double  m; // , mass[100], prob[100], p;
 
-  int     ix, nevents, nhm, nlm, nn, npassed(0);
+  int     /*ix,*/ nevents, nhm, npassed(0);
 
-  xw   = h1->GetXaxis()->GetBinWidth(1);  // all bins are the same
-  xmin = h1->GetXaxis()->GetXmin();
+  //  xw   = h1->GetXaxis()->GetBinWidth(1);  // all bins are the same
+  //  xmin = h1->GetXaxis()->GetXmin();
 
   fLhMassData = 0;
 //-----------------------------------------------------------------------------
@@ -598,15 +599,9 @@ int TLCalc::calc_4l_prob(double MinMass, int NMax) {
 //-----------------------------------------------------------------------------
   TRandom3  r3;
 
-  double lh, tot_prob, tot_prob_new, prob_hm;
-
   for (int ipe=0; ipe<NMax; ipe++) {
-    lh           = 0;
     nhm          = 0;
-    nlm          = 0;
-    tot_prob     = 1;
-    tot_prob_new = 1;
-    prob_hm      = 1;
+    //    nlm          = 0;
 
     //    nevents   = r3.Poisson(5.8);
     nevents      = r3.Poisson(fNMean);
@@ -615,8 +610,8 @@ int TLCalc::calc_4l_prob(double MinMass, int NMax) {
 
     for (int ievent=0; ievent<nevents; ievent++) {
       m = h1->GetRandom();
-      ix    = (int) ((m -xmin)/xw + 1);
-      p     = h1->GetBinContent(ix);
+      //      ix    = (int) ((m -xmin)/xw + 1);
+      //      p     = h1->GetBinContent(ix);
 
       if (m > MinMass) {
 	nhm += 1;

@@ -111,7 +111,7 @@ int TAnalysisDataset::FindRunRange(int RunNumber) {
   }
 
   if (rr == fNRunRanges) {
-    Error("FindRunRange",Form("run %7i is outside the run range"));
+    Error("FindRunRange",Form("run %7i is outside the run range",rr));
   }
 
   return rr;
@@ -126,7 +126,7 @@ const TAnalysisDataset::dataset_t* TAnalysisDataset::GetDataset(const char* Proc
   TDsMetadata*     dm;
   const dataset_t* ds;
   TString          dsid;
-  int              mc_flag, srr;
+  int              /*mc_flag,*/ srr;
 
   dm   = (TDsMetadata*) fListOfDatasets->FindObject(Process);
   if (dm) {

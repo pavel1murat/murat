@@ -2775,7 +2775,7 @@ void mclimit_csm::bh_xsfit(Double_t *xsfit, Double_t *downerr, Double_t *uperr)
   csm_channel_model* cm;
   TH1* ht;
   Double_t r;
-  int ngl;
+  //  int ngl;
   const PRIOR prior=flat;
   Int_t nobstot;
 
@@ -2873,7 +2873,7 @@ void mclimit_csm::bh_xsfit(Double_t *xsfit, Double_t *downerr, Double_t *uperr)
     }
 
   nens = nmc_req;
-  ngl = 0;
+  //  ngl = 0;
 
   //cout << "ngl: " << ngl << " " << nobstot << endl;
 
@@ -3282,7 +3282,7 @@ void mclimit_csm::bh_2d_scan(Double_t s1low, Double_t s1high, Double_t ds1,
   csm_channel_model* cm;
   TH1* ht;
   Double_t r;
-  int ngl;
+  //  int ngl;
   Int_t nobstot;
   const PRIOR prior=flat;
 
@@ -3389,7 +3389,7 @@ void mclimit_csm::bh_2d_scan(Double_t s1low, Double_t s1high, Double_t ds1,
     }
 
   nens = nmc_req;
-  ngl = 0;
+  //  ngl = 0;
 
   //cout << "ngl: " << ngl << " " << nobstot << endl;
 

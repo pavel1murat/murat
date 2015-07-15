@@ -308,7 +308,7 @@ void TMu2e3722::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  3: track reco efficiency vs momentum
 //-----------------------------------------------------------------------------
   if (Figure == 3) {
-    TH1D          *h1, *h2;
+    //    TH1D          *h1, *h2;
     TGraphErrors  *g;
 
     fCanvas  = new TCanvas(name,title,1000,700);
@@ -332,7 +332,7 @@ void TMu2e3722::plot(Int_t Figure, const char* CanvasName) {
 // Fig.  11: sensitivity vs lower limit
 //-----------------------------------------------------------------------------
   if (Figure == 11) {
-    TH1D   *h1, *h2;
+    //    TH1D   *h1, *h2;
     fCanvas  = new TCanvas(name,title,1000,600);
 
     fCanvas->cd();
@@ -408,7 +408,7 @@ void TMu2e3722::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 12) {
     TGraphAsymmErrors  *g1, *g2;
-    TH1D               *h1, *h2;
+    //    TH1D               *h1, *h2;
 
     fCanvas  = new TCanvas(name,title,1000,600);
 

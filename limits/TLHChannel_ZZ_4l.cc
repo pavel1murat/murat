@@ -50,11 +50,11 @@ int TLHChannel_ZZ_4l::Init() {
 // need to generate random numbers according to this histogram
 //                    M     PT
 //-----------------------------------------------------------------------------
-  double  xbin_width, ybin_width, xmin, ymin, m, pt, prob_hm, p;
-  double  mass[100], prob[100];
-  double  tot_prob;
+  double  xbin_width, ybin_width, xmin, ymin, p;
+  //  double  mass[100], prob[100];
+  //  double  tot_prob;
 
-  int     ix, iy, nn(0), nhm, nlm, nevents;
+  int     ix, iy;
 
   TLHChannel::Init();			// defines fProbHist
 
@@ -78,6 +78,7 @@ int TLHChannel_ZZ_4l::Init() {
   }
 
   printf(" >>> TLHChannel_ZZ_4l::fLhrData = %10.5f\n",fLhData);
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -92,14 +93,14 @@ TLHChannel_ZZ_4l::~TLHChannel_ZZ_4l() {
 int TLHChannel_ZZ_4l::PseudoExperiment(double& Likelihood) {
 
   TRandom3  r3;
-  int       success, nhm, nlm, ix, iy, nn, nevents, high_mass;
+  int       success, nhm, nlm, ix, iy, nn(-1), nevents, high_mass;
   double    mass[100], prob[100], msave[100], ptsave[100], psave[100];
-  double    lh, m, pt, p, xbin_width, xmin, ymin, prob_hm, tot_prob, ybin_width;
+  double    lh(-1.e10), m, pt, p, xbin_width, xmin, ymin, /*prob_hm,*/ tot_prob, ybin_width;
   
   nhm       = 0;
   nlm       = 0;
   tot_prob  = 1;
-  prob_hm   = 1;
+  //  prob_hm   = 1;
 
   xbin_width = fProbHist->GetXaxis()->GetBinWidth(1);  // all bins are the same
   ybin_width = fProbHist->GetYaxis()->GetBinWidth(1);  // all bins are the same
@@ -211,7 +212,7 @@ int TLHChannel_ZZ_4l::PseudoExperiment(double& Likelihood) {
   if (Likelihood > fLhData) success = 0;
   else {
     success = 1;
-    printf(" TLHChannel_ZZ_4l: lh  = %12.5e fLHData = %12.5e success = %i\n",
+    printf(" TLHChannel_ZZ_4l: tot_prob = %12.5e lh  = %12.5e fLHData = %12.5e success = %i\n",
 	   tot_prob, lh, fLhData, success);
     printf(" nevents, nlm, nhm, nn = %3i %3i %3i %3i\n",nevents,nlm,nhm,nn);
 

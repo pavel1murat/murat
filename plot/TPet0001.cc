@@ -206,7 +206,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 2) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -228,7 +228,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 3) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; // , *h2;
     TBox  *b1, *b2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
@@ -264,7 +264,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 4) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -288,7 +288,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 302) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -312,7 +312,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 304) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -336,7 +336,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 402) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -360,7 +360,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 404) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; // , *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -384,7 +384,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 502) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -408,7 +408,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 504) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; // , *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -456,7 +456,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 603) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; // , *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -479,7 +479,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 604) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; // , *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -544,7 +544,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 704) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; // , *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -585,7 +585,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 706) {
 
-    TH2F  *h1, *h2;
+    TH2F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,2,1,1200,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -609,7 +609,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 707) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,1,1,800,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -630,7 +630,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 708) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,1,1,800,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -681,7 +681,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 807) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,1,1,800,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");
@@ -702,7 +702,7 @@ void TPet0001::plot(Int_t Figure, const char* CanvasName) {
 //-----------------------------------------------------------------------------
   if (Figure == 808) {
 
-    TH1F  *h1, *h2;
+    TH1F  *h1; //, *h2;
 
     fCanvas  = new_slide(name,title,1,1,800,600);
     fP1      = (TPad*) fCanvas->GetPrimitive("p1");

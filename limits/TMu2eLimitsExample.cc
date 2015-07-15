@@ -82,7 +82,7 @@ int TMu2eLimitsExample::Init() {
 
   const char* pname[2] = {"b1","b2"};
 
-  const int np_bgr = 2;
+  //  const int np_bgr = 2;
   double   nps_lo[2]  = { -0.01, -0.01};
   double   nps_hi[2]  = {  0.01,  0.01};
 

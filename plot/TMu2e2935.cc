@@ -396,8 +396,8 @@ void TMu2e2935::plot(Int_t Figure, const char* CanvasName) {
 
     const int np = 60;
     float   eff [np], err[np], x[np], ex[np], d2[np];
-    float   eff_33[np], err_33[np], d2_33[np];
-    double  eff1, eff2_max, eff_2, d2_max;
+    float   eff_33[np], err_33[np] ; // , d2_33[np];
+    double  eff1, eff2_max, eff_2, d2_max(-1.);
     TH1     *h0, *h_qtot, *h1;
 //-----------------------------------------------------------------------------
 // normalize to the number of tracks - 1 track/event at max...
@@ -450,7 +450,7 @@ void TMu2e2935::plot(Int_t Figure, const char* CanvasName) {
 
       eff_33[i1] = eff1+eff2_max;
       err_33[i1] = 0.01;
-      d2_33 [i1] = d2_max;
+      //      d2_33 [i1] = d2_max;
     }
     fP1->cd(1);
 
@@ -499,7 +499,7 @@ void TMu2e2935::plot(Int_t Figure, const char* CanvasName) {
 
     const int np = 60;
     float   eff [np], err[np], x[np], ex[np], /* eff2[np], err2[np], */ d2[np];
-    double  eff1, eff2_max, eff_2, d2_max;
+    double  eff1, eff2_max, eff_2, d2_max(-1.);
     TH1     *h0, *h_qtot, *h1; // , *h2, *h3;
 //-----------------------------------------------------------------------------
 // normalize to the number of tracks - 1 track/event at max...

@@ -16,21 +16,27 @@
 
 ClassImp(TMu2eLimits)
 
-namespace {
-  TMu2eLimits::channel_data_t channel_data[] = {
-//------------------------------------------------------------------------------------------
-// define channels, channel with the name=0 - the last one
-// 
-//  ana init    bit      name           Module    HistSet HistBin  HistName  xmin xmax Rebin
-//------------------------------------------------------------------------------------------
-    { 0,  0,      0, "test"      , "Mu2eLimits" ,  ""    ,  49,   "p"   ,    0.,    -1.,  1},
-    { 0,  0,   1<<0, "mu2e"      , "Mu2eLimits" ,  "trk" ,  01,   "p"   ,   101.,   106., 1},
-    { 0,  0,      0,      0      , 0            ,  0     ,   0,        0,    0.,    -1.,  0}
-  };
+//-----------------------------------------------------------------------------
+TMu2eLimits::TMu2eLimits() {
+  fChannelData = NULL;
 }
 
 //-----------------------------------------------------------------------------
-TMu2eLimits::TMu2eLimits() {
+int TMu2eLimits::InitChannelData(channel_data_t*& Data) {
+//   TMu2eLimits::channel_data_t channel_data[] = {
+// //------------------------------------------------------------------------------------------
+// // define channels, channel with the name=0 - the last one
+// // 
+// //  ana init    bit      name           Module    HistSet HistBin  HistName  xmin xmax Rebin
+// //------------------------------------------------------------------------------------------
+//     { 0,  0,      0,   "test"    , "Mu2eLimits" ,  ""    ,  49,   "p"   ,    0.,    -1.,  1},
+//     { 0,  0,   1<<0,   "mu2e"    , "Mu2eLimits" ,  "trk" ,  01,   "p"   ,   101.,   106., 1},
+//     { 0,  0,      0,        0    , 0            ,  0     ,   0,        0,    0.,    -1.,  0}
+//   };
+
+  Data = new channel_data_t[3];
+  // dont forget to initialize
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -65,7 +71,9 @@ TMu2eLimits::TMu2eLimits(int Mode, channel_data_t* ChannelData, const char* Sign
   fHistName    = new TObjArray();
 				        // count number of channels
 
-  if (ChannelData == 0) fChannelData = channel_data;
+  if (ChannelData == 0) {
+    InitChannelData(fChannelData);
+  }
   else                  fChannelData = ChannelData;
 
   fNChannels = 0;
@@ -123,9 +131,9 @@ int TMu2eLimits::Init() {
   int                rebin_factor;
   const char         *channel_name, *module_name, *hist_file;
   char               hist_name[100];
-  TH1F*              hist;
+  TH1F*              hist(NULL);
   channel_data_t*    ch_data;
-  aprocess           *dat, *bgr;
+  aprocess           *dat; //, *bgr;
 
 //-----------------------------------------------------------------------------
 // create null and test hypotheses
@@ -329,7 +337,7 @@ int   TMu2eLimits::RunPseudoExperiments(int NPseudoExp) {
 //-----------------------------------------------------------------------------
 int   TMu2eLimits::AddSignal(const char* ChannelName, csm_model*  Model) {
 
-  TH1             *h1(0), *h2(0), *h11(0), *h12, *h15;
+  TH1             /**h1(0), *h2(0),*/  *h11(0) ; //, *h12, *h15;
   int              np;
   const char      *pnames [10];
   double           par_sf_lo    [10];
@@ -339,11 +347,11 @@ int   TMu2eLimits::AddSignal(const char* ChannelName, csm_model*  Model) {
   TH1*             hist_shape_hi[10];
   double           nsig_shape_hi[10];
   double           sf;
-  const char       *pname;
-  char             signal_name[100];
+  //  const char       *pname;
+  //  char             signal_name[100];
 
   channel_data_t*  ch_data;
-  aprocess         *process, *signal;
+  aprocess         /* *process,*/ *signal;
   analysis         *ana;
 //-----------------------------------------------------------------------------
 // for Mu2e  
@@ -374,26 +382,26 @@ int   TMu2eLimits::AddSignal(const char* ChannelName, csm_model*  Model) {
 //-----------------------------------------------------------------------------
 // kludge : replace number of entries in the histogram by the fit result
 //-----------------------------------------------------------------------------
-  double xxx [] = {
-    250.,   220.,   
-    300.,   201.,   
-    325.,   236.,   
-    350.,   238.,   
-    400.,   241.,   
-    500.,   225.,   
-    600.,   222.,   
-    700.,   210.,   
-    800.,   233.,   
-    900.,   223.,   
-   1000.,   157.,
-      -1.
-  };
+  // double xxx [] = {
+  //   250.,   220.,   
+  //   300.,   201.,   
+  //   325.,   236.,   
+  //   350.,   238.,   
+  //   400.,   241.,   
+  //   500.,   225.,   
+  //   600.,   222.,   
+  //   700.,   210.,   
+  //   800.,   233.,   
+  //   900.,   223.,   
+  //  1000.,   157.,
+  //     -1.
+  // };
 
-  double coef [2] = { 246.9, -0.0542 };
+  //  double coef [2] = { 246.9, -0.0542 };
 
   if (strcmp(ChannelName,"mu2e") == 0) {
 
-    int imass(0);
+    //    int imass(0);
 
     // for (int i=0; i<11; i++) {
     //   if ( fabs(xxx[2*i]-fMass) < 0.01) {

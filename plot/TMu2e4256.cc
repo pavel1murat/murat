@@ -552,7 +552,7 @@ void TMu2e4256::plot(Int_t Figure, const char* CanvasName) {
 // Fig. 101: single electrons , DV
 //-----------------------------------------------------------------------------
   if (Figure == 101) {
-    TGraph   *gr_x0(0), *gr_x1(0), *gr_x2(0), *gr_x4(0);
+    TGraph   *gr_x0(0), *gr_x1(0), *gr_x2(0); // , *gr_x4(0);
 
     fCanvas  = new TCanvas(name,title,1,1,1100,800);
 

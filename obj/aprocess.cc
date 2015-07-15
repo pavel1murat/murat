@@ -128,16 +128,16 @@ int aprocess::get_h1(const char* Module  ,
   // possibly rebinned
   // returned histogram is supposed to be owned by the caller
   
-  TH1  *hist, *h1, *h2, *hnorm;
+  TH1  *hist, *h1;
 
-  char    name[500], nnorm[500], file_hist_name[200], job_hist_name[200];
+  char    name[500], file_hist_name[200], job_hist_name[200];
 
   TString module_name;
 
-  double  q, q1, e1, qent, sf(1.), qnorm, fit_qevents;
+  double  q, q1, e1, sf(1.), qnorm, fit_qevents;
   double  acc, id_eff, id_eff_sf, tr_eff, tr_eff_sf;
 
-  int     nbins, delete_h1(0);
+  int     nbins; //, delete_h1(0);
 
   module_name = Module;
 //-----------------------------------------------------------------------------
@@ -172,7 +172,7 @@ int aprocess::get_h1(const char* Module  ,
       return -1;
     }
     h1   = (TH1*) hist->Clone();
-    delete_h1 = 1;
+    //    delete_h1 = 1;
 //-----------------------------------------------------------------------------
 // define h1, ignore underflows and overflows, defined errors and normalize to
 // right luminosity and efficiency
@@ -206,7 +206,8 @@ int aprocess::get_h1(const char* Module  ,
 	tr_eff_sf = fAnalysis->GetTrEffSF   (this,Module,HistSet,fRunRange,Bin,HistName);
 
 	if (fDebug[0] != 0) {
-	  printf("[aprocess:get_h1] acc, id_eff, id_eff_sf, tr_eff, tr_eff_sf = %10.3f %10.3f %10.3f %10.3f 510.3f\n", acc, id_eff, id_eff_sf, tr_eff, tr_eff_sf);
+	  printf("[aprocess:get_h1] acc, id_eff, id_eff_sf, tr_eff, tr_eff_sf = %10.3f %10.3f %10.3f %10.3f %10.3f\n", 
+		 acc, id_eff, id_eff_sf, tr_eff, tr_eff_sf);
 	}
 	// fQEvents - number of events in the normalized histogram
 
@@ -285,16 +286,14 @@ int aprocess::get_h1_unorm(const char* Module  ,
   // possibly rebinned
   // returned histogram is supposed to be owned by the caller
   
-  TH1  *hist, *h1, *h2, *hnorm;
+  TH1  *hist, *h1;
 
-  char    name[500], nnorm[500], file_hist_name[200], job_hist_name[200];
+  char    name[500], file_hist_name[200], job_hist_name[200];
 
   TString module_name;
 
-  double  q, q1, e1, qent, sf, qnorm, fit_qevents;
+  double  qnorm, fit_qevents;
   double  acc, id_eff, id_eff_sf, tr_eff, tr_eff_sf;
-
-  int     nbins, delete_h1(0);
 
   module_name = Module;
 //-----------------------------------------------------------------------------

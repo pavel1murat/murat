@@ -143,9 +143,10 @@ physics : {
 		minnstraws : 10
 #		hiterr             : [ 5.0, 1.44 ]
 
-		ambiguityStrategy  : [ 0   ]
-		hiterr             : [ 5.0 ]
-		t0Tolerance        : [ 5.0 ]   
+		ambiguityStrategy  : [ 0    ]
+		hiterr             : [ 5.0  ]
+		t0Tolerance        : [ 5.0  ]   
+		weedhits           : [ true ]   
 	    }
 #
 	    KalFitHack: { @table::CalPatRec.KalFitHack

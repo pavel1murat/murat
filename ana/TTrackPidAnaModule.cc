@@ -53,43 +53,6 @@ void TTrackPidAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Fold
 }
 
 //-----------------------------------------------------------------------------
-void TTrackPidAnaModule::BookTrackPidHistograms(TrackPidHist_t* Hist, const char* Folder) {
-//   char name [200];
-//   char title[200];
-
-  HBook1F(Hist->fLHEDedx     ,"lhe_dedx",Form("%s: LHEDedx"        ,Folder), 200,  -200. ,200. ,Folder);
-  HBook1F(Hist->fLHMDedx     ,"lhm_dedx",Form("%s: LHMDedx"        ,Folder), 200,  -200. ,200. ,Folder);
-  HBook1F(Hist->fLHRDedx     ,"lhr_dedx",Form("%s: LHRDedx"        ,Folder), 100,  -10.  , 10. ,Folder);
-  HBook1F(Hist->fDrdsVadimEle,"drds_ele",Form("%s: dr/ds vadim ele",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDrdsVadimMuo,"drds_muo",Form("%s: dr/ds vadim muo",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDxdsVadimEle,"dxds_ele",Form("%s: dx/ds vadim ele",Folder), 200,  -10   ,10   ,Folder);
-  HBook1F(Hist->fDxdsVadimMuo,"dxds_muo",Form("%s: dx/ds vadim muo",Folder), 200,  -10   ,10.  ,Folder);
-  HBook1F(Hist->fSumAvikEle  ,"avik_ele",Form("%s: Avik ele"       ,Folder), 200,    0   ,2.e-4 ,Folder);
-  HBook1F(Hist->fSumAvikMuo  ,"avik_muo",Form("%s: Avik muo"       ,Folder), 200,    0   ,2.e-4 ,Folder);
-
-  HBook1F(Hist->fSq2AvikEle  ,"sq2_ele",Form("%s: sq2 ele"         ,Folder), 200,    0   ,2.e-4 ,Folder);
-  HBook1F(Hist->fSq2AvikMuo  ,"sq2_muo",Form("%s: sq2 muo"         ,Folder), 200,    0   ,2.e-4 ,Folder);
-
-  HBook1F(Hist->fDrdsOsEle,"drds_os_ele",Form("%s: dr/ds OS ele",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDrdsOsMuo,"drds_os_muo",Form("%s: dr/ds OS muo",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDxdsOsEle,"dxds_os_ele",Form("%s: dx/ds OS ele",Folder), 200,  -100. , 100. ,Folder);
-  HBook1F(Hist->fDxdsOsMuo,"dxds_os_muo",Form("%s: dx/ds OS muo",Folder), 200,  -100. , 100. ,Folder);
-  
-  HBook1F(Hist->fDrdsSsEle,"drds_ss_ele",Form("%s: dr/ds SS ele",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDrdsSsMuo,"drds_ss_muo",Form("%s: dr/ds SS muo",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDxdsSsEle,"dxds_ss_ele",Form("%s: dx/ds SS ele",Folder), 200,  -100. ,100. ,Folder);
-  HBook1F(Hist->fDxdsSsMuo,"dxds_ss_muo",Form("%s: dx/ds SS muo",Folder), 200,  -100. ,100. ,Folder);
-
-  HBook1F(Hist->fSumAvikOsEle,"avik_os_ele",Form("%s: Avik OS Ele",Folder), 200, 0,2.e-2 ,Folder);
-  HBook1F(Hist->fSumAvikOsMuo,"avik_os_muo",Form("%s: Avik OS Muo",Folder), 200, 0,2.e-2 ,Folder);
-  HBook1F(Hist->fNUsedOsEle  ,"nu_os_ele"  ,Form("%s: N(used) OS Ele",Folder), 100, 0,100 ,Folder);
-  HBook1F(Hist->fNUsedOsMuo  ,"nu_os_muo"  ,Form("%s: N(used) OS Muo",Folder), 100, 0,100 ,Folder);
-  HBook1F(Hist->fLHROs       ,"lhr_os"     ,Form("%s: LHR OS doublets",Folder), 200, -100,100 ,Folder);
-
-  
-}
-
-//-----------------------------------------------------------------------------
 void TTrackPidAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
@@ -204,7 +167,7 @@ void TTrackPidAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track
 //-----------------------------------------------------------------------------
 void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* Pid) {
 
-  double lhrDedx;
+  double lhr_dedx, lhr_sum(-1.e10), lhr_sq2(-1.e10), lhr_osds(-1.e-10), lhr_osds_norm(-1.e-10) ;
 
   //  int              itrk;
   //  TrackPidPar_t*   tp;
@@ -215,9 +178,9 @@ void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* P
   Hist->fLHEDedx->Fill (Pid->fLogDedxProbEle);
   Hist->fLHMDedx->Fill (Pid->fLogDedxProbMuo);
   
-  lhrDedx = Pid->fLogDedxProbEle-Pid->fLogDedxProbMuo;
+  lhr_dedx = Pid->fLogDedxProbEle-Pid->fLogDedxProbMuo;
 
-  Hist->fLHRDedx->Fill(lhrDedx);
+  Hist->fLHRDedx->Fill(lhr_dedx);
 
   Hist->fDrdsVadimEle->Fill(Pid->fDrdsVadimEle);
   Hist->fDrdsVadimMuo->Fill(Pid->fDrdsVadimMuo);
@@ -227,14 +190,25 @@ void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* P
 
   Hist->fDxdsVadimEle->Fill(dxds_ele);
   Hist->fDxdsVadimMuo->Fill(dxds_muo);
-
+					// these are sums over doublets
   Hist->fSumAvikEle->Fill(Pid->fSumAvikEle);
   Hist->fSumAvikMuo->Fill(Pid->fSumAvikMuo);
+  Hist->fMeanAvikEle->Fill(Pid->fSumAvikEle/Pid->fNMatched);
+  Hist->fMeanAvikMuo->Fill(Pid->fSumAvikMuo/Pid->fNMatched);
 
-  printf("Pid->fSumAvikEle,Pid->fSumAvikMuo : %12.5e %12.5e\n",Pid->fSumAvikEle,Pid->fSumAvikMuo);
+  if (Pid->fSumAvikEle > 0) lhr_sum = log(Pid->fSumAvikMuo/Pid->fSumAvikEle);
+
+  Hist->fLHRSumAvik->Fill(lhr_sum);
 
   Hist->fSq2AvikEle->Fill(Pid->fSq2AvikEle);
   Hist->fSq2AvikMuo->Fill(Pid->fSq2AvikMuo);
+  Hist->fMq2AvikEle->Fill(Pid->fSq2AvikEle/Pid->fNMatchedAll);
+  Hist->fMq2AvikMuo->Fill(Pid->fSq2AvikMuo/Pid->fNMatchedAll);
+
+  lhr_sq2 = -1.e10;
+  if (Pid->fSq2AvikEle > 0) lhr_sq2 = log(Pid->fSq2AvikMuo/Pid->fSq2AvikEle);
+
+  Hist->fLHRSq2Avik->Fill(lhr_sq2);
 
   Hist->fDrdsOsEle->Fill(Pid->fDrdsOsEle);
   Hist->fDrdsOsMuo->Fill(Pid->fDrdsOsMuo);
@@ -253,9 +227,80 @@ void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* P
 
   Hist->fDxdsSsEle->Fill(dxds_ss_ele);
   Hist->fDxdsSsMuo->Fill(dxds_ss_muo);
-  
+//-----------------------------------------------------------------------------
+// osds: 'opposite side doublet slopes'
+//-----------------------------------------------------------------------------
+  Hist->fSumAvikOsEle->Fill(Pid->fSumAvikOsEle);
+  Hist->fSumAvikOsMuo->Fill(Pid->fSumAvikOsMuo);
+  Hist->fNUsedOsEle->Fill(Pid->fNUsedOsEle);
+  Hist->fNUsedOsMuo->Fill(Pid->fNUsedOsMuo);
+
+  if (Pid->fSumAvikOsEle > 0) {
+    lhr_osds      = log(Pid->fSumAvikOsMuo/Pid->fSumAvikOsEle);
+    lhr_osds_norm = log((Pid->fSumAvikOsMuo/Pid->fNUsedOsMuo)/(Pid->fSumAvikOsEle/Pid->fNUsedOsEle));
+  }
+  Hist->fLHROsDs->Fill(lhr_osds);
+  Hist->fLHROsDsNorm->Fill(lhr_osds_norm);
+//-----------------------------------------------------------------------------
+// now ony need to combine the time and dedx likelihoods - later
+//-----------------------------------------------------------------------------
+  double lhr_sq2_dedx = lhr_dedx + lhr_sq2;
+  Hist->fLHRSq2Dedx->Fill(lhr_sq2_dedx);
+
+  double lhr_osdsn_dedx = lhr_dedx + lhr_osds_norm;
+  Hist->fLHROsdsnDedx->Fill(lhr_osdsn_dedx);
+
+  Hist->fLHRDedxVsSq2->Fill(lhr_sq2,lhr_dedx);
+
 }
 
+
+//-----------------------------------------------------------------------------
+void TTrackPidAnaModule::BookTrackPidHistograms(TrackPidHist_t* Hist, const char* Folder) {
+//   char name [200];
+//   char title[200];
+
+  HBook1F(Hist->fLHEDedx     ,"lhe_dedx",Form("%s: LHEDedx"        ,Folder), 150,  -300. ,0. ,Folder);
+  HBook1F(Hist->fLHMDedx     ,"lhm_dedx",Form("%s: LHMDedx"        ,Folder), 150,  -300. ,0. ,Folder);
+  HBook1F(Hist->fLHRDedx     ,"lhr_dedx",Form("%s: LHRDedx"        ,Folder), 100,  -10.  , 10. ,Folder);
+  HBook1F(Hist->fDrdsVadimEle,"drds_ele",Form("%s: dr/ds vadim ele",Folder), 200,  -0.001 ,0.001 ,Folder);
+  HBook1F(Hist->fDrdsVadimMuo,"drds_muo",Form("%s: dr/ds vadim muo",Folder), 200,  -0.001 ,0.001 ,Folder);
+  HBook1F(Hist->fDxdsVadimEle,"dxds_ele",Form("%s: dx/ds vadim ele",Folder), 200,  -10   ,10   ,Folder);
+  HBook1F(Hist->fDxdsVadimMuo,"dxds_muo",Form("%s: dx/ds vadim muo",Folder), 200,  -10   ,10.  ,Folder);
+  HBook1F(Hist->fSumAvikEle  ,"avik_ele",Form("%s: Avik ele"       ,Folder), 200,    0   ,10 ,Folder);
+  HBook1F(Hist->fSumAvikMuo  ,"avik_muo",Form("%s: Avik muo"       ,Folder), 200,    0   ,10 ,Folder);
+  HBook1F(Hist->fMeanAvikEle  ,"mean_ele",Form("%s: Avik sum/N ele"       ,Folder), 200,    0   ,0.2 ,Folder);
+  HBook1F(Hist->fMeanAvikMuo  ,"mean_muo",Form("%s: Avik sum/N muo"       ,Folder), 200,    0   ,0.2 ,Folder);
+  HBook1F(Hist->fLHRSumAvik  ,"lhr_sum" ,Form("%s: lhr sum"        ,Folder), 200,  -10   ,10. ,Folder);
+
+  HBook1F(Hist->fSq2AvikEle  ,"sq2_ele",Form("%s: sq2 ele"         ,Folder), 200,    0   ,10. ,Folder);
+  HBook1F(Hist->fSq2AvikMuo  ,"sq2_muo",Form("%s: sq2 muo"         ,Folder), 200,    0   ,10. ,Folder);
+  HBook1F(Hist->fMq2AvikEle  ,"mq2_ele",Form("%s: Avik sq2/Nmatchedall ELE",Folder), 200,    0   ,0.2 ,Folder);
+  HBook1F(Hist->fMq2AvikMuo  ,"mq2_muo",Form("%s: Avik sq2/Nmatchedall MUO",Folder), 200,    0   ,0.2 ,Folder);
+  HBook1F(Hist->fLHRSq2Avik  ,"lhr_sq2",Form("%s: lhr sq2"         ,Folder), 200,  -10   ,10. ,Folder);
+
+  HBook1F(Hist->fDrdsOsEle,"drds_os_ele",Form("%s: dr/ds OS ele",Folder), 200,  -0.002 ,0.002 ,Folder);
+  HBook1F(Hist->fDrdsOsMuo,"drds_os_muo",Form("%s: dr/ds OS muo",Folder), 200,  -0.002 ,0.002 ,Folder);
+  HBook1F(Hist->fDxdsOsEle,"dxds_os_ele",Form("%s: dx/ds OS ele",Folder), 200,  -100. , 100. ,Folder);
+  HBook1F(Hist->fDxdsOsMuo,"dxds_os_muo",Form("%s: dx/ds OS muo",Folder), 200,  -100. , 100. ,Folder);
+  
+  HBook1F(Hist->fDrdsSsEle,"drds_ss_ele",Form("%s: dr/ds SS ele",Folder), 200,  -0.002 ,0.002 ,Folder);
+  HBook1F(Hist->fDrdsSsMuo,"drds_ss_muo",Form("%s: dr/ds SS muo",Folder), 200,  -0.002 ,0.002 ,Folder);
+  HBook1F(Hist->fDxdsSsEle,"dxds_ss_ele",Form("%s: dx/ds SS ele",Folder), 200,  -100. ,100. ,Folder);
+  HBook1F(Hist->fDxdsSsMuo,"dxds_ss_muo",Form("%s: dx/ds SS muo",Folder), 200,  -100. ,100. ,Folder);
+
+  HBook1F(Hist->fSumAvikOsEle,"avik_os_ele",Form("%s: Avik OS Ele",Folder), 200, 0,100. ,Folder);
+  HBook1F(Hist->fSumAvikOsMuo,"avik_os_muo",Form("%s: Avik OS Muo",Folder), 200, 0,100. ,Folder);
+  HBook1F(Hist->fNUsedOsEle  ,"nu_os_ele"  ,Form("%s: N(used) OS Ele",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fNUsedOsMuo  ,"nu_os_muo"  ,Form("%s: N(used) OS Muo",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fLHROsDs     ,"lhr_osds"   ,Form("%s: LHR OS doublets",Folder), 200, -10,10 ,Folder);
+  HBook1F(Hist->fLHROsDsNorm ,"lhr_osds_n" ,Form("%s: LHR OS doub N"  ,Folder), 200, -10,10 ,Folder);
+
+  HBook1F(Hist->fLHRSq2Dedx  ,"lhr_sq2_dedx",Form("%s: LHR DeDx+Sq2",Folder), 400, -20,20 ,Folder);
+  HBook1F(Hist->fLHROsdsnDedx,"lhr_osdsn_dedx",Form("%s: LHR OsdsN+Dedx",Folder), 400, -20,20 ,Folder);
+
+  HBook2F(Hist->fLHRDedxVsSq2,"lhr_dedx_vs_sq2",Form("%s: LHR OsdsN+Dedx",Folder),200,-10,10,200,-10,10,Folder);
+}
 
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
@@ -363,10 +408,22 @@ void TTrackPidAnaModule::FillHistograms() {
     pid = fTrackPidBlock->Pid(i);
     FillTrackPidHistograms(fHist.fTrackPid[0],pid);
 
-    if (trk->fIDWord == 0) {
-					// track passes selection "C" 
+    if ((trk->fIDWord == 0) && (trk->fP > 100.)) {
+
+					// track with P > 103 MeV/c passes selection "C" 
 
       FillTrackPidHistograms(fHist.fTrackPid[1],pid);
+
+      if (GetDebugBit(4) != 0) {
+	GetHeaderBlock()->Print(Form("-----bit004: p = %12.5f T0: %10.3f",trk->fP,trk->fT0));
+	printf("NMatched, NMatchedAll, sum_ele, sum_muo, sq2_ele, sq2_muo: %3i %3i %12.5f %12.5f %12.5f %12.5f \n", 
+	       pid->fNMatched,
+	       pid->fNMatchedAll,
+	       pid->fSumAvikEle,
+	       pid->fSumAvikMuo,
+	       pid->fSq2AvikEle,
+	       pid->fSq2AvikMuo);
+      }
     }
   }
 }

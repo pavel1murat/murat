@@ -47,6 +47,26 @@ TrkPatRecKalFit : { @table::TrkPatRec.KalFit
     }
 }
 
+CalPatRecKalFitHack : { @table::CalPatRec.KalFitHack
+    ambiguityStrategy    : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
+    #		ambiguityStrategy    : [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2   ]
+    hiterr               : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
+    t0Tolerance          : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
+    #	    final                    : 0
+    DoubletAmbigResolver : { @table::CalPatRec.KalFitHack.DoubletAmbigResolver
+	debugLevel                          : 0
+	HitAmbigPenalty 		    : false
+	HitMinDrift			    : 0.2
+	ZeroDriftPenalty 		    : 0.05
+	scaleErrDoublet                     : 5.   # external error scale factor
+	maxDoubletChi2                      : 10.  # to account for 1+4+4, not quite rigorous mathematically
+	sigmaSlope                          : 0.025
+	minDriftDoublet                     : 0.3
+	deltaDriftDoublet                   : 0.3
+	excludeBothHits                     : 1
+    }
+} 
+
 CalPatRecKalFit : { @table::CalPatRec.KalFitHack }
 #------------------------------------------------------------------------------
 # physics
@@ -58,25 +78,7 @@ physics.producers : { @table::physics.producers
     }
 
     CalPatRecDem         : { @table::CalPatRec
-	KalFitHack       : { @table::CalPatRec.KalFitHack
-	    ambiguityStrategy    : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
-	    #		ambiguityStrategy    : [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2   ]
-	    hiterr               : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
-	    t0Tolerance          : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
-	    #	    final                    : 0
-	    DoubletAmbigResolver : { @table::CalPatRec.KalFitHack.DoubletAmbigResolver
-		debugLevel                          : 0
-		HitAmbigPenalty 		    : false
-		HitMinDrift			    : 0.2
-		ZeroDriftPenalty 		    : 0.05
-		scaleErrDoublet                     : 5.   # external error scale factor
-		maxDoubletChi2                      : 10.  # to account for 1+4+4, not quite rigorous mathematically
-		sigmaSlope                          : 0.025
-		minDriftDoublet                     : 0.3
-		deltaDriftDoublet                   : 0.3
-		excludeBothHits                     : 1
-	    }
-	} 
+	KalFitHack       : { @table::CalPatRecKalFitHack }
     }
 
     TrkPatRecDmm         : { @table::TrkPatRec
@@ -88,25 +90,7 @@ physics.producers : { @table::physics.producers
     CalPatRecDmm         : { @table::CalPatRec
 	fitparticle  	 : 13
 	fitdirection     : 0
-	KalFitHack           : { @table::CalPatRec.KalFitHack
-	    ambiguityStrategy    : [ 0  , 0  , 4  , 4   , 4    , 4   , 4  , 4  , 4   ]
-	    #		ambiguityStrategy    : [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2   ]
-	    hiterr               : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
-	    t0Tolerance          : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
-	    #	    final                    : 0
-	    DoubletAmbigResolver : { @table::CalPatRec.KalFitHack.DoubletAmbigResolver
-		debugLevel                          : 0
-		HitAmbigPenalty 	            : false
-		HitMinDrift			    : 0.2
-		ZeroDriftPenalty 		    : 0.05
-		scaleErrDoublet                     : 5.   # external error scale factor
-		maxDoubletChi2                      : 10.  # to account for 1+4+4, not quite rigorous mathematically 
-		sigmaSlope                          : 0.025
-		minDriftDoublet                     : 0.3
-		deltaDriftDoublet                   : 0.3
-		excludeBothHits                     : 1
-	    }
-	} 
+	KalFitHack           : { @table::CalPatRecKalFitHack }
     }
 
     MergePatRecDem       : { @table::MergePatRec
@@ -144,8 +128,12 @@ physics.filters: { @table::physics.filters
 
 #------------------------------------------------------------------------------
 # paths - remake hits, but not regenerate the events
+# need to defined CalPatRec sequence correctly
 #------------------------------------------------------------------------------
-
+trkMakeHitsSeq : [FSHPreStereo, MakeStereoHits, FlagStrawHits, FlagBkgHits]
+trkDemSeq      : [TrkPatRecDem, CalPatRecDem, MergePatRecDem]
+trkDmmSeq      : [TrkPatRecDmm, CalPatRecDmm, MergePatRecDmm]
+#
 physics.p1 : [ @sequence::trkMakeHitsSeq
 	       , @sequence::trkDemSeq
 	       , @sequence::trkDmmSeq

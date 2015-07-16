@@ -13,7 +13,7 @@ void  pid_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
   m_pid = (TTrackPidAnaModule*) g.x->AddModule("TTrackPidAnaModule",0);  
   
-  if (DebugBit >= 0) m_eff->SetDebugBit(DebugBit,1);
+  if (DebugBit >= 0) m_pid->SetDebugBit(DebugBit,1);
 }
 
 

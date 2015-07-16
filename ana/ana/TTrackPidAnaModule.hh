@@ -38,9 +38,15 @@ public:
     TH1F*    fDxdsVadimMuo;
     TH1F*    fSumAvikEle;
     TH1F*    fSumAvikMuo;
+    TH1F*    fMeanAvikEle;
+    TH1F*    fMeanAvikMuo;
+    TH1F*    fLHRSumAvik;
 
     TH1F*    fSq2AvikEle;
     TH1F*    fSq2AvikMuo;
+    TH1F*    fMq2AvikEle;
+    TH1F*    fMq2AvikMuo;
+    TH1F*    fLHRSq2Avik;
 
     TH1F*    fDrdsOsEle;
     TH1F*    fDrdsOsMuo;
@@ -56,7 +62,13 @@ public:
     TH1F*    fSumAvikOsMuo;
     TH1F*    fNUsedOsEle;
     TH1F*    fNUsedOsMuo;
-    TH1F*    fLHROs;
+    TH1F*    fLHROsDs;
+    TH1F*    fLHROsDsNorm;
+
+    TH1F*    fLHRSq2Dedx;			// combined
+    TH1F*    fLHROsdsnDedx;			// combined
+
+    TH2F*    fLHRDedxVsSq2;
   };
 
   struct EventHist_t {

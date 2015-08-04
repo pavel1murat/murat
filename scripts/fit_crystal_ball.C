@@ -63,31 +63,20 @@ double f_crystal_ball_save(double* X, double* P) {
 }
 
 //-----------------------------------------------------------------------------
-// A1*exp((x-x0)^2/2sig^2 for (x-x0)/sig > -alp
-// A1*A2*(B-(x-x0)/sig)^{-n}
-// A2 = 
-// P[0] = N
-// P[1] = x[0]
-// P[2] = sigma
-// P[3] = alpha  (> 0)
-// P[4] = n
-// P[5] = tail fraction
-// P[6] = tail exponential slope
+// try two gaussians - an exponential tail extending only in one direction
+// doesn't make much sense
 //-----------------------------------------------------------------------------
 double f_crystal_ball(double* X, double* P) {
-  double f, fg, fe, alpha, abs_alpha, n, a, b;
-
-  double dx  = (X[0]-P[1]);
+  double f, alpha, abs_alpha, n, a, b;
+  double dx = (X[0]-P[1])/P[2];
 
   alpha     = P[3];
   abs_alpha = fabs(alpha);
   n         = P[4];
 
-  if (dx/P[2] > -abs_alpha) {
-    double dxn = dx/P[2];
-    fg = P[0]*TMath::Exp(-dxn*dxn/2.);
-    fe = P[0]*P[5]*dx*TMath::Exp(-dx/P[6])/(P[6]*P[6]);
-    f = fg+fe;
+  if (dx > -abs_alpha) {
+    double dx1 = fabs((X[0]-P[1])/P[6]);
+    f = P[0]*((1-P[5])*TMath::Exp(-dx*dx/2.)+P[5]*TMath::Exp(-dx1));
   }
   else {
     a = TMath::Power((n/abs_alpha),n)*TMath::Exp(-(alpha*alpha)/2);
@@ -121,7 +110,7 @@ void cb_init_parameters(TF1* F,
 //-----------------------------------------------------------------------------
 void cb_fit(TH1F* Hist, TF1* F, double XMin, double XMax) {
   Hist->GetXaxis()->SetRangeUser(XMin,XMax);
-  Hist->Fit(F,"","",XMin,XMax);
+  Hist->Fit(F,"L","",XMin,XMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -152,7 +141,7 @@ void fit_crystal_ball(const char* File, const char* Module, const char* Hist,
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
   cb_fit             (h,f,XMin,XMax);
 }
 
@@ -164,7 +153,7 @@ void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-  cb_init_parameters (f,anorm,X0,0.13,3.,1.,0.01,0.1);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
   cb_fit             (h,f,XMin,XMax);
 }
 
@@ -196,6 +185,6 @@ void fit_crystal_ball_norm(TH1* Hist, double X0, double XMin, double XMax) {
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.1);
+  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
   cb_fit             (h,f,XMin,XMax);
 }

@@ -57,7 +57,7 @@ void TVdetAnaModule::BookVdetHitHistograms(VdetHitHist_t* Hist, const char* Fold
   HBook1F(Hist->fPdgCode,"pdg_code",Form("%s: PDG code",Folder),  200,-1000, 1000,Folder);
   HBook1F(Hist->fGenCode,"gen_code",Form("%s: generator code",Folder),  100, -10, 90,Folder);
   HBook1F(Hist->fEnergy ,"energy",Form("%s: Hit Energy" ,Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fTime   ,"time"  ,Form("%s: Hit Time  " ,Folder),200, 0,2000,Folder);
+  HBook1F(Hist->fTime   ,"time"  ,Form("%s: Hit Time  " ,Folder),500, 0,10000,Folder);
 }
 
 

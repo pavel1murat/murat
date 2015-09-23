@@ -42,7 +42,7 @@
 #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "KalmanTests/inc/TrkStrawHit.hh"
-#include "KalmanTests/inc/KalRepCollection.hh"
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/TAnaDump.hh"
 
@@ -297,8 +297,8 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   void TTrackRecoAna::doubletmaker(const KalRep* ele_Trk) {
         
-    art::Handle<mu2e::KalRepCollection> eleKrepsHandle;
-    art::Handle<mu2e::KalRepCollection> muoKrepsHandle;
+    art::Handle<mu2e::KalRepPtrCollection> eleKrepsHandle;
+    art::Handle<mu2e::KalRepPtrCollection> muoKrepsHandle;
     
 //     int gen_index;
 //     int generatorID = 28;
@@ -343,7 +343,7 @@ namespace mu2e {
 
     fEvent = &Evt;
     
-    art::Handle<mu2e::KalRepCollection> dem_handle;
+    art::Handle<mu2e::KalRepPtrCollection> dem_handle;
     
     art::Selector  s_dem(art::ProcessNameSelector("")                && 
 			 art::ModuleLabelSelector(fTrkPatRecLabel)    );
@@ -352,11 +352,11 @@ namespace mu2e {
 // make sure collection exists
 //-----------------------------------------------------------------------------
     if (! dem_handle.isValid()) {
-      printf("%s: no TrkPatRecDem KalRepCollection, BAIL OUT\n",__oname);
+      printf("%s: no TrkPatRecDem KalRepPtrCollection, BAIL OUT\n",__oname);
       return;
     }
     
-    const mu2e::KalRepCollection* list_of_ele_tracks = dem_handle.product();
+    const mu2e::KalRepPtrCollection* list_of_ele_tracks = dem_handle.product();
     
     int n_ele_trk = list_of_ele_tracks->size();
 
@@ -370,7 +370,7 @@ namespace mu2e {
     TAnaDump* d = TAnaDump::Instance();
 
     for (int i=0; i<n_ele_trk; i++) {
-      trk = &list_of_ele_tracks->at(i);
+      trk = list_of_ele_tracks->at(i).get();
 
       int  rc;
       rc = MakeDoublets(trk, &fEle);

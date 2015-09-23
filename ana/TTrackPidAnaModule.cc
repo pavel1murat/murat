@@ -213,31 +213,38 @@ void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* P
   Hist->fDrdsOsEle->Fill(Pid->fDrdsOsEle);
   Hist->fDrdsOsMuo->Fill(Pid->fDrdsOsMuo);
 
-  double dxds_os_ele = Pid->fDrdsOsEle/Pid->fDrdsOsEleErr;
-  double dxds_os_muo = Pid->fDrdsOsMuo/Pid->fDrdsOsMuoErr;
+  double xdrds_os_ele = Pid->fDrdsOsEle/Pid->fDrdsOsEleErr;
+  double xdrds_os_muo = Pid->fDrdsOsMuo/Pid->fDrdsOsMuoErr;
 
-  Hist->fDxdsOsEle->Fill(dxds_os_ele);
-  Hist->fDxdsOsMuo->Fill(dxds_os_muo);
+  Hist->fDxdsOsEle->Fill(xdrds_os_ele);
+  Hist->fDxdsOsMuo->Fill(xdrds_os_muo);
 
   Hist->fDrdsSsEle->Fill(Pid->fDrdsSsEle);
   Hist->fDrdsSsMuo->Fill(Pid->fDrdsSsMuo);
 
-  double dxds_ss_ele = Pid->fDrdsSsEle/Pid->fDrdsSsEleErr;
-  double dxds_ss_muo = Pid->fDrdsSsMuo/Pid->fDrdsSsMuoErr;
+  double xdrds_ss_ele = Pid->fDrdsSsEle/Pid->fDrdsSsEleErr;
+  double xdrds_ss_muo = Pid->fDrdsSsMuo/Pid->fDrdsSsMuoErr;
 
-  Hist->fDxdsSsEle->Fill(dxds_ss_ele);
-  Hist->fDxdsSsMuo->Fill(dxds_ss_muo);
+  Hist->fDxdsSsEle->Fill(xdrds_ss_ele);
+  Hist->fDxdsSsMuo->Fill(xdrds_ss_muo);
+
+  Hist->fNUsedSsEleH->Fill(Pid->fNUsedSsEleH);
+  Hist->fNUsedSsMuoH->Fill(Pid->fNUsedSsMuoH);
 //-----------------------------------------------------------------------------
 // osds: 'opposite side doublet slopes'
 //-----------------------------------------------------------------------------
   Hist->fSumAvikOsEle->Fill(Pid->fSumAvikOsEle);
   Hist->fSumAvikOsMuo->Fill(Pid->fSumAvikOsMuo);
-  Hist->fNUsedOsEle->Fill(Pid->fNUsedOsEle);
-  Hist->fNUsedOsMuo->Fill(Pid->fNUsedOsMuo);
+
+  Hist->fNUsedOsEleH->Fill(Pid->fNUsedOsEleH);
+  Hist->fNUsedOsMuoH->Fill(Pid->fNUsedOsMuoH);
+
+  Hist->fNUsedOsEleD->Fill(Pid->fNUsedOsEleD);
+  Hist->fNUsedOsMuoD->Fill(Pid->fNUsedOsMuoD);
 
   if (Pid->fSumAvikOsEle > 0) {
     lhr_osds      = log(Pid->fSumAvikOsMuo/Pid->fSumAvikOsEle);
-    lhr_osds_norm = log((Pid->fSumAvikOsMuo/Pid->fNUsedOsMuo)/(Pid->fSumAvikOsEle/Pid->fNUsedOsEle));
+    lhr_osds_norm = log((Pid->fSumAvikOsMuo/Pid->fNUsedOsMuoD)/(Pid->fSumAvikOsEle/Pid->fNUsedOsEleD));
   }
   Hist->fLHROsDs->Fill(lhr_osds);
   Hist->fLHROsDsNorm->Fill(lhr_osds_norm);
@@ -289,10 +296,18 @@ void TTrackPidAnaModule::BookTrackPidHistograms(TrackPidHist_t* Hist, const char
   HBook1F(Hist->fDxdsSsEle,"dxds_ss_ele",Form("%s: dx/ds SS ele",Folder), 200,  -100. ,100. ,Folder);
   HBook1F(Hist->fDxdsSsMuo,"dxds_ss_muo",Form("%s: dx/ds SS muo",Folder), 200,  -100. ,100. ,Folder);
 
+  HBook1F(Hist->fNUsedSsEleH ,"nu_ss_eleh" ,Form("%s: N(used) SS EleH",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fNUsedSsMuoH ,"nu_ss_muoh" ,Form("%s: N(used) SS MuoH",Folder), 100, 0,100 ,Folder);
+
   HBook1F(Hist->fSumAvikOsEle,"avik_os_ele",Form("%s: Avik OS Ele",Folder), 200, 0,100. ,Folder);
   HBook1F(Hist->fSumAvikOsMuo,"avik_os_muo",Form("%s: Avik OS Muo",Folder), 200, 0,100. ,Folder);
-  HBook1F(Hist->fNUsedOsEle  ,"nu_os_ele"  ,Form("%s: N(used) OS Ele",Folder), 100, 0,100 ,Folder);
-  HBook1F(Hist->fNUsedOsMuo  ,"nu_os_muo"  ,Form("%s: N(used) OS Muo",Folder), 100, 0,100 ,Folder);
+
+  HBook1F(Hist->fNUsedOsEleH ,"nu_os_eleh" ,Form("%s: N(used) OS EleH",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fNUsedOsMuoH ,"nu_os_muoh" ,Form("%s: N(used) OS MuoH",Folder), 100, 0,100 ,Folder);
+
+  HBook1F(Hist->fNUsedOsEleD ,"nu_os_eled" ,Form("%s: N(used) OS EleD",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fNUsedOsMuoD ,"nu_os_muod" ,Form("%s: N(used) OS MuoD",Folder), 100, 0,100 ,Folder);
+
   HBook1F(Hist->fLHROsDs     ,"lhr_osds"   ,Form("%s: LHR OS doublets",Folder), 200, -10,10 ,Folder);
   HBook1F(Hist->fLHROsDsNorm ,"lhr_osds_n" ,Form("%s: LHR OS doub N"  ,Folder), 200, -10,10 ,Folder);
 
@@ -308,8 +323,10 @@ void TTrackPidAnaModule::BookTrackPidHistograms(TrackPidHist_t* Hist, const char
 int TTrackPidAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
+// follow Stntuple/fcl/templates.fcl and assume that the first, DEM, 
+// track data block is called just "TrackBlock"
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlockDem","TStnTrackBlock",&fTrackBlockDem);
+  RegisterDataBlock("TrackBlock"   ,"TStnTrackBlock",&fTrackBlockDem);
   RegisterDataBlock("TrackBlockDmm","TStnTrackBlock",&fTrackBlockDmm);
   RegisterDataBlock("PidBlock"     ,"TStnPidBlock"  ,&fTrackPidBlock);
 //-----------------------------------------------------------------------------

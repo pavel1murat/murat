@@ -212,7 +212,7 @@ double TMuonDecay::R1Arbuzov(double Z) {
 //-----------------------------------------------------------------------------
 double TMuonDecay::muon_spectrum_nlo_arbuzov(double E) {
 
-  double   a2pi, ax, bx, hx, f, f0, f1, f1LL, emax, L, me2, mmu, mmu2, R1, r, r2, z, z2, z3;
+  double   a2pi, ax, bx, hx, f, f0, f1LL, emax, L, me2, mmu, mmu2, R1, r, r2, z, z2, z3;
   double   logz, log1mz;
 
   //  E2   = E*E;

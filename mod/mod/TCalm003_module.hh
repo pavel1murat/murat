@@ -21,7 +21,7 @@
 #include "BTrk/TrkBase/HelixParams.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
-#include "KalmanTests/inc/KalRepPtrCollection.hh"
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
 #include "RecoDataProducts/inc/StrawHitCollection.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"

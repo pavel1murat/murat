@@ -4,6 +4,7 @@
 #include "murat/ana/scripts/modules.hh"
 
 def_name pid_001("pid_ana");
+def_name pid_002("pid_tpana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -11,10 +12,23 @@ void  pid_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
-  m_pid = (TTrackPidAnaModule*) g.x->AddModule("TTrackPidAnaModule",0);  
+  m_pid = (TPidAnaModule*) g.x->AddModule("TPidAnaModule",0);  
   
   if (DebugBit >= 0) m_pid->SetDebugBit(DebugBit,1);
 }
+
+
+//-----------------------------------------------------------------------------
+void  pid_tpana(int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_tpa = (TTrackPidAnaModule*) g.x->AddModule("TTrackPidAnaModule",0);  
+  
+  if (DebugBit >= 0) m_tpa->SetDebugBit(DebugBit,1);
+}
+
+
 
 
 

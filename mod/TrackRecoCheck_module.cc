@@ -40,7 +40,7 @@
 #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
 #include "Mu2eUtilities/inc/SortedStepPoints.hh"
 #include "Mu2eUtilities/inc/TrackTool.hh"
-#include "Mu2eUtilities/inc/TwoLinePCA.hh"
+// #include "Mu2eUtilities/inc/TwoLinePCA.hh"
 
 #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
 #include "MCDataProducts/inc/GenParticleCollection.hh"
@@ -60,7 +60,7 @@
 #include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
 
 #include "KalmanTests/inc/TrkStrawHit.hh"
-#include "KalmanTests/inc/KalRepPtrCollection.hh"
+#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
 

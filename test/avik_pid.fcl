@@ -8,7 +8,7 @@
 #include "Stntuple/fcl/templates.fcl"
 
 #                             Give this process a name
-process_name : AvikPid
+process_name : AvikPidProcess
 #------------------------------------------------------------------------------
 # Read events from a file (made by example 3)
 #------------------------------------------------------------------------------
@@ -90,33 +90,24 @@ physics.producers : { @table::physics.producers
     CalPatRecDmm         : { @table::CalPatRec
 	fitparticle  	 : 13
 	fitdirection     : 0
-	KalFitHack           : { @table::CalPatRecKalFitHack }
-    }
-
-    MergePatRecDem       : { @table::MergePatRec
-	trkPatReclabel   : TrkPatRecDem
-	calPatReclabel   : CalPatRecDem
-	fitparticle      : 11     # 11:electron, -11:positron, 13:mu-, -13: mu+
-	fitdirection     : 0      # 0:downstream, 1:upstream
-    }	
-
-    MergePatRecDmm       : { @table::MergePatRec
-	trkPatReclabel   : TrkPatRecDmm
-	calPatReclabel   : CalPatRecDmm
-	fitparticle      : 13     
-	fitdirection     : 0      
+	KalFitHack       : { @table::CalPatRecKalFitHack }
     }
 
     AvikPID:  @local::AvikPID 
 }
 
+allPatRecSeqPid  : [ @sequence::tprHitSeq, @sequence::cprHitSeq, 
+		     TrkPatRecDem, CalPatRecDem, MergePatRecDem, 
+		     TrkPatRecDmm, CalPatRecDmm, MergePatRecDmm,
+		     AvikPID ]
+
 physics.filters: { @table::physics.filters
-    StntupleMaker        : { @table::StntupleMaker
+    StntupleMaker        : { @table::StntupleMaker 
 #------------------------------------------------------------------------------
-# make 3 track blocks, for the moment need to specify all other labels
+# make 3 track blocks, for the moment need to specify all other labels 
 # default (in prolog): just one track block "TrackBlock" with output of MergePatRec
 #------------------------------------------------------------------------------
-	    trackBlockName          : [ "TrackBlockDem" , "TrackBlockDmm"   ] 
+	    trackBlockName          : [ "TrackBlockDem" , "TrackBlockDmm"  ] 
 	    trkRecoModuleLabel      : [ "MergePatRecDem", "MergePatRecDmm" ]
 	    trkExtrapolModuleLabel  : [            ""   ,               "" ]
 	    trkCaloMatchModuleLabel : [            ""   ,               "" ]
@@ -130,20 +121,10 @@ physics.filters: { @table::physics.filters
 # paths - remake hits, but not regenerate the events
 # need to defined CalPatRec sequence correctly
 #------------------------------------------------------------------------------
-trkMakeHitsSeq : [FSHPreStereo, MakeStereoHits, FlagStrawHits, FlagBkgHits]
-trkDemSeq      : [TrkPatRecDem, CalPatRecDem, MergePatRecDem]
-trkDmmSeq      : [TrkPatRecDmm, CalPatRecDmm, MergePatRecDmm]
-#
-physics.p1 : [ @sequence::trkMakeHitsSeq
-	       , @sequence::trkDemSeq
-	       , @sequence::trkDmmSeq
-	       , AvikPID
-	       , @sequence::stnmakerSeq
-	      ]
+physics.p1 : [ @sequence::allPatRecSeqPid, @sequence::stnmakerSeq ]
 
 physics.trigger_paths  : [p1]
-physics.end_paths      : []
-    
+physics.end_paths      : [  ]
 #------------------------------------------------------------------------------
 # print per event timing for ::event entry points
 #------------------------------------------------------------------------------

@@ -1126,8 +1126,8 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-//  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
-  RegisterDataBlock("TrkPatRec"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+  //  RegisterDataBlock("TrkPatRec"    ,"TStnTrackBlock"   ,&fTrackBlock  );
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
   RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
@@ -1207,9 +1207,9 @@ void TTrackAnaModule::FillHistograms() {
     cl_e    = cl0->Energy();
     disk_id = cl0->DiskID();
   }
-  //-----------------------------------------------------------------------------
-  // event histograms
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// event histograms
+//-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
 
   if (fNTracks[0]> 0) FillEventHistograms(fHist.fEvent[1]);
@@ -1268,6 +1268,7 @@ void TTrackAnaModule::FillHistograms() {
       FillEventHistograms(fHist.fEvent[10]);
     }
   }
+
 //-----------------------------------------------------------------------------
 // Dave's ladder for all tracks
 // 1. N(straw hits) > 20

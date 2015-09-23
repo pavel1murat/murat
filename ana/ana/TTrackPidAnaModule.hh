@@ -60,8 +60,16 @@ public:
 
     TH1F*    fSumAvikOsEle;
     TH1F*    fSumAvikOsMuo;
-    TH1F*    fNUsedOsEle;
-    TH1F*    fNUsedOsMuo;
+
+    TH1F*    fNUsedOsEleH;
+    TH1F*    fNUsedOsMuoH;
+
+    TH1F*    fNUsedOsEleD;
+    TH1F*    fNUsedOsMuoD;
+
+    TH1F*    fNUsedSsEleH;
+    TH1F*    fNUsedSsMuoH;
+
     TH1F*    fLHROsDs;
     TH1F*    fLHROsDsNorm;
 

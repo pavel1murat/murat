@@ -2,38 +2,70 @@
 #------------------------------------------------------------------------------
 # generate 105 MeV/c electrons
 # make STNTUPLE in one go, without creating an intermediate file
+# for 105 MeV/c electron : E = 105.00124           MeV
+# for 105 MeV/c muon     : E = 148.9584269653785   MeV
 #------------------------------------------------------------------------------
-# $Id: mgun_stnmaker.fcl,v 1.2 2014/07/01 22:52:23 murat Exp $
-# $Author: murat $
-# $Date: 2014/07/01 22:52:23 $
-
 //test: // This must be commented out for grid production.
 BEGIN_PROLOG
-#  muStops    : [ "/mu2e/data/tdr/beam/g4s3p5/mergedMuonStops/mustops.1025a_1426a_1504a.15318715.root" ]
+  muStops    : [ "mergedMuonStops/mustops.1025a_1426a_1504a.15318715.root" ]
+  pdgCode    : 13
 #  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
 #  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3-test/tdr.beam.mix.bgonly-test.1516a.15405463/good/00000/data_mixBG.root"]
 END_PROLOG
 
-#include "Stntuple/test/generate_mergePatRec_stnmaker.fcl"
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
 
-process_name : MgunMergePatRecStnmaker
+#include "Stntuple/fcl/templates.fcl"
 
-# for 105 MeV/c electron : E = 105.00124           MeV
-# for 105 MeV/c muon     : E = 148.9584269653785   MeV
+process_name : EgunMergePatRecStnmaker
 
-physics.producers.generate                : { @table::StoppedParticleReactionGun 
+source : { 
+    module_type : EmptyEvent
+    #    module_type : RootInput
+    #    fileNames   : [ {INPUT_DATA_FILE} ]
+    #    fileNames : ["/mu2e/data/tdr/beam/g4s4p5/tdr.beam.g4s4.conversion.1504a.15729672/good/00000/dsStopsToHitsConversion.root"]
+    #    maxEvents   : 100
+    # inputCommands : ['keep *_*_*_*'
+    #		     , 'drop *_muonTimeMap_*_*'
+    #		     , 'drop *_protonTimeMap_*_*'
+    #		     , 'drop mu2eStrawDigis_*_*_*'
+    #		     , 'drop mu2eStrawHits_*_*_*'
+    #		     , 'drop *_CaloReadoutHitsMaker_*_*'
+    #		     , 'drop *_CaloCrystalHitsMaker_*_*'
+    # ] 
+    # Uncomment the above lines to reduce file size.
+}
+
+# physics.producers.generate.physics.elow   : 148.953
+# physics.producers.generate.physics.ehi    : 148.963
+
+physics.producers.generate : { @table::StoppedParticleReactionGun 
     physics : {
-	pdgId            : 13
-	elow             : 148.953
-	ehi              : 148.963
-	spectrumVariable : "totalEnergy"
-	spectrumShape    : "flat"
+	pdgId            : @local::pdgCode
+	elow             : 148.9577         # 105.0010
+ 	ehi              : 148.9597         # 105.0015
+ 	spectrumVariable : "totalEnergy"
+ 	spectrumShape    : "flat"
     }
 }
+#------------------------------------------------------------------------------
+services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+#
+# can use path names specified in 'physics.' context w/o prefixing
+#
+physics.trigger_paths : [ gen_allpatrec_dem_dmm_reco_stnmaker ]
+physics.end_paths     : [  ]
+
+physics.producers.TrkPatRecDem.KalFit.ambiguityStrategy: [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2  ]
+physics.producers.TrkPatRecDmm.KalFit.ambiguityStrategy: [ 0  , 0  , 2  , 2   , 2    , 2   , 2  , 2  , 2  ]
 
 services.TFileService.fileName            : "mgun_stnmaker.hist"
 physics.filters.InitStntuple.histFileName : "mgun_stnmaker.stn" 
-
+#------------------------------------------------------------------------------
+# uncomment the next 2 lines if you want the DST file to be written out
+#-----------------------------------------------------------------------------
 # physics.out                               : [ detectorOutput ]
 # outputs.detectorOutput.fileName           : "mgun_stnmaker.root"
 #------------------------------------------------------------------------------

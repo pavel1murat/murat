@@ -1,7 +1,0 @@
-//
-#include "JobConfig/TDR/geom_MothersToHits.txt"
-
-// 2015-03-23 P.Murat: parallel setup
-string g4.physicsListName                   = "QGSP_BERT";
-int    ttracker.rotationPattern             =    4;
-double ttracker.oddStationRotation          = 30.0;

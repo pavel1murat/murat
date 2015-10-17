@@ -1,7 +1,7 @@
 # -*- mode: tcl -*-
 # conversion_01.fcl
 #
-# use QGSP_BERT - defined in murat/test/geom_01.txt
+# use QGSP_BERT - defined in murat/geom/geom_01.txt
 #
 # $Id: conversion_01_qgsp_bert.fcl,v 1.2 2015/01/23 22:11:31 murat Exp $
 # $Author: murat $
@@ -33,7 +33,7 @@ services : {
   RandomNumberGenerator : { }
 
   user : {
-    GeometryService        : { inputFile      : "murat/test/geom_01_qgsp_bert.txt"   }
+    GeometryService        : { inputFile      : "murat/geom/geom_01_qgsp_bert.txt"   }
     ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
     GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
     G4Helper               : { }

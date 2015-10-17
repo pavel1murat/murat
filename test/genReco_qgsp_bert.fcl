@@ -6,4 +6,4 @@
 # mu2e -c Analyses/test/genReco.fcl -n 1000 >| results/2014-12-19-Analyses_test_genReco.log &
 #------------------------------------------------------------------------------
 #include "Analyses/test/genReco.fcl"
-services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+services.user.GeometryService.inputFile : "murat/geom/geom_01_qgsp_bert.txt"

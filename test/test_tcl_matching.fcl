@@ -63,7 +63,7 @@ physics.producers.CaloMatching : { @table::TrackCaloMatchingA
 physics.trigger_paths : [ gen_allpatrec_reco_stnmaker ]
 physics.end_paths     : [  ]
 
-services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+services.user.GeometryService.inputFile : "murat/geom/geom_01_qgsp_bert.txt"
 
 services.TFileService.fileName                   : "test_tcl_matching.hist"
 physics.filters.InitStntuple.histFileName        : "test_tcl_matching.stn" 

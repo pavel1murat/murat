@@ -12,7 +12,7 @@ END_PROLOG
 
 process_name : CERecoStn
 
-# services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+# services.user.GeometryService.inputFile : "murat/geom/geom_01_qgsp_bert.txt"
 
 physics.producers.generate : { @table::StoppedMuonConversionGun }
 

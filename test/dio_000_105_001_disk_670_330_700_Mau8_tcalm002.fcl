@@ -36,7 +36,7 @@ services : {
   RandomNumberGenerator : { }
 
   user : {
-      GeometryService        : { inputFile      : "murat/test/geom_01_disk_670_330_700_Mau8.txt"        }
+      GeometryService        : { inputFile      : "murat/geom/geom_01_disk_670_330_700_Mau8.txt"        }
       ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
       GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
       G4Helper               : { }

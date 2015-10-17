@@ -11,7 +11,7 @@
 
 BEGIN_PROLOG
   pdgCode        : 11
-  meanBackground : -8
+  meanBackground : -6
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large
@@ -24,10 +24,9 @@ BEGIN_PROLOG
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
 END_PROLOG
 
-// #include "Stntuple/test/generate_mix_mergePatRec_stnmaker.fcl"
 #include "Stntuple/fcl/templates.fcl"
 
-process_name : EgunMixP3X4Stnmaker
+process_name : EgunMixP3X1Stnmaker
 
 source       : { module_type : EmptyEvent }
 
@@ -51,13 +50,14 @@ physics.filters.protonMixer.detail.mean  : @local::meanBackground
 physics.trigger_paths : [ genmix_allpatrec_dem_dmm_reco_stnmaker ]
 physics.end_paths     : [ out ]
 
-services.TFileService.fileName            : "egun_mixp3_x4_stnmaker.hist"
-physics.filters.InitStntuple.histFileName : "egun_mixp3_x4_stnmaker.stn"
+services.user.GeometryService.inputFile   : "murat/geom/geom_01_tdr.txt"
+services.TFileService.fileName            : "egun_mixp3_x3_stnmaker.hist"
+physics.filters.InitStntuple.histFileName : "egun_mixp3_x3_stnmaker.stn"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "egun_mixp3_x4_stnmaker.root"
+# outputs.detectorOutput.fileName           : "egun_mixp3_x3_stnmaker.root"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

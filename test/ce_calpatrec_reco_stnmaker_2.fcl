@@ -8,7 +8,7 @@
 
 process_name : CECalPatRecRecoStn
 
-services.user.GeometryService.inputFile : "murat/test/geom_01_qgsp_bert.txt"
+services.user.GeometryService.inputFile : "murat/geom/geom_01_qgsp_bert.txt"
 
 physics.producers.generate : { @table::StoppedMuonConversionGun }
 

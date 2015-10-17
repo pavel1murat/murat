@@ -1,0 +1,11 @@
+//
+
+#include "Mu2eG4/geom/geom_common_tdr.txt"
+#include "Mu2eG4/geom/g4_userOptions.txt"
+
+// string g4.physicsListName       = "QGSP_BERT";
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

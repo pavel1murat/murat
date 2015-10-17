@@ -28,6 +28,7 @@
 // 37  : TRK_26 LLHR_CAL > 5
 // 38  : EVT_7: events with E_CL > 60 and no CalPatRec tracks and TrkPatRec
 // 39  : trk_1: events with |SIN_TC| > 0.6
+// 40  : EVT_7: events with E_CL > 60 and no tracks at all
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -1254,6 +1255,13 @@ void TTrackAnaModule::FillHistograms() {
 	GetHeaderBlock()->Print(Form(" bit:038 cl_e = %10.3f, cl_time = %10.3f fNCalPatRec = 0",cl_e,cl0->Time()));
       }
     }
+
+    if (GetDebugBit(40)) {
+      if (fNTracks[0] <= 0) {
+	GetHeaderBlock()->Print(Form(" bit:040 cl_e = %10.3f, cl_time = %10.3f fNTracks[0] = %3i",
+				     cl_e,cl0->Time(),fNTracks[0]));
+      }
+    }
   }
 
   if      (disk_id == 0) FillEventHistograms(fHist.fEvent[8]);
@@ -1791,6 +1799,9 @@ int TTrackAnaModule::Event(int ientry) {
   }
 
   fNTracks[0] = fTrackBlock->NTracks();
+  if (fNTracks[0] == 0) fTrack = 0;
+  else                  fTrack = fTrackBlock->Track(0);
+
   fNClusters  = fClusterBlock->NClusters();
   fNCalHits   = fCalDataBlock->NHits();
   fNStrawHits = fStrawDataBlock->NHits();
@@ -1803,10 +1814,6 @@ int TTrackAnaModule::Event(int ientry) {
 
   fNGoodTracks    = 0;
   fNMatchedTracks = 0;
-
-  fNTracks[0] = fTrackBlock->NTracks();
-  if (fNTracks[0] == 0) fTrack = 0;
-  else                  fTrack = fTrackBlock->Track(0);
 
   int ntrk = fNTracks[0];
   int alg_mask;

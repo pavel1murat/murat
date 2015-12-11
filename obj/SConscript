@@ -109,10 +109,8 @@ for dict in list_of_dict_files:
 #------------------------------------------------------------------------------
 # done, build shared libs
 #------------------------------------------------------------------------------
-rootlibs = [ 'Core', 'Cint', 'RIO', 'Net', 'Hist', 'Spectrum', 'MLP', 'Graf', 'Graf3d', 'Gpad', 'Tree',
-             'Rint', 'Postscript', 'Matrix', 'Physics', 'MathCore', 'Thread', 'Gui', 'm', 'dl' ]
-
-libs     = [ ]
+rootlibs = env['ROOTLIBS']
+libs     = [ 'Stntuple_val' ]
 #------------------------------------------------------------------------------
 # build the shared library with non-module code
 #------------------------------------------------------------------------------

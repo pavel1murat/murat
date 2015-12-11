@@ -45,7 +45,9 @@ def gen_rootcint(source, target, env, for_signature):
 
 #    print ">>> cmd = %s"%cmd
     return cmd
-
+#------------------------------------------------------------------------------
+# new Builder
+#------------------------------------------------------------------------------
 my_rootcint = Builder(generator     = gen_rootcint,
                       single_source = 0,
                       suffix        = '.o',
@@ -58,67 +60,72 @@ env.Append(BUILDERS = {'RootCint' : my_rootcint})
 list_of_linkdef_files = Glob(subdir+'/dict/*_linkdef.h', strings=True)
 list_of_dict_files    = []
 
-for f in list_of_linkdef_files:
-    linkdef       = string.split(str(f),'/');
-    clname        = string.replace(linkdef[len(linkdef)-1],"_linkdef.h","");
-    include       = subdir+'/'+clname+'.hh';
-    
-    dict          = '#/tmp/src/'+d1+'/'+clname+'_dict.cxx';
-    list_of_dict_files.append(dict);
+def murat_petr():
+    for f in list_of_linkdef_files:
+        linkdef       = string.split(str(f),'/');
+        clname        = string.replace(linkdef[len(linkdef)-1],"_linkdef.h","");
+        include       = subdir+'/'+clname+'.hh';
 
-#    print "linkdef = ",linkdef
-#    print "include = ",include
+        dict          = '#/tmp/src/'+d1+'/'+clname+'_dict.cxx';
+        list_of_dict_files.append(dict);
 
-    env.RootCint(dict,[f,include]) 
+        #    print "linkdef = ",linkdef
+        #    print "include = ",include
+
+        env.RootCint(dict,[f,include]) 
 #------------------------------------------------------------------------------
 # Step3 : compile local .cc files
 #------------------------------------------------------------------------------
-list_of_skip_files = ['xx']
-list_of_cc_files   = [];
-list_of_obj_files  = [];
+    list_of_skip_files = ['xx']
+    list_of_cc_files   = [];
+    list_of_obj_files  = [];
 
-for f in Glob('*.cc', strings=True):
-    if (not f in list_of_skip_files):
-        list_of_cc_files.append(f)
+    for f in Glob('*.cc', strings=True):
+        if (not f in list_of_skip_files):
+            list_of_cc_files.append(f)
 
-for cc_file in list_of_cc_files:
-#    print ".cc file: "+cc_file
-    o_file = '#/tmp/src/'+d1+'/'+string.split(cc_file,'.')[0]+'.o'
-    list_of_obj_files.append(o_file);
-    env.SharedObject(o_file,cc_file)
+    for cc_file in list_of_cc_files:
+        #    print ".cc file: "+cc_file
+        o_file = '#/tmp/src/'+d1+'/'+string.split(cc_file,'.')[0]+'.o'
+        list_of_obj_files.append(o_file);
+        env.SharedObject(o_file,cc_file)
 #------------------------------------------------------------------------------
 # handle dictionaries
 #------------------------------------------------------------------------------
-list_of_o_cxx_files   = [];
+    list_of_o_cxx_files   = [];
 
-for dict in list_of_dict_files:
-    o_cxx_file = string.replace(dict,".cxx",".o");
-    list_of_o_cxx_files.append(o_cxx_file);
-    list_of_obj_files.append(o_cxx_file);
+    for dict in list_of_dict_files:
+        o_cxx_file = string.replace(dict,".cxx",".o");
+        list_of_o_cxx_files.append(o_cxx_file);
+        list_of_obj_files.append(o_cxx_file);
 
 # print " >>>> [Stntuple/obj] list_of_dict_files: ",list_of_dict_files
 #------------------------------------------------------------------------------
 # compile dictionaries
 # dictionary files are located under $WORK_DIR/tmp
 #------------------------------------------------------------------------------
-for dict in list_of_dict_files:
-#    print ">>> cxx_file: "+dict
-    obj_file = string.replace(dict,".cxx",".o");
-    include  = string.replace(dict,".cxx",".h");
-    env.SharedObject(obj_file,dict)
+    for dict in list_of_dict_files:
+    #    print ">>> cxx_file: "+dict
+        obj_file = string.replace(dict,".cxx",".o");
+        include  = string.replace(dict,".cxx",".h");
+        env.SharedObject(obj_file,dict)
 #------------------------------------------------------------------------------
 # done, build shared libs
 #------------------------------------------------------------------------------
-rootlibs = [ 'Core', 'Cint', 'RIO', 'Net', 'Hist', 'Spectrum', 'MLP', 'Graf', 'Graf3d', 'Gpad', 'Tree',
-             'Rint', 'Postscript', 'Matrix', 'Physics', 'MathCore', 'Thread', 'Gui', 'm', 'dl' ]
-
-libs     = [ ]
+    rootlibs = env['ROOTLIBS']
+    libs     = [ ]
 #------------------------------------------------------------------------------
 # build the shared library with non-module code
 #------------------------------------------------------------------------------
-lib_name=os.environ['MU2E_BASE_RELEASE']+'/lib/'+libname+'.so';
+    lib_name=os.environ['MU2E_BASE_RELEASE']+'/lib/'+libname+'.so';
 
-# print "Stntuple/obj list_of_obj_files:",list_of_obj_files
+    # print "Stntuple/obj list_of_obj_files:",list_of_obj_files
 
-env.SharedLibrary(lib_name,list_of_obj_files,LIBS = [libs, rootlibs])
-# print ">>>>> EXIT Stntuple/obj"
+    env.SharedLibrary(lib_name,list_of_obj_files,LIBS = [libs, rootlibs])
+    # print ">>>>> EXIT Stntuple/obj"
+
+#------------------------------------------------------------------------------
+# done, end of murat_pet()
+#------------------------------------------------------------------------------
+if (os.getenv("BUILD_PET") != None):
+    murat_petr()

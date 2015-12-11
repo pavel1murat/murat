@@ -112,7 +112,7 @@ for dict in list_of_dict_files:
 rootlibs = [ 'Core', 'Cint', 'RIO', 'Net', 'Hist', 'Spectrum', 'MLP', 'Graf', 'Graf3d', 'Gpad', 'Tree',
              'Rint', 'Postscript', 'Matrix', 'Physics', 'MathCore', 'Thread', 'Gui', 'm', 'dl' ]
 
-libs     = [ ]
+libs     = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop', 'Stntuple_obj', 'Stntuple_base' ]
 #------------------------------------------------------------------------------
 # build the shared library with non-module code
 #------------------------------------------------------------------------------

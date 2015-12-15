@@ -48,25 +48,25 @@ namespace mu2e {
 
     TTracker const& tracker(*GeomHandle<TTracker>());
 
-    int nstations = tracker.nDevices();
+    int nplanes = tracker.nPlanes();
 
-    printf("Tracker N(stations): %i\n", nstations);
+    printf("Tracker N(planes): %i\n", nplanes);
 
-    for ( auto const& dev : tracker.getDevices() ) {
+    for ( auto const& plane : tracker.getPlanes() ) {
 
     printf("----------------------------------------------------------------------------------------------------------------------\n");
     printf(" Chamber Sector Layer   StrawID  R(straw)  X(straw)   Y(straw)  Z(straw)   Rho(straw)    L/2       phi    wireNx   wireNy\n"); 
     printf("----------------------------------------------------------------------------------------------------------------------\n");
       //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
 
-      for ( auto const& sec : dev.getSectors() ) {
-	int nlayers = sec.nLayers();
+      for ( auto const& panel : plane.getPanels() ) {
+	int nlayers = panel.nLayers();
 
 	for (int il=0; il<nlayers; il++) {
 
-	  StrawId sid( sec.id(), il, 0 );
+	  StrawId sid( panel.id(), il, 0 );
 
-	  Straw const& straw = sec.getStraw(sid);
+	  Straw const& straw = panel.getStraw(sid);
 
 	  double x    = straw.getMidPoint().x();  
 	  double y    = straw.getMidPoint().y();  
@@ -80,7 +80,7 @@ namespace mu2e {
 	  double hl   = straw.getHalfLength();
 	  double r    = straw.getRadius();
 	  
-	  printf(" %5i %5i %5i",dev.id(), sec.id().getSector(), il);
+	  printf(" %5i %5i %5i",plane.id(), panel.id().getPanel(), il);
 
 	  double phi1 = phi/M_PI*180.;
 	  printf("  %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",

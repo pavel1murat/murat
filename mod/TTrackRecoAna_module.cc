@@ -140,8 +140,8 @@ namespace mu2e {
       hit   = (const mu2e::TrkStrawHit*) &(*it);
       straw = (mu2e::Straw*) &hit->straw();
       
-      sector [nhits] = straw->id().getSector();
-      device [nhits] = straw->id().getDevice();
+      sector [nhits] = straw->id().getPanel();
+      device [nhits] = straw->id().getPlane();
       layer  [nhits] = straw->id().getLayer();
       number [nhits] = straw->id().getStraw();
       iambig [nhits] = hit->ambig();

@@ -48,7 +48,7 @@
 
 static const char rcsid[] = "$Name:  $";
 
-void stntuple_get_version(char*& ver, char*& test);
+void stntuple_get_version(char* ver, char* test);
 namespace mu2e {
 //------------------------------------------------------------------------------
 // constructors
@@ -73,7 +73,7 @@ LLHRFilter::LLHRFilter(fhicl::ParameterSet const& PSet):
   , fMinTActive         (PSet.get<double>      ("minTActive"         , 700. ))
 {
 
-  char  *ver, *text;
+  char  ver[100], text[100];
   stntuple_get_version(ver,text);
 
   fVersion      = new TNamed(ver,text);

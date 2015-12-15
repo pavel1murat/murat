@@ -50,7 +50,7 @@ namespace mu2e {
 
     const TTracker*  tracker = handle.get();
 
-    int             nstations, nplanes, nfaces, npanels, nzlayers;
+    int             nstations, nplanes, iface, npanels, nlayers;
     //    int             nstraws;
 
     const Station*  station;
@@ -79,49 +79,43 @@ namespace mu2e {
       for (int iplane=0; iplane<nplanes; iplane++) {
 	const Plane* plane = &station->getPlane(iplane);
 
-	nfaces = plane->nFaces();
+	npanels = plane->nPanels();
 
-	for (int iface=0; iface<nfaces; iface++) {
+	for (int ipanel=0; ipanel<npanels; ipanel++) {
 
-	  const Face* face = &plane->getFace(iface);
+	  const Panel* panel = &plane->getPanel(ipanel);
 
-	  npanels = face->nPanels();
+	  iface   = ipanel%2;
+	  nlayers = panel->nLayers();
 
-	  for (int ipanel=0; ipanel<npanels; ipanel++) {
-
-	    const Panel* panel = &face->getPanel(ipanel);
-
-	    nzlayers = panel->nZLayers();
-
-	    for (int il=0; il<nzlayers; il++) {
-	      const ZLayer* zl = &panel->getZLayer(il);
+	  for (int il=0; il<nlayers; il++) {
+	    const Layer* lay = &panel->getLayer(il);
 	      
-	      // nstraws = zl->nStraws();
+	    // nstraws = zl->nStraws();
 
-	      // 	      for (int is=0; is<nstraws; is++) {
-	      int is = 0;
-	      straw       = zl->getStrawptr(is);
-	      sid         = straw->id();
-
-	      double x    = straw->getMidPoint().x();  
-	      double y    = straw->getMidPoint().y();  
-	      double rho  = sqrt(x*x+y*y);
-
-	      double phi  = straw->direction().phi();
-	      double nx   = straw->direction().x();
-	      double ny   = straw->direction().y();
-		
-	      double z    = straw->getMidPoint().z();  
-	      double hl   = straw->getHalfLength();
-	      double r    = straw->getRadius();
+	    // 	      for (int is=0; is<nstraws; is++) {
+	    int is = 0;
+	    straw       = &lay->getStraw(is);
+	    sid         = straw->id();
 	    
-	      double phi1 = phi/M_PI*180.;
-	      printf("  %3i %6i %5i %4i %5i %5i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
-		     ist,iplane,iface,ipanel,
-		     sid.getDevice(),sid.getSector(),
-		     il,is, straw->index().asInt(),r,x,y,z,rho, hl,phi1,nx,ny);
-	      //	    }
-	    }
+	    double x    = straw->getMidPoint().x();  
+	    double y    = straw->getMidPoint().y();  
+	    double rho  = sqrt(x*x+y*y);
+
+	    double phi  = straw->direction().phi();
+	    double nx   = straw->direction().x();
+	    double ny   = straw->direction().y();
+	    
+	    double z    = straw->getMidPoint().z();  
+	    double hl   = straw->getHalfLength();
+	    double r    = straw->getRadius();
+	    
+	    double phi1 = phi/M_PI*180.;
+	    printf("  %3i %6i %5i %4i %5i %5i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
+		   ist,iplane,iface, ipanel,
+		   sid.getPlane(),sid.getStraw(),
+		   il,is, straw->index().asInt(),r,x,y,z,rho, hl,phi1,nx,ny);
+	    //	    }
 	  }
 	}
       }

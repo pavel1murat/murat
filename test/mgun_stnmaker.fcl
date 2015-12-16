@@ -8,7 +8,8 @@
 # muStops must be commented out for grid production.
 BEGIN_PROLOG
 #  muStops    : [ @local::mergedMuonStops ]
-  pdgCode    : 11
+  pdgCode    : 13
+  bgHitFiles : @nil
 END_PROLOG
 
 #include "minimalMessageService.fcl"

@@ -9,6 +9,7 @@
 BEGIN_PROLOG
 #  muStops    : [ @local::mergedMuonStops ]
   pdgCode    : 11
+  bgHitFiles : @nil
 END_PROLOG
 
 #include "minimalMessageService.fcl"

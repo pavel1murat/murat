@@ -19,7 +19,7 @@
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
 
 #include "BTrk/KalmanTrack/KalRep.hh"
-#include "KalmanTests/inc/TrkStrawHit.hh"
+#include "TrkReco/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 #include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"
 
@@ -438,7 +438,7 @@ namespace mu2e {
 // optimize acceptance - use all reconstructed tracks
 // extrapolate track to a given distance - 
 //-----------------------------------------------------------------------------
-      slast      = krep->lastHit ()->kalHit()->hitOnTrack()->fltLen();
+      slast      = krep->lastHit ()->kalHit()->hit()->fltLen();
       traj       = &krep->traj();
 
       for (int j=0; j<50; j++) {

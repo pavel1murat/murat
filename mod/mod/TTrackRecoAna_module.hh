@@ -13,7 +13,7 @@
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
-#include "KalmanTests/inc/TrkStrawHit.hh"
+#include "TrkReco/inc/TrkStrawHit.hh"
 
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/alg/TStnTrackID.hh"

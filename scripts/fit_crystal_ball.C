@@ -116,7 +116,7 @@ void cb_fit(TH1F* Hist, TF1* F, double XMin, double XMax) {
 //-----------------------------------------------------------------------------
 void create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 
-  F = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,7);
+  F = new TF1("f_crystal_ball",f_crystal_ball_save,XMin,XMax,7);
 
   F->SetParName(0,"anorm");
   F->SetParName(1,"mean");
@@ -141,7 +141,8 @@ void fit_crystal_ball(const char* File, const char* Module, const char* Hist,
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
+  //  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
+  cb_init_parameters (f,anorm,X0,0.3,1,1.,0.01,0.5);
   cb_fit             (h,f,XMin,XMax);
 }
 

@@ -38,7 +38,8 @@
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
 
 #include "BTrk/KalmanTrack/KalRep.hh"
-#include "KalmanTests/inc/TrkStrawHit.hh"
+#include "BTrk/ProbTools/ChisqConsistency.hh"
+#include "TrkReco/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 #include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"
 
@@ -616,10 +617,10 @@ namespace mu2e {
     Hist->fTanDip->Fill(trk->helix(0).tanDip());
 
     const mu2e::TrkStrawHit* hit;
-    const TrkHotList*        hot_list = trk->hotList();
+    const TrkHitVector*      hits = &trk->hitVector();
 
     double chi2c(0), dr;
-    for(TrkHotList::hot_iterator it=hot_list->begin(); it<hot_list->end(); it++) {
+    for(auto it=hits->begin(); it<hits->end(); it++) {
       hit = (const mu2e::TrkStrawHit*) &(*it);
       dr  = hit->resid();
       Hist->fResid->Fill(dr);

@@ -49,7 +49,7 @@
 #include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
-#include "BTrk/TrkBase/TrkHotList.hh"
+// #include "BTrk/TrkBase/TrkHotList.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
@@ -59,10 +59,12 @@
 #include "RecoDataProducts/inc/StrawHitPositionCollection.hh"
 #include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
 
-#include "KalmanTests/inc/TrkStrawHit.hh"
+#include "TrkReco/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
+
+#include "Mu2eBTrk/inc/Mu2eDetectorModel.hh"
 
 // ROOT includes
 // #include "TApplication.h"
@@ -173,6 +175,8 @@ namespace mu2e {
   void TrackRecoCheck::Debug_11(art::Event* Evt) {
     const char* oname = "TrackRecoCheck::Debug_11";
 
+    GeomHandle<Mu2eDetectorModel> detmodel;
+
     art::Handle<mu2e::KalRepPtrCollection> krepsHandle;
 
     art::Selector  selector(art::ProcessNameSelector(fProcessName)         && 
@@ -196,7 +200,7 @@ namespace mu2e {
     const KalRep             *trk;
     HepPoint                 tpos;
     Hep3Vector               hpos;
-    const TrkHotList*        hot_list;
+    const TrkHitVector*      hot_list;
     const mu2e::TrkStrawHit* hit;
     const mu2e::StrawHit*    sh;
 
@@ -216,15 +220,17 @@ namespace mu2e {
 //       double fit_consistency = trk->chisqConsistency().consistency();
 //       int q        = trk->charge();
 
-      hot_list = trk->hotList();
+      hot_list = &trk->hitVector();
 
-      for(TrkHotList::hot_iterator it=hot_list->begin(); it<hot_list->end(); it++) {
+      for(auto it=hot_list->begin(); it!=hot_list->end(); it++) {
       // TrkStrawHit inherits from TrkHitOnTrk
 
 	hit  = (const mu2e::TrkStrawHit*) &(*it);
 	sh   = &hit->strawHit();
 					// gasPath() returns the half-path
-	path = 2.*hit->gasPath(hit->driftRadius(),hit->trkTraj()->direction( hit->fltLen()));
+	const DetStrawElem* strawelem = detmodel->strawElem(hit->straw());
+
+	path = 2.*strawelem->gasPath(hit->driftRadius(),hit->trkTraj()->direction( hit->fltLen()));
 	ehit = sh->energyDep();
 
 	//	const mu2e::StrawHit* sh = &hit->strawHit();

@@ -18,6 +18,9 @@
 #include "BTrk/TrkBase/TrkHelixUtils.hh"
 #include "BTrk/TrkBase/HelixParams.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
+#include "BTrk/ProbTools/ChisqConsistency.hh"
+#include "BTrk/BbrGeom/BbrVectorErr.hh"
+
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
 #include "RecoDataProducts/inc/StrawHitCollection.hh"
@@ -593,19 +596,19 @@ namespace mu2e {
       // get the fit at the first hit
       //      CLHEP::Hep3Vector entpos = det->toDetector(vdg->getGlobal(VirtualDetectorId::TT_FrontPA));
       //      double zent           = entpos.z();
-      double firsthitfltlen = trk->firstHit()->kalHit()->hitOnTrack()->fltLen() - 10;
-      double lasthitfltlen  = trk->lastHit ()->kalHit()->hitOnTrack()->fltLen() - 10;
+      double firsthitfltlen = trk->firstHit()->kalHit()->hit()->fltLen() - 10;
+      double lasthitfltlen  = trk->lastHit ()->kalHit()->hit()->fltLen() - 10;
       double entlen         = std::min(firsthitfltlen,lasthitfltlen);
 
       //      TrkHelixUtils::findZFltlen(trk->traj(),zent,entlen,0.1); 
 
       CLHEP::Hep3Vector fitmom = trk->momentum(entlen);
       //      double     ptot   = fitmom.mag();
-      Hep3Vector momdir = fitmom.unit();
+      CLHEP::Hep3Vector momdir = fitmom.unit();
 
       BbrVectorErr momerr = trk->momentumErr(entlen);
 
-      HepVector momvec(3);
+      CLHEP::HepVector momvec(3);
 
       for(int icor=0;icor<3;icor++) momvec[icor] = momdir[icor];
 

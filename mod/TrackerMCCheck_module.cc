@@ -51,7 +51,7 @@
 #include "DataProducts/inc/VirtualDetectorId.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
-#include "BTrk/TrkBase/TrkHotList.hh"
+// #include "BTrk/TrkBase/TrkHotList.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
@@ -61,7 +61,7 @@
 #include "RecoDataProducts/inc/StrawHitPositionCollection.hh"
 #include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
 
-#include "KalmanTests/inc/TrkStrawHit.hh"
+#include "TrkReco/inc/TrkStrawHit.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
 

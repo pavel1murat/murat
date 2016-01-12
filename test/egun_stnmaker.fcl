@@ -42,8 +42,8 @@ physics.filters.InitStntuple.histFileName : "egun_stnmaker.stn"
 #------------------------------------------------------------------------------
 # uncomment the next 2 lines if you want the DST file to be written out
 #-----------------------------------------------------------------------------
-# physics.out                               : [ detectorOutput ]
-# outputs.detectorOutput.SelectEvents       : { SelectEvents : [ gen_allpatrec_dem_dmm_reco_stnmaker ] }
+physics.out                               : [ detectorOutput ]
+outputs.detectorOutput.SelectEvents       : { SelectEvents : [ gen_allpatrec_dem_dmm_reco_stnmaker ] }
 outputs.detectorOutput.fileName           : "egun_stnmaker.root"
 #------------------------------------------------------------------------------
 # debugging

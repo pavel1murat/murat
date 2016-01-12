@@ -39,9 +39,11 @@
 #include "MCDataProducts/inc/StrawHitMCTruth.hh"
 #include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 
+#include "BTrk/BbrGeom/BbrVectorErr.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
+#include "BTrk/ProbTools/ChisqConsistency.hh"
 
-#include "KalmanTests/inc/TrkStrawHit.hh"
+#include "TrkReco/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/TAnaDump.hh"
@@ -129,14 +131,14 @@ namespace mu2e {
     int      dn, nhits(0);
     double   hitres, hiterr;
    
-    const TrkHotList* hot_list = Track->hotList();
+    const TrkHitVector* hot_list = &Track->hitVector();
 //-----------------------------------------------------------------------------
 // count number of hits on the track
 //-----------------------------------------------------------------------------
     const mu2e::TrkStrawHit* hit;
     mu2e::Straw*             straw;
 
-    for(TrkHotList::hot_iterator it=hot_list->begin(); it<hot_list->end(); it++) {
+    for (auto it=hot_list->begin(); it<hot_list->end(); it++) {
       hit   = (const mu2e::TrkStrawHit*) &(*it);
       straw = (mu2e::Straw*) &hit->straw();
       
@@ -160,15 +162,15 @@ namespace mu2e {
     float costh      = Track->momentum().cosTheta();
     float fitcons    = Track->chisqConsistency().consistency();
 
-    float h1_fltlen  = Track->firstHit()->kalHit()->hitOnTrack()->fltLen() - 10;
-    float hn_fltlen  = Track->lastHit ()->kalHit()->hitOnTrack()->fltLen() - 10;
+    float h1_fltlen  = Track->firstHit()->kalHit()->hit()->fltLen() - 10;
+    float hn_fltlen  = Track->lastHit ()->kalHit()->hit()->fltLen() - 10;
     float entlen     = std::min(h1_fltlen,hn_fltlen);
     
     BbrVectorErr      momerr = Track->momentumErr(entlen);
     CLHEP::Hep3Vector fitmom = Track->momentum(entlen);
     CLHEP::Hep3Vector momdir = fitmom.unit();
     
-    HepVector momvec(3);
+    CLHEP::HepVector momvec(3);
     for (int i=0; i<3; i++) momvec[i] = momdir[i];
 
     float fitmom_err = sqrt(momerr.covMatrix().similarity(momvec));

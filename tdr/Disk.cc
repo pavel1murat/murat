@@ -170,6 +170,18 @@ void Disk::GetPosition(int I, TVector2* Pos) {
 }
 
 //-----------------------------------------------------------------------------
+double Disk::GetRadius(int I) {
+  printf(">>> Disk::GetRadius(int) is not defined yet. BAIL OUT\n");
+  return -1.;
+}
+
+//-----------------------------------------------------------------------------
+double Disk::GetRadius(HexIndex* Index) {
+  printf(">>> Disk::GetRadius(HexIndex*) is not defined yet. BAIL OUT\n");
+  return -1.;
+}
+
+//-----------------------------------------------------------------------------
 int Disk::IsInside(HexIndex* Index, double* Fraction) {
 
   int       inside, nvin(0), nbelow(0), nabove(0);

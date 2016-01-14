@@ -621,7 +621,7 @@ namespace mu2e {
 
     double chi2c(0), dr;
     for(auto it=hits->begin(); it<hits->end(); it++) {
-      hit = (const mu2e::TrkStrawHit*) &(*it);
+      hit = (const mu2e::TrkStrawHit*) (*it);
       dr  = hit->resid();
       Hist->fResid->Fill(dr);
 					// normalize by 100 microns

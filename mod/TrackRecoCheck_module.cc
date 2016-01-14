@@ -225,7 +225,7 @@ namespace mu2e {
       for(auto it=hot_list->begin(); it!=hot_list->end(); it++) {
       // TrkStrawHit inherits from TrkHitOnTrk
 
-	hit  = (const mu2e::TrkStrawHit*) &(*it);
+	hit  = (const mu2e::TrkStrawHit*) (*it);
 	sh   = &hit->strawHit();
 					// gasPath() returns the half-path
 	const DetStrawElem* strawelem = detmodel->strawElem(hit->straw());

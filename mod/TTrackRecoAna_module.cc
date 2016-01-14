@@ -139,7 +139,7 @@ namespace mu2e {
     mu2e::Straw*             straw;
 
     for (auto it=hot_list->begin(); it<hot_list->end(); it++) {
-      hit   = (const mu2e::TrkStrawHit*) &(*it);
+      hit   = (const mu2e::TrkStrawHit*) (*it);
       straw = (mu2e::Straw*) &hit->straw();
       
       sector [nhits] = straw->id().getPanel();

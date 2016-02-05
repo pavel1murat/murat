@@ -51,6 +51,8 @@ public:
     double  fPath;
 
     double  fSinTC;			// angle between the cluster and the track
+    double  fDrTC;
+    double  fSInt;
   };
 //-----------------------------------------------------------------------------
 //  histograms
@@ -230,6 +232,8 @@ public:
     TH1F*    fFrE2;
 
     TH1F*    fSinTC;			// sin(track-cluster angle)
+    TH1F*    fDrTC;                     // deltaR(cluster-track)
+    TH1F*    fSInt;                     // calculated interaction length
   };
 
   struct GenpHist_t {

@@ -68,13 +68,14 @@ public:
     TH1F*    fNStrawHits[2];
     TH1F*    fNGoodSH;
     TH1F*    fDtClT;
-    TH1F*    fEMax;			// energy of the first reco cluster
     TH1F*    fDtClS;
     TH1F*    fSHTime;
     TH1F*    fNHyp;
     TH1F*    fBestHyp[2];		// [0]: by chi2, [1]: by fit consistency
     TH1F*    fNGenp;                    // N(particles in GENP block)
-
+    TH1F*    fNClusters;
+    TH1F*    fEClMax;			// energy of the first (highest) reconstructed cluster
+    TH1F*    fTClMax;			// time   of the first (highest) reconstructed cluster
   };
 
   struct TrackHist_t {
@@ -162,7 +163,7 @@ public:
   TSimParticle*     fSimp;
   double            fEleE;		// electron energy
 
-  int               fNTracks[2];
+  int               fNTracks[2];        // 0:TrkPatRec 1:CalPatRec
   int               fNGoodTracks[2];
   int               fNGenp;		// N(generated particles)
 
@@ -180,7 +181,8 @@ public:
 
   TStnCluster*      fCluster;
   int               fNClusters;
-  double            fEclMax;
+  double            fEClMax;
+  double            fTClMax;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

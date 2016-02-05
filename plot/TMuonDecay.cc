@@ -347,7 +347,7 @@ void TMuonDecay::plot_muon_spectrum_lo(const char* Opt) {
 //-----------------------------------------------------------------------------
 void TMuonDecay::plot_muon_spectrum_nlo(const char* Name, const char* Opt) {
 
-  TF1* f_nlo; 
+  TF1* f_nlo(NULL); 
   char name[100];
 
   sprintf(name,"f_muon_spectrum_nlo_name_%s",Name);

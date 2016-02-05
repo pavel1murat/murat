@@ -57,8 +57,8 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
             export DSID=${OPTARG}
 	    export DATASET=/grid/fermiapp/mu2e/personal/murat/$DSID
 	    if [ -d $DATASET ]      ; then 
-		export DATASET=$DATASET/$DSID.filelist ; 
 		export DATASET_DIR=$DATASET
+		export     DATASET=$DATASET_DIR/$DSID.filelist ; 
 	    else
 		export DATASET_DIR=`dirname $DATASET`
 	    fi

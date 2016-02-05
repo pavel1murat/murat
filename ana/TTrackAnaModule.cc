@@ -248,6 +248,8 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fFrE2   ,"fre2"   ,Form("%s: (E1+E2)/Etot"  ,Folder),200, 0,  1,Folder);
 
   HBook1F(Hist->fSinTC  ,"sintc"  ,Form("%s: sin(T^C)"      ,Folder),200, -1, 1,Folder);
+  HBook1F(Hist->fDrTC   ,"drtc"   ,Form("%s: DeltaR(T^C)"   ,Folder),200, -200, 200,Folder);
+  HBook1F(Hist->fSInt   ,"sint"   ,Form("%s: SInt"          ,Folder),200, -500, 500,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -1117,6 +1119,11 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fFrE2->Fill(fre2);
 
   Hist->fSinTC->Fill(tp->fSinTC);
+
+
+
+  Hist->fDrTC->Fill(tp->fDrTC);
+  Hist->fSInt->Fill(tp->fSInt);
 }
 
 
@@ -1886,6 +1893,8 @@ int TTrackAnaModule::Event(int ientry) {
     tp->fChi2T     = -1.e6;
     tp->fPath      = -1.e6;
     tp->fSinTC     = -1.e6;
+    tp->fDrTC      = -1.e6;
+    tp->fSInt      = -1.e6;
 
     if (vr) {
       tp->fEcl = vr->fEnergy;
@@ -1914,6 +1923,8 @@ int TTrackAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
       TStnCluster* cl = fClusterBlock->Cluster(vr->fClusterIndex);
       tp->fSinTC = nx*cl->fNy-ny*cl->fNx;
+      tp->fDrTC  = vr->fDr;
+      tp->fSInt  = vr->fSInt;
     }
 
     if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {

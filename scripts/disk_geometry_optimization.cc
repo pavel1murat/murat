@@ -166,8 +166,8 @@ int crystals(double RMin = 340, double RMax = 660, double CrystalSize = 34., dou
 
       x0 = side*ix;
       if (Staggered != 0) {
-	if (iy%2 == 0) x0 += side/4;
-	else           x0 -= side/4; 
+	if (iy%2 != 0) x0 += 0.;      // side/4;
+	else           x0 -= side/2.; // side/4; 
       }
       y0 = side*iy;
 
@@ -276,5 +276,13 @@ void scan_rmax(double RMin, double RMax1, double RMax2, double CrystalSize, doub
 
   for (double r=RMax1; r<=RMax2; r+=1.) {
     crystals(RMin, r,CrystalSize,Wrap,Staggered,0);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void scan_crystal_size(double RMin, double RMax, double Wrap, int Staggered) {
+
+  for (double size=30.; size<35; size+=0.1) {
+    crystals(RMin,RMax,size,Wrap,Staggered,0);
   }
 }

@@ -1,4 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
+// Validation of CalPatREc: compare CalPatRec tracks to TrkPatRec ones
+//
 // use of tmp:
 //
 // use of debug bits: bits 0-2 are reserved
@@ -6,13 +8,13 @@
 //  1  : passed events
 //  2  : rejected events
 //  3  : events with CalPatRec tracks with DPF > 5
-//  4  : events with TrkPatRec track and a cluster, but with no CalPatRec track
+//  4  : events with TrkPatRec track and a 60+ MeV cluster, but with no CalPatRec track
 //  5  : events with CalPatRec tracks with P > 106
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 //  7  : events with N(set "C" CalPatRec tracks)  > 0
 //  8  : events with CalPatRec tracks with P > 105
 //
-//
+// call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -132,11 +134,13 @@ void TTrackCompModule::BookEventHistograms(EventHist_t* Hist, const char* Folder
   HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
   HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
   HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
-  HBook1F(Hist->fEMax      ,"emax"     ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
   HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
   HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
   HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
   HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
+  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: N(Clusters)"                     ,Folder),100,0,100,Folder);
+  HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
+  HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -174,6 +178,7 @@ void TTrackCompModule::BookHistograms() {
   for (int i=0; i<kNEventHistSets; i++) book_event_histset[i] = 0;
 
   book_event_histset[ 0] = 1;		// all events
+  book_event_histset[ 1] = 1;		// events with EclMax > 60 and TClMax > 550
 
   for (int i=0; i<kNEventHistSets; i++) {
     if (book_event_histset[i] != 0) {
@@ -207,13 +212,16 @@ void TTrackCompModule::BookHistograms() {
   int book_track_histset[kNTrackHistSets];
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
-  book_track_histset[  0] = 1;		// TrkPatRec all tracks 
+  book_track_histset[  0] = 1;		// TrkPatRec all  tracks 
   book_track_histset[  1] = 1;		// TrkPatRec SetC tracks 
   book_track_histset[  2] = 1;		// TrkPatRec-not-CalPatRec SetC tracks 
   book_track_histset[  3] = 1;		// TrkPatRec Set C2025 tracks 
   book_track_histset[  4] = 1;		// TrkPatRec-not-CalPatRec Set C2025 tracks 
   book_track_histset[  5] = 1;		// TrkPatRec Set C30 tracks 
   book_track_histset[  6] = 1;		// TrkPatRec-not-CalPatRec Set C30 tracks 
+
+  book_track_histset[ 10] = 1;          // TrkPatRec all  tracks events Ecl > 60
+  book_track_histset[ 11] = 1;          // TrkPatRec SetC tracks events Ecl > 60
 
   book_track_histset[100] = 1;		// CalPatRec all tracks 
   book_track_histset[101] = 1;		// CalPatRec SetC tracks
@@ -222,6 +230,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[104] = 1;		// CalPatRec-not-TrkPatRec SetC2025 tracks 
   book_track_histset[105] = 1;		// CalPatRec Set C30 tracks 
   book_track_histset[106] = 1;		// CalPatRec-not-TrkPatRec Set C30 tracks 
+
+  book_track_histset[110] = 1;          // CalPatRec all  tracks events Ecl > 60
+  book_track_histset[111] = 1;          // CalPatRec SetC tracks events Ecl > 60
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -259,6 +270,10 @@ void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
 
   Hist->fNTracks[0]->Fill(fNTracks[0]);
   Hist->fNTracks[1]->Fill(fNTracks[1]);
+
+  Hist->fNClusters->Fill(fNClusters);
+  Hist->fEClMax->Fill(fEClMax);
+  Hist->fTClMax->Fill(fTClMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -364,6 +379,10 @@ void TTrackCompModule::FillHistograms() {
 // event histograms
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
+
+  if ((fEClMax > 60.) && (fTClMax > 550)) {
+    FillEventHistograms(fHist.fEvent[1]);
+  }
 //-----------------------------------------------------------------------------
 // Simp histograms
 //-----------------------------------------------------------------------------
@@ -403,6 +422,16 @@ void TTrackCompModule::FillHistograms() {
       if (tp->fIDWord_30 == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp);
 	n_setc30_tracks[i] += 1;
+      }
+//-----------------------------------------------------------------------------
+// IHIST+10: SetC30 selection
+//-----------------------------------------------------------------------------
+      if (fEClMax > 60.) {
+	FillTrackHistograms(fHist.fTrack[ihist+10],trk,tp);
+
+	if (trk->fIDWord == 0) {
+	  FillTrackHistograms(fHist.fTrack[ihist+11],trk,tp);
+	}
       }
     }
   }
@@ -487,10 +516,12 @@ int TTrackCompModule::Event(int ientry) {
   fNClusters = fClusterBlock->NClusters();
 
   fCluster = NULL;
-  fEclMax  = -1;
+  fEClMax  = -1;
+  fTClMax  = -1;
   if (fNClusters > 0) {
     fCluster = fClusterBlock->Cluster(0);
-    fEclMax  = fCluster->Energy();
+    fEClMax  = fCluster->Energy();
+    fTClMax  = fCluster->Time  ();
   }
 
   TGenParticle* genp;
@@ -622,9 +653,9 @@ void TTrackCompModule::Debug() {
 //-----------------------------------------------------------------------------
   if (GetDebugBit(4) == 1) {
     if ((fNTracks[0] > 0) && (fNClusters > 0) && (fNTracks[1] == 0)) {
-      if (fEclMax > 60.) {
+      if (fEClMax > 60.) {
 	sprintf(text,"TTrackCompModule bit004: N(TPR) = %i N(CPR) = %i E(cl) = %10.3f",
-		fNTracks[0],fNTracks[1],fEclMax);
+		fNTracks[0],fNTracks[1],fEClMax);
 	GetHeaderBlock()->Print(text);
       }
     }

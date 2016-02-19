@@ -1,0 +1,7 @@
+# -*- mode: tcl -*-
+
+* min_chi2_ratio_scan:
+
+	scan of one of the DoubletAmbigResolver parameters, choosing the best solution
+
+        if (chi2_best/chi2_next < min_chi2R) the best solution is considered reliable

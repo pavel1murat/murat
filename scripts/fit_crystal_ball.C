@@ -142,7 +142,7 @@ void fit_crystal_ball(const char* File, const char* Module, const char* Hist,
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
   //  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
-  cb_init_parameters (f,anorm,X0,0.3,1,1.,0.01,0.5);
+  cb_init_parameters (f,anorm,X0,0.140,3,2.,0.05,1.);
   cb_fit             (h,f,XMin,XMax);
 }
 
@@ -154,7 +154,7 @@ void fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 
   TF1*  f;
   create_fit_function(f,X0,XMin,XMax);
-  cb_init_parameters (f,anorm,X0,0.15,3.,1.,0.01,0.5);
+  cb_init_parameters (f,anorm,X0,0.120,2.,1.,0.01,0.5);
   cb_fit             (h,f,XMin,XMax);
 }
 

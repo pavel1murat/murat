@@ -5,7 +5,6 @@
 
 def_name track_001("track_ana");
 def_name track_002("val_cpr");
-def_name track_003("track_debug");
 def_name track_004("cal_ana");
 def_name track_005("track_ana_tandip_12");
 def_name track_006("track_debug_tandip_12");
@@ -15,13 +14,16 @@ def_name track_008("track_comp");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  track_ana(int PdgCode = 11, int GeneratorCode = 2) {
+void  track_ana(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
   m_trk->SetPdgCode      (PdgCode);
   m_trk->SetGeneratorCode(GeneratorCode);
+  if (DebugBit >= 0) {
+    m_trk->SetDebugBit(DebugBit,1);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -52,17 +54,6 @@ void  val_cpr(int Bit = -1) {
   if (Bit != -1) {
     m_vcpr->SetDebugBit(Bit,1);
   }
-}
-
-
-void  track_debug(int Bit, int PdgCode = 11, int GeneratorCode = 2) {
-//-----------------------------------------------------------------------------
-// configure analysis module
-//-----------------------------------------------------------------------------
-  m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
-  m_trk->SetDebugBit(Bit,1);
-  m_trk->SetPdgCode      (PdgCode);
-  m_trk->SetGeneratorCode(GeneratorCode);
 }
 
 

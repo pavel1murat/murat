@@ -2042,7 +2042,7 @@ void TTrackAnaModule::Debug() {
   if (GetDebugBit(5) == 1) {
     int ntrk = fTrackBlock->NTracks();
     if (ntrk > 1) {
-      GetHeaderBlock()->Print(Form("NTracks = %i5",ntrk));
+      GetHeaderBlock()->Print(Form("NTracks = %5i",ntrk));
     }
   }
 }

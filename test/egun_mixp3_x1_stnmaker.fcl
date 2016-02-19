@@ -11,7 +11,7 @@
 
 BEGIN_PROLOG
   pdgCode        : 11
-  meanBackground : -2
+  meanBackground : -1
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large
@@ -22,6 +22,7 @@ BEGIN_PROLOG
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 # bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+  bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
 END_PROLOG
 
 // #include "Stntuple/test/generate_mix_mergePatRec_stnmaker.fcl"
@@ -32,7 +33,7 @@ process_name : EgunMixP3X1Stnmaker
 source       : { module_type : EmptyEvent }
 
 physics.producers.generate : { @table::StoppedParticleReactionGun 
-    physics : {
+    physics : {/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/
 	pdgId            : @local::pdgCode
 	elow             : 105.0010
  	ehi              : 105.0015

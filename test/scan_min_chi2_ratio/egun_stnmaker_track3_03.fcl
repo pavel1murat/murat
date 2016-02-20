@@ -10,12 +10,16 @@ BEGIN_PROLOG
 #  muStops    : [ @local::mergedMuonStops ]
   pdgCode      : 11
   bgHitFiles   : @nil
-  minChi2Ratio : 0.2
+  minChi2Ratio : 0.3 
 END_PROLOG
 
 #include "minimalMessageService.fcl"
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
+
+BEGIN_PROLOG
+  DoubletAmbigResolver.minChi2Ratio : 0.5
+END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
 

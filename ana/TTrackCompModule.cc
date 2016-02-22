@@ -141,6 +141,7 @@ void TTrackCompModule::BookEventHistograms(EventHist_t* Hist, const char* Folder
   HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: N(Clusters)"                     ,Folder),100,0,100,Folder);
   HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
   HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
+  HBook1F(Hist->fDp        ,"dp"       ,Form("%s: P(TPR)-P(CPR)"                   ,Folder),500,-2.5,2.5,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -219,6 +220,7 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[  4] = 1;		// TrkPatRec-not-CalPatRec Set C2025 tracks 
   book_track_histset[  5] = 1;		// TrkPatRec Set C30 tracks 
   book_track_histset[  6] = 1;		// TrkPatRec-not-CalPatRec Set C30 tracks 
+  book_track_histset[  7] = 1;		// TrkPatRec SetC no fitCons&momErr&t0Err tracks 
 
   book_track_histset[ 10] = 1;          // TrkPatRec all  tracks events Ecl > 60
   book_track_histset[ 11] = 1;          // TrkPatRec SetC tracks events Ecl > 60
@@ -230,6 +232,7 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[104] = 1;		// CalPatRec-not-TrkPatRec SetC2025 tracks 
   book_track_histset[105] = 1;		// CalPatRec Set C30 tracks 
   book_track_histset[106] = 1;		// CalPatRec-not-TrkPatRec Set C30 tracks 
+  book_track_histset[107] = 1;		// CalPatRec SetC no fitCons&momErr&t0Err tracks 
 
   book_track_histset[110] = 1;          // CalPatRec all  tracks events Ecl > 60
   book_track_histset[111] = 1;          // CalPatRec SetC tracks events Ecl > 60
@@ -255,7 +258,6 @@ void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
   fParticle->Momentum(mom);
 
   p      = mom.P();
-
   cos_th = mom.Pz()/p;
 
   xv = fParticle->Vx()+3904.;
@@ -274,6 +276,17 @@ void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
   Hist->fNClusters->Fill(fNClusters);
   Hist->fEClMax->Fill(fEClMax);
   Hist->fTClMax->Fill(fTClMax);
+
+  double dp(1.e6);
+
+  if ((fNTracks[0] == 1) && (fNTracks[1] == 1)) {
+    TStnTrack* tpr = fTrackBlock[0]->Track(0);
+    TStnTrack* cpr = fTrackBlock[1]->Track(0);
+
+    dp = tpr->fP-cpr->fP;
+  }
+					// momentum difference
+  Hist->fDp->Fill(dp);
 }
 
 //-----------------------------------------------------------------------------
@@ -369,7 +382,8 @@ int TTrackCompModule::BeginRun() {
   return 0;
 }
 
-//_____________________________________________________________________________
+//_____________________________________________________________________________// SET 102,104,106: CalPatRec-not-TrkPatRec tracks 
+
 void TTrackCompModule::FillHistograms() {
 
   TStnTrack*   trk;
@@ -390,7 +404,7 @@ void TTrackCompModule::FillHistograms() {
 //     FillSimpHistograms(fHist.fSimp[0],fSimp);
 //   }
 //-----------------------------------------------------------------------------
-// TrkPatRec histograms, ihist defines the offset
+// TrkPatRec and CalPatRec histograms, inclusive, ihist defines the offset
 //-----------------------------------------------------------------------------
   for (int i=0; i<2; i++) {
     n_setc_tracks[i] = 0;
@@ -424,6 +438,13 @@ void TTrackCompModule::FillHistograms() {
 	n_setc30_tracks[i] += 1;
       }
 //-----------------------------------------------------------------------------
+// IHIST+7: SetC - FitConsBit - tracks 
+//-----------------------------------------------------------------------------
+      int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kFitMomErrBit;
+      if ((trk->fIDWord & ~mask) == 0) {
+	FillTrackHistograms(fHist.fTrack[ihist+7],trk,tp);
+      }
+//-----------------------------------------------------------------------------
 // IHIST+10: SetC30 selection
 //-----------------------------------------------------------------------------
       if (fEClMax > 60.) {
@@ -436,7 +457,7 @@ void TTrackCompModule::FillHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// CalPatRec-not-TrkPatRec tracks 
+// SET 102,104,106: CalPatRec-not-TrkPatRec tracks 
 //-----------------------------------------------------------------------------
   ihist = 100;
   for (int itrk=0; itrk<fNTracks[1]; itrk++) {
@@ -462,7 +483,7 @@ void TTrackCompModule::FillHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// TrkPatRec-not-CalPatRec tracks 
+// SET 002,004,006: TrkPatRec-not-CalPatRec tracks 
 //-----------------------------------------------------------------------------
   ihist = 0;
   for (int itrk=0; itrk<fNTracks[0]; itrk++) {

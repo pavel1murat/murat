@@ -76,6 +76,7 @@ public:
     TH1F*    fNClusters;
     TH1F*    fEClMax;			// energy of the first (highest) reconstructed cluster
     TH1F*    fTClMax;			// time   of the first (highest) reconstructed cluster
+    TH1F*    fDp;                       // P(TrkPatRec)-P(CalPatRec)
   };
 
   struct TrackHist_t {

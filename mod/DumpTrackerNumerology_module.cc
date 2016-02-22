@@ -68,8 +68,8 @@ namespace mu2e {
 
       printf("---------------------------------------------------------------------------------");
       printf("--------------------------------------------------------------------\n");
-      printf(" Station Plane Face Panel Device Sector Layer Straw  StrawInd  R(straw)  X(straw)");
-      printf(" Y(straw)  Z(straw)   Rho(straw)    L/2       phi    wireNx   wireNy\n"); 
+      printf(" Station Plane Face Panel Layer Straw  StrawInd  R(straw)  X(straw)");
+      printf("  Y(straw)   Z(straw)   Rho(straw)     L/2       phi    wireNx   wireNy\n"); 
       printf("---------------------------------------------------------------------------------");
       printf("--------------------------------------------------------------------\n");
       //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
@@ -111,9 +111,9 @@ namespace mu2e {
 	    double r    = straw->getRadius();
 	    
 	    double phi1 = phi/M_PI*180.;
-	    printf("  %3i %6i %5i %4i %5i %5i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
+	    printf("  %3i %6i %5i %4i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
 		   ist,iplane,iface, ipanel,
-		   sid.getPlane(),sid.getStraw(),
+		   //		   sid.getPlane(),sid.getStraw(),
 		   il,is, straw->index().asInt(),r,x,y,z,rho, hl,phi1,nx,ny);
 	    //	    }
 	  }

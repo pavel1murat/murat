@@ -2,10 +2,16 @@
 #------------------------------------------------------------------------------
 # generate 105 MeV/c electrons
 # make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
 #------------------------------------------------------------------------------
 BEGIN_PROLOG
   pdgCode        : 11
-  meanBackground : -1
+  meanBackground : -1        # fixed at 1
+#
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large
@@ -16,8 +22,9 @@ BEGIN_PROLOG
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 # bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
 # bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
-  bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
-
+# CD3
+# bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
+# bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local-v2/sim.mu2e.cd3-detmix-cut.v566.000003_00000000.art" ]
 END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
@@ -36,7 +43,6 @@ physics.producers.generate : { @table::StoppedParticleReactionGun
     }
 }
 
-# 2*0.5 = 1
 physics.filters.flashMixer.detail.mean   : @local::meanBackground
 physics.filters.ootMixer.detail.mean     : @local::meanBackground
 physics.filters.dioMixer.detail.mean     : @local::meanBackground

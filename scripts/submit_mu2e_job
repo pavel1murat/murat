@@ -271,12 +271,12 @@ if [ ".$GRID_CLUSTER" == ".local" ] ; then
 #------------------------------------------------------------------------------
 # redefine prolog, strip '@'
 #------------------------------------------------------------------------------
-	if [ $VERBOSE != "no" ] ; then echo " line:$LINENO : FCLINPUT= $FCLINPUT" ; fi
+	if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: "FCLINPUT= $FCLINPUT" ; fi
 	echo "BEGIN_PROLOG"  >| $TMP_FCL.1
 	for x in $FCLINPUT ; do
 	    xxx=`echo $x   | awk -F = '{print $2}'`
 	    nf=`echo $xxx | awk -F : '{print NF}'`
-	    if [ $VERBOSE != "no" ] ; then echo $LINENO : xxx=$xxx nf=$nf ; fi
+	    if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: xxx=$xxx nf=$nf ; fi
 
 	    if [ $nf == 2 ] ; then
 		par=`echo $xxx | awk -F : '{print $1}' | awk -F @ '{print $2}'`
@@ -286,19 +286,26 @@ if [ ".$GRID_CLUSTER" == ".local" ] ; then
 		val=`echo $xxx | awk -F : '{print $3}'`
 	    fi
 
-	    if [ $VERBOSE != "no" ] ; then echo $LINENO : "   $par : [ \"$val\" ] " ; fi
-	    if [ $VERBOSE != "no" ] ; then echo $LINENO : ---- $WORK_DIR/$val ; fi
+	    if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: "   $par : [ \"$val\" ] " ; fi
+	    if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: ---- $WORK_DIR/$val ; fi
 
 	    echo "   $par : [ "   >> $TMP_FCL.1 
-            for l in `cat $WORK_DIR/$val` ; do 
-		if [ $VERBOSE != "no" ] ; then echo $LINENO : l=$l ; fi
-		if [ $VERBOSE != "no" ] ; then echo $LINENO : l:0:1=${l:0:1} ; fi
+#------------------------------------------------------------------------------
+# in case of bgHitFiles $WORK_DIR/$val could be a directory
+#------------------------------------------------------------------------------
+	    if [ -d $WORK_DIR/$val ] ; then f=$WORK_DIR/$val/$val.filelist ; 
+	    else                            f=$WORK_DIR/$val               ; 
+	    fi
+
+            for l in `cat $f` ; do 
+		if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: l=$l ; fi
+		if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: l:0:1=${l:0:1} ; fi
 		if [ ${l:0:1} != '#' ] ; then
-		    if [ $VERBOSE != "no" ] ; then echo $LINENO : writing \"${l}\"  ; fi
+		    if [ $VERBOSE != "no" ] ; then echo [submit_mu2e_job:$LINENO]: writing \"${l}\"  ; fi
 		    echo "     " \"${l}\"      >> $TMP_FCL.1
                 fi
 	    done
-	    echo "    ]"         >> $TMP_FCL.1
+	    echo "    ]"     >> $TMP_FCL.1
 	done
  
 	echo "END_PROLOG  "  >> $TMP_FCL.1

@@ -1,0 +1,10 @@
+#include "Mu2eG4/geom/geom_common.txt"
+
+
+
+double calorimeter.crystalHalfLong             = 120.0;
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

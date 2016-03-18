@@ -1,5 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// 2016-03-18 P.Murat: default crystal ball parameterization 
 //
-
+// - gaussian   for dx > -|abs_alpha|
+// - power tail for dx < -|abs_alpha|
+//
+//   no positive tails
+///////////////////////////////////////////////////////////////////////////////
 /* --
 
 Double_t CrystalBall(Double_t *x,Double_t *par) {
@@ -34,6 +40,7 @@ Double_t CrystalBall(Double_t *x,Double_t *par) {
 //-----------------------------------------------------------------------------
 double f_crystal_ball(double* X, double* P) {
   double f, alpha, abs_alpha, n, a, b;
+
   double dx = (X[0]-P[1])/P[2];
 
   alpha     = P[3];
@@ -41,12 +48,7 @@ double f_crystal_ball(double* X, double* P) {
   n         = P[4];
 
   if (dx > -abs_alpha) {
-    if (dx < 0) {
-      f = P[0]*TMath::Exp(-dx*dx/2.);
-    }
-    else {
-      f = P[0]*TMath::Exp(-dx*dx/2.);
-    }
+    f = P[0]*TMath::Exp(-dx*dx/2.);
   }
   else {
     a = TMath::Power((n/abs_alpha),n)*TMath::Exp(-(alpha*alpha)/2);
@@ -96,7 +98,7 @@ void fit_crystal_ball(const char* File, const char* Module, const char* Hist,
   f->SetParLimits(2,0.,5.);
 
   double anorm = h->GetEntries()/10;
-  cb_init_parameters(f,anorm,X0,2.,3.,1.);
+  cb_init_parameters(f,anorm,X0,0.02.,0.05,3.);
   cb_fit(XMin,XMax);
 
   // h->Draw();

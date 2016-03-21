@@ -4,6 +4,7 @@
 #pragma link off all   functions;
 
 #pragma link C++ class TPolFitSpectrum;
+#pragma link C++ class TPolFitSpectrum::Range_t;
 
 #endif
 

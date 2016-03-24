@@ -1,0 +1,46 @@
+# -*- mode: tcl -*-
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+#  muStops    : [ @local::mergedMuonStops ]
+  pdgCode    : 11
+  bgHitFiles : @nil
+END_PROLOG
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "murat/fcl/prolog.fcl"
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : trackerMCCheck
+source : {
+    module_type :  RootInput
+    maxEvents   :  -1
+}
+#------------------------------------------------------------------------------
+# physics
+#------------------------------------------------------------------------------
+physics : { @table::physics 
+    filters : { @table::physics.filters 
+	TrackerMCCheck: @local::TrackerMCCheck
+    }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [ protonTimeMap, muonTimeMap, @sequence::hitMakerSeq, @sequence::tprPrepHitSeq, TrackerMCCheck ]
+    e1 : []
+}
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+#------------------------------------------------------------------------------
+#     services.Timing: { }
+physics.trigger_paths : [ p1 ]
+physics.end_paths     : [ e1 ]
+
+physics.filters.TrackerMCCheck.g4ModuleLabel : "dioMixer"
+physics.filters.TrackerMCCheck.debugBits     : { bit4:1 }
+
+services.TFileService.fileName               : "trackerMCCheck_read_dioMixer.hist"
+#------------------------------------------------------------------------------

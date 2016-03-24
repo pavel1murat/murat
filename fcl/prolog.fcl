@@ -51,7 +51,6 @@ MuratLLHRFilter : {
 #------------------------------------------------------------------------------
 TrackerMCCheck: {
     module_type                  : TrackerMCCheck # the class name
-    generatorModuleLabel         : generate
     g4ModuleLabel                : g4run
     strawHitMakerModuleLabel     : makeSH
     strawHitPosMakerModuleLabel  : MakeStereoHits

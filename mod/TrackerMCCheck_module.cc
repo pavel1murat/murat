@@ -95,7 +95,6 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
     std::string        fModuleLabel;	             // this module label
     std::string        processName_;
-    std::string        fGeneratorModuleLabel; 
     std::string        fG4ModuleLabel;
     
     std::string        producerName_;
@@ -145,8 +144,8 @@ namespace mu2e {
     Hist_t fHist;
 
 
-    double   fPStOut;	      // MC particle momentum out of the stopping traget
-    double   fPFront;	      // MC particle momentum on tracker entry
+    double   fPStOut;	      // MC particle momentum out of the stopping traget (VD)
+    double   fPFront;	      // MC particle momentum at the tracker front plane (VD)
     double   fCePitch;
 
 					// identify the particle of choice
@@ -172,7 +171,6 @@ namespace mu2e {
     StntupleModule            (pset,"TrackerMCCheck"),
     fModuleLabel              (pset.get<std::string>("module_label"                )),
     processName_              (pset.get<std::string>("processName"          ,""    )),
-    fGeneratorModuleLabel     (pset.get<std::string>("generatorModuleLabel"        )),
     fG4ModuleLabel            (pset.get<std::string>("g4ModuleLabel"               )),
 
     fStrawHitMaker            (pset.get<std::string>("strawHitMakerModuleLabel"    )),
@@ -226,7 +224,8 @@ namespace mu2e {
     fHist.fEHitMu       = tfs->make<TH1F>("ehmu","E(hit) Muon"       , 300,0,0.03);
     fHist.fEHitProt     = tfs->make<TH1F>("ehpr","E(hit) Proton"     , 300,0,0.03);
     fHist.fEHitDelta    = tfs->make<TH1F>("ehdl","E(hit) Delta"      , 300,0,0.03);
-    fHist.fMomCE        = tfs->make<TH1F>("pce" ,"Momentum CE"       , 220,0,110);
+    fHist.fMomCE        = tfs->make<TH1F>("pce" ,"Momentum CE"       , 500,0,250);
+    fHist.fMomMu        = tfs->make<TH1F>("pmu" ,"Momentum Muon"     , 500,0,250);
     fHist.fMomProt      = tfs->make<TH1F>("ppr" ,"Momentum Proton"   , 500,0,500);
     fHist.fMomDelta     = tfs->make<TH1F>("pdl" ,"Momentum Delta"    , 200,0, 10);
     fHist.fDt           = tfs->make<TH1F>("dt"    ,"Delta(T) left-right", 1000,-10,10);

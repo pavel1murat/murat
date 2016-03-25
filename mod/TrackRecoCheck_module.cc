@@ -29,6 +29,7 @@
 #include "ConditionsService/inc/ConditionsHandle.hh"
 #include "ConditionsService/inc/TrackerCalibrations.hh"
 
+#include "BTrkHelper/inc/BTrkHelper.hh"
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 
@@ -146,8 +147,8 @@ namespace mu2e {
 
     art::ServiceHandle<art::TFileService> tfs;
 
-    fHist.fHitDw        = tfs->make<TH1F>("hit_dw","Hit Dw",200,0,1000);
-    fHist.fHitRes       = tfs->make<TH1F>("hit_res","Hit Residual",1000,0,10);
+    fHist.fHitDw        = tfs->make<TH1F>("hit_dw","Hit Dw",200,-1000,1000);
+    fHist.fHitRes       = tfs->make<TH1F>("hit_res","Hit Residual",1000,-5,5);
     fHist.fPath         = tfs->make<TH1F>("path","Track path in a straw",200,0,20);
     fHist.fEHitVsPath   = tfs->make<TH2F>("ehit_vs_path","EHit Vs Path",200,0,20,1000,0.,0.005);
 //-----------------------------------------------------------------------------
@@ -160,22 +161,23 @@ namespace mu2e {
   bool TrackRecoCheck::filter(art::Event& Evt) {
     const char* oname = "TrackRecoCheck::filter";
 
-    printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
+    if (DebugBit(11)) printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
 //-----------------------------------------------------------------------------
 // do the rest
 //-----------------------------------------------------------------------------
-    if (DebugBit(11)) {
-      Debug_11(&Evt);
-    }
+    if (DebugBit(11)) Debug_11(&Evt);
 
     return 1;
   }
-    
+
+//-----------------------------------------------------------------------------
+// fill E(hit) vs path distributions
 //-----------------------------------------------------------------------------
   void TrackRecoCheck::Debug_11(art::Event* Evt) {
     const char* oname = "TrackRecoCheck::Debug_11";
 
-    GeomHandle<Mu2eDetectorModel> detmodel;
+    //     GeomHandle<Mu2eDetectorModel> detmodel;
+    Mu2eDetectorModel const& detmodel { art::ServiceHandle<BTrkHelper>()->detectorModel() };
 
     art::Handle<mu2e::KalRepPtrCollection> krepsHandle;
 
@@ -227,8 +229,12 @@ namespace mu2e {
 
 	hit  = (const mu2e::TrkStrawHit*) (*it);
 	sh   = &hit->strawHit();
+
+	const mu2e::Straw* straw     = &hit->straw();
+	const CLHEP::Hep3Vector* dir = &straw->direction();
+
 					// gasPath() returns the half-path
-	const DetStrawElem* strawelem = detmodel->strawElem(hit->straw());
+	const DetStrawElem* strawelem = detmodel.strawElem(*straw);
 
 	path = 2.*strawelem->gasPath(hit->driftRadius(),hit->trkTraj()->direction( hit->fltLen()));
 	ehit = sh->energyDep();
@@ -247,8 +253,10 @@ namespace mu2e {
 
 	dw = sqrt(dx*dx+dy*dy);
 
+	double dww = dx*dir->x() +dy*dir->y();
+
 	if (DebugBit(1) == 1) {
-	  printf("dx,dy,dw,len : %10.3f %10.3f %10.3f %10.3f\n",dx,dy,dw,len);
+	  printf("dx,dy,dw,len,dww : %10.3f %10.3f %10.3f %10.3f %10.3f\n",dx,dy,dw,len,dww);
 	}
 
 	//	sigw  = hitpos->posRes(StrawHitPosition::phi); 

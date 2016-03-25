@@ -1,19 +1,12 @@
 # -*- mode: tcl -*-
 #------------------------------------------------------------------------------
-# assume that we're running on a MC file with already generated hits
-#
-# -*- mode: tcl -*-
-# $Id: trackRecoCheck.fcl,v 1.5 2015/01/23 22:11:31 murat Exp $
-# $Author: murat $
-# $Date: 2015/01/23 22:11:31 $
+# generate electrons
 #-----------------------------------------------------------------------------
-
 #include "minimalMessageService.fcl"
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
-
 #include "murat/fcl/prolog.fcl"
 
 //test: // This must be commented out for grid production.
@@ -22,7 +15,11 @@ BEGIN_PROLOG
 #  muStops    : [ "mergedMuonStops/mustops.1025a_1426a_1504a.15318715.root" ]
 #  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
 #  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3-test/tdr.beam.mix.bgonly-test.1516a.15405463/good/00000/data_mixBG.root"]
-  pdgCode   : 11
+
+  bgHitFiles : @nil
+  pdgCode    : 11
+  elow       : 105.0012
+  ehi        : 105.0014
 END_PROLOG
 #                                       Give this process a name
 process_name : TrackRecoCheck
@@ -51,8 +48,7 @@ services : {
 
     user : {
 	
-#	GeometryService        : { inputFile      : "Mu2eG4/test/geom_01.txt" }
-	GeometryService        : { inputFile      : "murat/geom/geom_01_qgsp_bert.txt" }
+	GeometryService        : { inputFile      : "Mu2eG4/test/geom_01.txt" }
 
 	ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt" }
 	GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
@@ -75,11 +71,11 @@ physics : {
 #------------------------------------------------------------------------------
 	    module_type      : StoppedParticleReactionGun
 	    physics          : {
-		pdgId            : 11
+		pdgId            : @local::pdgCode
+		elow             : @local::elow
+		ehi              : @local::ehi
 		spectrumVariable : "totalEnergy"
 		spectrumShape    : "flat"
-		elow             : 105.0012
-		ehi              : 105.0014
 	    }
 	    muonStops            : {
 #------------------------------------------------------------------------------
@@ -132,14 +128,6 @@ physics : {
 	  , protonTimeMap, muonTimeMap
 	  , makeSD, makeSH 
 	  , FSHPreStereo, MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec
-##
-#	  , CaloReadoutHitsMaker, CaloCrystalHitsMaker
-#	  , MakeCaloCluster
-#	  , TrkExtrapol
-#	  , CaloMatching
-#	  , ParticleID			
-
-#	  , MuHitDisplay
 	  , TrackRecoCheck	  
 	 ]
 
@@ -147,7 +135,6 @@ physics : {
 
     trigger_paths  : [p1]
     end_paths      : [e1]
-    
 }
 
 services.scheduler.wantSummary: true
@@ -165,7 +152,7 @@ services.user.SeedService.baseSeed         :  0
 services.user.SeedService.maxUniqueEngines :  20
 
 # physics.producers.generate.inputfile  : "Mu2eG4/test/genconfig_DownstreameMinus.txt"
-physics.producers.makeSD.TimeOffsets               :  { inputs : [ "protonTimeMap", "muonTimeMap" ] }
+physics.producers.makeSD.TimeOffsets               : { inputs : [ "protonTimeMap", "muonTimeMap" ] }
 physics.producers.CaloReadoutHitsMaker.TimeOffsets : { inputs : [ "protonTimeMap", "muonTimeMap" ] }
 
 physics.filters.TrackRecoCheck.debugBits : {bit1:1 bit11:1}

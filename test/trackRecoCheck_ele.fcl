@@ -10,9 +10,9 @@
 #include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
-  pdgCode    : 13
-  elow       : 148.9583 # 105.0012
-  ehi        : 148.9585 # 105.0014
+  pdgCode    : 11
+  elow       : 105.0012
+  ehi        : 105.0014
   bgHitFiles : @nil
 END_PROLOG
 
@@ -29,8 +29,8 @@ physics : { @table::physics
     producers : { @table::physics.producers 
 	generate             : { @table::StoppedParticleReactionGun
 #------------------------------------------------------------------------------
-# for 105 MeV/c electron : E =                                  105.0013 MeV
-# for 105 MeV/c muon     : E = sqrt(105.*105+105.658*105.658) = 148.9584 MeV
+# for 105 MeV/c electron : E = 105.00130           MeV
+# for muon: sqrt(105.*105+105.658*105.658) = 148.9584269653785
 #------------------------------------------------------------------------------
 	    physics          : {
 		pdgId            : @local::pdgCode
@@ -43,8 +43,8 @@ physics : { @table::physics
     }
 
     filters : {  @table::physics.filters
-	TrackRecoCheck       : { @table::TrackRecoCheck 
-	    debugBits : {bit1:1 bit11:1}
+	TrackRecoCheck           : { @table::TrackRecoCheck 
+	    debugBits            : { bit1:1 bit11:1 }
 	}
     }
 #------------------------------------------------------------------------------

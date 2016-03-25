@@ -72,7 +72,7 @@ TrackRecoCheck : {
 
     g4ModuleLabel                : g4run
     strawHitPosMakerModuleLabel  : MakeStereoHits
-    trkPatRecModuleLabel         : TrkPatRec
+    trkPatRecModuleLabel         : MergePatRec
 
     debugBits                    : { 
 	bit11 : 1

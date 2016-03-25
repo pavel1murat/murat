@@ -43,7 +43,7 @@
 #include "BTrk/KalmanTrack/KalHit.hh"
 #include "BTrk/ProbTools/ChisqConsistency.hh"
 
-#include "TrkReco/inc/TrkStrawHit.hh"
+#include "BTrkData/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/TAnaDump.hh"

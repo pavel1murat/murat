@@ -39,7 +39,7 @@
 
 #include "BTrk/KalmanTrack/KalRep.hh"
 #include "BTrk/ProbTools/ChisqConsistency.hh"
-#include "TrkReco/inc/TrkStrawHit.hh"
+#include "BTrkData/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 #include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"
 

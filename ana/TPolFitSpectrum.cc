@@ -573,7 +573,7 @@ int TPolFitSpectrum::GetFWHM(double* XMax, double* Fwhm) {
 //-----------------------------------------------------------------------------
   int      found(0); 
   double   fm, fmax(-1), xx, xext[2], p[3], q[2], val;
-  double   xtot;
+  double   xtot(0), xt (0);
 
   for (int ir=0; ir<fNRanges; ir++) {
     // 3rd order polynomial - find derivative
@@ -608,7 +608,6 @@ int TPolFitSpectrum::GetFWHM(double* XMax, double* Fwhm) {
       }
     }
 
-    double xt;
     for (int i=0; i<nsol; i++) {
       if      (fRange[ir].fMode == 1) xt = fRange[ir].fXMin+xext[i];
       else {

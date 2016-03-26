@@ -261,7 +261,7 @@ namespace mu2e {
 
 	//	sigw  = hitpos->posRes(StrawHitPosition::phi); 
 
-	fHist.fHitDw->Fill(dw);
+	fHist.fHitDw->Fill(dww);
 	fHist.fHitRes->Fill(res);
 	fHist.fPath->Fill(path);
 	fHist.fEHitVsPath->Fill(path,ehit);

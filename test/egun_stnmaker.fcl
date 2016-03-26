@@ -45,6 +45,7 @@ physics: { @table::physics
 	}
 	TrackRecoCheck : { @table::TrackRecoCheck
 	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
+	    debugBits            : { bit11:1 }
 	}
     }
 

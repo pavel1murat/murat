@@ -41,10 +41,11 @@ physics: { @table::physics
     }
     filters : { @table::physics.filters 
 	InitStntuple   : { @table::InitStntuple 
-	    histFileName           : "egun_stnmaker.stn" 
+	    histFileName           : "mgun_stnmaker.stn" 
 	}
 	TrackRecoCheck : { @table::TrackRecoCheck
 	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
+	    debugBits            : { bit11:1 }
 	}
     }
 
@@ -56,13 +57,13 @@ physics: { @table::physics
 # can use path names specified in 'physics.' context w/o prefixing
 #
 
-services.TFileService.fileName                      : "egun_stnmaker.hist"
+services.TFileService.fileName            : "mgun_stnmaker.hist"
 #------------------------------------------------------------------------------
 # uncomment the next 2 lines if you want the DST file to be written out
 #-----------------------------------------------------------------------------
 # physics.out                               : [ detectorOutput ]
 # outputs.detectorOutput.SelectEvents       : { SelectEvents : [ p1 ] }
-outputs.detectorOutput.fileName           : "egun_stnmaker.root"
+outputs.detectorOutput.fileName           : "mgun_stnmaker.root"
 #------------------------------------------------------------------------------
 # debugging
 #------------------------------------------------------------------------------

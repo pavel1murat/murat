@@ -5,18 +5,21 @@
 # for 105 MeV/c electron : E = 105.00124           MeV
 # for 105 MeV/c muon     : E = 148.9584269653785   MeV
 #------------------------------------------------------------------------------
-# muStops must be commented out for grid production.
-BEGIN_PROLOG
-  pdgCode                             : 11
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDem
-  bgHitFiles                          : @nil
-END_PROLOG
-
 #include "minimalMessageService.fcl"
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
 #include "murat/fcl/prolog.fcl"
+#------------------------------------------------------------------------------
+# local changes to global variables
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+  pdgId                               : 11
+  elow                                : 105.0010
+  ehi                                 : 105.0015
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDem
+  bgHitFiles                          : @nil
+END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
 
@@ -28,9 +31,9 @@ physics: { @table::physics
     producers : { @table::physics.producers 
 	generate : { @table::StoppedParticleReactionGun 
 	    physics : {
-		pdgId            : @local::pdgCode
-		elow             : 105.0010
-		ehi              : 105.0015
+		pdgId            : @local::pdgId
+		elow             : @local::elow
+		ehi              : @local::ehi
 		spectrumVariable : "totalEnergy"
 		spectrumShape    : "flat"
 	    }

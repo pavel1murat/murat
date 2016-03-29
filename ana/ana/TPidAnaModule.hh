@@ -13,6 +13,7 @@
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStnPidBlock.hh"
+#include "Stntuple/obj/TStnTrackBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -21,6 +22,8 @@
 
 class TPidAnaModule: public TStnModule {
 public:
+
+#include "murat/ana/TrackPar_t.hh"
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
@@ -87,6 +90,10 @@ public:
 public:
 					// pointers to the data blocks used
   TStnPidBlock*         fPidDataBlock;
+  TStnTrackBlock*       fTrackBlock;
+					// additional track parameters (assume ntracks < 20)
+  TStnTrackID*          fTrackID;
+  TrackPar_t            fTrackPar[20];
 					// histograms filled
   Hist_t                fHist;
   int                   fNTracks;

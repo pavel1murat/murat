@@ -1153,40 +1153,9 @@ int TTrackAnaModule::BeginJob() {
 // initialize likelihood histograms
 // TRK 19: "Set C" plus reconstructed and matched cluster
 //-----------------------------------------------------------------------------
-//   const char   *mu2e_hist_dir, *muo_template_fn, *ele_template_fn;
-//   //  char         fn[200];
-
-//   mu2e_hist_dir   = gEnv->GetValue("mu2e.HistDir",gSystem->Getenv("MU2E_HIST_DIR"));
-//   ele_template_fn = gEnv->GetValue("mu2e.EleTemplates",gSystem->Getenv("_none_"));
-//   muo_template_fn = gEnv->GetValue("mu2e.MuoTemplates",gSystem->Getenv("_none_"));
-
-//   //   sprintf(fn,"%s/v4_2_1/e00s1212.track_ana.hist",mu2e_hist_dir);
-
-//   TH1* he_dt = gh1(ele_template_fn,"TrackAna","trk_19/dt");
-//   TH1* he_ep = gh1(ele_template_fn,"TrackAna","trk_19/ep");
-
-//   fLogLH->SetEleDtHist(he_dt);
-//   fLogLH->SetEleEpHist(he_ep);
-
-//   //  sprintf(fn,"%s/v4_2_1/m00s1212.track_ana.hist",mu2e_hist_dir);
-
-//   TH1* hm_dt = gh1(muo_template_fn,"TrackAna","trk_19/dt");
-//   TH1* hm_ep = gh1(muo_template_fn,"TrackAna","trk_19/ep");
-
-//   fLogLH->SetMuoDtHist(hm_dt);
-//   fLogLH->SetMuoEpHist(hm_ep);
-
-//   //  sprintf(fn,"%s/v4_2_1/e00s1212.track_ana.hist",mu2e_hist_dir);
-
-//   TH1* he_xs = gh1(ele_template_fn,"TrackAna","trk_1/xslope");
-//   fLogLH->SetEleXsHist(he_xs);
-
-//   //  sprintf(fn,"%s/v4_2_1/m00s1212.track_ana.hist",mu2e_hist_dir);
-
-//   TH1* hm_xs = gh1(muo_template_fn,"TrackAna","trk_1/xslope");
-//   fLogLH->SetMuoXsHist(hm_xs);
-
-  fLogLH->Init("v4_2_4");
+  const char   *pid_version;
+  pid_version = gEnv->GetValue("mu2e.PidVersion","_none_");
+  fLogLH->Init(pid_version);
 
   return 0;
 }

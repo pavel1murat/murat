@@ -3,7 +3,7 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ function  lhr_rejection;
+#pragma link C++ class lhr_rejection;
 
 #endif
 

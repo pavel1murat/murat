@@ -1,33 +1,31 @@
+///////////////////////////////////////////////////////////////////////////////
+// to run:
+// ------
+//        x = new lhr_rejection; x->run(571,0.01,0.2,100000);
 //
+///////////////////////////////////////////////////////////////////////////////
 
-#include "TH1.h"
-#include "TEnv.h"
-#include "TRandom3.h"
-#include "TCanvas.h"
-#include "TLegend.h"
-#include "TGraph.h"
 #include "Stntuple/val/stntuple_val_functions.hh"
-#include "Stntuple/alg/TEmuLogLH.hh"
 #include <math.h>
 
 #include "murat/ana/lhr_rejection.hh"
 
-namespace {
 
-  TCanvas* c(NULL);
-  TVirtualPad  *p1(0), *p2(0);
+//-----------------------------------------------------------------------------
+lhr_rejection::lhr_rejection() : TObject() {
+  c  = NULL;
+  p1 = NULL;
+  p2 = NULL;
+}
 
-  TH1F  *h_dt_e, *h_dt_m, *h_dt_es, *h_dt_ms;
-  TH2F  *h_ep_vs_s_e, *h_ep_vs_s_m, *h_ep_vs_s_e1, *h_ep_vs_s_m1, *h_ep_vs_s_es, *h_ep_vs_s_ms;
-  
-  TH1F  *h_llhr_cal_e, *h_llhr_cal_m;
-  TH1F  *h_prob_e, *h_prob_m;
-};
+//-----------------------------------------------------------------------------
+lhr_rejection::~lhr_rejection() {
+}
 
 //-----------------------------------------------------------------------------
 // smear E, but loop over S bins as well, E/P is Y
 //-----------------------------------------------------------------------------
-void smear_ep_vs_s_hist(TH2F* H1, TH2F* Hs, double SigEE) {
+void lhr_rejection::smear_ep_vs_s_hist(TH2F* H1, TH2F* Hs, double SigEE) {
 
   TRandom3* rn = new TRandom3();
 
@@ -64,7 +62,7 @@ void smear_ep_vs_s_hist(TH2F* H1, TH2F* Hs, double SigEE) {
 }
 
 //-----------------------------------------------------------------------------
-void smear_dt_hist(TH1F* H1, TH1F* Hs, double SigT) {
+void lhr_rejection::smear_dt_hist(TH1F* H1, TH1F* Hs, double SigT) {
 
   TRandom3* rn = new TRandom3();
 
@@ -96,8 +94,37 @@ void smear_dt_hist(TH1F* H1, TH1F* Hs, double SigT) {
   Hs->Scale(1./q);
 }
 
+
 //-----------------------------------------------------------------------------
-void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
+int lhr_rejection::build_cal_llhr_histogram(TH2F* HistEP, TH1F* HistDT, int NEvents, TH1F* HistLLHR) {
+
+  double llhr_ep, llhr_dt, llhr_cal;
+
+  TEmuLogLH::PidData_t data;
+
+  if (NEvents <= 0) {
+    printf(" ERROR in build_cal_llhr_histogram: NEvents = %10i. BAIL OUT\n",NEvents);
+    return -1;
+  }
+
+  for (int i=0; i<NEvents; i++) {
+    HistEP->GetRandom2(data.fPath,data.fEp);
+    data.fDt = HistDT->GetRandom();
+
+    llhr_ep  = llh->LogLHREp(&data);
+    llhr_dt  = llh->LogLHRDt(&data);
+    llhr_cal = llhr_ep+llhr_dt;
+
+    HistLLHR->Fill(llhr_cal);
+  }
+  
+  HistLLHR->Scale(1./NEvents);
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
 //-----------------------------------------------------------------------------
 // from murat/ana/TTrackAnaModule.cc: 
 // -----------------------
@@ -127,8 +154,7 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 //-----------------------------------------------------------------------------
   TH1::AddDirectory(kFALSE);
 //-----------------------------------------------------------------------------
-// smear DT histograms
-// h_dt_es, h_dt_ms are the smeared ones
+// smear DT histograms, h_dt_es, h_dt_ms are the smeared ones
 //-----------------------------------------------------------------------------
   h_dt_e = (TH1F*) gh1(fn_e,"TrackAna",Form("%s/dt",folder));
   h_dt_m = (TH1F*) gh1(fn_m,"TrackAna",Form("%s/dt",folder));
@@ -147,8 +173,8 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   h_ep_vs_s_e = (TH2F*) gh2(fn_e,"TrackAna",Form("%s/ep_vs_path",folder));
   h_ep_vs_s_m = (TH2F*) gh2(fn_m,"TrackAna",Form("%s/ep_vs_path",folder));
 
-  h_ep_vs_s_e1 = (TH2F*) ((TH1F*) h_ep_vs_s_e->Clone("h_ep_vs_s_e1")); // ->Rebin(2,2);
-  h_ep_vs_s_m1 = (TH2F*) ((TH1F*) h_ep_vs_s_m->Clone("h_ep_vs_s_m1")); // ->Rebin(2,2);
+  h_ep_vs_s_e1 = (TH2F*) ((TH1F*) h_ep_vs_s_e->Clone("h_ep_vs_s_e1"));
+  h_ep_vs_s_m1 = (TH2F*) ((TH1F*) h_ep_vs_s_m->Clone("h_ep_vs_s_m1"));
 
   h_ep_vs_s_es = (TH2F*) h_ep_vs_s_e->Clone("h_ep_vs_s_es");
   h_ep_vs_s_ms = (TH2F*) h_ep_vs_s_m->Clone("h_ep_vs_s_ms");
@@ -159,9 +185,9 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   smear_ep_vs_s_hist(h_ep_vs_s_e1,h_ep_vs_s_es,SigEE);
   smear_ep_vs_s_hist(h_ep_vs_s_m1,h_ep_vs_s_ms,SigEE);
 //-----------------------------------------------------------------------------
-// build the likelihood
+// build the likelihood and replace DT and EP histograms with the smeared ones
 //-----------------------------------------------------------------------------
-  TEmuLogLH* llh = new TEmuLogLH();
+  llh = new TEmuLogLH();
 
   llh->InitEleDtHist(h_dt_es);
   llh->InitEleEpHist(h_ep_vs_s_es);
@@ -173,55 +199,25 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 //-----------------------------------------------------------------------------
   h_llhr_cal_e = new TH1F("h_llhr_cal_e","LLHR(cal) Electrons",500,-100,100);
 
-  double llhr_ep, llhr_dt, llhr_cal;
-
-  TEmuLogLH::PidData_t data;
-
-  for (int i=0; i<NEvents; i++) {
-    h_ep_vs_s_es->GetRandom2(data.fPath,data.fEp);
-    data.fDt = h_dt_es->GetRandom();
-
-    llhr_ep  = llh->LogLHREp(&data);
-    llhr_dt  = llh->LogLHRDt(&data);
-    llhr_cal = llhr_ep+llhr_dt;
-					// debug
-    if (llhr_cal > 80) {
-      printf(" ------------- i = %i10 Electron LLHR_CAL = %12.5e\n",i,llhr_cal);
-      printf("llhr_ep = %12.5e llhr_dt = %12.5e\n", llhr_ep,llhr_dt);
-      printf("data.fPath, data.fEp, data.fDt = %12.5e %12.5e %12.5e\n",
-	     data.fPath,data.fEp,data.fDt);
-    }
-    h_llhr_cal_e->Fill(llhr_cal);
-  }
-  h_llhr_cal_e->Scale(1./NEvents);
+  build_cal_llhr_histogram(h_ep_vs_s_es,h_dt_es,NEvents,h_llhr_cal_e);
 //-----------------------------------------------------------------------------
 // sample muon distributions and build LLHR distribution for muons
 //-----------------------------------------------------------------------------
   h_llhr_cal_m = new TH1F("h_llhr_cal_m","LLHR(cal) Muons    ",500,-100,100);
   
-  for (int i=0; i<NEvents; i++) {
-    h_ep_vs_s_ms->GetRandom2(data.fPath,data.fEp);
-    data.fDt = h_dt_ms->GetRandom();
-
-    llhr_ep  = llh->LogLHREp(&data);
-    llhr_dt  = llh->LogLHRDt(&data);
-    llhr_cal = llhr_ep+llhr_dt;
-
-    h_llhr_cal_m->Fill(llhr_cal);
-  }
-  h_llhr_cal_m->Scale(1./NEvents);
+  build_cal_llhr_histogram(h_ep_vs_s_ms,h_dt_ms,NEvents,h_llhr_cal_m);
 //-----------------------------------------------------------------------------
-// normalize likelihood distributions 
+// draw likelihood distributions 
 //-----------------------------------------------------------------------------
-//  h_llhr_cal_e->DrawNormalized("",1);
   h_llhr_cal_e->Draw("");
 
   h_llhr_cal_m->SetFillColor(kBlue-7);
   h_llhr_cal_m->SetFillStyle(3002);
-
-  //  h_llhr_cal_m->DrawNormalized("same",1);
   h_llhr_cal_m->Draw("same");
 
+//-----------------------------------------------------------------------------
+// running integrals
+//-----------------------------------------------------------------------------
   h_prob_e = (TH1F*) h_llhr_cal_e->Clone("h_prob_e");
   h_prob_m = (TH1F*) h_llhr_cal_m->Clone("h_prob_m");
 
@@ -258,11 +254,14 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 
   h_ep_vs_s_ms->SetStats(0);
   h_ep_vs_s_ms->SetTitle("");
+  h_ep_vs_s_ms->GetXaxis()->SetRangeUser(0,450);
   h_ep_vs_s_ms->GetXaxis()->SetTitle("E/P");
-  h_ep_vs_s_ms->SetFillColor(kBlue-7);
+  h_ep_vs_s_ms->GetYaxis()->SetRangeUser(0,1.1);
+  h_ep_vs_s_ms->SetMarkerColor(kBlue+3);
   h_ep_vs_s_ms->SetFillStyle(3002);
   h_ep_vs_s_ms->DrawNormalized("",1);
 
+  h_ep_vs_s_es->SetMarkerColor(kRed+1);
   h_ep_vs_s_es->DrawNormalized("same",1);
 
   TLegend  /* *leg1,*/ *leg2, *leg3;
@@ -281,6 +280,8 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   h_dt_es->SetStats(0);
   h_dt_es->SetTitle("#Delta T = T_{trk}-T_{cal}");
   h_dt_es->GetXaxis()->SetTitle("#Delta T, ns");
+  h_dt_es->GetXaxis()->SetRangeUser(-10,10);
+  //  h_dt_es->GetYaxis()->SetRangeUser(0,0.08);
   h_dt_es->DrawNormalized("",1);
 
   h_dt_ms->SetFillColor(kBlue-7);
@@ -343,6 +344,8 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 
   TGraph* gr = new TGraph(nb,prob_e,prob_m);
 
+  gr->GetXaxis()->SetRangeUser(0.8,1);
+  gr->GetYaxis()->SetRangeUser(10,2.e4);
   gr->SetMarkerStyle(20);
   gr->SetMarkerSize(1);
   gr->Draw("ALP");

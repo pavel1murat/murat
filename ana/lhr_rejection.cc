@@ -13,9 +13,11 @@
 
 //-----------------------------------------------------------------------------
 lhr_rejection::lhr_rejection() : TObject() {
-  c  = NULL;
-  p1 = NULL;
-  p2 = NULL;
+  c_ep_vs_s    = NULL;
+  c_dt         = NULL;
+  c_prob       = NULL;
+  c_eff_vs_rej = NULL;
+
 }
 
 //-----------------------------------------------------------------------------
@@ -207,15 +209,6 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
   
   build_cal_llhr_histogram(h_ep_vs_s_ms,h_dt_ms,NEvents,h_llhr_cal_m);
 //-----------------------------------------------------------------------------
-// draw likelihood distributions 
-//-----------------------------------------------------------------------------
-  h_llhr_cal_e->Draw("");
-
-  h_llhr_cal_m->SetFillColor(kBlue-7);
-  h_llhr_cal_m->SetFillStyle(3002);
-  h_llhr_cal_m->Draw("same");
-
-//-----------------------------------------------------------------------------
 // running integrals
 //-----------------------------------------------------------------------------
   h_prob_e = (TH1F*) h_llhr_cal_e->Clone("h_prob_e");
@@ -232,26 +225,33 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
   }
 //-----------------------------------------------------------------------------
 // plot histograms
+// 0. likelihood distributions 
 //-----------------------------------------------------------------------------
-  if (c == NULL) {
-    c = new TCanvas("c","c",1400,800);
-    c->Divide(2,1);
+  c_llhr_cal = new TCanvas("c_llhr_cal","LLHR(CAL) : electrons vs muons",1400,900);
+  c_llhr_cal->cd();
 
-    c->cd(1);
+  h_llhr_cal_e->SetTitle("LLHR(CAL) : electrons vs muons");
+  h_llhr_cal_e->GetXaxis()->SetRangeUser(-50,49.99);
+  h_llhr_cal_e->Draw("");
 
-    p1= gPad;
-    p1->Divide(1,2);
+  h_llhr_cal_m->SetFillColor(kBlue-7);
+  h_llhr_cal_m->SetFillStyle(3002);
+  h_llhr_cal_m->Draw("same");
 
-    c->cd(2);
-    p2 = gPad;
+  TLegend* leg0 = new TLegend(0.2,0.75,0.4,0.85);
+  leg0->AddEntry(h_llhr_cal_e,"electrons","f");
+  leg0->AddEntry(h_llhr_cal_m,"muons"    ,"f");
+  leg0->SetFillStyle(0);
+  leg0->SetFillColor(0);
+  leg0->SetBorderSize(0);
+  leg0->Draw();
+  
 
-    p2->Divide(1,2);
-  }
-//-----------------------------------------------------------------------------
 // 1. E/P distributions for electrons and muons after the cuts
 //-----------------------------------------------------------------------------
-  p1->cd(1);
-
+  c_ep_vs_s = new TCanvas("c_ep_vs_s","EP vs SPath",1400,900);
+  c_ep_vs_s->cd();
+  
   h_ep_vs_s_ms->SetStats(0);
   h_ep_vs_s_ms->SetTitle("");
   h_ep_vs_s_ms->GetXaxis()->SetRangeUser(0,450);
@@ -274,9 +274,11 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
   // leg1->SetBorderSize(0);
   // leg1->Draw();
 //-----------------------------------------------------------------------------
-// 3. distributions in Delta(T) for electrons and muons after the cuts
+// 2. distributions in Delta(T) for electrons and muons after the cuts
 //-----------------------------------------------------------------------------
-  p1->cd(2);
+  c_dt = new TCanvas("c_dt","DT",1400,900);
+  c_dt->cd();
+  
   h_dt_es->SetStats(0);
   h_dt_es->SetTitle("#Delta T = T_{trk}-T_{cal}");
   h_dt_es->GetXaxis()->SetTitle("#Delta T, ns");
@@ -296,11 +298,12 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
   leg2->SetBorderSize(0);
   leg2->Draw();
 //-----------------------------------------------------------------------------
-// 2. probability distributions for electrons and muons
+// 3. probability distributions for electrons and muons
 //    why the electron efficiency doesn't saturate at 1 ?
 //-----------------------------------------------------------------------------
-  p2->cd(1);
-
+  c_prob = new TCanvas("c_prob","prob",1400,900);
+  c_prob->cd();
+  
   h_prob_e->SetTitle("logLHR = log(LH_{cal}(e)/LH_{cal}(#mu)) ");
   h_prob_e->GetXaxis()->SetTitle("log(LH_{cal}(e)/LH_{cal}(#mu)) ");
   h_prob_e->GetXaxis()->SetRangeUser(-20,19.9);
@@ -320,7 +323,8 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
 //-----------------------------------------------------------------------------
 // 4. electron efficiency vs muon rejection
 //-----------------------------------------------------------------------------
-  p2->cd(2);
+  c_eff_vs_rej = new TCanvas("c_eff_vs_rej","Electron efficiency vs muon rejection",1400,900);
+  c_eff_vs_rej->cd();
 
   gPad->SetLogy(1);
   gPad->SetGridy(1);
@@ -344,8 +348,14 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
 
   TGraph* gr = new TGraph(nb,prob_e,prob_m);
 
+  gr->SetTitle("Electron ID efficiency vs muon rejection");
+    
+  gr->GetXaxis()->SetTitle("electron ID efficiency");
+  gr->GetYaxis()->SetTitle("muon rejection factor" );
+
   gr->GetXaxis()->SetRangeUser(0.8,1);
   gr->GetYaxis()->SetRangeUser(10,2.e4);
+
   gr->SetMarkerStyle(20);
   gr->SetMarkerSize(1);
   gr->Draw("ALP");

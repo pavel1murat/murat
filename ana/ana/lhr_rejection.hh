@@ -19,8 +19,7 @@ public:
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
-  TCanvas* c;
-  TVirtualPad  *p1, *p2;
+  TCanvas *c_ep_vs_s, *c_dt, *c_prob, *c_eff_vs_rej, *c_llhr_cal;
 
   TH1F  *h_dt_e, *h_dt_m, *h_dt_es, *h_dt_ms;
   TH2F  *h_ep_vs_s_e, *h_ep_vs_s_m, *h_ep_vs_s_e1, *h_ep_vs_s_m1, *h_ep_vs_s_es, *h_ep_vs_s_ms;

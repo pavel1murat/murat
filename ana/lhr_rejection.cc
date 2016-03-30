@@ -1,6 +1,7 @@
 //
 
 #include "TH1.h"
+#include "TEnv.h"
 #include "TRandom3.h"
 #include "TCanvas.h"
 #include "TLegend.h"
@@ -105,21 +106,29 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 //-----------------------------------------------------------------------------
   const char* folder = "trk_25";
 
-  // const char* fn_e = "/cdf/hist/mu2e/v4_2_1/e00s1212.track_ana.hist";
-  // const char* fn_m = "/cdf/hist/mu2e/v4_2_1/m00s1212.track_ana.hist";
-
-  const char* fn_e(NULL), *fn_m(NULL);
+  char   fn_e[200], fn_m[200];
+  
+  const char* hist_dir = gEnv->GetValue("mu2e.HistDir","");
 
   if (HistSet == 1412) {
-    fn_e = "/cdf/hist/mu2e/v4_2_1/e00s1412.track_ana.hist";
-    fn_m = "/cdf/hist/mu2e/v4_2_1/m00s1412.track_ana.hist";
+    sprintf(fn_e,"%s/v4_2_1/e00s1412.track_ana.hist",hist_dir);
+    sprintf(fn_m,"%s/v4_2_1/m00s1412.track_ana.hist",hist_dir);
   }
   else if (HistSet == 0041) {
-    fn_e = "/cdf/hist/mu2e/v4_2_4/e00s0041.track_ana.hist";
-    fn_m = "/cdf/hist/mu2e/v4_2_4/m00s0041.track_ana.hist";
+    sprintf(fn_e,"%s/v4_2_4/e00s0041.track_ana.hist",hist_dir);
+    sprintf(fn_m,"%s/v4_2_4/m00s0041.track_ana.hist",hist_dir);
+  }
+  else if (HistSet == 571) {
+    sprintf(fn_e,"%s/v5_7_0/e00s5710.track_ana.hist",hist_dir);
+    sprintf(fn_m,"%s/v5_7_0/m00s5710.track_ana.hist",hist_dir);
   }
 //-----------------------------------------------------------------------------
+// allow multiple histograms with the same name in the same directory
+//-----------------------------------------------------------------------------
+  TH1::AddDirectory(kFALSE);
+//-----------------------------------------------------------------------------
 // smear DT histograms
+// h_dt_es, h_dt_ms are the smeared ones
 //-----------------------------------------------------------------------------
   h_dt_e = (TH1F*) gh1(fn_e,"TrackAna",Form("%s/dt",folder));
   h_dt_m = (TH1F*) gh1(fn_m,"TrackAna",Form("%s/dt",folder));
@@ -160,54 +169,58 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   llh->InitMuoDtHist(h_dt_ms);
   llh->InitMuoEpHist(h_ep_vs_s_ms);
 //-----------------------------------------------------------------------------
-// now sample electron distributions and build LLHR distribution for electrons
+// sample electron distributions and build LLHR distribution for electrons
 //-----------------------------------------------------------------------------
   h_llhr_cal_e = new TH1F("h_llhr_cal_e","LLHR(cal) Electrons",500,-100,100);
-  h_llhr_cal_m = new TH1F("h_llhr_cal_m","LLHR(cal) Muons    ",500,-100,100);
 
   double llhr_ep, llhr_dt, llhr_cal;
-
-  //  int nev = N100000;
 
   TEmuLogLH::PidData_t data;
 
   for (int i=0; i<NEvents; i++) {
-
     h_ep_vs_s_es->GetRandom2(data.fPath,data.fEp);
     data.fDt = h_dt_es->GetRandom();
 
-    llhr_ep = llh->LogLHREp(&data);
-    llhr_dt = llh->LogLHRDt(&data);
-
+    llhr_ep  = llh->LogLHREp(&data);
+    llhr_dt  = llh->LogLHRDt(&data);
     llhr_cal = llhr_ep+llhr_dt;
-
+					// debug
+    if (llhr_cal > 80) {
+      printf(" ------------- i = %i10 Electron LLHR_CAL = %12.5e\n",i,llhr_cal);
+      printf("llhr_ep = %12.5e llhr_dt = %12.5e\n", llhr_ep,llhr_dt);
+      printf("data.fPath, data.fEp, data.fDt = %12.5e %12.5e %12.5e\n",
+	     data.fPath,data.fEp,data.fDt);
+    }
     h_llhr_cal_e->Fill(llhr_cal);
   }
-
-
+  h_llhr_cal_e->Scale(1./NEvents);
+//-----------------------------------------------------------------------------
+// sample muon distributions and build LLHR distribution for muons
+//-----------------------------------------------------------------------------
+  h_llhr_cal_m = new TH1F("h_llhr_cal_m","LLHR(cal) Muons    ",500,-100,100);
+  
   for (int i=0; i<NEvents; i++) {
-
     h_ep_vs_s_ms->GetRandom2(data.fPath,data.fEp);
     data.fDt = h_dt_ms->GetRandom();
 
-    llhr_ep = llh->LogLHREp(&data);
-    llhr_dt = llh->LogLHRDt(&data);
-
+    llhr_ep  = llh->LogLHREp(&data);
+    llhr_dt  = llh->LogLHRDt(&data);
     llhr_cal = llhr_ep+llhr_dt;
 
     h_llhr_cal_m->Fill(llhr_cal);
   }
-
-
-  h_llhr_cal_e->Scale(1./(NEvents+1.e-12));
-  h_llhr_cal_m->Scale(1./(NEvents+1.e-12));
-
-  h_llhr_cal_e->DrawNormalized("",1);
+  h_llhr_cal_m->Scale(1./NEvents);
+//-----------------------------------------------------------------------------
+// normalize likelihood distributions 
+//-----------------------------------------------------------------------------
+//  h_llhr_cal_e->DrawNormalized("",1);
+  h_llhr_cal_e->Draw("");
 
   h_llhr_cal_m->SetFillColor(kBlue-7);
   h_llhr_cal_m->SetFillStyle(3002);
 
-  h_llhr_cal_m->DrawNormalized("same",1);
+  //  h_llhr_cal_m->DrawNormalized("same",1);
+  h_llhr_cal_m->Draw("same");
 
   h_prob_e = (TH1F*) h_llhr_cal_e->Clone("h_prob_e");
   h_prob_m = (TH1F*) h_llhr_cal_m->Clone("h_prob_m");
@@ -215,15 +228,12 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   h_prob_e->Reset();
   h_prob_m->Reset();
 
-
   int nb = h_prob_e->GetNbinsX();
 
   for (int i=0; i<nb; i++) {
     h_prob_e->SetBinContent(i+1,h_llhr_cal_e->Integral(i+1,nb));
     h_prob_m->SetBinContent(i+1,h_llhr_cal_m->Integral(i+1,nb));
   }
-
-
 //-----------------------------------------------------------------------------
 // plot histograms
 //-----------------------------------------------------------------------------
@@ -241,7 +251,9 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
 
     p2->Divide(1,2);
   }
-
+//-----------------------------------------------------------------------------
+// 1. E/P distributions for electrons and muons after the cuts
+//-----------------------------------------------------------------------------
   p1->cd(1);
 
   h_ep_vs_s_ms->SetStats(0);
@@ -262,7 +274,9 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   // leg1->SetFillColor(0);
   // leg1->SetBorderSize(0);
   // leg1->Draw();
-
+//-----------------------------------------------------------------------------
+// 3. distributions in Delta(T) for electrons and muons after the cuts
+//-----------------------------------------------------------------------------
   p1->cd(2);
   h_dt_es->SetStats(0);
   h_dt_es->SetTitle("#Delta T = T_{trk}-T_{cal}");
@@ -280,7 +294,10 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   leg2->SetFillColor(0);
   leg2->SetBorderSize(0);
   leg2->Draw();
-
+//-----------------------------------------------------------------------------
+// 2. probability distributions for electrons and muons
+//    why the electron efficiency doesn't saturate at 1 ?
+//-----------------------------------------------------------------------------
   p2->cd(1);
 
   h_prob_e->SetTitle("logLHR = log(LH_{cal}(e)/LH_{cal}(#mu)) ");
@@ -299,8 +316,9 @@ void lhr_rejection(int HistSet, double SigEE, double SigT, int NEvents) {
   leg3->SetFillColor(0);
   leg3->SetBorderSize(0);
   leg3->Draw();
-
-
+//-----------------------------------------------------------------------------
+// 4. electron efficiency vs muon rejection
+//-----------------------------------------------------------------------------
   p2->cd(2);
 
   gPad->SetLogy(1);

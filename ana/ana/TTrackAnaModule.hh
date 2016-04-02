@@ -102,6 +102,7 @@ public:
     TH1F*    fNHitCrystalsTot;
     TH1F*    fECal;
     TH1F*    fECalOverEKin;
+    TH1F*    fInstLumi;
       
   };
 

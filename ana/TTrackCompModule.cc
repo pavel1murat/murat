@@ -144,6 +144,7 @@ void TTrackCompModule::BookEventHistograms(EventHist_t* Hist, const char* Folder
   HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
   HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
   HBook1F(Hist->fDp        ,"dp"       ,Form("%s: P(TPR)-P(CPR)"                   ,Folder),500,-2.5,2.5,Folder);
+  HBook1F(Hist->fInstLumi  ,"dp"       ,Form("%s: Inst Luminosity"                 ,Folder),500,-2.5e6,2.5e6,Folder);
 }
 
 //-----------------------------------------------------------------------------

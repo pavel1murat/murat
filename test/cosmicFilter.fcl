@@ -1,6 +1,7 @@
 # -*- mode: tcl -*-
 #
-# Configuration file for CosmicFilter
+# Configuration file for the CosmicFilter - filter out Ralph's events to reduce 
+# the output dataset size
 #
 
 #include "minimalMessageService.fcl"
@@ -9,79 +10,49 @@
 
 #include "Analyses/fcl/prolog.fcl"
 
+BEGIN_PROLOG
+  bgHitFiles                          : @nil
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
 process_name : CosmicFilter
 
 source : {
   module_type : RootInput
   fileNames   : [ "/mu2e/data/users/rhbob/rpcTestData.root"]
   maxEvents   : 1000000
+    inputCommands : ['keep *_*_*_*'
+    		     , 'drop *_MakeCaloProtoCluster_*_*'
+    		     , 'drop *_MakeCaloCluster_*_*'
+    		     , 'drop *_FlagBkgHits_*_*'
+    		     , 'drop *_FlagStrawHits_*_*'
+    		     , 'drop *_TimePeakFinder_*_*'
+		     , 'drop *_TRFDownstreameMinus_*_*'
+		     , 'drop *_TrkExtrapolDem_*_*'
+		     , 'drop *_TrackCaloMatchingDem_*_*'
+		     , 'drop *_MakeStereoHits_*_*'
+		     , 'drop *_FSHPreStereo_*_*'
+    ] 
 }
 
-services : {
-  message : @local::default_message
-##   
-##     # Adjust configuration of message logger:
-##     # Load the standard message logger configuration:
-##     # Threshold=Info (from using mf_interactive). 
-##     # Limit of 5 per category; then exponential backoff.
-##   #  message.destinations.log.default.limit : 5
-##      
-    TFileService               : {fileName      : {ART_HIST_FILE}}
-    RandomNumberGenerator      : { }
-
-    user : {
-	GeometryService        : { inputFile      : "JobConfig/TDR/geom_MothersToHits.txt" }
-	ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"        }
-	GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"   }
-	G4Helper               : { }
-	SeedService            : @local::automaticSeeds
+services : { @table::services
+    TFileService : { @table::services.TFileService 
+	fileName : "cosmicFilter.hist"
     }
-} 
+}
 
-
-physics : {
-    producers: {
-        protonTimeMap        : { module_type : GenerateProtonTimes }
-        muonTimeMap          : { module_type : GenerateMuonLife }
-        makeSD               : @local::makeSD
-        makeSH               : @local::makeSHfromSD
-	CaloReadoutHitsMaker : @local::CaloReadoutHitsMaker
-	CaloCrystalHitsMaker : @local::CaloCrystalHitsMaker
-#------------------------------------------------------------------------------
-#  default tracking
-#------------------------------------------------------------------------------
-	FSHPreStereo         : @local::FSHPreStereo
-	MakeStereoHits       : @local::MakeStereoHits
-	FlagStrawHits        : @local::FlagStrawHits
-	FlagBkgHits          : @local::FlagBkgHits
-	TrkPatRec            : @local::TrkPatRecDownstreameMinus
-#------------------------------------------------------------------------------
-# CalPatRec modules
-#------------------------------------------------------------------------------
-	MakeCaloCluster      : @local::MakeCaloCluster
-	MakeStrawHitPositions: @local::MakeStrawHitPositions
-	CalPatRec            : @local::CalPatRec
-	MergePatRec          : @local::MergePatRec
-    }
-
-    filters: { 
-	CosmicFilter         : @local::CosmicFilter
+physics : { @table::physics 
+    filters: { @table::physics.filters 
+	CosmicFilter  : @local::CosmicFilter
     }
 #------------------------------------------------------------------------------
 # sequences
 #------------------------------------------------------------------------------
     p1 : [ 
-	  protonTimeMap, muonTimeMap, 
-	  makeSD, makeSH, 
-	  CaloReadoutHitsMaker, CaloCrystalHitsMaker, 
-	  MakeCaloCluster, 
-# 
-	  FSHPreStereo, MakeStereoHits, FlagStrawHits, FlagBkgHits, TrkPatRec, 
-#
-	  MakeStrawHitPositions, 
-	  CalPatRec, 
-	  MergePatRec,
-#	
+#	  @sequence::hitMakerSeq, 
+	  @sequence::calRecoSeq,
+	  @sequence::allPatRecSeq,
 	  CosmicFilter
 	 ]
     
@@ -96,24 +67,13 @@ physics : {
 outputs: {
   # Define the output file.
   outfile : {
-    module_type    : RootOutput
-      fileName       : {OUTPUT_DATA_FILE}
-    SelectEvents  : { SelectEvents: [ p1 ] }
-    outputCommands : ['keep *_*_*_*'
+      module_type    : RootOutput
+      fileName       : "cosmicFilter.root"
+      SelectEvents   : { SelectEvents: [ p1 ] }
+      outputCommands : ['keep *_*_*_*'
 #                   , 'drop mu2ePointTrajectoryMapVector_*_*_*'
 #                   , 'drop mu2eSimParticles_*_*_*'
 # Uncomment the above line to reduce file size.
                      ]  
   }
 }
-#------------------------------------------------------------------------------
-# print per event timing for ::event entry points
-#------------------------------------------------------------------------------
-#     services.Timing: { }
-source.firstRun                            :  1 
-services.scheduler.wantSummary             : true # print timing summary
-#
-services.user.SeedService.baseSeed         :  1
-services.user.SeedService.maxUniqueEngines :  20
-#
-physics.producers.CalPatRec.minClusterEnergy : 30.

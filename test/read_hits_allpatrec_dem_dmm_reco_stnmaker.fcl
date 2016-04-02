@@ -23,22 +23,25 @@ END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
 
-process_name : EgunMergePatRecStnmaker
+process_name : ReadHitsAllPatRecDemDmmRecoStnmaker
 
-source       : { module_type : EmptyEvent }
+source       : { 
+    module_type : RootInput
+    #    fileNames   : [ {INPUT_DATA_FILE} ]
+    #    fileNames : ["/mu2e/data/tdr/beam/g4s4p5/tdr.beam.g4s4.conversion.1504a.15729672/good/00000/dsStopsToHitsConversion.root"]
+    #    maxEvents   : 100
+    inputCommands : ['keep *_*_*_*'
+    #		     , 'drop *_muonTimeMap_*_*'
+    #		     , 'drop *_protonTimeMap_*_*'
+    #		     , 'drop mu2eStrawDigis_*_*_*'
+    #		     , 'drop mu2eStrawHits_*_*_*'
+    #		     , 'drop *_CaloReadoutHitsMaker_*_*'
+    #		     , 'drop *_CaloCrystalHitsMaker_*_*'
+    # Uncomment the above lines to reduce file size.
+		    ]
+}
 
 physics: { @table::physics 
-    producers : { @table::physics.producers 
-	generate : { @table::StoppedParticleReactionGun 
-	    physics : {
-		pdgId            : @local::pdgId
-		elow             : @local::elow
-		ehi              : @local::ehi
-		spectrumVariable : "totalEnergy"
-		spectrumShape    : "flat"
-	    }
-	}
-    }
     filters : { @table::physics.filters 
 	InitStntuple   : { @table::InitStntuple 
 	    histFileName           : "egun_stnmaker.stn" 
@@ -49,7 +52,11 @@ physics: { @table::physics
 	}
     }
 
-    p1 : [ @sequence::gen_allpatrec_dem_dmm_reco_stnmaker_seq, TrackRecoCheck ]
+#    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker, TrackRecoCheck ]
+#    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker ]
+#    p1 : [ @sequence::physics.calpatrec_dem_dmm_reco_stnmaker ]
+    p1 : [ @sequence::physics.trkpatrec_dem_dmm_reco_stnmaker ]
+#    p1 : [ @sequence::physics.trkpatrec_dem_reco_stnmaker ]
     trigger_paths : [ p1  ]
     end_paths     : [ out ]
 }
@@ -61,9 +68,9 @@ services.TFileService.fileName                      : "egun_stnmaker.hist"
 #------------------------------------------------------------------------------
 # uncomment the next 2 lines if you want the DST file to be written out
 #-----------------------------------------------------------------------------
-physics.out                               : [ detectorOutput ]
+# physics.out                               : [ detectorOutput ]
 # outputs.detectorOutput.SelectEvents       : { SelectEvents : [ p1 ] }
-outputs.detectorOutput.fileName           : "egun_stnmaker.root"
+outputs.detectorOutput.fileName           : ".root"
 #------------------------------------------------------------------------------
 # debugging
 #------------------------------------------------------------------------------

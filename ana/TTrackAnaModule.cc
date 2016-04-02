@@ -250,6 +250,7 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fSinTC  ,"sintc"  ,Form("%s: sin(T^C)"      ,Folder),200, -1, 1,Folder);
   HBook1F(Hist->fDrTC   ,"drtc"   ,Form("%s: DeltaR(T^C)"   ,Folder),200, -200, 200,Folder);
   HBook1F(Hist->fSInt   ,"sint"   ,Form("%s: SInt"          ,Folder),200, -500, 500,Folder);
+  HBook1F(Hist->fDaveTrkQual,"dtqual",Form("%s:DaveTrkQual" ,Folder),500, -2.5, 2.5,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -1124,6 +1125,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 
   Hist->fDrTC->Fill(tp->fDrTC);
   Hist->fSInt->Fill(tp->fSInt);
+  Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
 }
 
 

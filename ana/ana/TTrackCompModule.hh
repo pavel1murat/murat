@@ -112,6 +112,7 @@ public:
     TH1F*    fResid;
     TH1F*    fAlgMask;
     TH2F*    fFConsVsNActive;
+    TH1F*    fDaveTrkQual;
   };
 
   struct SimpHist_t {

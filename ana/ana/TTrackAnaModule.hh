@@ -208,6 +208,7 @@ public:
     TH1F*    fSinTC;			// sin(track-cluster angle)
     TH1F*    fDrTC;                     // deltaR(cluster-track)
     TH1F*    fSInt;                     // calculated interaction length
+    TH1F*    fDaveTrkQual;		// 
   };
 
   struct GenpHist_t {

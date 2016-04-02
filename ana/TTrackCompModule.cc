@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Validation of CalPatREc: compare CalPatRec tracks to TrkPatRec ones
+// assume running on stntuple with 3 tracking branches
 //
 // use of tmp:
 //
@@ -52,7 +53,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
   fPdgCode       = 11;
-  fGeneratorCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
+  fGeneratorCode = 2;			// 2:conversionGun, 28:StoppedParticleReactionGun
 
   fDebugCut[5].fXMin   = 106.;
   fDebugCut[5].fXMax   = 200.;
@@ -109,6 +110,7 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
+  HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 500, -2.5, 2.5,Folder);
 
   //  HBook1F(Hist->fZ1         ,"z1"       ,Form("%s: track Z1      "    ,Folder), 200,-2000,2000,Folder);
   //  HBook2F(Hist->fNHVsStation,"nh_vs_st" ,Form("%s: N(hits) Vs Station",Folder),  50, 0,50,10,-0.5,9.5,Folder);
@@ -347,6 +349,7 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fAlgMask->Fill(Track->AlgMask());
   Hist->fFConsVsNActive->Fill(Track->NActive(),Track->fFitCons);
+  Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
 
 }
 

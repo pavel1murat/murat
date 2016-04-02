@@ -344,6 +344,10 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
   for (int i=0; i<nb; i++) {
     prob_e[i] = h_prob_e->GetBinContent(i+1)*(qne_25/qne_13);
     prob_m[i] = 1./(h_prob_m->GetBinContent(i+1)+1.e-6)*(qnm_13/qnm_25);
+
+    if (prob_e[i] > 0.8) {
+      printf(" i, prob_e[i], prob_m[i]: %5i %10.3f %10.3f\n",i, prob_e[i], prob_m[i]);
+    }
   }
 
   TGraph* gr = new TGraph(nb,prob_e,prob_m);

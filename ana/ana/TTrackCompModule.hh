@@ -34,6 +34,7 @@ public:
 
     int     fIDWord_2025;		// ID word for 20 <= N(active) < 25 tracks
     int     fIDWord_30;	                // ID word for 30 <= N(active)
+    int     fIDWordA;
 
     float   fDpF ;                      // tracker-only resolution
     float   fDp0 ;
@@ -77,6 +78,7 @@ public:
     TH1F*    fEClMax;			// energy of the first (highest) reconstructed cluster
     TH1F*    fTClMax;			// time   of the first (highest) reconstructed cluster
     TH1F*    fDp;                       // P(TrkPatRec)-P(CalPatRec)
+    TH1F*    fInstLumi;                 // lumi
   };
 
   struct TrackHist_t {
@@ -102,6 +104,10 @@ public:
     TH1F*    fChi2DofC;
     TH1F*    fNActive;
     TH1F*    fNWrong;
+    TH1F*    fNDoublets;
+    TH1F*    fNOSDoublets;
+    TH1F*    fNSSDoublets;
+    TH1F*    fNAmb0;
     TH1F*    fT0;
     TH1F*    fT0Err;
     TH1F*    fQ;
@@ -176,6 +182,7 @@ public:
 
   TStnTrack*        fTrack;
   TStnTrackID*      fTrackID;
+  TStnTrackID*      fTrackIDA;
   TStnTrackID*      fTrackID_2025;
   TStnTrackID*      fTrackID_30;
 

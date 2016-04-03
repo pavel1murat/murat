@@ -50,10 +50,16 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fTrackID_30   = new TStnTrackID();
   fTrackID_30->SetMinNActive(30);
 //-----------------------------------------------------------------------------
+  fTrackIDA     = new TStnTrackID();
+  fTrackIDA->SetMaxFitMomErr (0.3);
+  fTrackIDA->SetMaxT0Err     (2.0);
+  fTrackIDA->SetMinFitCons   (-1.);
+  fTrackIDA->SetMinTrkQual   (0.5);
+//-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
   fPdgCode       = 11;
-  fGeneratorCode = 2;			// 2:conversionGun, 28:StoppedParticleReactionGun
+  fGeneratorCode = 2 ;			// 2:conversionGun, 28:StoppedParticleReactionGun
 
   fDebugCut[5].fXMin   = 106.;
   fDebugCut[5].fXMax   = 200.;
@@ -99,6 +105,10 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fChi2DofC   ,"chi2dc"   ,Form("%s: track chi2/N calc" ,Folder), 500, 0, 10,Folder);
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fNWrong     ,"nwrong"   ,Form("%s: Nhits w wrong drft",Folder), 200, 0,200,Folder);
+  HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(Doublets)"       ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNOSDoublets,"nosd"     ,Form("%s: N(OS Doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNSSDoublets,"nssd"     ,Form("%s: N(SS Doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNAmb0      ,"namb0"    ,Form("%s: N(Amb=0)"          ,Folder),  50, 0, 50,Folder);
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
@@ -112,11 +122,6 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 500, -2.5, 2.5,Folder);
 
-  //  HBook1F(Hist->fZ1         ,"z1"       ,Form("%s: track Z1      "    ,Folder), 200,-2000,2000,Folder);
-  //  HBook2F(Hist->fNHVsStation,"nh_vs_st" ,Form("%s: N(hits) Vs Station",Folder),  50, 0,50,10,-0.5,9.5,Folder);
-  //  HBook2F(Hist->fNHVsNSt    ,"nh_vs_nst",Form("%s: N(hits) Vs NSt"    ,Folder),  10,-0.5,9.5,40,-0.5,39.5,Folder);
-
-  //  HBook1F(Hist->fPdgCode    ,"pdg"      ,Form("%s: track PDG code"    ,Folder), 100,-50,50,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -224,9 +229,15 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[  5] = 1;		// TrkPatRec Set C30 tracks 
   book_track_histset[  6] = 1;		// TrkPatRec-not-CalPatRec Set C30 tracks 
   book_track_histset[  7] = 1;		// TrkPatRec SetC no fitCons&momErr&t0Err tracks 
+  book_track_histset[  8] = 0;          // **
+  book_track_histset[  9] = 1;		// CalPatRec SetC, dpf>1 tracks 
 
   book_track_histset[ 10] = 1;          // TrkPatRec all  tracks events Ecl > 60
   book_track_histset[ 11] = 1;          // TrkPatRec SetC tracks events Ecl > 60
+
+  book_track_histset[ 21] = 1;          // TrkPatRec TrackIDA
+  book_track_histset[ 22] = 1;          // TrkPatRec TrackIDA + (p>102) + (dpf > 1)
+  book_track_histset[ 23] = 1;          // TrkPatRec TrackIDA + (p>102) + (dpf > 1)
 
   book_track_histset[100] = 1;		// CalPatRec all tracks 
   book_track_histset[101] = 1;		// CalPatRec SetC tracks
@@ -236,9 +247,15 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[105] = 1;		// CalPatRec Set C30 tracks 
   book_track_histset[106] = 1;		// CalPatRec-not-TrkPatRec Set C30 tracks 
   book_track_histset[107] = 1;		// CalPatRec SetC no fitCons&momErr&t0Err tracks 
+  book_track_histset[108] = 0;          // **
+  book_track_histset[109] = 1;		// CalPatRec SetC, dpf>1 tracks 
 
   book_track_histset[110] = 1;          // CalPatRec all  tracks events Ecl > 60
   book_track_histset[111] = 1;          // CalPatRec SetC tracks events Ecl > 60
+
+  book_track_histset[121] = 1;          // CalPatRec TrackIDA
+  book_track_histset[122] = 1;          // CalPatRec TrackIDA + (p > 102) + (dpf > 1)
+  book_track_histset[123] = 1;          // CalPatRec TrackIDA + (p > 102) + (dpf > 1)
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -339,6 +356,10 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.));
   Hist->fNActive->Fill(Track->NActive());
   Hist->fNWrong->Fill(Track->NWrong());
+  Hist->fNDoublets->Fill(Track->NOSDoublets()+Track->NSSDoublets());
+  Hist->fNOSDoublets->Fill(Track->NOSDoublets());
+  Hist->fNSSDoublets->Fill(Track->NSSDoublets());
+  Hist->fNAmb0->Fill(Track->fNDoublets >> 16);
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
   Hist->fQ->Fill(-1);
@@ -442,11 +463,17 @@ void TTrackCompModule::FillHistograms() {
 	n_setc30_tracks[i] += 1;
       }
 //-----------------------------------------------------------------------------
-// IHIST+7: SetC - FitConsBit - tracks 
+// IHIST+7: (SetC - FitConsBit - T0ErrBit - MomErrBit) tracks 
 //-----------------------------------------------------------------------------
       int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kFitMomErrBit;
       if ((trk->fIDWord & ~mask) == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+7],trk,tp);
+      }
+//-----------------------------------------------------------------------------
+// IHIST+9: (SetC + (dpf > 1)tracks 
+//-----------------------------------------------------------------------------
+      if ((trk->fIDWord == 0) & (tp->fDpF > 1)) {
+	FillTrackHistograms(fHist.fTrack[ihist+9],trk,tp);
       }
 //-----------------------------------------------------------------------------
 // IHIST+10: SetC30 selection
@@ -456,6 +483,17 @@ void TTrackCompModule::FillHistograms() {
 
 	if (trk->fIDWord == 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+11],trk,tp);
+	}
+      }
+//-----------------------------------------------------------------------------
+// IHIST+21: IDA selection
+// IHIST+22: IDA +(dpf > 1) selection
+//-----------------------------------------------------------------------------
+      if ((tp->fIDWordA == 0)) {
+	FillTrackHistograms(fHist.fTrack[ihist+21],trk,tp);
+	if (trk->P() > 102.0) {
+	  FillTrackHistograms(fHist.fTrack[ihist+22],trk,tp);
+	  if (tp->fDpF > 1) FillTrackHistograms(fHist.fTrack[ihist+23],trk,tp);
 	}
       }
     }
@@ -591,6 +629,7 @@ int TTrackCompModule::Event(int ientry) {
       track            = fTrackBlock[i]->Track(itrk);
 
       id_word          = fTrackID->IDWord(track);
+      tp->fIDWordA     = fTrackIDA->IDWord(track);
       tp->fIDWord_2025 = fTrackID_2025->IDWord(track);
       tp->fIDWord_30   = fTrackID_30->IDWord(track);
       track->fIDWord   = id_word;

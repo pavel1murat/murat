@@ -319,6 +319,8 @@ public:
   TDiskCalorimeter* fDiskCalorimeter;
 
   TStnTrackID*      fTrackID;
+  TStnTrackID*      fTrackID_A;		// 
+
   TEmuLogLH*        fLogLH;
 
   double            fMinT0;

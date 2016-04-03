@@ -3,6 +3,7 @@
     int     fNEPl;
     int     fNDPl;
     int     fIDWord;
+    int     fIDWord_A;
 
     float   fDpF ;    // tracker-only resolution
     float   fDp0 ;

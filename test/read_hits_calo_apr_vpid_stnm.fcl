@@ -40,7 +40,7 @@ source       : {
 physics: { @table::physics 
     filters : { @table::physics.filters 
 	InitStntuple   : { @table::InitStntuple 
-	    histFileName           : "read_hits_dem_reco_stnmaker.stn" 
+	    histFileName           : "read_hits_calo_apr_vpid_stnm.stn" 
 	}
 
  	StntupleMaker   : { @table::StntupleMaker3 
@@ -60,13 +60,13 @@ physics: { @table::physics
 # can use path names specified in 'physics.' context w/o prefixing
 #
 
-services.TFileService.fileName                      : "egun_stnmaker.hist"
+services.TFileService.fileName                      : "read_mix_hits_calo_apr_vpid_stnm.hist"
 #------------------------------------------------------------------------------
 # uncomment the next 2 lines if you want the DST file to be written out
 #-----------------------------------------------------------------------------
 # physics.out                               : [ detectorOutput ]
 # outputs.detectorOutput.SelectEvents       : { SelectEvents : [ p1 ] }
-outputs.detectorOutput.fileName           : ".root"
+outputs.detectorOutput.fileName           : "read_mix_hits_calo_apr_vpid_stnm.root"
 #------------------------------------------------------------------------------
 # debugging
 #------------------------------------------------------------------------------

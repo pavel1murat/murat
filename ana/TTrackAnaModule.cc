@@ -62,8 +62,9 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 
   fMinT0 = 700; 
 
-  fTrackID = new TStnTrackID();
-  fLogLH   = new TEmuLogLH();
+  fTrackID   = new TStnTrackID();
+  fTrackID_A = new TStnTrackID();
+  fLogLH     = new TEmuLogLH();
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
@@ -436,6 +437,9 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 30] = 1;		// tracks with Nhits >= 25
   book_track_histset[ 31] = 1;		// tracks with Nhits >= 25 and chi/Ndof < 3
   book_track_histset[ 32] = 1;		// Set C tracks 100 < P < 110 , 0 < E/P < 1.15, |DT < 3|
+
+  book_track_histset[ 33] = 1;		// DaveTrkQual tracks
+  
 
   book_track_histset[ 40] = 1;		// all tracks, alg_mask = 1
   book_track_histset[ 41] = 1;		// Set "C" tracks, alg_mask = 1
@@ -1151,6 +1155,12 @@ int TTrackAnaModule::BeginJob() {
 // initialize likelihood histograms
 //-----------------------------------------------------------------------------
   fTrackID->SetMinT0(fMinT0);
+
+  fTrackID_A->SetMinT0(fMinT0);
+  fTrackID_A->SetMaxFitMomErr (0.3);
+  fTrackID_A->SetMaxT0Err     (2.0);
+  fTrackID_A->SetMinFitCons   (-1.);
+  fTrackID_A->SetMinTrkQual   (0.5);
 //-----------------------------------------------------------------------------
 // initialize likelihood histograms
 // TRK 19: "Set C" plus reconstructed and matched cluster
@@ -1580,6 +1590,12 @@ void TTrackAnaModule::FillHistograms() {
       }
     }
 //-----------------------------------------------------------------------------
+// TRK_33: "DaveTrkQual" tracks
+//-----------------------------------------------------------------------------
+    if (tp->fIDWord_A == 0) {
+      FillTrackHistograms(fHist.fTrack[33],trk);
+    }
+//-----------------------------------------------------------------------------
 // split tracks by the algorithm mask: 1 , 2 , or 3
 //-----------------------------------------------------------------------------
     alg_mask = trk->AlgMask();
@@ -1807,6 +1823,10 @@ int TTrackAnaModule::Event(int ientry) {
     track          = fTrackBlock->Track(itrk);
     id_word        = fTrackID->IDWord(track);
     track->fIDWord = id_word;
+
+    tp->fIDWord    = id_word;
+    tp->fIDWord_A  = fTrackID_A->IDWord(track);
+
     if (id_word == 0) {
       fNGoodTracks += 1;
       if ((track->fVMaxEp != NULL) && (fabs(track->fVMaxEp->fDt) < 2.5)) {

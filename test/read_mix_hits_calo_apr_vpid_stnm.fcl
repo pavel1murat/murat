@@ -46,7 +46,7 @@ process_name : ReadMixHitsCaloAprVpidStnm
 
 physics: { @table::physics 
     filters : { @table::physics.filters 
-	InitStntuple  : { @table::InitStntuple histFileName : "conv_mixcd3_x1_stnmaker.stn"  }
+	InitStntuple  : { @table::InitStntuple histFileName : "read_mix_hits_calo_apr_vpid_stnm.stn"  }
  	StntupleMaker : { @table::StntupleMaker3 
 	    g4ModuleLabel : @local::G4_MODULE_LABEL
 	}
@@ -65,12 +65,12 @@ physics.filters.neutronMixer.detail.mean : @local::meanBackground
 physics.filters.photonMixer.detail.mean  : @local::meanBackground
 physics.filters.protonMixer.detail.mean  : @local::meanBackground
 
-services.TFileService.fileName            : "conv_mixcd3_x1_stnmaker.hist"
+services.TFileService.fileName            : "read_mix_hits_calo_apr_vpid_stnm.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "conv_mixcd3_x1_stnmaker.root"
+# outputs.detectorOutput.fileName           : "read_mix_hits_calo_apr_vpid_stnm.root"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

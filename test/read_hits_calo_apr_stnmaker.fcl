@@ -11,10 +11,10 @@
 # local changes to global variables
 #------------------------------------------------------------------------------
 BEGIN_PROLOG
-  pdgId                               : 11
-  elow                                : 105.0010
-  ehi                                 : 105.0015
   bgHitFiles                          : @nil
+#  g4ModuleLabel                       : "g4run"          # for normal generators
+#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
+  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
@@ -43,7 +43,9 @@ physics: { @table::physics
 	    histFileName           : "read_hits_dem_reco_stnmaker.stn" 
 	}
 
- 	StntupleMaker   : { @table::StntupleMaker3 }
+ 	StntupleMaker   : { @table::StntupleMaker3 
+	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	}
     }
 
 #    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker, TrackRecoCheck ]

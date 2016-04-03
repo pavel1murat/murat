@@ -1,0 +1,78 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# make STNTUPLE in one go, without creating an intermediate file
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "murat/fcl/prolog.fcl"
+#------------------------------------------------------------------------------
+# local changes to global variables
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+  bgHitFiles                          : @nil
+#  g4ModuleLabel                       : "g4run"          # for normal generators
+#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
+  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : ReadHitsCaloAprStnmaker
+
+source       : { 
+    module_type : RootInput
+    #    fileNames   : [ {INPUT_DATA_FILE} ]
+    #    fileNames : ["/mu2e/data/tdr/beam/g4s4p5/tdr.beam.g4s4.conversion.1504a.15729672/good/00000/dsStopsToHitsConversion.root"]
+    #    maxEvents   : 100
+    inputCommands : ['keep *_*_*_*'
+    #		     , 'drop *_muonTimeMap_*_*'
+    #		     , 'drop *_protonTimeMap_*_*'
+    #		     , 'drop mu2eStrawDigis_*_*_*'
+    #		     , 'drop mu2eStrawHits_*_*_*'
+    #		     , 'drop *_CaloReadoutHitsMaker_*_*'
+    #		     , 'drop *_CaloCrystalHitsMaker_*_*'
+    # Uncomment the above lines to reduce file size.
+		    ]
+}
+
+physics: { @table::physics 
+    filters : { @table::physics.filters 
+	InitStntuple   : { @table::InitStntuple 
+	    histFileName           : "read_hits_dem_reco_stnmaker.stn" 
+	}
+
+ 	StntupleMaker   : { @table::StntupleMaker3 
+	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	}
+    }
+
+#    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker, TrackRecoCheck ]
+#    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker ]
+#    p1 : [ @sequence::physics.calpatrec_dem_dmm_reco_stnmaker ]
+#    p1 : [ @sequence::physics.trkpatrec_dem_dmm_reco_stnmaker ]
+    p1 : [ @sequence::hits_calo_apr_stnmaker_seq ]
+    trigger_paths : [ p1  ]
+    end_paths     : [ out ]
+}
+#
+# can use path names specified in 'physics.' context w/o prefixing
+#
+
+services.TFileService.fileName                      : "egun_stnmaker.hist"
+#------------------------------------------------------------------------------
+# uncomment the next 2 lines if you want the DST file to be written out
+#-----------------------------------------------------------------------------
+# physics.out                               : [ detectorOutput ]
+# outputs.detectorOutput.SelectEvents       : { SelectEvents : [ p1 ] }
+outputs.detectorOutput.fileName           : ".root"
+#------------------------------------------------------------------------------
+# debugging
+#------------------------------------------------------------------------------
+# physics.producers.CalPatRecDem.diagLevel : 1
+# physics.producers.CalPatRecDmm.diagLevel : 1
+# physics.producers.AvikPID.debugLevel     : 100
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

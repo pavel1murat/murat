@@ -4,6 +4,7 @@
     int     fNDPl;
     int     fIDWord;
     int     fIDWord_A;
+    int     fIDWord_01;
 
     float   fDpF ;    // tracker-only resolution
     float   fDp0 ;

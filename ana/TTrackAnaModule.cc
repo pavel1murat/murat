@@ -62,9 +62,10 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 
   fMinT0 = 700; 
 
-  fTrackID   = new TStnTrackID();
-  fTrackID_A = new TStnTrackID();
-  fLogLH     = new TEmuLogLH();
+  fTrackID    = new TStnTrackID();
+  fTrackID_A  = new TStnTrackID();
+  fTrackID_01 = new TStnTrackID();
+  fLogLH      = new TEmuLogLH  ();
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
@@ -438,9 +439,9 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 31] = 1;		// tracks with Nhits >= 25 and chi/Ndof < 3
   book_track_histset[ 32] = 1;		// Set C tracks 100 < P < 110 , 0 < E/P < 1.15, |DT < 3|
 
-  book_track_histset[ 33] = 1;		// DaveTrkQual tracks
+  book_track_histset[ 33] = 1;		// DaveTrkQual tracks Q > 0.5
+  book_track_histset[ 34] = 1;		// DaveTrkQual tracks Q > 0.1
   
-
   book_track_histset[ 40] = 1;		// all tracks, alg_mask = 1
   book_track_histset[ 41] = 1;		// Set "C" tracks, alg_mask = 1
   book_track_histset[ 42] = 1;		// Set "C" tracks, alg_mask = 1, T > 700
@@ -462,8 +463,6 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 70] = 0;
 
   book_track_histset[ 71] = 1;		// Set "C" tracks   103.5 < P < 105 : interesting for DIO
-
-  
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -1152,15 +1151,21 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
   BookHistograms();
 //-----------------------------------------------------------------------------
-// initialize likelihood histograms
+// initialize track identification
 //-----------------------------------------------------------------------------
   fTrackID->SetMinT0(fMinT0);
 
   fTrackID_A->SetMinT0(fMinT0);
-  fTrackID_A->SetMaxFitMomErr (0.3);
-  fTrackID_A->SetMaxT0Err     (2.0);
+  fTrackID_A->SetMaxFitMomErr (100);
+  fTrackID_A->SetMaxT0Err     (100);
   fTrackID_A->SetMinFitCons   (-1.);
   fTrackID_A->SetMinTrkQual   (0.5);
+
+  fTrackID_01->SetMinT0(fMinT0);
+  fTrackID_01->SetMaxFitMomErr (100);
+  fTrackID_01->SetMaxT0Err     (100);
+  fTrackID_01->SetMinFitCons   (-1.);
+  fTrackID_01->SetMinTrkQual   (0.1);
 //-----------------------------------------------------------------------------
 // initialize likelihood histograms
 // TRK 19: "Set C" plus reconstructed and matched cluster
@@ -1590,10 +1595,16 @@ void TTrackAnaModule::FillHistograms() {
       }
     }
 //-----------------------------------------------------------------------------
-// TRK_33: "DaveTrkQual" tracks
+// TRK_33: "DaveTrkQual" Q>0.5 tracks
 //-----------------------------------------------------------------------------
     if (tp->fIDWord_A == 0) {
       FillTrackHistograms(fHist.fTrack[33],trk);
+    }
+//-----------------------------------------------------------------------------
+// TRK_34: "DaveTrkQual" Q>0.1 tracks
+//-----------------------------------------------------------------------------
+    if (tp->fIDWord_01 == 0) {
+      FillTrackHistograms(fHist.fTrack[34],trk);
     }
 //-----------------------------------------------------------------------------
 // split tracks by the algorithm mask: 1 , 2 , or 3
@@ -1826,6 +1837,7 @@ int TTrackAnaModule::Event(int ientry) {
 
     tp->fIDWord    = id_word;
     tp->fIDWord_A  = fTrackID_A->IDWord(track);
+    tp->fIDWord_01 = fTrackID_01->IDWord(track);
 
     if (id_word == 0) {
       fNGoodTracks += 1;

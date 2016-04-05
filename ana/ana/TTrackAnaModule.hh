@@ -320,6 +320,7 @@ public:
 
   TStnTrackID*      fTrackID;
   TStnTrackID*      fTrackID_A;		// 
+  TStnTrackID*      fTrackID_01;	// 
 
   TEmuLogLH*        fLogLH;
 

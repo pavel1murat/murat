@@ -50,11 +50,17 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fTrackID_30   = new TStnTrackID();
   fTrackID_30->SetMinNActive(30);
 //-----------------------------------------------------------------------------
-  fTrackIDA     = new TStnTrackID();
-  fTrackIDA->SetMaxFitMomErr (0.3);
-  fTrackIDA->SetMaxT0Err     (2.0);
-  fTrackIDA->SetMinFitCons   (-1.);
-  fTrackIDA->SetMinTrkQual   (0.5);
+  fTrackID_01     = new TStnTrackID();
+  fTrackID_01->SetMaxFitMomErr (100);
+  fTrackID_01->SetMaxT0Err     (100);
+  fTrackID_01->SetMinFitCons   (-1.);
+  fTrackID_01->SetMinTrkQual   (0.1);
+
+  fTrackID_A     = new TStnTrackID();
+  fTrackID_A->SetMaxFitMomErr (100);
+  fTrackID_A->SetMaxT0Err     (100);
+  fTrackID_A->SetMinFitCons   (-1.);
+  fTrackID_A->SetMinTrkQual   (0.5);
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
@@ -235,9 +241,10 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[ 10] = 1;          // TrkPatRec all  tracks events Ecl > 60
   book_track_histset[ 11] = 1;          // TrkPatRec SetC tracks events Ecl > 60
 
-  book_track_histset[ 21] = 1;          // TrkPatRec TrackIDA
-  book_track_histset[ 22] = 1;          // TrkPatRec TrackIDA + (p>102) + (dpf > 1)
-  book_track_histset[ 23] = 1;          // TrkPatRec TrackIDA + (p>102) + (dpf > 1)
+  book_track_histset[ 21] = 1;          // TrkPatRec TrackID_A
+  book_track_histset[ 22] = 1;          // TrkPatRec TrackID_A + (p>102)
+  book_track_histset[ 23] = 1;          // TrkPatRec TrackID_A + (p>102) + (dpf > 1)
+  book_track_histset[ 24] = 1;          // TrkPatRec TrackID_01
 
   book_track_histset[100] = 1;		// CalPatRec all tracks 
   book_track_histset[101] = 1;		// CalPatRec SetC tracks
@@ -253,9 +260,10 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[110] = 1;          // CalPatRec all  tracks events Ecl > 60
   book_track_histset[111] = 1;          // CalPatRec SetC tracks events Ecl > 60
 
-  book_track_histset[121] = 1;          // CalPatRec TrackIDA
-  book_track_histset[122] = 1;          // CalPatRec TrackIDA + (p > 102) + (dpf > 1)
-  book_track_histset[123] = 1;          // CalPatRec TrackIDA + (p > 102) + (dpf > 1)
+  book_track_histset[121] = 1;          // CalPatRec TrackID_A
+  book_track_histset[122] = 1;          // CalPatRec TrackID_A + (p > 102) 
+  book_track_histset[123] = 1;          // CalPatRec TrackID_A + (p > 102) + (dpf > 1)
+  book_track_histset[124] = 1;          // CalPatRec TrackID_01
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -416,10 +424,19 @@ void TTrackCompModule::FillHistograms() {
   int          ihist, n_setc_tracks[2], n_setc2025_tracks[2], n_setc30_tracks[2];
 //-----------------------------------------------------------------------------
 // event histograms
+// EVT_0: all events
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
-
-  if ((fEClMax > 60.) && (fTClMax > 550)) {
+//-----------------------------------------------------------------------------
+// EVT_1: events with 50 MeV+ cluster and T0 > 550
+//-----------------------------------------------------------------------------
+  if ((fEClMax > 50.) && (fTClMax > 550)) {
+    FillEventHistograms(fHist.fEvent[1]);
+  }
+//-----------------------------------------------------------------------------
+// EVT_2: events with 50 MeV+ cluster and both tracks T0 > 550
+//-----------------------------------------------------------------------------
+  if ((fEClMax > 50.) && (fTClMax > 550)) {
     FillEventHistograms(fHist.fEvent[1]);
   }
 //-----------------------------------------------------------------------------
@@ -487,14 +504,21 @@ void TTrackCompModule::FillHistograms() {
       }
 //-----------------------------------------------------------------------------
 // IHIST+21: IDA selection
-// IHIST+22: IDA +(dpf > 1) selection
+// IHIST+22: IDA + (p > 102) selection
+// IHIST+23: IDA + (p > 102) + (dpf > 1) selection
 //-----------------------------------------------------------------------------
-      if ((tp->fIDWordA == 0)) {
+      if ((tp->fIDWord_A == 0)) {
 	FillTrackHistograms(fHist.fTrack[ihist+21],trk,tp);
 	if (trk->P() > 102.0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+22],trk,tp);
 	  if (tp->fDpF > 1) FillTrackHistograms(fHist.fTrack[ihist+23],trk,tp);
 	}
+      }
+//-----------------------------------------------------------------------------
+// IHIST+24: ID_01 selection
+//-----------------------------------------------------------------------------
+      if ((tp->fIDWord_01 == 0)) {
+	FillTrackHistograms(fHist.fTrack[ihist+24],trk,tp);
       }
     }
   }
@@ -629,7 +653,8 @@ int TTrackCompModule::Event(int ientry) {
       track            = fTrackBlock[i]->Track(itrk);
 
       id_word          = fTrackID->IDWord(track);
-      tp->fIDWordA     = fTrackIDA->IDWord(track);
+      tp->fIDWord_01   = fTrackID_01->IDWord(track);
+      tp->fIDWord_A     = fTrackID_A->IDWord(track);
       tp->fIDWord_2025 = fTrackID_2025->IDWord(track);
       tp->fIDWord_30   = fTrackID_30->IDWord(track);
       track->fIDWord   = id_word;

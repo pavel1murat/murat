@@ -13,7 +13,7 @@
 BEGIN_PROLOG
   bgHitFiles                          : @nil
 #  g4ModuleLabel                       : "g4run"          # for normal generators
-#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
+#  g4ModuleLabel                       : "detectorFilter" # for Ralf's cosmics
   G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
 

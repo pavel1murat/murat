@@ -34,8 +34,8 @@ public:
 
     int     fIDWord_2025;		// ID word for 20 <= N(active) < 25 tracks
     int     fIDWord_30;	                // ID word for 30 <= N(active)
-    int     fIDWord_01;
-    int     fIDWord_A;
+    int     fIDWord_01;			// TrkQual > 0.1
+    int     fIDWord_03;			// TrkQual > 0.3
 
     float   fDpF ;                      // tracker-only resolution
     float   fDp0 ;
@@ -183,8 +183,10 @@ public:
 
   TStnTrack*        fTrack;
   TStnTrackID*      fTrackID;
+
   TStnTrackID*      fTrackID_01;
-  TStnTrackID*      fTrackID_A;
+  TStnTrackID*      fTrackID_03;
+
   TStnTrackID*      fTrackID_2025;
   TStnTrackID*      fTrackID_30;
 

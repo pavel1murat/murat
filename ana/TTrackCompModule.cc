@@ -56,11 +56,11 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fTrackID_01->SetMinFitCons   (-1.);
   fTrackID_01->SetMinTrkQual   (0.1);
 
-  fTrackID_A     = new TStnTrackID();
-  fTrackID_A->SetMaxFitMomErr (100);
-  fTrackID_A->SetMaxT0Err     (100);
-  fTrackID_A->SetMinFitCons   (-1.);
-  fTrackID_A->SetMinTrkQual   (0.5);
+  fTrackID_03     = new TStnTrackID();
+  fTrackID_03->SetMaxFitMomErr (100);
+  fTrackID_03->SetMaxT0Err     (100);
+  fTrackID_03->SetMinFitCons   (-1.);
+  fTrackID_03->SetMinTrkQual   (0.3);
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
@@ -507,7 +507,7 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+22: IDA + (p > 102) selection
 // IHIST+23: IDA + (p > 102) + (dpf > 1) selection
 //-----------------------------------------------------------------------------
-      if ((tp->fIDWord_A == 0)) {
+      if ((tp->fIDWord_03 == 0)) {
 	FillTrackHistograms(fHist.fTrack[ihist+21],trk,tp);
 	if (trk->P() > 102.0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+22],trk,tp);
@@ -653,8 +653,10 @@ int TTrackCompModule::Event(int ientry) {
       track            = fTrackBlock[i]->Track(itrk);
 
       id_word          = fTrackID->IDWord(track);
+
       tp->fIDWord_01   = fTrackID_01->IDWord(track);
-      tp->fIDWord_A     = fTrackID_A->IDWord(track);
+      tp->fIDWord_03   = fTrackID_03->IDWord(track);
+
       tp->fIDWord_2025 = fTrackID_2025->IDWord(track);
       tp->fIDWord_30   = fTrackID_30->IDWord(track);
       track->fIDWord   = id_word;

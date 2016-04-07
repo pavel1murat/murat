@@ -303,6 +303,7 @@ void TTrackAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder)
   HBook1F(Hist->fNHitCrystalsTot,"nhcr_tot",Form("%s: NHit Crystals Tot",Folder), 100, 0,100,Folder);
   HBook1F(Hist->fECal,"ecal",Form("%s: E(cal), sum over both disks",Folder), 500, 0,250,Folder);
   HBook1F(Hist->fECalOverEKin,"ec_over_ek",Form("%s: E(cal)/E(kin)",Folder), 200, 0,2,Folder);
+  HBook1F(Hist->fInstLumi    ,"lumi"      ,Form("%s: N(protons/mubunch)",Folder), 2000, 0,1.e10,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -544,11 +545,11 @@ void TTrackAnaModule::BookHistograms() {
 // need MC truth branch
 //-----------------------------------------------------------------------------
 void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
-  double            cos_th, dio_wt, xv, yv, rv, zv, p;
+  double            cos_th, dio_wt, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
   double            e, m, r;
-  TLorentzVector    mom;
+  TLorentzVector    mom(1.,0.,0.,0);
 
-  fParticle->Momentum(mom);
+  if (fParticle) fParticle->Momentum(mom);
 
   p      = mom.P();
 
@@ -556,10 +557,12 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
 
   dio_wt = TStntuple::DioWeightAl(p);
 
-  xv = fParticle->Vx()+3904.;
-  yv = fParticle->Vy();
-  rv = sqrt(xv*xv+yv*yv);
-  zv = fParticle->Vz();
+  if (fParticle) {
+    xv = fParticle->Vx()+3904.;
+    yv = fParticle->Vy();
+    rv = sqrt(xv*xv+yv*yv);
+    zv = fParticle->Vz();
+  }
 
   Hist->fEleMom->Fill(p);
   Hist->fDioMom->Fill(p,dio_wt);
@@ -777,7 +780,10 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
       ekin = sqrt(p*p+m*m)-m;
     }
     Hist->fECalOverEKin->Fill(ecal/ekin);
+
   }
+
+  Hist->fInstLumi->Fill(GetHeaderBlock()->InstLum());
 }
 
 //-----------------------------------------------------------------------------
@@ -1159,7 +1165,7 @@ int TTrackAnaModule::BeginJob() {
   fTrackID_A->SetMaxFitMomErr (100);
   fTrackID_A->SetMaxT0Err     (100);
   fTrackID_A->SetMinFitCons   (-1.);
-  fTrackID_A->SetMinTrkQual   (0.5);
+  fTrackID_A->SetMinTrkQual   (0.3);
 
   fTrackID_01->SetMinT0(fMinT0);
   fTrackID_01->SetMaxFitMomErr (100);
@@ -1219,9 +1225,9 @@ void TTrackAnaModule::FillHistograms() {
   if (fNGoodTracks > 0) {
     FillEventHistograms(fHist.fEvent[6]); 
 
-    TLorentzVector    mom;
+    TLorentzVector    mom(1.,0.,0.,0);
     
-    fParticle->Momentum(mom);
+    if (fParticle) fParticle->Momentum(mom);
 
     double p, cos_th;
 
@@ -1595,13 +1601,13 @@ void TTrackAnaModule::FillHistograms() {
       }
     }
 //-----------------------------------------------------------------------------
-// TRK_33: "DaveTrkQual" Q>0.5 tracks
+// TRK_33: "DaveTrkQual" Q > 0.3 tracks
 //-----------------------------------------------------------------------------
     if (tp->fIDWord_A == 0) {
       FillTrackHistograms(fHist.fTrack[33],trk);
     }
 //-----------------------------------------------------------------------------
-// TRK_34: "DaveTrkQual" Q>0.1 tracks
+// TRK_34: "DaveTrkQual" Q > 0.1 tracks
 //-----------------------------------------------------------------------------
     if (tp->fIDWord_01 == 0) {
       FillTrackHistograms(fHist.fTrack[34],trk);
@@ -1744,7 +1750,7 @@ int TTrackAnaModule::Event(int ientry) {
   TEmuLogLH::PidData_t  dat;
   TStnTrack*            track;
   int                   id_word;
-  TLorentzVector        mom;
+  TLorentzVector        mom (1.,0.,0.,0);
 
   TDiskCalorimeter::GeomData_t disk_geom;
 
@@ -1773,10 +1779,12 @@ int TTrackAnaModule::Event(int ientry) {
       break;
     }
   }
+
 					// may want to revisit the definition of fSimp
   fSimp     = fSimpBlock->Particle(0);
 
-  fParticle->Momentum(mom);
+  if (fParticle) fParticle->Momentum(mom);
+
 					// this is a kludge, to be removed at the next 
 					// ntupling 
   //  fEleE     = fParticle->Energy();

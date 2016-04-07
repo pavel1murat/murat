@@ -1,8 +1,6 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
-# read pre-generated conversion electron files : 
-# - dataset datasets/ccd35600       to run on the grid
-# - dataset datasets/ccd35600-local for local tests
+# generate 105 MeV/c electrons and mix with background
 #
 # make STNTUPLE in one go, without creating an intermediate file
 # if not running on the grid, need to specify the background hit file 
@@ -20,31 +18,33 @@
 # murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
 #                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
 #------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
 BEGIN_PROLOG
   meanBackground                      : -1        # fixed at 1
   pdgId                               : 11
   elow                                : 105.0010
   ehi                                 : 105.0015
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDem
-#  bgHitFiles                          : @nil
-#  g4ModuleLabel                       : "g4run"          # for normal generators
-#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
-  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+# bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+# G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large
 # mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
 #------------------------------------------------------------------------------
-# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
-# bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
-# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
 # CD3
 # bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
 # bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local-v2/sim.mu2e.cd3-detmix-cut.v566.000003_00000000.art" ]
 END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
-
+#---------------------------------------------------------------------------------------------------
 process_name : EgunMixHitsCaloAprVpidStnm
 
 source       : { module_type : EmptyEvent }
@@ -68,7 +68,7 @@ physics: { @table::physics
 	}
     }
 
-    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_stnm ]
+    p1 : [ @sequence::path_gen_mix_hits_calo_apr_vpid_stnm ]
 
     trigger_paths : [ p1  ]
     end_paths     : [ out ]
@@ -85,8 +85,8 @@ services.TFileService.fileName            : "egun_mix_hits_calo_apr_vpid_stnm.hi
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
-# physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "egun_mix_hits_calo_apr_vpid_stnm.root"
+# physics.out : [ detectorOutput ]
+# outputs.detectorOutput.fileName           : "egun_mix_hits_calo_apr_vpid_stnm.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

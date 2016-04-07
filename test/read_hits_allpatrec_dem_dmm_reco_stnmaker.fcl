@@ -52,25 +52,21 @@ physics: { @table::physics
 	}
     }
 
-#    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker, TrackRecoCheck ]
-#    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker ]
-#    p1 : [ @sequence::physics.calpatrec_dem_dmm_reco_stnmaker ]
     p1 : [ @sequence::physics.trkpatrec_dem_dmm_reco_stnmaker ]
-#    p1 : [ @sequence::physics.trkpatrec_dem_reco_stnmaker ]
+
     trigger_paths : [ p1  ]
     end_paths     : [ out ]
 }
 #
 # can use path names specified in 'physics.' context w/o prefixing
 #
-
-services.TFileService.fileName                      : "egun_stnmaker.hist"
+services.TFileService.fileName            : "read_hits_allpatrec_dem_dmm_reco_stnmaker.hist"
 #------------------------------------------------------------------------------
 # uncomment the next 2 lines if you want the DST file to be written out
 #-----------------------------------------------------------------------------
 # physics.out                               : [ detectorOutput ]
 # outputs.detectorOutput.SelectEvents       : { SelectEvents : [ p1 ] }
-outputs.detectorOutput.fileName           : ".root"
+outputs.detectorOutput.fileName           : "read_hits_allpatrec_dem_dmm_reco_stnmaker.art"
 #------------------------------------------------------------------------------
 # debugging
 #------------------------------------------------------------------------------

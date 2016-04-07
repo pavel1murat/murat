@@ -1,6 +1,8 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
-# read pre-generated conversion electron files : 
+# read pre-generated [CE] or [HE] files, mix, run full reco and stntuple
+# force to define bgHitFiles
+#
 # - dataset datasets/ccd35600       to run on the grid
 # - dataset datasets/ccd35600-local for local tests
 #
@@ -52,7 +54,8 @@ physics: { @table::physics
 	}
     }
 
-    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_stnm ]
+#    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_stnm ]
+    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_display ]
 
     trigger_paths : [ p1  ]
     end_paths     : [ out ]
@@ -70,7 +73,7 @@ services.TFileService.fileName            : "read_mix_hits_calo_apr_vpid_stnm.hi
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "read_mix_hits_calo_apr_vpid_stnm.root"
+# outputs.detectorOutput.fileName           : "read_mix_hits_calo_apr_vpid_stnm.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

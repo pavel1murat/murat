@@ -1,0 +1,74 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate single 105 MeV/c electrons
+#
+# - dataset datasets/ccd35600       to run on the grid
+# - dataset datasets/ccd35600-local for local tests
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  meanBackground                      : -1        # fixed at 1
+  pdgId                               : 13
+  elow                                : 148.9583  # 105.0010
+  ehi                                 : 148.9585  # 105.0015
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+#------------------------------------------------------------------------------
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : MgunHitsCaloAprVpidStnm
+
+source       : { module_type : EmptyEvent }
+
+physics: { @table::physics 
+    producers : { @table::physics.producers 
+	generate : { @table::StoppedParticleReactionGun 
+	    physics : {
+		pdgId            : @local::pdgId
+		elow             : @local::elow
+		ehi              : @local::ehi
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "flat"
+	    }
+	}
+    }
+    filters : { @table::physics.filters 
+	InitStntuple  : { @table::InitStntuple histFileName : "mgun_hits_calo_apr_vpid_stnm.stn"  }
+ 	StntupleMaker : { @table::StntupleMaker3 
+	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	}
+    }
+
+    p1 : [ @sequence::path_gen_hits_calo_apr_vpid_stnm ]
+
+    trigger_paths : [ p1  ]
+    end_paths     : [ out ]
+}
+
+services.TFileService.fileName            : "mgun_hits_calo_apr_vpid_stnm.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "mgun_hits_calo_apr_vpid_stnm.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

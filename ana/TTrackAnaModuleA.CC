@@ -45,15 +45,14 @@
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
 
-#include "ana/TTrackAnaModule.hh"
+#include "ana/TTrackAnaModuleA.hh"
 
-ClassImp(TTrackAnaModule)
+ClassImp(TTrackAnaModuleA)
 //-----------------------------------------------------------------------------
-TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
-  TStnModule(name,title)
+TTrackAnaModuleA::TTrackAnaModuleA(const char* name, const char* title):
+  TTrackAnaModuleBase(name,title)
 {
   fPtMin  = 1.;
-  fTrackNumber.Set(100);
 
   fDiskCalorimeter = new TDiskCalorimeter();
   fCalorimeterType = 2;
@@ -77,13 +76,13 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 }
 
 //-----------------------------------------------------------------------------
-TTrackAnaModule::~TTrackAnaModule() {
+TTrackAnaModuleA::~TTrackAnaModuleA() {
   for (int i=0; i<fNID; i++) delete fTrackID[i];
 }
 
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
+void TTrackAnaModuleA::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
   //     char name [200];
   //     char title[200];
   //-----------------------------------------------------------------------------
@@ -108,7 +107,7 @@ void TTrackAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
+void TTrackAnaModuleA::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
@@ -135,7 +134,7 @@ void TTrackAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Fol
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
+void TTrackAnaModuleA::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
@@ -150,7 +149,7 @@ void TTrackAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
+void TTrackAnaModuleA::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
@@ -190,8 +189,6 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
-  HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
-
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
 
@@ -261,7 +258,7 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+void TTrackAnaModuleA::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
   char name [200];
   //  char title[200];
 
@@ -311,7 +308,7 @@ void TTrackAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder)
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
+void TTrackAnaModuleA::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
@@ -321,7 +318,7 @@ void TTrackAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fMomTrackerFront,"pfront",Form("%s: CE mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
 }
 //_____________________________________________________________________________
-void TTrackAnaModule::BookHistograms() {
+void TTrackAnaModuleA::BookHistograms() {
 
   //  char name [200];
   //  char title[200];
@@ -563,7 +560,7 @@ void TTrackAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // need MC truth branch
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
+void TTrackAnaModuleA::FillEventHistograms(EventHist_t* Hist) {
   double            cos_th, dio_wt, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
   double            e, m, r;
   TLorentzVector    mom(1.,0.,0.,0);
@@ -810,7 +807,7 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
+void TTrackAnaModuleA::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
 
   int                    nhits;
   float                  t, e, r, e700, n700;
@@ -858,7 +855,7 @@ void TTrackAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
 
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
+void TTrackAnaModuleA::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
   int   row, col;
   float  x, y, z, r;
 
@@ -897,7 +894,7 @@ void TTrackAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cl
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
+void TTrackAnaModuleA::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
   int    gen_id;
   float  p, cos_th, z0, t0, r0, x0, y0;
 
@@ -928,7 +925,7 @@ void TTrackAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
+void TTrackAnaModuleA::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
 
   Hist->fPdgCode->Fill(Simp->fPdgCode);
   Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
@@ -939,7 +936,7 @@ void TTrackAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
 //-----------------------------------------------------------------------------
 // for DIO : ultimately, one would need to renormalize the distribution
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
+void TTrackAnaModuleA::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 
   TLorentzVector  mom;
   double          chi2c, r;
@@ -981,7 +978,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fNWrong->Fill(Track->NWrong());
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
-  //  printf("TTrackAnaModule::FillTrackHistograms: track charge is not defined yet\n");
+  //  printf("TTrackAnaModuleA::FillTrackHistograms: track charge is not defined yet\n");
   Hist->fQ->Fill(-1);
   Hist->fFitCons[0]->Fill(Track->fFitCons);
   Hist->fFitCons[1]->Fill(Track->fFitCons);
@@ -1124,7 +1121,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
-int TTrackAnaModule::BeginJob() {
+int TTrackAnaModuleA::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
@@ -1170,7 +1167,7 @@ int TTrackAnaModule::BeginJob() {
 
 
 //_____________________________________________________________________________
-int TTrackAnaModule::BeginRun() {
+int TTrackAnaModuleA::BeginRun() {
   int rn = GetHeaderBlock()->RunNumber();
   TStntuple::Init(rn);
   return 0;
@@ -1181,7 +1178,7 @@ int TTrackAnaModule::BeginRun() {
 // fill efficiency histograms : need 10 histogram sets
 // pitch = 1./tan(dip)
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
+void TTrackAnaModuleA::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
 					       TStnTrackID*     TrackID   , 
 					       int              HistSet   ) {
   if (fSimp->NStrawHits() >= 20) {
@@ -1241,7 +1238,7 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 }
 
 //_____________________________________________________________________________
-void TTrackAnaModule::FillHistograms() {
+void TTrackAnaModuleA::FillHistograms() {
 
   double       cos_th (-2.),  cl_e(-1.);
   int          disk_id(-1), alg_mask, best_alg;
@@ -1719,7 +1716,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // assume less than 20 tracks 
 //-----------------------------------------------------------------------------
-int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  , 
+int TTrackAnaModuleA::InitTrackPar(TStnTrackBlock*   TrackBlock  , 
 				  TStnClusterBlock* ClusterBlock, 
 				  TrackPar_t*       TrackPar    ) {
   TrackPar_t*           tp;
@@ -1829,7 +1826,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     }
 
     if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
-      GetHeaderBlock()->Print(Form(" TTrackAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
+      GetHeaderBlock()->Print(Form(" TTrackAnaModuleA ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
     }
 //-----------------------------------------------------------------------------
 // PID likelihoods
@@ -1868,7 +1865,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // 2014-04-30: it looks that reading the straw hits takes a lot of time - 
 //              turn off by default by commenting it out
 //-----------------------------------------------------------------------------
-int TTrackAnaModule::Event(int ientry) {
+int TTrackAnaModuleA::Event(int ientry) {
 
   TLorentzVector        mom (1.,0.,0.,0);
 
@@ -1888,7 +1885,7 @@ int TTrackAnaModule::Event(int ientry) {
 
   TGenParticle* genp;
   int           pdg_code, generator_code;
-  
+
   fParticle = NULL;
   for (int i=fNGenp-1; i>=0; i--) {
     genp           = fGenpBlock->Particle(i);
@@ -1910,13 +1907,8 @@ int TTrackAnaModule::Event(int ientry) {
   int nvdhits = fVdetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
     TVdetHitData* vdhit = fVdetBlock->Hit(i);
-    if (vdhit->PdgCode() == fSimp->fPdgCode) {
-      if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
-	fSimPar.fTFront = vdhit;
-      }
-      else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
-	fSimPar.fTMid = vdhit;
-      }
+    if ((vdhit->PdgCode() == fSimp->fPdgCode) && ((vdhit->Index() == 13) || (vdhit->Index() == 14))) {
+      fSimPar.fTFront = vdhit;
     }
   }
 
@@ -1991,7 +1983,7 @@ int TTrackAnaModule::Event(int ientry) {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::Debug() {
+void TTrackAnaModuleA::Debug() {
 
   TStnTrack* trk;
   TrackPar_t* tp;
@@ -2065,13 +2057,13 @@ void TTrackAnaModule::Debug() {
 }
 
 //_____________________________________________________________________________
-int TTrackAnaModule::EndJob() {
+int TTrackAnaModuleA::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
   return 0;
 }
 
 //_____________________________________________________________________________
-void TTrackAnaModule::Test001() {
+void TTrackAnaModuleA::Test001() {
 
   // mu2e::HexMap* hmap      = new mu2e::HexMap();
 

@@ -4,6 +4,7 @@
   struct SimPar_t {
     TSimParticle*  fParticle;		// pointer to the signal particle
     TVdetHitData*  fTFront;		// VD hit at the tracker front
+    TVdetHitData*  fTMid;		// VD hit at the tracker center
   };
 
 #endif

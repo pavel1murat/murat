@@ -93,7 +93,9 @@ public:
     TH1F*    fD0;
     TH1F*    fZ0;
     TH1F*    fTanDip;
+    TH1F*    fDtZ0;			// MC truth: T0-T(MC TMid)
     TH1F*    fResid;
+
     TH1F*    fAlgMask;
 					// matching
     TH1F*    fChi2Match;

@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TTrackAnaModule_hh
-#define murat_ana_TTrackAnaModule_hh
+#ifndef murat_ana_TTrackAnaModuleA_hh
+#define murat_ana_TTrackAnaModuleA_hh
 
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
 
-#include "Stntuple/loop/TStnModule.hh"
+#include "murat/ana/TTrackAnaModuleBase.hh"
 
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
@@ -25,7 +25,7 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
-class TTrackAnaModule: public TStnModule {
+class TTrackAnaModuleA: public TTrackAnaModuleBase {
 public:
 //-----------------------------------------------------------------------------
 // track and sim particle additional parameters
@@ -37,7 +37,7 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct CaloHist_t {
+  struct CaloHist_t: public HistData_t {
     TH1F*    fDiskID;		       // per crystal hit
     TH1F*    fEnergy  [kNDisks];
     TH1F*    fTime    [kNDisks];
@@ -51,7 +51,7 @@ public:
     TH1F*    fRWE700  [kNDisks];
   };
 
-  struct ClusterHist_t {
+  struct ClusterHist_t: public HistData_t {
     TH1F*    fDiskID;
     TH1F*    fEnergy;
     TH1F*    fT0;
@@ -74,7 +74,7 @@ public:
     TH1F*    fSigE2;
   };
 
-  struct EventHist_t {
+  struct EventHist_t: public HistData_t  {
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
     TH1F*    fEleMom;
@@ -113,7 +113,7 @@ public:
     TH1F*    fInstLumi;
   };
 
-  struct TrackHist_t {
+  struct TrackHist_t: public HistData_t  {
     TH1F*    fP[3];			// total momentum, 3 hists with different binning
     TH1F*    fP0;
     TH1F*    fP2;
@@ -144,7 +144,6 @@ public:
     TH1F*    fD0;
     TH1F*    fZ0;
     TH1F*    fTanDip;
-    TH1F*    fDtZ0;			// MC truth: T0-T(MC TMid)
     TH1F*    fResid;
     TH1F*    fAlgMask;
 					// matching histograms
@@ -219,7 +218,7 @@ public:
     TH1F*    fNMcStrawHits;             // N(straw hits) produced in the tracker by the MC particle
   };
 
-  struct GenpHist_t {
+  struct GenpHist_t: public HistData_t  {
     TH1F*    fPdgCode[2];		// same distribution in different scale
     TH1F*    fGenID;			// 
     TH1F*    fZ0;			// 
@@ -229,14 +228,14 @@ public:
     TH1F*    fCosTh;			// 
   };
 					// histograms for the simulated CE
-  struct SimpHist_t {
+  struct SimpHist_t: public HistData_t  {
     TH1F*    fPdgCode;
     TH1F*    fMomTargetEnd;
     TH1F*    fMomTrackerFront;
     TH1F*    fNStrawHits;
   };
 
-  struct TrackEffHist_t {
+  struct TrackEffHist_t: public HistData_t  {
     TH1F*    fPtMc;			// denominator
     TH1F*    fPtReco;			// numerator
   };
@@ -269,10 +268,6 @@ public:
   TVdetDataBlock*   fVdetBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
-					// additional track parameters (assume ntracks < 20)
-  TrackPar_t        fTrackPar[20];
-
-  SimPar_t          fSimPar;
 					// histograms filled
   Hist_t            fHist;
 					// cut values
@@ -284,8 +279,6 @@ public:
 
   TSimParticle*     fSimp;
   double            fEleE;		// electron energy
-
-  int               fCalorimeterType;
 
   int               fNClusters;
   int               fNTracks[10];
@@ -299,29 +292,14 @@ public:
   int               fNHyp;
   int               fBestHyp[10];
   int               fFillDioHist;
-					// fTrackNumber[i]: track number, 
-					// corresponding to OBSP particle #i
-					// or -1
-  TStnArrayI        fTrackNumber;
-
-  TStnTrack*        fTrack;
-  TStnCluster*      fCluster;
-
-  TDiskCalorimeter* fDiskCalorimeter;
-
-  int               fNID;            // 0:SetC 1:DaveTrkQual>0.1 2:DaveTrkQual>0.4
-  TStnTrackID*      fTrackID[20];
-  int               fBestID;
-
-  TEmuLogLH*        fLogLH;
 
   double            fMinT0;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TTrackAnaModule(const char* name="TrackAna", const char* title="TrackAna");
-  ~TTrackAnaModule();
+  TTrackAnaModuleA(const char* name="TrackAnaA", const char* title="TrackAnaA");
+  ~TTrackAnaModuleA();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -347,21 +325,19 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms    (CaloHist_t*    Hist, const char* Folder);
-  void    BookClusterHistograms (ClusterHist_t* Hist, const char* Folder);
-  void    BookGenpHistograms    (GenpHist_t*    Hist, const char* Folder);
-  void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
-  void    BookSimpHistograms    (SimpHist_t*    Hist, const char* Folder);
-  void    BookTrackHistograms   (TrackHist_t*   Hist, const char* Folder);
+  void    BookCaloHistograms    (HistData_t* Hist, const char* Folder);
+  void    BookClusterHistograms (HistData_t* Hist, const char* Folder);
+  void    BookGenpHistograms    (HistData_t* Hist, const char* Folder);
+  void    BookEventHistograms   (HistData_t* Hist, const char* Folder);
+  void    BookSimpHistograms    (HistData_t* Hist, const char* Folder);
+  void    BookTrackHistograms   (HistData_t* Hist, const char* Folder);
 
-  void    FillEventHistograms    (EventHist_t* Hist);
-  void    FillCaloHistograms     (CaloHist_t*    Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms  (ClusterHist_t* Hist, TStnCluster*  Cluster);
-  void    FillGenpHistograms     (GenpHist_t*    Hist, TGenParticle* Genp   );
-  void    FillSimpHistograms     (SimpHist_t*    Hist, TSimParticle* Simp   );
-  void    FillTrackHistograms    (TrackHist_t*   Hist, TStnTrack*    Trk    );
-
-  void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
+  void    FillEventHistograms    (HistData_t* Hist);
+  void    FillCaloHistograms     (HistData_t* Hist, TStnCrystal*  Crystal);
+  void    FillClusterHistograms  (HistData_t* Hist, TStnCluster*  Cluster);
+  void    FillGenpHistograms     (HistData_t* Hist, TGenParticle* Genp   );
+  void    FillSimpHistograms     (HistData_t* Hist, TSimParticle* Simp   );
+  void    FillTrackHistograms    (HistData_t* Hist, TStnTrack*    Trk    );
 
   void    BookHistograms();
   void    FillHistograms();
@@ -376,7 +352,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TTrackAnaModule,0)
+  ClassDef(TTrackAnaModuleA,0)
 };
 
 #endif

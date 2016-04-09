@@ -119,6 +119,8 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
+  HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
+
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
 
@@ -457,6 +459,8 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fD0->Fill(Track->fD0);
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
+  Hist->fDtZ0->Fill(Tp->fDtZ0);
+  
   Hist->fAlgMask->Fill(Track->AlgMask());
 
   Hist->fChi2Match->Fill(Tp->fChi2Match);
@@ -667,12 +671,6 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     id_word = tp->fIDWord[fBestID];
     track->fIDWord = id_word;
 
-    //    if (id_word == 0) {
-    //      fNGoodTracks += 1;
-    //       if ((track->fVMaxEp != NULL) && (fabs(track->fVMaxEp->fDt) < 2.5)) {
-    // 	fNMatchedTracks += 1;
-    //       }
-    //    }
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -691,7 +689,8 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fNHPl = n1;
     tp->fNEPl = n2;
     tp->fNDPl = ndiff;
-
+    
+    tp->fP     = track->fP ;		// provision for correcting
     tp->fDpF   = track->fP     -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;
@@ -699,6 +698,9 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     if (fFillDioHist == 0) tp->fDioWt = 1.;
     else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
+
+    tp->fDtZ0 = -1.e6;
+    if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -845,8 +847,13 @@ int TTrackCompModule::Event(int ientry) {
   int nvdhits = fVdetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
     TVdetHitData* vdhit = fVdetBlock->Hit(i);
-    if ((vdhit->PdgCode() == fSimp->fPdgCode) && ((vdhit->Index() == 13) || (vdhit->Index() == 14))) {
-      fSimPar.fTFront = vdhit;
+    if (vdhit->PdgCode() == fSimp->fPdgCode) {
+      if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
+	fSimPar.fTFront = vdhit;
+      }
+      else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
+	fSimPar.fTMid = vdhit;
+      }
     }
   }
 
@@ -861,51 +868,7 @@ int TTrackCompModule::Event(int ientry) {
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
-
-    //    int ntrk = fNTracks[i];
-
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i]);
-
-//     for (int itrk=0; itrk<ntrk; itrk++) {
-// //-----------------------------------------------------------------------------
-// // assume less 20 tracks
-// //-----------------------------------------------------------------------------
-//       tp               = fTrackPar[i]+itrk;
-//       track            = fTrackBlock[i]->Track(itrk);
-
-//       for (int iw=0; iw<7; iw++) {
-// 	tp->fIDWord[iw]  = fTrackID[iw]->IDWord(track);
-//       }
-
-//       track->fIDWord   = tp->fIDWord[0];
-
-//       if (tp->fIDWord[fBestID] == 0) fNGoodTracks[i] += 1;
-// //-----------------------------------------------------------------------------
-// // process hit masks
-// //-----------------------------------------------------------------------------
-//       int i1, i2, n1(0) ,n2(0), ndiff(0);
-//       int nbits = track->fHitMask.GetNBits();
-//       for (int i=0; i<nbits; i++) {
-// 	i1 = track->HitMask()->GetBit(i);
-// 	i2 = track->ExpectedHitMask()->GetBit(i);
-// 	n1 += i1;
-// 	n2 += i2;
-// 	if (i1 != i2) ndiff += 1;
-//       }
-// //-----------------------------------------------------------------------------
-// // define additional parameters
-// //-----------------------------------------------------------------------------
-//       tp->fNHPl = n1;
-//       tp->fNEPl = n2;
-//       tp->fNDPl = ndiff;
-
-//       tp->fDpF   = track->fP     -track->fPFront;
-//       tp->fDp0   = track->fP0    -track->fPFront;
-//       tp->fDp2   = track->fP2    -track->fPFront;
-//       tp->fDpFSt = track->fPFront-track->fPStOut;
-
-//       tp->fDioWt = TStntuple::DioWeightAl(fEleE);
-//  }
   }
 
   FillHistograms();
@@ -926,7 +889,6 @@ void TTrackCompModule::Debug() {
   TrackPar_t* tp(NULL);
   char        text[500];
   int         calpatrec(1);
-
 //-----------------------------------------------------------------------------
 // bit 0: All Events
 //-----------------------------------------------------------------------------

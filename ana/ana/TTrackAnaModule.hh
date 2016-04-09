@@ -14,6 +14,7 @@
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
 #include "Stntuple/obj/TStrawDataBlock.hh"
+#include "Stntuple/obj/TVdetDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 
@@ -26,27 +27,32 @@
 
 class TTrackAnaModule: public TStnModule {
 public:
-
+//-----------------------------------------------------------------------------
+// track and sim particle additional parameters
+//-----------------------------------------------------------------------------
 #include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/SimPar_t.hh"
+
+  enum { kNDisks = 2 };
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
   struct CaloHist_t {
-    TH1F*    fVaneID;		       // per crystal hit
-    TH1F*    fEnergy  [4];
-    TH1F*    fTime    [4];
-    TH1F*    fNHits   [4];
-    TH1F*    fRadius  [4];
-    TH1F*    fRadiusWE[4];
-    TH1F*    fE700    [4];
-    TH1F*    fT700    [4];
-    TH1F*    fN700    [4];
-    TH1F*    fR700    [4];
-    TH1F*    fRWE700  [4];
+    TH1F*    fDiskID;		       // per crystal hit
+    TH1F*    fEnergy  [kNDisks];
+    TH1F*    fTime    [kNDisks];
+    TH1F*    fNHits   [kNDisks];
+    TH1F*    fRadius  [kNDisks];
+    TH1F*    fRadiusWE[kNDisks];
+    TH1F*    fE700    [kNDisks];
+    TH1F*    fT700    [kNDisks];
+    TH1F*    fN700    [kNDisks];
+    TH1F*    fR700    [kNDisks];
+    TH1F*    fRWE700  [kNDisks];
   };
 
   struct ClusterHist_t {
-    TH1F*    fVaneID;
+    TH1F*    fDiskID;
     TH1F*    fEnergy;
     TH1F*    fT0;
     TH1F*    fRow;
@@ -78,6 +84,8 @@ public:
     TH1F*    fNTracks;
     TH1F*    fNStrawHits[2];
     TH1F*    fNGoodSH;
+    TH1F*    fMomTF;                    // signal particle momentuum @ Tracker Front
+    TH1F*    fPitchTF;		        // SIM tan(pitch) @ Tracker Front
     TH1F*    fDtClT;
     TH1F*    fEMax;			// energy of the first reco cluster
     TH1F*    fDtClS;
@@ -86,24 +94,23 @@ public:
     TH1F*    fBestHyp[2];		// [0]: by chi2, [1]: by fit consistency
     TH1F*    fNGenp;                    // N(particles in GENP block)
 
-    TH1F*    fNCaloCrystalHits[2];
-    TH2F*    fNCaloHitsVsVane[2];
-    TH2F*    fNCaloHitsVsRow[2];
-    TH2F*    fNCaloHitsVsCol[2];
+    TH1F*    fNCaloCrystalHits[kNDisks];
+    TH2F*    fNCaloHitsVsDisk [kNDisks];
+    TH2F*    fNCaloHitsVsRow  [kNDisks];
+    TH2F*    fNCaloHitsVsCol  [kNDisks];
     // calorimeter hit histograms
 
-    TH1F*    fETot        [4];            // total energy/event 
-    TH2F*    fECrVsR      [4];            // total energy_per_crystal/event vs radius
-    TH2F*    fNCrVsR      [4];            // total energy_per_crystal/event vs radius
+    TH1F*    fETot        [kNDisks];            // total energy/event 
+    TH2F*    fECrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
+    TH2F*    fNCrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
 
-    TH2F*    fNCrystalHitsVsR[4];            //
-    TH2F*    fNHitCrystalsVsR[4];            //
+    TH2F*    fNCrystalHitsVsR[kNDisks];            //
+    TH2F*    fNHitCrystalsVsR[kNDisks];            //
 
     TH1F*    fNHitCrystalsTot;
     TH1F*    fECal;
     TH1F*    fECalOverEKin;
     TH1F*    fInstLumi;
-      
   };
 
   struct TrackHist_t {
@@ -141,7 +148,7 @@ public:
     TH1F*    fAlgMask;
 					// matching histograms
     TH1F*    fNClusters;
-    TH1F*    fVaneID;
+    TH1F*    fDiskID;
     TH1F*    fXCal;
     TH1F*    fYCal;
     TH1F*    fZCal;
@@ -165,9 +172,7 @@ public:
     TH2F*    fDvVsDu;
     TH1F*    fPath;
     TH2F*    fDuVsPath;
-    TH2F*    fDucVsPath;
     TH2F*    fDvVsPath;
-    TH2F*    fDvcVsPath;
     TH2F*    fDtVsPath;
     TH2F*    fDuVsTDip;
     TH2F*    fDvVsTDip;
@@ -210,6 +215,7 @@ public:
     TH1F*    fDrTC;                     // deltaR(cluster-track)
     TH1F*    fSInt;                     // calculated interaction length
     TH1F*    fDaveTrkQual;		// 
+    TH1F*    fNMcStrawHits;             // N(straw hits) produced in the tracker by the MC particle
   };
 
   struct GenpHist_t {
@@ -233,25 +239,6 @@ public:
     TH1F*    fPtMc;			// denominator
     TH1F*    fPtReco;			// numerator
   };
-
-//-----------------------------------------------------------------------------
-//  fTrackHist[ 0]: all the tracks
-//  fTrackHist[ 1]: all the tracks Pt > PtMin and within the fiducial
-//  fTrackHist[ 2]: [1]+ matched to MC
-//  fTrackHist[ 3]: [1]+ not matched to MC
-//  fTrackHist[ 4]: [2]+ inside  the jet
-//  fTrackHist[ 5]: [3]+ inside  the jet
-//  fTrackHist[ 6]: [2]+ outside the jet
-//  fTrackHist[ 7]: [3]+ outside the jet
-//  fTrackHist[ 8]:
-//  fTrackHist[ 9]:
-//  fTrackHist[10]:
-//  fTrackHist[11]: tracks with pt.10 inside the COT
-//
-//  fTrackEffHist[0]
-//  fTrackEffHist[1]
-//  fTrackEffHist[2]
-//  fTrackEffHist[3]
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets   = 100 };
   enum { kNTrackHistSets   = 400 };
@@ -262,12 +249,12 @@ public:
 
   struct Hist_t {
     TH1F*          fCrystalR[2];	          // crystal radius
-    EventHist_t*   fEvent  [kNEventHistSets];
-    TrackHist_t*   fTrack  [kNTrackHistSets];
+    EventHist_t*   fEvent  [kNEventHistSets  ];
+    TrackHist_t*   fTrack  [kNTrackHistSets  ];
     ClusterHist_t* fCluster[kNClusterHistSets];
-    CaloHist_t*    fCalo   [kNCaloHistSets];
-    GenpHist_t*    fGenp   [kNGenpHistSets];
-    SimpHist_t*    fSimp   [kNSimpHistSets];
+    CaloHist_t*    fCalo   [kNCaloHistSets   ];
+    GenpHist_t*    fGenp   [kNGenpHistSets   ];
+    SimpHist_t*    fSimp   [kNSimpHistSets   ];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -278,10 +265,13 @@ public:
   TStnClusterBlock* fClusterBlock;
   TCalDataBlock*    fCalDataBlock;
   TStrawDataBlock*  fStrawDataBlock;
+  TVdetDataBlock*   fVdetBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
 					// additional track parameters (assume ntracks < 20)
   TrackPar_t        fTrackPar[20];
+
+  SimPar_t          fSimPar;
 					// histograms filled
   Hist_t            fHist;
 					// cut values
@@ -318,9 +308,9 @@ public:
 
   TDiskCalorimeter* fDiskCalorimeter;
 
-  TStnTrackID*      fTrackID;
-  TStnTrackID*      fTrackID_A;		// 
-  TStnTrackID*      fTrackID_01;	// 
+  int               fNID;            // 0:SetC 1:DaveTrkQual>0.1 2:DaveTrkQual>0.4
+  TStnTrackID*      fTrackID[20];
+  int               fBestID;
 
   TEmuLogLH*        fLogLH;
 
@@ -338,8 +328,8 @@ public:
   TStnTrackBlock*    GetTrackBlock  () { return fTrackBlock;   }
   TStnClusterBlock*  GetClusterBlock() { return fClusterBlock; }
 
-  TStnTrackID*       GetTrackID     () { return fTrackID; }
-  TEmuLogLH*         GetLogLH       () { return fLogLH; }
+  TStnTrackID*       GetTrackID(int I) { return fTrackID[I];   }
+  TEmuLogLH*         GetLogLH       () { return fLogLH;        }
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -370,9 +360,14 @@ public:
   void    FillSimpHistograms     (SimpHist_t*    Hist, TSimParticle* Simp   );
   void    FillTrackHistograms    (TrackHist_t*   Hist, TStnTrack*    Trk    );
 
+  void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
+
   void    BookHistograms();
   void    FillHistograms();
 
+  int     InitTrackPar(TStnTrackBlock*   TrackBlock  , 
+		       TStnClusterBlock* ClusterBlock, 
+		       TrackPar_t*       TrackPar    );
 
   void    Debug();
 //-----------------------------------------------------------------------------

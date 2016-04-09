@@ -32,12 +32,13 @@ ClassImp(TPidAnaModule)
 TPidAnaModule::TPidAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
-  fTrackID = new TStnTrackID();
+  fNID = 1;
+  for (int i=0; i<fNID; i++) fTrackID[i] = new TStnTrackID();
 }
 
 //-----------------------------------------------------------------------------
 TPidAnaModule::~TPidAnaModule() {
-  delete fTrackID;
+  for (int i=0; i<fNID; i++) delete fTrackID[i];
 }
 
 
@@ -305,7 +306,9 @@ int TPidAnaModule::Event(int ientry) {
     tp             = fTrackPar+itrk;
 
     track          = fTrackBlock->Track(itrk);
-    tp->fIDWord    = fTrackID->IDWord(track);
+    for (int i=0; i<fNID; i++) {
+      tp->fIDWord[i] = fTrackID[i]->IDWord(track);
+    }
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------

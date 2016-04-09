@@ -92,7 +92,8 @@ public:
   TStnPidBlock*         fPidDataBlock;
   TStnTrackBlock*       fTrackBlock;
 					// additional track parameters (assume ntracks < 20)
-  TStnTrackID*          fTrackID;
+  int                   fNID;
+  TStnTrackID*          fTrackID [20];
   TrackPar_t            fTrackPar[20];
 					// histograms filled
   Hist_t                fHist;

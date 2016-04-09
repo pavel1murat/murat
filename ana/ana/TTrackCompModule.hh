@@ -16,6 +16,7 @@
 #include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
+#include "Stntuple/obj/TVdetDataBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -26,48 +27,24 @@
 
 class TTrackCompModule: public TStnModule {
 public:
-
-  struct TrackPar_t {
-    int     fNHPl;
-    int     fNEPl;
-    int     fNDPl;
-
-    int     fIDWord_2025;		// ID word for 20 <= N(active) < 25 tracks
-    int     fIDWord_30;	                // ID word for 30 <= N(active)
-    int     fIDWord_01;			// TrkQual > 0.1
-    int     fIDWord_03;			// TrkQual > 0.3
-
-    float   fDpF ;                      // tracker-only resolution
-    float   fDp0 ;
-    float   fDp2 ;
-    float   fDpFSt;
-    double  fDioWt;
-
-    double  fEcl;
-    double  fEp;
-    double  fDx;
-    double  fDy;
-    double  fDz;
-    double  fDt;
-    double  fDu;			// rotated residuals
-    double  fDv;
-    double  fChi2Match;
-    double  fChi2XY;
-    double  fChi2T;
-    double  fPath;
-
-    double  fSinTC;			// angle between the cluster and the track
-  };
+#include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/SimPar_t.hh"
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
   struct EventHist_t {
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
+
+    TH1F*    fPdgCode;
+    TH1F*    fMomTargetEnd;
+    TH1F*    fMomTrackerFront;
+    TH1F*    fNshCE;
+
     TH1F*    fEleMom;
     TH1F*    fEleCosTh;
     TH1F*    fNTracks[2];
-    TH1F*    fNStrawHits[2];
+    TH1F*    fNshTot [2];
     TH1F*    fNGoodSH;
     TH1F*    fDtClT;
     TH1F*    fDtClS;
@@ -118,28 +95,34 @@ public:
     TH1F*    fTanDip;
     TH1F*    fResid;
     TH1F*    fAlgMask;
+					// matching
+    TH1F*    fChi2Match;
+    TH1F*    fChi2XY;
+    TH1F*    fChi2T;
+
+    TH1F*    fDt;			// track-cluster residuals
+    TH1F*    fDx;
+    TH1F*    fDy;
+    TH1F*    fDz;
+    TH1F*    fDu;
+    TH1F*    fDv;
+    TH1F*    fPath;
+
     TH2F*    fFConsVsNActive;
     TH1F*    fDaveTrkQual;
-  };
-
-  struct SimpHist_t {
-    TH1F*    fPdgCode;
-    TH1F*    fMomTargetEnd;
-    TH1F*    fMomTrackerFront;
-    TH1F*    fNStrawHits;
   };
 //-----------------------------------------------------------------------------
 //  fTrackHist[  0]: all tracks
 //  fTrackHist[100]: Set C tracks
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets   = 100 };
-  enum { kNTrackHistSets   = 400 };
-  enum { kNSimpHistSets    = 100 };
+  enum { kNEventHistSets   =  100 };
+  enum { kNTrackHistSets   =  500 };
+  enum { kNSimpHistSets    =  100 };
 
   struct Hist_t {
     EventHist_t*   fEvent  [kNEventHistSets];
     TrackHist_t*   fTrack  [kNTrackHistSets];
-    SimpHist_t*    fSimp   [kNSimpHistSets];
+    //    SimpHist_t*    fSimp   [kNSimpHistSets];
   };
 
 
@@ -152,14 +135,16 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlock[2];	// [0]: TrkPatRec, [1]:CalPatRec
+  TStnTrackBlock*   fTrackBlock[2];	// [0]: TrkPatRec tracks, [1]:all CalPatRec
   TStnClusterBlock* fClusterBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
-					// additional track parameters (assume ntracks < 10)
-  TrackPar_t        fTrackPar[2][10];
-					// histograms filled
-  Hist_t            fHist;
+  TVdetDataBlock*   fVdetBlock;
+					
+  TrackPar_t        fTrackPar[2][10];	// additional track parameters (assume ntracks < 10)
+  SimPar_t          fSimPar;		// additional parameters of the simulated MC particle
+  Hist_t            fHist;		// histograms filled
+
 					// cut values
   double            fPtMin;
 
@@ -172,23 +157,19 @@ public:
   TSimParticle*     fSimp;
   double            fEleE;		// electron energy
 
-  int               fNTracks[2];        // 0:TrkPatRec 1:CalPatRec
+  int               fNTracks    [2];    // 0:TrkPatRec 1:CalPatRec
   int               fNGoodTracks[2];
   int               fNGenp;		// N(generated particles)
 
-					// fTrackNumber[i]: track number, 
-					// corresponding to OBSP particle #i
-					// or -1
-  TStnArrayI        fTrackNumber;
-
   TStnTrack*        fTrack;
-  TStnTrackID*      fTrackID;
+  int               fFillDioHist;
+					// [0]: SetC, [1-6]: TrkQual 0.1 ... 0.6
+  int               fNID;
+  TStnTrackID*      fTrackID[20];
+  TStnTrackID*      fBestTrackID;
+  int               fBestID;
 
-  TStnTrackID*      fTrackID_01;
-  TStnTrackID*      fTrackID_03;
-
-  TStnTrackID*      fTrackID_2025;
-  TStnTrackID*      fTrackID_30;
+  TEmuLogLH*        fLogLH;
 
   double            fMinT0;
 
@@ -206,7 +187,7 @@ public:
 // accessors
 //-----------------------------------------------------------------------------
   Hist_t*            GetHist      () { return &fHist;      }
-  TStnTrackID*       GetTrackID   () { return fTrackID; }
+  //  TStnTrackID*       GetTrackID   () { return fTrackID; }
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
@@ -227,16 +208,19 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
-  void    BookSimpHistograms    (SimpHist_t*    Hist, const char* Folder);
   void    BookTrackHistograms   (TrackHist_t*   Hist, const char* Folder);
 
   void    FillEventHistograms    (EventHist_t*  Hist);
-  void    FillSimpHistograms     (SimpHist_t*   Hist, TSimParticle* Simp);
   void    FillTrackHistograms    (TrackHist_t*  Hist, TStnTrack*    Trk , TrackPar_t* Tp);
+
+  void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
 
   void    BookHistograms();
   void    FillHistograms();
 
+  int     InitTrackPar(TStnTrackBlock*   TrackBlock  , 
+		       TStnClusterBlock* ClusterBlock, 
+		       TrackPar_t*       TrackPar    );
 
   void    Debug();
 //-----------------------------------------------------------------------------

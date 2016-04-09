@@ -1,10 +1,10 @@
+#ifndef __murat_ana_TrackPar_t__
+#define __murat_ana_TrackPar_t__
   struct TrackPar_t {
     int     fNHPl;
     int     fNEPl;
     int     fNDPl;
-    int     fIDWord;
-    int     fIDWord_A;
-    int     fIDWord_01;
+    int     fIDWord[20];
 
     float   fDpF ;    // tracker-only resolution
     float   fDp0 ;
@@ -29,3 +29,4 @@
     double  fDrTC;
     double  fSInt;
   };
+#endif

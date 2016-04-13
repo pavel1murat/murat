@@ -569,7 +569,7 @@ void TTrackCompModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
 // what does CalPatRec add ?
-// TRK_0 : TrkPatRec only
+// TRK_0 : TrkPatRec tracks, BEST_ID
 //-----------------------------------------------------------------------------
   if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
     TStnTrack* trk = fTrackBlock[0]->Track(0);
@@ -580,7 +580,7 @@ void TTrackCompModule::FillHistograms() {
     if (fTrackBlock[1]->NTracks() > 0) {
       if (fTrackPar[1][0].fIDWord[3] == 0) {
 //-----------------------------------------------------------------------------
-// have CalPatRec track TrkQual > 0.3 and no TrkPatRec TrkQual > 0.4 track
+// TRK_1: have CalPatRec track TrkQual > 0.3 and no TrkPatRec TrkQual > 0.4 track
 //-----------------------------------------------------------------------------
 	TStnTrack* trk = fTrackBlock[1]->Track(0);
 	TrackPar_t* tp = &fTrackPar[1][0];
@@ -588,7 +588,7 @@ void TTrackCompModule::FillHistograms() {
       }
       if (fTrackPar[1][0].fIDWord[2] == 0) {
 //-----------------------------------------------------------------------------
-// have CalPatRec track TrkQual > 0.2 and no TrkPatRec TrkQual > 0.4 track
+// TRK_2: have CalPatRec track TrkQual > 0.2 and no TrkPatRec TrkQual > 0.4 track
 //-----------------------------------------------------------------------------
 	TStnTrack* trk = fTrackBlock[1]->Track(0);
 	TrackPar_t* tp = &fTrackPar[1][0];
@@ -642,14 +642,14 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp);
 //-----------------------------------------------------------------------------
-// IHIST+1: SetC selection
+// TRK_101, TRK_201: BestID 
 //-----------------------------------------------------------------------------
       if (tp->fIDWord[fBestID] == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp);
 	n_setc_tracks[i] += 1;
       }
 //-----------------------------------------------------------------------------
-// IHIST+2: (SetC - FitConsBit - T0ErrBit - MomErrBit) tracks 
+// TRK_102, TRK_202: (BestID - FitConsBit - T0ErrBit - MomErrBit) tracks 
 //-----------------------------------------------------------------------------
       int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kFitMomErrBit;
       if ((tp->fIDWord[fBestID] & ~mask) == 0) {

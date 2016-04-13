@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // use of TStnTrack::fTmp:
 //
-// Tmp(0) : corrected momentum at the tracker front
+// Tmp(0) : corrected momentum at the tracker front - not yet
 // 
 // use of debug bits: bits 0-2 are reserved
 //  0  : all events
@@ -28,6 +28,8 @@
 // 38  : EVT_7: events with E_CL > 60 and no CalPatRec tracks and TrkPatRec
 // 39  : trk_1: events with |SIN_TC| > 0.6
 // 40  : EVT_7: events with E_CL > 60 and no tracks at all
+//
+// 3 different ID : 
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -60,20 +62,47 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   fFillDioHist     = 1;
 
   fMinT0           = 700; 
-					// initialized in ::BeginJob
-  fNID             = 3;
+//-----------------------------------------------------------------------------
+// initialize Track ID
+// 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
+// what about number of hits ?
+//-----------------------------------------------------------------------------
+  fNID             = 4;
   for (int i=0; i<fNID; i++) {
     fTrackID[i]    = new TStnTrackID();
   }
 
-  fBestID     = 2;			// best: DaveTrkQual > 0.4
+  fTrackID[1]->SetMaxFitMomErr (100);
+  fTrackID[1]->SetMaxT0Err     (100);
+  fTrackID[1]->SetMinFitCons   (-1.);
+  fTrackID[1]->SetMinTrkQual   (0.1);
 
+  fTrackID[2]->SetMaxFitMomErr (100);
+  fTrackID[2]->SetMaxT0Err     (100);
+  fTrackID[2]->SetMinFitCons   (-1.);
+  fTrackID[2]->SetMinTrkQual   (0.4);
+
+  fTrackID[3]->SetMaxFitMomErr (100);
+  fTrackID[3]->SetMaxT0Err     (100);
+  fTrackID[3]->SetMinFitCons   (-1.);
+  fTrackID[3]->SetMinTrkQual   (0.4);
+  fTrackID[3]->SetMinNActive   (-1 );
+
+  fBestID     = 2;			// best: DaveTrkQual > 0.4
+//-----------------------------------------------------------------------------
+// PID: initialize likelihood histograms
+// TRK 19: "Set C" plus reconstructed and matched cluster
+//-----------------------------------------------------------------------------
   fLogLH      = new TEmuLogLH  ();
+  const char   *pid_version;
+  pid_version = gEnv->GetValue("mu2e.PidVersion","_none_");
+  fLogLH->Init(pid_version);
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
+// 2:conversionGun, 28:StoppedParticleReactionGun - see 
 //-----------------------------------------------------------------------------
   fPdgCode       = 11;
-  fGeneratorCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
+  fGeneratorCode =  2;
 }
 
 //-----------------------------------------------------------------------------
@@ -554,9 +583,6 @@ void TTrackAnaModule::BookHistograms() {
   for (int i=0; i<kNGenpHistSets; i++) book_genp_histset[i] = 0;
 
   book_genp_histset[0] = 1;		// all particles
-//   book_genp_histset[1] = 1;		// all crystals, e > 0
-//   book_genp_histset[2] = 1;		// all crystals, e > 0.1
-//   book_genp_histset[3] = 1;		// all crystals, e > 1.0
 
   for (int i=0; i<kNGenpHistSets; i++) {
     if (book_genp_histset[i] != 0) {
@@ -729,9 +755,6 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
     double   etot[4];
 
     TCalHitData* hit;
-
-    //    TDisk*       disk;
-    //    TEvdCrystal* cr;
 
     ndisks = fDiskCalorimeter->NDisks();
 
@@ -1154,30 +1177,6 @@ int TTrackAnaModule::BeginJob() {
 // book histograms
 //-----------------------------------------------------------------------------
   BookHistograms();
-//-----------------------------------------------------------------------------
-// initialize track identification
-//-----------------------------------------------------------------------------
-  fTrackID[0]->SetMinT0(fMinT0);
-
-  fTrackID[1]->SetMinT0(fMinT0);
-  fTrackID[1]->SetMaxFitMomErr (100);
-  fTrackID[1]->SetMaxT0Err     (100);
-  fTrackID[1]->SetMinFitCons   (-1.);
-  fTrackID[1]->SetMinTrkQual   (0.1);
-
-  fTrackID[2]->SetMinT0(fMinT0);
-  fTrackID[2]->SetMaxFitMomErr (100);
-  fTrackID[2]->SetMaxT0Err     (100);
-  fTrackID[2]->SetMinFitCons   (-1.);
-  fTrackID[2]->SetMinTrkQual   (0.4);
-
-//-----------------------------------------------------------------------------
-// initialize likelihood histograms
-// TRK 19: "Set C" plus reconstructed and matched cluster
-//-----------------------------------------------------------------------------
-  const char   *pid_version;
-  pid_version = gEnv->GetValue("mu2e.PidVersion","_none_");
-  fLogLH->Init(pid_version);
 
   return 0;
 }
@@ -1514,7 +1513,7 @@ void TTrackAnaModule::FillHistograms() {
 	FillTrackHistograms(fHist.fTrack[24],trk);
       }
 //-----------------------------------------------------------------------------
-// TRK 25: Set "C" tracks, 100 < P < 110, 0 < E/p < 1.15,  |dt_corr| < 3, chi2(match) < 100
+// TRK_25: Set "C" tracks, 100 < P < 110, 0 < E/p < 1.15,  |dt_corr| < 3, chi2(match) < 100
 //-----------------------------------------------------------------------------
       double dt_corr = trk->Dt(); // -1.;
       if ( (fabs(dt_corr) < 3.) && (tp->fEp < 1.15) && (trk->fP > 100.) && (trk->fP < 110)) {

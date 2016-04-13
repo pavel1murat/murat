@@ -731,8 +731,8 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // efficiency histograms, use fDaveTrkQual > 0.4 for the cuts
 //-----------------------------------------------------------------------------
-  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[4],&fTrackPar[0][0],10);
-  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[4],&fTrackPar[1][0],20);
+  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID],&fTrackPar[0][0],10);
+  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID],&fTrackPar[1][0],20);
 }
 
 

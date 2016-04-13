@@ -45,11 +45,11 @@ void plot_dio_spectrum(const char* Fn, const char* Hist = "trk_1/pdio") {
   h2->Reset();
 
   int n = 10000;
-  step  = (xmax-xmin)/n;
+  double step  = (xmax-xmin)/n;
   
   double qint = 0;
   for (int i=0; i<n; i++) {
-    x = xmin+(i+0.5)*step;
+    double x = xmin+(i+0.5)*step;
     qint += step*TStntuple::DioWeightAl(x); 
   }
 

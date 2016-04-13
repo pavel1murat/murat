@@ -2,87 +2,120 @@
 
 namespace {
   char* cut_label[10] = {
-    "DetFilter"   , "N(MC)>20", "Pf>100 MeV/c", "CE Pitch", "Track Fit", 
+    "DetFilter"   , "Nsh(CE)>20", "P(CE TF)>100 MeV/c", "CE Pitch", "Track Fit", 
     "Fit Qual", "T0>700"  , "Reco Pitch", "cosmics", "103.5 < P < 105 MeV/c"
   };
 
+  const char* e42s5721_track_ana  = "~/hist/mu2e/v5_7_0/e42s5721.track_ana.hist" ; // CE+BGR  , matcorr in CalPatRec
+  const char* e42s5721_track_comp = "~/hist/mu2e/v5_7_0/e42s5721.track_comp.hist"; // CE+BGR  , matcorr in CalPatRec
+
 };
+
+
+//-----------------------------------------------------------------------------
+void make_eff_ladder_hist(const char* Filename, const char* TrkAlg, int NEvents, TH1F*& Hist) {
+
+  if (Hist != 0) delete Hist;
+  
+  Hist = new TH1F(Form("h_eff_ladder_%s",TrkAlg),"Efficiency",10,0,10);
+  
+  float dat[10];	// for TrackCompAna circa Apr'2016
+  int   iset;
+
+  if      (strcmp(TrkAlg,"TrkPatRec") == 0) iset = 10;
+  else if (strcmp(TrkAlg,"CalPatRec") == 0) iset = 20;
+  
+  // total N(events) in the dataset ( <= NEvents)
+  dat[0] = gh1(Filename,"TrackComp","evt_0/ce_costh")->GetEntries();
+
+  // CE N(straw hits) > 20
+  dat[1] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset))->GetEntries();
+
+  // CE P > 100
+  dat[2] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+1))->GetEntries();
+
+  // CE pitch
+  dat[3] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+2))->GetEntries();
+
+  // commonality ends, track reconstructed and fit
+  dat[4] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+3))->GetEntries();
+
+  // TrkQual
+  dat[5] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+4))->GetEntries();
+
+  dat[6] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+5))->GetEntries();
+
+  dat[7] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+7))->GetEntries();
+
+  dat[8] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+8))->GetEntries();
+
+  dat[9] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+9))->GetEntries();
+
+  for (int i=1; i<=10; i++) {
+    Hist->GetXaxis()->SetBinLabel(i,cut_label[i-1]);
+    float v1 = dat[i-1]/(NEvents+0.);
+    Hist->SetBinContent(i,v1);
+  }
+}
 
 //-----------------------------------------------------------------------------
 // TrkAlg = "TrkPatRec", or "CalPatRec", or "MergePatRec"
 //-----------------------------------------------------------------------------
 void plot_daves_ladder(const char* Filename, const char* TrkAlg, int NEvents) {
 
-  TH1F* h_mpr = new TH1F("h_mpr","MergePatRec Efficiency",10,0,10);
-  TH1F* h_tpr = new TH1F("h_tpr","TrkPatRec   Efficiency",10,0,10);
-
-  float dat_mpr[10], dat_tpr[10];	// for TrackCompAna
-  int   iset;
-
-  if      (strcmp(TrkAlg,"TrkPatRec") == 0) iset = 10;
-  else if (strcmp(TrkAlg,"CalPatRec") == 0) iset = 20;
+  TH1F* hist(0);
   
-					// total N(events) in the dataset ( <= NEvents)
-  dat_mpr[0] = gh1(Filename,"TrackComp","evt_0/ce_costh")->GetEntries();
-  //  dat_tpr[0] = dat_mpr[0];
-					// CE N(straw hits) > 20
-  dat_mpr[1] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset))->GetEntries();
-  //  dat_tpr[1] = dat_mpr[1];
-					// CE P > 100
-  dat_mpr[2] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+1))->GetEntries();
-  //  dat_tpr[2] = dat_mpr[2];
-					// CE pitch
-  dat_mpr[3] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+2))->GetEntries();
-  //  dat_tpr[3] = dat_mpr[3];
-					// commonality ends, track reconstructed and fit
-  dat_mpr[4] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+3))->GetEntries();
-  //  dat_tpr[4] = gh1(Filename,"TrackComp","evt_24/ce_costh")->GetEntries();
+  make_eff_ladder_hist(Filename,TrkAlg,NEvents,hist);
 
-					// TrkQual
-  dat_mpr[5] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+4))->GetEntries();
-  //  dat_tpr[5] = gh1(Filename,"TrackComp","evt_25/ce_costh")->GetEntries();
-
-  dat_mpr[6] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+5))->GetEntries();
-  //  dat_tpr[6] = gh1(Filename,"TrackComp","evt_26/ce_costh")->GetEntries();
-
-  dat_mpr[7] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+7))->GetEntries();
-  //  dat_tpr[7] = gh1(Filename,"TrackComp","evt_27/ce_costh")->GetEntries();
-
-  dat_mpr[8] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+8))->GetEntries();
-  //  dat_tpr[8] = gh1(Filename,"TrackComp","evt_27/ce_costh")->GetEntries();
-
-  dat_mpr[9] = gh1(Filename,"TrackComp",Form("evt_%i/ce_costh",iset+9))->GetEntries();
-  //  dat_tpr[9] = gh1(Filename,"TrackComp","evt_27/ce_costh")->GetEntries();
-
-  float v1, v2;
-
-  for (int i=1; i<=10; i++) {
-    h_mpr->GetXaxis()->SetBinLabel(i,cut_label[i-1]);
-
-    v1 = dat_mpr[i-1]/(NEvents+0.);
-    //    v2 = dat_tpr[i-1]/(dat_tpr[0]+0.);
-
-    h_mpr->SetBinContent(i,v1);
-    //    h_tpr->SetBinContent(i,v2);
-  }
-
-  h_mpr->SetTitle(Form("MergePatRec+CalPatRec efficiency: %s",Filename));
-  h_mpr->SetStats(0);
-  h_mpr->SetMinimum(0.);
-  h_mpr->Draw();
-  h_mpr->Draw("same,text45");
-
-//   h_tpr->SetFillStyle(3003);
-//   h_tpr->SetFillColor(kBlue-7);
-//   h_tpr->Draw("same");
-
+  hist->SetTitle(Form("%s efficiency: %s",TrkAlg,Filename));
+  hist->SetStats(0);
+  hist->SetMaximum(0.8);
+  hist->SetMinimum(0.);
+  hist->Draw();
+  hist->Draw("same,text45");
 
   TLegend* leg = new TLegend(0.7,0.7,0.9,0.9);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
 
-  leg->AddEntry(h_mpr,"TrkPatRec+CalPatRec","f");
-  //  leg->AddEntry(h_tpr,"TrkPatRec","f");
+  leg->AddEntry(hist,TrkAlg,"f");
+
+  leg->Draw();
+}
+
+
+//-----------------------------------------------------------------------------
+// TrkAlg = "TrkPatRec", or "CalPatRec", or "MergePatRec"
+//-----------------------------------------------------------------------------
+void plot_trkpatrec_vs_calpatrec_ladders(const char* Filename, int NEvents) {
+
+  TH1F  *h_tpr(0), *h_cpr(0);
+  
+  make_eff_ladder_hist(Filename,"TrkPatRec",NEvents,h_tpr);
+  make_eff_ladder_hist(Filename,"CalPatRec",NEvents,h_cpr);
+
+  h_tpr->SetTitle("");
+  h_tpr->SetStats(0);
+  h_tpr->SetMaximum(0.8);
+  h_tpr->SetMinimum(0.);
+  h_tpr->SetLineColor(2);
+  h_tpr->SetLineWidth(2);
+  h_tpr->Draw();
+  h_tpr->Draw("same,text45");
+
+  h_cpr->Draw("same");
+
+  TText* label = new TText(1.5,0.75,Form("efficiency, TrkPatRec vs CalPatRec: %s",Filename));
+  label->SetTextSize(0.035);
+  label->SetTextFont(52);
+  label->Draw();
+  
+  TLegend* leg = new TLegend(0.7,0.6,0.9,0.75);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+
+  leg->AddEntry(h_tpr,"TrkPatRec","f");
+  leg->AddEntry(h_cpr,"CalPatRec","f");
 
   leg->Draw();
 }

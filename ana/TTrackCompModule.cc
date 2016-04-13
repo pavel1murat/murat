@@ -156,6 +156,9 @@ void TTrackCompModule::BookEventHistograms(EventHist_t* Hist, const char* Folder
   //  char name [200];
   //  char title[200];
 
+  HBook1D(Hist->fLumWt     ,"lumwt"    ,Form("%s: Luminosity Weight"               ,Folder),200, 0,10,Folder);
+  Hist->fLumWt->Sumw2(kTRUE);
+
   HBook1F(Hist->fRv        ,"rv"       ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
   HBook1F(Hist->fZv        ,"zv"       ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
 
@@ -307,10 +310,16 @@ void TTrackCompModule::BookHistograms() {
 // need MC truth branch
 //-----------------------------------------------------------------------------
 void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
-  double            cos_th, xv, yv, rv, zv, p;
-  TLorentzVector    mom;
+  double            cos_th, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
+  TLorentzVector    mom (1.,0.,0.,0);
 
-  fParticle->Momentum(mom);
+  if (fParticle) { 
+    fParticle->Momentum(mom);
+    xv = fParticle->Vx()+3904.;
+    yv = fParticle->Vy();
+    rv = sqrt(xv*xv+yv*yv);
+    zv = fParticle->Vz();
+  }
 
   p      = mom.P();
   cos_th = mom.Pz()/p;
@@ -320,6 +329,7 @@ void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
   rv = sqrt(xv*xv+yv*yv);
   zv = fParticle->Vz();
 
+  Hist->fLumWt->Fill(fLumWt);
   Hist->fRv->Fill(rv);
   Hist->fZv->Fill(zv);
 
@@ -906,15 +916,16 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 int TTrackCompModule::Event(int ientry) {
 
-  //  TStnTrack*            track;
-  TLorentzVector        mom;
-
   fTrackBlock[0]->GetEntry(ientry);
   fTrackBlock[1]->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fVdetBlock->GetEntry(ientry);
+//-----------------------------------------------------------------------------
+// luminosity weight
+//-----------------------------------------------------------------------------
+  fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
@@ -930,7 +941,9 @@ int TTrackCompModule::Event(int ientry) {
     fEClMax  = fCluster->Energy();
     fTClMax  = fCluster->Time  ();
   }
-
+//-----------------------------------------------------------------------------
+// MC generator info
+//-----------------------------------------------------------------------------
   TGenParticle* genp;
   int           pdg_code, generator_code;
 
@@ -944,6 +957,9 @@ int TTrackCompModule::Event(int ientry) {
       break;
     }
   }
+
+  if (fParticle) fEleE = fParticle->Energy();
+  else           fEleE = -1.;
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimp in the future
 //-----------------------------------------------------------------------------
@@ -964,15 +980,9 @@ int TTrackCompModule::Event(int ientry) {
       }
     }
   }
-
-  fParticle->Momentum(mom);
-  fEleE     = mom.Energy();
 //-----------------------------------------------------------------------------
-// 
+// initialize additional track parameters
 //-----------------------------------------------------------------------------
-//  TrackPar_t*   tp;
-//  int           ntrk;
-
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;

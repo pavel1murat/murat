@@ -37,6 +37,45 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
+  struct EventHist_t {
+    TH1D*    fLumWt;		       // luminosity related MC weight
+    TH1F*    fRv;			// MC truth information
+    TH1F*    fZv;
+    TH1F*    fEleMom;
+    TH1D*    fDioMom;
+    TH1F*    fEleCosTh;
+    TH1F*    fNClusters;
+    TH1F*    fNTracks;
+    TH1F*    fNStrawHits[2];
+    TH1F*    fNGoodSH;
+    TH1F*    fMomTF;                    // signal particle momentuum @ Tracker Front
+    TH1F*    fPitchTF;		        // SIM tan(pitch) @ Tracker Front
+    TH1F*    fDtClT;
+    TH1F*    fEMax;			// energy of the first reco cluster
+    TH1F*    fDtClS;
+    TH1F*    fSHTime;
+    TH1F*    fNHyp;
+    TH1F*    fBestHyp[2];		// [0]: by chi2, [1]: by fit consistency
+    TH1F*    fNGenp;                    // N(particles in GENP block)
+
+    TH1F*    fNCaloCrystalHits[kNDisks];
+    TH2F*    fNCaloHitsVsDisk [kNDisks];
+    TH2F*    fNCaloHitsVsRow  [kNDisks];
+    TH2F*    fNCaloHitsVsCol  [kNDisks];
+					        // *** calorimeter hit histograms
+    TH1F*    fETot        [kNDisks];            // total energy/event 
+    TH2F*    fECrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
+    TH2F*    fNCrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
+
+    TH2F*    fNCrystalHitsVsR[kNDisks];            //
+    TH2F*    fNHitCrystalsVsR[kNDisks];            //
+
+    TH1F*    fNHitCrystalsTot;
+    TH1F*    fECal;
+    TH1F*    fECalOverEKin;
+    TH1F*    fInstLumi;
+  };
+
   struct CaloHist_t {
     TH1F*    fDiskID;		       // per crystal hit
     TH1F*    fEnergy  [kNDisks];
@@ -72,45 +111,6 @@ public:
     TH1F*    fFrE2;
     TH1F*    fSigE1;
     TH1F*    fSigE2;
-  };
-
-  struct EventHist_t {
-    TH1F*    fRv;			// MC truth information
-    TH1F*    fZv;
-    TH1F*    fEleMom;
-    TH1D*    fDioMom;
-    TH1F*    fEleCosTh;
-    TH1F*    fNClusters;
-    TH1F*    fNTracks;
-    TH1F*    fNStrawHits[2];
-    TH1F*    fNGoodSH;
-    TH1F*    fMomTF;                    // signal particle momentuum @ Tracker Front
-    TH1F*    fPitchTF;		        // SIM tan(pitch) @ Tracker Front
-    TH1F*    fDtClT;
-    TH1F*    fEMax;			// energy of the first reco cluster
-    TH1F*    fDtClS;
-    TH1F*    fSHTime;
-    TH1F*    fNHyp;
-    TH1F*    fBestHyp[2];		// [0]: by chi2, [1]: by fit consistency
-    TH1F*    fNGenp;                    // N(particles in GENP block)
-
-    TH1F*    fNCaloCrystalHits[kNDisks];
-    TH2F*    fNCaloHitsVsDisk [kNDisks];
-    TH2F*    fNCaloHitsVsRow  [kNDisks];
-    TH2F*    fNCaloHitsVsCol  [kNDisks];
-    // calorimeter hit histograms
-
-    TH1F*    fETot        [kNDisks];            // total energy/event 
-    TH2F*    fECrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
-    TH2F*    fNCrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
-
-    TH2F*    fNCrystalHitsVsR[kNDisks];            //
-    TH2F*    fNHitCrystalsVsR[kNDisks];            //
-
-    TH1F*    fNHitCrystalsTot;
-    TH1F*    fECal;
-    TH1F*    fECalOverEKin;
-    TH1F*    fInstLumi;
   };
 
   struct TrackHist_t {
@@ -318,6 +318,7 @@ public:
   TEmuLogLH*        fLogLH;
 
   double            fMinT0;
+  double            fLumWt;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

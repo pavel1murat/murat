@@ -33,6 +33,7 @@ public:
 //  histograms
 //-----------------------------------------------------------------------------
   struct EventHist_t {
+    TH1D*    fLumWt;		        // luminosity related MC weight
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
 
@@ -177,6 +178,7 @@ public:
   TEmuLogLH*        fLogLH;
 
   double            fMinT0;
+  double            fLumWt;
 
   TStnCluster*      fCluster;
   int               fNClusters;

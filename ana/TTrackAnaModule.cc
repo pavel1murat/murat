@@ -272,7 +272,10 @@ void TTrackAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder)
   char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
+  HBook1D(Hist->fLumWt     ,"lumwt"    ,Form("%s: Luminosity Weight"               ,Folder),200, 0,10,Folder);
+  Hist->fLumWt->Sumw2(kTRUE);
+
+  HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1, 1,Folder);
   HBook1F(Hist->fEleMom    ,"ce_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
   HBook1D(Hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
   HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
@@ -575,26 +578,24 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
   double            e, m, r;
   TLorentzVector    mom(1.,0.,0.,0);
 
-  if (fParticle) fParticle->Momentum(mom);
-
-  p      = mom.P();
-
-  cos_th = mom.Pz()/p;
-
-  dio_wt = TStntuple::DioWeightAl(p);
-
-  if (fParticle) {
+  if (fParticle) { 
+    fParticle->Momentum(mom);
     xv = fParticle->Vx()+3904.;
     yv = fParticle->Vy();
     rv = sqrt(xv*xv+yv*yv);
     zv = fParticle->Vz();
   }
 
+  p      = mom.P();
+  cos_th = mom.Pz()/p;
+  dio_wt = TStntuple::DioWeightAl(p);
+
+  Hist->fLumWt->Fill(fLumWt);
+  Hist->fRv->Fill(rv);
+  Hist->fZv->Fill(zv);
   Hist->fEleMom->Fill(p);
   Hist->fDioMom->Fill(p,dio_wt);
   Hist->fEleCosTh->Fill(cos_th);
-  Hist->fRv->Fill(rv);
-  Hist->fZv->Fill(zv);
 
   Hist->fNClusters->Fill(fNClusters);
   Hist->fNTracks->Fill  (fNTracks[0]);
@@ -1915,8 +1916,6 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 int TTrackAnaModule::Event(int ientry) {
 
-  TLorentzVector        mom (1.,0.,0.,0);
-
   TDiskCalorimeter::GeomData_t disk_geom;
 
   fTrackBlock  ->GetEntry(ientry);
@@ -1926,6 +1925,10 @@ int TTrackAnaModule::Event(int ientry) {
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fVdetBlock->GetEntry(ientry);
+//-----------------------------------------------------------------------------
+// luminosity weight
+//-----------------------------------------------------------------------------
+  fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
 // look for signal particle defined by the PDG code and the generator code
 //-----------------------------------------------------------------------------
@@ -1944,6 +1947,9 @@ int TTrackAnaModule::Event(int ientry) {
       break;
     }
   }
+
+  if (fParticle) fEleE = fParticle->Energy();
+  else           fEleE = -1.;
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimp in the future
 //-----------------------------------------------------------------------------
@@ -1964,11 +1970,6 @@ int TTrackAnaModule::Event(int ientry) {
       }
     }
   }
-
-  if (fParticle) fParticle->Momentum(mom);
-
-  double p  = mom.P();
-  fEleE     = sqrt(p*p+0.511*0.511);
 
   if (fDiskCalorimeter->Initialized() == 0) {
     disk_geom.fNDisks = fCalDataBlock->NDisks();

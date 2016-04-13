@@ -9,7 +9,15 @@
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
-process_name : Exercise01
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles : @nil
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : TCalm006Test
 
 source : {
   module_type : RootInput
@@ -31,18 +39,6 @@ outputs: {
     }
 }
 
-services : {
-  message      : @local::default_message
-  TFileService : { fileName : "{DATASET}.trkpatrec.hist"}
-
-  user : {
-    GeometryService        : { inputFile      : "murat/geom/geom_01_lyso_crystal.txt"}
-    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
-    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
-  }
-
-}
-
 physics : {
 
   filters : {
@@ -60,13 +56,6 @@ physics : {
 	      # bit51:1
 	  }
       }
-  }
-#------------------------------------------------------------------------------
-# analysis modules
-#
-# tcalm002 bit 51: write out events with matched tracks
-#------------------------------------------------------------------------------
-  analyzers : {
   }
   
   p1 : [ tcalm006 ]

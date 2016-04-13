@@ -252,6 +252,24 @@ namespace mu2e {
     }
   }
 
+
+//-----------------------------------------------------------------------------
+// this example demonstrates how to outsmart an art smart Ptr and use it to store 
+// a normal human pointer 
+// the getter routine is undefined, so hopefully art won't get confused
+//----------------------------------------------------------------------------- 
+  void aaa (CaloCluster* x) {
+
+    art::Ptr<CaloCluster> px;
+					// storing
+    ((CaloCluster**) &px)[1] = x;
+					// retrieving
+
+    CaloCluster* cl = ((CaloCluster**) &px)[1];
+
+    if (cl) printf("emoe!\n");
+  }
+
 //-----------------------------------------------------------------------------
   bool TCalm006::filter(art::Event& Evt) {
     const char* oname = "TCalm006::filter";
@@ -263,17 +281,21 @@ namespace mu2e {
 
     printf(" >>>>>>> [%s] RUN: %10i  EVENT: %10i\n",oname,fRunNumber,fEventNumber);
 
-    getData(&Evt);
-    Init   (&Evt);
-    Debug  (&Evt);
+//     getData(&Evt);
+//     Init   (&Evt);
+//     Debug  (&Evt);
 
-    FillHistograms();
-					// so far - fake
-    if (TModule::fDebugBit[51] != 0) {
-      rc = 1;
-    }
+//     FillHistograms();
+// 					// so far - fake
+//     if (TModule::fDebugBit[51] != 0) {
+//       rc = 1;
+//     }
 
-    TModule::filter(Evt);
+//     TModule::filter(Evt);
+
+    CaloCluster  x;
+
+    aaa(&x);
     
     return rc;
   }

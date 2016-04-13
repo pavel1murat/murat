@@ -119,6 +119,8 @@ public:
     TH1F*    fP2;
     TH1F*    fPt;
     TH1D*    fPDio;                     // momentum dist weighted with the DIO weight
+    TH1D*    fPlw;			// lumi-weighted momentum
+    TH1D*    fPDiolw;			// lumi- and LO DIO-weighted momentum
     TH1F*    fFitMomErr;
     TH1F*    fPFront;
     TH1F*    fDpFront;

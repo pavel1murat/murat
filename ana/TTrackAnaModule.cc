@@ -1,8 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
-// use of tmp:
+// use of TStnTrack::fTmp:
 //
-// Tmp(0) : nax seg
-// Tmp(1) : nst seg
+// Tmp(0) : corrected momentum at the tracker front
 // 
 // use of debug bits: bits 0-2 are reserved
 //  0  : all events
@@ -40,6 +39,7 @@
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/obj/TDisk.hh"
+#include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
 // Mu2e offline includes
@@ -154,14 +154,21 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  90  ,110. ,Folder);
+  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 800,  80  ,120. ,Folder);
   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
-  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  90  ,110. ,Folder);
+  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 800,  80  ,120. ,Folder);
   Hist->fPDio->Sumw2(kTRUE);
-
+//-----------------------------------------------------------------------------
+// luminosity-weighted distributions for signal and background
+//-----------------------------------------------------------------------------
+  HBook1D(Hist->fPlw        ,"plw"     ,Form("%s: Track P(Lumi-WT)"   ,Folder), 800,  80  ,120. ,Folder);
+  Hist->fPlw->Sumw2(kTRUE);
+  HBook1D(Hist->fPDiolw     ,"pdiolw"  ,Form("%s: Trk P WT(Lumi+DIO)" ,Folder), 800,  80  ,120. ,Folder);
+  Hist->fPDiolw->Sumw2(kTRUE);
+//-----------------------------------------------------------------------------
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
   HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder), 200,  -5. ,  5. ,Folder);
@@ -949,13 +956,17 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   itrk = Track->Number();
   tp   = fTrackPar+itrk;
 
-  Hist->fP[0]->Fill (Track->fP);
-  Hist->fP[1]->Fill (Track->fP);
-  Hist->fP[2]->Fill (Track->fP);
-  Hist->fP0->  Fill (Track->fP0);
-  Hist->fP2->  Fill (Track->fP2);
+  Hist->fP[0]->Fill (tp->fP);		// corrected momentum in the first point
+  Hist->fP[1]->Fill (tp->fP);
+  Hist->fP[2]->Fill (tp->fP);
 
-  Hist->fPDio->Fill(Track->fP,tp->fDioWt);
+  Hist->fP0->  Fill (Track->fP0);	// momentum zt Z0
+  Hist->fP2->  Fill (Track->fP2);	// momentum at z2 = -1540, the same as in the 1st point
+
+  Hist->fPDio->Fill  (tp->fP, tp->fDioWt);
+  Hist->fPlw->Fill   (tp->fP, tp->fLumWt);
+  Hist->fPDiolw->Fill(tp->fP, tp->fTotWt);
+
 
   Hist->fFitMomErr->Fill(Track->fFitMomErr);
 
@@ -989,6 +1000,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fD0->Fill(Track->fD0);
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
+  Hist->fDtZ0->Fill(tp->fDtZ0);
   Hist->fAlgMask->Fill(Track->AlgMask());
 
   chi2c = Track->fChi2C/(Track->NActive()-5.);
@@ -1029,7 +1041,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   double    ekin(-1.);
   if (fSimp) {
     double p, m;
-    p    = Track->fP;
+    p    = tp->fP;
     m    = 105.658; // in MeV
     ekin = sqrt(p*p+m*m)-m;
   }
@@ -1130,6 +1142,7 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
   RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
   //  RegisterDataBlock("TrkPatRec"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
   RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
@@ -1624,7 +1637,6 @@ void TTrackAnaModule::FillHistograms() {
       if      (best_alg == 0) FillTrackHistograms(fHist.fTrack[63],trk);
       else if (best_alg == 1) FillTrackHistograms(fHist.fTrack[64],trk);
     }
-   
 //-----------------------------------------------------------------------------
 // TRK_71: SetC tracks  103.5 < p < 105 : DIO studies
 //-----------------------------------------------------------------------------
@@ -1724,10 +1736,27 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 				  TrackPar_t*       TrackPar    ) {
   TrackPar_t*           tp;
   TStnTrack*            track;
-  int                   id_word;
+  int                   id_word, icorr;
   double                xs;
   TEmuLogLH::PidData_t  dat;
+//-----------------------------------------------------------------------------
+// momentum corrections for TrkPatRec and CalPatRec
+//-----------------------------------------------------------------------------
+  const double kMomentumCorr[2] = { 0.049, 0.020 };
 
+  const char* block_name = TrackBlock->GetNode()->GetName();
+
+  if      (strcmp(block_name,"TrkPatRec" ) == 0) icorr = 0;
+  else if (strcmp(block_name,"CalPatRec" ) == 0) icorr = 1;
+  else if (strcmp(block_name,"TrackBlock") == 0) icorr = 2;
+  else {
+    icorr = -999;
+    Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
+    return -1;
+  }
+//-----------------------------------------------------------------------------
+// loop over tracks, assume 
+//-----------------------------------------------------------------------------
   int ntrk = TrackBlock->NTracks();
 
   for (int itrk=0; itrk<ntrk; itrk++) {
@@ -1766,6 +1795,14 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fNEPl = n2;
     tp->fNDPl = ndiff;
 
+//-----------------------------------------------------------------------------
+// in this scheme correction is set right before the call
+// in case of MergePatRec use BestAlg - 
+// hopefully, TTrackComp will never use MergePatRec branch
+//-----------------------------------------------------------------------------
+    if (icorr == 2) icorr = track->BestAlg();
+
+    tp->fP     = track->fP     +kMomentumCorr[icorr];		// correcting
     tp->fDpF   = track->fP     -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;
@@ -1773,6 +1810,14 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     if (fFillDioHist == 0) tp->fDioWt = 1.;
     else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
+
+    tp->fLumWt   = GetHeaderBlock()->LumWeight();
+    tp->fTotWt   = tp->fLumWt*tp->fDioWt;
+    tp->fDioWtRC = tp->fDioWt;
+    tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
+
+    tp->fDtZ0 = -1.e6;
+    if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -1963,7 +2008,8 @@ int TTrackAnaModule::Event(int ientry) {
   fNGoodTracks    = 0;
   fNMatchedTracks = 0;
 //-----------------------------------------------------------------------------
-// determine the number of CalPatRec tracks
+// determine the number of CalPatRec tracks - this assumes that the list of 
+// tracks has been created by MergePatRec
 //-----------------------------------------------------------------------------
   TStnTrack*   track;
   int ntrk = fTrackBlock->NTracks();

@@ -57,6 +57,7 @@ public:
     TH1F*    fTClMax;			// time   of the first (highest) reconstructed cluster
     TH1F*    fDp;                       // P(TrkPatRec)-P(CalPatRec)
     TH1F*    fInstLumi;                 // lumi
+    TH1F*    fWeight;			// weight, need with statistics
   };
 
   struct TrackHist_t {
@@ -64,6 +65,8 @@ public:
     TH1F*    fP0;
     TH1F*    fP2;
     TH1D*    fPDio;
+    TH1D*    fPlw;			// lumi-weighted momentum
+    TH1D*    fPDiolw;			// lumi- and LO DIO-weighted momentum
     TH1F*    fPt;
     TH1F*    fFitMomErr;
     TH1F*    fPFront;
@@ -215,7 +218,10 @@ public:
   void    FillEventHistograms    (EventHist_t*  Hist);
   void    FillTrackHistograms    (TrackHist_t*  Hist, TStnTrack*    Trk , TrackPar_t* Tp);
 
-  void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
+  void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
+				   TStnTrackID*    TrackID   , 
+				   TrackPar_t*     TPar      , 
+				   int             HistSet   );
 
   void    BookHistograms();
   void    FillHistograms();

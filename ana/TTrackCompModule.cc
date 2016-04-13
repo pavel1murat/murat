@@ -25,6 +25,7 @@
 
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
+#include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
@@ -50,6 +51,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     if (i > 0) {
       fTrackID[i]->SetMaxFitMomErr (100);
       fTrackID[i]->SetMaxT0Err     (100);
+      //      fTrackID[i]->SetMinNActive   ( 10);
       fTrackID[i]->SetMinFitCons   (-1.);
       fTrackID[i]->SetMinTrkQual   (0.1*i);
     }
@@ -79,15 +81,22 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  80  ,120. ,Folder);
+  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 800,  80  ,120. ,Folder);
   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
 
-  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  80  ,120. ,Folder);
+  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 800,  80  ,120. ,Folder);
   Hist->fPDio->Sumw2(kTRUE);
-
+//-----------------------------------------------------------------------------
+// luminosity-weighted distributions for signal and background
+//-----------------------------------------------------------------------------
+  HBook1D(Hist->fPlw        ,"plw"     ,Form("%s: Track P(Lumi-WT)"   ,Folder), 800,  80  ,120. ,Folder);
+  Hist->fPlw->Sumw2(kTRUE);
+  HBook1D(Hist->fPDiolw     ,"pdiolw"  ,Form("%s: Trk P WT(Lumi+DIO)" ,Folder), 800,  80  ,120. ,Folder);
+  Hist->fPDiolw->Sumw2(kTRUE);
+//-----------------------------------------------------------------------------
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
   HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder), 200,  -5. ,  5. ,Folder);
@@ -217,6 +226,12 @@ void TTrackCompModule::BookHistograms() {
   int book_track_histset[kNTrackHistSets];
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
+  book_track_histset[  0] = 1;          // good TrkPatRec tracks 
+  book_track_histset[  1] = 1;          // good CalPatRec tracks in events where there is no good TrkPatRec tracks TrkQual>0.3
+  book_track_histset[  2] = 1;          // good CalPatRec tracks in events where there is no good TrkPatRec tracks TrkQual>0.2
+  book_track_histset[  3] = 1;          // best track
+
+
   book_track_histset[100] = 1;		// TrkPatRec all  tracks 
   book_track_histset[101] = 1;		// TrkPatRec BestTrackID
   book_track_histset[102] = 1;		// TrkPatRec BestTrackID no fitCons&momErr&t0Err tracks 
@@ -333,10 +348,10 @@ void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
   double dp(1.e6);
 
   if ((fNTracks[0] == 1) && (fNTracks[1] == 1)) {
-    TStnTrack* tpr = fTrackBlock[0]->Track(0);
-    TStnTrack* cpr = fTrackBlock[1]->Track(0);
+    TrackPar_t* tp = &fTrackPar[0][0];
+    TrackPar_t* cp = &fTrackPar[1][0];
 
-    dp = tpr->fP-cpr->fP;
+    dp = tp->fP-cp->fP;
   }
 					// momentum difference
   Hist->fDp->Fill(dp);
@@ -348,6 +363,7 @@ void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
 						TStnTrackID*     TrackID   , 
+						TrackPar_t*      TPar      ,
 						int              HistSet   ) {
   if (fSimPar.fParticle->NStrawHits() >= 20) {
     FillEventHistograms(fHist.fEvent[HistSet]);
@@ -391,7 +407,7 @@ void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 		  if ((id_word & TStnTrackID::kTanDipBit) == 0) {
 		    FillEventHistograms(fHist.fEvent[HistSet+8]);
 
-		    if ((103.5 < track->fP) && (track->fP < 105)) {
+		    if ((103.5 < TPar->fP) && (TPar->fP < 105)) {
 		      FillEventHistograms(fHist.fEvent[HistSet+9]);
 		    }
 		  }
@@ -416,14 +432,18 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
 
   //  TrackPar_t* tp = fTrackPar+itrk;
 
-
-  Hist->fP[0]->Fill (Track->fP);
-  Hist->fP[1]->Fill (Track->fP);
-  Hist->fP[2]->Fill (Track->fP);
+					// fP - corrected momentum, fP0 and fP2 - not corrected
+  Hist->fP[0]->Fill (Tp->fP);
+  Hist->fP[1]->Fill (Tp->fP);
+  Hist->fP[2]->Fill (Tp->fP);
+					// track fP0 and track fP2 are supposed to be the same...
   Hist->fP0->  Fill (Track->fP0);
   Hist->fP2->  Fill (Track->fP2);
 
-  Hist->fPDio->Fill(Track->fP,Tp->fDioWt);
+  Hist->fPDio->Fill(Tp->fP,Tp->fDioWt);
+
+  Hist->fPlw->Fill   (Tp->fP, Tp->fLumWt);
+  Hist->fPDiolw->Fill(Tp->fP, Tp->fTotWt);
 
   Hist->fFitMomErr->Fill(Track->fFitMomErr);
 
@@ -536,6 +556,67 @@ void TTrackCompModule::FillHistograms() {
   if ((fEClMax > 50.) && (fTClMax > 550)) {
     FillEventHistograms(fHist.fEvent[1]);
   }
+
+//-----------------------------------------------------------------------------
+// what does CalPatRec add ?
+// TRK_0 : TrkPatRec only
+//-----------------------------------------------------------------------------
+  if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
+    TStnTrack* trk = fTrackBlock[0]->Track(0);
+    TrackPar_t* tp = &fTrackPar[0][0];
+    FillTrackHistograms(fHist.fTrack[0],trk,tp);
+  }
+  else {
+    if (fTrackBlock[1]->NTracks() > 0) {
+      if (fTrackPar[1][0].fIDWord[3] == 0) {
+//-----------------------------------------------------------------------------
+// have CalPatRec track TrkQual > 0.3 and no TrkPatRec TrkQual > 0.4 track
+//-----------------------------------------------------------------------------
+	TStnTrack* trk = fTrackBlock[1]->Track(0);
+	TrackPar_t* tp = &fTrackPar[1][0];
+	FillTrackHistograms(fHist.fTrack[1],trk,tp);
+      }
+      if (fTrackPar[1][0].fIDWord[2] == 0) {
+//-----------------------------------------------------------------------------
+// have CalPatRec track TrkQual > 0.2 and no TrkPatRec TrkQual > 0.4 track
+//-----------------------------------------------------------------------------
+	TStnTrack* trk = fTrackBlock[1]->Track(0);
+	TrackPar_t* tp = &fTrackPar[1][0];
+	FillTrackHistograms(fHist.fTrack[2],trk,tp);
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// TRK_3 : an attempt to define best track
+//-----------------------------------------------------------------------------
+    TStnTrack*  best_track(0);
+    TrackPar_t* best_tp;
+
+    if (fTrackBlock[1]->NTracks() > 0) {
+      if (fTrackPar[1][0].fIDWord[fBestID] == 0) {
+	best_track = fTrackBlock[1]->Track(0);
+	best_tp    = &fTrackPar[1][0];
+      }
+      else if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
+	best_track = fTrackBlock[0]->Track(0);
+	best_tp    = &fTrackPar[0][0];
+      }
+      else if (fTrackPar[1][0].fIDWord[2] == 0) {
+	best_track = fTrackBlock[1]->Track(0);
+	best_tp    = &fTrackPar[1][0];
+      }
+    }
+    else {
+      if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
+	best_track = fTrackBlock[0]->Track(0);
+	best_tp    = &fTrackPar[0][0];
+      }
+    }
+
+    if (best_track != 0) {
+      FillTrackHistograms(fHist.fTrack[3],best_track,best_tp);
+    }
+
 //-----------------------------------------------------------------------------
 // TrkPatRec and CalPatRec histograms, inclusive, ihist defines the offset
 // i=0:TrkPatRec, i=1:CalPatRec
@@ -640,8 +721,8 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // efficiency histograms, use fDaveTrkQual > 0.4 for the cuts
 //-----------------------------------------------------------------------------
-  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[4],10);
-  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[4],20);
+  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[4],&fTrackPar[0][0],10);
+  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[4],&fTrackPar[1][0],20);
 }
 
 
@@ -654,10 +735,27 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 				   TrackPar_t*       TrackPar    ) {
   TrackPar_t*           tp;
   TStnTrack*            track;
-  int                   id_word;
+  int                   id_word, icorr;
   double                xs;
   TEmuLogLH::PidData_t  dat;
+//-----------------------------------------------------------------------------
+// momentum corrections for TrkPatRec and CalPatRec
+//-----------------------------------------------------------------------------
+  const double kMomentumCorr[2] = { 0.049, 0.020 };
 
+  const char* block_name = TrackBlock->GetNode()->GetName();
+
+  if      (strcmp(block_name,"TrkPatRec" ) == 0) icorr = 0;
+  else if (strcmp(block_name,"CalPatRec" ) == 0) icorr = 1;
+  else if (strcmp(block_name,"TrackBlock") == 0) icorr = 2;
+  else {
+    icorr = -999;
+    Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
+    return -1;
+  }
+//-----------------------------------------------------------------------------
+// loop over tracks
+//-----------------------------------------------------------------------------
   int ntrk = TrackBlock->NTracks();
 
   for (int itrk=0; itrk<ntrk; itrk++) {
@@ -670,7 +768,6 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     id_word = tp->fIDWord[fBestID];
     track->fIDWord = id_word;
-
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -689,15 +786,26 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fNHPl = n1;
     tp->fNEPl = n2;
     tp->fNDPl = ndiff;
-    
-    tp->fP     = track->fP ;		// provision for correcting
-    tp->fDpF   = track->fP     -track->fPFront;
+//-----------------------------------------------------------------------------
+// in this scheme correction is set right before the call
+// in case of MergePatRec use BestAlg - 
+// hopefully, TTrackComp will never use MergePatRec branch
+//-----------------------------------------------------------------------------
+    if (icorr == 2) icorr = track->BestAlg();
+
+    tp->fP     = track->fP     +kMomentumCorr[icorr];		// correcting
+    tp->fDpF   = tp->fP        -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;
     tp->fDpFSt = track->fPFront-track->fPStOut;
 
     if (fFillDioHist == 0) tp->fDioWt = 1.;
     else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
+
+    tp->fLumWt   = GetHeaderBlock()->LumWeight();
+    tp->fTotWt   = tp->fLumWt*tp->fDioWt;
+    tp->fDioWtRC = tp->fDioWt;
+    tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
 
     tp->fDtZ0 = -1.e6;
     if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
@@ -727,7 +835,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     if (vr) {
       tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/track->fP;
+      tp->fEp  = tp->fEcl/tp->fP;
 
       tp->fDx  = vr->fDx;
       tp->fDy  = vr->fDy;

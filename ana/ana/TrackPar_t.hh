@@ -14,7 +14,11 @@ struct TrackPar_t : public TrackParBase_t {
   float   fDp0 ;
   float   fDp2 ;
   float   fDpFSt;
-  double  fDioWt;
+  double  fDioWt;			// DIO LO weight
+  double  fDioWtRC;			// DIO LO weight with rad corrections
+  double  fLumWt;			// luminosity weight
+  double  fTotWt;			// total weight
+  double  fTotWtRC;			// total weight with rad corrections
 
   double  fDtZ0;
   

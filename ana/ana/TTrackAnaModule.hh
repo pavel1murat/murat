@@ -140,6 +140,7 @@ public:
     TH1F*    fNaFract;
     TH1F*    fNWrong;
     TH1F*    fNDoublets;
+    TH1F*    fNadOverNd;		// fraction of doublets with all hits active
     TH1F*    fNSSD;
     TH1F*    fNOSD;
     TH1F*    fNdOverNa;
@@ -149,6 +150,7 @@ public:
     TH1F*    fNzaOverNa;
     TH1F*    fNMatActive;
     TH1F*    fNmaOverNa;
+    TH1F*    fNBend;
 
     TH1F*    fT0;
     TH1F*    fT0Err;

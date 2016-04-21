@@ -134,11 +134,22 @@ public:
     TH1F*    fDpFSt;			// P(TT_Hollow) - P(ST_Out)
     TH1F*    fCosTh;
     TH1F*    fChi2;
-    TH1F*    fNDof;
     TH1F*    fChi2Dof;
-    TH1F*    fChi2DofC;
+
     TH1F*    fNActive;
+    TH1F*    fNaFract;
     TH1F*    fNWrong;
+    TH1F*    fNDoublets;
+    TH1F*    fNSSD;
+    TH1F*    fNOSD;
+    TH1F*    fNdOverNa;
+    TH1F*    fNssdOverNa;
+    TH1F*    fNosdOverNa;
+    TH1F*    fNZeroAmb;
+    TH1F*    fNzaOverNa;
+    TH1F*    fNMatActive;
+    TH1F*    fNmaOverNa;
+
     TH1F*    fT0;
     TH1F*    fT0Err;
     TH1F*    fQ;
@@ -147,6 +158,8 @@ public:
     TH1F*    fZ0;
     TH1F*    fTanDip;
     TH1F*    fDtZ0;			// MC truth: T0-T(MC TMid)
+    TH1F*    fRMax;
+
     TH1F*    fResid;
     TH1F*    fAlgMask;
 					// matching histograms
@@ -160,7 +173,7 @@ public:
     TH1F*    fZTrk;
     TH1F*    fRTrk;
     TH1F*    fDt;			// track-cluster residuals
-    TH1F*    fChi2Match;
+    TH1F*    fChi2Tcm;
     TH1F*    fChi2XY;
     TH1F*    fChi2T;
     TH1F*    fDt_eMinus;
@@ -174,20 +187,22 @@ public:
     TH1F*    fDv;
     TH2F*    fDvVsDu;
     TH1F*    fPath;
+
     TH2F*    fDuVsPath;
     TH2F*    fDvVsPath;
     TH2F*    fDtVsPath;
     TH2F*    fDuVsTDip;
     TH2F*    fDvVsTDip;
+
     TH1F*    fZ1;
     TH1F*    fECl;
     TH1F*    fEClEKin;
     TH1F*    fEp;
     TH2F*    fEpVsPath;
-    TH1F*    fEp_eMinus;
-    TH1F*    fEp_ePlus;
-    TH1F*    fEp_muMinus;
-    TH1F*    fEp_muPlus;
+//     TH1F*    fEp_eMinus;
+//     TH1F*    fEp_ePlus;
+//     TH1F*    fEp_muMinus;
+//     TH1F*    fEp_muPlus;
     TH2F*    fNHVsStation;
     TH2F*    fNHVsNSt;
 
@@ -318,6 +333,10 @@ public:
   TEmuLogLH*        fLogLH;
 
   double            fMinT0;
+					// Tcm - track-cluster matching
+  double            fMinDtTcm;
+  double            fMaxDtTcm;
+
   double            fLumWt;
 //-----------------------------------------------------------------------------
 //  functions

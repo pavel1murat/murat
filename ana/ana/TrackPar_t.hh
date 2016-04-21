@@ -30,7 +30,7 @@ struct TrackPar_t : public TrackParBase_t {
   double  fDt;
   double  fDu;			// rotated residuals
   double  fDv;
-  double  fChi2Match;
+  double  fChi2Tcm;
   double  fChi2XY;
   double  fChi2T;
   double  fPath;

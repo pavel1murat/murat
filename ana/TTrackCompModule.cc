@@ -111,15 +111,21 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
   HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1,Folder);
   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
-  HBook1F(Hist->fNDof       ,"ndof"     ,Form("%s: Number of DOF"     ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
-  HBook1F(Hist->fChi2DofC   ,"chi2dc"   ,Form("%s: track chi2/N calc" ,Folder), 500, 0, 10,Folder);
+
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
+  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 100, 0.5,1,Folder);
   HBook1F(Hist->fNWrong     ,"nwrong"   ,Form("%s: Nhits w wrong drft",Folder), 200, 0,200,Folder);
   HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(Doublets)"       ,Folder),  50, 0, 50,Folder);
-  HBook1F(Hist->fNOSDoublets,"nosd"     ,Form("%s: N(OS Doublets)"    ,Folder),  50, 0, 50,Folder);
-  HBook1F(Hist->fNSSDoublets,"nssd"     ,Form("%s: N(SS Doublets)"    ,Folder),  50, 0, 50,Folder);
-  HBook1F(Hist->fNAmb0      ,"namb0"    ,Form("%s: N(Amb=0)"          ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNOSD       ,"nosd"     ,Form("%s: N(OS doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNssdOverNa ,"nssd_na"  ,Form("%s: NSSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
+  HBook1F(Hist->fNosdOverNa ,"nosd_na"  ,Form("%s: NOSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
+  HBook1F(Hist->fNZeroAmb   ,"nza"      ,Form("%s: N (Iamb = 0) hits" ,Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNzaOverNa  ,"nza_na"   ,Form("%s: NZeroAmb/Nactive"  ,Folder), 100, 0,  1,Folder);
+  HBook1F(Hist->fNMatActive ,"nma"      ,Form("%s: N (Mat Active"     ,Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 100, 0,  1,Folder);
+
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
@@ -128,12 +134,13 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
+  HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 100,Folder);
   HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
 
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
 
-  HBook1F(Hist->fChi2Match  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
+  HBook1F(Hist->fChi2Tcm  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
   HBook1F(Hist->fChi2XY     ,"chi2xy"   ,Form("%s: chi2(t-c match) XY",Folder), 300,-50  ,250 ,Folder);
   HBook1F(Hist->fChi2T      ,"chi2t"    ,Form("%s: chi2(t-c match) T" ,Folder), 250,  0  ,250 ,Folder);
 
@@ -185,7 +192,7 @@ void TTrackCompModule::BookEventHistograms(EventHist_t* Hist, const char* Folder
   HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
   HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
   HBook1F(Hist->fDp        ,"dp"       ,Form("%s: P(TPR)-P(CPR)"                   ,Folder),500,-2.5,2.5,Folder);
-  HBook1F(Hist->fInstLumi  ,"dp"       ,Form("%s: Inst Luminosity"                 ,Folder),500,-2.5e6,2.5e6,Folder);
+  HBook1F(Hist->fInstLumi  ,"inst_lum" ,Form("%s: Inst Luminosity"                 ,Folder),500, 0,1.e8,Folder);
 }
 
 //_____________________________________________________________________________
@@ -409,8 +416,8 @@ void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 	      if ((id_word & TStnTrackID::kTanDipBit) == 0) {
 		FillEventHistograms(fHist.fEvent[HistSet+6]);
 		
-		if (((id_word & TStnTrackID::kD1Bit) == 0) && 
-		    ((id_word & TStnTrackID::kD1Bit) == 0)    ) {
+		if (((id_word & TStnTrackID::kD0Bit  ) == 0) && 
+		    ((id_word & TStnTrackID::kRMaxBit) == 0)    ) {
 		  
 		  FillEventHistograms(fHist.fEvent[HistSet+7]);
 		  
@@ -472,14 +479,25 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
 
   Hist->fCosTh->Fill(Track->Momentum()->CosTheta());
   Hist->fChi2->Fill (Track->fChi2);
-  Hist->fNDof->Fill(Track->NActive()-5.);
   Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.));
-  Hist->fNActive->Fill(Track->NActive());
+
+  float na = Track->NActive();
+
+  Hist->fNActive->Fill(na);
+  Hist->fNaFract->Fill(na/(Track->NHits()+0.));
   Hist->fNWrong->Fill(Track->NWrong());
-  Hist->fNDoublets->Fill(Track->NOSDoublets()+Track->NSSDoublets());
-  Hist->fNOSDoublets->Fill(Track->NOSDoublets());
-  Hist->fNSSDoublets->Fill(Track->NSSDoublets());
-  Hist->fNAmb0->Fill(Track->fNDoublets >> 16);
+
+  float nd = Track->NDoublets();
+
+  Hist->fNDoublets->Fill(nd);
+  Hist->fNOSD->Fill(Track->NOSDoublets());
+  Hist->fNSSD->Fill(Track->NSSDoublets());
+  Hist->fNdOverNa->Fill(nd/(Track->NActive()+0.));
+  Hist->fNosdOverNa->Fill(Track->NOSDoublets()/na);
+  Hist->fNssdOverNa->Fill(Track->NSSDoublets()/na);
+  Hist->fNZeroAmb->Fill(Track->NHitsAmbZero());
+  Hist->fNzaOverNa->Fill(Track->NHitsAmbZero()/na);
+
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
   Hist->fQ->Fill(-1);
@@ -490,10 +508,11 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fDtZ0->Fill(Tp->fDtZ0);
+  Hist->fRMax->Fill(Track->RMax());
   
   Hist->fAlgMask->Fill(Track->AlgMask());
 
-  Hist->fChi2Match->Fill(Tp->fChi2Match);
+  Hist->fChi2Tcm->Fill(Tp->fChi2Tcm);
   Hist->fChi2XY->Fill(Tp->fChi2XY);
   Hist->fChi2T->Fill (Tp->fChi2T);
 
@@ -638,7 +657,7 @@ void TTrackCompModule::FillHistograms() {
       trk = fTrackBlock[i]->Track(itrk);
       tp  = fTrackPar[i]+itrk;
 //-----------------------------------------------------------------------------
-// set IHIST+0: all tracks
+// TRK_100, TRK_200: all reconstructed tracks
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp);
 //-----------------------------------------------------------------------------
@@ -835,7 +854,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Match = -1.e6;
+    tp->fChi2Tcm = -1.e6;
     tp->fChi2XY    = -1.e6;
     tp->fChi2T     = -1.e6;
     tp->fPath      = -1.e6;
@@ -860,7 +879,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
       tp->fDu        = vr->fDx*nx+vr->fDy*ny;
       tp->fDv        = vr->fDx*ny-vr->fDy*nx;
-      tp->fChi2Match = vr->fChi2Match;
+      tp->fChi2Tcm   = vr->fChi2Match;
 					// from now on the matching chi2 has XY part only
       tp->fChi2XY    = vr->fChi2Match;
       tp->fChi2T     = vr->fChi2Time;

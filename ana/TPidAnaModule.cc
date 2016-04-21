@@ -322,7 +322,7 @@ int TPidAnaModule::Event(int ientry) {
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Match = -1.e6;
+    tp->fChi2Tcm   = -1.e6;
     tp->fChi2XY    = -1.e6;
     tp->fChi2T     = -1.e6;
     tp->fPath      = -1.e6;

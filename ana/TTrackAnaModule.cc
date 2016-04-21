@@ -62,6 +62,9 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   fFillDioHist     = 1;
 
   fMinT0           = 700; 
+					// track-cluster matching timing cut
+  fMinDtTcm        = -5.;
+  fMaxDtTcm        =  8.;
 //-----------------------------------------------------------------------------
 // initialize Track ID
 // 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
@@ -94,9 +97,9 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 // TRK 19: "Set C" plus reconstructed and matched cluster
 //-----------------------------------------------------------------------------
   fLogLH      = new TEmuLogLH  ();
-  const char   *pid_version;
-  pid_version = gEnv->GetValue("mu2e.PidVersion","_none_");
-  fLogLH->Init(pid_version);
+//   const char   *pid_version;
+//   pid_version = gEnv->GetValue("mu2e.PidVersion","_none_");
+//   fLogLH->Init(pid_version);
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 // 2:conversionGun, 28:StoppedParticleReactionGun - see 
@@ -213,11 +216,22 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
   HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1,Folder);
   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
-  HBook1F(Hist->fNDof       ,"ndof"     ,Form("%s: Number of DOF"     ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
-  HBook1F(Hist->fChi2DofC   ,"chi2dc"   ,Form("%s: track chi2/N calc" ,Folder), 500, 0, 10,Folder);
+
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
+  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 100, 0.5,1,Folder);
   HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNOSD       ,"nosd"     ,Form("%s: N(OS doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNdOverNa   ,"nd_na"    ,Form("%s: NDoublets/Nactive" ,Folder), 100, 0,0.5,Folder);
+  HBook1F(Hist->fNssdOverNa ,"nssd_na"  ,Form("%s: NSSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
+  HBook1F(Hist->fNosdOverNa ,"nosd_na"  ,Form("%s: NOSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
+  HBook1F(Hist->fNZeroAmb   ,"nza"      ,Form("%s: N (Iamb = 0) hits" ,Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNzaOverNa  ,"nza_na"   ,Form("%s: NZeroAmb/Nactive"  ,Folder), 100, 0,  1,Folder);
+  HBook1F(Hist->fNMatActive ,"nma"      ,Form("%s: N (Mat Active"     ,Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 100, 0,  1,Folder);
+
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
@@ -226,12 +240,13 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
+  HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 100,Folder);
   HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
 
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
 
-  HBook1F(Hist->fChi2Match  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
+  HBook1F(Hist->fChi2Tcm  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
   HBook1F(Hist->fChi2XY     ,"chi2xy"   ,Form("%s: chi2(t-c match) XY",Folder), 300,-50  ,250 ,Folder);
   HBook1F(Hist->fChi2T      ,"chi2t"    ,Form("%s: chi2(t-c match) T" ,Folder), 250,  0  ,250 ,Folder);
 
@@ -466,7 +481,7 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 10] = 1;		// Set C tracks in the event when there is no EM clusters E > 60 MeV
   book_track_histset[ 11] = 1;		// all tracks with P > 103.5
   book_track_histset[ 12] = 1;		// tracks with fcons < 1.e-4
-  book_track_histset[ 13] = 1;		// "Set C" tracks with 100 <= P < 110 
+  book_track_histset[ 13] = 1;		// SetC tracks with 100 <= P < 110 
   book_track_histset[ 14] = 1;		// tracks with fcons < 1.e-2
   book_track_histset[ 15] = 1;		// tracks intersecting the 1st disk
   book_track_histset[ 16] = 1;		// tracks intersecting the 2nd disk
@@ -480,15 +495,15 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 23] = 1;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) > 0 (interesting for muons)
   book_track_histset[ 24] = 1;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) < 0 (interesting for electrons)
 
-  book_track_histset[ 25] = 1;		// Set C tracks, 0 < E/P < 1.15,  -2 < DT < 4, chi2(match) < 100, P>100
+  book_track_histset[ 25] = 1;		// Set C tracks, 100<p<110, 0<E/P<1.15, chi2tcm<100, -5<DT<8, 
   book_track_histset[ 26] = 1;		// [25] + LLHR_CAL > 0 - interesting for muons
   book_track_histset[ 27] = 1;		// [25] + LLHR_CAL < 0 - interesting for electrons
   book_track_histset[ 28] = 1;		// Set C tracks, E/P > 1.1
-  book_track_histset[ 29] = 1;		// Set C tracks 100 < P < 110 , 0 < E/P < 1.15 *precursor for TRK_25*
+  book_track_histset[ 29] = 1;		// Set C tracks 100 < P < 110 , 0 < E/P < 1.15 *precursor for TRK_32*
 
   book_track_histset[ 30] = 1;		// tracks with Nhits >= 25
   book_track_histset[ 31] = 1;		// tracks with Nhits >= 25 and chi/Ndof < 3
-  book_track_histset[ 32] = 1;		// Set C tracks 100 < P < 110 , 0 < E/P < 1.15, |DT < 3|
+  book_track_histset[ 32] = 1;		// Set C tracks 100 < P < 110 , 0 < E/P < 1.15, chi2tcm<100
 
   book_track_histset[ 33] = 1;		// DaveTrkQual tracks Q > 0.4
   book_track_histset[ 34] = 1;		// DaveTrkQual tracks Q > 0.1
@@ -973,7 +988,7 @@ void TTrackAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
 void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 
   TLorentzVector  mom;
-  double          chi2c, r;
+  double          r;
   int             itrk;
   TrackPar_t*     tp;
 					// pointer to local track parameters
@@ -1010,10 +1025,24 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 
   Hist->fCosTh->Fill(Track->Momentum()->CosTheta());
   Hist->fChi2->Fill (Track->fChi2);
-  Hist->fNDof->Fill(Track->NActive()-5.);
-  Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.));
-  Hist->fNActive->Fill(Track->NActive());
+
+  float na = Track->NActive();
+
+  Hist->fChi2Dof->Fill(Track->fChi2/(na-5.));
+  Hist->fNActive->Fill(na);
+  Hist->fNaFract->Fill(na/(Track->NHits()+0.));
   Hist->fNWrong->Fill(Track->NWrong());
+
+  float nd = Track->NDoublets();
+  Hist->fNDoublets->Fill(nd);
+  Hist->fNOSD->Fill(Track->NOSDoublets());
+  Hist->fNSSD->Fill(Track->NSSDoublets());
+  Hist->fNdOverNa->Fill(nd/na);
+  Hist->fNosdOverNa->Fill(Track->NOSDoublets()/na);
+  Hist->fNssdOverNa->Fill(Track->NSSDoublets()/na);
+  Hist->fNZeroAmb->Fill(Track->NHitsAmbZero());
+  Hist->fNzaOverNa->Fill(Track->NHitsAmbZero()/na);
+
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
   //  printf("TTrackAnaModule::FillTrackHistograms: track charge is not defined yet\n");
@@ -1025,11 +1054,8 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fDtZ0->Fill(tp->fDtZ0);
+  Hist->fRMax->Fill(Track->RMax());
   Hist->fAlgMask->Fill(Track->AlgMask());
-
-  chi2c = Track->fChi2C/(Track->NActive()-5.);
-  Hist->fChi2DofC->Fill(chi2c);
-
 //-----------------------------------------------------------------------------
 // track-cluster matching part: 
 // - for residuals, determine intersection with the most energetic cluster
@@ -1080,7 +1106,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fDz->Fill(tp->fDz);
 
   Hist->fDt->Fill(tp->fDt);
-  Hist->fChi2Match->Fill(tp->fChi2Match);
+  Hist->fChi2Tcm->Fill(tp->fChi2Tcm);
   Hist->fChi2XY->Fill(tp->fChi2XY);
   Hist->fChi2T->Fill (tp->fChi2T);
 
@@ -1231,8 +1257,8 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 	      if ((id_word & TStnTrackID::kTanDipBit) == 0) {
 		FillEventHistograms(fHist.fEvent[HistSet+6]);
 		
-		if (((id_word & TStnTrackID::kD1Bit) == 0) && 
-		    ((id_word & TStnTrackID::kD1Bit) == 0)    ) {
+		if (((id_word & TStnTrackID::kD0Bit  ) == 0) && 
+		    ((id_word & TStnTrackID::kRMaxBit) == 0)    ) {
 		  
 		  FillEventHistograms(fHist.fEvent[HistSet+7]);
 		  
@@ -1494,7 +1520,7 @@ void TTrackAnaModule::FillHistograms() {
 // TRK 23: Set "C" tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) > 0
 //         this is interesting to see which muons are getting misidentified
 //-----------------------------------------------------------------------------
-    if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Match < 100.)) {
+    if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Tcm < 100.)) {
       FillTrackHistograms(fHist.fTrack[22],trk);
       if    (trk->LogLHRCal() > 0) {
 	FillTrackHistograms(fHist.fTrack[23],trk);
@@ -1515,8 +1541,10 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_25: Set "C" tracks, 100 < P < 110, 0 < E/p < 1.15,  |dt_corr| < 3, chi2(match) < 100
 //-----------------------------------------------------------------------------
-      double dt_corr = trk->Dt(); // -1.;
-      if ( (fabs(dt_corr) < 3.) && (tp->fEp < 1.15) && (trk->fP > 100.) && (trk->fP < 110)) {
+//      double dt_corr = trk->Dt(); // -1.;
+      if ( (tp->fDt > fMinDtTcm) && (tp->fDt < fMaxDtTcm) && 
+	   (tp->fEp <      1.15) && 
+	   (trk->fP >      100.) && (trk->fP <       110)   ) {
 	FillTrackHistograms(fHist.fTrack[25],trk);
 //-----------------------------------------------------------------------------
 // more details on the calorimeter-based likelihood 
@@ -1553,21 +1581,21 @@ void TTrackAnaModule::FillHistograms() {
       }
     }
 //-----------------------------------------------------------------------------
-// TRK_29: "Set C" track 100 < P < 110, 0 < E/P < 1.15 : (next to TRK_13)
-// TRK_32: "Set C" track 100 < P < 110, 0 < E/P < 1.15 , |DT_CORR| < 3 ns (next to TRK_29)
+// TRK_29: "Set C" track 100 < P < 110, 0 < E/P < 1.15              : next to TRK_13
+// TRK_32: "Set C" track 100 < P < 110, 0 < E/P < 1.15, chi2tcm<100 : next to TRK_29
 //-----------------------------------------------------------------------------
     if (trk->fIDWord == 0) {
       if ((tp->fEp > 0) && (trk->P() > 100.) && (trk->P() < 110.) && (tp->fEp < 1.15)) {
 	FillTrackHistograms(fHist.fTrack[29],trk);
 
-	if (fabs(tp->fDt)< 3.) {
+	if (tp->fChi2Tcm < 100.) {
 	  FillTrackHistograms(fHist.fTrack[32],trk);
 	}
       }
     }
 //-----------------------------------------------------------------------------
-// TRK 30: tracks with >= 25 hits
-// TRK 31: tracks with >= 25 hits and Chi2/Ndof < 3
+// TRK_30: tracks with >= 25 hits
+// TRK_31: tracks with >= 25 hits and Chi2/Ndof < 3
 //-----------------------------------------------------------------------------
     if (trk->NActive() >= 25) {
       FillTrackHistograms(fHist.fTrack[30],trk);
@@ -1743,6 +1771,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // momentum corrections for TrkPatRec and CalPatRec
 //-----------------------------------------------------------------------------
   const double kMomentumCorr[2] = { 0.049, 0.020 };
+  const double kDtTcmCorr   [2] = { 0.22 , -0.30 }; // ns, sign: fit peak positions
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
@@ -1834,7 +1863,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Match = -1.e6;
+    tp->fChi2Tcm = -1.e6;
     tp->fChi2XY    = -1.e6;
     tp->fChi2T     = -1.e6;
     tp->fPath      = -1.e6;
@@ -1850,16 +1879,16 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       tp->fDy  = vr->fDy;
       tp->fDz  = vr->fDz;
 //-----------------------------------------------------------------------------
-// v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
+// correct TrkpatRec and CalPatRec tracks differently
 //-----------------------------------------------------------------------------
-      tp->fDt  = vr->fDt ; // v4_2_4: - 0.22; // - 1.;
+      tp->fDt  = vr->fDt - kDtTcmCorr[icorr];
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
 
       tp->fDu        = vr->fDx*nx+vr->fDy*ny;
       tp->fDv        = vr->fDx*ny-vr->fDy*nx;
-      tp->fChi2Match = vr->fChi2Match;
+      tp->fChi2Tcm   = vr->fChi2Match;
 					// from now on the matching chi2 has XY part only
       tp->fChi2XY    = vr->fChi2Match;
       tp->fChi2T     = vr->fChi2Time;

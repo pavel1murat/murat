@@ -706,7 +706,7 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
     int  nhits_vane[2][kNDisks], nhits_row [2][20], nhits_col[2][50];
     int  crystal_id, vane_id, local_id, vane_row, vane_col;
 
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<kNDisks; i++) {
       nhits_vane[0][i] = 0;
       nhits_vane[1][i] = 0;
     }

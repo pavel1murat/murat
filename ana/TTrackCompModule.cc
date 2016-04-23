@@ -114,17 +114,20 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
 
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
-  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 100, 0.5,1,Folder);
-  HBook1F(Hist->fNWrong     ,"nwrong"   ,Form("%s: Nhits w wrong drft",Folder), 200, 0,200,Folder);
-  HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(Doublets)"       ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110, 0.5,1.05,Folder);
+  HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNadOverNd  ,"nad_nd"   ,Form("%s: Nad/N(doublets)"   ,Folder), 110, 0,1.1,Folder);
   HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
   HBook1F(Hist->fNOSD       ,"nosd"     ,Form("%s: N(OS doublets)"    ,Folder),  50, 0, 50,Folder);
+  HBook1F(Hist->fNdOverNa   ,"nd_na"    ,Form("%s: NDoublets/Nactive" ,Folder), 100, 0,0.5,Folder);
   HBook1F(Hist->fNssdOverNa ,"nssd_na"  ,Form("%s: NSSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
   HBook1F(Hist->fNosdOverNa ,"nosd_na"  ,Form("%s: NOSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
   HBook1F(Hist->fNZeroAmb   ,"nza"      ,Form("%s: N (Iamb = 0) hits" ,Folder), 100, 0,100,Folder);
   HBook1F(Hist->fNzaOverNa  ,"nza_na"   ,Form("%s: NZeroAmb/Nactive"  ,Folder), 100, 0,  1,Folder);
   HBook1F(Hist->fNMatActive ,"nma"      ,Form("%s: N (Mat Active"     ,Folder), 100, 0,100,Folder);
-  HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 100, 0,  1,Folder);
+  HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 200, 0,   2,Folder);
+  HBook1F(Hist->fNBend      ,"nbend"    ,Form("%s: Nbend"             ,Folder), 100, 0,1000,Folder);
 
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
@@ -489,14 +492,23 @@ void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
 
   float nd = Track->NDoublets();
 
+  float nad = Track->NDoubletsAct();
   Hist->fNDoublets->Fill(nd);
+  Hist->fNadOverNd->Fill(nad/nd);
   Hist->fNOSD->Fill(Track->NOSDoublets());
   Hist->fNSSD->Fill(Track->NSSDoublets());
-  Hist->fNdOverNa->Fill(nd/(Track->NActive()+0.));
+  Hist->fNdOverNa->Fill(nd/na);
   Hist->fNosdOverNa->Fill(Track->NOSDoublets()/na);
   Hist->fNssdOverNa->Fill(Track->NSSDoublets()/na);
   Hist->fNZeroAmb->Fill(Track->NHitsAmbZero());
   Hist->fNzaOverNa->Fill(Track->NHitsAmbZero()/na);
+
+  int nma = Track->NMatActive();
+
+  Hist->fNMatActive->Fill(nma);
+  Hist->fNmaOverNa->Fill(nma/na);
+
+  Hist->fNBend->Fill(Track->NBend());
 
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);

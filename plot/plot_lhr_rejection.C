@@ -2,7 +2,7 @@
 // 2014-06-11: plot result produced by murat/ana/lhr_rejection.cc
 ///////////////////////////////////////////////////////////////////////////////
 
-
+#include "murat/scripts/datasets.hh"
 
 //-----------------------------------------------------------------------------
 // templates tell the dataset name: 1212 - use e00s1212 and m00s1212 (no background added)
@@ -126,11 +126,15 @@ void plot_lhr_rejection(int Templates = 1212) {
 //---------------------------------------------------------------------------------------
 // example: FnEle: "~/hist/mu2e/v4_2_1/e00s1212.track_ana.hist"
 //          FnMuo: "~/hist/mu2e/v4_2_1/m00s1212.track_ana.hist"
+// Print = 1: print few values around LLHR = 0 to determine the operational point
 //---------------------------------------------------------------------------------------
-void create_llhr_cal_rejection_graph(const char* FnEle, const char* FnMuo, TGraph*& Graph) {
+void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
+				     const dataset_t* DsMuo,
+				     TGraph*&         Graph,
+				     int              Print = 0) {
 
-  TH1* h_llhr_e = (TH1*) gh1(FnEle,"TrackAna","trk_25/llhr_cal")->Clone("h_llhr_e");
-  TH1* h_llhr_m = (TH1*) gh1(FnMuo,"TrackAna","trk_25/llhr_cal")->Clone("h_llhr_m");
+  TH1* h_llhr_e = (TH1*) gh1(DsEle->fn_track_ana,"TrackAna","trk_25/llhr_cal")->Clone("h_llhr_e");
+  TH1* h_llhr_m = (TH1*) gh1(DsMuo->fn_track_ana,"TrackAna","trk_25/llhr_cal")->Clone("h_llhr_m");
 
   double pe[1000], rm[1000];
 
@@ -138,11 +142,11 @@ void create_llhr_cal_rejection_graph(const char* FnEle, const char* FnMuo, TGrap
 
   int nbx = h_llhr_e->GetNbinsX();
 
-  qne_25 = gh1(FnEle,"TrackAna","trk_25/llhr_cal")->GetEntries();
-  qne_13 = gh1(FnEle,"TrackAna","trk_13/llhr_cal")->GetEntries();
+  qne_25 = gh1(DsEle->fn_track_ana,"TrackAna","trk_25/llhr_cal")->GetEntries();
+  qne_13 = gh1(DsEle->fn_track_ana,"TrackAna","trk_13/llhr_cal")->GetEntries();
 
-  qnm_25 = gh1(FnMuo,"TrackAna","trk_25/llhr_cal")->GetEntries();
-  qnm_13 = gh1(FnMuo,"TrackAna","trk_13/llhr_cal")->GetEntries();
+  qnm_25 = gh1(DsMuo->fn_track_ana,"TrackAna","trk_25/llhr_cal")->GetEntries();
+  qnm_13 = gh1(DsMuo->fn_track_ana,"TrackAna","trk_13/llhr_cal")->GetEntries();
 
   double se = h_llhr_e->Integral();
   double sm = h_llhr_m->Integral();
@@ -156,8 +160,10 @@ void create_llhr_cal_rejection_graph(const char* FnEle, const char* FnMuo, TGrap
     pe[i] =(1-qe/se)*(qne_25/qne_13);
     rm[i] = 1./(1-qm/sm + 1.e-6)*(qnm_13/qnm_25);
 
-  //   printf(" i+1, llhr , qe, qm, prob(e) , rej(mu) : %3i %10.3f %10.3f %10.3f %10.5f %10.3f\n",
-  // 	   i+1,h_llhr_e_1412->GetBinCenter(i+1),qe,qm,pe_1412[i+1],rm_1412[i+1]);
+    if (Print != 0) {
+      printf(" i, llhr , qe, qm, prob(e) , rej(mu) : %3i %10.3f %10.3f %10.3f %10.5f %10.3f\n",
+	     i,h_llhr_e->GetBinCenter(i+1),qe,qm,pe[i],rm[i]);
+    }
   }
 
   if (Graph != NULL) delete Graph;
@@ -171,18 +177,28 @@ void plot_llhr_cal_rejection_2(int OffVer = 421) {
 
   TGraph  *gr_x0(0), *gr_x1(0);
 
+  dataset_t   *ele_x0, *muo_x0, *ele_x1, *muo_x1;
+
   char fn_ele_x0[200], fn_muo_x0[200], fn_ele_x1[200], fn_muo_x1[200];
 
   if (OffVer == 421) {
-    strcmp(fn_ele_x0,"~/hist/mu2e/v4_2_1/e00s1212.track_ana.hist");
-    strcmp(fn_muo_x0,"~/hist/mu2e/v4_2_1/m00s1212.track_ana.hist");
-    strcmp(fn_ele_x0,"~/hist/mu2e/v4_2_1/e00s1412.track_ana.hist");
-    strcmp(fn_muo_x0,"~/hist/mu2e/v4_2_1/m00s1412.track_ana.hist");
+    strcpy(fn_ele_x0,"~/hist/mu2e/v4_2_1/e00s1212.track_ana.hist");
+    strcpy(fn_muo_x0,"~/hist/mu2e/v4_2_1/m00s1212.track_ana.hist");
+
+    strcpy(fn_ele_x1,"~/hist/mu2e/v4_2_1/e00s1412.track_ana.hist");
+    strcpy(fn_muo_x1,"~/hist/mu2e/v4_2_1/m00s1412.track_ana.hist");
   }
-  else {
+  else if (OffVer == 572) {
+    ele_x0 = &e40s5720;
+    muo_x0 = &m40s5720;
+    ele_x1 = &e42s5721;
+    muo_x1 = &m40s5721;
   }
 
-  TH2F* h2 = new TH2F("h2","Muon Rejection Vs Electron Efficiency",1000,0.7,1.0,1,10,2000);
+  printf(" OffVer = %3i fn_ele: %s fn_muo: %s\n",
+	 OffVer,ele_x0->fn_track_ana,muo_x0->fn_track_ana);
+
+  TH2F* h2 = new TH2F("h2","Muon Rejection Vs Electron Efficiency",1000,0.8,1.0,1,10,5000);
 
   h2->GetXaxis()->SetTitle("Electron efficiency");
   h2->GetYaxis()->SetTitle("Muon Rejection");
@@ -193,13 +209,13 @@ void plot_llhr_cal_rejection_2(int OffVer = 421) {
   gPad->SetLogy(1);
   gPad->SetGridy(1);
 
-  create_llhr_rejection_graph(fn_ele_x0,fn_muo_x0,gr_x0);
+  create_llhr_cal_rejection_graph(ele_x0,muo_x0,gr_x0);
 
   gr_x0->SetMarkerStyle(20);
   gr_x0->SetMarkerSize(1);
   gr_x0->Draw("LP");
 
-  create_llhr_rejection_graph(fn_ele_x1,fn_muo_x1,gr_x1);
+  create_llhr_cal_rejection_graph(ele_x1,muo_x1,gr_x1);
 
   gr_x1->SetMarkerStyle(24);
   gr_x1->SetMarkerSize(1);
@@ -209,8 +225,8 @@ void plot_llhr_cal_rejection_2(int OffVer = 421) {
   leg->SetBorderSize(0);
   leg->SetFillStyle(0);
 
-  leg->AddEntry(gr_x0,"CE only"    ,"ep");
-  leg->AddEntry(gr_x1,"CE+MIXP3-x1","ep");
+  leg->AddEntry(gr_x0,"Signal only"           ,"ep");
+  leg->AddEntry(gr_x1,"Signal + Overlays (x1)","ep");
 
   leg->Draw();
 }

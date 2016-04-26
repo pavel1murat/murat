@@ -151,6 +151,10 @@ void lhr_rejection::run(int HistSet, double SigEE, double SigT, int NEvents) {
     sprintf(fn_e,"%s/v5_7_0/e00s5710.track_ana.hist",hist_dir);
     sprintf(fn_m,"%s/v5_7_0/m00s5710.track_ana.hist",hist_dir);
   }
+  else if (HistSet == 572) {
+    sprintf(fn_e,"%s/v5_7_0/e40s5720.track_ana.hist",hist_dir);
+    sprintf(fn_m,"%s/v5_7_0/m40s5720.track_ana.hist",hist_dir);
+  }
 //-----------------------------------------------------------------------------
 // allow multiple histograms with the same name in the same directory
 //-----------------------------------------------------------------------------

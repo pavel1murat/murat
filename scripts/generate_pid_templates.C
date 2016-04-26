@@ -29,7 +29,7 @@ void generate_dt_templates(const char* HistFile, const char* Module, const char*
 
   fprintf(f,"title:          %-s/%s/%s\n",HistFile,Module,HistName);
   fprintf(f,"name:           %-s\n",HistName);
-  fprintf(f,"nb,xmin,xmax: %5i %10.4f %10.4f\n",
+  fprintf(f,"nbx,xmin,xmax: %5i %10.4f %10.4f\n",
 	  nb,he->GetXaxis()->GetXmin(),he->GetXaxis()->GetXmax());
 
   int nmax(10), ip(0);
@@ -66,7 +66,7 @@ void generate_xs_templates(const char* HistFile, const char* Module, const char*
 
   fprintf(f,"title:          %-s/%s/%s\n",HistFile,Module,HistName);
   fprintf(f,"name:           %-s\n",HistName);
-  fprintf(f,"nb,xmin,xmax: %5i %10.4f %10.4f\n",
+  fprintf(f,"nbx,xmin,xmax: %5i %10.4f %10.4f\n",
 	  nb,he->GetXaxis()->GetXmin(),he->GetXaxis()->GetXmax());
 
   int nmax(10), ip(0);

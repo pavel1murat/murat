@@ -6,7 +6,7 @@
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
-#include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/prolog.fcl"
 #------------------------------------------------------------------------------
 # local changes to global variables
 #------------------------------------------------------------------------------

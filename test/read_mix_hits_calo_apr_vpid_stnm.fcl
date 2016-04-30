@@ -60,8 +60,7 @@ physics: { @table::physics
 	}
     }
 
-#    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_stnm ]
-    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_display ]
+    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_stnm ]
 
     trigger_paths : [ p1  ]
     end_paths     : [ out ]

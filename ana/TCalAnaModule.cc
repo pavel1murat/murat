@@ -794,9 +794,9 @@ int TCalAnaModule::Event(int ientry) {
 
   fNCalHits   = fCalDataBlock->NHits();
 
-  fDiskCalorimeter->InitEvent(fCalDataBlock);
+//   fDiskCalorimeter->InitEvent(fCalDataBlock);
 
-  FillHistograms();
+//   FillHistograms();
 
   Debug();
 

@@ -17,6 +17,13 @@
     int          ngen;	       //  number of generated events
   };
 
+dataset_t e00s5730 = { "e00s5730",
+		       "~/hist/mu2e/v5_7_0/e00s5730.track_comp.hist",
+		       "~/hist/mu2e/v5_7_0/e00s5730.track_ana.hist",
+		       "E105",
+		       1,
+		       5000000};
+
 dataset_t e40s5720 = { "e40s5720",
 		       "~/hist/mu2e/v5_7_0/e40s5720.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/e40s5720.track_ana.hist",

@@ -9,7 +9,9 @@ def_name track_004("cal_ana");
 def_name track_005("track_ana_tandip_12");
 def_name track_006("track_debug_tandip_12");
 def_name track_007("track_ana_muon");
+
 def_name track_008("track_comp");
+def_name track_008("track_comp_tmva");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -91,14 +93,20 @@ void  track_comp(int GeneratorCode,int DebugBit = -1, double XMin=1,double XMax 
 
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+// TrkRrecoAlg = 1: TrkPatRec    =2:CalPatRec
 //-----------------------------------------------------------------------------
-void  track_comp_debug(int GeneratorCode, double PMin = 106.) {
+void  track_comp_tmva(int GeneratorCode, int TrkRecoAlg = 0, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
-// configure analysis module
+// configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------
   m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
   m_tcm->SetPdgCode      (11);
   m_tcm->SetGeneratorCode(GeneratorCode);
-  m_tcm->GetTrackID()->SetMaxT0Err(1.5);
-  m_tcm->SetDebugBit(6,1);
+  m_tcm->SetWriteTmvaTree(TrkRecoAlg);
+
+  if (DebugBit >= 0) {
+    m_tcm->SetDebugBit(DebugBit,1);
+    if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
+  }
 }
+

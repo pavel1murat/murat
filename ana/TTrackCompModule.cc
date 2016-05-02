@@ -24,6 +24,8 @@
 #include "TSystem.h"
 
 #include "Stntuple/loop/TStnAna.hh"
+#include "Stntuple/loop/TStnInputModule.hh"
+#include "Stntuple/base/TStnDataset.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/alg/TStntuple.hh"
@@ -45,8 +47,8 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 // TrackID[0] : "SetC"
 // i = 1..6 : cut on DaveTrkQual > 0.1*i instead
 //-----------------------------------------------------------------------------
-  fNID  = 7;
-  for (int i=0; i<fNID; i++) {
+  fNID  = 6;
+  for (int i=0; i<fNID-1; i++) {
     fTrackID[i] = new TStnTrackID();
     if (i > 0) {
       fTrackID[i]->SetMaxFitMomErr (100);
@@ -57,8 +59,17 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     }
   }
 
-  fBestTrackID = fTrackID[4];  // Dave's default: DaveTrkQual > 0.4
-  fBestID      = 4;
+					// ID = 4: no hits on the number of active hits
+  fTrackID[5] = new TStnTrackID();
+  fTrackID[5]->SetMaxFitMomErr (100);
+  fTrackID[5]->SetMaxT0Err     (100);
+  fTrackID[5]->SetMinNActive   ( -1);
+  fTrackID[5]->SetMinFitCons   (-1.);
+  fTrackID[5]->SetMinTrkQual   (0.4);
+
+  fBestTrackID = fTrackID[5];  // Dave's default: DaveTrkQual > 0.4, no N(active) cut 
+  fBestID      = 5;
+
   fLogLH       = new TEmuLogLH();
 //-----------------------------------------------------------------------------
 // debugging information
@@ -68,6 +79,11 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 
   fDebugCut[6].fXMin   = 1.5;
   fDebugCut[6].fXMax   = 10.0;
+//-----------------------------------------------------------------------------
+// ntuples for TMVA training
+//-----------------------------------------------------------------------------
+  fDoLittle      = 0;
+  fWriteTmvaTree = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -77,9 +93,11 @@ TTrackCompModule::~TTrackCompModule() {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
+void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder) {
 //   char name [200];
 //   char title[200];
+
+  TrackHist_t* Hist =  (TrackHist_t*) HistR;
 
   HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 800,  80  ,120. ,Folder);
   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
@@ -137,7 +155,7 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
-  HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 100,Folder);
+  HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
   HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
 
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
@@ -162,9 +180,11 @@ void TTrackCompModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder
 }
 
 //-----------------------------------------------------------------------------
-void TTrackCompModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+void TTrackCompModule::BookEventHistograms(HistBase_t* HistR, const char* Folder) {
   //  char name [200];
   //  char title[200];
+
+  EventHist_t* Hist =  (EventHist_t*) HistR;
 
   HBook1D(Hist->fLumWt     ,"lumwt"    ,Form("%s: Luminosity Weight"               ,Folder),200, 0,10,Folder);
   Hist->fLumWt->Sumw2(kTRUE);
@@ -256,9 +276,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[111] = 1;          // TrkPatRec TrackID[1]
   book_track_histset[112] = 1;          // TrkPatRec TrackID[2]
   book_track_histset[113] = 1;          // TrkPatRec TrackID[3]
-  book_track_histset[114] = 1;          // TrkPatRec TrackID[1]
-  book_track_histset[115] = 1;          // TrkPatRec TrackID[2]
-  book_track_histset[116] = 1;          // TrkPatRec TrackID[3]
+  book_track_histset[114] = 1;          // TrkPatRec TrackID[4]
+  book_track_histset[115] = 1;          // TrkPatRec TrackID[5]
+  book_track_histset[116] = 0;          // TrkPatRec TrackID[6]
 
   book_track_histset[200] = 1;		// CalPatRec all  tracks 
   book_track_histset[201] = 1;		// CalPatRec BestTrackID tracks 
@@ -271,9 +291,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[211] = 1;          // CalPatRec TrackID[1]
   book_track_histset[212] = 1;          // CalPatRec TrackID[2]
   book_track_histset[213] = 1;          // CalPatRec TrackID[3]
-  book_track_histset[214] = 1;          // CalPatRec TrackID[1]
-  book_track_histset[215] = 1;          // CalPatRec TrackID[2]
-  book_track_histset[216] = 1;          // CalPatRec TrackID[3]
+  book_track_histset[214] = 1;          // CalPatRec TrackID[4]
+  book_track_histset[215] = 1;          // CalPatRec TrackID[5]
+  book_track_histset[216] = 0;          // CalPatRec TrackID[6]
 
   book_track_histset[300] = 1;		// TrkPatRec not CalPatRec all  tracks 
   book_track_histset[301] = 1;		// TrkPatRec not CalPatRec BestTrackID tracks 
@@ -286,9 +306,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[311] = 1;          // TrkPatRec not CalPatRec TrackID[1]
   book_track_histset[312] = 1;          // TrkPatRec not CalPatRec TrackID[2]
   book_track_histset[313] = 1;          // TrkPatRec not CalPatRec TrackID[3]
-  book_track_histset[314] = 1;          // TrkPatRec not CalPatRec TrackID[1]
-  book_track_histset[315] = 1;          // TrkPatRec not CalPatRec TrackID[2]
-  book_track_histset[316] = 1;          // TrkPatRec not CalPatRec TrackID[3]
+  book_track_histset[314] = 1;          // TrkPatRec not CalPatRec TrackID[4]
+  book_track_histset[315] = 1;          // TrkPatRec not CalPatRec TrackID[5]
+  book_track_histset[316] = 0;          // TrkPatRec not CalPatRec TrackID[6]
 
   book_track_histset[400] = 1;		// CalPatRec not TrkPatRec all  tracks 
   book_track_histset[401] = 1;		// CalPatRec not TrkPatRec BestTrackID tracks 
@@ -301,9 +321,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[411] = 1;          // CalPatRec not TrkPatRec TrackID[1]
   book_track_histset[412] = 1;          // CalPatRec not TrkPatRec TrackID[2]
   book_track_histset[413] = 1;          // CalPatRec not TrkPatRec TrackID[3]
-  book_track_histset[414] = 1;          // CalPatRec not TrkPatRec TrackID[1]
-  book_track_histset[415] = 1;          // CalPatRec not TrkPatRec TrackID[2]
-  book_track_histset[416] = 1;          // CalPatRec not TrkPatRec TrackID[3]
+  book_track_histset[414] = 1;          // CalPatRec not TrkPatRec TrackID[4]
+  book_track_histset[415] = 1;          // CalPatRec not TrkPatRec TrackID[5]
+  book_track_histset[416] = 0;          // CalPatRec not TrkPatRec TrackID[6]
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -319,9 +339,12 @@ void TTrackCompModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // need MC truth branch
 //-----------------------------------------------------------------------------
-void TTrackCompModule::FillEventHistograms(EventHist_t* Hist) {
+void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
+
   double            cos_th, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
   TLorentzVector    mom (1.,0.,0.,0);
+
+  EventHist_t* Hist = (EventHist_t*) HistR;
 
   if (fParticle) { 
     fParticle->Momentum(mom);
@@ -444,9 +467,12 @@ void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 //-----------------------------------------------------------------------------
 // for DIO : ultimately, one would need to renormalize the distribution
 //-----------------------------------------------------------------------------
-void TTrackCompModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, TrackPar_t* Tp) {
+void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, TrackPar_t* Tp) {
 
   TLorentzVector  mom;
+
+  TrackHist_t* Hist = (TrackHist_t*) HistR;
+
 					// pointer to local track parameters
   //  int itrk = Track->Number();
 
@@ -562,6 +588,52 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // initialize likelihood histograms
 //-----------------------------------------------------------------------------
+  if (fWriteTmvaTree != 0) {
+    fDoLittle = 1;
+    TDirectory* dir = gDirectory;
+
+    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
+
+    if      (fWriteTmvaTree == 1) {
+      fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
+    }
+    else if (fWriteTmvaTree == 2) {
+      fTmvaFile  = new TFile(Form("%s.tmva_training_calpatrec.root",dsname),"recreate");
+    }
+
+    fSigTree  = new TTree("signal"    ,"TMVA Signal Tree");
+    fBgrTree  = new TTree("background","TMVA Background Tree");
+
+					// signal tree
+
+    fSigBranch.fNActive   = fSigTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
+    fSigBranch.fNaFract   = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
+    fSigBranch.fChi2Dof   = fSigTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
+    fSigBranch.fMomErr    = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
+    fSigBranch.fT0Err     = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
+    fSigBranch.fD0        = fSigTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
+    fSigBranch.fRMax      = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
+    fSigBranch.fNdaOverNa = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
+    fSigBranch.fNzaOverNa = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
+    fSigBranch.fNmaOverNa = fSigTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
+
+					// background tree
+
+    fBgrBranch.fNActive   = fBgrTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
+    fBgrBranch.fNaFract   = fBgrTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
+    fBgrBranch.fChi2Dof   = fBgrTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
+    fBgrBranch.fMomErr    = fBgrTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
+    fBgrBranch.fT0Err     = fBgrTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
+    fBgrBranch.fD0        = fBgrTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
+    fBgrBranch.fRMax      = fBgrTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
+    fBgrBranch.fNdaOverNa = fBgrTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
+    fBgrBranch.fNzaOverNa = fBgrTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
+    fBgrBranch.fNmaOverNa = fBgrTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
+    fBgrBranch.fWeight    = fBgrTree->Branch("weight"  ,&fTmvaData.fWeight   ,"F");
+
+    dir->cd();
+  }
+
   return 0;
 }
 
@@ -571,6 +643,47 @@ int TTrackCompModule::BeginRun() {
   int rn = GetHeaderBlock()->RunNumber();
   TStntuple::Init(rn);
   return 0;
+}
+
+
+//-----------------------------------------------------------------------------
+int TTrackCompModule::FillTmvaTree() {
+  int rc(0), loc(-1);
+
+  if      (fWriteTmvaTree == 1) loc = 0; // trkpatrec
+  else if (fWriteTmvaTree == 2) loc = 1; // calpatrec
+
+  if (fTrackBlock[loc]->NTracks() != 1) return rc;
+
+					// first CalPatRec track
+
+  TStnTrack* trk = fTrackBlock[loc]->Track(0);
+  TrackPar_t* tp = &fTrackPar[loc][0];
+
+  float na = trk->NActive();
+
+  fTmvaData.fNActive   = na;
+  fTmvaData.fNaFract   = na/trk->NHits();
+  fTmvaData.fChi2Dof   = trk->Chi2Dof();
+  fTmvaData.fMomErr    = trk->FitMomErr();
+  fTmvaData.fT0Err     = trk->T0Err();
+  fTmvaData.fD0        = trk->D0();
+  fTmvaData.fRMax      = trk->RMax();
+  fTmvaData.fNdaOverNa = trk->NDoubletsAct()/na;
+  fTmvaData.fNzaOverNa = trk->NHitsAmbZero()/na;
+  fTmvaData.fNmaOverNa = trk->NMatActive()/na;
+  fTmvaData.fWeight    = 1.;
+
+  // there should be two trees - signal and background
+
+  if (tp->fDpF > 0.5) {
+    fBgrTree->Fill();
+  }
+  else if (fabs(tp->fDpF) < 0.2) {
+    fSigTree->Fill();
+  }
+
+  return rc;
 }
 
 //_____________________________________________________________________________
@@ -764,6 +877,13 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID],&fTrackPar[0][0],10);
   FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID],&fTrackPar[1][0],20);
+
+//-----------------------------------------------------------------------------
+// fill little tree if requested
+//-----------------------------------------------------------------------------
+  if (fDoLittle != 0) {
+    if (fWriteTmvaTree) FillTmvaTree();
+  }
 }
 
 
@@ -1119,9 +1239,19 @@ void TTrackCompModule::Debug() {
 
 }
 
-//_____________________________________________________________________________
+//-----------------------------------------------------------------------------
 int TTrackCompModule::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
+
+  if (fWriteTmvaTree) {
+    printf("[TTrackCompModule::EndJob] Writing output TMVA training file %s\n",fTmvaFile->GetName());
+    fTmvaFile->Write();
+    delete fTmvaFile;
+    fTmvaFile  = 0;
+    fSigTree   = 0;
+    fBgrTree   = 0;
+  }
+
   return 0;
 }
 

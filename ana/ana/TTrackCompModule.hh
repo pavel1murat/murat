@@ -7,6 +7,9 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TBranch.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -29,10 +32,12 @@ class TTrackCompModule: public TStnModule {
 public:
 #include "murat/ana/TrackPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
+#include "murat/ana/HistBase_t.h"
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct EventHist_t {
+  struct EventHist_t : public HistBase_t {
+
     TH1D*    fLumWt;		        // luminosity related MC weight
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
@@ -61,7 +66,8 @@ public:
     TH1F*    fWeight;			// weight, need with statistics
   };
 
-  struct TrackHist_t {
+  struct TrackHist_t : public HistBase_t {
+
     TH1F*    fP[3];			// total momentum, 3 hists with different binning
     TH1F*    fP0;
     TH1F*    fP2;
@@ -147,6 +153,34 @@ public:
     double fXMin;
     double fXMax;
   };
+
+  struct TmvaTrainingData_t {
+    float    fNActive;
+    float    fNaFract;
+    float    fChi2Dof;
+    float    fMomErr;
+    float    fT0Err;
+    float    fD0;
+    float    fRMax;
+    float    fNdaOverNa;
+    float    fNzaOverNa;
+    float    fNmaOverNa;
+    float    fWeight;
+  };
+
+  struct TmvaTrainingBranches_t {
+    TBranch*  fNActive;
+    TBranch*  fNaFract;
+    TBranch*  fChi2Dof;
+    TBranch*  fMomErr;
+    TBranch*  fT0Err;
+    TBranch*  fD0;
+    TBranch*  fRMax;
+    TBranch*  fNdaOverNa;
+    TBranch*  fNzaOverNa;
+    TBranch*  fNmaOverNa;
+    TBranch*  fWeight;			// for background only
+  };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
@@ -196,6 +230,20 @@ public:
   double            fEClMax;
   double            fTClMax;
 //-----------------------------------------------------------------------------
+// TMVA training ntuples
+//-----------------------------------------------------------------------------
+  int                     fDoLittle;
+  int                     fWriteTmvaTree;
+
+  TFile*                  fTmvaFile;
+
+  TTree*                  fSigTree;
+  TTree*                  fBgrTree;
+
+  TmvaTrainingData_t      fTmvaData;
+  TmvaTrainingBranches_t  fSigBranch;
+  TmvaTrainingBranches_t  fBgrBranch;
+//-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
 public:
@@ -215,6 +263,8 @@ public:
     fDebugCut[I].fXMin = XMin;
     fDebugCut[I].fXMax = XMax;
   }
+  
+  void               SetWriteTmvaTree(int Flag) { fWriteTmvaTree = Flag; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
@@ -225,16 +275,18 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
-  void    BookTrackHistograms   (TrackHist_t*   Hist, const char* Folder);
+  void    BookEventHistograms   (HistBase_t*   Hist, const char* Folder);
+  void    BookTrackHistograms   (HistBase_t*   Hist, const char* Folder);
 
-  void    FillEventHistograms    (EventHist_t*  Hist);
-  void    FillTrackHistograms    (TrackHist_t*  Hist, TStnTrack*    Trk , TrackPar_t* Tp);
+  void    FillEventHistograms    (HistBase_t*  Hist);
+  void    FillTrackHistograms    (HistBase_t*  Hist, TStnTrack*    Trk , TrackPar_t* Tp);
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
 				   TStnTrackID*    TrackID   , 
 				   TrackPar_t*     TPar      , 
 				   int             HistSet   );
+
+  int     FillTmvaTree();
 
   void    BookHistograms();
   void    FillHistograms();

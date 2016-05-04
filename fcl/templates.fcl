@@ -1,0 +1,194 @@
+# -*- mode:tcl -*-
+
+#------------------------------------------------------------------------------
+# services section
+#------------------------------------------------------------------------------
+services : {
+    message               : @local::default_message
+    TFileService          : { fileName : "Stntuple_fcl_templates_fcl.hist" }
+    RandomNumberGenerator : { }
+    #   Timing                : { }fcl/
+
+    user : {
+        GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
+        ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"        }
+        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"   }
+        BTrkHelper             : @local::BTrkHelperDefault
+        G4Helper               : { }
+        SeedService            : { @table::automaticSeeds
+	    baseSeed         :  0
+	    maxUniqueEngines :  20
+	}
+    }
+}
+services.scheduler.wantSummary: true
+#------------------------------------------------------------------------------
+# definitions of modules
+#------------------------------------------------------------------------------
+
+muratModules : {
+    generate : { @table::StoppedMuonConversionGun    }
+    g4run    : { @table::mu2eg4runDefaultSingleStage }
+}
+#------------------------------------------------------------------------------
+# sequences: can't define recursively within one namespace
+#------------------------------------------------------------------------------
+gen_g4              : [ generate, g4run, detectorFilter] 
+gen_g4_time_map     : [ @sequence::gen_g4, @sequence::EventMixing.TimeMaps ]
+mix                 : [ dioMixer, protonMixer, neutronMixer, photonMixer, ootMixer, flashMixer ]
+mix_time_map        : [ @sequence::mix, @sequence::EventMixing.TimeMaps ]
+g4_mix_time_map     : [ @sequence::gen_g4, @sequence::mix, @sequence::EventMixing.TimeMaps ]
+stnmaker_cosmics    : [ @sequence::Stntuple.stnmaker4 ]
+
+murat : {
+    physics : {
+	producers: {
+	    generate: { @table::muratModules.generate }
+	    g4run   : { @table::muratModules.g4run    }
+#------------------------------------------------------------------------------
+# hit makers
+#------------------------------------------------------------------------------
+	    makeSD                 : { @table::makeSD                 }
+	    makeSH                 : { @table::makeSHfromSD           }
+
+	    MakeCaloCompressedHits : { @table::MakeCaloCompressedHits }
+	    MakeCaloReadoutHits    : { @table::MakeCaloReadoutHits    }
+	    MakeCaloCrystalHits    : { @table::MakeCaloCrystalHitsNew }
+#------------------------------------------------------------------------------
+# calorimeter digi maker
+#------------------------------------------------------------------------------
+	    CaloDigisFromStepPointMCs   :{ @table::CaloDigisFromStepPointMCs   }
+	    CaloHitsFromCaloDigis       :{ @table::CaloHitsFromCaloDigis       }
+	    CaloCrystalHitsFromCaloHits :{ @table::CaloCrystalHitsFromCaloHits }
+#------------------------------------------------------------------------------
+#  default tracking
+#------------------------------------------------------------------------------
+	    FSHPreStereo         : { @table::FSHPreStereo   }
+	    MakeStereoHits       : { @table::MakeStereoHits }
+	    FlagStrawHits        : { @table::FlagStrawHits  }
+	    FlagBkgHits          : { @table::FlagBkgHits    }
+
+	    TimePeakFinder       : { @table::TimePeakFinder }
+	    NegHelixFinder       : { @table::NegHelixFinder }
+	    PosHelixFinder       : { @table::PosHelixFinder }
+
+	    TRFDownstreameMinus : { @table::TrkRecFitDownstreameMinus  }
+	    TRFDownstreammuMinus: { @table::TrkRecFitDownstreammuMinus }
+	    TRFUpstreameMinus   : { @table::TrkRecFitUpstreameMinus    }
+	    TRFUpstreammuMinus  : { @table::TrkRecFitUpstreammuMinus   }
+#------------------------------------------------------------------------------
+# CalPatRec modules
+#------------------------------------------------------------------------------
+	    MakeCaloProtoCluster            : { @table::MakeCaloProtoCluster }
+	    MakeCaloCluster                 : { @table::MakeCaloCluster      }
+
+	    CalPatRecFSHP                   : { @table::CalPatRecFSHP }
+	    CalPatRecMakeStrawHitPositions  : { @table::CalPatRecMakeStrawHitPositions }
+	    CalPatRecMakeStereoHits         : { @table::CalPatRecMakeStereoHits        }
+	    CalPatRecFlagStrawHits          : { @table::CalPatRecFlagStrawHits         }
+	    CalPatRecFlagBkgHits            : { @table::CalPatRecFlagBkgHits           }
+
+	    CalPatRec                       : { @table::CalPatRec    }
+	    CalPatRecDem                    : { @table::CalPatRecDem }
+	    CalPatRecDmm                    : { @table::CalPatRecDmm }
+
+	    MergePatRec                     : { @table::MergePatRec    }
+	    MergePatRecDem                  : { @table::MergePatRecDem }
+	    MergePatRecDmm                  : { @table::MergePatRecDmm }
+	    MergePatRecUem                  : { @table::MergePatRecUem }
+	    MergePatRecUmm                  : { @table::MergePatRecUmm }
+
+	    TrackCaloIntersectionDem        : { @table::TrackCaloIntersectionDem }
+	    TrackCaloIntersectionDmm        : { @table::TrackCaloIntersectionDmm }
+	    TrackCaloIntersectionUem        : { @table::TrackCaloIntersectionUem }
+	    TrackCaloIntersectionUmm        : { @table::TrackCaloIntersectionUmm }
+
+	    TrackCaloMatchingDem            : { @table::TrackCaloMatchingDem }
+	    TrackCaloMatchingDmm            : { @table::TrackCaloMatchingDmm }
+	    TrackCaloMatchingUem            : { @table::TrackCaloMatchingUem }
+	    TrackCaloMatchingUmm            : { @table::TrackCaloMatchingUmm }
+#------------------------------------------------------------------------------
+# higher-level reconstruction
+# ParticleID, AvikPID - tracker-only particle ID
+# TrackCaloMatching doesn't explicitly know anything about the particle mass, 
+# it is just using the extrapolation results 
+#------------------------------------------------------------------------------
+	    ParticleID           : { @table::ParticleID fitterModuleLabel:MergePatRec    }
+	    ParticleIDDem        : { @table::ParticleID fitterModuleLabel:MergePatRecDem }
+	    ParticleIDDmm        : { @table::ParticleID fitterModuleLabel:MergePatRecDmm }
+
+	    AvikPID              : { @table::AvikPID           
+		trkPatRecDemModuleLabel : MergePatRecDem 
+		trkPatRecDmmModuleLabel : MergePatRecDmm 
+	    }
+	}
+#------------------------------------------------------------------------------
+# event mixing modules - all clones of the same module.
+# each clone takes certain collections from the input file and adds them to the event
+#------------------------------------------------------------------------------
+	filters: {
+	    flashMixer    : { @table::mixerTemplate 
+		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:flashMixer genModuleLabel:flashMixer }
+	    }
+	    ootMixer      : { @table::mixerTemplate
+		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:ootMixer genModuleLabel:ootMixer     }
+	    }
+	    dioMixer      : { @table::mixerTemplate
+		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:dioMixer genModuleLabel:dioMixer     }
+	    }
+	    neutronMixer  : { @table::mixerTemplate 
+		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:neutronMixer genModuleLabel:neutronMixer}
+	    }
+	    photonMixer   : { @table::mixerTemplate
+		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:photonMixer genModuleLabel:photonMixer }
+	    }
+	    protonMixer   : { @table::mixerTemplate
+		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:protonMixer genModuleLabel:protonMixer }
+	    }
+#------------------------------------------------------------------------------
+# Stntuple maker sequence
+#------------------------------------------------------------------------------
+	    InitStntuple   : { @table::InitStntuple }
+	    FillStntuple   : { @table::FillStntuple }
+#------------------------------------------------------------------------------
+# default version of StntupleMaker - one branch - electrons
+#------------------------------------------------------------------------------
+	    StntupleMaker       : { @table::StntupleMaker       }
+	    StntupleMakerDem    : { @table::StntupleMakerDem    }
+	    StntupleMakerDmm    : { @table::StntupleMakerDmm    }
+	    StntupleMakerDemDmm : { @table::StntupleMakerDemDmm }
+	    StntupleMaker3      : { @table::StntupleMaker3      }
+	    StntupleMaker4      : { @table::StntupleMaker4      }
+#------------------------------------------------------------------------------
+# Andrej's filter
+# Reject events with no hits from signal-like tracks in the detectors.  
+# The filter does not look at the background hits from mixed events.
+#------------------------------------------------------------------------------
+	    detectorFilter : { @table::FilterStepPointMomentum }
+	    EventFilter    : { @table::EventFilter }
+#------------------------------------------------------------------------------
+# event display
+#------------------------------------------------------------------------------
+	    MuHitDisplay   : { @table::MuHitDisplay }
+	}
+    }
+
+    hits     : [ MakeCaloReadoutHits, MakeCaloCrystalHits, @sequence::Tracking.DigiSim ]
+
+    cal_reco : [ MakeCaloProtoCluster, MakeCaloCluster ]
+
+    dem_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
+		 @sequence::CalPatRecNS.calpatrec_dem_reco, 
+		 MergePatRecDem, 
+		 @sequence::TrackCaloMatchingNS.matching_dem ]
+
+    dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus, 
+		 @sequence::CalPatRecNS.calpatrec_dmm_reco, 
+		 MergePatRecDmm, 
+		 @sequence::TrackCaloMatchingNS.matching_dmm ]
+
+    uem_reco : [ @sequence::Tracking.TPRUpstreameMinus   , MergePatRecUem, @sequence::TrackCaloMatchingNS.matching_uem ]
+    umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus  , MergePatRecUmm, @sequence::TrackCaloMatchingNS.matching_umm ]
+
+    gen_g4_time_map     :  [ gen_g4 ] 
+}

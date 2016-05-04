@@ -77,15 +77,17 @@ TCosmicsAnaModule::~TCosmicsAnaModule() {
 
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
+//
+//-----------------------------------------------------------------------------
+void TCosmicsAnaModule::BookCaloHistograms(HistBase_t* HistBase, const char* Folder) {
   //     char name [200];
   //     char title[200];
-  //-----------------------------------------------------------------------------
-  //  
-  //-----------------------------------------------------------------------------
-  HBook1F(Hist->fVaneID ,"vane_id",Form("%s: Vane ID"       ,Folder), 10, 0,  10,Folder);
 
-  for (int i=0; i<4; i++) {
+  CaloHist_t* Hist = (CaloHist_t*) HistBase;
+
+  HBook1F(Hist->fDiskID ,"disk_id",Form("%s: Disk ID"       ,Folder), 10, 0,  10,Folder);
+
+  for (int i=0; i<kNDisks; i++) {
     HBook1F(Hist->fEnergy  [i],Form("energy_%i",i),Form("%s: Hit Energy[%i]",Folder,i),200, 0, 100,Folder);
     HBook1F(Hist->fTime    [i],Form("time_%i"  ,i),Form("%s: Hit time  [%i]",Folder,i),200, 0,2000,Folder);
     HBook1F(Hist->fNHits   [i],Form("nhits_%i" ,i),Form("%s: NHits     [%i]",Folder,i), 50, 0,  50,Folder);
@@ -102,11 +104,13 @@ void TCosmicsAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder)
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
+void TCosmicsAnaModule::BookClusterHistograms(HistBase_t* HistBase, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fVaneID ,"vane_id",Form("%s: Vane ID"       ,Folder), 10, 0,  10,Folder);
+  ClusterHist_t* Hist = (ClusterHist_t*) HistBase;
+
+  HBook1F(Hist->fDiskID ,"disk_id",Form("%s: Vane ID"       ,Folder), 10, 0,  10,Folder);
   HBook1F(Hist->fEnergy ,"energy" ,Form("%s: Cluster Energy",Folder),500, 0, 250,Folder);
   HBook1F(Hist->fT0     ,"t0"     ,Form("%s: cluster T0"    ,Folder),200, 0,2000,Folder);
   HBook1F(Hist->fRow    ,"row"    ,Form("%s: cluster Row"   ,Folder),200, 0, 200,Folder);
@@ -129,9 +133,11 @@ void TCosmicsAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* F
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
+void TCosmicsAnaModule::BookGenpHistograms(HistBase_t* HistBase, const char* Folder) {
 //   char name [200];
 //   char title[200];
+
+  GenpHist_t* Hist = (GenpHist_t*) HistBase;
 
   HBook1F(Hist->fP      ,"p"       ,Form("%s: Momentum"     ,Folder),1000,     0, 200,Folder);
   HBook1F(Hist->fPdgCode[0],"pdg_code_0",Form("%s: PDG Code[0]"     ,Folder),200, -100, 100,Folder);
@@ -144,9 +150,11 @@ void TCosmicsAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder)
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
+void TCosmicsAnaModule::BookTrackHistograms(HistBase_t* HistBase, const char* Folder) {
 //   char name [200];
-//   char title[200];
+//   char title[200]
+
+  TrackHist_t* Hist = (TrackHist_t*) HistBase;
 
   HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  90  ,120. ,Folder);
   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 104.5,105.5,Folder);
@@ -238,9 +246,11 @@ void TCosmicsAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folde
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+void TCosmicsAnaModule::BookEventHistograms(HistBase_t* HistBase, const char* Folder) {
   char name [200];
-  //  char title[200];
+  //  char title[200]
+
+  EventHist_t* Hist = (EventHist_t*) HistBase;
 
   HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
   HBook1F(Hist->fEleMom    ,"ce_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000, 50,150,Folder);
@@ -289,9 +299,11 @@ void TCosmicsAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folde
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
+void TCosmicsAnaModule::BookSimpHistograms(HistBase_t* HistBase, const char* Folder) {
   //  char name [200];
   //  char title[200];
+
+  SimpHist_t* Hist = (SimpHist_t*) HistBase;
 
   HBook1F(Hist->fPdgCode   ,"pdg"         ,Form("%s: PDG code"                     ,Folder),200,-100,100,Folder);
   HBook1F(Hist->fNStrawHits,"nsth"        ,Form("%s: n straw hits"                 ,Folder),200,   0,200,Folder);
@@ -510,11 +522,13 @@ void TCosmicsAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // need MC truth branch
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::FillEventHistograms(EventHist_t* Hist) {
+void TCosmicsAnaModule::FillEventHistograms(HistBase_t* HistBase) {
   double            cos_th, dio_wt, xv, yv, rv, zv, p;
   double            e, m, r;
   TLorentzVector    mom;
 
+  EventHist_t* Hist = (EventHist_t*) HistBase;
+  
   fParticle->Momentum(mom);
 
   p      = mom.P();
@@ -587,76 +601,11 @@ void TCosmicsAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 // crystals - count crystals with E > 1MeV
 //-----------------------------------------------------------------------------
-  TCalHitData* cch;
+//  TCalHitData* cch;
 
-  int n_cch_1mev = 0;
+//  int n_cch_1mev = 0;
 
-  if (fCalorimeterType == 1) {
-//-----------------------------------------------------------------------------
-// vane calorimeter
-//-----------------------------------------------------------------------------
-    int  nhits_vane[2][4], nhits_row [2][20], nhits_col[2][50];
-    int  crystal_id, vane_id, local_id, vane_row, vane_col;
-
-    for (int i=0; i<4; i++) {
-      nhits_vane[0][i] = 0;
-      nhits_vane[1][i] = 0;
-    }
-      
-    for (int i=0; i<20; i++) {
-      nhits_row[0][i] = 0;
-      nhits_row[1][i] = 0;
-    }
-
-    for (int i=0; i<50; i++) {
-      nhits_col[0][i] = 0;
-      nhits_col[1][i] = 0;
-    }
-      
-    for (int ic=0; ic<fNCalHits; ic++) {
-      cch        = fCalDataBlock->CalHitData(ic);
-      crystal_id = cch->ID();
-
-      if (cch->Energy() > 1.) {
-	n_cch_1mev += 1;
-      }
-      // for each crystal determine its row and column
-      // the following is for vanes
-      vane_id  = crystal_id/484.;
-      local_id = crystal_id-vane_id*484;
-      vane_row = local_id/44;
-      vane_col = local_id-vane_row*44;
-      
-      nhits_vane[0][vane_id ] += 1;
-      nhits_row [0][vane_row] += 1;
-      nhits_col [0][vane_col] += 1;
-      
-      if (cch->Energy() > 1.) {
-	nhits_row [1][vane_row] += 1;
-	nhits_col [1][vane_col] += 1;
-	nhits_vane[1][vane_id ] += 1;
-      }
-    }
-
-    Hist->fNCaloCrystalHits[0]->Fill(fNCalHits);
-    Hist->fNCaloCrystalHits[1]->Fill(n_cch_1mev);
-
-    for (int iv=0; iv<4; iv++) {
-      Hist->fNCaloHitsVsVane[0]->Fill(iv,nhits_vane[0][iv]);
-      Hist->fNCaloHitsVsVane[1]->Fill(iv,nhits_vane[1][iv]);
-    }
-
-    for (int ir=0; ir<20; ir++) {
-      Hist->fNCaloHitsVsRow[0]->Fill(ir,nhits_row[0][ir]);
-      Hist->fNCaloHitsVsRow[1]->Fill(ir,nhits_row[1][ir]);
-    }
-
-    for (int ic=0; ic<50; ic++) {
-      Hist->fNCaloHitsVsCol[0]->Fill(ic,nhits_col[0][ic]);
-      Hist->fNCaloHitsVsCol[1]->Fill(ic,nhits_col[1][ic]);
-    }
-  }
-  else if (fCalorimeterType == 2) {
+  if (fCalorimeterType == 2) {
 //-----------------------------------------------------------------------------
 // disk calorimeter
 //-----------------------------------------------------------------------------
@@ -749,14 +698,14 @@ void TCosmicsAnaModule::FillEventHistograms(EventHist_t* Hist) {
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
+void TCosmicsAnaModule::FillCaloHistograms(HistBase_t* HistBase, TStnCrystal* Cr) {
 
   int                    nhits;
   float                  t, e, r, e700, n700;
   TCalHitData*           hit;
 
-  // determine crystal coordinates
-
+  CaloHist_t* Hist = (CaloHist_t*) HistBase;
+					// determine crystal coordinates
   TDisk* disk = Cr->Disk();
 
   int idisk = disk->SectionID();
@@ -766,7 +715,7 @@ void TCosmicsAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
   r     = Cr->Radius();
   nhits = Cr->NHits();
 
-  Hist->fVaneID->Fill(idisk);
+  Hist->fDiskID->Fill(idisk);
 
   Hist->fEnergy  [idisk]->Fill(e);
   Hist->fNHits   [idisk]->Fill(nhits);
@@ -798,9 +747,11 @@ void TCosmicsAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
 
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
+void TCosmicsAnaModule::FillClusterHistograms(HistBase_t* HistBase, TStnCluster* Cluster) {
   int   row, col;
   float  x, y, z, r;
+
+  ClusterHist_t* Hist = (ClusterHist_t*) HistBase;
 
   row = Cluster->Ix1();
   col = Cluster->Ix2();
@@ -813,7 +764,7 @@ void TCosmicsAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* 
   if ((row < 0) || (row > 9999)) row = -9999;
   if ((col < 0) || (col > 9999)) col = -9999;
 
-  Hist->fVaneID->Fill(Cluster->DiskID());
+  Hist->fDiskID->Fill(Cluster->DiskID());
   Hist->fEnergy->Fill(Cluster->Energy());
   Hist->fT0->Fill(Cluster->Time());
   Hist->fRow->Fill(row);
@@ -837,11 +788,13 @@ void TCosmicsAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* 
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
+void TCosmicsAnaModule::FillGenpHistograms(HistBase_t* HistBase, TGenParticle* Genp) {
   int    gen_id;
   float  p, cos_th, z0, t0, r0, x0, y0;
 
   TLorentzVector mom, v;
+
+  GenpHist_t* Hist  = (GenpHist_t*) HistBase;
 
   Genp->Momentum(mom);
   //  Genp->ProductionVertex(v);
@@ -868,7 +821,9 @@ void TCosmicsAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp)
 }
 
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
+void TCosmicsAnaModule::FillSimpHistograms(HistBase_t* HistBase, TSimParticle* Simp) {
+
+  SimpHist_t* Hist = (SimpHist_t*) HistBase;
 
   Hist->fPdgCode->Fill(Simp->fPdgCode);
   Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
@@ -879,13 +834,16 @@ void TCosmicsAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp)
 //-----------------------------------------------------------------------------
 // for DIO : ultimately, one would need to renormalize the distribution
 //-----------------------------------------------------------------------------
-void TCosmicsAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
+void TCosmicsAnaModule::FillTrackHistograms(HistBase_t* HistBase, TStnTrack* Track) {
 
   TLorentzVector  mom;
   double          chi2c, r;
   int             itrk;
   TrackPar_t*     tp;
 					// pointer to local track parameters
+
+  TrackHist_t* Hist = (TrackHist_t*) HistBase;
+
   itrk = Track->Number();
   tp   = fTrackPar+itrk;
 
@@ -1003,7 +961,7 @@ void TCosmicsAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track)
   Hist->fDz->Fill(tp->fDz);
 
   Hist->fDt->Fill(tp->fDt);
-  Hist->fChi2Match->Fill(tp->fChi2Match);
+  Hist->fChi2Match->Fill(tp->fChi2Tcm);
 
   Hist->fDu->Fill    (tp->fDu);
   Hist->fDv->Fill    (tp->fDv);
@@ -1076,7 +1034,7 @@ int TCosmicsAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlockDem  );
+  RegisterDataBlock("TrackBlockDem" ,"TStnTrackBlock"   ,&fTrackBlockDem  );
   RegisterDataBlock("TrackBlockDmm" ,"TStnTrackBlock"   ,&fTrackBlockDmm  );
   RegisterDataBlock("TrackBlockUem" ,"TStnTrackBlock"   ,&fTrackBlockUem  );
   RegisterDataBlock("TrackBlockUmm" ,"TStnTrackBlock"   ,&fTrackBlockUmm  );
@@ -1355,15 +1313,15 @@ void TCosmicsAnaModule::FillHistograms() {
       if (fNTrkUpstream == 0) {
 	FillTrackHistograms(fHist.fTrack[14],trk);
 
-	if ((fabs(tp->fDt) < 3.) && (tp->fEp < 1.15) && (tp->fChi2Match < 100.)) {
+	if ((fabs(tp->fDt) < 3.) && (tp->fEp < 1.15) && (tp->fChi2Tcm < 100.)) {
 	  FillTrackHistograms(fHist.fTrack[15],trk);
 
 					// add debug printout
 	  if (GetDebugBit(40)) {
 	    char  text[1000];
 
-	    sprintf(text,":bit040: p,e/p,dt,chi2m,llhr_cal: %10.3f %10.3f %10.3f %10.3f %10.3f",
-		    trk->P(),tp->fEp,tp->fDt,tp->fChi2Match,trk->LogLHRCal());
+	    sprintf(text,":bit040: p,e/p,dt,chi2_tcm,llhr_cal: %10.3f %10.3f %10.3f %10.3f %10.3f",
+		    trk->P(),tp->fEp,tp->fDt,tp->fChi2Tcm,trk->LogLHRCal());
 	    GetHeaderBlock()->Print(text);
 	  }
 	    
@@ -1403,7 +1361,7 @@ void TCosmicsAnaModule::FillHistograms() {
 // TRK 23: Set "C" tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) > 0
 //         this is interesting to see which muons are getting misidentified
 //-----------------------------------------------------------------------------
-    if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Match < 100.)) {
+    if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Tcm < 100.)) {
       FillTrackHistograms(fHist.fTrack[22],trk);
       if    (trk->LogLHRCal() > 0) {
 	FillTrackHistograms(fHist.fTrack[23],trk);
@@ -1747,7 +1705,7 @@ int TCosmicsAnaModule::Event(int ientry) {
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Match = -1.e6;
+    tp->fChi2Tcm   = -1.e6;
     tp->fPath      = -1.e6;
 
     if (vr) {
@@ -1767,7 +1725,7 @@ int TCosmicsAnaModule::Event(int ientry) {
 
       tp->fDu        = vr->fDu; // vr->fDx*nx+vr->fDy*ny;
       tp->fDv        = vr->fDv; // vr->fDx*ny-vr->fDy*nx;
-      tp->fChi2Match = vr->fChi2Match;
+      tp->fChi2Tcm   = vr->fChi2Match;
       tp->fPath      = vr->fPath;
     }
 

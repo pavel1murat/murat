@@ -16,6 +16,7 @@
 #include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
+#include "Stntuple/obj/TVdetHitData.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -26,47 +27,33 @@
 
 class TCosmicsAnaModule: public TStnModule {
 public:
+//-----------------------------------------------------------------------------
+// track and sim particle additional parameters
+//-----------------------------------------------------------------------------
+#include "murat/ana/HistBase_t.h"
+#include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/SimPar_t.hh"
 
-  struct TrackPar_t {
-    int     fNHPl;
-    int     fNEPl;
-    int     fNDPl;
-    float   fDpF ;    // tracker-only resolution
-    float   fDp0 ;
-    float   fDp2 ;
-    float   fDpFSt;
-    double  fDioWt;
-
-    double  fEcl;
-    double  fEp;
-    double  fDx;
-    double  fDy;
-    double  fDz;
-    double  fDt;
-    double  fDu;			// rotated residuals
-    double  fDv;
-    double  fChi2Match;
-    double  fPath;
-  };
+  enum { kNDisks = 2 };
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct CaloHist_t {
-    TH1F*    fVaneID;		       // per crystal hit
-    TH1F*    fEnergy  [4];
-    TH1F*    fTime    [4];
-    TH1F*    fNHits   [4];
-    TH1F*    fRadius  [4];
-    TH1F*    fRadiusWE[4];
-    TH1F*    fE700    [4];
-    TH1F*    fT700    [4];
-    TH1F*    fN700    [4];
-    TH1F*    fR700    [4];
-    TH1F*    fRWE700  [4];
+  struct CaloHist_t : public HistBase_t {
+    TH1F*    fDiskID;		       // per crystal hit
+    TH1F*    fEnergy  [kNDisks];
+    TH1F*    fTime    [kNDisks];
+    TH1F*    fNHits   [kNDisks];
+    TH1F*    fRadius  [kNDisks];
+    TH1F*    fRadiusWE[kNDisks];
+    TH1F*    fE700    [kNDisks];
+    TH1F*    fT700    [kNDisks];
+    TH1F*    fN700    [kNDisks];
+    TH1F*    fR700    [kNDisks];
+    TH1F*    fRWE700  [kNDisks];
   };
 
-  struct ClusterHist_t {
-    TH1F*    fVaneID;
+  struct ClusterHist_t : public HistBase_t {
+    TH1F*    fDiskID;
     TH1F*    fEnergy;
     TH1F*    fT0;
     TH1F*    fRow;
@@ -88,7 +75,7 @@ public:
     TH1F*    fSigE2;
   };
 
-  struct EventHist_t {
+  struct EventHist_t : public HistBase_t {
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
     TH1F*    fEleMom;
@@ -108,17 +95,17 @@ public:
     TH1F*    fNGenp;                    // N(particles in GENP block)
 
     TH1F*    fNCaloCrystalHits[2];
-    TH2F*    fNCaloHitsVsVane[2];
-    TH2F*    fNCaloHitsVsRow[2];
-    TH2F*    fNCaloHitsVsCol[2];
+    TH2F*    fNCaloHitsVsVane [2];
+    TH2F*    fNCaloHitsVsRow  [2];
+    TH2F*    fNCaloHitsVsCol  [2];
     // calorimeter hit histograms
 
-    TH1F*    fETot        [4];            // total energy/event 
-    TH2F*    fECrVsR      [4];            // total energy_per_crystal/event vs radius
-    TH2F*    fNCrVsR      [4];            // total energy_per_crystal/event vs radius
+    TH1F*    fETot        [kNDisks];            // total energy/event 
+    TH2F*    fECrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
+    TH2F*    fNCrVsR      [kNDisks];            // total energy_per_crystal/event vs radius
 
-    TH2F*    fNCrystalHitsVsR[4];            //
-    TH2F*    fNHitCrystalsVsR[4];            //
+    TH2F*    fNCrystalHitsVsR[kNDisks];            //
+    TH2F*    fNHitCrystalsVsR[kNDisks];            //
 
     TH1F*    fNHitCrystalsTot;
     TH1F*    fECal;
@@ -126,7 +113,7 @@ public:
       
   };
 
-  struct TrackHist_t {
+  struct TrackHist_t : public HistBase_t {
     TH1F*    fP[3];			// total momentum, 3 hists with different binning
     TH1F*    fP0;
     TH1F*    fP2;
@@ -217,7 +204,7 @@ public:
 
   };
 
-  struct GenpHist_t {
+  struct GenpHist_t : public HistBase_t {
     TH1F*    fPdgCode[2];		// same distribution in different scale
     TH1F*    fGenID;			// 
     TH1F*    fZ0;			// 
@@ -227,14 +214,14 @@ public:
     TH1F*    fCosTh;			// 
   };
 					// histograms for the simulated CE
-  struct SimpHist_t {
+  struct SimpHist_t : public HistBase_t {
     TH1F*    fPdgCode;
     TH1F*    fMomTargetEnd;
     TH1F*    fMomTrackerFront;
     TH1F*    fNStrawHits;
   };
 
-  struct TrackEffHist_t {
+  struct TrackEffHist_t : public HistBase_t {
     TH1F*    fPtMc;			// denominator
     TH1F*    fPtReco;			// numerator
   };
@@ -362,19 +349,19 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms    (CaloHist_t*    Hist, const char* Folder);
-  void    BookClusterHistograms (ClusterHist_t* Hist, const char* Folder);
-  void    BookGenpHistograms    (GenpHist_t*    Hist, const char* Folder);
-  void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
-  void    BookSimpHistograms    (SimpHist_t*    Hist, const char* Folder);
-  void    BookTrackHistograms   (TrackHist_t*   Hist, const char* Folder);
+  void    BookCaloHistograms    (HistBase_t*  Hist, const char* Folder);
+  void    BookClusterHistograms (HistBase_t*  Hist, const char* Folder);
+  void    BookGenpHistograms    (HistBase_t*  Hist, const char* Folder);
+  void    BookEventHistograms   (HistBase_t*  Hist, const char* Folder);
+  void    BookSimpHistograms    (HistBase_t*  Hist, const char* Folder);
+  void    BookTrackHistograms   (HistBase_t*  Hist, const char* Folder);
 
-  void    FillEventHistograms    (EventHist_t* Hist);
-  void    FillCaloHistograms     (CaloHist_t*    Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms  (ClusterHist_t* Hist, TStnCluster*  Cluster);
-  void    FillGenpHistograms     (GenpHist_t*    Hist, TGenParticle* Genp   );
-  void    FillSimpHistograms     (SimpHist_t*    Hist, TSimParticle* Simp   );
-  void    FillTrackHistograms    (TrackHist_t*   Hist, TStnTrack*    Trk    );
+  void    FillEventHistograms    (HistBase_t*  Hist);
+  void    FillCaloHistograms     (HistBase_t*  Hist, TStnCrystal*  Crystal);
+  void    FillClusterHistograms  (HistBase_t*  Hist, TStnCluster*  Cluster);
+  void    FillGenpHistograms     (HistBase_t*  Hist, TGenParticle* Genp   );
+  void    FillSimpHistograms     (HistBase_t*  Hist, TSimParticle* Simp   );
+  void    FillTrackHistograms    (HistBase_t*  Hist, TStnTrack*    Trk    );
 
   void    BookHistograms();
   void    FillHistograms();

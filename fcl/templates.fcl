@@ -191,4 +191,20 @@ murat : {
     umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus  , MergePatRecUmm, @sequence::TrackCaloMatchingNS.matching_umm ]
 
     gen_g4_time_map     :  [ gen_g4 ] 
+#------------------------------------------------------------------------------
+# these names could be predefined
+#------------------------------------------------------------------------------
+    trigger_paths  : [ ]
+    #    out : [detectorOutput]
+    out            : []
+    end_paths      : [out]
+
+}
+
+outputs: {
+    detectorOutput : {
+	module_type : RootOutput
+	SelectEvents: { SelectEvents: [] }
+	outputCommands:   [ "keep *_*_*_*"]
+    }
 }

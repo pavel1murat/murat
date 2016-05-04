@@ -172,10 +172,11 @@ export      LOGFILE=$NAME_STUB.log
 
 if [ $OUTPUT_DIR == "undefined" ] ; then 
     dsid=$DSID
+    host=`hostname -s`
     if [ $dsid == "undefined" ] ; then 
-	export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${JOB}.`echo $$`
+	export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${JOB}.$host.`echo $$`
     else
-	export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${DSID}_${JOB}.`echo $$`
+	export OUTPUT_DIR=$WORK_DIR/results/`date +%Y-%m-%d-%H-%M`.${DSID}_${JOB}.$host.`echo $$`
     fi
 fi
 

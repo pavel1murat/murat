@@ -13,10 +13,10 @@ void  cosmics_ana(int DebugBit = -1) {
 // configure analysis module
 //-----------------------------------------------------------------------------
   m_cos = (TCosmicsAnaModule*) g.x->AddModule("TCosmicsAnaModule",0);  
-  gEnv->SetValue("mu2e.EleTemplates",
-		 "/grid/fermiapp/mu2e/users/murat/hist/mu2e/v4_2_1/e00s1212.track_ana.hist");
-  gEnv->SetValue("mu2e.MuoTemplates",
-		 "/grid/fermiapp/mu2e/users/murat/hist/mu2e/v4_2_1/m00s1212.track_ana.hist");
+//   gEnv->SetValue("mu2e.EleTemplates",
+// 		 "/grid/fermiapp/mu2e/users/murat/hist/mu2e/v4_2_1/e00s1212.track_ana.hist");
+//   gEnv->SetValue("mu2e.MuoTemplates",
+// 		 "/grid/fermiapp/mu2e/users/murat/hist/mu2e/v4_2_1/m00s1212.track_ana.hist");
 
   if (DebugBit >= 0) m_cos->SetDebugBit(DebugBit,1);
 }

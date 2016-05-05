@@ -55,7 +55,7 @@ physics: { @table::murat.physics
  	StntupleMaker4 : { @table::murat.physics.filters.StntupleMaker4  g4ModuleLabel: @local::G4_MODULE_LABEL }
      }
     
-     p1 : [ @sequence::murat.hits, 
+     p1 : [ @sequence::murat.digis, 
 	    @sequence::murat.cal_reco,
 	    @sequence::murat.dem_reco, 
 	    @sequence::murat.dmm_reco,

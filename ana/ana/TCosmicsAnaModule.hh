@@ -17,6 +17,7 @@
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TVdetHitData.hh"
+#include "Stntuple/obj/TVdetDataBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -225,25 +226,6 @@ public:
     TH1F*    fPtMc;			// denominator
     TH1F*    fPtReco;			// numerator
   };
-
-//-----------------------------------------------------------------------------
-//  fTrackHist[ 0]: all the tracks
-//  fTrackHist[ 1]: all the tracks Pt > PtMin and within the fiducial
-//  fTrackHist[ 2]: [1]+ matched to MC
-//  fTrackHist[ 3]: [1]+ not matched to MC
-//  fTrackHist[ 4]: [2]+ inside  the jet
-//  fTrackHist[ 5]: [3]+ inside  the jet
-//  fTrackHist[ 6]: [2]+ outside the jet
-//  fTrackHist[ 7]: [3]+ outside the jet
-//  fTrackHist[ 8]:
-//  fTrackHist[ 9]:
-//  fTrackHist[10]:
-//  fTrackHist[11]: tracks with pt.10 inside the COT
-//
-//  fTrackEffHist[0]
-//  fTrackEffHist[1]
-//  fTrackEffHist[2]
-//  fTrackEffHist[3]
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets   = 100 };
   enum { kNTrackHistSets   = 400 };
@@ -271,13 +253,17 @@ public:
   TStnTrackBlock*   fTrackBlockUem;
   TStnTrackBlock*   fTrackBlockUmm;
 
+  TStnTrackBlock*   fTrackBlock[4]; 	// same thing, cached pointers ...
+
   TStnClusterBlock* fClusterBlock;
   TCalDataBlock*    fCalDataBlock;
   TStrawDataBlock*  fStrawDataBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
+  TVdetDataBlock*   fVdetBlock;
 					// additional track parameters (assume ntracks < 20)
-  TrackPar_t        fTrackPar[20];
+  TrackPar_t        fTrackPar[4][20];
+  SimPar_t          fSimPar;
 					// histograms filled
   Hist_t            fHist;
 					// cut values
@@ -287,15 +273,15 @@ public:
   int               fPdgCode;		// determines which one
   int               fGeneratorCode;      
 
-  TSimParticle*     fSimp;
   double            fEleE;		// electron energy
 
   int               fCalorimeterType;
 
   int               fNClusters;
-  int               fNTracks[10];
-  int               fNGoodTracks;
-  int               fNMatchedTracks;
+  int               fNTracks       [4];	// for a given track block
+  int               fNGoodTracks   [4];
+  int               fNMatchedTracks[4];
+
   int               fNTrkUpstream;
   int               fNStrawHits;
   int               fNCalHits;
@@ -314,10 +300,10 @@ public:
 
   TDiskCalorimeter* fDiskCalorimeter;
 
-  TStnTrackID*      fTrackID;
+  int               fNID;
+  int               fBestID;
+  TStnTrackID*      fTrackID[10];
   TEmuLogLH*        fLogLH;
-
-  double            fMinT0;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -331,7 +317,7 @@ public:
   TStnTrackBlock*    GetTrackBlock  () { return fTrackBlockDem; }
   TStnClusterBlock*  GetClusterBlock() { return fClusterBlock; }
 
-  TStnTrackID*       GetTrackID     () { return fTrackID; }
+  TStnTrackID*       GetTrackID     (int I) { return fTrackID[I]; }
   TEmuLogLH*         GetLogLH       () { return fLogLH; }
 //-----------------------------------------------------------------------------
 // accessors
@@ -367,6 +353,11 @@ public:
   void    FillHistograms();
 
 
+  int     InitTrackPar(TStnTrackBlock*   TrackBlock  , 
+		       TStnClusterBlock* ClusterBlock, 
+		       TrackPar_t*       TrackPar    ,
+		       int&              NGoodTracks ,
+		       int&              NMatchedTracks);
   void    Debug();
 //-----------------------------------------------------------------------------
 // test

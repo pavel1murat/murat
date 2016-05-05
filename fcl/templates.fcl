@@ -146,6 +146,12 @@ murat : {
 		fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:protonMixer genModuleLabel:protonMixer }
 	    }
 #------------------------------------------------------------------------------
+# Andrej's filter
+# Reject events with no hits from signal-like tracks in the detectors.  
+# The filter does not look at the background hits from mixed events.
+#------------------------------------------------------------------------------
+	    detectorFilter : { @table::FilterStepPointMomentum }
+#------------------------------------------------------------------------------
 # Stntuple maker sequence
 #------------------------------------------------------------------------------
 	    InitStntuple   : { @table::InitStntuple }
@@ -159,12 +165,6 @@ murat : {
 	    StntupleMakerDemDmm : { @table::StntupleMakerDemDmm }
 	    StntupleMaker3      : { @table::StntupleMaker3      }
 	    StntupleMaker4      : { @table::StntupleMaker4      }
-#------------------------------------------------------------------------------
-# Andrej's filter
-# Reject events with no hits from signal-like tracks in the detectors.  
-# The filter does not look at the background hits from mixed events.
-#------------------------------------------------------------------------------
-	    detectorFilter : { @table::FilterStepPointMomentum }
 	    EventFilter    : { @table::EventFilter }
 #------------------------------------------------------------------------------
 # event display
@@ -173,9 +173,9 @@ murat : {
 	}
     }
 
-    hits     : [ MakeCaloReadoutHits, MakeCaloCrystalHits, @sequence::Tracking.DigiSim ]
+    digis    : [ MakeCaloReadoutHits, @sequence::Tracking.DigiSim ]
 
-    cal_reco : [ MakeCaloProtoCluster, MakeCaloCluster ]
+    cal_reco : [ MakeCaloCrystalHits, MakeCaloProtoCluster, MakeCaloCluster ]
 
     dem_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
 		 @sequence::CalPatRecNS.calpatrec_dem_reco, 

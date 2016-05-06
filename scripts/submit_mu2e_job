@@ -212,14 +212,10 @@ for x in $LIST_OF_REP ; do
     val=${!n}
 
     if [ ".$val" == "." ] ; then
-	if [ $var == "INPUT_DATA_FILE"    ] ; then
-	    val="$NAME_STUB.root"
-	elif [ $var == "ART_HIST_FILE"    ] ; then
-	    val="$NAME_STUB.hist"
-	elif [ $var == "OUTPUT_STNTUPLE"  ] ; then
-	    val="$NAME_STUB.stn"
-	elif [ $var == "OUTPUT_DATA_FILE" ] ; then
-	    val="$NAME_STUB.output.root"
+	if   [ $var == "INPUT_DATA_FILE"  ] ; then val="$NAME_STUB.root"
+	elif [ $var == "ART_HIST_FILE"    ] ; then val="$NAME_STUB.hist"
+	elif [ $var == "OUTPUT_STNTUPLE"  ] ; then val="$NAME_STUB.stn"
+	elif [ $var == "OUTPUT_DATA_FILE" ] ; then val="$NAME_STUB.output.root"
 	fi
     fi
 

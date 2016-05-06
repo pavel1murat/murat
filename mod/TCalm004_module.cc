@@ -63,10 +63,10 @@ namespace mu2e {
     fTrackIDSetC    = new TStnTrackID();
     fTrackIDSetB    = new TStnTrackID();
 
-    fTrackIDSetB->SetMinNActive  (20   );
-    fTrackIDSetB->SetMaxT0Err    (1.0  );
-    fTrackIDSetB->SetMaxFitMomErr(0.2  );
-    fTrackIDSetB->SetMinFitCons  (1.e-4);
+    fTrackIDSetB->SetMinNActive(20   );
+    fTrackIDSetB->SetMaxT0Err  (1.0  );
+    fTrackIDSetB->SetMaxMomErr (0.2  );
+    fTrackIDSetB->SetMinFitCons(1.e-4);
 
     fLogLH          = new TEmuLogLH();
   }

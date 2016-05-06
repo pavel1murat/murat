@@ -61,7 +61,7 @@ TCosmicsAnaModule::TCosmicsAnaModule(const char* name, const char* title):
 					// cut on track quality only
   fNID        = 1;
   fTrackID[0] = new TStnTrackID();
-  fTrackID[0]->SetMaxFitMomErr (100);
+  fTrackID[0]->SetMaxMomErr    (100);
   fTrackID[0]->SetMaxT0Err     (100);
   fTrackID[0]->SetMinNActive   ( -1);
   fTrackID[0]->SetMinFitCons   (-1.);
@@ -204,6 +204,27 @@ void TCosmicsAnaModule::BookGenpHistograms(HistBase_t* HistBase, const char* Fol
 }
 
 //-----------------------------------------------------------------------------
+void TCosmicsAnaModule::BookTrackIDHistograms(TStnTrackID::Hist_t* Hist, const char* Folder) {
+//   char name [200];
+//   char title[200]
+
+  for (int i=0; i<5; i++) {
+    HBook1F(Hist->fNActive[i],Form("nactive_%i",i) ,Form("%s: Nactive[%i]"         ,Folder,i), 150,   0  , 150. ,Folder);
+    HBook1F(Hist->fFitCons[i],Form("fcons_%i"  ,i) ,Form("%s: FitCons[%i]"         ,Folder,i), 200,   0  ,   1. ,Folder);
+    HBook1F(Hist->fT0     [i],Form("t0_%i"     ,i) ,Form("%s: T0     [%i]"         ,Folder,i), 200,   0  ,2000. ,Folder);
+    HBook1F(Hist->fT0Err  [i],Form("t0err_%i"  ,i) ,Form("%s: T0Err  [%i]"         ,Folder,i), 200,   0  ,   2. ,Folder);
+    HBook1F(Hist->fMomErr [i],Form("momerr_%i" ,i) ,Form("%s: MomErr [%i]"         ,Folder,i), 200,   0  ,   1. ,Folder);
+    HBook1F(Hist->fTanDip [i],Form("tandip_%i" ,i) ,Form("%s: TanDip [%i]"         ,Folder,i), 400,   0  ,   4. ,Folder);
+    HBook1F(Hist->fD0     [i],Form("d0_%i"     ,i) ,Form("%s: D0     [%i]"         ,Folder,i), 400, -200., 200. ,Folder);
+    HBook1F(Hist->fRMax   [i],Form("rmax_%i"   ,i) ,Form("%s: RMax   [%i]"         ,Folder,i), 400,    0., 800. ,Folder);
+    HBook1F(Hist->fDtQual [i],Form("dtqual_%i" ,i) ,Form("%s: DTQual [%i]"         ,Folder,i), 200,  -0.5,   1.5,Folder);
+  }
+
+  HBook1F(Hist->fPassed    ,"passed"     ,Form("%s: Passed     "         ,Folder),  5,  0,   5,Folder);
+  HBook1F(Hist->fFailedBits,"failed_bits",Form("%s: Failed Bits"         ,Folder), 40,  0,  40,Folder);
+}
+
+//-----------------------------------------------------------------------------
 void TCosmicsAnaModule::BookTrackHistograms(HistBase_t* HistBase, const char* Folder) {
 //   char name [200];
 //   char title[200]
@@ -242,8 +263,10 @@ void TCosmicsAnaModule::BookTrackHistograms(HistBase_t* HistBase, const char* Fo
   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
+  HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
+  HBook1F(Hist->fBestAlg    ,"bestalg"  ,Form("%s: best algorithm"    ,Folder),  10,  0, 10,Folder);
 
   HBook1F(Hist->fDt         ,"dt"       ,Form("%s: track delta(T)"    ,Folder), 200,-20  ,20 ,Folder);
   HBook1F(Hist->fChi2Match  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
@@ -297,6 +320,8 @@ void TCosmicsAnaModule::BookTrackHistograms(HistBase_t* HistBase, const char* Fo
   HBook2F(Hist->fNDPlVsNHPl ,"ndp_vs_nhp",Form("%s: Track NDIF vs NHit",Folder), 100, 0,100,100,0.,100,Folder);
   HBook2F(Hist->fChi2dVsNDPl,"chi2d_vs_ndp",Form("%s: Track Chi2/Dof vs NDP",Folder), 30, 0,30,100,0.,10,Folder);
   HBook2F(Hist->fDpFVsNDPl  ,"dpf_vs_ndp"  ,Form("%s: Track DpF vs NDP",Folder)     , 30, 0,30,100,-5,5,Folder);
+
+  HBook1F(Hist->fDaveTrkQual,"dtqual",Form("%s:DaveTrkQual" ,Folder),500, -2.5, 2.5,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -459,10 +484,10 @@ void TCosmicsAnaModule::BookHistograms() {
   book_track_histset[  5] = 1;		// trk_2 + E/P cut
   book_track_histset[  6] = 1;		// trk_2 + E/P + (chi2_tcm < 100)
   book_track_histset[  7] = 1;		// trk_2 + E/P + (chi2_tcm < 100) + (llhr > 0)
-  book_track_histset[  8] = 0;		// Set C tracks e- , |xslope| < 3.
-  book_track_histset[  9] = 0;		// all  tracks in the event when there is no EM clusters E > 60 MeV
-  book_track_histset[ 10] = 0;		// Set C tracks in the event when there is no EM clusters E > 60 MeV
-  book_track_histset[ 11] = 0;		// all tracks with P > 103.5
+  book_track_histset[  8] = 1;		// trk_7 + e-
+  book_track_histset[  9] = 1;		// trk_7 + mu-
+  book_track_histset[ 10] = 1;		// trk_7 + e+
+  book_track_histset[ 11] = 1;		// trk_7 + mu+
   book_track_histset[ 12] = 0;		// tracks with fcons < 1.e-4
   book_track_histset[ 13] = 0;		// "Set C" tracks with 100 <= P < 110 
   book_track_histset[ 14] = 0;		// [13] + no upstream electrons
@@ -478,25 +503,6 @@ void TCosmicsAnaModule::BookHistograms() {
   book_track_histset[ 23] = 0;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) > 0 (interesting for muons)
   book_track_histset[ 24] = 0;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) < 0 (interesting for electrons)
 
-  book_track_histset[ 25] = 0;		// Set C tracks, 0 < E/P < 1.15,  -2 < DT < 4, chi2(match) < 100, P>100
-  book_track_histset[ 26] = 0;		// [25] + LLHR_CAL > 0 - interesting for muons
-  book_track_histset[ 27] = 0;		// [25] + LLHR_CAL < 0 - interesting for electrons
-  book_track_histset[ 28] = 0;		// Set C tracks, E/P > 1.1
-  book_track_histset[ 29] = 0;		// Set C tracks, E/P > 0, P > 100 *precursor for TRK_25*
-
-  book_track_histset[ 30] = 0;		// [25] + P < 110
-  book_track_histset[ 31] = 0;		// [26] + P < 110
-  book_track_histset[ 32] = 0;		// [27] + P < 110
-  book_track_histset[ 33] = 0;		// [30] + electrons
-  book_track_histset[ 34] = 0;		// [30] + muons
-  book_track_histset[ 35] = 0;		// electrons with LLHR < 1.5
-  book_track_histset[ 36] = 0;		// muons with LLHR > 1.5
-  book_track_histset[ 37] = 0;		// [30] + NTRK(upstream) == 0
-  book_track_histset[ 38] = 0;		// [37] + NTRK(upstream) == 0
-  book_track_histset[ 39] = 0;		// [37] + NTRK(upstream) == 0
-
-  
-
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
       sprintf(folder_name,"trk_%i",i);
@@ -506,6 +512,24 @@ void TCosmicsAnaModule::BookHistograms() {
       BookTrackHistograms(fHist.fTrack[i],Form("Hist/%s",folder_name));
     }
   }
+//-----------------------------------------------------------------------------
+// book track ID histograms
+//-----------------------------------------------------------------------------
+  int book_track_id_histset[kNTrackIDHistSets];
+  for (int i=0; i<kNTrackIDHistSets; i++) book_track_id_histset[i] = 0;
+
+  book_track_id_histset[  0] = 1;          // all tracks on input
+
+  for (int i=0; i<kNTrackIDHistSets; i++) {
+    if (book_track_id_histset[i] != 0) {
+      sprintf(folder_name,"tid_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fTrackID[i] = new TStnTrackID::Hist_t;
+      BookTrackIDHistograms(fHist.fTrackID[i],Form("Hist/%s",folder_name));
+    }
+  }
+
 //-----------------------------------------------------------------------------
 // book cluster histograms
 //-----------------------------------------------------------------------------
@@ -937,7 +961,9 @@ void TCosmicsAnaModule::FillTrackHistograms(HistBase_t* HistBase, TStnTrack* Tra
   Hist->fD0->Fill(Track->fD0);
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
+  Hist->fRMax->Fill(Track->RMax());
   Hist->fAlgMask->Fill(Track->AlgMask());
+  Hist->fBestAlg->Fill(Track->BestAlg());
 
   chi2c = Track->fChi2C/(Track->NActive()-5.);
   Hist->fChi2DofC->Fill(chi2c);
@@ -1076,6 +1102,8 @@ void TCosmicsAnaModule::FillTrackHistograms(HistBase_t* HistBase, TStnTrack* Tra
   Hist->fNDPlVsNHPl->Fill(tp->fNDPl,tp->fNHPl);
   Hist->fChi2dVsNDPl->Fill(tp->fNDPl,Track->Chi2Dof());
   Hist->fDpFVsNDPl  ->Fill(tp->fNDPl,tp->fDpF);
+
+  Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
 }
 
 //_____________________________________________________________________________
@@ -1147,16 +1175,7 @@ void TCosmicsAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 	FillEventHistograms(fHist.fEvent[13]);
 
-	//	TStnTrack* trk = fTrackBlockDem->Track(0);
 	TrackPar_t* tp = &fTrackPar[0][0];
-	
-	//	fcons = trk->fFitCons;
-	// t0    = trk->T0();
-	//	reco_pitch = trk->fTanDip;
-// 	sigp       = trk->fFitMomErr;
-// 	sigt       = trk->fT0Err;
-	//	nactive    = trk->NActive();
-	//	p          = trk->fP;
 	
 	if (tp->fIDWord[fBestID] == 0) {
 	  FillEventHistograms(fHist.fEvent[14]);
@@ -1182,6 +1201,8 @@ void TCosmicsAnaModule::FillHistograms() {
     tp  = fTrackPar[0]+i;
 
     FillTrackHistograms(fHist.fTrack[0],trk);
+
+    fTrackID[fBestID]->FillHistograms(fHist.fTrackID[0],trk,1);
 
     if (tp->fIDWord[fBestID] == 0) {
 					// GOOD track: IDWORD=0
@@ -1216,81 +1237,16 @@ void TCosmicsAnaModule::FillHistograms() {
 	    double llhr_cal = trk->LogLHRCal();
 	    if (llhr_cal > 0) {
 	      FillTrackHistograms(fHist.fTrack[7],trk);
+
+	      if      (trk->fPdgCode ==  11) FillTrackHistograms(fHist.fTrack[ 8],trk); // e-
+	      else if (trk->fPdgCode ==  13) FillTrackHistograms(fHist.fTrack[ 9],trk); // mu-
+	      else if (trk->fPdgCode == -11) FillTrackHistograms(fHist.fTrack[10],trk); // e+
+	      else if (trk->fPdgCode == -13) FillTrackHistograms(fHist.fTrack[11],trk); // mu+
 	    }
 	  }
 	}
       }
     }
-//----------------------------------------------------------------------------
-//TRK  9: events with track and with no EM cluster      with E < 60 MeV
-//TRK 10: events with good track and with no EM cluster with E < 60 MeV
-//TRK 10: events with good track and with no EM cluster with E < 60 MeV
-//----------------------------------------------------------------------------
-//    if (cl_e > 60) {
-//      FillTrackHistograms(fHist.fTrack[9],trk);
-//      if (trk->fIDWord == 0) {
-//	FillTrackHistograms(fHist.fTrack[10],trk);
-//      }
-//    }
-////-----------------------------------------------------------------------------
-// TRK 11: tracks with P > 103.5 MeV
-//-----------------------------------------------------------------------------
-//    if (trk->P() > 103.5) FillTrackHistograms(fHist.fTrack[11],trk);
-//-----------------------------------------------------------------------------
-// TRK 12: tracks with fcon < 1e-4
-// TRK 13: "Set C" tracks with 100 <= P < 110 
-// TRK 14: [13] + no upstream electrons
-// TRK 15: [13] + no upstream electrons + calorimeter preselections
-//-----------------------------------------------------------------------------
-//    if (trk->fFitCons < 1.e-4) FillTrackHistograms(fHist.fTrack[12],trk);
-//
-//    if ((trk->fIDWord == 0) && (trk->P() >= 100.) && (trk->P() < 110.)) {
-//      FillTrackHistograms(fHist.fTrack[13],trk);
-//
-//      if (fNTrkUpstream == 0) {
-//	FillTrackHistograms(fHist.fTrack[14],trk);
-//
-//	if ((fabs(tp->fDt) < 3.) && (tp->fEp < 1.15) && (tp->fChi2Tcm < 100.)) {
-//	  FillTrackHistograms(fHist.fTrack[15],trk);
-//
-//					// add debug printout
-//	  if (GetDebugBit(40)) {
-//	    char  text[1000];
-//
-//	    sprintf(text,":bit040: p,e/p,dt,chi2_tcm,llhr_cal: %10.3f %10.3f %10.3f %10.3f %10.3f",
-//		    trk->P(),tp->fEp,tp->fDt,tp->fChi2Tcm,trk->LogLHRCal());
-//	    GetHeaderBlock()->Print(text);
-//	  }
-//	    
-//	  if (trk->LogLHRCal() > 1.5) {
-//	    FillTrackHistograms(fHist.fTrack[16],trk);
-//
-//	    if      (abs(trk->fPdgCode) == 11) FillTrackHistograms(fHist.fTrack[17],trk);
-//	    else if (abs(trk->fPdgCode) == 13) FillTrackHistograms(fHist.fTrack[18],trk);
-//	  }
-//	}
-//      }
-//    }
-//-----------------------------------------------------------------------------
-// TRK 19: Set "C" tracks with an associated cluster
-//-----------------------------------------------------------------------------
-//    if ((trk->fIDWord == 0) && (trk->Ep() > 0)) {
-//      FillTrackHistograms(fHist.fTrack[19],trk);
-//
-//      if (trk->LogLHRCal() < 0) {
-//	if (GetDebugBit(29)) {
-//	  GetHeaderBlock()->Print(Form(" bit:029 LLHR(CAL) = %10.3f ep = %10.3f dt = %10.3f chi2_tcm = %10.3f",
-//				       trk->LogLHRCal(), trk->Ep(), trk->Dt(), trk->fVMinS->fChi2Match));
-//	}
-//      }
-//
-//      if (tp->fDu < -80.) {
-//	if (GetDebugBit(33)) {
-//	  GetHeaderBlock()->Print(Form(" bit:033 DU = %10.3f dv = %10.3f ep = %10.3f dt = %10.3f",
-//				       tp->fDu, tp->fDv, tp->fEp, trk->Dt()));
-//	}
-//      }
-//    }
   }
 //-----------------------------------------------------------------------------
 // cluster histograms
@@ -1326,15 +1282,9 @@ void TCosmicsAnaModule::FillHistograms() {
 	cr = disk->Crystal(ic);
 	FillCaloHistograms(fHist.fCalo[0],cr);
 
-	if (cr->Energy() > 0) {
-	  FillCaloHistograms(fHist.fCalo[1],cr);
-	}
-	if (cr->Energy() > 0.1) {
-	  FillCaloHistograms(fHist.fCalo[2],cr);
-	}
-	if (cr->Energy() > 1.0) {
-	  FillCaloHistograms(fHist.fCalo[3],cr);
-	}
+	if (cr->Energy() > 0  ) FillCaloHistograms(fHist.fCalo[1],cr);
+	if (cr->Energy() > 0.1) FillCaloHistograms(fHist.fCalo[2],cr);
+	if (cr->Energy() > 1.0) FillCaloHistograms(fHist.fCalo[3],cr);
       }
     }
   }

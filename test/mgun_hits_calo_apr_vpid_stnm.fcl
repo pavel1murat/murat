@@ -19,6 +19,7 @@
 #include "standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
   meanBackground                      : -1        # fixed at 1
@@ -50,16 +51,26 @@ physics: { @table::physics
 	    }
 	}
     }
+
     filters : { @table::physics.filters 
 	InitStntuple  : { @table::InitStntuple histFileName : "mgun_hits_calo_apr_vpid_stnm.stn"  }
- 	StntupleMaker : { @table::StntupleMaker3 
+ 	StntupleMakerDemDmm : { @table::StntupleMakerDemDmm
 	    g4ModuleLabel : @local::G4_MODULE_LABEL
 	}
     }
 
-    p1 : [ @sequence::path_gen_hits_calo_apr_vpid_stnm ]
+    aaaa : [ @sequence::generatorSeq, @sequence::hitMakerSeq ,
+	     @sequence::calRecoSeq  , 
+	     @sequence::allPatRecDemSeq,
+	     @sequence::trkCaloMatchingDemSeq,
+	     @sequence::allPatRecDmmSeq,
+	     @sequence::trkCaloMatchingDmmSeq,
+	     ParticleIDDmm, 
+	     @sequence::stnmaker_dem_dmm_seq ]
 
-    trigger_paths : [ p1  ]
+    p2 : [ @sequence::path_gen_hits_calo_apr_vpid_stnm ]
+
+    trigger_paths : [ aaaa ]
     end_paths     : [ out ]
 }
 

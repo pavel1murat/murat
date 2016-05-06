@@ -51,7 +51,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   for (int i=0; i<fNID-1; i++) {
     fTrackID[i] = new TStnTrackID();
     if (i > 0) {
-      fTrackID[i]->SetMaxFitMomErr (100);
+      fTrackID[i]->SetMaxMomErr (100);
       fTrackID[i]->SetMaxT0Err     (100);
       //      fTrackID[i]->SetMinNActive   ( 10);
       fTrackID[i]->SetMinFitCons   (-1.);
@@ -61,7 +61,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 
 					// ID = 4: no hits on the number of active hits
   fTrackID[5] = new TStnTrackID();
-  fTrackID[5]->SetMaxFitMomErr (100);
+  fTrackID[5]->SetMaxMomErr (100);
   fTrackID[5]->SetMaxT0Err     (100);
   fTrackID[5]->SetMinNActive   ( -1);
   fTrackID[5]->SetMinFitCons   (-1.);
@@ -433,7 +433,7 @@ void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 
 	  FillEventHistograms(fHist.fEvent[HistSet+3]);
 	  
-	  if ((id_word & TStnTrackID::kTrkQualBit) == 0) {
+	  if ((id_word & TStnTrackID::kDtQualBit) == 0) {
 	    FillEventHistograms(fHist.fEvent[HistSet+4]);
 	    
 	    if ((id_word & TStnTrackID::kT0Bit) == 0) {
@@ -795,7 +795,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_102, TRK_202: (BestID - FitConsBit - T0ErrBit - MomErrBit) tracks 
 //-----------------------------------------------------------------------------
-      int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kFitMomErrBit;
+      int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kMomErrBit;
       if ((tp->fIDWord[fBestID] & ~mask) == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
       }
@@ -844,7 +844,7 @@ void TTrackCompModule::FillHistograms() {
 	//-----------------------------------------------------------------------------
 	// IHIST+2: (SetC - FitConsBit - T0ErrBit - MomErrBit) tracks 
 	//-----------------------------------------------------------------------------
-	int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kFitMomErrBit;
+	int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kMomErrBit;
 	if ((tp->fIDWord[fBestID] & ~mask) == 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
 	}

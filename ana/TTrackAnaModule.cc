@@ -76,21 +76,21 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
     fTrackID[i]    = new TStnTrackID();
   }
 
-  fTrackID[1]->SetMaxFitMomErr (100);
-  fTrackID[1]->SetMaxT0Err     (100);
-  fTrackID[1]->SetMinFitCons   (-1.);
-  fTrackID[1]->SetMinTrkQual   (0.1);
+  fTrackID[1]->SetMaxMomErr (100);
+  fTrackID[1]->SetMaxT0Err  (100);
+  fTrackID[1]->SetMinFitCons(-1.);
+  fTrackID[1]->SetMinTrkQual(0.1);
 
-  fTrackID[2]->SetMaxFitMomErr (100);
-  fTrackID[2]->SetMaxT0Err     (100);
-  fTrackID[2]->SetMinFitCons   (-1.);
-  fTrackID[2]->SetMinTrkQual   (0.4);
+  fTrackID[2]->SetMaxMomErr (100);
+  fTrackID[2]->SetMaxT0Err  (100);
+  fTrackID[2]->SetMinFitCons(-1.);
+  fTrackID[2]->SetMinTrkQual(0.4);
 
-  fTrackID[3]->SetMaxFitMomErr (100);
-  fTrackID[3]->SetMaxT0Err     (100);
-  fTrackID[3]->SetMinFitCons   (-1.);
-  fTrackID[3]->SetMinTrkQual   (0.4);
-  fTrackID[3]->SetMinNActive   (-1 );
+  fTrackID[3]->SetMaxMomErr (100);
+  fTrackID[3]->SetMaxT0Err  (100);
+  fTrackID[3]->SetMinFitCons(-1.);
+  fTrackID[3]->SetMinTrkQual(0.4);
+  fTrackID[3]->SetMinNActive(-1 );
 
   fBestID     = 2;			// best: DaveTrkQual > 0.4
 //-----------------------------------------------------------------------------
@@ -761,7 +761,7 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 
 	  FillEventHistograms(fHist.fEvent[HistSet+3]);
 	  
-	  if ((id_word & TStnTrackID::kTrkQualBit) == 0) {
+	  if ((id_word & TStnTrackID::kDtQualBit) == 0) {
 	    FillEventHistograms(fHist.fEvent[HistSet+4]);
 	    
 	    if ((id_word & TStnTrackID::kT0Bit) == 0) {

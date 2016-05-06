@@ -140,9 +140,11 @@ public:
     TH1F*    fFitCons[2];		// fit consistency (0 to 1)
     TH1F*    fD0;
     TH1F*    fZ0;
+    TH1F*    fRMax;
     TH1F*    fTanDip;
     TH1F*    fResid;
     TH1F*    fAlgMask;
+    TH1F*    fBestAlg;
 					// matching histograms
     TH1F*    fNClusters;
     TH1F*    fVaneID;
@@ -203,6 +205,7 @@ public:
     TH2F*    fChi2dVsNDPl;
     TH2F*    fDpFVsNDPl;
 
+    TH1F*    fDaveTrkQual;		// 
   };
 
   struct GenpHist_t : public HistBase_t {
@@ -233,15 +236,17 @@ public:
   enum { kNCaloHistSets    = 100 };
   enum { kNGenpHistSets    = 100 };
   enum { kNSimpHistSets    = 100 };
+  enum { kNTrackIDHistSets =  10 };
 
   struct Hist_t {
-    TH1F*          fCrystalR[2];	          // crystal radius
-    EventHist_t*   fEvent  [kNEventHistSets];
-    TrackHist_t*   fTrack  [kNTrackHistSets];
-    ClusterHist_t* fCluster[kNClusterHistSets];
-    CaloHist_t*    fCalo   [kNCaloHistSets];
-    GenpHist_t*    fGenp   [kNGenpHistSets];
-    SimpHist_t*    fSimp   [kNSimpHistSets];
+    TH1F*                fCrystalR[2];	          // crystal radius
+    EventHist_t*         fEvent  [kNEventHistSets];
+    TrackHist_t*         fTrack  [kNTrackHistSets];
+    ClusterHist_t*       fCluster[kNClusterHistSets];
+    CaloHist_t*          fCalo   [kNCaloHistSets];
+    GenpHist_t*          fGenp   [kNGenpHistSets];
+    SimpHist_t*          fSimp   [kNSimpHistSets];
+    TStnTrackID::Hist_t* fTrackID[kNTrackIDHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -341,6 +346,8 @@ public:
   void    BookEventHistograms   (HistBase_t*  Hist, const char* Folder);
   void    BookSimpHistograms    (HistBase_t*  Hist, const char* Folder);
   void    BookTrackHistograms   (HistBase_t*  Hist, const char* Folder);
+
+  void    BookTrackIDHistograms (TStnTrackID::Hist_t* Hist, const char* Folder);
 
   void    FillEventHistograms    (HistBase_t*  Hist);
   void    FillCaloHistograms     (HistBase_t*  Hist, TStnCrystal*  Crystal);

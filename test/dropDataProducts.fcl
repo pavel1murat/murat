@@ -1,0 +1,69 @@
+# -*- mode:tcl -*- 
+# clean up cosmics stage4 files
+
+#include "minimalMessageService.fcl"
+
+# Give this process a name.
+process_name : DropDataProducts
+
+# Read events from a file (made by example 3)
+source :
+{
+  module_type : RootInput
+  fileNames : ["/prj/mu2e/users/kutschke/beamlineData_01.root"]
+  maxEvents : -1
+     inputCommands : ['keep *_*_*_*'
+    		     , 'drop HelixVal_*_*_*'
+    		     , 'drop *_PosHelixFinder_*_*'
+     		     , 'drop *_NegHelixFinder_*_*'
+ 		     , 'drop *_TRFDownstreameMinus_*_*'
+ 		     , 'drop *_TRFDownstreamePlus_*_*'
+ 		     , 'drop *_TRFDownstreammuMinus_*_*'
+ 		     , 'drop *_TRFDownstreammuPlus_*_*'
+		     , 'drop *_TRFUpstreameMinus_*_*'
+		     , 'drop *_TRFUpstreammuMinus_*_*'
+		     , 'drop *_TrkExtrapolDem_*_*'
+ 		     , 'drop *_TimePeakFinder_*_*'
+ 		     , 'drop *_FSHPreStereo_*_*'
+		     , 'drop *_MakeStereoHits_*_*'
+ 		     , 'drop *_MakeCaloProtoCluster_*_*'
+ 		     , 'drop *_MakeCaloCluster_*_*'
+                     , 'drop *_MakeCaloCrystalHits_*_*'
+ 		     , 'drop *_makeSH_*_*'
+		     , 'drop *_*_*_drap'
+# drop hits
+#  		     , 'drop *_makeSD_*_*'
+#   		     , 'drop *_CaloReadoutHitsMaker_*_*'
+#                    , 'drop *_MakeCaloReadoutHits_*_*'
+ 		     ]
+}
+
+services : {
+  message : @local::mf_debugging
+
+  user : { }
+} # close of services block
+
+outputs: {
+    # Print info about all data products in the file.
+    dump: { module_type   : DataProductDump }
+    
+    detectorOutput : {
+	module_type    : RootOutput
+	fileName       : 'dropDataProducts.art'
+	SelectEvents   :  { SelectEvents: [] }
+	outputCommands :   [ 'keep *_*_*_*' ]
+    }
+}
+
+physics : {
+  producers: { }
+
+  p1 : []
+  e1 : [detectorOutput]
+
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}

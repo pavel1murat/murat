@@ -65,7 +65,7 @@ physics: { @table::physics
 	     @sequence::trkCaloMatchingDemSeq,
 	     @sequence::allPatRecDmmSeq,
 	     @sequence::trkCaloMatchingDmmSeq,
-	     ParticleIDDmm, 
+	     AvikPID,
 	     @sequence::stnmaker_dem_dmm_seq ]
 
     p2 : [ @sequence::path_gen_hits_calo_apr_vpid_stnm ]

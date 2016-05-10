@@ -283,6 +283,7 @@ public:
 //  data members
 //-----------------------------------------------------------------------------
 public:
+  TString           fTrackBlockName;	// 
 					// pointers to the data blocks used
   TStnTrackBlock*   fTrackBlock;
   TStnClusterBlock* fClusterBlock;
@@ -297,8 +298,6 @@ public:
   SimPar_t          fSimPar;
 					// histograms filled
   Hist_t            fHist;
-					// cut values
-  double            fPtMin;
 
   TGenParticle*     fParticle;		// electron or muon
   int               fPdgCode;		// determines which one
@@ -364,6 +363,7 @@ public:
   void               SetFillDioHist  (int YesNo) { fFillDioHist   = YesNo; }
   void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
+  void               SetTrackBlockName (const char* Name) { fTrackBlockName = Name; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

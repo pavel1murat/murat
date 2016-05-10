@@ -55,7 +55,7 @@ ClassImp(TTrackAnaModule)
 TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
-  fPtMin  = 1.;
+  fTrackBlockName = "TrackBlock";
   fTrackNumber.Set(100);
 
   fDiskCalorimeter = new TDiskCalorimeter();
@@ -122,15 +122,14 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
-  //  RegisterDataBlock("TrkPatRec"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+  RegisterDataBlock(fTrackBlockName.Data(),"TStnTrackBlock"   ,&fTrackBlock  );
 
-  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
-  RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
-  RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
-  RegisterDataBlock("GenpBlock"     ,"TGenpBlock"       ,&fGenpBlock);
-  RegisterDataBlock("SimpBlock"     ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VdetBlock"     ,"TVdetDataBlock"   ,&fVdetBlock);
+  RegisterDataBlock("ClusterBlock"        ,"TStnClusterBlock" ,&fClusterBlock);
+  RegisterDataBlock("CalDataBlock"        ,"TCalDataBlock"    ,&fCalDataBlock);
+  RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
+  RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
+  RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
+  RegisterDataBlock("VdetBlock"           ,"TVdetDataBlock"   ,&fVdetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -1288,9 +1287,10 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
-  if      (strcmp(block_name,"TrkPatRec" ) == 0) icorr = 0;
-  else if (strcmp(block_name,"CalPatRec" ) == 0) icorr = 1;
-  else if (strcmp(block_name,"TrackBlock") == 0) icorr = 2;
+  if      (strcmp(block_name,"TrkPatRec"    ) == 0) icorr = 0;
+  else if (strcmp(block_name,"CalPatRec"    ) == 0) icorr = 1;
+  else if (strcmp(block_name,"TrackBlock"   ) == 0) icorr = 2;
+  else if (strcmp(block_name,"TrackBlockDmm") == 0) icorr = -1;
   else {
     icorr = -999;
     Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
@@ -1344,7 +1344,9 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
     if (icorr == 2) icorr = track->BestAlg();
 
-    tp->fP     = track->fP     +kMomentumCorr[icorr];		// correcting
+    tp->fP = track->fP;
+    if (icorr >= 0) tp->fP  += kMomentumCorr[icorr];		// correcting
+
     tp->fDpF   = track->fP     -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;
@@ -1394,7 +1396,8 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 // correct TrkpatRec and CalPatRec tracks differently
 //-----------------------------------------------------------------------------
-      tp->fDt  = vr->fDt - kDtTcmCorr[icorr];
+      tp->fDt  = vr->fDt;
+      if (icorr >= 0) tp->fDt  -= kDtTcmCorr[icorr];
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);

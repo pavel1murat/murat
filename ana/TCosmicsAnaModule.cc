@@ -10,25 +10,7 @@
 //  2  : rejected events
 // 
 //  3  : print NTracks[0-3] for all events
-//  4  : 
-//  5  : events with N(tracks) > 1
-//  6  : events trk_41 with 0.8< E/P < 1.1 - tracks missed by CalPatRec
-//  7  : events (muo) with LogLHRCal >   20
-//  8  : events (ele) with LogLHRCal < - 20
-//  9  : events (muo) with 0.42 < E/P < 0.46
-// 10  : events (muo) with Set C track with ECL > 80 MeV
-// 28  : Set C DEM tracks with E/P > 1.1
-// 29  : TRK_19 (Set C DEM tracks with a cluster) and LLHR(cal) < 0
-// 31  : EVT_6 events with ce_costh > 0.8 
-// 32  : TRK_1 events with chi2tcm > 100. 
-// 33  : DU < -80mm - study edge effects
-// 34  : EVT_7: events with E_CL > 60 and no tracks (makes sense only for single CE events)
-// 35  : TRK_1: events with P > 106 MeV/c - misreconstruction
-// 36  : TRK_23 events with P < 80: odd misidentified muons - turned out to be DIO electrons
-// 37  : TRK_26 LLHR_CAL > 5
-// 38  : used
-// 39  : LLHR info
-// 40  : trk_15
+//  4  : mu+ passed all selections
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -1213,12 +1195,6 @@ void TCosmicsAnaModule::FillHistograms() {
 	FillTrackHistograms(fHist.fTrack[2],trk);
 
 
-//       if (GetDebugBit(32) && (trk->fVMinS != NULL)) {
-// 	if (trk->fVMinS->fChi2Match > 100) {
-// 	  GetHeaderBlock()->Print(Form("bit032: chi2(match) = %10.3lf",trk->fVMinS->fChi2Match));
-// 	}
-//       }
-
 //       if (GetDebugBit(35) && (trk->fP > 106.)) {
 // 	GetHeaderBlock()->Print(Form("bit035: P = %10.3lf",trk->fP));
 //       }
@@ -1241,7 +1217,12 @@ void TCosmicsAnaModule::FillHistograms() {
 	      if      (trk->fPdgCode ==  11) FillTrackHistograms(fHist.fTrack[ 8],trk); // e-
 	      else if (trk->fPdgCode ==  13) FillTrackHistograms(fHist.fTrack[ 9],trk); // mu-
 	      else if (trk->fPdgCode == -11) FillTrackHistograms(fHist.fTrack[10],trk); // e+
-	      else if (trk->fPdgCode == -13) FillTrackHistograms(fHist.fTrack[11],trk); // mu+
+	      else if (trk->fPdgCode == -13) {
+		FillTrackHistograms(fHist.fTrack[11],trk); // mu+
+		if (GetDebugBit(4)) {
+		  GetHeaderBlock()->Print(Form("bit004: mu+ passed all selections"));
+		}
+	      }
 	    }
 	  }
 	}
@@ -1440,8 +1421,8 @@ int TCosmicsAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 void TCosmicsAnaModule::Debug() {
 
-  TStnTrack* trk;
-  TrackPar_t* tp;
+//   TStnTrack* trk;
+//   TrackPar_t* tp;
 
   char s[1000];
 
@@ -1455,66 +1436,12 @@ void TCosmicsAnaModule::Debug() {
     GetHeaderBlock()->Print(Form(":bit003: %s",s));
   }
 
-  int ntrk = fTrackBlockDem->NTracks();
+//   int ntrk = fTrackBlockDem->NTracks();
 
-  for (int itrk=0; itrk<ntrk; itrk++) {
-    trk = fTrackBlockDem->Track(itrk);
-    tp  = &fTrackPar[0][itrk];
-//-----------------------------------------------------------------------------
-// bit 4: tracks with DpF > 1MeV - positive tail...
-//-----------------------------------------------------------------------------
-    if (GetDebugBit(4) == 1) {
-      if (tp->fDpF > 1.) {
-	GetHeaderBlock()->Print(Form("pF pRec, fDpf = %10.3f  %10.3f  %10.3f",
-				     trk->fPFront, trk->Momentum()->P(),tp->fDpF));
-      }
-    }
-//-----------------------------------------------------------------------------
-// bit 9: Set C tracks with DpF > 1MeV - positive tail...
-//-----------------------------------------------------------------------------
-    if (GetDebugBit(9) == 1) {
-      double ep = trk->Ep();
-      if (trk->fIDWord == 0) { 
-	if (((ep > 0.42) && (ep < 0.46)) || ((ep > 0.35) && (ep < 0.39))) {
-	  GetHeaderBlock()->Print(Form("bit:009 ep = %10.3f e = %10.3f p = %10.3f",
-				       trk->fEp,trk->fEp*trk->fP,trk->fP));
-	}
-      }
-    }
-//-----------------------------------------------------------------------------
-// bit 10: Set C tracks with Ecl > 80
-//-----------------------------------------------------------------------------
-    if (GetDebugBit(10) == 1) {
-      double ecl = trk->ClusterE();
-      if (trk->fIDWord == 0) { 
-	if (ecl > 60) {
-	  GetHeaderBlock()->Print(Form("bit:010 e = %10.3f p = %10.3f",
-				       ecl,trk->fP));
-	}
-      }
-    }
-
-    if (GetDebugBit(39) == 1) {
-      TEmuLogLH::PidData_t dat;
-
-      dat.fDt   = tp->fDt;
-      dat.fEp   = tp->fEp;
-      dat.fPath = tp->fPath;
-
-      
-
-      char line [200];
-      sprintf(line,"ep: %10.4f dt: %10.4f prob(ele_ep): %10.4f prob(muo_ep): %10.4f prob(ele_dt): %10.4f prob(muo_dt): %10.4f llhr: %10.4f",
-	      tp->fEp,tp->fDt, 
-	      fLogLH->LogLHEp(&dat,11),
-	      fLogLH->LogLHEp(&dat,13),
-	      fLogLH->LogLHDt(&dat,11),
-	      fLogLH->LogLHDt(&dat,13),
-	      trk->LogLHRCal());
-      
-      GetHeaderBlock()->Print(Form("bit:038: %s",line));
-    }
-  }
+//   for (int itrk=0; itrk<ntrk; itrk++) {
+//     trk = fTrackBlockDem->Track(itrk);
+//     tp  = &fTrackPar[0][itrk];
+//   }
 
 //-----------------------------------------------------------------------------
 // bit 5: events with N(tracks) > 1

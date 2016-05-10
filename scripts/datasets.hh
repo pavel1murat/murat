@@ -18,19 +18,42 @@
   };
 
 //-----------------------------------------------------------------------------
+// 574 v0 datasets 
+//-----------------------------------------------------------------------------
+dataset_t e12s5740 = { "e12s5740",
+		       "~/hist/mu2e/v5_7_0/e12s5740.track_comp.hist",
+		       "~/hist/mu2e/v5_7_0/e12s5740.track_ana.hist",
+		       "HEE+cd3-detmix-cut.v566b.x2",
+		       1,
+		       1310000};
+//-----------------------------------------------------------------------------
 // 573 v1 datasets (include Giani's pattern recognition cleanup)
 //-----------------------------------------------------------------------------
+dataset_t m02s5731 = { "m02s5731",
+		       "~/hist/mu2e/v5_7_0/mo2s5731.track_comp.hist",
+		       "~/hist/mu2e/v5_7_0/m02s5731.track_ana.hist",
+		       "M105+cd3-detmix-cut.v566b.x2",
+		       1,
+		       460000};
+
+dataset_t e22s5731 = { "e22s5731",
+		       "~/hist/mu2e/v5_7_0/e22s5731.track_comp.hist",
+		       "~/hist/mu2e/v5_7_0/e22s5731.track_ana.hist",
+		       "CE+cd3-detmix-cut.v566b.x2",
+		       1,
+		       860000};
+
 dataset_t e21s5731 = { "e21s5731",
 		       "~/hist/mu2e/v5_7_0/e21s5731.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/e21s5731.track_ana.hist",
-		       "CE+MIXCD3-cut-v2",
+		       "CE+cd3-detmix-cut.v566b",
 		       1,
 		       890000};
 
 dataset_t e11s5731 = { "e11s5731",
 		       "~/hist/mu2e/v5_7_0/e11s5731.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/e11s5731.track_ana.hist",
-		       "HEE+MIXCD3-cut-v2",
+		       "HEE+cd3-detmix-cut.v566b",
 		       1,
 		       2290000};
 //-----------------------------------------------------------------------------
@@ -53,14 +76,14 @@ dataset_t e40s5720 = { "e40s5720",
 dataset_t e41s5721 = { "e41s5721",
 		       "~/hist/mu2e/v5_7_0/e41s5721.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/e41s5721.track_ana.hist",
-		       "HEE",
+		       "HEE+cd3-detmix-cut.v566b",
 		       1,
 		       5110000};
 
 dataset_t e42s5721 = { "e42s5721",
 		       "~/hist/mu2e/v5_7_0/e42s5721.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/e42s5721.track_ana.hist",
-		       "CE",
+		       "CE+cd3-detmix-cut.v566b",
 		       1,
 		       880000};
 
@@ -74,7 +97,7 @@ dataset_t m40s5720 = { "m40s5720",
 dataset_t m40s5721 = { "m40s5721",
 		       "~/hist/mu2e/v5_7_0/m40s5721.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/m40s5721.track_ana.hist",
-		       "M105+MIXCD3-cut-v2",
+		       "M105+cd3-detmix-cut.v566b",
 		       1,
 		       1990000};
 

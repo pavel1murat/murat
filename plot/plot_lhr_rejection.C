@@ -1,9 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // 2014-06-11: plot result produced by murat/ana/lhr_rejection.cc
+//             uses "track_ana" histograms for electron and muon datasets
 ///////////////////////////////////////////////////////////////////////////////
-
 #include "murat/scripts/datasets.hh"
-
 //-----------------------------------------------------------------------------
 // templates tell the dataset name: 1212 - use e00s1212 and m00s1212 (no background added)
 //                                  1412 - use e00s1412 and m00s1412
@@ -177,9 +176,9 @@ void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
 //-----------------------------------------------------------------------------
 void plot_llhr_cal_rejection_2(int OffVer = 421, int Print = 0) {
 
-  TGraph  *gr_x0(0), *gr_x1(0);
+  TGraph  *gr_x0(0), *gr_x1(0), *gr_x2(0);
 
-  dataset_t   *ele_x0, *muo_x0, *ele_x1, *muo_x1;
+  dataset_t   *ele_x0(0), *muo_x0(0), *ele_x1(0), *muo_x1(0), *ele_x2(0), *muo_x2(0);
 
   char fn_ele_x0[200], fn_muo_x0[200], fn_ele_x1[200], fn_muo_x1[200];
 
@@ -195,7 +194,11 @@ void plot_llhr_cal_rejection_2(int OffVer = 421, int Print = 0) {
     muo_x0 = &m40s5720;
     ele_x1 = &e42s5721;
     muo_x1 = &m40s5721;
+    ele_x2 = &e22s5731;
+    muo_x2 = &m02s5731;
   }
+
+  TCanvas* c = new TCanvas("c_llhr_cal_rejection","LLHR CAL rejection",1400,800);
 
   printf(" OffVer = %3i fn_ele: %s fn_muo: %s\n",
 	 OffVer,ele_x0->fn_track_ana,muo_x0->fn_track_ana);
@@ -228,7 +231,20 @@ void plot_llhr_cal_rejection_2(int OffVer = 421, int Print = 0) {
   leg->SetFillStyle(0);
 
   leg->AddEntry(gr_x0,"Signal only"           ,"ep");
-  leg->AddEntry(gr_x1,"Signal + Overlays (x1)","ep");
+  leg->AddEntry(gr_x1,"Signal + CD3 Overlays (x1)","ep");
+
+//-----------------------------------------------------------------------------
+//  efficiency vs rejection for signal + background x2
+//-----------------------------------------------------------------------------
+  if (ele_x2 != NULL) {
+    create_llhr_cal_rejection_graph(ele_x2,muo_x2,gr_x2,Print);
+
+    gr_x2->SetMarkerStyle(25);
+    gr_x2->SetMarkerSize(1);
+    gr_x2->Draw("same,LP");
+
+    leg->AddEntry(gr_x2,"Signal + CD3 Overlays (x2)","ep");
+  }
 
   leg->Draw();
 }

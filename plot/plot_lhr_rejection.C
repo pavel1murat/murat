@@ -153,6 +153,8 @@ void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
 
   double qe, qm;
 
+  if (Print != 0) printf(" ------------------- print efficiency and rejection numbers for %s and %s \n",
+			 DsEle->name,DsMuo->name);
   for (int i=0; i<nbx; i++) {
     qe = h_llhr_e->Integral(1,i+1);
     qm = h_llhr_m->Integral(1,i+1);
@@ -160,7 +162,7 @@ void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
     pe[i] =(1-qe/se)*(qne_25/qne_13);
     rm[i] = 1./(1-qm/sm + 1.e-6)*(qnm_13/qnm_25);
 
-    if (Print != 0) {
+    if ((Print != 0) && (pe[i] > 0.85) && (rm[i] > 10)) {
       printf(" i, llhr , qe, qm, prob(e) , rej(mu) : %3i %10.3f %10.3f %10.3f %10.5f %10.3f\n",
 	     i,h_llhr_e->GetBinCenter(i+1),qe,qm,pe[i],rm[i]);
     }
@@ -173,7 +175,7 @@ void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
 
 
 //-----------------------------------------------------------------------------
-void plot_llhr_cal_rejection_2(int OffVer = 421) {
+void plot_llhr_cal_rejection_2(int OffVer = 421, int Print = 0) {
 
   TGraph  *gr_x0(0), *gr_x1(0);
 
@@ -209,13 +211,13 @@ void plot_llhr_cal_rejection_2(int OffVer = 421) {
   gPad->SetLogy(1);
   gPad->SetGridy(1);
 
-  create_llhr_cal_rejection_graph(ele_x0,muo_x0,gr_x0);
+  create_llhr_cal_rejection_graph(ele_x0,muo_x0,gr_x0,Print);
 
   gr_x0->SetMarkerStyle(20);
   gr_x0->SetMarkerSize(1);
   gr_x0->Draw("LP");
 
-  create_llhr_cal_rejection_graph(ele_x1,muo_x1,gr_x1);
+  create_llhr_cal_rejection_graph(ele_x1,muo_x1,gr_x1,Print);
 
   gr_x1->SetMarkerStyle(24);
   gr_x1->SetMarkerSize(1);

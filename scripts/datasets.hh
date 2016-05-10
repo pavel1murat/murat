@@ -25,9 +25,9 @@ dataset_t e21s5731 = { "e21s5731",
 		       "~/hist/mu2e/v5_7_0/e21s5731.track_ana.hist",
 		       "CE+MIXCD3-cut-v2",
 		       1,
-		       960000};
+		       890000};
 
-dataset_t e21s5731 = { "e21s5731",
+dataset_t e11s5731 = { "e11s5731",
 		       "~/hist/mu2e/v5_7_0/e11s5731.track_comp.hist",
 		       "~/hist/mu2e/v5_7_0/e11s5731.track_ana.hist",
 		       "HEE+MIXCD3-cut-v2",

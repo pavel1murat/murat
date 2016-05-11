@@ -18,11 +18,19 @@ namespace {
 //-----------------------------------------------------------------------------
 
 class make_money_plot {
-
+public:
+  
   char fFiguresDir[200];
 
+  const dataset_t* fDatasetDio;
+  const dataset_t* fDatasetCnv;
+
 public:
-  make_money_plot() { fFiguresDir[0] = 0; }
+  make_money_plot() {
+    fFiguresDir[0] = 0;
+    fDatasetDio    = &e41s5721;
+    fDatasetCnv    = &e42s5721;
+  }
   
   void set_figures_dir(const char* Dir) { strcpy(fFiguresDir,Dir); }
   
@@ -30,14 +38,21 @@ public:
 		       int         IMin      = 478,
 		       int         IMax      = 510,
 		       int         Print     =   0);
+
+  void plot           (const dataset_t*  DatasetCnv,
+		       const dataset_t*  DatasetDio,
+		       const char*       TrkFolder = "trk_3",
+		       int               IMin      = 478,
+		       int               IMax      = 510,
+		       int               Print     =   0);
 };
 
 
 //-----------------------------------------------------------------------------
 void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print) {
 
-  dataset_t* dio_dataset = &e41s5721;
-  dataset_t* cnv_dataset = &e42s5721;
+  // dataset_t* dio_dataset = &e41s5721;
+  // dataset_t* cnv_dataset = &e42s5721;
 
   // 1. get DIO histogram and normalize it
 
@@ -56,7 +71,7 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
 
   TCanvas* c = new TCanvas("c_money_plot","Money Plot",1500,800);
 
-  TH1F* h_dio = (TH1F*) gh1(dio_dataset->fn_track_comp,"TrackComp",h_dio_name)->Clone("h_dio");
+  TH1F* h_dio = (TH1F*) gh1(fDatasetDio->fn_track_comp,"TrackComp",h_dio_name)->Clone("h_dio");
 
 					// upper limit of the plot
   float ymax = 0.6;
@@ -92,7 +107,7 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
 
   double emax(105.), emin(95.);  // in MeV
 
-  double norm_dio = n_dio*(emax-emin)/dio_dataset->ngen;
+  double norm_dio = n_dio*(emax-emin)/fDatasetDio->ngen;
 
   printf("norm_dio: %12.5e\n",norm_dio);
 //-----------------------------------------------------------------------------
@@ -100,7 +115,7 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
 //-----------------------------------------------------------------------------
 //  int imin(478), imax(510);
   
-  TH1F* h_cnv = (TH1F*) gh1(cnv_dataset->fn_track_comp,"TrackComp",h_cnv_name)->Clone("h_cnv");
+  TH1F* h_cnv = (TH1F*) gh1(fDatasetCnv->fn_track_comp,"TrackComp",h_cnv_name)->Clone("h_cnv");
 
   double emin = h_cnv->GetBinLowEdge(IMin);
   double emax = h_cnv->GetBinLowEdge(IMax)+h_cnv->GetBinWidth(IMax);
@@ -128,7 +143,7 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
 //-----------------------------------------------------------------------------
   double n_conv = n_stopped_muons*mu_capture_prob*R*live_fraction;
 
-  double norm_cnv = n_conv/cnv_dataset->ngen;
+  double norm_cnv = n_conv/fDatasetCnv->ngen;
 
   h_cnv->Scale(norm_cnv);
 
@@ -163,3 +178,21 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
   if (Print == 1) c->Print(Form("%s/money_plot_%s.eps",figures_dir,TrkFolder));
 
 }
+
+
+//-----------------------------------------------------------------------------
+void make_money_plot::plot(const dataset_t*  DatasetCnv,
+			   const dataset_t*  DatasetDio,
+			   const char*       TrkFolder ,
+			   int               IMin      ,
+			   int               IMax      ,
+			   int               Print     ) {
+
+  fDatasetCnv = DatasetCnv;
+  fDatasetDio = DatasetDio;
+
+  plot(TrkFolder,IMin,IMax,Print);
+}
+
+
+

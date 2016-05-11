@@ -48,9 +48,9 @@ source       : { module_type:RootInput
 }
 
 physics: { @table::murat.physics 
-    filters : { @table::murat.physics.filters 
- 	InitStntuple   : { @table::murat.physics.filters.InitStntuple    histFileName : "do_cosmics_nodigis.stn" }
- 	StntupleMaker4 : { @table::murat.physics.filters.StntupleMaker4  g4ModuleLabel: @local::G4_MODULE_LABEL }
+    filters : { @table::murat.filters 
+ 	InitStntuple   : { @table::murat.filters.InitStntuple    histFileName : "do_cosmics_nodigis.stn" }
+ 	StntupleMaker4 : { @table::murat.filters.StntupleMaker4  g4ModuleLabel: @local::G4_MODULE_LABEL }
      }
     
      p1 : [ # @sequence::murat.digis, 

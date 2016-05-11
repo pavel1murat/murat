@@ -44,12 +44,14 @@ END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : EgunHitsCaloAprVpidStn4
+process_name : EgunDigiRecoStn4
 
 source       : { module_type : EmptyEvent }
 
-physics: { @table::physics 
-    producers : { @table::murat.producers 
+physics: { 
+    producers : { 
+	@table::murat.producers 
+
 	generate : { @table::StoppedParticleReactionGun 
 	    physics : {
 		pdgId            : @local::pdgId
@@ -65,8 +67,8 @@ physics: { @table::physics
     }
 
     filters : { @table::murat.filters 
-	InitStntuple  : { @table::InitStntuple histFileName : "egun_hits_calo_apr_vpid_stnm.stn"  }
- 	StntupleMaker : { @table::StntupleMaker4 
+	InitStntuple  : { @table::murat.filters.InitStntuple histFileName : "egun_hits_calo_apr_vpid_stnm.stn"  }
+ 	StntupleMaker : { @table::murat.filters.StntupleMaker4 
 	    g4ModuleLabel : @local::G4_MODULE_LABEL
 	}
     }
@@ -78,10 +80,10 @@ physics: { @table::physics
 	   @sequence::murat.dmm_reco       ,
 	   @sequence::murat.uep_reco       ,
 	   @sequence::murat.ump_reco       ,
-	   @sequence::Stntuple.stnmaker4   ,
-	   path_gen_hits_calo_apr_vpid_stnm 
+	   @sequence::Stntuple.stnmaker4 
 	  ]
 
+    out : []
     trigger_paths : [ p1  ]
     end_paths     : [ out ]
 }

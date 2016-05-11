@@ -23,6 +23,7 @@
 #include "standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
   pdgId                               : 11
@@ -34,10 +35,10 @@ BEGIN_PROLOG
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
 
-#include "Stntuple/fcl/templates.fcl"
+#include "murat/fcl/templates.fcl"
 
-# process_name : EgunHitsCaloAprVpidStnmP1
-process_name : EgunHitsCaloAprVpidStnmP2
+process_name : EgunHitsCaloAprVpidStnmP1
+# process_name : EgunHitsCaloAprVpidStnmP2
 
 path_make_hits                      : [ @sequence::generatorSeq, 
 					@sequence::hitMakerSeq ]

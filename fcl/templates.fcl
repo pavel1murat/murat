@@ -22,7 +22,7 @@ services : {
     }
 }
 #------------------------------------------------------------------------------
-# looks that services.schedule doesn't exist by default
+# looks that services.scheduler doesn't exist by default
 #
 # fileMode:MERGE prevents jobs from growing their footprint in memory linearly with time
 #------------------------------------------------------------------------------

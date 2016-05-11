@@ -62,8 +62,8 @@ physics: {
     }
 
     filters : { @table::murat.filters 
-	InitStntuple  : { @table::murat.filters.InitStntuple histFileName : "egun_digi_reco_stn.stn"  }
- 	StntupleMaker : { @table::murat.filters.StntupleMakerDem
+	InitStntuple   : { @table::murat.filters.InitStntuple histFileName : "egun_digi_reco_stn.stn"  }
+ 	StntupleMaker3 : { @table::murat.filters.StntupleMaker3
 	    g4ModuleLabel : @local::G4_MODULE_LABEL
 	}
     }
@@ -72,7 +72,7 @@ physics: {
 	   @sequence::murat.digis          ,
 	   @sequence::murat.cal_reco       ,
 	   @sequence::murat.dem_reco       ,
-	   @sequence::Stntuple.stnmaker
+	   @sequence::Stntuple.stnmaker3
 	  ]
 
     trigger_paths : [ p1  ]

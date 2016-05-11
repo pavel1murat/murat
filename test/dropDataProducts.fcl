@@ -2,13 +2,23 @@
 # clean up cosmics stage4 files
 
 #include "minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles:  @nil
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+#include "murat/fcl/templates.fcl"
 
 # Give this process a name.
 process_name : DropDataProducts
 
 # Read events from a file (made by example 3)
-source :
-{
+source : {
   module_type : RootInput
   fileNames : ["/prj/mu2e/users/kutschke/beamlineData_01.root"]
   maxEvents : -1
@@ -31,18 +41,13 @@ source :
                      , 'drop *_MakeCaloCrystalHits_*_*'
  		     , 'drop *_makeSH_*_*'
 		     , 'drop *_*_*_drap'
+ 		     , 'drop *_compressPV_*_*'
 # drop hits
 #  		     , 'drop *_makeSD_*_*'
 #   		     , 'drop *_CaloReadoutHitsMaker_*_*'
 #                    , 'drop *_MakeCaloReadoutHits_*_*'
  		     ]
 }
-
-services : {
-  message : @local::mf_debugging
-
-  user : { }
-} # close of services block
 
 outputs: {
     # Print info about all data products in the file.

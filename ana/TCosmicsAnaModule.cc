@@ -1469,8 +1469,8 @@ void TCosmicsAnaModule::Debug() {
   int ntrk = fTrackBlockDem->NTracks();
 
   for (int itrk=0; itrk<ntrk; itrk++) {
-    trk  = fTrackBlockDem->Track(itrk);
-     tp  = &fTrackPar[0][itrk];
+    TStnTrack* trk  = fTrackBlockDem->Track(itrk);
+     TrackPar_t* tp = &fTrackPar[0][itrk];
 
      if (GetDebugBit(5) && ((tp->fIDWord[fBestID] & ~TStnTrackID::kTanDipBit) == 0)) {
        GetHeaderBlock()->Print(Form("trk->TanDip = %10.3f",trk->TanDip()));

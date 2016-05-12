@@ -1,5 +1,4 @@
 # -*- mode:tcl -*-
-
 #------------------------------------------------------------------------------
 # services section
 #------------------------------------------------------------------------------
@@ -122,8 +121,6 @@ murat.mix             : [ dioMixer, protonMixer, neutronMixer, photonMixer, ootM
 murat.mix_time_map    : [ @sequence::murat.mix, @sequence::EventMixing.TimeMaps ]
 murat.g4_mix_time_map : [ @sequence::murat.gen_g4, @sequence::murat.mix, @sequence::EventMixing.TimeMaps ]
 murat.digis           : [ MakeCaloReadoutHits, @sequence::Tracking.DigiSim ]
-murat.stnmaker4       : [ @sequence::Stntuple.stnmaker4 ]
-murat.stnmaker6       : [ @sequence::Stntuple.stnmaker6 ]
 
 murat.cal_reco : [ MakeCaloCrystalHits, MakeCaloProtoCluster, MakeCaloCluster ]
 

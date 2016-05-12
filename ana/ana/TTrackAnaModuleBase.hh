@@ -33,9 +33,8 @@ public:
 #include "murat/ana/TrackPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
 
-  enum { kNDisks    = 2,
-	 kMaxNTrkID = 20		// max number of trtck ID objects
-  };
+  enum { kNDisks    =  2 } ;
+  enum { kMaxNTrkID = 20 } ;		// max number of trtck ID objects
 //-----------------------------------------------------------------------------
 //  data members: no data blocks! 
 //-----------------------------------------------------------------------------
@@ -91,7 +90,7 @@ public:
   virtual void  BookTrackHistograms   (HistData_t* Hist, const char* Folder) = 0;
 
   virtual void  FillEventHistograms   (HistData_t* Hist                    ) = 0;
-  virtual void  FillTrackHistograms   (HistData_t* Hist, TStnTrack*  Trk   ) = 0;
+  virtual void  FillTrackHistograms   (HistData_t* Hist, TStnTrack*  Trk , TrackPar_t* Tp) = 0;
   
   virtual void    BookHistograms() = 0;
   virtual void    FillHistograms() = 0;

@@ -1344,10 +1344,10 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
     if (icorr == 2) icorr = track->BestAlg();
 
-    tp->fP = track->fP;
+    tp->fP = track->fP2;
     if (icorr >= 0) tp->fP  += kMomentumCorr[icorr];		// correcting
 
-    tp->fDpF   = track->fP     -track->fPFront;
+    tp->fDpF   = tp->fP        -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;
     tp->fDpFSt = track->fPFront-track->fPStOut;
@@ -1388,7 +1388,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     if (vr) {
       tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/track->fP;
+      tp->fEp  = tp->fEcl/tp->fP;
 
       tp->fDx  = vr->fDx;
       tp->fDy  = vr->fDy;

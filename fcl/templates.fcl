@@ -51,21 +51,8 @@ murat : {
 #------------------------------------------------------------------------------
 	@table::Tracking.producers      # defined in TrkPatRec
 	@table::CaloCluster.producers   # defined in CaloCluster
-	@table::CalPatRecNS.producers
-
-	TrackCaloIntersectionDem        : { @table::TrackCaloIntersectionDem }
-	TrackCaloIntersectionDmm        : { @table::TrackCaloIntersectionDmm }
-	TrackCaloIntersectionUem        : { @table::TrackCaloIntersectionUem }
-	TrackCaloIntersectionUmm        : { @table::TrackCaloIntersectionUmm }
-	TrackCaloIntersectionUep        : { @table::TrackCaloIntersectionUep }
-	TrackCaloIntersectionUmp        : { @table::TrackCaloIntersectionUmp }
-
-	TrackCaloMatchingDem            : { @table::TrackCaloMatchingDem }
-	TrackCaloMatchingDmm            : { @table::TrackCaloMatchingDmm }
-	TrackCaloMatchingUem            : { @table::TrackCaloMatchingUem }
-	TrackCaloMatchingUmm            : { @table::TrackCaloMatchingUmm }
-	TrackCaloMatchingUep            : { @table::TrackCaloMatchingUep }
-	TrackCaloMatchingUmp            : { @table::TrackCaloMatchingUmp }
+	@table::CalPatRec.producers
+	@table::TrackCaloMatching.producers
 #------------------------------------------------------------------------------
 # higher-level reconstruction
 # ParticleID, AvikPID - tracker-only particle ID
@@ -114,7 +101,7 @@ murat : {
 #------------------------------------------------------------------------------
 # Stntuple modules
 #------------------------------------------------------------------------------
-	@table::CalPatRecNS.filters
+	@table::CalPatRec.filters
 	@table::Stntuple.filters
     }
 
@@ -140,18 +127,31 @@ murat.stnmaker6       : [ @sequence::Stntuple.stnmaker6 ]
 
 murat.cal_reco : [ MakeCaloCrystalHits, MakeCaloProtoCluster, MakeCaloCluster ]
 
+murat.cpr_reco : [ @sequence::CalPatRec.calpatrec, 
+		   MergePatRecCpr, 
+		   @sequence::TrackCaloMatching.matching_cpr ]
+
+murat.tpr_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
+		   MergePatRecTpr, 
+		   @sequence::TrackCaloMatching.matching_tpr ]
+
+murat.mpr_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
+		   @sequence::CalPatRec.calpatrec, 
+		   MergePatRec, 
+		   @sequence::TrackCaloMatching.matching ]
+
 murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
-		   @sequence::CalPatRecNS.calpatrec_dem_reco, 
+		   @sequence::CalPatRec.calpatrec_dem, 
 		   MergePatRecDem, 
-		   @sequence::TrackCaloMatchingNS.matching_dem ]
+		   @sequence::TrackCaloMatching.matching_dem ]
 
 murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus, 
-		   @sequence::CalPatRecNS.calpatrec_dmm_reco, 
+		   @sequence::CalPatRec.calpatrec_dmm, 
 		   MergePatRecDmm, 
-		   @sequence::TrackCaloMatchingNS.matching_dmm ]
+		   @sequence::TrackCaloMatching.matching_dmm ]
 
-murat.uem_reco : [ @sequence::Tracking.TPRUpstreameMinus  , MergePatRecUem, @sequence::TrackCaloMatchingNS.matching_uem ]
-murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @sequence::TrackCaloMatchingNS.matching_umm ]
-murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatchingNS.matching_uep ]
-murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @sequence::TrackCaloMatchingNS.matching_ump ]
+murat.uem_reco : [ @sequence::Tracking.TPRUpstreameMinus  , MergePatRecUem, @sequence::TrackCaloMatching.matching_uem ]
+murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm ]
+murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep ]
+murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump ]
 

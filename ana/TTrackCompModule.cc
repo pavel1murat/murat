@@ -478,7 +478,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 
   //  TrackPar_t* tp = fTrackPar+itrk;
 
-					// fP - corrected momentum, fP0 and fP2 - not corrected
+					// Tp->fP - corrected momentum, fP0 and fP2 - not corrected
   Hist->fP[0]->Fill (Tp->fP);
   Hist->fP[1]->Fill (Tp->fP);
   Hist->fP[2]->Fill (Tp->fP);
@@ -954,7 +954,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
     if (icorr == 2) icorr = track->BestAlg();
 
-    tp->fP     = track->fP     +kMomentumCorr[icorr];		// correcting
+    tp->fP     = track->fP2    +kMomentumCorr[icorr];		// correcting
     tp->fDpF   = tp->fP        -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;

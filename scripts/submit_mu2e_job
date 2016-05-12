@@ -107,13 +107,15 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
             if [ $VERBOSE != "no" ] ; then echo PARAMETERS=$PARAMETERS ; fi
             ;;
         r)                                          # job name
-	          var=`echo $OPTARG | awk -F = '{print $1}'`
-	     val_$var=`echo $OPTARG | awk -F = '{print $2}'`
+	    var=`echo $OPTARG | awk -F = '{print $1}'`
+	    val="`echo $OPTARG | awk -F = '{print $2}'`"
+		  
+	    if [ $var == "OUTPUT_STNTUPLE" ] ; then val_OUTPUT_STNTUPLE=$val ; fi
 
             export LIST_OF_REP=$LIST_OF_REP" "$var
 
             if [ $VERBOSE != "no" ] ; then 
-		echo var=$var ; val=${!val_$var}
+		echo var=$var ; val=${val_$var}
 		echo LIST_OF_REP=$LIST_OF_REP ; 
 	    fi
             ;;

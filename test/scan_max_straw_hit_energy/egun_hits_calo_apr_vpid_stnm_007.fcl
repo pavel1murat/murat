@@ -1,0 +1,88 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate single 105 MeV/c electrons, run full electron reco, make ntuple
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
+# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
+# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
+# -          datasets/cd3-detmix-cut-v2 for the grid
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  meanBackground                      : -1        # fixed at 1
+  pdgId                               : 11
+  elow                                : 105.0010
+  ehi                                 : 105.0015
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+  FSHP_maximumEnergy                  : 0.01
+  FlagStrawHits_maximumEnergy         : 0.007
+#------------------------------------------------------------------------------
+# note 1: background files below correspond to the TDR geometry 
+# note 2: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+#------------------------------------------------------------------------------
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : EgunHitsCaloAprVpidStnm
+
+source       : { module_type : EmptyEvent }
+
+physics: { @table::physics 
+    producers : { @table::physics.producers 
+	generate : { @table::StoppedParticleReactionGun 
+	    physics : {
+		pdgId            : @local::pdgId
+		elow             : @local::elow
+		ehi              : @local::ehi
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "flat"
+	    }
+	}
+	FSHPreStereo           : { @table::FSHPreStereo           maximumEnergy: @local::FSHP_maximumEnergy }
+	CalPatRecFSHP          : { @table::CalPatRecFSHP          maximumEnergy: @local::FSHP_maximumEnergy }
+	FlagStrawHits          : { @table::FlagStrawHits          maximumEnergy: @local::FlagStrawHits_maximumEnergy }
+	CalPatRecFlagStrawHits : { @table::CalPatRecFlagStrawHits maximumEnergy: @local::FlagStrawHits_maximumEnergy }
+    }
+    filters : { @table::physics.filters 
+	InitStntuple  : { @table::InitStntuple histFileName : "egun_hits_calo_apr_vpid_stnm.stn"  }
+ 	StntupleMaker : { @table::StntupleMaker3 
+	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	}
+    }
+
+    p1 : [ @sequence::path_gen_hits_calo_apr_vpid_stnm ]
+
+    trigger_paths : [ p1  ]
+    end_paths     : [ out ]
+}
+
+services.TFileService.fileName            : "egun_hits_calo_apr_vpid_stnm.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "egun_hits_calo_apr_vpid_stnm.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

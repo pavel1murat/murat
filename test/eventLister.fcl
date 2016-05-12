@@ -1,0 +1,49 @@
+# List run/subrun/event numbers found in a file
+#
+# $Id: eventLister.fcl,v 1.1 2013/01/22 00:05:10 kutschke Exp $
+# $Author: kutschke $
+# $Date: 2013/01/22 00:05:10 $
+
+#include "minimalMessageService.fcl"
+
+process_name : eventLister
+
+source : {
+  module_type : RootInput
+  fileNames   : [ "/mu2e/data/users/kutschke/MixDisk/v3/TrackerOrCalo/dioBG_data.root" ]
+  maxEvents : -1
+
+    inputCommands : ['keep *_*_*_*'
+    		     , 'drop HelixVal_*_*_*'
+    		     , 'drop *_PosHelixFinder_*_*'
+     		     , 'drop *_NegHelixFinder_*_*'
+ 		     , 'drop *_TRFDownstreameMinus_*_*'
+ 		     , 'drop *_TRFDownstreamePlus_*_*'
+ 		     , 'drop *_TRFDownstreammuMinus_*_*'
+ 		     , 'drop *_TRFDownstreammuPlus_*_*'
+ 		     , 'drop *_TimePeakFinder_*_*'
+		     , 'drop *_FSHPreStereo_*_*'
+		     , 'drop *_MakeStereoHits_*_*'
+ 		     , 'drop *_MakeCaloProtoCluster_*_*'
+ 		     , 'drop *_MakeCaloCluster_*_*'
+		     , 'drop *_*_*_drap'
+ 		     , 'drop *_compressPV_*_*'
+		     ]
+}
+
+services : {
+  message               : @local::default_message
+}
+
+physics : {
+
+  analyzers:  {
+    eventLister: { module_type : EventLister  }
+  }
+
+  e1 : [ eventLister ]
+
+  end_paths      : [e1]
+
+}
+

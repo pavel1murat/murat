@@ -1,0 +1,93 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# read pre-generated [CE] or [HE] files, mix, run full reco and stntuple
+# force to define bgHitFiles
+#
+# - dataset datasets/ccd35600       to run on the grid
+# - dataset datasets/ccd35600-local for local tests
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
+# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
+# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
+# -          datasets/cd3-detmix-cut-v2 for the grid
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  meanBackground : -1        # fixed at 1
+#  g4ModuleLabel                       : "g4run"          # for normal generators
+#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
+  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
+  FSHP_maximumEnergy                  : 0.01
+  FlagStrawHits_maximumEnergy         : 0.004
+#------------------------------------------------------------------------------
+# note 1: background files below correspond to the TDR geometry 
+# note 2: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+#------------------------------------------------------------------------------
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+# CD3
+# bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
+# bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local-v2/sim.mu2e.cd3-detmix-cut.v566.000003_00000000.art" ]
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : ReadMixHitsCaloAprVpidStnm
+
+# source       : { module_type : RootInput }  # this is the default....
+
+physics: { @table::physics 
+    producers: { @table::physics.producers
+	FSHPreStereo           : { @table::FSHPreStereo           maximumEnergy: @local::FSHP_maximumEnergy }
+	CalPatRecFSHP          : { @table::CalPatRecFSHP          maximumEnergy: @local::FSHP_maximumEnergy }
+	FlagStrawHits          : { @table::FlagStrawHits          maximumEnergy: @local::FlagStrawHits_maximumEnergy }
+	CalPatRecFlagStrawHits : { @table::CalPatRecFlagStrawHits maximumEnergy: @local::FlagStrawHits_maximumEnergy }
+    }
+
+    filters  : { @table::physics.filters 
+	InitStntuple  : { @table::InitStntuple histFileName : "read_mix_hits_calo_apr_vpid_stnm.stn"  }
+ 	StntupleMaker : { @table::StntupleMaker3 
+	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	}
+    }
+
+    p1 : [ @sequence::path_mix_hits_calo_apr_vpid_stnm ]
+
+    trigger_paths : [ p1  ]
+    end_paths     : [ out ]
+}
+
+physics.filters.flashMixer.detail.mean   : @local::meanBackground
+physics.filters.ootMixer.detail.mean     : @local::meanBackground
+physics.filters.dioMixer.detail.mean     : @local::meanBackground
+physics.filters.neutronMixer.detail.mean : @local::meanBackground
+physics.filters.photonMixer.detail.mean  : @local::meanBackground
+physics.filters.protonMixer.detail.mean  : @local::meanBackground
+
+services.TFileService.fileName            : "read_mix_hits_calo_apr_vpid_stnm.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "read_mix_hits_calo_apr_vpid_stnm.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

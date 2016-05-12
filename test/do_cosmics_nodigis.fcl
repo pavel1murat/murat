@@ -38,6 +38,7 @@ source       : { module_type:RootInput
  		     , 'drop *_MakeCaloProtoCluster_*_*'
  		     , 'drop *_MakeCaloCluster_*_*'
 		     , 'drop *_*_*_drap'
+ 		     , 'drop *_compressPV_*_*'
 # do not drop digits
 # 		     , 'drop *_makeSD_*_*'
 # 		     , 'drop *_makeSH_*_*'
@@ -47,10 +48,15 @@ source       : { module_type:RootInput
 		    ]
 }
 
-physics: { @table::murat.physics 
-    filters : { @table::murat.filters 
+physics: { 
+    producers : {
+	@table::murat.producers
+    } 
+
+    filters : { 
+	@table::murat.filters 
  	InitStntuple   : { @table::murat.filters.InitStntuple    histFileName : "do_cosmics_nodigis.stn" }
- 	StntupleMaker4 : { @table::murat.filters.StntupleMaker4  g4ModuleLabel: @local::G4_MODULE_LABEL }
+ 	StntupleMaker6 : { @table::murat.filters.StntupleMaker6  g4ModuleLabel: @local::G4_MODULE_LABEL }
      }
     
      p1 : [ # @sequence::murat.digis, 
@@ -59,7 +65,9 @@ physics: { @table::murat.physics
 	    @sequence::murat.dmm_reco,
 	    @sequence::murat.uem_reco,
 	    @sequence::murat.umm_reco,
-	    @sequence::stnmaker_cosmics
+	    @sequence::murat.uep_reco,
+	    @sequence::murat.ump_reco,
+	    @sequence::Stntuple.stnmaker6
 	   ]
 #     trigger_paths : [ p1  ]
 #     end_paths     : [ out ]

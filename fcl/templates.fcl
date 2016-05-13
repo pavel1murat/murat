@@ -178,3 +178,30 @@ murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @seq
 murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep ]
 murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump ]
 
+
+murat.paths : {
+
+    gen_digi_tcm_reco_stn : [ @sequence::murat.gen_g4_time_map,
+			      @sequence::murat.digis          ,
+			      @sequence::murat.cal_reco       ,
+			      @sequence::murat.tpr_reco       ,
+			      @sequence::murat.cpr_reco       ,
+			      @sequence::murat.mpr_reco       ,
+			      @sequence::Stntuple.stnmaker_tcm
+			     ]
+    
+    gen_digi_dem_reco_stn : [ @sequence::murat.gen_g4_time_map,
+			      @sequence::murat.digis          ,
+			      @sequence::murat.cal_reco       ,
+			      @sequence::murat.dem_reco       ,
+			      @sequence::Stntuple.stnmaker_dem
+			     ]
+    
+    gen_digi_dmm_reco_stn : [ @sequence::murat.gen_g4_time_map,
+			      @sequence::murat.digis          ,
+			      @sequence::murat.cal_reco       ,
+			      @sequence::murat.dmm_reco       ,
+			      @sequence::Stntuple.stnmaker_dmm
+			     ]
+}
+

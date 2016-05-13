@@ -1,18 +1,11 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
-# generate single 105 MeV/c electrons, run full electron reco, make ntuple
+# generate single 105 MeV/c muons,  run full electron reco, make ntuple
 #
 # make STNTUPLE in one go, without creating an intermediate file
 # if not running on the grid, need to specify the background hit file 
 # or use murat/scripts/submit_mu2e_job
 #
-# see examples in the PROLOG section
-# - old background files (x050) had 0.5 expected background, to generate nominal 
-#   background, need to set meanBackground to 2
-# - for the CD3c background files don't need to do that
-# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
-# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
-# -          datasets/cd3-detmix-cut-v2 for the grid
 # example:
 # --------
 # murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
@@ -28,7 +21,7 @@
 BEGIN_PROLOG
   meanBackground                      : -1        # fixed at 1
   bgHitFiles                          : @nil
-  pdgId                               : 11
+  pdgId                               : 13
   elow                                : 105.0010
   ehi                                 : 105.0015
   TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
@@ -44,50 +37,34 @@ process_name : EgunDigiRecoStn4
 source       : { module_type : EmptyEvent }
 
 physics: { 
-    producers : { 
+    producers : {
 	@table::murat.producers 
 
-	generate : { @table::StoppedParticleReactionGun 
-	    physics : {
-		pdgId            : @local::pdgId
-		elow             : @local::elow
-		ehi              : @local::ehi
-		spectrumVariable : "totalEnergy"
-		spectrumShape    : "flat"
-	    }
-	}
+	generate : { @table::murat.producers.mgun }
+
 	FlagStrawHits : { @table::FlagStrawHits 
 	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
 	}
     }
 
     filters : { @table::murat.filters 
-	InitStntuple   : { @table::murat.filters.InitStntuple histFileName : "egun_digi_reco_stn.stn"  }
- 	StntupleMaker3 : { @table::murat.filters.StntupleMaker3
-	    g4ModuleLabel : @local::G4_MODULE_LABEL
-	}
+	InitStntuple   : { @table::murat.filters.InitStntuple    histFileName  : "egun_digi_tcm_reco_stn.stn"  }
+ 	StntupleMaker3 : { @table::murat.filters.StntupleMaker3  g4ModuleLabel : @local::G4_MODULE_LABEL
     }
 
-    p1 : [ @sequence::murat.gen_g4_time_map,
-	   @sequence::murat.digis          ,
-	   @sequence::murat.cal_reco       ,
-	   @sequence::murat.tpr_reco       ,
-	   @sequence::murat.cpr_reco       ,
-	   @sequence::murat.mpr_reco       ,
-	   @sequence::Stntuple.stnmaker3
-	  ]
+    @table::murat.paths
 
-    trigger_paths : [ p1  ]
+    trigger_paths : [ gen_digi_tcm_reco_stnmaker ]
     out: []
     end_paths     : [ out ]
 }
 
-services.TFileService.fileName            : "egun_digi_reco_stn.hist"
+services.TFileService.fileName    : "egun_digi_tcm_reco_stn.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "egun_digi_reco_stn.art"
+# outputs.detectorOutput.fileName  : "egun_digi_tcm_reco_stn.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

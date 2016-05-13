@@ -48,8 +48,8 @@ physics: {
     }
 
     filters : { @table::murat.filters 
-	InitStntuple   : { @table::murat.filters.InitStntuple    histFileName  : "egun_digi_tcm_reco_stn.stn"  }
- 	StntupleMaker3 : { @table::murat.filters.StntupleMaker3  g4ModuleLabel : @local::G4_MODULE_LABEL
+	InitStntuple     : { @table::murat.filters.InitStntuple      histFileName  : "egun_digi_tcm_reco_stn.stn"  }
+ 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm  g4ModuleLabel : @local::G4_MODULE_LABEL
     }
 
     @table::murat.paths

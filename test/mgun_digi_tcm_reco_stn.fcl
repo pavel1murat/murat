@@ -32,7 +32,7 @@ END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : EgunDigiRecoStn4
+process_name : MgunDigiTcmRecoStn
 
 source       : { module_type : EmptyEvent }
 
@@ -49,13 +49,13 @@ physics: {
 
     filters : { @table::murat.filters 
 	InitStntuple     : { @table::murat.filters.InitStntuple      histFileName  : "egun_digi_tcm_reco_stn.stn"  }
- 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm  g4ModuleLabel : @local::G4_MODULE_LABEL
+ 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm  g4ModuleLabel : @local::G4_MODULE_LABEL       }
     }
 
     @table::murat.paths
 
-    trigger_paths : [ gen_digi_tcm_reco_stnmaker ]
-    out: []
+    trigger_paths : [ gen_digi_tcm_reco_stn ]
+    out           : []
     end_paths     : [ out ]
 }
 

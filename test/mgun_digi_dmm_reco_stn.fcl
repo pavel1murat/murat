@@ -43,7 +43,7 @@ physics: {
     }
 
     filters : { @table::murat.filters 
-	InitStntuple      : { @table::murat.filters.InitStntuple histFileName : "mgun_digi_reco_stn_dmm.stn"  }
+	InitStntuple      : { @table::murat.filters.InitStntuple histFileName : "mgun_digi_dmm_reco_stn.stn"  }
  	StntupleMakerDmm  : { @table::murat.filters.StntupleMakerDmm
 	    g4ModuleLabel : @local::G4_MODULE_LABEL
 	}
@@ -56,12 +56,12 @@ physics: {
     end_paths     : [ out ]
 }
 
-services.TFileService.fileName            : "mgun_digi_reco_stn_dmm.hist"
+services.TFileService.fileName            : "mgun_digi_dmm_reco_stn.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "mgun_digi_reco_stn_dmm.art"
+# outputs.detectorOutput.fileName           : "mgun_digi_dmm_reco_stn.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

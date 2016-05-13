@@ -28,11 +28,37 @@ services : {
 services.scheduler.wantSummary: true
 services.scheduler.fileMode   : MERGE
 
-murat : {
-    producers: {
+murat : { 
+    producers : {
 	generate: { @table::StoppedMuonConversionGun    }
 	g4run   : { @table::mu2eg4runDefaultSingleStage }
 	@table::EventMixing.producers
+    }
+}
+
+murat : {
+    producers: {
+	@table::murat.producers
+
+  	egun : { @table::StoppedParticleReactionGun # p(e)=105 MeV/c
+	    physics : {
+		pdgId            :  11
+		elow             : 105.0010
+		ehi              : 105.0015
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "flat"
+	    }
+	}
+
+  	mgun : { @table::StoppedParticleReactionGun # p(mu)=105 MeV/c
+	    physics : {
+		pdgId            :  13
+		elow             : 148.9583      
+		ehi              : 148.9585
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "flat"
+	    }
+	}
 #------------------------------------------------------------------------------
 # hit makers
 #------------------------------------------------------------------------------

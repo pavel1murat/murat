@@ -172,7 +172,9 @@ murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus,
 		   @sequence::CalPatRec.calpatrec_dmm, 
 		   MergePatRecDmm, 
 		   @sequence::TrackCaloMatching.matching_dmm ]
-
+#----------------------------------------------------------------------------------------------------
+# so far, CalPatRec is not used for upstream reconstruction
+#----------------------------------------------------------------------------------------------------
 murat.uem_reco : [ @sequence::Tracking.TPRUpstreameMinus  , MergePatRecUem, @sequence::TrackCaloMatching.matching_uem ]
 murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm ]
 murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep ]

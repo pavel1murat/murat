@@ -12,6 +12,11 @@
 //  3  : print NTracks[0-3] for all events
 //  4  : mu+ passed all selections
 //  5  : tracks passing all ID but TanDip with TanDip > 1
+//  6  : mu- events reconstructed with DT(DEM) > 0
+//
+//  ReportedErrors: 
+//  ---------------
+//  0  : E/p discrepancy
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -39,6 +44,11 @@ TCosmicsAnaModule::TCosmicsAnaModule(const char* name, const char* title):
   fPtMin  = 1.;
   fTrackNumber.Set(100);
 
+  for (int i=0; i<kMaxNErrors; i++) {
+    fError[i].fNReports   =  0;
+    fError[i].fMaxNReports = 10;
+  }
+
   fDiskCalorimeter = new TDiskCalorimeter();
   fCalorimeterType = 2;
 					// cut on track quality only
@@ -51,7 +61,6 @@ TCosmicsAnaModule::TCosmicsAnaModule(const char* name, const char* title):
   fTrackID[0]->SetMinTrkQual   (0.4);
   
   fBestID      = 0;
-
   fFillDioHist = 0;
 
   fLogLH   = new TEmuLogLH();
@@ -324,6 +333,7 @@ void TCosmicsAnaModule::BookEventHistograms(HistBase_t* HistBase, const char* Fo
   HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
   HBook1F(Hist->fZv         ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
   HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
+  HBook1F(Hist->fNGoodDem    ,"ngdem"  ,Form("%s: Number of Good DEM tracks"       ,Folder),200,0,200,Folder);
   HBook1F(Hist->fNTrkDem     ,"ntdem"  ,Form("%s: NTRK DEM"                        ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTrkUNeg    ,"ntuneg" ,Form("%s: NTRK(upstream NEG)"              ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTrkUPos    ,"ntupos" ,Form("%s: NTRK(upstream POS)"              ,Folder), 10,0, 10,Folder);
@@ -487,10 +497,16 @@ void TCosmicsAnaModule::BookHistograms() {
   book_track_histset[ 19] = 0;		// Set C tracks with E/P > 0
 
   book_track_histset[ 20] = 0;		// 
-  book_track_histset[ 21] = 0;		// 
-  book_track_histset[ 22] = 0;		// Set C tracks with E/P > 0 and chi2(match) < 100
-  book_track_histset[ 23] = 0;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) > 0 (interesting for muons)
-  book_track_histset[ 24] = 0;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) < 0 (interesting for electrons)
+
+  book_track_histset[ 21] = 1;		// e- all selections but no PID
+  book_track_histset[ 22] = 1;		// mu-
+  book_track_histset[ 23] = 1;		// e+
+  book_track_histset[ 24] = 1;		// mu+
+
+  book_track_histset[ 31] = 1;		// e- after all selections
+  book_track_histset[ 32] = 1;		// mu-
+  book_track_histset[ 33] = 1;		// e+
+  book_track_histset[ 34] = 1;		// mu+
 
   book_track_histset[100] = 1.;
   book_track_histset[101] = 1.;
@@ -633,6 +649,7 @@ void TCosmicsAnaModule::FillEventHistograms(HistBase_t* HistBase) {
   Hist->fNClusters->Fill(fNClusters);
 
   Hist->fNTrkDem->Fill (fNTracks[0]);
+  Hist->fNGoodDem->Fill (fNGoodTracks[0]);
   Hist->fNTrkUNeg->Fill(fNTrkUNeg);
   Hist->fNTrkUPos->Fill(fNTrkUPos);
   Hist->fNTrkUpstream->Fill(fNTrkUpstream);
@@ -1139,7 +1156,7 @@ void TCosmicsAnaModule::FillHistograms() {
   if (fNGoodTracks[0] > 0) { 
     FillEventHistograms(fHist.fEvent[5]); 
 
-    if (fNTrkUpstream == 0) {
+    if (fNTrkUNeg == 0) {
       FillEventHistograms(fHist.fEvent[6]); 
     }
   }
@@ -1213,7 +1230,7 @@ void TCosmicsAnaModule::FillHistograms() {
 
       FillTrackHistograms(fHist.fTrack[1],trk,tp);
 
-      if (fNTrkUpstream == 0) {
+      if (fNTrkUNeg == 0) {
 	FillTrackHistograms(fHist.fTrack[2],trk,tp);
 
 	if   (fNClusters > 0) FillTrackHistograms(fHist.fTrack[3],trk,tp);
@@ -1228,14 +1245,27 @@ void TCosmicsAnaModule::FillHistograms() {
 	    FillTrackHistograms(fHist.fTrack[6],trk,tp);
 
 	    double llhr_cal = trk->LogLHRCal();
+	    
+	    if      (trk->fPdgCode ==  11) FillTrackHistograms(fHist.fTrack[21],trk,tp); // e-
+	    else if (trk->fPdgCode ==  13) {
+	      FillTrackHistograms(fHist.fTrack[22],trk,tp); // mu-
+	      if (tp->fDt > 0) {
+		if (GetDebugBit(6)) {
+		  GetHeaderBlock()->Print(Form("bit006: mu- with DT = %10.3f",tp->fDt));
+		}
+	      }
+	    }
+	    else if (trk->fPdgCode == -11) FillTrackHistograms(fHist.fTrack[23],trk,tp); // e+
+	    else if (trk->fPdgCode == -13) FillTrackHistograms(fHist.fTrack[24],trk,tp); // mu+
+
 	    if (llhr_cal > 2.) {
 	      FillTrackHistograms(fHist.fTrack[7],trk,tp);
 
-	      if      (trk->fPdgCode ==  11) FillTrackHistograms(fHist.fTrack[ 8],trk,tp); // e-
-	      else if (trk->fPdgCode ==  13) FillTrackHistograms(fHist.fTrack[ 9],trk,tp); // mu-
-	      else if (trk->fPdgCode == -11) FillTrackHistograms(fHist.fTrack[10],trk,tp); // e+
+	      if      (trk->fPdgCode ==  11) FillTrackHistograms(fHist.fTrack[31],trk,tp); // e-
+	      else if (trk->fPdgCode ==  13) FillTrackHistograms(fHist.fTrack[32],trk,tp); // mu-
+	      else if (trk->fPdgCode == -11) FillTrackHistograms(fHist.fTrack[33],trk,tp); // e+
 	      else if (trk->fPdgCode == -13) {
-		FillTrackHistograms(fHist.fTrack[11],trk,tp); // mu+
+		FillTrackHistograms(fHist.fTrack[34],trk,tp); // mu+
 		if (GetDebugBit(4)) {
 		  GetHeaderBlock()->Print(Form("bit004: mu+ passed all selections"));
 		}
@@ -1661,7 +1691,10 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
     }
 
     if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
-      GetHeaderBlock()->Print(Form(" TTrackAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
+      if (fError[0].fNReports < fError[0].fMaxNReports) {
+	GetHeaderBlock()->Print(Form("ERROR in TCosmicsAnaModule: tp->fEp = %10.5f track->fEp = %10.5f ",tp->fEp,track->fEp));
+	fError[0].fNReports += 1;
+      }
     }
 //-----------------------------------------------------------------------------
 // PID likelihoods

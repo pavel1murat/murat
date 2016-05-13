@@ -35,9 +35,10 @@ public:
 #include "murat/ana/TrackPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
 
-  enum { kNDisks        =  2 } ;
-  enum { kNTrackBlocks  =  6 } ;
-  enum { kMaxTrackID    = 10 } ;
+  enum { kNDisks        =   2 } ;
+  enum { kNTrackBlocks  =   6 } ;
+  enum { kMaxTrackID    =  10 } ;
+  enum { kMaxNErrors    = 100 } ;
 
 //-----------------------------------------------------------------------------
 //  histograms
@@ -86,6 +87,7 @@ public:
     TH1D*    fDioMom;
     TH1F*    fEleCosTh;
     TH1F*    fNClusters;
+    TH1F*    fNGoodDem;
     TH1F*    fNTrkDem;
     TH1F*    fNTrkUNeg;
     TH1F*    fNTrkUPos;
@@ -233,6 +235,12 @@ public:
     TH1F*    fPtMc;			// denominator
     TH1F*    fPtReco;			// numerator
   };
+
+  struct Error_t {
+    int fNReports;
+    int fMaxNReports;
+  };
+
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets   =  100 };
   enum { kNTrackHistSets   = 1000 };
@@ -318,6 +326,8 @@ public:
   int               fBestID;
   TStnTrackID*      fTrackID[kMaxTrackID];
   TEmuLogLH*        fLogLH;
+
+  Error_t           fError[kMaxNErrors];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

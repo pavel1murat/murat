@@ -131,6 +131,10 @@ public:
     TH1F*    fDv;
     TH1F*    fPath;
 
+    TH1F*    fECl;
+    TH1F*    fEClEKin;
+    TH1F*    fEp;
+
     TH2F*    fFConsVsNActive;
     TH1F*    fDaveTrkQual;
   };

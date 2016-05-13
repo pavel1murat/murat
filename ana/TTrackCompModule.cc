@@ -173,6 +173,9 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fDv         ,"dv"       ,Form("%s: track-cluster DV)" ,Folder), 200,-100 ,100,Folder);
   HBook1F(Hist->fPath       ,"path"     ,Form("%s: track sdisk"       ,Folder),  50,   0 ,500,Folder);
 
+  HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
+  HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 200, 0   ,2,Folder);
+  HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
 
   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
@@ -562,9 +565,20 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
   Hist->fDv->Fill(Tp->fDv);
   Hist->fPath->Fill(Tp->fPath);
 
+  double    ekin(-1.);
+  if (fSimp) {
+    double p, m;
+    p    = Tp->fP;
+    m    = 105.658; // in MeV
+    ekin = sqrt(p*p+m*m)-m;
+  }
+
+  Hist->fECl->Fill(Tp->fEcl);
+  Hist->fEClEKin->Fill(Tp->fEcl/ekin);
+  Hist->fEp->Fill(Tp->fEp);
+
   Hist->fFConsVsNActive->Fill(Track->NActive(),Track->fFitCons);
   Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
-
 }
 
 
@@ -903,6 +917,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // momentum corrections for TrkPatRec and CalPatRec
 //-----------------------------------------------------------------------------
   const double kMomentumCorr[2] = { 0.049, 0.020 };
+  const double kDtTcmCorr   [2] = { 0.22 , -0.30 }; // ns, sign: fit peak positions
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
@@ -1005,6 +1020,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
 //-----------------------------------------------------------------------------
       tp->fDt  = vr->fDt ; // v4_2_4: - 0.22; // - 1.;
+      if (icorr >= 0) tp->fDt  -= kDtTcmCorr[icorr];
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);

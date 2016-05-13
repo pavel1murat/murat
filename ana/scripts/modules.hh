@@ -8,6 +8,7 @@ TCosmicsAnaModule*       m_cos   = NULL;
 TDioCalibModule*         m_dio   = NULL;
 // TStrawHitAnaModule*      m_str   = NULL;
 TTrackAnaModule*         m_trk   = NULL;
+TTrackAnaModuleA*        m_trka  = NULL;
 TTrackCompModule*        m_tcm   = NULL;
 TPidAnaModule*           m_pid   = NULL;
 TTrackPidAnaModule*      m_tpa   = NULL;

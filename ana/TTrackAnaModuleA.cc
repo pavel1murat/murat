@@ -48,31 +48,24 @@
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
 
-#include "ana/TTrackAnaModule.hh"
+#include "ana/TTrackAnaModuleA.hh"
 
-ClassImp(TTrackAnaModule)
+ClassImp(TTrackAnaModuleA)
 //-----------------------------------------------------------------------------
-TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
-  TStnModule(name,title)
+TTrackAnaModuleA::TTrackAnaModuleA(const char* name, const char* title):
+  TTrackAnaModuleBase(name,title)
 {
   fTrackBlockName = "TrackBlock";
   fTrackNumber.Set(100);
-
-  fDiskCalorimeter = new TDiskCalorimeter();
-  fCalorimeterType = 2;
-  fFillDioHist     = 1;
-
-  fMinT0           = 700; 
 					// track-cluster matching timing cut
   fMinDtTcm        = -5.;
   fMaxDtTcm        =  8.;
 //-----------------------------------------------------------------------------
 // initialize Track ID
 // 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
-// what about number of hits ?
 //-----------------------------------------------------------------------------
-  fNID             = 4;
-  for (int i=0; i<fNID; i++) {
+  fNTrkID          = 4;
+  for (int i=0; i<fNTrkID; i++) {
     fTrackID[i]    = new TStnTrackID();
   }
 
@@ -93,32 +86,17 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   fTrackID[3]->SetMinNActive(-1 );
 
   fBestID     = 2;			// best: DaveTrkQual > 0.4
-//-----------------------------------------------------------------------------
-// PID: initialize likelihood histograms
-// TRK 19: "Set C" plus reconstructed and matched cluster
-//-----------------------------------------------------------------------------
-  fLogLH      = new TEmuLogLH  ();
-//   const char   *pid_version;
-//   pid_version = gEnv->GetValue("mu2e.PidVersion","_none_");
-//   fLogLH->Init(pid_version);
-//-----------------------------------------------------------------------------
-// MC truth: define which MC particle to consider as signal
-// 2:conversionGun, 28:StoppedParticleReactionGun - see 
-//-----------------------------------------------------------------------------
-  fPdgCode       = 11;
-  fGeneratorCode =  2;
 }
 
 //-----------------------------------------------------------------------------
-TTrackAnaModule::~TTrackAnaModule() {
-  for (int i=0; i<fNID; i++) delete fTrackID[i];
+TTrackAnaModuleA::~TTrackAnaModuleA() {
 }
 
 
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
-int TTrackAnaModule::BeginJob() {
+int TTrackAnaModuleA::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
@@ -139,21 +117,15 @@ int TTrackAnaModule::BeginJob() {
 }
 
 
-//_____________________________________________________________________________
-int TTrackAnaModule::BeginRun() {
-  int rn = GetHeaderBlock()->RunNumber();
-  TStntuple::Init(rn);
-  return 0;
-}
-
-
 //-----------------------------------------------------------------------------
 // need MC truth branch
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
+void TTrackAnaModuleA::FillEventHistograms(HistBase_t* Hist) {
   double            cos_th, dio_wt, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
   double            e, m, r;
   TLorentzVector    mom(1.,0.,0.,0);
+
+  EventHist_t* hist = (EventHist_t*) Hist;
 
   if (fParticle) { 
     fParticle->Momentum(mom);
@@ -167,19 +139,19 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
   cos_th = mom.Pz()/p;
   dio_wt = TStntuple::DioWeightAl(p);
 
-  Hist->fLumWt->Fill(fLumWt);
-  Hist->fRv->Fill(rv);
-  Hist->fZv->Fill(zv);
-  Hist->fEleMom->Fill(p);
-  Hist->fDioMom->Fill(p,dio_wt);
-  Hist->fEleCosTh->Fill(cos_th);
+  hist->fLumWt->Fill(fLumWt);
+  hist->fRv->Fill(rv);
+  hist->fZv->Fill(zv);
+  hist->fEleMom->Fill(p);
+  hist->fDioMom->Fill(p,dio_wt);
+  hist->fEleCosTh->Fill(cos_th);
 
-  Hist->fNClusters->Fill(fNClusters);
-  Hist->fNTracks->Fill  (fNTracks[0]);
+  hist->fNClusters->Fill(fNClusters);
+  hist->fNTracks->Fill  (fNTracks[0]);
 
   int nsh = GetHeaderBlock()->fNStrawHits;
-  Hist->fNStrawHits[0]->Fill(nsh);
-  Hist->fNStrawHits[1]->Fill(nsh);
+  hist->fNStrawHits[0]->Fill(nsh);
+  hist->fNStrawHits[1]->Fill(nsh);
 
   double emax   = -1;
   double t0_cls = -1;
@@ -205,8 +177,8 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
     dt = t0_cls-t0_trk;
   }
 
-  Hist->fDtClT->Fill(dt);
-  Hist->fEMax->Fill(emax);
+  hist->fDtClT->Fill(dt);
+  hist->fEMax->Fill(emax);
 
   TStrawHitData*  sh;
   int n_good_hits = 0;
@@ -214,18 +186,18 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
   for (int i=0; i<nstraw_hits; i++ ) {
     sh = fStrawDataBlock->Hit(i);
     dt = t0_cls-sh->Time() + 15;
-    Hist->fDtClS->Fill(dt);
-    Hist->fSHTime->Fill(sh->Time());
+    hist->fDtClS->Fill(dt);
+    hist->fSHTime->Fill(sh->Time());
 
     if (fabs(dt+15.)< 50) n_good_hits += 1;
   }
 
-  Hist->fNGoodSH->Fill(n_good_hits);
+  hist->fNGoodSH->Fill(n_good_hits);
 
-  Hist->fNHyp->Fill(fNHyp);
-  Hist->fBestHyp[0]->Fill(fBestHyp[0]);
-  Hist->fBestHyp[1]->Fill(fBestHyp[1]);
-  Hist->fNGenp->Fill(fNGenp);
+  hist->fNHyp->Fill(fNHyp);
+  hist->fBestHyp[0]->Fill(fBestHyp[0]);
+  hist->fBestHyp[1]->Fill(fBestHyp[1]);
+  hist->fNGenp->Fill(fNGenp);
 //-----------------------------------------------------------------------------
 // crystals - count crystals with E > 1MeV
 //-----------------------------------------------------------------------------
@@ -280,22 +252,22 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
       }
     }
 
-    Hist->fNCaloCrystalHits[0]->Fill(fNCalHits);
-    Hist->fNCaloCrystalHits[1]->Fill(n_cch_1mev);
+    hist->fNCaloCrystalHits[0]->Fill(fNCalHits);
+    hist->fNCaloCrystalHits[1]->Fill(n_cch_1mev);
 
     for (int iv=0; iv<4; iv++) {
-      Hist->fNCaloHitsVsDisk[0]->Fill(iv,nhits_vane[0][iv]);
-      Hist->fNCaloHitsVsDisk[1]->Fill(iv,nhits_vane[1][iv]);
+      hist->fNCaloHitsVsDisk[0]->Fill(iv,nhits_vane[0][iv]);
+      hist->fNCaloHitsVsDisk[1]->Fill(iv,nhits_vane[1][iv]);
     }
 
     for (int ir=0; ir<20; ir++) {
-      Hist->fNCaloHitsVsRow[0]->Fill(ir,nhits_row[0][ir]);
-      Hist->fNCaloHitsVsRow[1]->Fill(ir,nhits_row[1][ir]);
+      hist->fNCaloHitsVsRow[0]->Fill(ir,nhits_row[0][ir]);
+      hist->fNCaloHitsVsRow[1]->Fill(ir,nhits_row[1][ir]);
     }
 
     for (int ic=0; ic<50; ic++) {
-      Hist->fNCaloHitsVsCol[0]->Fill(ic,nhits_col[0][ic]);
-      Hist->fNCaloHitsVsCol[1]->Fill(ic,nhits_col[1][ic]);
+      hist->fNCaloHitsVsCol[0]->Fill(ic,nhits_col[0][ic]);
+      hist->fNCaloHitsVsCol[1]->Fill(ic,nhits_col[1][ic]);
     }
   }
   else if (fCalorimeterType == 2) {
@@ -335,8 +307,8 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
       etot          [idisk] += e;
       n_hit_crystals[idisk] += 1;
 
-      Hist->fECrVsR[idisk]->Fill(r,e);
-      Hist->fNCrVsR[idisk]->Fill(r,1);
+      hist->fECrVsR[idisk]->Fill(r,e);
+      hist->fNCrVsR[idisk]->Fill(r,1);
 
       bin  = (int) (r/10.);
 
@@ -357,20 +329,20 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 // fill 'per-disk' histograms
 //-----------------------------------------------------------------------------
-      Hist->fETot[id]->Fill(etot[id]);
+      hist->fETot[id]->Fill(etot[id]);
 
 //-----------------------------------------------------------------------------
 // 100 is fixed by the number of bins in the radial distributions
 //-----------------------------------------------------------------------------
       for (int ib=0; ib<100; ib++) {
 	r = (ib+0.5)*10.;
-	Hist->fNCrystalHitsVsR[id]->Fill(r,nhits_r         [id][ib]);
-	Hist->fNHitCrystalsVsR[id]->Fill(r,n_hit_crystals_r[id][ib]);
+	hist->fNCrystalHitsVsR[id]->Fill(r,nhits_r         [id][ib]);
+	hist->fNHitCrystalsVsR[id]->Fill(r,n_hit_crystals_r[id][ib]);
       }
     }
 
-    Hist->fNHitCrystalsTot->Fill(n_hit_crystals_tot);
-    Hist->fECal->Fill(ecal);
+    hist->fNHitCrystalsTot->Fill(n_hit_crystals_tot);
+    hist->fECal->Fill(ecal);
 
     double ekin(-1.);
 //-----------------------------------------------------------------------------
@@ -384,26 +356,26 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
       m    = 105.658; // in MeV
       ekin = sqrt(p*p+m*m)-m;
     }
-    Hist->fECalOverEKin->Fill(ecal/ekin);
+    hist->fECalOverEKin->Fill(ecal/ekin);
 
   }
 
-  Hist->fInstLumi->Fill(GetHeaderBlock()->InstLum());
+  hist->fInstLumi->Fill(GetHeaderBlock()->InstLum());
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
+void TTrackAnaModuleA::FillCaloHistograms(HistBase_t* HistBase, TStnCrystal* Cr) {
 
   int                    nhits;
   float                  t, e, r, e700, n700;
   TCalHitData*           hit;
 
-  // determine crystal coordinates
+  CaloHist_t* Hist = (CaloHist_t*) HistBase;
 
+					// determine crystal coordinates
   TDisk* disk = Cr->Disk();
-
-  int idisk = disk->SectionID();
-  // time needs to be defiend
+  int   idisk = disk->SectionID();
+					// time needs to be defiend
   //    t  = Cr->Time();
   e     = Cr->Energy();
   r     = Cr->Radius();
@@ -440,9 +412,11 @@ void TTrackAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
 
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
+void TTrackAnaModuleA::FillClusterHistograms(HistBase_t* Hist, TStnCluster* Cluster) {
   int   row, col;
   float  x, y, z, r;
+
+  ClusterHist_t* hist = (ClusterHist_t*) Hist;
 
   row = Cluster->Ix1();
   col = Cluster->Ix2();
@@ -455,35 +429,37 @@ void TTrackAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cl
   if ((row < 0) || (row > 9999)) row = -9999;
   if ((col < 0) || (col > 9999)) col = -9999;
 
-  Hist->fDiskID->Fill(Cluster->DiskID());
-  Hist->fEnergy->Fill(Cluster->Energy());
-  Hist->fT0->Fill(Cluster->Time());
-  Hist->fRow->Fill(row);
-  Hist->fCol->Fill(col);
-  Hist->fX->Fill(x);
-  Hist->fY->Fill(y);
-  Hist->fZ->Fill(z);
-  Hist->fR->Fill(r);
+  hist->fDiskID->Fill(Cluster->DiskID());
+  hist->fEnergy->Fill(Cluster->Energy());
+  hist->fT0->Fill(Cluster->Time());
+  hist->fRow->Fill(row);
+  hist->fCol->Fill(col);
+  hist->fX->Fill(x);
+  hist->fY->Fill(y);
+  hist->fZ->Fill(z);
+  hist->fR->Fill(r);
 
-  Hist->fYMean->Fill(Cluster->fYMean);
-  Hist->fZMean->Fill(Cluster->fZMean);
-  Hist->fSigY->Fill(Cluster->fSigY);
-  Hist->fSigZ->Fill(Cluster->fSigZ);
-  Hist->fSigR->Fill(Cluster->fSigR);
-  Hist->fNCr0->Fill(Cluster->fNCrystals);
-  Hist->fNCr1->Fill(Cluster->fNCr1);
-  Hist->fFrE1->Fill(Cluster->fFrE1);
-  Hist->fFrE2->Fill(Cluster->fFrE2);
-  Hist->fSigE1->Fill(Cluster->fSigE1);
-  Hist->fSigE2->Fill(Cluster->fSigE2);
+  hist->fYMean->Fill(Cluster->fYMean);
+  hist->fZMean->Fill(Cluster->fZMean);
+  hist->fSigY->Fill(Cluster->fSigY);
+  hist->fSigZ->Fill(Cluster->fSigZ);
+  hist->fSigR->Fill(Cluster->fSigR);
+  hist->fNCr0->Fill(Cluster->fNCrystals);
+  hist->fNCr1->Fill(Cluster->fNCr1);
+  hist->fFrE1->Fill(Cluster->fFrE1);
+  hist->fFrE2->Fill(Cluster->fFrE2);
+  hist->fSigE1->Fill(Cluster->fSigE1);
+  hist->fSigE2->Fill(Cluster->fSigE2);
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
+void TTrackAnaModuleA::FillGenpHistograms(HistBase_t* Hist, TGenParticle* Genp) {
   int    gen_id;
   float  p, cos_th, z0, t0, r0, x0, y0;
 
   TLorentzVector mom, v;
+
+  GenpHist_t* hist = (GenpHist_t*) Hist;
 
   Genp->Momentum(mom);
   //  Genp->ProductionVertex(v);
@@ -499,108 +475,111 @@ void TTrackAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
   r0     = sqrt(x0*x0+y0*y0);
   gen_id = Genp->GetStatusCode();
 
-  Hist->fPdgCode[0]->Fill(Genp->GetPdgCode());
-  Hist->fPdgCode[1]->Fill(Genp->GetPdgCode());
-  Hist->fGenID->Fill(gen_id);
-  Hist->fZ0->Fill(z0);
-  Hist->fT0->Fill(t0);
-  Hist->fR0->Fill(r0);
-  Hist->fP->Fill(p);
-  Hist->fCosTh->Fill(cos_th);
+  hist->fPdgCode[0]->Fill(Genp->GetPdgCode());
+  hist->fPdgCode[1]->Fill(Genp->GetPdgCode());
+  hist->fGenID->Fill(gen_id);
+  hist->fZ0->Fill(z0);
+  hist->fT0->Fill(t0);
+  hist->fR0->Fill(r0);
+  hist->fP->Fill(p);
+  hist->fCosTh->Fill(cos_th);
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
+void TTrackAnaModuleA::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp) {
 
-  Hist->fPdgCode->Fill(Simp->fPdgCode);
-  Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
-  Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront);
-  Hist->fNStrawHits->Fill(Simp->fNStrawHits);
+  SimpHist_t* hist = (SimpHist_t*) Hist;
+  
+  hist->fPdgCode->Fill(Simp->fPdgCode);
+  hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
+  hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront);
+  hist->fNStrawHits->Fill(Simp->fNStrawHits);
 }
 
 //-----------------------------------------------------------------------------
 // for DIO : ultimately, one would need to renormalize the distribution
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
+void TTrackAnaModuleA::FillTrackHistograms(HistBase_t* Hist, TStnTrack* Track, TrackPar_t* TrackPar) {
 
   TLorentzVector  mom;
   double          r;
-  int             itrk;
+  //  int             itrk;
   TrackPar_t*     tp;
-					// pointer to local track parameters
-  itrk = Track->Number();
-  tp   = fTrackPar+itrk;
 
-  Hist->fP[0]->Fill (tp->fP);		// corrected momentum in the first point
-  Hist->fP[1]->Fill (tp->fP);
-  Hist->fP[2]->Fill (tp->fP);
+  TrackHist_t* hist = (TrackHist_t*) Hist;
 
-  Hist->fP0->  Fill (Track->fP0);	// momentum zt Z0
-  Hist->fP2->  Fill (Track->fP2);	// momentum at z2 = -1540, the same as in the 1st point
+  tp   = TrackPar;
 
-  Hist->fPDio->Fill  (tp->fP, tp->fDioWt);
-  Hist->fPlw->Fill   (tp->fP, tp->fLumWt);
-  Hist->fPDiolw->Fill(tp->fP, tp->fTotWt);
+  hist->fP[0]->Fill (tp->fP);		// corrected momentum in the first point
+  hist->fP[1]->Fill (tp->fP);
+  hist->fP[2]->Fill (tp->fP);
+
+  hist->fP0->  Fill (Track->fP0);	// momentum zt Z0
+  hist->fP2->  Fill (Track->fP2);	// momentum at z2 = -1540, the same as in the 1st point
+
+  hist->fPDio->Fill  (tp->fP, tp->fDioWt);
+  hist->fPlw->Fill   (tp->fP, tp->fLumWt);
+  hist->fPDiolw->Fill(tp->fP, tp->fTotWt);
 
 
-  Hist->fFitMomErr->Fill(Track->fFitMomErr);
+  hist->fFitMomErr->Fill(Track->fFitMomErr);
 
-  Hist->fPt    ->Fill(Track->fPt    );
-  Hist->fPFront->Fill(Track->fPFront);
-  Hist->fPStOut->Fill(Track->fPStOut);
+  hist->fPt    ->Fill(Track->fPt    );
+  hist->fPFront->Fill(Track->fPFront);
+  hist->fPStOut->Fill(Track->fPStOut);
 					// dp: Tracker-only resolution
 
-  Hist->fDpFront ->Fill(tp->fDpF);
-  Hist->fXDpF    ->Fill(tp->fDpF/Track->fFitMomErr);
-  Hist->fDpFDio  ->Fill(tp->fDpF,tp->fDioWt);
-  Hist->fXDpFDio ->Fill(tp->fDpF/Track->fFitMomErr,tp->fDioWt);
-  Hist->fDpFront0->Fill(tp->fDp0);
-  Hist->fDpFront2->Fill(tp->fDp2);
-  Hist->fDpFSt   ->Fill(tp->fDpFSt);
-  Hist->fDpFVsZ1 ->Fill(Track->fZ1,tp->fDpF);
+  hist->fDpFront ->Fill(tp->fDpF);
+  hist->fXDpF    ->Fill(tp->fDpF/Track->fFitMomErr);
+  hist->fDpFDio  ->Fill(tp->fDpF,tp->fDioWt);
+  hist->fXDpFDio ->Fill(tp->fDpF/Track->fFitMomErr,tp->fDioWt);
+  hist->fDpFront0->Fill(tp->fDp0);
+  hist->fDpFront2->Fill(tp->fDp2);
+  hist->fDpFSt   ->Fill(tp->fDpFSt);
+  hist->fDpFVsZ1 ->Fill(Track->fZ1,tp->fDpF);
 
-  Hist->fCosTh->Fill(Track->Momentum()->CosTheta());
-  Hist->fChi2->Fill (Track->fChi2);
+  hist->fCosTh->Fill(Track->Momentum()->CosTheta());
+  hist->fChi2->Fill (Track->fChi2);
 
   float na = Track->NActive();
 
-  Hist->fChi2Dof->Fill(Track->fChi2/(na-5.));
-  Hist->fNActive->Fill(na);
-  Hist->fNaFract->Fill(na/(Track->NHits()+0.));
-  Hist->fNWrong->Fill(Track->NWrong());
+  hist->fChi2Dof->Fill(Track->fChi2/(na-5.));
+  hist->fNActive->Fill(na);
+  hist->fNaFract->Fill(na/(Track->NHits()+0.));
+  hist->fNWrong->Fill(Track->NWrong());
 
   float nd  = Track->NDoublets();
   float nad = Track->NDoubletsAct();
-  Hist->fNDoublets->Fill(nd);
-  Hist->fNadOverNd->Fill(nad/nd);
-  Hist->fNOSD->Fill(Track->NOSDoublets());
-  Hist->fNSSD->Fill(Track->NSSDoublets());
-  Hist->fNdOverNa->Fill(nd/na);
-  Hist->fNosdOverNa->Fill(Track->NOSDoublets()/na);
-  Hist->fNssdOverNa->Fill(Track->NSSDoublets()/na);
-  Hist->fNZeroAmb->Fill(Track->NHitsAmbZero());
-  Hist->fNzaOverNa->Fill(Track->NHitsAmbZero()/na);
+  hist->fNDoublets->Fill(nd);
+  hist->fNadOverNd->Fill(nad/nd);
+  hist->fNOSD->Fill(Track->NOSDoublets());
+  hist->fNSSD->Fill(Track->NSSDoublets());
+  hist->fNdOverNa->Fill(nd/na);
+  hist->fNosdOverNa->Fill(Track->NOSDoublets()/na);
+  hist->fNssdOverNa->Fill(Track->NSSDoublets()/na);
+  hist->fNZeroAmb->Fill(Track->NHitsAmbZero());
+  hist->fNzaOverNa->Fill(Track->NHitsAmbZero()/na);
 
   int nma = Track->NMatActive();
 
-  Hist->fNMatActive->Fill(nma);
-  Hist->fNmaOverNa->Fill(nma/na);
+  hist->fNMatActive->Fill(nma);
+  hist->fNmaOverNa->Fill(nma/na);
 
-  Hist->fNBend->Fill(Track->NBend());
+  hist->fNBend->Fill(Track->NBend());
 
-  Hist->fT0->Fill(Track->fT0);
-  Hist->fT0Err->Fill(Track->fT0Err);
-  //  printf("TTrackAnaModule::FillTrackHistograms: track charge is not defined yet\n");
-  Hist->fQ->Fill(-1);
-  Hist->fFitCons[0]->Fill(Track->fFitCons);
-  Hist->fFitCons[1]->Fill(Track->fFitCons);
+  hist->fT0->Fill(Track->fT0);
+  hist->fT0Err->Fill(Track->fT0Err);
+  //  printf("TTrackAnaModuleA::FillTrackHistograms: track charge is not defined yet\n");
+  hist->fQ->Fill(-1);
+  hist->fFitCons[0]->Fill(Track->fFitCons);
+  hist->fFitCons[1]->Fill(Track->fFitCons);
 
-  Hist->fD0->Fill(Track->fD0);
-  Hist->fZ0->Fill(Track->fZ0);
-  Hist->fTanDip->Fill(Track->fTanDip);
-  Hist->fDtZ0->Fill(tp->fDtZ0);
-  Hist->fRMax->Fill(Track->RMax());
-  Hist->fAlgMask->Fill(Track->AlgMask());
+  hist->fD0->Fill(Track->fD0);
+  hist->fZ0->Fill(Track->fZ0);
+  hist->fTanDip->Fill(Track->fTanDip);
+  hist->fDtZ0->Fill(tp->fDtZ0);
+  hist->fRMax->Fill(Track->RMax());
+  hist->fAlgMask->Fill(Track->AlgMask());
 //-----------------------------------------------------------------------------
 // track-cluster matching part: 
 // - for residuals, determine intersection with the most energetic cluster
@@ -609,24 +588,24 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   TStnTrack::InterData_t*    vt = Track->fVMinS;  // track-cluster residuals
 
   if (vt) {
-    Hist->fDiskID->Fill(vt->fID  );
-    Hist->fXTrk->Fill  (vt->fXTrk);
-    Hist->fYTrk->Fill  (vt->fYTrk);
+    hist->fDiskID->Fill(vt->fID  );
+    hist->fXTrk->Fill  (vt->fXTrk);
+    hist->fYTrk->Fill  (vt->fYTrk);
 
     r = sqrt(vt->fXTrk*vt->fXTrk+vt->fYTrk*vt->fYTrk);
-    Hist->fRTrk->Fill  (r);
+    hist->fRTrk->Fill  (r);
 
-    Hist->fZTrk->Fill  (vt->fZTrk);
+    hist->fZTrk->Fill  (vt->fZTrk);
   }
   else {
 //-----------------------------------------------------------------------------
 // fill histograms with numbers easy to recognize as dummy
 //-----------------------------------------------------------------------------
-    Hist->fDiskID->Fill(-1.);
-    Hist->fXTrk->Fill  (999.);
-    Hist->fYTrk->Fill  (999.);
-    Hist->fRTrk->Fill  (999.);
-    Hist->fZTrk->Fill  (-1. );
+    hist->fDiskID->Fill(-1.);
+    hist->fXTrk->Fill  (999.);
+    hist->fYTrk->Fill  (999.);
+    hist->fRTrk->Fill  (999.);
+    hist->fZTrk->Fill  (-1. );
   }
 //-----------------------------------------------------------------------------
 // there is an inconsistency in the SIMP block filling - in Mu2e offline 
@@ -641,67 +620,67 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
     ekin = sqrt(p*p+m*m)-m;
   }
 
-  Hist->fECl->Fill(tp->fEcl);
-  Hist->fEClEKin->Fill(tp->fEcl/ekin);
-  Hist->fEp->Fill(tp->fEp);
-  Hist->fEpVsPath->Fill(tp->fPath,tp->fEp);
+  hist->fECl->Fill(tp->fEcl);
+  hist->fEClEKin->Fill(tp->fEcl/ekin);
+  hist->fEp->Fill(tp->fEp);
+  hist->fEpVsPath->Fill(tp->fPath,tp->fEp);
 
-  Hist->fDx->Fill(tp->fDx);
-  Hist->fDy->Fill(tp->fDy);
-  Hist->fDz->Fill(tp->fDz);
+  hist->fDx->Fill(tp->fDx);
+  hist->fDy->Fill(tp->fDy);
+  hist->fDz->Fill(tp->fDz);
 
-  Hist->fDt->Fill(tp->fDt);
-  Hist->fChi2Tcm->Fill(tp->fChi2Tcm);
-  Hist->fChi2XY->Fill(tp->fChi2XY);
-  Hist->fChi2T->Fill (tp->fChi2T);
+  hist->fDt->Fill(tp->fDt);
+  hist->fChi2Tcm->Fill(tp->fChi2Tcm);
+  hist->fChi2XY->Fill(tp->fChi2XY);
+  hist->fChi2T->Fill (tp->fChi2T);
 
-  Hist->fDu->Fill    (tp->fDu);
-  Hist->fDv->Fill    (tp->fDv);
-  Hist->fDvVsDu->Fill(tp->fDu,tp->fDv);
+  hist->fDu->Fill    (tp->fDu);
+  hist->fDv->Fill    (tp->fDv);
+  hist->fDvVsDu->Fill(tp->fDu,tp->fDv);
 
-  Hist->fPath->Fill(tp->fPath);
-  Hist->fDuVsPath->Fill(tp->fPath,tp->fDu);
+  hist->fPath->Fill(tp->fPath);
+  hist->fDuVsPath->Fill(tp->fPath,tp->fDu);
 
-  Hist->fDvVsPath->Fill(tp->fPath,tp->fDv);
-  Hist->fDtVsPath->Fill(tp->fPath,tp->fDt);
+  hist->fDvVsPath->Fill(tp->fPath,tp->fDv);
+  hist->fDtVsPath->Fill(tp->fPath,tp->fDt);
 
-  Hist->fDuVsTDip->Fill(Track->fTanDip,tp->fDu);
-  Hist->fDvVsTDip->Fill(Track->fTanDip,tp->fDv);
+  hist->fDuVsTDip->Fill(Track->fTanDip,tp->fDu);
+  hist->fDvVsTDip->Fill(Track->fTanDip,tp->fDv);
 
-  Hist->fZ1->Fill(Track->fZ1);
+  hist->fZ1->Fill(Track->fZ1);
 
   int ncl = Track->NClusters();
-  Hist->fNClusters->Fill(ncl);
+  hist->fNClusters->Fill(ncl);
 
-  Hist->fRSlope->Fill(Track->RSlope());
-  Hist->fXSlope->Fill(Track->XSlope());
+  hist->fRSlope->Fill(Track->RSlope());
+  hist->fXSlope->Fill(Track->XSlope());
 
   double llhr_dedx, llhr_xs, llhr_cal, llhr_trk, llhr;
 
-  Hist->fEleLogLHCal->Fill(Track->EleLogLHCal());
-  Hist->fMuoLogLHCal->Fill(Track->MuoLogLHCal());
+  hist->fEleLogLHCal->Fill(Track->EleLogLHCal());
+  hist->fMuoLogLHCal->Fill(Track->MuoLogLHCal());
 
   llhr_cal = Track->LogLHRCal();
-  Hist->fLogLHRCal->Fill(llhr_cal);
+  hist->fLogLHRCal->Fill(llhr_cal);
 
   llhr_dedx = Track->LogLHRDeDx();
   llhr_xs   = Track->LogLHRXs();
   llhr_trk  = Track->LogLHRTrk();
   llhr      = llhr_cal+llhr_trk;
 
-  Hist->fEpVsDt->Fill(tp->fDt,tp->fEp);
-  Hist->fLogLHRDeDx->Fill(llhr_dedx);
-  Hist->fLogLHRXs->Fill(llhr_xs);
-  Hist->fLogLHRTrk->Fill(llhr_trk);
-  Hist->fLogLHR->Fill(llhr);
+  hist->fEpVsDt->Fill(tp->fDt,tp->fEp);
+  hist->fLogLHRDeDx->Fill(llhr_dedx);
+  hist->fLogLHRXs->Fill(llhr_xs);
+  hist->fLogLHRTrk->Fill(llhr_trk);
+  hist->fLogLHR->Fill(llhr);
 
-  Hist->fPdgCode->Fill(Track->fPdgCode);
-  Hist->fFrGH->Fill(Track->fNGoodMcHits/(Track->NActive()+1.e-5));
+  hist->fPdgCode->Fill(Track->fPdgCode);
+  hist->fFrGH->Fill(Track->fNGoodMcHits/(Track->NActive()+1.e-5));
 
-  Hist->fNEPlVsNHPl->Fill(tp->fNEPl,tp->fNHPl);
-  Hist->fNDPlVsNHPl->Fill(tp->fNDPl,tp->fNHPl);
-  Hist->fChi2dVsNDPl->Fill(tp->fNDPl,Track->Chi2Dof());
-  Hist->fDpFVsNDPl  ->Fill(tp->fNDPl,tp->fDpF);
+  hist->fNEPlVsNHPl->Fill(tp->fNEPl,tp->fNHPl);
+  hist->fNDPlVsNHPl->Fill(tp->fNDPl,tp->fNHPl);
+  hist->fChi2dVsNDPl->Fill(tp->fNDPl,Track->Chi2Dof());
+  hist->fDpFVsNDPl  ->Fill(tp->fNDPl,tp->fDpF);
 
   float        fre1(-1), fre2(-1);
   int          icl;
@@ -716,83 +695,20 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
     }
   }
 
-  Hist->fFrE1->Fill(fre1);
-  Hist->fFrE2->Fill(fre2);
+  hist->fFrE1->Fill(fre1);
+  hist->fFrE2->Fill(fre2);
 
-  Hist->fSinTC->Fill(tp->fSinTC);
+  hist->fSinTC->Fill(tp->fSinTC);
 
-  Hist->fDrTC->Fill(tp->fDrTC);
-  Hist->fSInt->Fill(tp->fSInt);
-  Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
-  Hist->fNMcStrawHits->Fill(Track->fNMcStrawHits);
+  hist->fDrTC->Fill(tp->fDrTC);
+  hist->fSInt->Fill(tp->fSInt);
+  hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
+  hist->fNMcStrawHits->Fill(Track->fNMcStrawHits);
 }
 
-
-//-----------------------------------------------------------------------------
-// fill efficiency histograms : need 10 histogram sets
-// pitch = 1./tan(dip)
-//-----------------------------------------------------------------------------
-void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
-					       TStnTrackID*     TrackID   , 
-					       int              HistSet   ) {
-  if (fSimp->NStrawHits() >= 20) {
-    FillEventHistograms(fHist.fEvent[HistSet]);
-
-    if (fSimp->fMomTrackerFront > 100.) {
-      FillEventHistograms(fHist.fEvent[HistSet+1]);
-
-      TLorentzVector vdmom;
-      vdmom.SetXYZM(fSimPar.fTFront->McMomentumX(),
-		    fSimPar.fTFront->McMomentumY(),		      
-		    fSimPar.fTFront->McMomentumZ(),
-		    fSimPar.fTFront->Mass());
-
-      float ce_pitch  = vdmom.Pt()/vdmom.Pz();
-      float min_pitch = 1./TrackID->MaxTanDip();
-      float max_pitch = 1./TrackID->MinTanDip();
-
-      if ((min_pitch < ce_pitch) && (ce_pitch < max_pitch)) {
-	FillEventHistograms(fHist.fEvent[HistSet+2]);
-	  
-	if (TrackBlock->NTracks() > 0) {
-	  TStnTrack* track = TrackBlock->Track(0);
-	  int id_word      = TrackID->IDWord(track);
-
-	  FillEventHistograms(fHist.fEvent[HistSet+3]);
-	  
-	  if ((id_word & TStnTrackID::kDtQualBit) == 0) {
-	    FillEventHistograms(fHist.fEvent[HistSet+4]);
-	    
-	    if ((id_word & TStnTrackID::kT0Bit) == 0) {
-	      FillEventHistograms(fHist.fEvent[HistSet+5]);
-	      
-	      if ((id_word & TStnTrackID::kTanDipBit) == 0) {
-		FillEventHistograms(fHist.fEvent[HistSet+6]);
-		
-		if (((id_word & TStnTrackID::kD0Bit  ) == 0) && 
-		    ((id_word & TStnTrackID::kRMaxBit) == 0)    ) {
-		  
-		  FillEventHistograms(fHist.fEvent[HistSet+7]);
-		  
-		  if ((id_word & TStnTrackID::kTanDipBit) == 0) {
-		    FillEventHistograms(fHist.fEvent[HistSet+8]);
-
-		    if ((103.5 < track->fP) && (track->fP < 105)) {
-		      FillEventHistograms(fHist.fEvent[HistSet+9]);
-		    }
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
-}
 
 //_____________________________________________________________________________
-void TTrackAnaModule::FillHistograms() {
+void TTrackAnaModuleA::FillHistograms() {
 
   double       cos_th (-2.),  cl_e(-1.);
   int          disk_id(-1), alg_mask, best_alg;
@@ -888,12 +804,12 @@ void TTrackAnaModule::FillHistograms() {
     trk = fTrackBlock->Track(i);
     tp  = fTrackPar+i;
 
-    FillTrackHistograms(fHist.fTrack[0],trk);
+    FillTrackHistograms(fHist.fTrack[0],trk,tp);
 
     if (trk->fIDWord == 0) {
 					// track passes selection "C" 
 
-      FillTrackHistograms(fHist.fTrack[1],trk);
+      FillTrackHistograms(fHist.fTrack[1],trk,tp);
 
       if (GetDebugBit(32) && (trk->fVMinS != NULL)) {
 	if (trk->fVMinS->fChi2Match > 100) {
@@ -911,29 +827,29 @@ void TTrackAnaModule::FillHistograms() {
 
 					// events with at least one  cluster
       if (fNClusters > 0) {
-	FillTrackHistograms(fHist.fTrack[2],trk);
+	FillTrackHistograms(fHist.fTrack[2],trk,tp);
       }
       else {
 					// events without a cluster
-	FillTrackHistograms(fHist.fTrack[3],trk);
+	FillTrackHistograms(fHist.fTrack[3],trk,tp);
       }
 //-----------------------------------------------------------------------------
 // events with a good track, reconstructed clusters but without a match
 //-----------------------------------------------------------------------------
       if ((fNClusters > 0) && (trk->NClusters() == 0)) {
-	FillTrackHistograms(fHist.fTrack[4],trk);
+	FillTrackHistograms(fHist.fTrack[4],trk,tp);
       }
 //-----------------------------------------------------------------------------
 // TRK 5 : events with a good track, reconstructed clusters but without a match
 //-----------------------------------------------------------------------------
       if ((trk->fVMaxEp) && (fabs(trk->fVMaxEp->fDt) < 2.5)) {
-	FillTrackHistograms(fHist.fTrack[5],trk);
+	FillTrackHistograms(fHist.fTrack[5],trk,tp);
       }
 //-----------------------------------------------------------------------------
 // TRK 8: good track, |xslope| < 3
 //-----------------------------------------------------------------------------
       if (fabs(trk->XSlope()) < 3.) {
-	FillTrackHistograms(fHist.fTrack[8],trk);
+	FillTrackHistograms(fHist.fTrack[8],trk,tp);
       }
     }
 //-----------------------------------------------------------------------------
@@ -941,9 +857,9 @@ void TTrackAnaModule::FillHistograms() {
 // TRK 7 : events with a "Set C" track and a cluster E/P > 0.4
 //-----------------------------------------------------------------------------
     if ((trk->Ep() > 0.4) && ( trk->Ep() < 1.2)) {
-      FillTrackHistograms(fHist.fTrack[6],trk);
+      FillTrackHistograms(fHist.fTrack[6],trk,tp);
       if (trk->fIDWord == 0) {
-	FillTrackHistograms(fHist.fTrack[7],trk);
+	FillTrackHistograms(fHist.fTrack[7],trk,tp);
       }
     }
 //----------------------------------------------------------------------------
@@ -952,27 +868,27 @@ void TTrackAnaModule::FillHistograms() {
 //TRK 10: events with good track and with no EM cluster with E < 60 MeV
 //----------------------------------------------------------------------------
     if (cl_e > 60) {
-      FillTrackHistograms(fHist.fTrack[9],trk);
+      FillTrackHistograms(fHist.fTrack[9],trk,tp);
       if (trk->fIDWord == 0) {
-	FillTrackHistograms(fHist.fTrack[10],trk);
+	FillTrackHistograms(fHist.fTrack[10],trk,tp);
       }
     }
 //-----------------------------------------------------------------------------
 // TRK 11: tracks with P > 103.5 MeV
 //-----------------------------------------------------------------------------
-    if (trk->P() > 103.5) FillTrackHistograms(fHist.fTrack[11],trk);
+    if (trk->P() > 103.5) FillTrackHistograms(fHist.fTrack[11],trk,tp);
 //-----------------------------------------------------------------------------
 // TRK 12: tracks with fcon < 1e-4
 // TRK 13: "Set C" tracks with 100 <= P < 110 
 // TRK 14: tracks with fcon < 1e-2
 //-----------------------------------------------------------------------------
-    if (trk->fFitCons < 1.e-4) FillTrackHistograms(fHist.fTrack[12],trk);
+    if (trk->fFitCons < 1.e-4) FillTrackHistograms(fHist.fTrack[12],trk,tp);
 
     if ((trk->fIDWord == 0) && (trk->P() >= 100.) && (trk->P() < 110.)) {
-      FillTrackHistograms(fHist.fTrack[13],trk);
+      FillTrackHistograms(fHist.fTrack[13],trk,tp);
     }
 
-    if (trk->fFitCons < 1.e-2) FillTrackHistograms(fHist.fTrack[14],trk);
+    if (trk->fFitCons < 1.e-2) FillTrackHistograms(fHist.fTrack[14],trk,tp);
 
     TStnTrack::InterData_t*    vt = trk->fVMinS;  // track-only
 //-----------------------------------------------------------------------------
@@ -982,26 +898,26 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
     if (vt) {
       if      (vt->fID == 0) {
-	FillTrackHistograms(fHist.fTrack[15],trk);
+	FillTrackHistograms(fHist.fTrack[15],trk,tp);
       }
       else if (vt->fID == 1) {
-	FillTrackHistograms(fHist.fTrack[16],trk);
+	FillTrackHistograms(fHist.fTrack[16],trk,tp);
       }
     }
     else {
-      FillTrackHistograms(fHist.fTrack[17],trk);
+      FillTrackHistograms(fHist.fTrack[17],trk,tp);
     }
 //-----------------------------------------------------------------------------
 // TRK_18: Set "C" tracks with T0 > 700
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (trk->T0() > 700)) {
-      FillTrackHistograms(fHist.fTrack[18],trk);
+      FillTrackHistograms(fHist.fTrack[18],trk,tp);
     }
 //-----------------------------------------------------------------------------
 // TRK_19: Set "C" tracks with an associated cluster
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (trk->Ep() > 0)) {
-      FillTrackHistograms(fHist.fTrack[19],trk);
+      FillTrackHistograms(fHist.fTrack[19],trk,tp);
 
       if (trk->LogLHRCal() < 0) {
 	if (GetDebugBit(29)) {
@@ -1022,9 +938,9 @@ void TTrackAnaModule::FillHistograms() {
 // TRK_21: tracks with >= 20 hits and Chi2/Ndof < 3
 //-----------------------------------------------------------------------------
     if (trk->NActive() >= 20) {
-      FillTrackHistograms(fHist.fTrack[20],trk);
+      FillTrackHistograms(fHist.fTrack[20],trk,tp);
       if (trk->Chi2Dof() < 3) {
-	FillTrackHistograms(fHist.fTrack[21],trk);
+	FillTrackHistograms(fHist.fTrack[21],trk,tp);
       }
     }
 //-----------------------------------------------------------------------------
@@ -1033,9 +949,9 @@ void TTrackAnaModule::FillHistograms() {
 //         this is interesting to see which muons are getting misidentified
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Tcm < 100.)) {
-      FillTrackHistograms(fHist.fTrack[22],trk);
+      FillTrackHistograms(fHist.fTrack[22],trk,tp);
       if    (trk->LogLHRCal() > 0) {
-	FillTrackHistograms(fHist.fTrack[23],trk);
+	FillTrackHistograms(fHist.fTrack[23],trk,tp);
 	
 	if (trk->fP < 80.) {
 	  if (GetDebugBit(36)) {
@@ -1048,7 +964,7 @@ void TTrackAnaModule::FillHistograms() {
 // TRK_24: Set "C" tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) < 0
 //         this set allows to see which electrons are getting misidentified
 //-----------------------------------------------------------------------------
-	FillTrackHistograms(fHist.fTrack[24],trk);
+	FillTrackHistograms(fHist.fTrack[24],trk,tp);
       }
 //-----------------------------------------------------------------------------
 // TRK_25: Set "C" tracks, 100 < P < 110, 0 < E/p < 1.15,  |dt_corr| < 3, chi2(match) < 100
@@ -1057,7 +973,7 @@ void TTrackAnaModule::FillHistograms() {
       if ( (tp->fDt > fMinDtTcm) && (tp->fDt < fMaxDtTcm) && 
 	   (tp->fEp <      1.15) && 
 	   (trk->fP >      100.) && (trk->fP <       110)   ) {
-	FillTrackHistograms(fHist.fTrack[25],trk);
+	FillTrackHistograms(fHist.fTrack[25],trk,tp);
 //-----------------------------------------------------------------------------
 // more details on the calorimeter-based likelihood 
 // TRK_26 : TRK 25 events with LLHR_CAL > 0 ( interesting for muons)
@@ -1065,7 +981,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 	double llhr_cal = trk->LogLHRCal();
 	if (llhr_cal > 0) {
-	  FillTrackHistograms(fHist.fTrack[26],trk);
+	  FillTrackHistograms(fHist.fTrack[26],trk,tp);
 
 	  if (llhr_cal > 5.) {
 	    if (GetDebugBit(37)) {
@@ -1074,7 +990,7 @@ void TTrackAnaModule::FillHistograms() {
 	  }
 	}
 	else {
-	  FillTrackHistograms(fHist.fTrack[27],trk);
+	  FillTrackHistograms(fHist.fTrack[27],trk,tp);
 	}
       }
 
@@ -1084,7 +1000,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
     if (trk->fIDWord == 0) {
       if (tp->fEp > 1.1) {
-	FillTrackHistograms(fHist.fTrack[28],trk);
+	FillTrackHistograms(fHist.fTrack[28],trk,tp);
 
 	if (GetDebugBit(28)) {
 	  GetHeaderBlock()->Print(Form(" bit:028 LLHR(CAL) = %10.3f ep = %10.3f dt = %10.3f",
@@ -1098,10 +1014,10 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
     if (trk->fIDWord == 0) {
       if ((tp->fEp > 0) && (trk->P() > 100.) && (trk->P() < 110.) && (tp->fEp < 1.15)) {
-	FillTrackHistograms(fHist.fTrack[29],trk);
+	FillTrackHistograms(fHist.fTrack[29],trk,tp);
 
 	if (tp->fChi2Tcm < 100.) {
-	  FillTrackHistograms(fHist.fTrack[32],trk);
+	  FillTrackHistograms(fHist.fTrack[32],trk,tp);
 	}
       }
     }
@@ -1110,22 +1026,22 @@ void TTrackAnaModule::FillHistograms() {
 // TRK_31: tracks with >= 25 hits and Chi2/Ndof < 3
 //-----------------------------------------------------------------------------
     if (trk->NActive() >= 25) {
-      FillTrackHistograms(fHist.fTrack[30],trk);
+      FillTrackHistograms(fHist.fTrack[30],trk,tp);
       if (trk->Chi2Dof() < 3) {
-	FillTrackHistograms(fHist.fTrack[31],trk);
+	FillTrackHistograms(fHist.fTrack[31],trk,tp);
       }
     }
 //-----------------------------------------------------------------------------
 // TRK_33: "DaveTrkQual" Q > 0.4 tracks
 //-----------------------------------------------------------------------------
     if (tp->fIDWord[fBestID] == 0) {
-      FillTrackHistograms(fHist.fTrack[33],trk);
+      FillTrackHistograms(fHist.fTrack[33],trk,tp);
     }
 //-----------------------------------------------------------------------------
 // TRK_34: "DaveTrkQual" Q > 0.1 tracks
 //-----------------------------------------------------------------------------
     if (tp->fIDWord[1] == 0) {
-      FillTrackHistograms(fHist.fTrack[34],trk);
+      FillTrackHistograms(fHist.fTrack[34],trk,tp);
     }
 //-----------------------------------------------------------------------------
 // split tracks by the algorithm mask: 1 , 2 , or 3
@@ -1136,9 +1052,9 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TrkPatRec-only tracks
 //-----------------------------------------------------------------------------
-      FillTrackHistograms(fHist.fTrack[40],trk);
+      FillTrackHistograms(fHist.fTrack[40],trk,tp);
       if (trk->fIDWord == 0) {
-	FillTrackHistograms(fHist.fTrack[41],trk);
+	FillTrackHistograms(fHist.fTrack[41],trk,tp);
 	// print run/event numbers :
 	if (GetDebugBit(6)) {
 	  double ep = trk->Ep();
@@ -1146,27 +1062,27 @@ void TTrackAnaModule::FillHistograms() {
 	    GetHeaderBlock()->Print(Form(" bit:006 trk_41: track E/P = %8.3f",trk->Ep()));
 	  }
 	}
-	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[42],trk);
+	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[42],trk,tp);
       }
     }
     else if (alg_mask == 2) {
 //-----------------------------------------------------------------------------
 // CalPatRec-only tracks
 //-----------------------------------------------------------------------------
-      FillTrackHistograms(fHist.fTrack[50],trk);
+      FillTrackHistograms(fHist.fTrack[50],trk,tp);
       if (trk->fIDWord == 0) {
-	FillTrackHistograms(fHist.fTrack[51],trk);
-	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[52],trk);
+	FillTrackHistograms(fHist.fTrack[51],trk,tp);
+	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[52],trk,tp);
       }
     }
     else if (alg_mask == 3) {
 //-----------------------------------------------------------------------------
 // TrkPatRec+CalPatRec tracks
 //-----------------------------------------------------------------------------
-      FillTrackHistograms(fHist.fTrack[60],trk);
+      FillTrackHistograms(fHist.fTrack[60],trk,tp);
       if (trk->fIDWord == 0) {
-	FillTrackHistograms(fHist.fTrack[61],trk);
-	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[62],trk);
+	FillTrackHistograms(fHist.fTrack[61],trk,tp);
+	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[62],trk,tp);
       }
     }
 //-----------------------------------------------------------------------------
@@ -1174,14 +1090,14 @@ void TTrackAnaModule::FillHistograms() {
 // TRK_64 : fIDWORD[bestID] == 0, CalPatRec
 //-----------------------------------------------------------------------------
     if (tp->fIDWord[fBestID] == 0) {
-      if      (best_alg == 0) FillTrackHistograms(fHist.fTrack[63],trk);
-      else if (best_alg == 1) FillTrackHistograms(fHist.fTrack[64],trk);
+      if      (best_alg == 0) FillTrackHistograms(fHist.fTrack[63],trk,tp);
+      else if (best_alg == 1) FillTrackHistograms(fHist.fTrack[64],trk,tp);
     }
 //-----------------------------------------------------------------------------
 // TRK_71: SetC tracks  103.5 < p < 105 : DIO studies
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (trk->fP > 103.5) && (trk->fP < 105.)) {
-      FillTrackHistograms(fHist.fTrack[71],trk);
+      FillTrackHistograms(fHist.fTrack[71],trk,tp);
     }
   }
 
@@ -1269,196 +1185,10 @@ void TTrackAnaModule::FillHistograms() {
 
 
 //-----------------------------------------------------------------------------
-// assume less than 20 tracks 
-//-----------------------------------------------------------------------------
-int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  , 
-				  TStnClusterBlock* ClusterBlock, 
-				  TrackPar_t*       TrackPar    ) {
-  TrackPar_t*           tp;
-  TStnTrack*            track;
-  int                   id_word, icorr;
-  double                xs;
-  TEmuLogLH::PidData_t  dat;
-//-----------------------------------------------------------------------------
-// momentum corrections for TrkPatRec and CalPatRec
-//-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0.049, 0.020 };
-  const double kDtTcmCorr   [2] = { 0.22 , -0.30 }; // ns, sign: fit peak positions
-
-  const char* block_name = TrackBlock->GetNode()->GetName();
-
-  if      (strcmp(block_name,"TrkPatRec"    ) == 0) icorr = 0;
-  else if (strcmp(block_name,"CalPatRec"    ) == 0) icorr = 1;
-  else if (strcmp(block_name,"TrackBlock"   ) == 0) icorr = 2;
-  else if (strcmp(block_name,"TrackBlockDmm") == 0) icorr = -1;
-  else {
-    icorr = -999;
-    Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
-    return -1;
-  }
-//-----------------------------------------------------------------------------
-// loop over tracks, assume 
-//-----------------------------------------------------------------------------
-  int ntrk = TrackBlock->NTracks();
-
-  for (int itrk=0; itrk<ntrk; itrk++) {
-    tp             = TrackPar+itrk;
-    track          = TrackBlock->Track(itrk);
-
-    for (int idd=0; idd<fNID; idd++) {
-      tp->fIDWord[idd] = fTrackID[idd]->IDWord(track);
-    }
-
-    id_word        = tp->fIDWord[fBestID];
-    track->fIDWord = id_word;
-
-    if (id_word == 0) {
-      fNGoodTracks += 1;
-      if ((track->fVMaxEp != NULL) && (fabs(track->fVMaxEp->fDt) < 2.5)) {
-	fNMatchedTracks += 1;
-      }
-    }
-//-----------------------------------------------------------------------------
-// process hit masks
-//-----------------------------------------------------------------------------
-    int i1, i2, n1(0) ,n2(0), ndiff(0);
-    int nbits = track->fHitMask.GetNBits();
-    for (int i=0; i<nbits; i++) {
-      i1 = track->HitMask()->GetBit(i);
-      i2 = track->ExpectedHitMask()->GetBit(i);
-      n1 += i1;
-      n2 += i2;
-      if (i1 != i2) ndiff += 1;
-    }
-//-----------------------------------------------------------------------------
-// define additional parameters
-//-----------------------------------------------------------------------------
-    tp->fNHPl = n1;
-    tp->fNEPl = n2;
-    tp->fNDPl = ndiff;
-
-//-----------------------------------------------------------------------------
-// in this scheme correction is set right before the call
-// in case of MergePatRec use BestAlg - 
-// hopefully, TTrackComp will never use MergePatRec branch
-//-----------------------------------------------------------------------------
-    if (icorr == 2) icorr = track->BestAlg();
-
-    tp->fP = track->fP2;
-    if (icorr >= 0) tp->fP  += kMomentumCorr[icorr];		// correcting
-
-    tp->fDpF   = tp->fP        -track->fPFront;
-    tp->fDp0   = track->fP0    -track->fPFront;
-    tp->fDp2   = track->fP2    -track->fPFront;
-    tp->fDpFSt = track->fPFront-track->fPStOut;
-
-    if (fFillDioHist == 0) tp->fDioWt = 1.;
-    else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
-
-    tp->fLumWt   = GetHeaderBlock()->LumWeight();
-    tp->fTotWt   = tp->fLumWt*tp->fDioWt;
-    tp->fDioWtRC = tp->fDioWt;
-    tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
-
-    tp->fDtZ0 = -1.e6;
-    if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
-//-----------------------------------------------------------------------------
-// track residuals
-//-----------------------------------------------------------------------------
-    TStnTrack::InterData_t*  vr = track->fVMaxEp; 
-    double    nx, ny;
-
-    tp->fEcl       = -1.e6;
-    tp->fEp        = -1.e6;
-
-    tp->fDu        = -1.e6;
-    tp->fDv        = -1.e6;
-    tp->fDx        = -1.e6;
-    tp->fDy        = -1.e6;
-    tp->fDz        = -1.e6;
-    tp->fDt        = -1.e6;
-
-    tp->fChi2Tcm = -1.e6;
-    tp->fChi2XY    = -1.e6;
-    tp->fChi2T     = -1.e6;
-    tp->fPath      = -1.e6;
-    tp->fSinTC     = -1.e6;
-    tp->fDrTC      = -1.e6;
-    tp->fSInt      = -1.e6;
-
-    if (vr) {
-      tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/track->fP2;
-
-      tp->fDx  = vr->fDx;
-      tp->fDy  = vr->fDy;
-      tp->fDz  = vr->fDz;
-//-----------------------------------------------------------------------------
-// correct TrkpatRec and CalPatRec tracks differently
-//-----------------------------------------------------------------------------
-      tp->fDt  = vr->fDt;
-      if (icorr >= 0) tp->fDt  -= kDtTcmCorr[icorr];
-
-      nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
-      ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
-
-      tp->fDu        = vr->fDx*nx+vr->fDy*ny;
-      tp->fDv        = vr->fDx*ny-vr->fDy*nx;
-      tp->fChi2Tcm   = vr->fChi2Match;
-					// from now on the matching chi2 has XY part only
-      tp->fChi2XY    = vr->fChi2Match;
-      tp->fChi2T     = vr->fChi2Time;
-      tp->fPath      = vr->fPath;
-//-----------------------------------------------------------------------------
-// angle
-//-----------------------------------------------------------------------------
-      TStnCluster* cl = fClusterBlock->Cluster(vr->fClusterIndex);
-      tp->fSinTC = nx*cl->fNy-ny*cl->fNx;
-      tp->fDrTC  = vr->fDr;
-      tp->fSInt  = vr->fSInt;
-    }
-
-    if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
-      GetHeaderBlock()->Print(Form(" TTrackAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
-    }
-//-----------------------------------------------------------------------------
-// PID likelihoods
-//-----------------------------------------------------------------------------
-    dat.fDt   = tp->fDt;
-    dat.fEp   = tp->fEp;
-    dat.fPath = tp->fPath;
-      
-    xs = track->XSlope();
-
-    track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
-    track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
-
-    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
-
-    if (GetDebugBit(7)) {
-      if ((id_word == 0) && (llhr_cal > 20)) {
-	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
-      }
-    }
-
-    if (GetDebugBit(8)) {
-      if ((id_word == 0) && (llhr_cal < -20)) {
-	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
-				     track->P(),track->Dt(),tp->fEp));
-      }
-    }
-
-    track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
-  }
-
-  return 0;
-}
-
-//-----------------------------------------------------------------------------
 // 2014-04-30: it looks that reading the straw hits takes a lot of time - 
 //              turn off by default by commenting it out
 //-----------------------------------------------------------------------------
-int TTrackAnaModule::Event(int ientry) {
+int TTrackAnaModuleA::Event(int ientry) {
 
   TDiskCalorimeter::GeomData_t disk_geom;
 
@@ -1550,9 +1280,6 @@ int TTrackAnaModule::Event(int ientry) {
   fNHyp           = -1;
   fBestHyp[0]     = -1;
   fBestHyp[1]     = -1;
-
-  fNGoodTracks    = 0;
-  fNMatchedTracks = 0;
 //-----------------------------------------------------------------------------
 // determine the number of CalPatRec tracks - this assumes that the list of 
 // tracks has been created by MergePatRec
@@ -1566,7 +1293,7 @@ int TTrackAnaModule::Event(int ientry) {
     if (alg_mask & 0x2) fNCalPatRec += 1;
   }
   
-  InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar);
+  InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,fNGoodTracks,fNMatchedTracks);
 //-----------------------------------------------------------------------------
 // init calorimeter clusters - remember, the first one not necessarily is the 
 // most energetic
@@ -1583,7 +1310,7 @@ int TTrackAnaModule::Event(int ientry) {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackAnaModule::Debug() {
+void TTrackAnaModuleA::Debug() {
 
   TStnTrack* trk;
   TrackPar_t* tp;
@@ -1657,12 +1384,12 @@ void TTrackAnaModule::Debug() {
 }
 
 //_____________________________________________________________________________
-int TTrackAnaModule::EndJob() {
+int TTrackAnaModuleA::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
   return 0;
 }
 
 //_____________________________________________________________________________
-void TTrackAnaModule::Test001() {
+void TTrackAnaModuleA::Test001() {
 }
 

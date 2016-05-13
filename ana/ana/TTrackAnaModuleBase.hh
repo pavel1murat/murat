@@ -25,6 +25,8 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+#include "HistBase_t.h"
+
 class TTrackAnaModuleBase: public TStnModule {
 public:
 //-----------------------------------------------------------------------------
@@ -51,12 +53,15 @@ public:
 					// best track in the event
   TStnTrack*        fTrack;
   TStnCluster*      fCluster;
+  TGenParticle*     fParticle;		// electron or muon
 
-  int               fNTrkID;            // 0:SetC 1:DaveTrkQual>0.1 2:DaveTrkQual>0.4
+  int               fNTrkID;               // 0:SetC 1:DaveTrkQual>0.1 2:DaveTrkQual>0.4
   TStnTrackID*      fTrackID[kMaxNTrkID];
   int               fBestID;
 
   TEmuLogLH*        fLogLH;
+
+  double            fLumWt;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -78,22 +83,31 @@ public:
 //-----------------------------------------------------------------------------
   virtual int     InitTrackPar(TStnTrackBlock*   TrackBlock  , 
 			       TStnClusterBlock* ClusterBlock, 
-			       TrackPar_t*       TrackPar    );
+			       TrackPar_t*       TrackPar    ,
+			       int&              NGoodTracks ,
+			       int&              NMatchedTracks);
 
   virtual void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
 					   TStnTrackID*    TrackID   , 
 					   int HistSet);
 //-----------------------------------------------------------------------------
-// virtual functions
+// overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
-  virtual void  BookEventHistograms   (HistData_t* Hist, const char* Folder) = 0;
-  virtual void  BookTrackHistograms   (HistData_t* Hist, const char* Folder) = 0;
+  virtual int     BeginRun();
+//-----------------------------------------------------------------------------
+// undefined virtual functions
+//-----------------------------------------------------------------------------
+  virtual void  BookEventHistograms(HistBase_t* Hist, const char* Folder) = 0;
+  virtual void  BookTrackHistograms(HistBase_t* Hist, const char* Folder) = 0;
 
-  virtual void  FillEventHistograms   (HistData_t* Hist                    ) = 0;
-  virtual void  FillTrackHistograms   (HistData_t* Hist, TStnTrack*  Trk , TrackPar_t* Tp) = 0;
+  virtual void  FillEventHistograms(HistBase_t* Hist                    ) = 0;
+  virtual void  FillTrackHistograms(HistBase_t* Hist, TStnTrack*  Trk, TrackPar_t* Tp) = 0;
   
-  virtual void    BookHistograms() = 0;
-  virtual void    FillHistograms() = 0;
+  virtual void  BookHistograms() = 0;
+  virtual void  FillHistograms() = 0;
+  virtual void  Debug         () = 0;
+
+  virtual HistBase_t* EventHistSet(int I) = 0;
 
   ClassDef(TTrackAnaModuleBase,0)
 };

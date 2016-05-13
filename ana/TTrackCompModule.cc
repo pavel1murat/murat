@@ -1011,7 +1011,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     if (vr) {
       tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/tp->fP;
+      tp->fEp  = tp->fEcl/track->fP2;
 
       tp->fDx  = vr->fDx;
       tp->fDy  = vr->fDy;

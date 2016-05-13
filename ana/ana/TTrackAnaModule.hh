@@ -367,10 +367,10 @@ public:
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
-  int     BeginJob();
-  int     BeginRun();
-  int     Event   (int ientry);
-  int     EndJob  ();
+  virtual int     BeginJob();
+  virtual int     BeginRun();
+  virtual int     Event   (int ientry);
+  virtual int     EndJob  ();
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------

@@ -232,8 +232,8 @@ void TCosmicsAnaModule::BookTrackHistograms(HistBase_t* HistBase, const char* Fo
   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
-  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  90  ,110. ,Folder);
-  Hist->fPDio->Sumw2(kTRUE);
+  //  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 400,  90  ,110. ,Folder);
+  //  Hist->fPDio->Sumw2(kTRUE);
 
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
@@ -953,7 +953,7 @@ void TCosmicsAnaModule::FillTrackHistograms(HistBase_t* HistBase, TStnTrack* Tra
   Hist->fP0->  Fill (Track->fP0);
   Hist->fP2->  Fill (Track->fP2);
 
-  Hist->fPDio->Fill(Track->fP,tp->fDioWt);
+  //  Hist->fPDio->Fill(Track->fP,tp->fDioWt);
 
   Hist->fFitMomErr->Fill(Track->fFitMomErr);
 
@@ -1379,7 +1379,6 @@ int TCosmicsAnaModule::Event(int ientry) {
   for (int i=0; i< kNTrackBlocks; i++) fTrackBlock[i]  ->GetEntry(ientry);
 
   fClusterBlock->GetEntry(ientry);
-  //  fStrawDataBlock->GetEntry(ientry);
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
@@ -1390,16 +1389,13 @@ int TCosmicsAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fNGenp    = fGenpBlock->NParticles();
 
-  //  TGenParticle* genp;
-  //  int           pdg_code, generator_code;
-
   fParticle = fGenpBlock->Particle(0);
-
 					// may want to revisit the definition of fSimp
 
   fSimPar.fParticle = fSimpBlock->Particle(0);
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
+  fSimPar.fGenp     = fParticle;
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 //-----------------------------------------------------------------------------
@@ -1415,13 +1411,11 @@ int TCosmicsAnaModule::Event(int ientry) {
       }
     }
   }
-
-  fParticle->Momentum(mom);
 					// this is a kludge, to be removed at the next 
 					// ntupling 
+  fParticle->Momentum(mom);
   p         = mom.P();
   fEleE     = sqrt(p*p+0.511*0.511);
-
 
   if (fDiskCalorimeter->Initialized() == 0) {
     disk_geom.fNDisks = fCalDataBlock->NDisks();
@@ -1557,16 +1551,6 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
   const double kMomentumCorr[2] = { 0.049, 0.020 };
   const double kDtTcmCorr   [2] = { 0.22 , -0.30 }; // ns, sign: fit peak positions
 
-//   const char* block_name = TrackBlock->GetNode()->GetName();
-
-//   if      (strcmp(block_name,"TrkPatRec" ) == 0) icorr = 0;
-//   else if (strcmp(block_name,"CalPatRec" ) == 0) icorr = 1;
-//   else if (strcmp(block_name,"TrackBlock") == 0) icorr = 2;
-//   else {
-//     icorr = -999;
-//     Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
-//     return -1;
-//   }
   icorr = 2; 				// everything is coming after MergePatRec
 //-----------------------------------------------------------------------------
 // loop over tracks, assume 
@@ -1617,7 +1601,7 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
 // in case of MergePatRec use BestAlg - 
 // hopefully, TTrackComp will never use MergePatRec branch
 //-----------------------------------------------------------------------------
-    if (icorr == 2) icorr = track->BestAlg();
+    icorr = track->BestAlg();
 
     tp->fP     = track->fP2    +kMomentumCorr[icorr];		// correcting
     tp->fDpF   = tp->fP        -track->fPFront;
@@ -1625,8 +1609,7 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
     tp->fDp2   = track->fP2    -track->fPFront;
     tp->fDpFSt = track->fPFront-track->fPStOut;
 
-    if (fFillDioHist == 0) tp->fDioWt = 1.;
-    else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
+    tp->fDioWt = 1.; // TStntuple::DioWeightAl(fEleE);
 
     tp->fLumWt   = GetHeaderBlock()->LumWeight();
     tp->fTotWt   = tp->fLumWt*tp->fDioWt;
@@ -1661,7 +1644,7 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
 
     if (vr) {
       tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/tp->fP;
+      tp->fEp  = tp->fEcl/track->fP2;
 
       tp->fDx  = vr->fDx;
       tp->fDy  = vr->fDy;

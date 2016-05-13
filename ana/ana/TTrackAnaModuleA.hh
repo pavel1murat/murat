@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TTrackAnaModule_hh
-#define murat_ana_TTrackAnaModule_hh
+#ifndef murat_ana_TTrackAnaModuleA_hh
+#define murat_ana_TTrackAnaModuleA_hh
 
 #include "TH1.h"
 #include "TH2.h"
@@ -28,13 +28,14 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 #include "murat/ana/TTrackAnaModuleBase.hh"
+#include "HistBase_t.h"
 
-class TTrackAnaModule: public TTrackAnaModuleBase {
+class TTrackAnaModuleA: public TTrackAnaModuleBase {
 public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct EventHist_t {
+  struct EventHist_t: public HistBase_t {
     TH1D*    fLumWt;		       // luminosity related MC weight
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
@@ -73,7 +74,7 @@ public:
     TH1F*    fInstLumi;
   };
 
-  struct CaloHist_t {
+  struct CaloHist_t : public HistBase_t {
     TH1F*    fDiskID;		       // per crystal hit
     TH1F*    fEnergy  [kNDisks];
     TH1F*    fTime    [kNDisks];
@@ -87,7 +88,7 @@ public:
     TH1F*    fRWE700  [kNDisks];
   };
 
-  struct ClusterHist_t {
+  struct ClusterHist_t : public HistBase_t {
     TH1F*    fDiskID;
     TH1F*    fEnergy;
     TH1F*    fT0;
@@ -110,7 +111,7 @@ public:
     TH1F*    fSigE2;
   };
 
-  struct TrackHist_t {
+  struct TrackHist_t : public HistBase_t {
     TH1F*    fP[3];			// total momentum, 3 hists with different binning
     TH1F*    fP0;
     TH1F*    fP2;
@@ -235,7 +236,7 @@ public:
     TH1F*    fNMcStrawHits;             // N(straw hits) produced in the tracker by the MC particle
   };
 
-  struct GenpHist_t {
+  struct GenpHist_t : public HistBase_t {
     TH1F*    fPdgCode[2];		// same distribution in different scale
     TH1F*    fGenID;			// 
     TH1F*    fZ0;			// 
@@ -245,14 +246,14 @@ public:
     TH1F*    fCosTh;			// 
   };
 					// histograms for the simulated CE
-  struct SimpHist_t {
+  struct SimpHist_t : public HistBase_t {
     TH1F*    fPdgCode;
     TH1F*    fMomTargetEnd;
     TH1F*    fMomTrackerFront;
     TH1F*    fNStrawHits;
   };
 
-  struct TrackEffHist_t {
+  struct TrackEffHist_t : public HistBase_t {
     TH1F*    fPtMc;			// denominator
     TH1F*    fPtReco;			// numerator
   };
@@ -286,21 +287,11 @@ public:
   TVdetDataBlock*   fVdetBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
-					// additional track parameters (assume ntracks < 20)
-  TrackPar_t        fTrackPar[20];
-
-  SimPar_t          fSimPar;
 					// histograms filled
   Hist_t            fHist;
 
-  TGenParticle*     fParticle;		// electron or muon
-  int               fPdgCode;		// determines which one
-  int               fGeneratorCode;      
-
   TSimParticle*     fSimp;
   double            fEleE;		// electron energy
-
-  int               fCalorimeterType;
 
   int               fNClusters;
   int               fNTracks[10];
@@ -313,91 +304,64 @@ public:
 
   int               fNHyp;
   int               fBestHyp[10];
-  int               fFillDioHist;
 					// fTrackNumber[i]: track number, 
 					// corresponding to OBSP particle #i
 					// or -1
   TStnArrayI        fTrackNumber;
-
-  TStnTrack*        fTrack;
-  TStnCluster*      fCluster;
-
-  TDiskCalorimeter* fDiskCalorimeter;
-
-  int               fNID;            // 0:SetC 1:DaveTrkQual>0.1 2:DaveTrkQual>0.4
-  TStnTrackID*      fTrackID[20];
-  int               fBestID;
-
-  TEmuLogLH*        fLogLH;
-
-  double            fMinT0;
 					// Tcm - track-cluster matching
   double            fMinDtTcm;
   double            fMaxDtTcm;
-
-  double            fLumWt;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TTrackAnaModule(const char* name="TrackAna", const char* title="TrackAna");
-  ~TTrackAnaModule();
+  TTrackAnaModuleA(const char* name="TrackAna", const char* title="TrackAna");
+  ~TTrackAnaModuleA();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
   Hist_t*            GetHist        () { return &fHist;        }
   TStnTrackBlock*    GetTrackBlock  () { return fTrackBlock;   }
   TStnClusterBlock*  GetClusterBlock() { return fClusterBlock; }
-
-  TStnTrackID*       GetTrackID(int I) { return fTrackID[I];   }
-  TEmuLogLH*         GetLogLH       () { return fLogLH;        }
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  void               SetFillDioHist  (int YesNo) { fFillDioHist   = YesNo; }
-  void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
-  void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
-  void               SetTrackBlockName (const char* Name) { fTrackBlockName = Name; }
+  void               SetTrackBlockName (const char* Name) { fTrackBlockName = Name;  }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
   int     BeginJob();
-  int     BeginRun();
   int     Event   (int ientry);
   int     EndJob  ();
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms    (CaloHist_t*    Hist, const char* Folder);
-  void    BookClusterHistograms (ClusterHist_t* Hist, const char* Folder);
-  void    BookGenpHistograms    (GenpHist_t*    Hist, const char* Folder);
-  void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
-  void    BookSimpHistograms    (SimpHist_t*    Hist, const char* Folder);
-  void    BookTrackHistograms   (TrackHist_t*   Hist, const char* Folder);
+  void    BookCaloHistograms    (HistBase_t* Hist, const char* Folder);
+  void    BookClusterHistograms (HistBase_t* Hist, const char* Folder);
+  void    BookGenpHistograms    (HistBase_t* Hist, const char* Folder);
+  void    BookEventHistograms   (HistBase_t* Hist, const char* Folder);
+  void    BookSimpHistograms    (HistBase_t* Hist, const char* Folder);
+  void    BookTrackHistograms   (HistBase_t* Hist, const char* Folder);
 
-  void    FillEventHistograms    (EventHist_t* Hist);
-  void    FillCaloHistograms     (CaloHist_t*    Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms  (ClusterHist_t* Hist, TStnCluster*  Cluster);
-  void    FillGenpHistograms     (GenpHist_t*    Hist, TGenParticle* Genp   );
-  void    FillSimpHistograms     (SimpHist_t*    Hist, TSimParticle* Simp   );
-  void    FillTrackHistograms    (TrackHist_t*   Hist, TStnTrack*    Trk    );
+  void    FillEventHistograms   (HistBase_t* Hist);
+  void    FillCaloHistograms    (HistBase_t* Hist, TStnCrystal*  Crystal);
+  void    FillClusterHistograms (HistBase_t* Hist, TStnCluster*  Cluster);
+  void    FillGenpHistograms    (HistBase_t* Hist, TGenParticle* Genp   );
+  void    FillSimpHistograms    (HistBase_t* Hist, TSimParticle* Simp   );
 
-  void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
+  virtual void    FillTrackHistograms(HistBase_t* Hist, TStnTrack* Trk, TrackPar_t* Tp);
 
-  void    BookHistograms();
-  void    FillHistograms();
+  virtual void    BookHistograms();
+  virtual void    FillHistograms();
+  virtual void    Debug();
 
-  int     InitTrackPar(TStnTrackBlock*   TrackBlock  , 
-		       TStnClusterBlock* ClusterBlock, 
-		       TrackPar_t*       TrackPar    );
-
-  void    Debug();
+  virtual HistBase_t* EventHistSet(int  I) { return fHist.fEvent[I]; }
 //-----------------------------------------------------------------------------
 // test
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TTrackAnaModule,0)
+  ClassDef(TTrackAnaModuleA,0)
 };
 
 #endif

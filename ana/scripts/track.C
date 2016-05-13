@@ -11,8 +11,9 @@ def_name track_006("track_debug_tandip_12");
 def_name track_007("track_ana_dmm");
 
 def_name track_008("track_comp");
-def_name track_008("track_comp_tmva");
+def_name track_009("track_comp_tmva");
 
+def_name track_100("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -48,6 +49,19 @@ void  track_ana_tandip_12(int GeneratorCode = 2) {
 }
 
 //-----------------------------------------------------------------------------
+// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+//-----------------------------------------------------------------------------
+void  track_anaB(int PdgCode = 11, int GeneratorCode = 2, const char* DebugBits) {
+
+  m_trka = (TTrackAnaModuleA*) g.x->AddModule("TTrackAnaModuleA",0);  
+  m_trka->SetPdgCode(PdgCode);
+  m_trka->SetGeneratorCode(GeneratorCode);
+  if (DebugBit >= 0) {
+    m_trka->SetDebugBit(DebugBit,1);
+  }
+}
+
+//-----------------------------------------------------------------------------
 void  val_cpr(int Bit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis modules
@@ -79,12 +93,12 @@ void  cal_ana() {
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
 //-----------------------------------------------------------------------------
-void  track_comp(int GeneratorCode,int DebugBit = -1, double XMin=1,double XMax = -1) {
+void  track_comp(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
-  m_tcm->SetPdgCode      (11);
+  m_tcm->SetPdgCode      (PDGCode);
   m_tcm->SetGeneratorCode(GeneratorCode);
   if (DebugBit >= 0) {
     m_tcm->SetDebugBit(DebugBit,1);
@@ -96,7 +110,7 @@ void  track_comp(int GeneratorCode,int DebugBit = -1, double XMin=1,double XMax 
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
 // TrkRrecoAlg = 1: TrkPatRec    =2:CalPatRec
 //-----------------------------------------------------------------------------
-void  track_comp_tmva(int GeneratorCode, int TrkRecoAlg = 0, int DebugBit = -1) {
+void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------

@@ -1291,6 +1291,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
   else if (strcmp(block_name,"CalPatRec"    ) == 0) icorr = 1;
   else if (strcmp(block_name,"TrackBlock"   ) == 0) icorr = 2;
   else if (strcmp(block_name,"TrackBlockDmm") == 0) icorr = -1;
+  else if (strcmp(block_name,"TrackBlockUmp") == 0) icorr = -1;
   else {
     icorr = -999;
     Error("TTrackCompModule::InitTrackPar","IN TROUBLE");

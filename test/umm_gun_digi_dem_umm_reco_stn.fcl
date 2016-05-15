@@ -1,0 +1,77 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate single 105 MeV/c electrons, run full electron reco, make ntuple
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+  FlagStrawHits_maximumEnergy         : 0.005
+#------------------------------------------------------------------------------
+# note 1: background files below correspond to the TDR geometry 
+# note 2: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+#------------------------------------------------------------------------------
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : UmmGunDigiDemUmmRecoStn
+
+source       : { module_type : EmptyEvent }
+
+outputs      : { @table::murat.outputs }
+
+physics: { 
+    producers : {
+
+	@table::murat.producers
+
+	generate : { @table::generate
+	    inputfile  : "murat/test/genConfig/ummGun.txt"
+	}
+
+	FlagStrawHits : { @table::FlagStrawHits 
+	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
+	}
+    }
+
+    filters : { 
+
+	@table::murat.filters 
+
+	InitStntuple  : { @table::murat.filters.InitStntuple         histFileName  : "ump_gun_digi_dem_ump_reco_stn.stn" }
+ 	StntupleMaker : { @table::murat.filters.StntupleMakerDemUmm  g4ModuleLabel : @local::G4_MODULE_LABEL             }
+    }
+
+    @table::murat.paths
+    
+    trigger_paths : [ gen_digi_dem_umm_reco_stn ]
+    out           : [ ]
+    end_paths     : [ out ]
+}
+
+services.TFileService.fileName            : "ump_gun_digi_dem_ump_reco_stn.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+physics.out : [ detectorOutput ]
+outputs.detectorOutput.fileName           : "ump_gun_digi_dem_ump_reco_stn.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

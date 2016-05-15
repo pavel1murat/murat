@@ -36,7 +36,7 @@ public:
 #include "murat/ana/SimPar_t.hh"
 
   enum { kNDisks        =   2 } ;
-  enum { kNTrackBlocks  =   6 } ;
+  enum { kNTrackBlocks  =   8 } ; // dem:dmm:dep:dmp:uem:umm:uep:ump
   enum { kMaxTrackID    =  10 } ;
   enum { kMaxNErrors    = 100 } ;
 
@@ -267,6 +267,8 @@ public:
 					// pointers to the data blocks used
   TStnTrackBlock*   fTrackBlockDem;
   TStnTrackBlock*   fTrackBlockDmm;
+  TStnTrackBlock*   fTrackBlockDep;
+  TStnTrackBlock*   fTrackBlockDmp;
   TStnTrackBlock*   fTrackBlockUem;
   TStnTrackBlock*   fTrackBlockUmm;
   TStnTrackBlock*   fTrackBlockUep;

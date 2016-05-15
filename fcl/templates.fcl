@@ -172,6 +172,16 @@ murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus,
 		   @sequence::CalPatRec.calpatrec_dmm, 
 		   MergePatRecDmm, 
 		   @sequence::TrackCaloMatching.matching_dmm ]
+
+murat.dep_reco : [ @sequence::Tracking.TPRDownstreamePlus , 
+		   @sequence::CalPatRec.calpatrec_dep, 
+		   MergePatRecDep, 
+		   @sequence::TrackCaloMatching.matching_dep ]
+
+murat.dmp_reco : [ @sequence::Tracking.TPRDownstreammuPlus, 
+		   @sequence::CalPatRec.calpatrec_dmp, 
+		   MergePatRecDmp, 
+		   @sequence::TrackCaloMatching.matching_dmp ]
 #----------------------------------------------------------------------------------------------------
 # so far, CalPatRec is not used for upstream reconstruction
 #----------------------------------------------------------------------------------------------------
@@ -179,7 +189,6 @@ murat.uem_reco : [ @sequence::Tracking.TPRUpstreameMinus  , MergePatRecUem, @seq
 murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm ]
 murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep ]
 murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump ]
-
 
 murat.paths : {
 
@@ -204,6 +213,61 @@ murat.paths : {
 			      @sequence::murat.cal_reco       ,
 			      @sequence::murat.dmm_reco       ,
 			      @sequence::Stntuple.stnmaker_dmm
+			     ]
+
+    gen_digi_uep_reco_stn : [ @sequence::murat.gen_g4_time_map,
+			      @sequence::murat.digis          ,
+			      @sequence::murat.cal_reco       ,
+			      @sequence::murat.uep_reco       ,
+			      @sequence::Stntuple.stnmaker
+			     ]
+
+    gen_digi_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
+			      @sequence::murat.digis          ,
+			      @sequence::murat.cal_reco       ,
+			      @sequence::murat.ump_reco       ,
+			      @sequence::Stntuple.stnmaker
+			     ]
+
+    gen_digi_dem_umm_reco_stn : [ @sequence::murat.gen_g4_time_map,
+				  @sequence::murat.digis          ,
+				  @sequence::murat.cal_reco       ,
+				  @sequence::murat.dem_reco       ,
+				  @sequence::murat.umm_reco       ,
+				  @sequence::Stntuple.stnmaker
+				 ]
+
+    gen_digi_dem_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
+				  @sequence::murat.digis          ,
+				  @sequence::murat.cal_reco       ,
+				  @sequence::murat.dem_reco       ,
+				  @sequence::murat.ump_reco       ,
+				  @sequence::Stntuple.stnmaker
+				 ]
+
+    gen_digi_dem_dmm_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
+				      @sequence::murat.digis          ,
+				      @sequence::murat.cal_reco       ,
+				      @sequence::murat.dem_reco       ,
+				      @sequence::murat.dmm_reco       ,
+				      @sequence::murat.ump_reco       ,
+				      @sequence::Stntuple.stnmaker
+				     ]
+#------------------------------------------------------------------------------
+# run all 8 reconstruction passes
+#------------------------------------------------------------------------------
+    gen_digi_all_reco_ump : [ @sequence::murat.gen_g4_time_map,
+			      @sequence::murat.digis          ,
+			      @sequence::murat.cal_reco       ,
+			      @sequence::murat.dem_reco       ,
+			      @sequence::murat.dmm_reco       ,
+			      @sequence::murat.dep_reco       ,
+			      @sequence::murat.dmp_reco       ,
+			      @sequence::murat.uem_reco       ,
+			      @sequence::murat.umm_reco       ,
+			      @sequence::murat.uep_reco       ,
+			      @sequence::murat.ump_reco       ,
+			      @sequence::Stntuple.stnmaker_all
 			     ]
 }
 

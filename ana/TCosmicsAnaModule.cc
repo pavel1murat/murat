@@ -85,6 +85,8 @@ int TCosmicsAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
   RegisterDataBlock("TrackBlockDem" ,"TStnTrackBlock"   ,&fTrackBlockDem  );
   RegisterDataBlock("TrackBlockDmm" ,"TStnTrackBlock"   ,&fTrackBlockDmm  );
+  RegisterDataBlock("TrackBlockDep" ,"TStnTrackBlock"   ,&fTrackBlockDep  );
+  RegisterDataBlock("TrackBlockDmp" ,"TStnTrackBlock"   ,&fTrackBlockDmp  );
   RegisterDataBlock("TrackBlockUem" ,"TStnTrackBlock"   ,&fTrackBlockUem  );
   RegisterDataBlock("TrackBlockUmm" ,"TStnTrackBlock"   ,&fTrackBlockUmm  );
   RegisterDataBlock("TrackBlockUep" ,"TStnTrackBlock"   ,&fTrackBlockUep  );
@@ -101,10 +103,12 @@ int TCosmicsAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
   fTrackBlock[0] = fTrackBlockDem;
   fTrackBlock[1] = fTrackBlockDmm;
-  fTrackBlock[2] = fTrackBlockUem;
-  fTrackBlock[3] = fTrackBlockUmm;
-  fTrackBlock[4] = fTrackBlockUep;
-  fTrackBlock[5] = fTrackBlockUmp;
+  fTrackBlock[2] = fTrackBlockDep;
+  fTrackBlock[3] = fTrackBlockDmp;
+  fTrackBlock[4] = fTrackBlockUem;
+  fTrackBlock[5] = fTrackBlockUmm;
+  fTrackBlock[6] = fTrackBlockUep;
+  fTrackBlock[7] = fTrackBlockUmp;
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -522,6 +526,12 @@ void TCosmicsAnaModule::BookHistograms() {
 
   book_track_histset[500] = 1.;
   book_track_histset[501] = 1.;
+
+  book_track_histset[600] = 1.;
+  book_track_histset[601] = 1.;
+
+  book_track_histset[700] = 1.;
+  book_track_histset[701] = 1.;
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {

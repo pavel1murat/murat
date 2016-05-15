@@ -31,7 +31,7 @@ END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : UmpGunDigiDemUmpRecoStn
+process_name : UmpGunDigiDemDmmUmpRecoStn
 
 source       : { module_type : EmptyEvent }
 
@@ -56,7 +56,7 @@ physics: {
 	@table::murat.filters 
 
 	InitStntuple  : { @table::murat.filters.InitStntuple            histFileName  : "ump_gun_digi_dem_dmm_ump_reco_stn.stn" }
- 	StntupleMaker : { @table::murat.filters.StntupleMakerDemUmp 	g4ModuleLabel : @local::G4_MODULE_LABEL             }
+ 	StntupleMaker : { @table::murat.filters.StntupleMakerDemDmmUmp  g4ModuleLabel : @local::G4_MODULE_LABEL             }
     }
 
     @table::murat.paths

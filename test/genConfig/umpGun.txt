@@ -34,7 +34,7 @@ double particleGun.pmin = 104.99;
 double particleGun.pmax = 105.01;
 
 // Particle Id
-int particleGun.id = 13;
+int particleGun.id = -13;
 
 // Mean particle.
 double particleGun.mean =  -1;

@@ -245,11 +245,11 @@ murat.paths : {
 				  @sequence::Stntuple.stnmaker
 				 ]
 
-    gen_digi_dem_dmm_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
+    gen_digi_dem_dmp_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				      @sequence::murat.digis          ,
 				      @sequence::murat.cal_reco       ,
 				      @sequence::murat.dem_reco       ,
-				      @sequence::murat.dmm_reco       ,
+				      @sequence::murat.dmp_reco       ,
 				      @sequence::murat.ump_reco       ,
 				      @sequence::Stntuple.stnmaker
 				     ]

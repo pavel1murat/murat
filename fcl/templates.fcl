@@ -150,7 +150,7 @@ murat.digis           : [ MakeCaloReadoutHits, @sequence::Tracking.DigiSim ]
 
 murat.cal_reco : [ MakeCaloCrystalHits, MakeCaloProtoCluster, MakeCaloCluster ]
 
-murat.cpr_reco : [ @sequence::CalPatRec.calpatrec, 
+murat.cpr_reco : [ @sequence::CalPatRec.reco, 
 		   MergePatRecCpr, 
 		   @sequence::TrackCaloMatching.matching_cpr ]
 
@@ -159,27 +159,27 @@ murat.tpr_reco : [ @sequence::Tracking.TPRDownstreameMinus ,
 		   @sequence::TrackCaloMatching.matching_tpr ]
 
 murat.mpr_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
-		   @sequence::CalPatRec.calpatrec, 
+		   @sequence::CalPatRec.reco, 
 		   MergePatRec, 
 		   @sequence::TrackCaloMatching.matching ]
 
 murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
-		   @sequence::CalPatRec.calpatrec_dem, 
+		   @sequence::CalPatRec.dem_reco, 
 		   MergePatRecDem, 
 		   @sequence::TrackCaloMatching.matching_dem ]
 
 murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus, 
-		   @sequence::CalPatRec.calpatrec_dmm, 
+		   @sequence::CalPatRec.dmm_reco, 
 		   MergePatRecDmm, 
 		   @sequence::TrackCaloMatching.matching_dmm ]
 
 murat.dep_reco : [ @sequence::Tracking.TPRDownstreamePlus , 
-		   @sequence::CalPatRec.calpatrec_dep, 
+		   @sequence::CalPatRec.dep_reco, 
 		   MergePatRecDep, 
 		   @sequence::TrackCaloMatching.matching_dep ]
 
 murat.dmp_reco : [ @sequence::Tracking.TPRDownstreammuPlus, 
-		   @sequence::CalPatRec.calpatrec_dmp, 
+		   @sequence::CalPatRec.dmp_reco, 
 		   MergePatRecDmp, 
 		   @sequence::TrackCaloMatching.matching_dmp ]
 #----------------------------------------------------------------------------------------------------

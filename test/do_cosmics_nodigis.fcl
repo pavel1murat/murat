@@ -71,7 +71,7 @@ physics: {
 	    @sequence::murat.ump_reco,
 	    @sequence::Stntuple.stnmaker_all
 	   ]
-#     trigger_paths : [ p1  ]
+    trigger_paths : [ p1  ]
 #     end_paths     : [ out ]
 }
 

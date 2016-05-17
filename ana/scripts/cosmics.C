@@ -8,11 +8,12 @@ def_name cosmics_002("cosmics_ralf");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  cosmics_ana(int DebugBit = -1) {
+void  cosmics_ana(const char* TrackBlockName = "TrackBlockDem", int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
-  m_cos = (TCosmicsAnaModule*) g.x->AddModule("TCosmicsAnaModule",0);  
+  m_cos = (TCosmicsAnaModule*) g.x->AddModule("TCosmicsAnaModule",0);
+  m_cos->SetTrackBlockName(TrackBlockName);
   if (DebugBit >= 0) m_cos->SetDebugBit(DebugBit,1);
 }
 

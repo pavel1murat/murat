@@ -39,7 +39,8 @@
 ClassImp(TCosmicsAnaModule)
 //-----------------------------------------------------------------------------
 TCosmicsAnaModule::TCosmicsAnaModule(const char* name, const char* title):
-  TStnModule(name,title)
+  TStnModule(name,title),
+  fTrackBlockName("TrackBlock")
 {
   fPtMin  = 1.;
   fTrackNumber.Set(100);
@@ -67,7 +68,7 @@ TCosmicsAnaModule::TCosmicsAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 //-----------------------------------------------------------------------------
-  fPdgCode       = 11;
+  fPdgCode       = 13;
   fGeneratorCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
 }
 
@@ -84,12 +85,15 @@ int TCosmicsAnaModule::BeginJob() {
 // register data blocks
 // note that the first one has name'TrackBlock'
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlockDem  );
+  RegisterDataBlock(fTrackBlockName.Data(),"TStnTrackBlock"   ,&fTrackBlockDem  );
   RegisterDataBlock("TrackBlockDmm" ,"TStnTrackBlock"   ,&fTrackBlockDmm  );
+
   RegisterDataBlock("TrackBlockDep" ,"TStnTrackBlock"   ,&fTrackBlockDep  );
   RegisterDataBlock("TrackBlockDmp" ,"TStnTrackBlock"   ,&fTrackBlockDmp  );
+
   RegisterDataBlock("TrackBlockUem" ,"TStnTrackBlock"   ,&fTrackBlockUem  );
   RegisterDataBlock("TrackBlockUmm" ,"TStnTrackBlock"   ,&fTrackBlockUmm  );
+
   RegisterDataBlock("TrackBlockUep" ,"TStnTrackBlock"   ,&fTrackBlockUep  );
   RegisterDataBlock("TrackBlockUmp" ,"TStnTrackBlock"   ,&fTrackBlockUmp  );
 

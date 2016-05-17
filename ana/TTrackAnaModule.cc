@@ -69,7 +69,7 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // initialize Track ID
 // 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
-// what about number of hits ?
+// what about number of hits ? - 3: no cuts on the number of hits
 //-----------------------------------------------------------------------------
   fNID             = 4;
   for (int i=0; i<fNID; i++) {
@@ -92,7 +92,7 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   fTrackID[3]->SetMinTrkQual(0.4);
   fTrackID[3]->SetMinNActive(-1 );
 
-  fBestID     = 2;			// best: DaveTrkQual > 0.4
+  fBestID     = 3;			// best: DaveTrkQual > 0.4, no NActive cut
 //-----------------------------------------------------------------------------
 // PID: initialize likelihood histograms
 // TRK 19: "Set C" plus reconstructed and matched cluster
@@ -107,6 +107,8 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
   fPdgCode       = 11;
   fGeneratorCode =  2;
+
+  fApplyCorrections = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1276,7 +1278,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 				  TrackPar_t*       TrackPar    ) {
   TrackPar_t*           tp;
   TStnTrack*            track;
-  int                   id_word, icorr;
+  int                   id_word, icorr (-1);
   double                xs;
   TEmuLogLH::PidData_t  dat;
 //-----------------------------------------------------------------------------
@@ -1287,15 +1289,17 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
-  if      (strcmp(block_name,"TrkPatRec"    ) == 0) icorr = 0;
-  else if (strcmp(block_name,"CalPatRec"    ) == 0) icorr = 1;
-  else if (strcmp(block_name,"TrackBlock"   ) == 0) icorr = 2;
-  else if (strcmp(block_name,"TrackBlockDmm") == 0) icorr = -1;
-  else if (strcmp(block_name,"TrackBlockUmp") == 0) icorr = -1;
-  else {
-    icorr = -999;
-    Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
-    return -1;
+  if (fApplyCorrections != 0) {
+    if      (strcmp(block_name,"TrkPatRec"    ) == 0) icorr = 0;
+    else if (strcmp(block_name,"CalPatRec"    ) == 0) icorr = 1;
+    else if (strcmp(block_name,"TrackBlock"   ) == 0) icorr = 2;
+    else if (strcmp(block_name,"TrackBlockDmm") == 0) icorr = -1;
+    else if (strcmp(block_name,"TrackBlockUmp") == 0) icorr = -1;
+    else {
+      icorr = -999;
+      Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
+      return -1;
+    }
   }
 //-----------------------------------------------------------------------------
 // loop over tracks, assume 

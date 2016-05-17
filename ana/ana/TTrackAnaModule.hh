@@ -342,6 +342,7 @@ public:
   double            fMaxDtTcm;
 
   double            fLumWt;
+  int               fApplyCorrections;  // 0: do not apply momentum ant DT corrections
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -358,12 +359,13 @@ public:
   TStnTrackID*       GetTrackID(int I) { return fTrackID[I];   }
   TEmuLogLH*         GetLogLH       () { return fLogLH;        }
 //-----------------------------------------------------------------------------
-// accessors
+// modifiers
 //-----------------------------------------------------------------------------
   void               SetFillDioHist  (int YesNo) { fFillDioHist   = YesNo; }
   void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
   void               SetTrackBlockName (const char* Name) { fTrackBlockName = Name; }
+  void               SetApplyCorrections(int YesNo) { fApplyCorrections = YesNo; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

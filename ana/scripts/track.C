@@ -10,9 +10,10 @@ def_name track_005("track_ana_tandip_12");
 def_name track_006("track_debug_tandip_12");
 def_name track_007("track_ana_dmm");
 def_name track_008("track_ana_ump");
+def_name track_011("track_ana_nocorr");
 
-def_name track_009("track_comp");
-def_name track_010("track_comp_tmva");
+def_name track_051("track_comp");
+def_name track_052("track_comp_tmva");
 
 def_name track_100("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +26,20 @@ void  track_ana(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
   m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
   m_trk->SetPdgCode      (PdgCode);
   m_trk->SetGeneratorCode(GeneratorCode);
+  if (DebugBit >= 0) {
+    m_trk->SetDebugBit(DebugBit,1);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void  track_ana_nocorr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
+  m_trk->SetPdgCode      (PdgCode);
+  m_trk->SetGeneratorCode(GeneratorCode);
+  m_trk->SetApplyCorrections(0);
   if (DebugBit >= 0) {
     m_trk->SetDebugBit(DebugBit,1);
   }

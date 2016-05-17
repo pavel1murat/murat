@@ -82,8 +82,9 @@ TCosmicsAnaModule::~TCosmicsAnaModule() {
 int TCosmicsAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
+// note that the first one has name'TrackBlock'
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlockDem" ,"TStnTrackBlock"   ,&fTrackBlockDem  );
+  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlockDem  );
   RegisterDataBlock("TrackBlockDmm" ,"TStnTrackBlock"   ,&fTrackBlockDmm  );
   RegisterDataBlock("TrackBlockDep" ,"TStnTrackBlock"   ,&fTrackBlockDep  );
   RegisterDataBlock("TrackBlockDmp" ,"TStnTrackBlock"   ,&fTrackBlockDmp  );
@@ -339,6 +340,8 @@ void TCosmicsAnaModule::BookEventHistograms(HistBase_t* HistBase, const char* Fo
   HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
   HBook1F(Hist->fNGoodDem    ,"ngdem"  ,Form("%s: Number of Good DEM tracks"       ,Folder),200,0,200,Folder);
   HBook1F(Hist->fNTrkDem     ,"ntdem"  ,Form("%s: NTRK DEM"                        ,Folder), 10,0, 10,Folder);
+  HBook1F(Hist->fNTrkDNeg    ,"ntdneg" ,Form("%s: NTRK(downstream NEG)"            ,Folder), 10,0, 10,Folder);
+  HBook1F(Hist->fNTrkDPos    ,"ntdpos" ,Form("%s: NTRK(downstream POS)"            ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTrkUNeg    ,"ntuneg" ,Form("%s: NTRK(upstream NEG)"              ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTrkUPos    ,"ntupos" ,Form("%s: NTRK(upstream POS)"              ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTrkUpstream,"ntrku"  ,Form("%s: NTRK(upstream POS+NEG)"          ,Folder), 10,0, 10,Folder);
@@ -512,26 +515,26 @@ void TCosmicsAnaModule::BookHistograms() {
   book_track_histset[ 33] = 1;		// e+
   book_track_histset[ 34] = 1;		// mu+
 
-  book_track_histset[100] = 1.;
-  book_track_histset[101] = 1.;
+  book_track_histset[100] = 1.;         // DMM
+  book_track_histset[101] = 1.;         // DMM
 
-  book_track_histset[200] = 1.;
-  book_track_histset[201] = 1.;
+  book_track_histset[200] = 1.;		// DEP
+  book_track_histset[201] = 1.;		// DEP
 
-  book_track_histset[300] = 1.;
-  book_track_histset[301] = 1.;
+  book_track_histset[300] = 1.;		// DMP
+  book_track_histset[301] = 1.;		// DMP
 
-  book_track_histset[400] = 1.;
-  book_track_histset[401] = 1.;
+  book_track_histset[400] = 1.;		// UEM
+  book_track_histset[401] = 1.;		// UEM
 
-  book_track_histset[500] = 1.;
-  book_track_histset[501] = 1.;
+  book_track_histset[500] = 1.;		// UMM
+  book_track_histset[501] = 1.;		// UMM
 
-  book_track_histset[600] = 1.;
-  book_track_histset[601] = 1.;
+  book_track_histset[600] = 1.;		// UEP
+  book_track_histset[601] = 1.;		// UEP
 
-  book_track_histset[700] = 1.;
-  book_track_histset[701] = 1.;
+  book_track_histset[700] = 1.;		// UMP
+  book_track_histset[701] = 1.;		// UMP
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -660,6 +663,8 @@ void TCosmicsAnaModule::FillEventHistograms(HistBase_t* HistBase) {
 
   Hist->fNTrkDem->Fill (fNTracks[0]);
   Hist->fNGoodDem->Fill (fNGoodTracks[0]);
+  Hist->fNTrkDNeg->Fill(fNTrkDNeg);
+  Hist->fNTrkDPos->Fill(fNTrkDPos);
   Hist->fNTrkUNeg->Fill(fNTrkUNeg);
   Hist->fNTrkUPos->Fill(fNTrkUPos);
   Hist->fNTrkUpstream->Fill(fNTrkUpstream);
@@ -1166,7 +1171,7 @@ void TCosmicsAnaModule::FillHistograms() {
   if (fNGoodTracks[0] > 0) { 
     FillEventHistograms(fHist.fEvent[5]); 
 
-    if (fNTrkUNeg == 0) {
+    if ((fNTrkUNeg == 0) && (fNTrkDPos == 0)) {
       FillEventHistograms(fHist.fEvent[6]); 
     }
   }
@@ -1240,7 +1245,10 @@ void TCosmicsAnaModule::FillHistograms() {
 
       FillTrackHistograms(fHist.fTrack[1],trk,tp);
 
-      if (fNTrkUNeg == 0) {
+      if ((fNTrkUNeg == 0) && (fNTrkDPos == 0)) {
+//-----------------------------------------------------------------------------
+// no other track which couldn't be mistaken with the DEM
+//----------------------------------------------------------------------------- 
 	FillTrackHistograms(fHist.fTrack[2],trk,tp);
 
 	if   (fNClusters > 0) FillTrackHistograms(fHist.fTrack[3],trk,tp);
@@ -1462,8 +1470,11 @@ int TCosmicsAnaModule::Event(int ientry) {
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],fNGoodTracks[i],fNMatchedTracks[i]);
   }
 
-  fNTrkUNeg     = fNTracks[2]+fNTracks[3];
-  fNTrkUPos     = fNTracks[4]+fNTracks[5];
+  fNTrkDNeg     = fNTracks[kDem]+fNTracks[kDmm];
+  fNTrkDPos     = fNTracks[kDep]+fNTracks[kDmp];
+  fNTrkUNeg     = fNTracks[kUem]+fNTracks[kUmm];
+  fNTrkUPos     = fNTracks[kUep]+fNTracks[kUmp];
+
   fNTrkUpstream = fNTrkUNeg+fNTrkUPos;
 
   if (fNTracks[0] == 0) fTrack = 0;

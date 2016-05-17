@@ -40,6 +40,7 @@ public:
   enum { kMaxTrackID    =  10 } ;
   enum { kMaxNErrors    = 100 } ;
 
+  enum { kDem = 0, kDmm = 1, kDep = 2, kDmp = 3, kUem = 4, kUmm = 5, kUep = 6, kUmp = 7 } ;
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
@@ -89,6 +90,8 @@ public:
     TH1F*    fNClusters;
     TH1F*    fNGoodDem;
     TH1F*    fNTrkDem;
+    TH1F*    fNTrkDNeg;
+    TH1F*    fNTrkDPos;
     TH1F*    fNTrkUNeg;
     TH1F*    fNTrkUPos;
     TH1F*    fNTrkUpstream;
@@ -305,6 +308,8 @@ public:
   int               fNMatchedTracks[kNTrackBlocks];
 
   int               fNTrkUNeg;
+  int               fNTrkDNeg;
+  int               fNTrkDPos;
   int               fNTrkUPos;
   int               fNTrkUpstream;
   int               fNStrawHits;

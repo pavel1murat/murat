@@ -55,19 +55,21 @@ physics: {
 
     filters : { 
 	@table::murat.filters 
- 	InitStntuple   : { @table::murat.filters.InitStntuple    histFileName : "do_cosmics_nodigis.stn" }
- 	StntupleMaker6 : { @table::murat.filters.StntupleMaker6  g4ModuleLabel: @local::G4_MODULE_LABEL }
+ 	InitStntuple     : { @table::murat.filters.InitStntuple      histFileName : "do_cosmics_nodigis.stn" }
+ 	StntupleMakerAll : { @table::murat.filters.StntupleMakerAll  g4ModuleLabel: @local::G4_MODULE_LABEL }
      }
     
      p1 : [ # @sequence::murat.digis, 
 	    @sequence::murat.cal_reco,
 	    @sequence::murat.dem_reco, 
 	    @sequence::murat.dmm_reco,
+	    @sequence::murat.dep_reco, 
+	    @sequence::murat.dmp_reco,
 	    @sequence::murat.uem_reco,
 	    @sequence::murat.umm_reco,
 	    @sequence::murat.uep_reco,
 	    @sequence::murat.ump_reco,
-	    @sequence::Stntuple.stnmaker6
+	    @sequence::Stntuple.stnmaker_all
 	   ]
 #     trigger_paths : [ p1  ]
 #     end_paths     : [ out ]

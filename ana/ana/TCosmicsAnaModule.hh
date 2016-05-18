@@ -182,6 +182,7 @@ public:
     TH2F*    fDvVsPath;
     TH2F*    fDvcVsPath;
     TH2F*    fDtVsPath;
+    TH1F*    fDtBack;			// dt at TT_Back (kludge for upstream particles)
     TH1F*    fZ1;
     TH1F*    fECl;
     TH1F*    fEClEKin;

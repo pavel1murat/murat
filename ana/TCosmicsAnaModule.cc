@@ -12,7 +12,7 @@
 //  3  : print NTracks[0-3] for all events
 //  4  : mu+ passed all selections
 //  5  : tracks passing all ID but TanDip with TanDip > 1
-//  6  : mu- events reconstructed with DT(DEM) > 0
+//  6  : print TanDip for all tracks
 //
 //  ReportedErrors: 
 //  ---------------
@@ -29,6 +29,7 @@
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/obj/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
+#include "DataProducts/inc/VirtualDetectorId.hh"
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
@@ -288,6 +289,8 @@ void TCosmicsAnaModule::BookTrackHistograms(HistBase_t* HistBase, const char* Fo
   HBook2F(Hist->fDvVsPath   ,"dv_vs_path",Form("%s: T-C  Dv Vs Path"  ,Folder),  50,   0 ,500,200,-200.,200.,Folder);
   HBook2F(Hist->fDvcVsPath  ,"dvc_vs_path",Form("%s: T-C Dvc Vs Path" ,Folder),  50,   0 ,500,200,-200.,200.,Folder);
   HBook2F(Hist->fDtVsPath   ,"dt_vs_path",Form("%s: T-C DT Vs Path"   ,Folder),  50,   0 ,500,100,  -5.,  5.,Folder);
+
+  HBook1F(Hist->fDtBack     ,"dtback"   ,Form("%s: DT at TT_Back"     ,Folder), 200,-20  ,20 ,Folder);
 
   HBook1F(Hist->fZ1         ,"z1"       ,Form("%s: track Z1      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fNClusters  ,"ncl"      ,Form("%s: track N(clusters)" ,Folder),  10, 0   , 10,Folder);
@@ -1415,12 +1418,14 @@ int TCosmicsAnaModule::Event(int ientry) {
 					// may want to revisit the definition of fSimp
 
   fSimPar.fParticle = fSimpBlock->Particle(0);
-  fSimPar.fTFront   = NULL;
-  fSimPar.fTMid     = NULL;
   fSimPar.fGenp     = fParticle;
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 //-----------------------------------------------------------------------------
+  fSimPar.fTFront   = NULL;
+  fSimPar.fTMid     = NULL;
+  fSimPar.fTBack    = NULL;
+
   int nvdhits = fVdetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
     TVdetHitData* vdhit = fVdetBlock->Hit(i);
@@ -1430,6 +1435,9 @@ int TCosmicsAnaModule::Event(int ientry) {
       }
       else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
 	fSimPar.fTMid = vdhit;
+      }
+      else if (vdhit->Index() == mu2e::VirtualDetectorId::TT_Back) {
+	fSimPar.fTBack = vdhit;
       }
     }
   }
@@ -1524,17 +1532,13 @@ void TCosmicsAnaModule::Debug() {
      if (GetDebugBit(5) && ((tp->fIDWord[fBestID] & ~TStnTrackID::kTanDipBit) == 0)) {
        GetHeaderBlock()->Print(Form("trk->TanDip = %10.3f",trk->TanDip()));
      }
+
+     if (GetDebugBit(6)) {
+       GetHeaderBlock()->Print(Form("trk->PDG: %7i trk->TanDip = %10.3f tp->fLogLHDedm: %10.5f",
+				    trk->fPdgCode,trk->TanDip(),tp->fLogLHDedm));
+     }
   }
 
-//-----------------------------------------------------------------------------
-// bit 5: events with N(tracks) > 1
-//-----------------------------------------------------------------------------
-  if (GetDebugBit(5) == 1) {
-    int ntrk = fTrackBlockDem->NTracks();
-    if (ntrk > 1) {
-      GetHeaderBlock()->Print(Form("NTracks = %i5",ntrk));
-    }
-  }
 }
 
 //_____________________________________________________________________________
@@ -1641,8 +1645,11 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
     tp->fDioWtRC = tp->fDioWt;
     tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
 
-    tp->fDtZ0 = -1.e6;
+    tp->fDtZ0    = -1.e6;
     if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
+
+    tp->fDtBack  = -1.e6;
+    if (fSimPar.fTBack) tp->fDtBack = track->TBack()-fSimPar.fTBack->Time();
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -1716,20 +1723,7 @@ int TCosmicsAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock    ,
     track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
     track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
 
-    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
-
-    if (GetDebugBit(7)) {
-      if ((id_word == 0) && (llhr_cal > 20)) {
-	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
-      }
-    }
-
-    if (GetDebugBit(8)) {
-      if ((id_word == 0) && (llhr_cal < -20)) {
-	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
-				     track->P(),track->Dt(),tp->fEp));
-      }
-    }
+    tp->fLogLHDedm = track->fEleLogLHCal-track->fMuoLogLHCal;
 
     track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
   }

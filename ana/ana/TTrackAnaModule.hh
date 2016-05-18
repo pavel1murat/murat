@@ -163,6 +163,7 @@ public:
     TH1F*    fZ0;
     TH1F*    fTanDip;
     TH1F*    fDtZ0;			// MC truth: T0-T(MC TMid)
+    TH1F*    fDtBack;			// MC truth: T0-T(MC TMid)
     TH1F*    fRMax;
 
     TH1F*    fResid;

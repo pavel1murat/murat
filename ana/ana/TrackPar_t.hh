@@ -20,7 +20,8 @@ struct TrackPar_t : public TrackParBase_t {
   double  fTotWt;			// total weight
   double  fTotWtRC;			// total weight with rad corrections
 
-  double  fDtZ0;
+  double  fDtZ0;			// delta(T) at z=0
+  double  fDtBack;			// delta(T) at z=Z(TT_Back)
   
   double  fEcl;
   double  fEp;
@@ -38,5 +39,7 @@ struct TrackPar_t : public TrackParBase_t {
   double  fSinTC;			// angle between the cluster and the track
   double  fDrTC;
   double  fSInt;
+
+  double  fLogLHDedm;			// downstram electron (DE) vs downstream muon (DM)
 };
 #endif

@@ -6,6 +6,7 @@
     TSimParticle*  fParticle;		// pointer to the signal particle
     TVdetHitData*  fTFront;		// VD hit at the tracker front
     TVdetHitData*  fTMid;		// VD hit at the tracker center
+    TVdetHitData*  fTBack;		// VD hit at the tracker back (+1610 mm)
   };
 
 #endif

@@ -38,25 +38,14 @@ source       : { module_type : EmptyEvent }
 outputs      : { @table::murat.outputs }
 
 physics: { 
-    producers : {
-
-	@table::murat.producers
-
-	generate : { @table::generate
-	    inputfile  : "murat/test/genConfig/ummGun.txt"
-	}
-
-	FlagStrawHits : { @table::FlagStrawHits 
-	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
-	}
+    producers : { @table::murat.producers
+	generate      : { @table::generate      inputfile    : "murat/test/genConfig/ummGun.txt" }
+	FlagStrawHits : { @table::FlagStrawHits maximumEnergy: @local::FlagStrawHits_maximumEnergy }
     }
 
-    filters : { 
-
-	@table::murat.filters 
-
+    filters : { @table::murat.filters 
 	InitStntuple  : { @table::murat.filters.InitStntuple            histFileName  : "umm_gun_digi_dem_dmm_umm_reco_stn.stn" }
- 	StntupleMaker : { @table::murat.filters.StntupleMakerDemDmmUmm  g4ModuleLabel : @local::G4_MODULE_LABEL             }
+ 	StntupleMaker : { @table::murat.filters.StntupleMakerDemDmmUmm  g4ModuleLabel : @local::G4_MODULE_LABEL                 }
     }
 
     @table::murat.paths

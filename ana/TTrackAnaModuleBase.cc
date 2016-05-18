@@ -218,6 +218,9 @@ int TTrackAnaModuleBase::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     tp->fDtZ0 = -1.e6;
     if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
+
+    tp->fDtBack  = -1.e6;
+    if (fSimPar.fTBack) tp->fDtBack = track->TBack()-fSimPar.fTBack->Time();
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -289,16 +292,16 @@ int TTrackAnaModuleBase::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
     track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
 
-    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
+    tp->fLogLHDedm = track->fEleLogLHCal-track->fMuoLogLHCal;
 
     if (GetDebugBit(7)) {
-      if ((id_word == 0) && (llhr_cal > 20)) {
+      if ((id_word == 0) && (tp->fLogLHDedm > 20)) {
 	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
       }
     }
 
     if (GetDebugBit(8)) {
-      if ((id_word == 0) && (llhr_cal < -20)) {
+      if ((id_word == 0) && (tp->fLogLHDedm < -20)) {
 	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
 				     track->P(),track->Dt(),tp->fEp));
       }

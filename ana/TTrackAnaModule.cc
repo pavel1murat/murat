@@ -44,6 +44,8 @@
 #include "Stntuple/obj/TDisk.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
+#include "DataProducts/inc/VirtualDetectorId.hh"
+
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
@@ -601,6 +603,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fDtZ0->Fill(tp->fDtZ0);
+  Hist->fDtBack->Fill(tp->fDtBack);
   Hist->fRMax->Fill(Track->RMax());
   Hist->fAlgMask->Fill(Track->AlgMask());
 //-----------------------------------------------------------------------------
@@ -1365,8 +1368,10 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fDioWtRC = tp->fDioWt;
     tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
 
-    tp->fDtZ0 = -1.e6;
-    if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
+    tp->fDtZ0    = -1.e6;
+    tp->fDtBack  = -1.e6;
+    if (fSimPar.fTMid ) tp->fDtZ0   = track->T0()-fSimPar.fTMid->Time();
+    if (fSimPar.fTBack) tp->fDtBack = track->TBack()-fSimPar.fTBack->Time();
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -1508,6 +1513,9 @@ int TTrackAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 //-----------------------------------------------------------------------------
+  fSimPar.fTFront   = NULL;
+  fSimPar.fTMid     = NULL;
+  fSimPar.fTBack    = NULL;
   int nvdhits = fVdetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
     TVdetHitData* vdhit = fVdetBlock->Hit(i);
@@ -1517,6 +1525,9 @@ int TTrackAnaModule::Event(int ientry) {
       }
       else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
 	fSimPar.fTMid = vdhit;
+      }
+      else if (vdhit->Index() == mu2e::VirtualDetectorId::TT_Back) {
+	fSimPar.fTBack = vdhit;
       }
     }
   }

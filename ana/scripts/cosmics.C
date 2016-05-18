@@ -8,12 +8,26 @@ def_name cosmics_002("cosmics_ralf");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  cosmics_ana(const char* TrackBlockName = "TrackBlockDem", int DebugBit = -1) {
+void  cosmics_ana(int TrackBlockID = -1, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
+// 0:dem 1:dmm 2:dep 3:dmp 4:uem 5:umm 6:uep 7:ump
 //-----------------------------------------------------------------------------
   m_cos = (TCosmicsAnaModule*) g.x->AddModule("TCosmicsAnaModule",0);
-  m_cos->SetTrackBlockName(TrackBlockName);
+
+  if      (TrackBlockID == -1) m_cos->SetTrackBlockName("TrackBlock"   );
+  else if (TrackBlockID ==  0) m_cos->SetTrackBlockName("TrackBlockDem");
+  else if (TrackBlockID ==  1) m_cos->SetTrackBlockName("TrackBlockDmm");
+  else if (TrackBlockID ==  2) m_cos->SetTrackBlockName("TrackBlockDep");
+  else if (TrackBlockID ==  3) m_cos->SetTrackBlockName("TrackBlockDmp");
+  else if (TrackBlockID ==  4) m_cos->SetTrackBlockName("TrackBlockUem");
+  else if (TrackBlockID ==  5) m_cos->SetTrackBlockName("TrackBlockUmm");
+  else if (TrackBlockID ==  6) m_cos->SetTrackBlockName("TrackBlockUep");
+  else if (TrackBlockID ==  7) m_cos->SetTrackBlockName("TrackBlockUmp");
+  else {
+    printf(" ERROR in cosmics_ana(cosmics.C): unknown track block ID=%i\n",TrackBlockID);
+  }
+
   if (DebugBit >= 0) m_cos->SetDebugBit(DebugBit,1);
 }
 
@@ -71,13 +85,6 @@ int cosmics_ralf() {
   g.x->SetNEventsToReport(5000);
   g.x->SetEventList(run_event);
 
-
   m_cos = (TCosmicsAnaModule*) g.x->AddModule("TCosmicsAnaModule",0);
-
   m_cos->SetDebugBit(39,1);
-
-  gEnv->SetValue("mu2e.EleTemplates",
-		 "/grid/fermiapp/mu2e/users/murat/hist/mu2e/v4_2_1/e00s1212.track_ana.hist");
-  gEnv->SetValue("mu2e.MuoTemplates",
-		 "/grid/fermiapp/mu2e/users/murat/hist/mu2e/v4_2_1/m00s1212.track_ana.hist");
 }

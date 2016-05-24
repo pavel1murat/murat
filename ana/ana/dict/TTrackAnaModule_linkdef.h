@@ -5,6 +5,7 @@
 
 #pragma link C++ class TTrackAnaModule;
 #pragma link C++ class TTrackAnaModule::TrackPar_t;
+#pragma link C++ class TTrackAnaModule::SimPar_t;
 
 #endif
 

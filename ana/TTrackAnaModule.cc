@@ -109,6 +109,7 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
   fPdgCode       = 11;
   fGeneratorCode =  2;
+  fDirection     =  1;
 
   fApplyCorrections = 0;
 }
@@ -747,10 +748,24 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
       FillEventHistograms(fHist.fEvent[HistSet+1]);
 
       TLorentzVector vdmom;
-      vdmom.SetXYZM(fSimPar.fTFront->McMomentumX(),
-		    fSimPar.fTFront->McMomentumY(),		      
-		    fSimPar.fTFront->McMomentumZ(),
-		    fSimPar.fTFront->Mass());
+
+      if (fSimPar.fTFront != NULL) {
+//-----------------------------------------------------------------------------
+// regular case
+//-----------------------------------------------------------------------------
+	vdmom.SetXYZM(fSimPar.fTFront->McMomentumX(),
+		      fSimPar.fTFront->McMomentumY(),		      
+		      fSimPar.fTFront->McMomentumZ(),
+		      fSimPar.fTFront->Mass());
+      }
+      else {
+//-----------------------------------------------------------------------------
+// pathologicalcase when an upstream simulated MC particle is reconstructed 
+// as the downstream one and there is no hit... efficiency doens't make sense
+// just make sure the code doesnt' crash
+//-----------------------------------------------------------------------------
+	vdmom = fSimPar.fParticle->fStartMom;
+      }
 
       float ce_pitch  = vdmom.Pt()/vdmom.Pz();
       float min_pitch = 1./TrackID->MaxTanDip();
@@ -981,17 +996,13 @@ void TTrackAnaModule::FillHistograms() {
 
     TStnTrack::InterData_t*    vt = trk->fVMinS;  // track-only
 //-----------------------------------------------------------------------------
-// TRK_15: tracks which have intersection with the 1st disk
-// TRK_16: tracks which have intersection with the 2nd disk
-// TRK_17: tracks which do not have intersections with the calorimeter
+// TRK_15: all tracks which have intersection with the 1st disk
+// TRK_16: all tracks which have intersection with the 2nd disk
+// TRK_17: all tracks which do not have intersections with the calorimeter
 //-----------------------------------------------------------------------------
     if (vt) {
-      if      (vt->fID == 0) {
-	FillTrackHistograms(fHist.fTrack[15],trk);
-      }
-      else if (vt->fID == 1) {
-	FillTrackHistograms(fHist.fTrack[16],trk);
-      }
+      if      (vt->fID == 0) FillTrackHistograms(fHist.fTrack[15],trk);
+      else if (vt->fID == 1) FillTrackHistograms(fHist.fTrack[16],trk);
     }
     else {
       FillTrackHistograms(fHist.fTrack[17],trk);
@@ -1023,40 +1034,37 @@ void TTrackAnaModule::FillHistograms() {
       }
     }
 //-----------------------------------------------------------------------------
-// TRK_20: tracks with >= 20 hits
-// TRK_21: tracks with >= 20 hits and Chi2/Ndof < 3
+// TRK_20: BEST_ID tracks intersecting DISK=0
+// TRK_21: BEST_ID tracks intersecting DISK=1
 //-----------------------------------------------------------------------------
-    if (trk->NActive() >= 20) {
-      FillTrackHistograms(fHist.fTrack[20],trk);
-      if (trk->Chi2Dof() < 3) {
-	FillTrackHistograms(fHist.fTrack[21],trk);
-      }
+    if (vt && (trk->fIDWord == 0)) {
+      if      (vt->fID == 0) FillTrackHistograms(fHist.fTrack[20],trk);
+      else if (vt->fID == 1) FillTrackHistograms(fHist.fTrack[21],trk);
     }
 //-----------------------------------------------------------------------------
-// TRK 22: Set "C" tracks with an associated cluster and chi2(match) < 100
-// TRK 23: Set "C" tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) > 0
+// TRK 22: BEST_ID tracks with an associated cluster and chi2(match) < 100
+// TRK 23: BEST_ID tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) > 0
 //         this is interesting to see which muons are getting misidentified
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Tcm < 100.)) {
+
       FillTrackHistograms(fHist.fTrack[22],trk);
-      if    (trk->LogLHRCal() > 0) {
+      if (trk->LogLHRCal() > 0) {
 	FillTrackHistograms(fHist.fTrack[23],trk);
 	
-	if (trk->fP < 80.) {
-	  if (GetDebugBit(36)) {
-	    GetHeaderBlock()->Print(Form(" bit:036 trk p = %10.3f E/P = %10.3f", trk->fP,tp->fEp));
-	  }
+	if (GetDebugBit(36) && (trk->fP < 80.)) {
+	  GetHeaderBlock()->Print(Form(" bit:036 trk p = %10.3f E/P = %10.3f", trk->fP,tp->fEp));
 	}
       }
       else {
 //-----------------------------------------------------------------------------
-// TRK_24: Set "C" tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) < 0
+// TRK_24: BEST_ID  tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) < 0
 //         this set allows to see which electrons are getting misidentified
 //-----------------------------------------------------------------------------
 	FillTrackHistograms(fHist.fTrack[24],trk);
       }
 //-----------------------------------------------------------------------------
-// TRK_25: Set "C" tracks, 100 < P < 110, 0 < E/p < 1.15,  |dt_corr| < 3, chi2(match) < 100
+// TRK_25: BEST_ID tracks, 100 < P < 110, 0 < E/p < 1.15,  |dt_corr| < 3, chi2(match) < 100
 //-----------------------------------------------------------------------------
 //      double dt_corr = trk->Dt(); // -1.;
       if ( (tp->fDt > fMinDtTcm) && (tp->fDt < fMaxDtTcm) && 
@@ -1085,7 +1093,7 @@ void TTrackAnaModule::FillHistograms() {
 
     }
 //-----------------------------------------------------------------------------
-// TRK_28 : events with a "Set C" track and a cluster E/P > 1.1
+// TRK_28 : events with a BEST_ID track and a cluster E/P > 1.1
 //-----------------------------------------------------------------------------
     if (trk->fIDWord == 0) {
       if (tp->fEp > 1.1) {
@@ -1098,8 +1106,8 @@ void TTrackAnaModule::FillHistograms() {
       }
     }
 //-----------------------------------------------------------------------------
-// TRK_29: "Set C" track 100 < P < 110, 0 < E/P < 1.15              : next to TRK_13
-// TRK_32: "Set C" track 100 < P < 110, 0 < E/P < 1.15, chi2tcm<100 : next to TRK_29
+// TRK_29: BEST_ID track 100 < P < 110, 0 < E/P < 1.15              : next to TRK_13
+// TRK_32: BEST_ID track 100 < P < 110, 0 < E/P < 1.15, chi2tcm<100 : next to TRK_29
 //-----------------------------------------------------------------------------
     if (trk->fIDWord == 0) {
       if ((tp->fEp > 0) && (trk->P() > 100.) && (trk->P() < 110.) && (tp->fEp < 1.15)) {
@@ -1512,6 +1520,7 @@ int TTrackAnaModule::Event(int ientry) {
   fSimPar.fGenp     = fParticle;
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
+// use the first fit
 //-----------------------------------------------------------------------------
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
@@ -1521,13 +1530,19 @@ int TTrackAnaModule::Event(int ientry) {
     TVdetHitData* vdhit = fVdetBlock->Hit(i);
     if (vdhit->PdgCode() == fSimp->fPdgCode) {
       if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
-	fSimPar.fTFront = vdhit;
+	if (fDirection*vdhit->McMomentumZ() > 0) {
+	  if (fSimPar.fTFront == 0) fSimPar.fTFront = vdhit;
+	}
       }
       else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
-	fSimPar.fTMid = vdhit;
+	if (fDirection*vdhit->McMomentumZ() > 0) {
+	  if (fSimPar.fTMid == 0) fSimPar.fTMid = vdhit;
+	}
       }
       else if (vdhit->Index() == mu2e::VirtualDetectorId::TT_Back) {
-	fSimPar.fTBack = vdhit;
+	if (fDirection*vdhit->McMomentumZ() > 0) {
+	  if (fSimPar.fTBack == NULL) fSimPar.fTBack = vdhit;
+	}
       }
     }
   }

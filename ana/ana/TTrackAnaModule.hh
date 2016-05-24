@@ -302,6 +302,7 @@ public:
 
   TGenParticle*     fParticle;		// electron or muon
   int               fPdgCode;		// determines which one
+  int               fDirection;         // 1:downstream, -1:upstream  [direction of the particle]
   int               fGeneratorCode;      
 
   TSimParticle*     fSimp;
@@ -365,6 +366,7 @@ public:
   void               SetFillDioHist  (int YesNo) { fFillDioHist   = YesNo; }
   void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
+  void               SetDirection    (int Dir  ) { fDirection     = Dir  ; }
   void               SetTrackBlockName (const char* Name) { fTrackBlockName = Name; }
   void               SetApplyCorrections(int YesNo) { fApplyCorrections = YesNo; }
 //-----------------------------------------------------------------------------

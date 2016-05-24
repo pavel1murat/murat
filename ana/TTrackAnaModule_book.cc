@@ -391,19 +391,19 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 12] = 1;		// tracks with fcons < 1.e-4
   book_track_histset[ 13] = 1;		// SetC tracks with 100 <= P < 110 
   book_track_histset[ 14] = 1;		// tracks with fcons < 1.e-2
-  book_track_histset[ 15] = 1;		// tracks intersecting the 1st disk
-  book_track_histset[ 16] = 1;		// tracks intersecting the 2nd disk
-  book_track_histset[ 17] = 1;		// tracks with no calorimeter intersections
+  book_track_histset[ 15] = 1;		// all tracks intersecting the 1st disk
+  book_track_histset[ 16] = 1;		// all tracks intersecting the 2nd disk
+  book_track_histset[ 17] = 1;		// all tracks with no calorimeter intersections
   book_track_histset[ 18] = 1;		// Set C tracks, T0 > 700
   book_track_histset[ 19] = 1;		// Set C tracks with E/P > 0
 
-  book_track_histset[ 20] = 1;		// tracks with Nhits >= 20
-  book_track_histset[ 21] = 1;		// tracks with Nhits >= 20 and chi/Ndof < 3
-  book_track_histset[ 22] = 1;		// Set C tracks with E/P > 0 and chi2(match) < 100
-  book_track_histset[ 23] = 1;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) > 0 (interesting for muons)
-  book_track_histset[ 24] = 1;		// Set C tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) < 0 (interesting for electrons)
+  book_track_histset[ 20] = 1;		// BEST_ID tracks intersecting the 1st disk 
+  book_track_histset[ 21] = 1;		// BEST_ID tracks intersecting the 2nd disk 
+  book_track_histset[ 22] = 1;		// BEST_ID tracks with E/P > 0 and chi2(match) < 100
+  book_track_histset[ 23] = 1;		// BEST_ID tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) > 0 (interesting for muons)
+  book_track_histset[ 24] = 1;		// BEST_ID tracks with E/P > 0 and chi2(match) < 100 and LLHR(cal) < 0 (interesting for electrons)
 
-  book_track_histset[ 25] = 1;		// Set C tracks, 100<p<110, 0<E/P<1.15, chi2tcm<100, -5<DT<8, 
+  book_track_histset[ 25] = 1;		// BEST_ID tracks, 100<p<110, 0<E/P<1.15, chi2tcm<100, -5<DT<8, 
   book_track_histset[ 26] = 1;		// [25] + LLHR_CAL > 0 - interesting for muons
   book_track_histset[ 27] = 1;		// [25] + LLHR_CAL < 0 - interesting for electrons
   book_track_histset[ 28] = 1;		// Set C tracks, E/P > 1.1
@@ -415,7 +415,7 @@ void TTrackAnaModule::BookHistograms() {
 
   book_track_histset[ 33] = 1;		// DaveTrkQual tracks Q > 0.4
   book_track_histset[ 34] = 1;		// DaveTrkQual tracks Q > 0.1
-  
+
   book_track_histset[ 40] = 1;		// all tracks, alg_mask = 1
   book_track_histset[ 41] = 1;		// Set "C" tracks, alg_mask = 1
   book_track_histset[ 42] = 1;		// Set "C" tracks, alg_mask = 1, T > 700

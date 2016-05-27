@@ -4,7 +4,7 @@
 
   struct fitter_t {
     const char *name;		// fitter name
-    const char *script;         // name of teh script to load
+    const char *script;         // name of the script to load
   };
 
 fitter_t fitter_asymm_gauss = { "asymm_gauss", "murat/scripts/fit_asymm_gauss.C" };

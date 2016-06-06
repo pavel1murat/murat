@@ -14,6 +14,7 @@
 #include "Stntuple/loop/TStnModule.hh"
 
 #include "Stntuple/obj/TStnTrackBlock.hh"
+#include "Stntuple/obj/TTrackStrawHitBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
 #include "Stntuple/obj/TStrawDataBlock.hh"
@@ -240,6 +241,13 @@ public:
     TH1F*    fSInt;                     // calculated interaction length
     TH1F*    fDaveTrkQual;		// 
     TH1F*    fNMcStrawHits;             // N(straw hits) produced in the tracker by the MC particle
+
+					// if the TrackStrawHitBlock is present
+    TH1F*    fHitEnergy;
+    TH1F*    fHitDt;
+    TH1F*    fHitTRel;
+
+    TH1F*    fT0MinusTM;
   };
 
   struct GenpHist_t {
@@ -266,33 +274,36 @@ public:
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets   = 100 };
   enum { kNTrackHistSets   = 400 };
+  enum { kNTrackStrawHitHistSets   = 10 };
   enum { kNClusterHistSets = 100 };
   enum { kNCaloHistSets    = 100 };
   enum { kNGenpHistSets    = 100 };
   enum { kNSimpHistSets    = 100 };
 
   struct Hist_t {
-    TH1F*          fCrystalR[2];	          // crystal radius
-    EventHist_t*   fEvent  [kNEventHistSets  ];
-    TrackHist_t*   fTrack  [kNTrackHistSets  ];
-    ClusterHist_t* fCluster[kNClusterHistSets];
-    CaloHist_t*    fCalo   [kNCaloHistSets   ];
-    GenpHist_t*    fGenp   [kNGenpHistSets   ];
-    SimpHist_t*    fSimp   [kNSimpHistSets   ];
+    TH1F*                  fCrystalR[2];	          // crystal radius
+    EventHist_t*           fEvent  [kNEventHistSets  ];
+    TrackHist_t*           fTrack  [kNTrackHistSets  ];
+    ClusterHist_t*         fCluster[kNClusterHistSets];
+    CaloHist_t*            fCalo   [kNCaloHistSets   ];
+    GenpHist_t*            fGenp   [kNGenpHistSets   ];
+    SimpHist_t*            fSimp   [kNSimpHistSets   ];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
-  TString           fTrackBlockName;	// 
-					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlock;
-  TStnClusterBlock* fClusterBlock;
-  TCalDataBlock*    fCalDataBlock;
-  TStrawDataBlock*  fStrawDataBlock;
-  TVdetDataBlock*   fVdetBlock;
-  TGenpBlock*       fGenpBlock;
-  TSimpBlock*       fSimpBlock;
+  TString           fTrackBlockName;	     // 
+  TString           fTrackStrawHitBlockName; // 
+					     // pointers to the data blocks used
+  TStnTrackBlock*        fTrackBlock;
+  TTrackStrawHitBlock*   fTrackStrawHitBlock;
+  TStnClusterBlock*      fClusterBlock;
+  TCalDataBlock*         fCalDataBlock;
+  TStrawDataBlock*       fStrawDataBlock;
+  TVdetDataBlock*        fVdetBlock;
+  TGenpBlock*            fGenpBlock;
+  TSimpBlock*            fSimpBlock;
 					// additional track parameters (assume ntracks < 20)
   TrackPar_t        fTrackPar[20];
 
@@ -367,7 +378,10 @@ public:
   void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
   void               SetDirection    (int Dir  ) { fDirection     = Dir  ; }
-  void               SetTrackBlockName (const char* Name) { fTrackBlockName = Name; }
+
+  void               SetTrackBlockName         (const char* Name) { fTrackBlockName         = Name; }
+  void               SetTrackStrawHitBlockName (const char* Name) { fTrackStrawHitBlockName = Name; }
+
   void               SetApplyCorrections(int YesNo) { fApplyCorrections = YesNo; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule

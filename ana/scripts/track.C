@@ -68,6 +68,7 @@ void  track_ana_dem(int PdgCode = 11) {
 //-----------------------------------------------------------------------------
   m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
   m_trk->SetTrackBlockName("TrackBlockDem");
+  m_trk->SetTrackStrawHitBlockName("TrackHitBlockDem");
   m_trk->SetPdgCode(PdgCode);
   m_trk->SetDirection(1);
   m_trk->SetGeneratorCode(28);

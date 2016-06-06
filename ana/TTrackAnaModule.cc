@@ -57,7 +57,8 @@ ClassImp(TTrackAnaModule)
 TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
-  fTrackBlockName = "TrackBlock";
+  fTrackBlockName         = "TrackBlock";
+  fTrackStrawHitBlockName = "TrackStrawHitBlock";
   fTrackNumber.Set(100);
 
   fDiskCalorimeter = new TDiskCalorimeter();
@@ -127,7 +128,8 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock(fTrackBlockName.Data(),"TStnTrackBlock"   ,&fTrackBlock  );
+  RegisterDataBlock(fTrackBlockName.Data()        ,"TStnTrackBlock"     ,&fTrackBlock  );
+  RegisterDataBlock(fTrackStrawHitBlockName.Data(),"TTrackStrawHitBlock",&fTrackStrawHitBlock);
 
   RegisterDataBlock("ClusterBlock"        ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"        ,"TCalDataBlock"    ,&fCalDataBlock);
@@ -731,6 +733,20 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fSInt->Fill(tp->fSInt);
   Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
   Hist->fNMcStrawHits->Fill(Track->fNMcStrawHits);
+
+  if (fTrackStrawHitBlock->NTracks() > 0) {
+    
+    int nhits = fTrackStrawHitBlock->NTrackHits(itrk);
+
+    for (int i=0; i<nhits; i++) {
+      TStrawHitData* hit = fTrackStrawHitBlock->Hit(itrk,i);
+      Hist->fHitEnergy->Fill(hit->Energy());
+      Hist->fHitDt->Fill(hit->Dt());
+      Hist->fHitTRel->Fill(hit->Time()-tp->fTMean);
+    }
+  }
+  
+  Hist->fT0MinusTM->Fill(Track->T0()-tp->fTMean);
 }
 
 
@@ -1440,6 +1456,23 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       GetHeaderBlock()->Print(Form(" TTrackAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
     }
 //-----------------------------------------------------------------------------
+// it track hits are stored, calculate track mean time averaged over the hits 
+//-----------------------------------------------------------------------------
+    tp->fTMean = -1.e6;
+    if (fTrackStrawHitBlock->NTracks() > 0) {
+    
+      int nhits = fTrackStrawHitBlock->NTrackHits(itrk);
+
+					// calculate the mean time
+      float tmean(0);
+      for (int i=0; i<nhits; i++) {
+	TStrawHitData* hit = fTrackStrawHitBlock->Hit(itrk,i);
+	tmean += hit->Time();
+      }
+
+      tp->fTMean  = tmean/nhits;
+    }
+//-----------------------------------------------------------------------------
 // PID likelihoods
 //-----------------------------------------------------------------------------
     dat.fDt   = tp->fDt;
@@ -1480,7 +1513,8 @@ int TTrackAnaModule::Event(int ientry) {
 
   TDiskCalorimeter::GeomData_t disk_geom;
 
-  fTrackBlock  ->GetEntry(ientry);
+  fTrackBlock->GetEntry(ientry);
+  fTrackStrawHitBlock->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
   fStrawDataBlock->GetEntry(ientry);
   fCalDataBlock->GetEntry(ientry);
@@ -1596,7 +1630,7 @@ int TTrackAnaModule::Event(int ientry) {
     int alg_mask = track->AlgMask();
     if (alg_mask & 0x2) fNCalPatRec += 1;
   }
-  
+
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar);
 //-----------------------------------------------------------------------------
 // init calorimeter clusters - remember, the first one not necessarily is the 

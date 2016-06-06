@@ -217,6 +217,13 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fSInt   ,"sint"   ,Form("%s: SInt"          ,Folder),200, -500, 500,Folder);
   HBook1F(Hist->fDaveTrkQual,"dtqual",Form("%s:DaveTrkQual" ,Folder),500, -2.5, 2.5,Folder);
   HBook1F(Hist->fNMcStrawHits,"nmc_hits",Form("%s:N(MC Straw Hits by parent",Folder),150, 0, 150,Folder);
+
+  HBook1F(Hist->fHitEnergy  ,"hit_e"   ,Form("%s: hit energy"   ,Folder),100, 0, 0.05,Folder);
+  HBook1F(Hist->fHitDt      ,"hit_dt"  ,Form("%s: hit Dt=T1-T2" ,Folder),100, -10, 10,Folder);
+  HBook1F(Hist->fHitTRel    ,"hit_trel",Form("%s: hit T-<T>   " ,Folder),100, -50, 50,Folder);
+
+  HBook1F(Hist->fT0MinusTM  ,"t0_minus_tm",Form("%s: T0-<T>"    ,Folder),100, -50, 50,Folder);
+
 }
 
 //-----------------------------------------------------------------------------

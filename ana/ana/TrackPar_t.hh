@@ -41,5 +41,7 @@ struct TrackPar_t : public TrackParBase_t {
   double  fSInt;
 
   double  fLogLHDedm;			// downstram electron (DE) vs downstream muon (DM)
+
+  double  fTMean;			// mean time over the track hits
 };
 #endif

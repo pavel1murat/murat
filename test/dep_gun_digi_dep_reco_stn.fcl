@@ -16,53 +16,62 @@
 #include "standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
-#include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
   bgHitFiles                          : @nil
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
   FlagStrawHits_maximumEnergy         : 0.005
+#------------------------------------------------------------------------------
+# note 1: background files below correspond to the TDR geometry 
+# note 2: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+#------------------------------------------------------------------------------
 END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : EgunDigiDemRecoStn
+process_name : DepGunDigiDepRecoStn
 
 source       : { module_type : EmptyEvent }
 
-physics: { 
-    producers : { 
-	@table::murat.producers 
+outputs      : { @table::murat.outputs }
 
-	generate : { @table::murat.producers.egun }
+physics: { 
+    producers : {
+
+	@table::murat.producers
+
+	generate : { @table::generate
+	    inputfile  : "murat/test/genConfig/depGun.txt"
+	}
 
 	FlagStrawHits : { @table::FlagStrawHits 
 	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
 	}
     }
 
-    filters : { @table::murat.filters 
-	InitStntuple      : { @table::murat.filters.InitStntuple      histFileName  : "egun_digi_reco_stn_dem.stn" }
- 	StntupleMakerDem  : { @table::murat.filters.StntupleMakerDem  
-	    g4ModuleLabel      : @local::G4_MODULE_LABEL
-	    makeTrackStrawHits : 1
-	}
+    filters : { 
+
+	@table::murat.filters 
+
+	InitStntuple  : { @table::murat.filters.InitStntuple            histFileName  : "dep_gun_digi_dep_reco_stn.stn" }
+ 	StntupleMaker : { @table::murat.filters.StntupleMakerDemDmpUmp  g4ModuleLabel : @local::G4_MODULE_LABEL             }
     }
 
     @table::murat.paths
-
-    trigger_paths : [ gen_digi_dem_reco_stn ]
-    out           : []
+    
+    trigger_paths : [ gen_digi_dep_reco_stn ]
+    out           : [ ]
     end_paths     : [ out ]
 }
 
-services.TFileService.fileName            : "egun_digi_dem_reco_stn.hist"
+services.TFileService.fileName            : "dep_gun_digi_dep_reco_stn.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
-# physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "egun_digi_dem_reco_stn.art"
+# physics.out : [ detectorOutput ]
+# outputs.detectorOutput.fileName           : "dep_gun_digi_dep_reco_stn.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

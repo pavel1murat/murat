@@ -78,20 +78,7 @@ murat : {
 	@table::CaloCluster.producers   # defined in CaloCluster
 	@table::CalPatRec.producers
 	@table::TrackCaloMatching.producers
-#------------------------------------------------------------------------------
-# higher-level reconstruction
-# ParticleID, AvikPID - tracker-only particle ID
-# TrackCaloMatching doesn't explicitly know anything about the particle mass, 
-# it is just using the extrapolation results 
-#------------------------------------------------------------------------------
-	ParticleID           : { @table::ParticleID fitterModuleLabel:MergePatRec    }
-	ParticleIDDem        : { @table::ParticleID fitterModuleLabel:MergePatRecDem }
-	ParticleIDDmm        : { @table::ParticleID fitterModuleLabel:MergePatRecDmm }
-
-	AvikPID              : { @table::AvikPID           
-	    trkPatRecDemModuleLabel : MergePatRecDem 
-	    trkPatRecDmmModuleLabel : MergePatRecDmm 
-	}
+	@table::ParticleID.producers
     }
 #------------------------------------------------------------------------------
 # event mixing modules - all clones of the same module.

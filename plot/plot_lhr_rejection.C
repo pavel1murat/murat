@@ -9,7 +9,7 @@
 //
 // plot results by the toy simulation
 //-----------------------------------------------------------------------------
-void plot_lhr_rejection(int Templates = 1212) {
+void plot_lhr_rejection_vs_sigt(int Templates = 1212) {
 
   float  sigt [5] = { 0.05,  0.10, 0.20, 0.50, 1.00};
 
@@ -163,7 +163,8 @@ void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
 
     if ((Print != 0) && (pe[i] > 0.85) && (rm[i] > 10)) {
       printf(" i, llhr , qe, qm, prob(e) , rej(mu) : %3i %10.3f %10.3f %10.3f %10.5f %10.3f\n",
-	     i,h_llhr_e->GetBinCenter(i+1),qe,qm,pe[i],rm[i]);
+	     i,h_llhr_e->GetBinLowEdge(i+1)+h_llhr_e->GetBinWidth(i+1),
+	     qe,qm,pe[i],rm[i]);
     }
   }
 
@@ -174,7 +175,7 @@ void create_llhr_cal_rejection_graph(const dataset_t* DsEle,
 
 
 //-----------------------------------------------------------------------------
-void plot_llhr_cal_rejection_2(int OffVer = 421, int Print = 0) {
+void plot_llhr_cal_rejection(int OffVer = 421, int Print = 0) {
 
   TGraph  *gr_x0(0), *gr_x1(0), *gr_x2(0);
 
@@ -232,7 +233,18 @@ void plot_llhr_cal_rejection_2(int OffVer = 421, int Print = 0) {
 
   leg->AddEntry(gr_x0,"Signal only"           ,"ep");
   leg->AddEntry(gr_x1,"Signal + CD3 Overlays (x1)","ep");
-
+//-----------------------------------------------------------------------------
+//  add label
+// ------------------- print efficiency and rejection numbers for e42s5721 and m40s5721 
+// i, llhr , qe, qm, prob(e) , rej(mu) :  99      0.000   1960.000 103332.000    0.95041    126.180
+// i, llhr , qe, qm, prob(e) , rej(mu) : 100      1.000   2696.000 104020.000    0.94398    195.568
+//-----------------------------------------------------------------------------
+  TLatex* t1 = new TLatex(0.94398+0.001 , 195.568+5,"LLHR < 1.0");
+  TLatex* t2 = new TLatex(0.95041+0.001 , 126.180+5,"LLHR < 0.0");
+  t1->SetTextSize(0.025);
+  t2->SetTextSize(0.025);
+  t1->Draw();
+  t2->Draw();
 //-----------------------------------------------------------------------------
 //  efficiency vs rejection for signal + background x2
 //-----------------------------------------------------------------------------

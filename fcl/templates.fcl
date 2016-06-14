@@ -153,29 +153,35 @@ murat.mpr_reco : [ @sequence::Tracking.TPRDownstreameMinus ,
 murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
 		   @sequence::CalPatRec.dem_reco, 
 		   MergePatRecDem, 
-		   @sequence::TrackCaloMatching.matching_dem ]
+		   @sequence::TrackCaloMatching.matching_dem
+		   , AvikPIDNewDem 
+		  ]
 
 murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus, 
 		   @sequence::CalPatRec.dmm_reco, 
 		   MergePatRecDmm, 
-		   @sequence::TrackCaloMatching.matching_dmm ]
+		   @sequence::TrackCaloMatching.matching_dmm
+		   , AvikPIDNewDmm 
+		  ]
 
 murat.dep_reco : [ @sequence::Tracking.TPRDownstreamePlus , 
 		   @sequence::CalPatRec.dep_reco, 
 		   MergePatRecDep, 
-		   @sequence::TrackCaloMatching.matching_dep ]
+		   @sequence::TrackCaloMatching.matching_dep,
+		   AvikPIDNewDep ]
 
 murat.dmp_reco : [ @sequence::Tracking.TPRDownstreammuPlus, 
 		   @sequence::CalPatRec.dmp_reco, 
 		   MergePatRecDmp, 
-		   @sequence::TrackCaloMatching.matching_dmp ]
+		   @sequence::TrackCaloMatching.matching_dmp,
+		   AvikPIDNewDmp ]
 #----------------------------------------------------------------------------------------------------
 # so far, CalPatRec is not used for upstream reconstruction
 #----------------------------------------------------------------------------------------------------
-murat.uem_reco : [ @sequence::Tracking.TPRUpstreameMinus  , MergePatRecUem, @sequence::TrackCaloMatching.matching_uem ]
-murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm ]
-murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep ]
-murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump ]
+murat.uem_reco : [ @sequence::Tracking.TPRUpstreameMinus  , MergePatRecUem, @sequence::TrackCaloMatching.matching_uem, AvikPIDNewUem ]
+murat.umm_reco : [ @sequence::Tracking.TPRUpstreammuMinus , MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm, AvikPIDNewUmm ]
+murat.uep_reco : [ @sequence::Tracking.TPRUpstreamePlus   , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep, AvikPIDNewUep ]
+murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump, AvikPIDNewUmp ]
 
 murat.paths : {
 
@@ -216,12 +222,20 @@ murat.paths : {
 			      @sequence::Stntuple.stnmaker
 			     ]
 
+    gen_digi_dem_dmm_reco_stn : [ @sequence::murat.gen_g4_time_map,
+				  @sequence::murat.digis          ,
+				  @sequence::murat.cal_reco       ,
+				  @sequence::murat.dem_reco       ,
+				  @sequence::murat.dmm_reco       ,
+				  @sequence::Stntuple.stnmaker_dem_dmm
+				 ]
+
     gen_digi_dem_umm_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				  @sequence::murat.digis          ,
 				  @sequence::murat.cal_reco       ,
 				  @sequence::murat.dem_reco       ,
 				  @sequence::murat.umm_reco       ,
-				  @sequence::Stntuple.stnmaker
+				  @sequence::Stntuple.stnmaker_dem_umm
 				 ]
 
     gen_digi_dem_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
@@ -229,7 +243,7 @@ murat.paths : {
 				  @sequence::murat.cal_reco       ,
 				  @sequence::murat.dem_reco       ,
 				  @sequence::murat.ump_reco       ,
-				  @sequence::Stntuple.stnmaker
+				  @sequence::Stntuple.stnmaker_dem_ump
 				 ]
 
     gen_digi_dem_dmp_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,

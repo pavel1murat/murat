@@ -28,48 +28,32 @@ public:
 //  histograms
 //-----------------------------------------------------------------------------
   struct PidHist_t {
-    TH1F*    fEleTrkNumber;
-    TH1F*    fMuoTrkNumber;
+    TH1F*    fTrkNumber;
 
     TH1F*    fNMatched;		       //
     TH1F*    fNMatchedAll;		       // generator code
 
-    TH1F*    fNUsedOsEleH;
-    TH1F*    fNUsedOsMuoH;
-    TH1F*    fNUsedSsEleH;
-    TH1F*    fNUsedSsMuoH;
-
-    TH1F*    fNUsedOsEleD;
-    TH1F*    fNUsedOsMuoD;
+    TH1F*    fNUsedOsH;
+    TH1F*    fNUsedSsH;
+    TH1F*    fNUsedOsD;
 
     TH1F*    fLogDedxProbEle;
     TH1F*    fLogDedxProbMuo;
     TH1F*    fLhrDedx;
 
-    TH1F*    fDrdsVadimEle;
-    TH1F*    fXdrdsVadimEle;
-    TH1F*    fDrdsVadimMuo;
-    TH1F*    fXdrdsVadimMuo;
+    TH1F*    fDrdsVadim;
+    TH1F*    fXdrdsVadim;
 
-    TH1F*    fSumAvikEle;
-    TH1F*    fSumAvikMuo;
-    TH1F*    fLhrAvikSum;
+    TH1F*    fSumAvik;
+    TH1F*    fSq2Avik;
 
-    TH1F*    fSq2AvikEle;
-    TH1F*    fSq2AvikMuo;
+    TH1F*    fDrdsOs;
+    TH1F*    fXdrdsOs;
 
-    TH1F*    fDrdsOsEle;
-    TH1F*    fXdrdsOsEle;
-    TH1F*    fDrdsOsMuo;
-    TH1F*    fXdrdsOsMuo;
+    TH1F*    fSumAvikOs;
 
-    TH1F*    fSumAvikOsEle;
-    TH1F*    fSumAvikOsMuo;
-
-    TH1F*    fDrdsSsEle;
-    TH1F*    fXdrdsSsEle;
-    TH1F*    fDrdsSsMuo;
-    TH1F*    fXdrdsSsMuo;
+    TH1F*    fDrdsSs;
+    TH1F*    fXdrdsSs;
   };
 
   struct EventHist_t {

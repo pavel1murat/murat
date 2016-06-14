@@ -31,52 +31,29 @@ public:
   struct TrackPidHist_t {
     TH1F*    fLHEDedx;		       // 
     TH1F*    fLHMDedx;		       // 
-    TH1F*    fLHRDedx;		       // 
-    TH1F*    fDrdsVadimEle;
-    TH1F*    fDrdsVadimMuo;
-    TH1F*    fDxdsVadimEle;
-    TH1F*    fDxdsVadimMuo;
-    TH1F*    fSumAvikEle;
-    TH1F*    fSumAvikMuo;
-    TH1F*    fMeanAvikEle;
-    TH1F*    fMeanAvikMuo;
-    TH1F*    fLHRSumAvik;
+    TH1F*    fLHRDedx;
+    TH1F*    fDrdsVadim;
+    TH1F*    fDxdsVadim;
+    TH1F*    fSumAvik;
+    TH1F*    fMeanAvik;
 
-    TH1F*    fSq2AvikEle;
-    TH1F*    fSq2AvikMuo;
-    TH1F*    fMq2AvikEle;
-    TH1F*    fMq2AvikMuo;
-    TH1F*    fLHRSq2Avik;
+    TH1F*    fSq2Avik;
+    TH1F*    fMq2Avik;
 
-    TH1F*    fDrdsOsEle;
-    TH1F*    fDrdsOsMuo;
-    TH1F*    fDxdsOsEle;
-    TH1F*    fDxdsOsMuo;
+    TH1F*    fDrdsOs;
+    TH1F*    fDxdsOs;
 
-    TH1F*    fDrdsSsEle;
-    TH1F*    fDrdsSsMuo;
-    TH1F*    fDxdsSsEle;
-    TH1F*    fDxdsSsMuo;
+    TH1F*    fDrdsSs;
+    TH1F*    fDxdsSs;
 
-    TH1F*    fSumAvikOsEle;
-    TH1F*    fSumAvikOsMuo;
+    TH1F*    fSumAvikOs;
 
-    TH1F*    fNUsedOsEleH;
-    TH1F*    fNUsedOsMuoH;
+    TH1F*    fNUsedOsH;
 
-    TH1F*    fNUsedOsEleD;
-    TH1F*    fNUsedOsMuoD;
+    TH1F*    fNUsedOsD;
 
-    TH1F*    fNUsedSsEleH;
-    TH1F*    fNUsedSsMuoH;
+    TH1F*    fNUsedSsH;
 
-    TH1F*    fLHROsDs;
-    TH1F*    fLHROsDsNorm;
-
-    TH1F*    fLHRSq2Dedx;			// combined
-    TH1F*    fLHROsdsnDedx;			// combined
-
-    TH2F*    fLHRDedxVsSq2;
   };
 
   struct EventHist_t {

@@ -739,7 +739,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
     int nhits = fTrackStrawHitBlock->NTrackHits(itrk);
 
     for (int i=0; i<nhits; i++) {
-      TStrawHitData* hit = fTrackStrawHitBlock->Hit(itrk,i);
+      TTrackStrawHitData* hit = fTrackStrawHitBlock->Hit(itrk,i);
       Hist->fHitEnergy->Fill(hit->Energy());
       Hist->fHitDt->Fill(hit->Dt());
       Hist->fHitTRel->Fill(hit->Time()-tp->fTMean);
@@ -1466,7 +1466,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 					// calculate the mean time
       float tmean(0);
       for (int i=0; i<nhits; i++) {
-	TStrawHitData* hit = fTrackStrawHitBlock->Hit(itrk,i);
+	TTrackStrawHitData* hit = fTrackStrawHitBlock->Hit(itrk,i);
 	tmean += hit->Time();
       }
 

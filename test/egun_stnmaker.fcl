@@ -9,7 +9,8 @@
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
-#include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/prolog.fcl"
+#                                      #include "murat/fcl/prolog.fcl"
 #------------------------------------------------------------------------------
 # local changes to global variables
 #------------------------------------------------------------------------------
@@ -40,16 +41,16 @@ physics: { @table::physics
 	}
     }
     filters : { @table::physics.filters 
-	InitStntuple   : { @table::InitStntuple 
+	InitStntuple   : { @table::physics.filters.InitStntuple 
 	    histFileName           : "egun_stnmaker.stn" 
 	}
-	TrackRecoCheck : { @table::TrackRecoCheck
-	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
-	    debugBits            : { bit11:1 }
-	}
+# 	TrackRecoCheck : { @table::physics.filters.TrackRecoCheck
+# 	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
+# 	    debugBits            : { bit11:1 }
+# 	}
     }
 
-    p1 : [ @sequence::gen_allpatrec_dem_dmm_reco_stnmaker_seq, TrackRecoCheck ]
+    p1 : [ @sequence::gen_allpatrec_dem_dmm_reco_stnmaker_seq ] # , TrackRecoCheck ]
     trigger_paths : [ p1  ]
     end_paths     : [ out ]
 }

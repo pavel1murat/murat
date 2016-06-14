@@ -50,45 +50,35 @@ void TPidAnaModule::BookPidHistograms(PidHist_t* Hist, const char* Folder) {
   //  
   //-----------------------------------------------------------------------------
 
-  HBook1F(Hist->fEleTrkNumber ,"etrk"        ,Form("%s: Ele Trk Number" ,Folder), 100, 0, 100,Folder);
-  HBook1F(Hist->fMuoTrkNumber ,"mtrk"        ,Form("%s: Muo Trk Number" ,Folder), 100, 0, 100,Folder);
+  HBook1F(Hist->fTrkNumber ,"trk"        ,Form("%s: Trk Number" ,Folder), 100, 0, 100,Folder);
   HBook1F(Hist->fNMatched     ,"nmatched"    ,Form("%s: N(Matched)"     ,Folder), 100, 0, 100,Folder);
   HBook1F(Hist->fNMatchedAll  ,"nmatched_all",Form("%s: N(matched all"  ,Folder), 100, 0, 100,Folder);
 
-  HBook1F(Hist->fNUsedOsEleH  ,"nused_os_eleh",Form("%s: N(used OS Ele H)" ,Folder), 100, 0, 100,Folder);
-  HBook1F(Hist->fNUsedOsMuoH  ,"nused_os_muoh",Form("%s: N(used OS Muo H)" ,Folder), 100, 0, 100,Folder);
+  HBook1F(Hist->fNUsedOsH  ,"nused_os_h",Form("%s: N(used OS H)" ,Folder), 100, 0, 100,Folder);
 
-  HBook1F(Hist->fNUsedSsEleH  ,"nused_ss_eleh",Form("%s: N(used SS Ele H)" ,Folder), 100, 0, 100,Folder);
-  HBook1F(Hist->fNUsedSsMuoH  ,"nused_ss_muoh",Form("%s: N(used SS Muo H)" ,Folder), 100, 0, 100,Folder);
+  HBook1F(Hist->fNUsedSsH  ,"nused_ss_h",Form("%s: N(used SS H)" ,Folder), 100, 0, 100,Folder);
 
-  HBook1F(Hist->fNUsedOsEleD  ,"nused_os_eled",Form("%s: N(used OS Ele D)" ,Folder), 100, 0, 100,Folder);
-  HBook1F(Hist->fNUsedOsMuoD  ,"nused_os_muod",Form("%s: N(used OS Muo D)" ,Folder), 100, 0, 100,Folder);
+  HBook1F(Hist->fNUsedOsD  ,"nused_os_d",Form("%s: N(used OS D)" ,Folder), 100, 0, 100,Folder);
 
   HBook1F(Hist->fLogDedxProbEle,"log_dedx_prob_ele",Form("%s: Log DedxProb(Ele)" ,Folder), 200, -400,   0,Folder);
   HBook1F(Hist->fLogDedxProbMuo,"log_dedx_prob_muo",Form("%s: Log DedxProb(Muo)" ,Folder), 200, -400,   0,Folder);
   HBook1F(Hist->fLhrDedx,       "lhr_dedx"         ,Form("%s: LHR Dedx(ELE/Muo)" ,Folder), 200, -10 , 10 ,Folder);
 
-  HBook1F(Hist->fDrdsVadimEle  ,"drds_vadim_ele" ,Form("%s: DrDs Vadim Ele " ,Folder), 200, -2.0e-3, 2.0e-3,Folder);
-  HBook1F(Hist->fXdrdsVadimEle ,"xdrds_vadim_ele",Form("%s: XDrDs Vadim Ele" ,Folder), 400, -20, 20,Folder);
-  HBook1F(Hist->fDrdsVadimMuo  ,"drds_vadim_muo" ,Form("%s: DrDs Vadim Muo " ,Folder), 200, -2.0e-3, 2.0e-3,Folder);
-  HBook1F(Hist->fXdrdsVadimMuo ,"xdrds_vadim_muo",Form("%s: XDrDs Vadim Muo" ,Folder), 400, -20, 20,Folder);
+  HBook1F(Hist->fDrdsVadim  ,"drds_vadim" ,Form("%s: DrDs Vadim" ,Folder), 200, -2.0e-3, 2.0e-3,Folder);
+  HBook1F(Hist->fXdrdsVadim ,"xdrds_vadim",Form("%s: XDrDs Vadim" ,Folder), 400, -20, 20,Folder);
 
-  HBook1F(Hist->fSumAvikEle  ,"sum_avik_ele" ,Form("%s: Sum Avik Ele " ,Folder), 500, 0, 5,Folder);
-  HBook1F(Hist->fSumAvikMuo  ,"sum_avik_muo" ,Form("%s: Sum Avik Muo " ,Folder), 500, 0, 5,Folder);
-  HBook1F(Hist->fLhrAvikSum  ,"lhr_avik_sum" ,Form("%s: LHR Avik Sum " ,Folder), 500, -25, 25,Folder);
+  HBook1F(Hist->fSumAvik  ,"sum_avik" ,Form("%s: Sum Avik" ,Folder), 500, 0, 5,Folder);
 
-  HBook1F(Hist->fDrdsOsEle  ,"drds_os_ele" ,Form("%s: DrDs  OS Ele",Folder), 200, -2.0e-3, 2.0e-3,Folder);
-  HBook1F(Hist->fXdrdsOsEle ,"xdrds_os_ele",Form("%s: XdrDs OS Ele",Folder), 400, -20, 20,Folder);
-  HBook1F(Hist->fDrdsOsMuo  ,"drds_os_muo" ,Form("%s: DrDs  OS Muo",Folder), 200, -2.0e-3, 2.0e-3,Folder);
-  HBook1F(Hist->fXdrdsOsMuo ,"xdrds_os_muo",Form("%s: XdrDs OS Muo",Folder), 400, -20, 20,Folder);
+  HBook1F(Hist->fDrdsOs  ,"drds_os" ,Form("%s: DrDs  OS",Folder), 200, -2.0e-3, 2.0e-3,Folder);
+  HBook1F(Hist->fXdrdsOs ,"xdrds_os",Form("%s: XdrDs OS",Folder), 400, -20, 20,Folder);
 
-  HBook1F(Hist->fSumAvikOsEle  ,"sum_avik_os_ele" ,Form("%s: Sum Avik OS Ele " ,Folder), 500, 0, 10,Folder);
-  HBook1F(Hist->fSumAvikOsMuo  ,"sum_avik_os_muo" ,Form("%s: Sum Avik OS Muo " ,Folder), 500, 0, 10,Folder);
+  HBook1F(Hist->fSumAvikOs  ,"sum_avik_os" ,Form("%s: Sum Avik OS" ,Folder), 500, 0, 10,Folder);
+  //  HBook1F(Hist->fSumAvikOsMuo  ,"sum_avik_os_muo" ,Form("%s: Sum Avik OS Muo " ,Folder), 500, 0, 10,Folder);
 
-  HBook1F(Hist->fDrdsSsEle  ,"drds_ss_ele" ,Form("%s: DrDs SS Ele ",Folder), 200, -2.0e-3, 2.0e-3,Folder);
-  HBook1F(Hist->fXdrdsSsEle ,"xdrds_ss_ele",Form("%s: XdrDs SS Ele",Folder), 400, -20, 20,Folder);
-  HBook1F(Hist->fDrdsSsMuo  ,"drds_ss_muo" ,Form("%s: DrDs SS Muo ",Folder), 200, -2.0e-3, 2.0e-3,Folder);
-  HBook1F(Hist->fXdrdsSsMuo ,"xdrds_ss_muo",Form("%s: XdrDs SS Muo",Folder), 400, -20, 20,Folder);
+  HBook1F(Hist->fDrdsSs  ,"drds_ss" ,Form("%s: DrDs SS ",Folder), 200, -2.0e-3, 2.0e-3,Folder);
+  HBook1F(Hist->fXdrdsSs ,"xdrds_ss",Form("%s: XdrDs SS",Folder), 400, -20, 20,Folder);
+//   HBook1F(Hist->fDrdsSsMuo  ,"drds_ss_muo" ,Form("%s: DrDs SS Muo ",Folder), 200, -2.0e-3, 2.0e-3,Folder);
+//   HBook1F(Hist->fXdrdsSsMuo ,"xdrds_ss_muo",Form("%s: XdrDs SS Muo",Folder), 400, -20, 20,Folder);
 
 }
 
@@ -154,48 +144,33 @@ void TPidAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 void TPidAnaModule::FillPidHistograms(PidHist_t* Hist, TStnPid* Pid) {
 
-  Hist->fEleTrkNumber->Fill(Pid->fEleTrkNumber);
-  Hist->fMuoTrkNumber->Fill(Pid->fMuoTrkNumber);
+  Hist->fTrkNumber->Fill(Pid->fTrkNumber);
 
   Hist->fNMatched->Fill   (Pid->fNMatched);
   Hist->fNMatchedAll->Fill(Pid->fNMatchedAll);
 
-  Hist->fNUsedOsEleH->Fill(Pid->fNUsedOsEleH);
-  Hist->fNUsedOsMuoH->Fill(Pid->fNUsedOsMuoH);
+  Hist->fNUsedOsH->Fill(Pid->fNUsedOsH);
 
-  Hist->fNUsedOsEleD->Fill(Pid->fNUsedOsEleD);
-  Hist->fNUsedOsMuoD->Fill(Pid->fNUsedOsMuoD);
+  Hist->fNUsedOsD->Fill(Pid->fNUsedOsD);
 
-  Hist->fNUsedSsEleH->Fill (Pid->fNUsedSsEleH);
-  Hist->fNUsedSsMuoH->Fill (Pid->fNUsedSsMuoH);
+  Hist->fNUsedSsH->Fill (Pid->fNUsedSsH);
 
   Hist->fLogDedxProbEle->Fill (Pid->fLogDedxProbEle);
   Hist->fLogDedxProbMuo->Fill (Pid->fLogDedxProbMuo);
   Hist->fLhrDedx->Fill        (Pid->fLogDedxProbEle-Pid->fLogDedxProbMuo);
 
-  Hist->fDrdsVadimEle ->Fill(Pid->fDrdsVadimEle);
-  Hist->fXdrdsVadimEle->Fill(Pid->fDrdsVadimEle/Pid->fDrdsVadimEleErr);
-  Hist->fDrdsVadimMuo ->Fill(Pid->fDrdsVadimMuo);
-  Hist->fXdrdsVadimMuo->Fill(Pid->fDrdsVadimMuo/Pid->fDrdsVadimMuoErr);
+  Hist->fDrdsVadim ->Fill(Pid->fDrdsVadim);
+  Hist->fXdrdsVadim->Fill(Pid->fDrdsVadim/Pid->fDrdsVadimErr);
 
-  Hist->fSumAvikEle->Fill(Pid->fSumAvikEle);
-  Hist->fSumAvikMuo->Fill(Pid->fSumAvikMuo);
+  Hist->fSumAvik->Fill(Pid->fSumAvik);
 
-  double lhr_avik_sum = TMath::Log(Pid->fSumAvikMuo/Pid->fSumAvikEle);
-  Hist->fLhrAvikSum->Fill(lhr_avik_sum);
+  Hist->fDrdsOs->Fill(Pid->fDrdsOs);
+  Hist->fXdrdsOs->Fill(Pid->fDrdsOs/Pid->fDrdsOsErr);
 
-  Hist->fDrdsOsEle->Fill(Pid->fDrdsOsEle);
-  Hist->fXdrdsOsEle->Fill(Pid->fDrdsOsEle/Pid->fDrdsOsEleErr);
-  Hist->fDrdsOsMuo->Fill(Pid->fDrdsOsMuo);
-  Hist->fXdrdsOsMuo->Fill(Pid->fDrdsOsMuo/Pid->fDrdsOsMuoErr);
+  Hist->fSumAvikOs->Fill(Pid->fSumAvikOs);
 
-  Hist->fSumAvikOsEle->Fill(Pid->fSumAvikOsEle);
-  Hist->fSumAvikOsMuo->Fill(Pid->fSumAvikOsMuo);
-
-  Hist->fDrdsSsEle->Fill(Pid->fDrdsSsEle);
-  Hist->fXdrdsSsEle->Fill(Pid->fDrdsSsEle/Pid->fDrdsSsEleErr);
-  Hist->fDrdsSsMuo->Fill(Pid->fDrdsSsMuo);
-  Hist->fXdrdsSsMuo->Fill(Pid->fDrdsSsMuo/Pid->fDrdsSsMuoErr);
+  Hist->fDrdsSs->Fill(Pid->fDrdsSs);
+  Hist->fXdrdsSs->Fill(Pid->fDrdsSs/Pid->fDrdsSsErr);
 
 }
 

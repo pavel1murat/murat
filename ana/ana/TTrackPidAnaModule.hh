@@ -19,6 +19,9 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+#include "murat/ana/TAnaPart.hh"
+#include "murat/ana/AnaDefs.hh"
+
 class TTrackPidAnaModule: public TStnModule {
 public:
 
@@ -28,10 +31,15 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct TrackPidHist_t {
+  struct PidHist_t {
     TH1F*    fLHEDedx;		       // 
     TH1F*    fLHMDedx;		       // 
     TH1F*    fLHRDedx;
+
+    TH1F*    fNUsedOsH;
+    TH1F*    fNUsedSsH;
+    TH1F*    fNUsedOsD;
+
     TH1F*    fDrdsVadim;
     TH1F*    fDxdsVadim;
     TH1F*    fSumAvik;
@@ -47,20 +55,10 @@ public:
     TH1F*    fDxdsSs;
 
     TH1F*    fSumAvikOs;
-
-    TH1F*    fNUsedOsH;
-
-    TH1F*    fNUsedOsD;
-
-    TH1F*    fNUsedSsH;
-
   };
 
   struct EventHist_t {
-    TH1F*    fNTracks[2];		// N(reconstructed tracks)
-    TH2F*    fNDmmVsNDem;
-    TH1F*    fNDem;
-    TH1F*    fNDmm;
+    TH1F*    fNTracks[8];		// N(reconstructed tracks)
   };
 
   struct TrackHist_t {
@@ -71,42 +69,41 @@ public:
 //  fTrackPidHist[ 0]: all the tracks
 //  fTrackPidHist[ 1]: Set C tracks
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets    = 100 };
-  enum { kNTrackHistSets    = 100 };
-  enum { kNTrackPidHistSets =  10 };
+  enum { kNEventHistSets    = 800 };
+  enum { kNTrackHistSets    = 800 };
+  enum { kNPidHistSets      = 800 };
 
   struct Hist_t {
-    EventHist_t*    fEvent   [kNEventHistSets   ];
-    TrackHist_t*    fTrack   [kNTrackHistSets   ];
-    TrackPidHist_t* fTrackPid[kNTrackPidHistSets];
+    EventHist_t* fEvent[kNEventHistSets];
+    TrackHist_t* fTrack[kNTrackHistSets];
+    PidHist_t*   fPid  [kNPidHistSets  ];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlockDem;
-  TStnTrackBlock*   fTrackBlockDmm;
-  TStnPidBlock*     fTrackPidBlock;
-					// additional track PID parameters (for simplicity, assume Ntracks < 20)
-  TrackPidPar_t     fTrackPidPar[20];
-					// histograms filled
-  Hist_t            fHist;
-					// cut values
-  double            fMinPt;
-  double            fMinT0;
 
-  int               fNTracks[10];
-  int               fNTracksDem;
-  int               fNTracksDmm;
+  TStnTrackBlock*      fTrackBlock   [8];
+  TTrackStrawHitBlock* fTrackHitBlock[8];
+  TStnPidBlock*        fPidBlock     [8];
 
-  int               fNPid;
+  double               fLogProb      [8];  // 
 
-  TStnTrack*        fTrack;
+					   // assume less than 20 particles
+  TAnaPart             fPart[20];
+					   // additional track PID parameters (for simplicity, assume Ntracks < 20)
+  TrackPidPar_t        fTrackPidPar[20];
+					   // histograms filled
+  Hist_t               fHist;
+					   // cut values
+  double               fMinPt;
+  int                  fNTracks[8];
+  int                  fNID;
+  TStnTrackID*         fTrackID[20];
+  int                  fBestID;
 
-  TStnTrackID*      fTrackID;
-
-  TEmuLogLH*        fLogLH;
+  TEmuLogLH*           fLogLH;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -116,13 +113,8 @@ public:
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  Hist_t*            GetHist         () { return &fHist;         }
-  TStnTrackBlock*    GetTrackBlockDem() { return fTrackBlockDem; }
-  TStnTrackBlock*    GetTrackBlockDmm() { return fTrackBlockDmm; }
-  TStnPidBlock*      GetTrackPidBlock() { return fTrackPidBlock; }
-
-  TStnTrackID*       GetTrackID      () { return fTrackID; }
-  TEmuLogLH*         GetLogLH        () { return fLogLH; }
+  Hist_t*            GetHist         () { return &fHist;   }
+  TEmuLogLH*         GetLogLH        () { return fLogLH;   }
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -136,16 +128,19 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookEventHistograms   (EventHist_t*    Hist, const char* Folder);
-  void    BookTrackHistograms   (TrackHist_t*    Hist, const char* Folder);
-  void    BookTrackPidHistograms(TrackPidHist_t* Hist, const char* Folder);
+  void    BookEventHistograms(EventHist_t*  Hist, const char* Folder);
+  void    BookTrackHistograms(TrackHist_t*  Hist, const char* Folder);
+  void    BookPidHistograms  (PidHist_t*    Hist, const char* Folder);
 
-  void    FillEventHistograms    (EventHist_t*    Hist);
-  void    FillTrackHistograms    (TrackHist_t*    Hist, TStnTrack*  Trk    );
-  void    FillTrackPidHistograms (TrackPidHist_t* Hist, TStnPid*    Cluster);
+  void    FillEventHistograms(EventHist_t* Hist);
+  void    FillTrackHistograms(TrackHist_t* Hist, TStnTrack*  Trk    );
+  void    FillPidHistograms  (PidHist_t*   Hist, TStnPid*    Cluster);
 
   void    BookHistograms();
   void    FillHistograms();
+
+  int     FindTrack(TAnaPart* Part, int Index);
+  int     MakeParticles();
 
 
   void    Debug();

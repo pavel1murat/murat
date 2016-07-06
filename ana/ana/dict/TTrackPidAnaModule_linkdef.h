@@ -5,7 +5,7 @@
 
 #pragma link C++ class TTrackPidAnaModule;
 #pragma link C++ class TTrackPidAnaModule::TrackPidPar_t;
-#pragma link C++ class TTrackPidAnaModule::TrackPidHist_t;
+#pragma link C++ class TTrackPidAnaModule::PidHist_t;
 
 #endif
 

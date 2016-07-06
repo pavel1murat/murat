@@ -9,6 +9,7 @@ int load_stnana_scripts_murat() {
     //    "init_geometry.C",
     "cosmics.C",
     "dio_calib.C",
+    "genp.C",
     "pid.C",
     "reco_eff_ana.C",
     "track.C",

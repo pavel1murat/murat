@@ -18,6 +18,7 @@
 
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
+#include "Stntuple/obj/TTrackStrawHitBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/obj/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
@@ -33,9 +34,29 @@ ClassImp(TTrackPidAnaModule)
 TTrackPidAnaModule::TTrackPidAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
-  fMinT0 = 700; 
+  for (int i=0; i<8; i++) {
+    fTrackBlock   [i] = NULL;
+    fTrackHitBlock[i] = NULL;
+    fPidBlock     [i] = NULL;
+  }
+//-----------------------------------------------------------------------------
+// track quality selection
+//-----------------------------------------------------------------------------
+  fNID             = 1;
+  for (int i=0; i<fNID; i++) {
+    fTrackID[i]    = new TStnTrackID();
+  }
 
-  fTrackID = new TStnTrackID();
+  fTrackID[0]->SetMaxMomErr (100);
+  fTrackID[0]->SetMaxT0Err  (100);
+  fTrackID[0]->SetMinFitCons(-1.);
+  fTrackID[0]->SetMinTrkQual(0.4);
+  fTrackID[0]->SetMinNActive(-1 );
+
+  fBestID     = 0;			// best: DaveTrkQual > 0.4, no NActive cut
+//-----------------------------------------------------------------------------
+// track quality selection
+//-----------------------------------------------------------------------------
   fLogLH   = new TEmuLogLH();
 }
 
@@ -45,11 +66,33 @@ TTrackPidAnaModule::~TTrackPidAnaModule() {
 
 
 //-----------------------------------------------------------------------------
-void TTrackPidAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
+void TTrackPidAnaModule::BookPidHistograms(PidHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fP       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  90  ,110. ,Folder);
+  HBook1F(Hist->fLHEDedx   ,"lhe_dedx",Form("%s: LHEDedx"        ,Folder), 150,  -300. ,0. ,Folder);
+  HBook1F(Hist->fLHMDedx   ,"lhm_dedx",Form("%s: LHMDedx"        ,Folder), 150,  -300. ,0. ,Folder);
+  HBook1F(Hist->fLHRDedx   ,"lhr_dedx",Form("%s: LHRDedx"        ,Folder), 100,  -10.  , 10. ,Folder);
+  HBook1F(Hist->fDrdsVadim ,"drds"    ,Form("%s: dr/ds vadim",Folder), 200,  -0.001 ,0.001 ,Folder);
+  HBook1F(Hist->fDxdsVadim ,"dxds"    ,Form("%s: dx/ds vadim",Folder), 200,  -10   ,10   ,Folder);
+  HBook1F(Hist->fSumAvik   ,"avik_sum",Form("%s: sum Avik"   ,Folder), 200,    0   ,0.2 ,Folder);
+  HBook1F(Hist->fMeanAvik  ,"mean_sum",Form("%s: Avik sum/N"       ,Folder), 200,    0   ,0.2 ,Folder);
+
+  HBook1F(Hist->fSq2Avik   ,"sq2"     ,Form("%s: sq2"         ,Folder), 200,    0   ,10. ,Folder);
+  HBook1F(Hist->fMq2Avik   ,"mq2"     ,Form("%s: Avik sq2/Nmatchedall",Folder), 200,    0   ,10 ,Folder);
+
+  HBook1F(Hist->fDrdsOs    ,"drds_os" ,Form("%s: dr/ds OS",Folder), 200,  -0.002 ,0.002 ,Folder);
+  HBook1F(Hist->fDxdsOs    ,"dxds_os" ,Form("%s: dx/ds OS",Folder), 200,  -100. , 100. ,Folder);
+  
+  HBook1F(Hist->fDrdsSs    ,"drds_ss" ,Form("%s: dr/ds SS",Folder), 200,  -0.002 ,0.002 ,Folder);
+  HBook1F(Hist->fDxdsSs    ,"dxds_ss" ,Form("%s: dx/ds SS",Folder), 200,  -100. ,100. ,Folder);
+
+  HBook1F(Hist->fNUsedSsH  ,"nu_ss_h" ,Form("%s: N(used) SS H",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fNUsedOsH  ,"nu_os_h" ,Form("%s: N(used) OS H",Folder), 100, 0,100 ,Folder);
+  HBook1F(Hist->fNUsedOsD  ,"nu_os_d" ,Form("%s: N(used) OS D",Folder), 100, 0,100 ,Folder);
+
+  HBook1F(Hist->fSumAvikOs ,"avik_os" ,Form("%s: Avik OS",Folder), 200, 0,100. ,Folder);
+
 }
 
 //-----------------------------------------------------------------------------
@@ -57,13 +100,18 @@ void TTrackPidAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Fold
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fNTracks[0],"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fNTracks[1],"ntrk_1"     ,Form("%s: Number of Set C         Tracks"  ,Folder),5,0,5,Folder);
 
-  HBook1F(Hist->fNDem,"ndem"   ,Form("%s: NTRK Dem"                        ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fNDmm,"ndmm"   ,Form("%s: NTRK Dmm"                        ,Folder),5,0,5,Folder);
+  for (int i=0; i<8; i++) {
+    HBook1F(Hist->fNTracks[i],Form("ntrk_%i",i) ,Form("%s: Number of Reconstructed Tracks[%i]"  ,Folder,i),5,0,5,Folder);
+  }
+}
 
-  HBook2F(Hist->fNDmmVsNDem,"ndmm_vs_ndem"     ,Form("%s: N(Dmm) vs N(Dem)"          ,Folder),5,0,5,5,0,5,Folder);
+//-----------------------------------------------------------------------------
+void TTrackPidAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
+//   char name [200];
+//   char title[200];
+
+  HBook1F(Hist->fP       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 400,  90  ,110. ,Folder);
 }
 
 //_____________________________________________________________________________
@@ -101,9 +149,12 @@ void TTrackPidAnaModule::BookHistograms() {
   int book_track_histset[kNTrackHistSets];
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
-  book_track_histset[  0] = 1;		// all tracks e-
-  book_track_histset[  1] = 1;		// all tracks e- passing Set C cuts 
-  
+  for (int ih=0; ih<8; ih++) {
+    int loc = 100*ih;
+    book_track_histset[loc   ] = 1;		// all tracks 
+    book_track_histset[loc+ 1] = 1;		// BEST_ID tracks
+  }
+
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
       sprintf(folder_name,"trk_%i",i);
@@ -116,19 +167,22 @@ void TTrackPidAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book track PID histograms
 //-----------------------------------------------------------------------------
-  int book_track_pid_histset[kNTrackPidHistSets];
-  for (int i=0; i<kNTrackPidHistSets; i++) book_track_pid_histset[i] = 0;
+  int book_pid_histset[kNPidHistSets];
+  for (int i=0; i<kNPidHistSets; i++) book_pid_histset[i] = 0;
 
-  book_track_pid_histset[0] = 1;		// all tracks
-  book_track_pid_histset[1] = 1;		// Set C tracks
+  for (int ih=0; ih<8; ih++) {
+    int loc = 100*ih;
+    book_pid_histset[loc   ] = 1;		// all tracks 
+    book_pid_histset[loc+ 1] = 1;		// BEST_ID tracks
+  }
 
-  for (int i=0; i<kNTrackPidHistSets; i++) {
-    if (book_track_pid_histset[i] != 0) {
+  for (int i=0; i<kNPidHistSets; i++) {
+    if (book_pid_histset[i] != 0) {
       sprintf(folder_name,"pid_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fTrackPid[i] = new TrackPidHist_t;
-      BookTrackPidHistograms(fHist.fTrackPid[i],Form("Hist/%s",folder_name));
+      fHist.fPid[i] = new PidHist_t;
+      BookPidHistograms(fHist.fPid[i],Form("Hist/%s",folder_name));
     }
   }
 
@@ -141,13 +195,9 @@ void TTrackPidAnaModule::FillEventHistograms(EventHist_t* Hist) {
   // double            p;
   // TLorentzVector    mom;
 
-  Hist->fNTracks[0]->Fill  (fNTracks[0]);
-  Hist->fNTracks[1]->Fill  (fNTracks[1]);
-
-  Hist->fNDem->Fill(fNTracksDem);
-  Hist->fNDmm->Fill(fNTracksDmm);
-
-  Hist->fNDmmVsNDem->Fill(fNTracksDem,fNTracksDmm);
+  for (int i=0; i<8; i++) {
+    Hist->fNTracks[i]->Fill(fNTracks[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -165,7 +215,7 @@ void TTrackPidAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track
 }
 
 //-----------------------------------------------------------------------------
-void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* Pid) {
+void TTrackPidAnaModule::FillPidHistograms(PidHist_t* Hist, TStnPid* Pid) {
 
   double lhr_dedx;
 
@@ -216,36 +266,6 @@ void TTrackPidAnaModule::FillTrackPidHistograms(TrackPidHist_t* Hist, TStnPid* P
 
 
 //-----------------------------------------------------------------------------
-void TTrackPidAnaModule::BookTrackPidHistograms(TrackPidHist_t* Hist, const char* Folder) {
-//   char name [200];
-//   char title[200];
-
-  HBook1F(Hist->fLHEDedx     ,"lhe_dedx",Form("%s: LHEDedx"        ,Folder), 150,  -300. ,0. ,Folder);
-  HBook1F(Hist->fLHMDedx     ,"lhm_dedx",Form("%s: LHMDedx"        ,Folder), 150,  -300. ,0. ,Folder);
-  HBook1F(Hist->fLHRDedx     ,"lhr_dedx",Form("%s: LHRDedx"        ,Folder), 100,  -10.  , 10. ,Folder);
-  HBook1F(Hist->fDrdsVadim   ,"drds",Form("%s: dr/ds vadim",Folder), 200,  -0.001 ,0.001 ,Folder);
-  HBook1F(Hist->fDxdsVadim   ,"dxds",Form("%s: dx/ds vadim",Folder), 200,  -10   ,10   ,Folder);
-  HBook1F(Hist->fSumAvik     ,"avik",Form("%s: sum Avik"   ,Folder), 200,    0   ,10 ,Folder);
-  HBook1F(Hist->fMeanAvik    ,"mean",Form("%s: Avik sum/N"       ,Folder), 200,    0   ,0.2 ,Folder);
-
-  HBook1F(Hist->fSq2Avik     ,"sq2",Form("%s: sq2"         ,Folder), 200,    0   ,10. ,Folder);
-  HBook1F(Hist->fMq2Avik     ,"mq2",Form("%s: Avik sq2/Nmatchedall",Folder), 200,    0   ,0.2 ,Folder);
-
-  HBook1F(Hist->fDrdsOs,"drds_os",Form("%s: dr/ds OS",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDxdsOs,"dxds_os",Form("%s: dx/ds OS",Folder), 200,  -100. , 100. ,Folder);
-  
-  HBook1F(Hist->fDrdsSs,"drds_ss",Form("%s: dr/ds SS",Folder), 200,  -0.002 ,0.002 ,Folder);
-  HBook1F(Hist->fDxdsSs,"dxds_ss",Form("%s: dx/ds SS",Folder), 200,  -100. ,100. ,Folder);
-
-  HBook1F(Hist->fNUsedSsH ,"nu_ss_h" ,Form("%s: N(used) SS H",Folder), 100, 0,100 ,Folder);
-  HBook1F(Hist->fNUsedOsH ,"nu_os_h" ,Form("%s: N(used) OS H",Folder), 100, 0,100 ,Folder);
-  HBook1F(Hist->fNUsedOsD ,"nu_os_d" ,Form("%s: N(used) OS D",Folder), 100, 0,100 ,Folder);
-
-  HBook1F(Hist->fSumAvikOs,"avik_os",Form("%s: Avik OS",Folder), 200, 0,100. ,Folder);
-
-}
-
-//-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
 int TTrackPidAnaModule::BeginJob() {
@@ -254,17 +274,28 @@ int TTrackPidAnaModule::BeginJob() {
 // follow Stntuple/fcl/templates.fcl and assume that the first, DEM, 
 // track data block is called just "TrackBlock"
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"   ,"TStnTrackBlock",&fTrackBlockDem);
-  RegisterDataBlock("TrackBlockDmm","TStnTrackBlock",&fTrackBlockDmm);
-  RegisterDataBlock("PidBlock"     ,"TStnPidBlock"  ,&fTrackPidBlock);
+  RegisterDataBlock("TrackBlockDem"   ,"TStnTrackBlock"     ,&fTrackBlock[kDem]);
+  RegisterDataBlock("TrackBlockDmp"   ,"TStnTrackBlock"     ,&fTrackBlock[kDmp]);
+  RegisterDataBlock("TrackBlockUmm"   ,"TStnTrackBlock"     ,&fTrackBlock[kUmm]);
+  RegisterDataBlock("TrackBlockUmp"   ,"TStnTrackBlock"     ,&fTrackBlock[kUmp]);
+
+  RegisterDataBlock("TrackHitBlockDem","TTrackStrawHitBlock",&fTrackHitBlock[kDem]);
+  RegisterDataBlock("TrackHitBlockDmp","TTrackStrawHitBlock",&fTrackHitBlock[kDmp]);
+  RegisterDataBlock("TrackHitBlockUmm","TTrackStrawHitBlock",&fTrackHitBlock[kUmm]);
+  RegisterDataBlock("TrackHitBlockUmp","TTrackStrawHitBlock",&fTrackHitBlock[kUmp]);
+
+  RegisterDataBlock("PidBlockDem"     ,"TStnPidBlock"       ,&fPidBlock[kDem]     );
+  RegisterDataBlock("PidBlockDmp"     ,"TStnPidBlock"       ,&fPidBlock[kDmp]     );
+  RegisterDataBlock("PidBlockUmm"     ,"TStnPidBlock"       ,&fPidBlock[kUmm]     );
+  RegisterDataBlock("PidBlockUmp"     ,"TStnPidBlock"       ,&fPidBlock[kUmp]     );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
   BookHistograms();
-//-----------------------------------------------------------------------------
-// initialize likelihood histograms
-//-----------------------------------------------------------------------------
-  fTrackID->SetMinT0(fMinT0);
+// //-----------------------------------------------------------------------------
+// // initialize likelihood histograms
+// //-----------------------------------------------------------------------------
+//   fTrackID->SetMinT0(fMinT0);
 //-----------------------------------------------------------------------------
 // initialize likelihood histograms
 // TRK 19: "Set C" plus reconstructed and matched cluster
@@ -288,56 +319,129 @@ int TTrackPidAnaModule::BeginRun() {
 //_____________________________________________________________________________
 void TTrackPidAnaModule::FillHistograms() {
 
-  //  double       cos_th (-2.),  cl_e(-1.);
-  //  int          disk_id(-1), alg_mask, nsh, nactive;
-  //  float        pfront, ce_pitch, reco_pitch, fcons, t0, sigt, sigp, p; 
-  TStnPid      *pid;
 //-----------------------------------------------------------------------------
 // event histograms
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
 //-----------------------------------------------------------------------------
-// track histograms, fill them only for the downstream e- hypothesis
+// track histograms - just test
 //-----------------------------------------------------------------------------
   TStnTrack*      trk;
-  //  TrackPidPar_t*  tp;
+  TStnPid*        pid;
 
-  for (int i=0; i<fNTracks[0]; ++i ) {
-    trk = fTrackBlockDem->Track(i);
-    //    tp  = fTrackPidPar+i;
-
-    FillTrackHistograms(fHist.fTrack[0],trk);
-
-    if (trk->fIDWord == 0) {
-					// track passes selection "C" 
-
-      FillTrackHistograms(fHist.fTrack[1],trk);
-    }
-  }
+  for (int ihyp=0; ihyp<8; ihyp++) {
+    TStnTrackBlock* tb = fTrackBlock[ihyp];
+    TStnPidBlock*   pb = fPidBlock  [ihyp];
+    if (tb) {
+      int loc = 100*ihyp;
+      int nt  = tb->NTracks();
+      for (int it=0; it<nt; it++ ) {
+	trk = tb->Track(it);
+	pid = pb->Pid(it);
 //-----------------------------------------------------------------------------
-// particle ID histograms
+// SET LOC+0: all tracks
 //-----------------------------------------------------------------------------
-  for (int i=0; i<fNPid; ++i ) {
-    trk = fTrackBlockDem->Track(i);
-    pid = fTrackPidBlock->Pid(i);
-    FillTrackPidHistograms(fHist.fTrackPid[0],pid);
+	FillTrackHistograms(fHist.fTrack[loc],trk);
+	FillPidHistograms(fHist.fPid    [loc],pid);
 
-    if ((trk->fIDWord == 0) && (trk->fP > 100.)) {
-
-					// track with P > 103 MeV/c passes selection "C" 
-
-      FillTrackPidHistograms(fHist.fTrackPid[1],pid);
-
-      if (GetDebugBit(4) != 0) {
-	GetHeaderBlock()->Print(Form("-----bit004: p = %12.5f T0: %10.3f",trk->fP,trk->fT0));
-	printf("NMatched, NMatchedAll, sum, sq2  %3i %3i %12.5f %12.5f \n", 
-	       pid->fNMatched,
-	       pid->fNMatchedAll,
-	       pid->fSumAvik,
-	       pid->fSq2Avik);
+	if (trk->fIDWord == 0) {
+//-----------------------------------------------------------------------------
+// SET LOC+1: BEST_ID tracks
+//-----------------------------------------------------------------------------
+	  FillTrackHistograms(fHist.fTrack[loc+1],trk);
+	  FillPidHistograms(fHist.fPid    [loc+1],pid);
+	}
       }
     }
   }
+
+}
+
+
+//-----------------------------------------------------------------------------
+int TTrackPidAnaModule::FindTrack(TAnaPart* Part, int Index) {
+  TStnTrack           *t1, *t2;
+  TTrackStrawHitData  *h1, *h2;
+  int                  nh1, nh2, ncommon;
+
+  Part->fTrack[Index] = NULL;
+
+  if (fTrackBlock[Index] == NULL) return 0;
+
+  t1  = Part->fTrack[0];
+  nh1 = t1->NHits();
+
+  int nt2 = fTrackBlock[Index]->NTracks();
+  for (int it2=0; it2<nt2; it2++) {
+    t2  = fTrackBlock[Index]->Track(it2);
+    nh2 = t2->NHits();
+					// check hit pattern
+    ncommon = 0;
+    for (int ih1=0; ih1<t1->NHits(); ih1++) {
+      h1  = fTrackHitBlock[0]->Hit(0,ih1);
+      for (int ih2=0; ih2<t2->NHits(); ih2++) {
+	h2  = fTrackHitBlock[Index]->Hit(it2,ih2);
+
+	if (h1->Index() == h2->Index()) {
+					// common hit
+	  ncommon += 1;
+	}
+      }
+    }
+//-----------------------------------------------------------------------------
+// require more than 50% of hit overlap
+//-----------------------------------------------------------------------------
+    if (ncommon > (nh1+nh2)/4.) {
+					// the same track
+      Part->fTrack[Index] = t2;
+      break;
+    }
+  }
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+// for each potential CE candidate (DEM track) make an analysis object and run PID 
+//-----------------------------------------------------------------------------
+int TTrackPidAnaModule::MakeParticles() {
+  TStnTrack           *t1;
+  int ndem = fTrackBlock[kDem]->NTracks();
+
+  for (int it1=0; it1<ndem; it1++) {
+    t1                      = fTrackBlock[kDem]->Track(it1);
+    fPart[it1].fTrack[kDem] = t1;
+//-----------------------------------------------------------------------------
+// loop over all other blocks and initialize other allowed hypotheses
+//-----------------------------------------------------------------------------
+    for (int i=1; i<8; i++) {
+      FindTrack(&fPart[it1],i);
+    }
+  }
+//-----------------------------------------------------------------------------
+// particle ID 
+//-----------------------------------------------------------------------------
+  for (int it1=0; it1<ndem; it1++) {
+    t1                    = fTrackBlock[kDem]->Track(it1);
+    if ((t1->Ep() > 0) && (t1->Ep() < 1.15)) {
+//-----------------------------------------------------------------------------
+// a track has an associated cluster - calculate track-calo likelihoods
+// for an upstream hypotheses the expected energy distribution can't be predicted
+// In this case, set log(probability) to a positive value and do not consider the 
+// energy part of the likelihood when comparing the two hypotheses
+//-----------------------------------------------------------------------------
+      // #####
+      
+    }
+    else {
+//-----------------------------------------------------------------------------
+// a track doesn't have a cluster - use tracker-only particle ID 
+//-----------------------------------------------------------------------------
+    }
+    
+  }
+
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -354,38 +458,31 @@ int TTrackPidAnaModule::Event(int ientry) {
 
   //  TDiskCalorimeter::GeomData_t disk_geom;
 
-  fTrackBlockDem->GetEntry(ientry);
-  fTrackBlockDmm->GetEntry(ientry);
-  fTrackPidBlock->GetEntry(ientry);
+  for (int i=0; i<8; i++) {
+    if (fTrackBlock[i] != NULL) {
+      fTrackBlock   [i]->GetEntry(ientry);
+      fTrackHitBlock[i]->GetEntry(ientry);
+      fPidBlock     [i]->GetEntry(ientry);
+
+      fNTracks[i] = fTrackBlock[i]->NTracks();
+    }
+  }
 //-----------------------------------------------------------------------------
-// assume electron in the first particle, otherwise the logic will need to 
-// be changed
+// make analysis object
 //-----------------------------------------------------------------------------
-  fNTracks[0] = fTrackBlockDem->NTracks();
-  fNTracksDem = fTrackBlockDem->NTracks();
-  fNTracksDmm = fTrackBlockDmm->NTracks();
-  fNPid       = fTrackPidBlock->NTracks();
+  MakeParticles();
+//-----------------------------------------------------------------------------
+// assume electron in the first particle, otherwise the logic will need to be changed
+//-----------------------------------------------------------------------------
+  int ndem = fTrackBlock[kDem]->NTracks();
 
-  fNTracks[1] = 0;
-
-  if (fNTracks[0] == 0) fTrack = 0;
-  else                  fTrack = fTrackBlockDem->Track(0);
-
-  int ntrk = fNTracksDem;
-  //  int alg_mask;
-
-  //  TrackPidPar_t*   tp;
-
-  for (int itrk=0; itrk<ntrk; itrk++) {
+  for (int i=0; i<ndem; i++) {
 					// assume less 20 tracks
     //    tp             = fTrackPidPar+itrk;
 
-    track          = fTrackBlockDem->Track(itrk);
-    id_word        = fTrackID->IDWord(track);
+    track          = fPart[i].fTrack[kDem];
+    id_word        = fTrackID[fBestID]->IDWord(track);
     track->fIDWord = id_word;
-    if (id_word == 0) {
-      fNTracks[1] += 1;
-    }
   }
 
   FillHistograms();
@@ -400,10 +497,10 @@ void TTrackPidAnaModule::Debug() {
 
   TStnTrack*     trk;
   //  TrackPidPar_t* tp;
-  int ntrk = fTrackBlockDem->NTracks();
+  int ntrk = fTrackBlock[kDem]->NTracks();
 
   for (int itrk=0; itrk<ntrk; itrk++) {
-    trk = fTrackBlockDem->Track(itrk);
+    trk = fTrackBlock[kDem]->Track(itrk);
     //    tp  = fTrackPidPar+itrk;
 //-----------------------------------------------------------------------------
 // bit 3: Set C tracks with large DX : 70mm < |DX| < 90mm

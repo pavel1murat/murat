@@ -6,6 +6,7 @@
 TCalAnaModule*           m_cal   = NULL;
 TCosmicsAnaModule*       m_cos   = NULL;
 TDioCalibModule*         m_dio   = NULL;
+TGenAnaModule*           m_gen   = NULL;
 // TStrawHitAnaModule*      m_str   = NULL;
 TTrackAnaModule*         m_trk   = NULL;
 TTrackAnaModuleA*        m_trka  = NULL;

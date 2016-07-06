@@ -150,31 +150,17 @@ murat.mpr_reco : [ @sequence::Tracking.TPRDownstreameMinus ,
 		   MergePatRec, 
 		   @sequence::TrackCaloMatching.matching ]
 
-murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus , 
-		   @sequence::CalPatRec.dem_reco, 
-		   MergePatRecDem, 
-		   @sequence::TrackCaloMatching.matching_dem
-		   , AvikPIDNewDem 
-		  ]
+murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus  , @sequence::CalPatRec.dem_reco, MergePatRecDem, 
+		   @sequence::TrackCaloMatching.matching_dem, AvikPIDNewDem ]
 
-murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus, 
-		   @sequence::CalPatRec.dmm_reco, 
-		   MergePatRecDmm, 
-		   @sequence::TrackCaloMatching.matching_dmm
-		   , AvikPIDNewDmm 
-		  ]
+murat.dmm_reco : [ @sequence::Tracking.TPRDownstreammuMinus , @sequence::CalPatRec.dmm_reco, MergePatRecDmm, 
+		   @sequence::TrackCaloMatching.matching_dmm, AvikPIDNewDmm ]
 
-murat.dep_reco : [ @sequence::Tracking.TPRDownstreamePlus , 
-		   @sequence::CalPatRec.dep_reco, 
-		   MergePatRecDep, 
-		   @sequence::TrackCaloMatching.matching_dep,
-		   AvikPIDNewDep ]
+murat.dep_reco : [ @sequence::Tracking.TPRDownstreamePlus   , @sequence::CalPatRec.dep_reco, MergePatRecDep, 
+		   @sequence::TrackCaloMatching.matching_dep, AvikPIDNewDep ]
 
-murat.dmp_reco : [ @sequence::Tracking.TPRDownstreammuPlus, 
-		   @sequence::CalPatRec.dmp_reco, 
-		   MergePatRecDmp, 
-		   @sequence::TrackCaloMatching.matching_dmp,
-		   AvikPIDNewDmp ]
+murat.dmp_reco : [ @sequence::Tracking.TPRDownstreammuPlus  , @sequence::CalPatRec.dmp_reco, MergePatRecDmp, 
+		   @sequence::TrackCaloMatching.matching_dmp, AvikPIDNewDmp ]
 #----------------------------------------------------------------------------------------------------
 # so far, CalPatRec is not used for upstream reconstruction
 #----------------------------------------------------------------------------------------------------

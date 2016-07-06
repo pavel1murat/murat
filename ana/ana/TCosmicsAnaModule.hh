@@ -26,6 +26,8 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+#include "murat/ana/AnaDefs.hh"
+
 class TCosmicsAnaModule: public TStnModule {
 public:
 //-----------------------------------------------------------------------------
@@ -39,8 +41,6 @@ public:
   enum { kNTrackBlocks  =   8 } ; // dem:dmm:dep:dmp:uem:umm:uep:ump
   enum { kMaxTrackID    =  10 } ;
   enum { kMaxNErrors    = 100 } ;
-
-  enum { kDem = 0, kDmm = 1, kDep = 2, kDmp = 3, kUem = 4, kUmm = 5, kUep = 6, kUmp = 7 } ;
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------

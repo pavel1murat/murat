@@ -8,6 +8,8 @@ struct TrackPar_t : public TrackParBase_t {
   int     fNEPl;
   int     fNDPl;
   int     fIDWord[20];
+
+  double  fMVAOut[20];			// outputs of different MVA classifiers
   
   double  fP   ; 			// momentum, corrected to set DPF at 0
   float   fDpF ;			// tracker-only resolution

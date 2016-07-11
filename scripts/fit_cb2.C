@@ -94,15 +94,15 @@ void cb2_create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 
 //-----------------------------------------------------------------------------
 void cb2_fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
-			  double X0, double XMin, double XMax) {
+			  double X0, double XMin, double XMax, double Sigma = -1.) {
 
   _Hist = (TH1F*) gh1(File,Module,Hist)->Clone("h_cb2_fit_crystal_ball");
 
-  cb2_fit_crystal_ball(_Hist,X0,XMin,XMax);
+  cb2_fit_crystal_ball(_Hist,X0,XMin,XMax,Sigma);
 }
 
 //-----------------------------------------------------------------------------
-void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
+void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1.) {
 
   TH1F* h      = (TH1F*) Hist;
   double anorm = h->GetEntries()/10;
@@ -114,6 +114,12 @@ void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 
 //   h->Draw();
 //   _Func->Draw("same");
+
+  if (Sigma > 0) {
+    _Func->SetParameter(2,Sigma);
+    _Func->SetParLimits(2,Sigma*(1+1.e-5),Sigma*(1+1.e-5));
+  }
+
   cb2_fit                (h,_Func,XMin,XMax);
 
   TF1* f2 = new TF1("cb2_gauss",cb2_gauss,XMin,XMax,3);

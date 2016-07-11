@@ -28,6 +28,10 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+namespace mu2e { 
+  class MVATools;
+};
+
 class TTrackCompModule: public TStnModule {
 public:
 #include "murat/ana/TrackPar_t.hh"
@@ -137,6 +141,8 @@ public:
 
     TH2F*    fFConsVsNActive;
     TH1F*    fDaveTrkQual;
+    TH1F*    fMVAOut;			// output of our MVA
+    TH1F*    fDeltaMVA;			// DaveTrkQual-MVAOut[0]
   };
 //-----------------------------------------------------------------------------
 //  fTrackHist[  0]: all tracks
@@ -159,6 +165,9 @@ public:
   };
 
   struct TmvaTrainingData_t {
+    float    fP;
+    float    fPMC;
+    float    fTanDip;
     float    fNActive;
     float    fNaFract;
     float    fChi2Dof;
@@ -173,6 +182,9 @@ public:
   };
 
   struct TmvaTrainingBranches_t {
+    TBranch*  fP;
+    TBranch*  fPMC;
+    TBranch*  fTanDip;
     TBranch*  fNActive;
     TBranch*  fNaFract;
     TBranch*  fChi2Dof;
@@ -247,6 +259,11 @@ public:
   TmvaTrainingData_t      fTmvaData;
   TmvaTrainingBranches_t  fSigBranch;
   TmvaTrainingBranches_t  fBgrBranch;
+
+  int                     fUseMVA;
+  int                     fNMVA;	// number of MVA classifiers used
+  mu2e::MVATools*         fTrkQualMva;
+  TString                 fMVAWeightsFile;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -261,14 +278,19 @@ public:
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
-  void               SetPdgCode      (int Code ) { fPdgCode       = Code ; }
-  void               SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
-  void               SetDebugCut(int I, double XMin, double XMax) {
+  void    SetPdgCode      (int Code ) { fPdgCode       = Code ; }
+  void    SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
+  void    SetDebugCut(int I, double XMin, double XMax) {
     fDebugCut[I].fXMin = XMin;
     fDebugCut[I].fXMax = XMax;
   }
   
-  void               SetWriteTmvaTree(int Flag) { fWriteTmvaTree = Flag; }
+  void    SetUseMVA        (int Flag) { fUseMVA        = Flag; }
+  void    SetWriteTmvaTree (int Flag) { fWriteTmvaTree = Flag; }
+
+  void    SetMVAWeightsFile(const char* Filename) { 
+    if (Filename[0] != 0) fMVAWeightsFile = Filename; 
+  }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

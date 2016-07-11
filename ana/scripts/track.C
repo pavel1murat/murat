@@ -16,6 +16,7 @@ def_name track_011("track_ana_nocorr");
 
 def_name track_051("track_comp");
 def_name track_052("track_comp_tmva");
+def_name track_053("track_comp_use_mva");
 
 def_name track_100("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
@@ -177,6 +178,30 @@ void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, 
   m_tcm->SetPdgCode      (11);
   m_tcm->SetGeneratorCode(GeneratorCode);
   m_tcm->SetWriteTmvaTree(TrkRecoAlg);
+
+  if (DebugBit >= 0) {
+    m_tcm->SetDebugBit(DebugBit,1);
+    if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+// TrkRrecoAlg = 1: TrkPatRec    =2:CalPatRec
+//-----------------------------------------------------------------------------
+void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module to write TMVA training trees
+//-----------------------------------------------------------------------------
+  m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
+  m_tcm->SetPdgCode      (11);
+  m_tcm->SetGeneratorCode(GeneratorCode);
+
+  m_tcm->SetUseMVA(1);
+  
+  const char* MVAWeightsFile = "../../alaha/dev/TrkQualExponentialWeights/TMVAClassification_MLP.weights.xml";
+
+  if (MVAWeightsFile != NULL) m_tcm->SetMVAWeightsFile(MVAWeightsFile);
 
   if (DebugBit >= 0) {
     m_tcm->SetDebugBit(DebugBit,1);

@@ -35,6 +35,18 @@
 //-----------------------------------------------------------------------------
 #include "ana/TTrackCompModule.hh"
 
+// framework
+#include "fhiclcpp/ParameterSet.h"
+
+// Xerces XML Parser
+#include <xercesc/dom/DOM.hpp>
+
+#include "Mu2eUtilities/inc/MVATools.hh"
+#include<string>
+
+using std::string;
+using std::vector;
+
 ClassImp(TTrackCompModule)
 //-----------------------------------------------------------------------------
 TTrackCompModule::TTrackCompModule(const char* name, const char* title):
@@ -84,12 +96,115 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
   fDoLittle      = 0;
   fWriteTmvaTree = 0;
+
+  fUseMVA        = 0;
+  fNMVA          = 0;
+  fMVAWeightsFile  = "TrkDiag/test/TrkQual.weights.xml";
 }
 
 //-----------------------------------------------------------------------------
 TTrackCompModule::~TTrackCompModule() {
   delete fLogLH;
   for (int i=0; i<fNID; i++) delete fTrackID[i];
+}
+
+//-----------------------------------------------------------------------------
+// register data blocks and book histograms
+//-----------------------------------------------------------------------------
+int TTrackCompModule::BeginJob() {
+//-----------------------------------------------------------------------------
+// register data blocks
+//-----------------------------------------------------------------------------
+  RegisterDataBlock("TrkPatRec"     ,"TStnTrackBlock"     ,&fTrackBlock[0]);
+  RegisterDataBlock("CalPatRec"     ,"TStnTrackBlock"     ,&fTrackBlock[1]);
+  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"   ,&fClusterBlock );
+  RegisterDataBlock("SimpBlock"     ,"TSimpBlock"         ,&fSimpBlock    );
+  RegisterDataBlock("GenpBlock"     ,"TGenpBlock"         ,&fGenpBlock    );
+  RegisterDataBlock("VdetBlock"     ,"TVdetDataBlock"     ,&fVdetBlock    );
+//-----------------------------------------------------------------------------
+// book histograms
+//-----------------------------------------------------------------------------
+  BookHistograms();
+//-----------------------------------------------------------------------------
+// initialize likelihood histograms
+//-----------------------------------------------------------------------------
+  if (fWriteTmvaTree != 0) {
+    fDoLittle = 1;
+    TDirectory* dir = gDirectory;
+
+    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
+
+    if      (fWriteTmvaTree == 1) {
+      fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
+    }
+    else if (fWriteTmvaTree == 2) {
+      fTmvaFile  = new TFile(Form("%s.tmva_training_calpatrec.root",dsname),"recreate");
+    }
+
+    fSigTree  = new TTree("signal"    ,"TMVA Signal Tree");
+    fBgrTree  = new TTree("background","TMVA Background Tree");
+
+					// signal tree
+
+    fSigBranch.fP         = fSigTree->Branch("p"       ,&fTmvaData.fP        ,"F");
+    fSigBranch.fPMC       = fSigTree->Branch("pmc"     ,&fTmvaData.fPMC      ,"F");
+    fSigBranch.fTanDip    = fSigTree->Branch("tdip"    ,&fTmvaData.fTanDip   ,"F");
+    fSigBranch.fNActive   = fSigTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
+    fSigBranch.fNaFract   = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
+    fSigBranch.fChi2Dof   = fSigTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
+    fSigBranch.fMomErr    = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
+    fSigBranch.fT0Err     = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
+    fSigBranch.fD0        = fSigTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
+    fSigBranch.fRMax      = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
+    fSigBranch.fNdaOverNa = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
+    fSigBranch.fNzaOverNa = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
+    fSigBranch.fNmaOverNa = fSigTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
+
+					// background tree
+
+    fBgrBranch.fP         = fBgrTree->Branch("p"       ,&fTmvaData.fP        ,"F");
+    fBgrBranch.fPMC       = fBgrTree->Branch("pmc"     ,&fTmvaData.fPMC      ,"F");
+    fBgrBranch.fTanDip    = fBgrTree->Branch("tdip"    ,&fTmvaData.fTanDip   ,"F");
+    fBgrBranch.fNActive   = fBgrTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
+    fBgrBranch.fNaFract   = fBgrTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
+    fBgrBranch.fChi2Dof   = fBgrTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
+    fBgrBranch.fMomErr    = fBgrTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
+    fBgrBranch.fT0Err     = fBgrTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
+    fBgrBranch.fD0        = fBgrTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
+    fBgrBranch.fRMax      = fBgrTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
+    fBgrBranch.fNdaOverNa = fBgrTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
+    fBgrBranch.fNzaOverNa = fBgrTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
+    fBgrBranch.fNmaOverNa = fBgrTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
+    fBgrBranch.fWeight    = fBgrTree->Branch("weight"  ,&fTmvaData.fWeight   ,"F");
+
+    dir->cd();
+  }
+//-----------------------------------------------------------------------------
+// init MVA 
+//-----------------------------------------------------------------------------
+  if (fUseMVA) {
+    fNMVA = 1;
+    // initialize TrkQual MVA.  Note the weight file is passed in from the KalDiag config
+    fhicl::ParameterSet mvapset; //  = pset.get<fhicl::ParameterSet>("TrkQualMVA",fhicl::ParameterSet());
+    //  mvapset.put<string>("MVAWeights",pset.get<string>("TrkQualWeights","TrkDiag/test/TrkQual.weights.xml"));
+
+    string s(fMVAWeightsFile.Data());
+    mvapset.put<string>("MVAWeights",s);
+  
+    fTrkQualMva = new mu2e::MVATools(mvapset);
+    fTrkQualMva->initMVA();
+    //    fTrkQualMva->showMVA();
+  }
+
+  return 0;
+}
+
+
+//_____________________________________________________________________________
+int TTrackCompModule::BeginRun() {
+  int rn = GetHeaderBlock()->RunNumber();
+  TStntuple::Init(rn);
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -179,7 +294,8 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
 
   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
-
+  HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVAOut[0]"          ,Folder), 200, -0.5, 1.5,Folder);
+  HBook1F(Hist->fDeltaMVA   ,"dmva"     ,Form("%s:MVAOut[0]-TrkQual"  ,Folder), 200, -1.0, 1.0,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -578,85 +694,14 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
   Hist->fEp->Fill(Tp->fEp);
 
   Hist->fFConsVsNActive->Fill(Track->NActive(),Track->fFitCons);
+//-----------------------------------------------------------------------------
+// MVA variables
+//-----------------------------------------------------------------------------
   Hist->fDaveTrkQual->Fill(Track->DaveTrkQual());
-}
 
-
-//-----------------------------------------------------------------------------
-// register data blocks and book histograms
-//-----------------------------------------------------------------------------
-int TTrackCompModule::BeginJob() {
-//-----------------------------------------------------------------------------
-// register data blocks
-//-----------------------------------------------------------------------------
-  RegisterDataBlock("TrkPatRec"     ,"TStnTrackBlock"     ,&fTrackBlock[0]);
-  RegisterDataBlock("CalPatRec"     ,"TStnTrackBlock"     ,&fTrackBlock[1]);
-  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"   ,&fClusterBlock );
-  RegisterDataBlock("SimpBlock"     ,"TSimpBlock"         ,&fSimpBlock    );
-  RegisterDataBlock("GenpBlock"     ,"TGenpBlock"         ,&fGenpBlock    );
-  RegisterDataBlock("VdetBlock"     ,"TVdetDataBlock"     ,&fVdetBlock    );
-//-----------------------------------------------------------------------------
-// book histograms
-//-----------------------------------------------------------------------------
-  BookHistograms();
-//-----------------------------------------------------------------------------
-// initialize likelihood histograms
-//-----------------------------------------------------------------------------
-  if (fWriteTmvaTree != 0) {
-    fDoLittle = 1;
-    TDirectory* dir = gDirectory;
-
-    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
-
-    if      (fWriteTmvaTree == 1) {
-      fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
-    }
-    else if (fWriteTmvaTree == 2) {
-      fTmvaFile  = new TFile(Form("%s.tmva_training_calpatrec.root",dsname),"recreate");
-    }
-
-    fSigTree  = new TTree("signal"    ,"TMVA Signal Tree");
-    fBgrTree  = new TTree("background","TMVA Background Tree");
-
-					// signal tree
-
-    fSigBranch.fNActive   = fSigTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
-    fSigBranch.fNaFract   = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
-    fSigBranch.fChi2Dof   = fSigTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
-    fSigBranch.fMomErr    = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
-    fSigBranch.fT0Err     = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
-    fSigBranch.fD0        = fSigTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
-    fSigBranch.fRMax      = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
-    fSigBranch.fNdaOverNa = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
-    fSigBranch.fNzaOverNa = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
-    fSigBranch.fNmaOverNa = fSigTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
-
-					// background tree
-
-    fBgrBranch.fNActive   = fBgrTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
-    fBgrBranch.fNaFract   = fBgrTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
-    fBgrBranch.fChi2Dof   = fBgrTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
-    fBgrBranch.fMomErr    = fBgrTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
-    fBgrBranch.fT0Err     = fBgrTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
-    fBgrBranch.fD0        = fBgrTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
-    fBgrBranch.fRMax      = fBgrTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
-    fBgrBranch.fNdaOverNa = fBgrTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
-    fBgrBranch.fNzaOverNa = fBgrTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
-    fBgrBranch.fNmaOverNa = fBgrTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
-    fBgrBranch.fWeight    = fBgrTree->Branch("weight"  ,&fTmvaData.fWeight   ,"F");
-
-    dir->cd();
-  }
-
-  return 0;
-}
-
-
-//_____________________________________________________________________________
-int TTrackCompModule::BeginRun() {
-  int rn = GetHeaderBlock()->RunNumber();
-  TStntuple::Init(rn);
-  return 0;
+  Hist->fMVAOut->Fill(Tp->fMVAOut[0]);
+  float dmva=Tp->fMVAOut[0]-Track->DaveTrkQual();
+  Hist->fDeltaMVA->Fill(dmva);
 }
 
 
@@ -676,6 +721,9 @@ int TTrackCompModule::FillTmvaTree() {
 
   float na = trk->NActive();
 
+  fTmvaData.fP         = tp->fP;
+  fTmvaData.fPMC       = trk->fPFront;
+  fTmvaData.fTanDip    = trk->TanDip();
   fTmvaData.fNActive   = na;
   fTmvaData.fNaFract   = na/trk->NHits();
   fTmvaData.fChi2Dof   = trk->Chi2Dof();
@@ -690,10 +738,10 @@ int TTrackCompModule::FillTmvaTree() {
 
   // there should be two trees - signal and background
 
-  if (tp->fDpF > 0.5) {
+  if (tp->fDpF > 0.7) {
     fBgrTree->Fill();
   }
-  else if (fabs(tp->fDpF) < 0.2) {
+  else if (fabs(tp->fDpF) < 0.25) {
     fSigTree->Fill();
   }
 
@@ -1072,6 +1120,30 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     }
 
     track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
+//-----------------------------------------------------------------------------
+// on-the-fly MVA calculation
+//-----------------------------------------------------------------------------
+    tp->fMVAOut[0] = -1.e6;
+
+    if (fUseMVA) {
+      vector<double>  pmva;
+      pmva.resize(10);
+
+      float na = track->NActive();
+
+      pmva[0] = na;
+      pmva[1] = na/track->NHits();
+      pmva[2] = track->Chi2Dof();
+      pmva[3] = track->FitMomErr();
+      pmva[4] = track->T0Err();
+      pmva[5] = track->D0();
+      pmva[6] = track->RMax();
+      pmva[7] = track->NDoubletsAct()/na;
+      pmva[8] = track->NHitsAmbZero()/na;
+      pmva[9] = track->NMatActive()/na;
+
+      tp->fMVAOut[0] = fTrkQualMva->evalMVA(pmva);
+    }
   }
 
   return 0;

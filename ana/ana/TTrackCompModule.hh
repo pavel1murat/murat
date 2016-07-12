@@ -261,9 +261,15 @@ public:
   TmvaTrainingBranches_t  fBgrBranch;
 
   int                     fUseMVA;
-  int                     fNMVA;	// number of MVA classifiers used
-  mu2e::MVATools*         fTrkQualMva;
-  TString                 fMVAWeightsFile;
+  int                     fNMVA;	// number of MVA classifiers used for tracks of the same type
+//-----------------------------------------------------------------------------
+// MVA-based classifiers for TrkPatRec and CalPatRec tracks separately
+//-----------------------------------------------------------------------------
+  TString                 fTprWeightsFile;
+  TString                 fCprWeightsFile;
+
+  mu2e::MVATools*         fTprQualMva;
+  mu2e::MVATools*         fCprQualMva;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -288,9 +294,8 @@ public:
   void    SetUseMVA        (int Flag) { fUseMVA        = Flag; }
   void    SetWriteTmvaTree (int Flag) { fWriteTmvaTree = Flag; }
 
-  void    SetMVAWeightsFile(const char* Filename) { 
-    if (Filename[0] != 0) fMVAWeightsFile = Filename; 
-  }
+  void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }
+  void    SetCprWeightsFile(const char* Fn) { if (Fn[0] != 0) fCprWeightsFile = Fn; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

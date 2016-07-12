@@ -59,7 +59,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 // TrackID[0] : "SetC"
 // i = 1..6 : cut on DaveTrkQual > 0.1*i instead
 //-----------------------------------------------------------------------------
-  fNID  = 6;
+  fNID  = 10;
   for (int i=0; i<fNID-1; i++) {
     fTrackID[i] = new TStnTrackID();
     if (i > 0) {
@@ -67,20 +67,20 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
       fTrackID[i]->SetMaxT0Err     (100);
       //      fTrackID[i]->SetMinNActive   ( 10);
       fTrackID[i]->SetMinFitCons   (-1.);
-      fTrackID[i]->SetMinTrkQual   (0.1*i);
+      fTrackID[i]->SetMinTrkQual   (0.1*i+0.1);
     }
   }
 
 					// ID = 4: no hits on the number of active hits
-  fTrackID[5] = new TStnTrackID();
-  fTrackID[5]->SetMaxMomErr (100);
-  fTrackID[5]->SetMaxT0Err     (100);
-  fTrackID[5]->SetMinNActive   ( -1);
-  fTrackID[5]->SetMinFitCons   (-1.);
-  fTrackID[5]->SetMinTrkQual   (0.4);
+  fTrackID[9] = new TStnTrackID();
+  fTrackID[9]->SetMaxMomErr (100);
+  fTrackID[9]->SetMaxT0Err     (100);
+  fTrackID[9]->SetMinNActive   ( -1);
+  fTrackID[9]->SetMinFitCons   (-1.);
+  fTrackID[9]->SetMinTrkQual   (0.4);
 
-  fBestTrackID = fTrackID[5];  // Dave's default: DaveTrkQual > 0.4, no N(active) cut 
-  fBestID      = 5;
+  fBestTrackID = fTrackID[9];  // Dave's default: DaveTrkQual > 0.4, no N(active) cut 
+  fBestID      = 9;
 
   fLogLH       = new TEmuLogLH();
 //-----------------------------------------------------------------------------
@@ -94,12 +94,14 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // ntuples for TMVA training
 //-----------------------------------------------------------------------------
-  fDoLittle      = 0;
-  fWriteTmvaTree = 0;
+  fDoLittle       = 0;
+  fWriteTmvaTree  = 0;
 
-  fUseMVA        = 0;
-  fNMVA          = 0;
-  fMVAWeightsFile  = "TrkDiag/test/TrkQual.weights.xml";
+  fUseMVA         = 0;
+  fNMVA           = 0;
+
+  fTprWeightsFile = "TrkDiag/test/TrkQual.weights.xml";
+  fCprWeightsFile = "CalPatRec/test/MLP_weights_exp2.xml";
 }
 
 //-----------------------------------------------------------------------------
@@ -180,20 +182,24 @@ int TTrackCompModule::BeginJob() {
     dir->cd();
   }
 //-----------------------------------------------------------------------------
-// init MVA 
+// init two MVA-based classifiers - TrkPatRec (TPR) and CalPatRec (CPR) 
 //-----------------------------------------------------------------------------
   if (fUseMVA) {
-    fNMVA = 1;
-    // initialize TrkQual MVA.  Note the weight file is passed in from the KalDiag config
-    fhicl::ParameterSet mvapset; //  = pset.get<fhicl::ParameterSet>("TrkQualMVA",fhicl::ParameterSet());
-    //  mvapset.put<string>("MVAWeights",pset.get<string>("TrkQualWeights","TrkDiag/test/TrkQual.weights.xml"));
+    fhicl::ParameterSet mvapset, pset_cpr;
 
-    string s(fMVAWeightsFile.Data());
-    mvapset.put<string>("MVAWeights",s);
-  
-    fTrkQualMva = new mu2e::MVATools(mvapset);
-    fTrkQualMva->initMVA();
+    string              s1(fTprWeightsFile.Data());
+    string              s2(fCprWeightsFile.Data());
+
+    fNMVA = 1;
+
+    mvapset.put<string>("MVAWeights",s1);
+    fTprQualMva = new mu2e::MVATools(mvapset);
+    fTprQualMva->initMVA();
     //    fTrkQualMva->showMVA();
+
+    pset_cpr.put<string>("MVAWeights",s2);
+    fCprQualMva = new mu2e::MVATools(pset_cpr);
+    fCprQualMva->initMVA();
   }
 
   return 0;
@@ -397,7 +403,10 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[113] = 1;          // TrkPatRec TrackID[3]
   book_track_histset[114] = 1;          // TrkPatRec TrackID[4]
   book_track_histset[115] = 1;          // TrkPatRec TrackID[5]
-  book_track_histset[116] = 0;          // TrkPatRec TrackID[6]
+  book_track_histset[116] = 1;          // TrkPatRec TrackID[6]
+  book_track_histset[117] = 1;          // TrkPatRec TrackID[7]
+  book_track_histset[118] = 1;          // TrkPatRec TrackID[8]
+  book_track_histset[119] = 1;          // TrkPatRec TrackID[9]
 
   book_track_histset[200] = 1;		// CalPatRec all  tracks 
   book_track_histset[201] = 1;		// CalPatRec BestTrackID tracks 
@@ -412,7 +421,10 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[213] = 1;          // CalPatRec TrackID[3]
   book_track_histset[214] = 1;          // CalPatRec TrackID[4]
   book_track_histset[215] = 1;          // CalPatRec TrackID[5]
-  book_track_histset[216] = 0;          // CalPatRec TrackID[6]
+  book_track_histset[216] = 1;          // CalPatRec TrackID[6]
+  book_track_histset[217] = 1;          // CalPatRec TrackID[7]
+  book_track_histset[218] = 1;          // CalPatRec TrackID[8]
+  book_track_histset[219] = 1;          // CalPatRec TrackID[9]
 
   book_track_histset[300] = 1;		// TrkPatRec not CalPatRec all  tracks 
   book_track_histset[301] = 1;		// TrkPatRec not CalPatRec BestTrackID tracks 
@@ -427,7 +439,10 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[313] = 1;          // TrkPatRec not CalPatRec TrackID[3]
   book_track_histset[314] = 1;          // TrkPatRec not CalPatRec TrackID[4]
   book_track_histset[315] = 1;          // TrkPatRec not CalPatRec TrackID[5]
-  book_track_histset[316] = 0;          // TrkPatRec not CalPatRec TrackID[6]
+  book_track_histset[316] = 1;          // TrkPatRec not CalPatRec TrackID[6]
+  book_track_histset[317] = 1;          // TrkPatRec not CalPatRec TrackID[7]
+  book_track_histset[318] = 1;          // TrkPatRec not CalPatRec TrackID[8]
+  book_track_histset[319] = 1;          // TrkPatRec not CalPatRec TrackID[9]
 
   book_track_histset[400] = 1;		// CalPatRec not TrkPatRec all  tracks 
   book_track_histset[401] = 1;		// CalPatRec not TrkPatRec BestTrackID tracks 
@@ -442,7 +457,10 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[413] = 1;          // CalPatRec not TrkPatRec TrackID[3]
   book_track_histset[414] = 1;          // CalPatRec not TrkPatRec TrackID[4]
   book_track_histset[415] = 1;          // CalPatRec not TrkPatRec TrackID[5]
-  book_track_histset[416] = 0;          // CalPatRec not TrkPatRec TrackID[6]
+  book_track_histset[416] = 1;          // CalPatRec not TrkPatRec TrackID[6]
+  book_track_histset[417] = 1;          // CalPatRec not TrkPatRec TrackID[7]
+  book_track_histset[418] = 1;          // CalPatRec not TrkPatRec TrackID[8]
+  book_track_histset[419] = 1;          // CalPatRec not TrkPatRec TrackID[9]
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -552,7 +570,7 @@ void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 
 	  FillEventHistograms(fHist.fEvent[HistSet+3]);
 	  
-	  if ((id_word & TStnTrackID::kDtQualBit) == 0) {
+	  if ((id_word & TStnTrackID::kTrkQualBit) == 0) {
 	    FillEventHistograms(fHist.fEvent[HistSet+4]);
 	    
 	    if ((id_word & TStnTrackID::kT0Bit) == 0) {
@@ -935,7 +953,7 @@ void TTrackCompModule::FillHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// efficiency histograms, use fDaveTrkQual > 0.4 for the cuts
+// efficiency histograms, use fTrkQual > 0.4 for the cuts
 //-----------------------------------------------------------------------------
   FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID],&fTrackPar[0][0],10);
   FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID],&fTrackPar[1][0],20);
@@ -958,7 +976,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 				   TrackPar_t*       TrackPar    ) {
   TrackPar_t*           tp;
   TStnTrack*            track;
-  int                   id_word, icorr;
+  int                   icorr;
   double                xs;
   TEmuLogLH::PidData_t  dat;
 //-----------------------------------------------------------------------------
@@ -985,13 +1003,6 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
   for (int itrk=0; itrk<ntrk; itrk++) {
     tp             = TrackPar+itrk;
     track          = TrackBlock->Track(itrk);
-
-    for (int idd=0; idd<fNID; idd++) {
-      tp->fIDWord[idd] = fTrackID[idd]->IDWord(track);
-    }
-
-    id_word = tp->fIDWord[fBestID];
-    track->fIDWord = id_word;
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -1093,34 +1104,6 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       GetHeaderBlock()->Print(Form(" TTrackAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
     }
 //-----------------------------------------------------------------------------
-// PID likelihoods
-//-----------------------------------------------------------------------------
-    dat.fDt   = tp->fDt;
-    dat.fEp   = tp->fEp;
-    dat.fPath = tp->fPath;
-      
-    xs = track->XSlope();
-
-    track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
-    track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
-
-    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
-
-    if (GetDebugBit(7)) {
-      if ((id_word == 0) && (llhr_cal > 20)) {
-	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
-      }
-    }
-
-    if (GetDebugBit(8)) {
-      if ((id_word == 0) && (llhr_cal < -20)) {
-	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
-				     track->P(),track->Dt(),tp->fEp));
-      }
-    }
-
-    track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
-//-----------------------------------------------------------------------------
 // on-the-fly MVA calculation
 //-----------------------------------------------------------------------------
     tp->fMVAOut[0] = -1.e6;
@@ -1142,8 +1125,54 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       pmva[8] = track->NHitsAmbZero()/na;
       pmva[9] = track->NMatActive()/na;
 
-      tp->fMVAOut[0] = fTrkQualMva->evalMVA(pmva);
+      int alg = track->BestAlg();
+
+      if      (alg == 0) tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
+      else if (alg == 1) tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
     }
+//-----------------------------------------------------------------------------
+// finally, the track ID
+//-----------------------------------------------------------------------------
+    for (int idd=0; idd<fNID; idd++) {
+      int idw = fTrackID[idd]->IDWord(track);
+//-----------------------------------------------------------------------------
+// redefine IDWord to use TQ ANN for TrkPatRec and CQ ANN for CalPatRec tracks
+//-----------------------------------------------------------------------------
+      idw &= (!TStnTrackID::kTrkQualBit);
+      if (tp->fMVAOut[0] < fTrackID[idd]->MinTrkQual()) idw |= TStnTrackID::kTrkQualBit;
+
+      tp->fIDWord[idd] = idw;
+    }
+//-----------------------------------------------------------------------------
+// PID likelihoods
+//-----------------------------------------------------------------------------
+    dat.fDt   = tp->fDt;
+    dat.fEp   = tp->fEp;
+    dat.fPath = tp->fPath;
+      
+    xs = track->XSlope();
+
+    track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
+    track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
+
+    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
+
+    int id_word = tp->fIDWord[fBestID];
+
+    if (GetDebugBit(7)) {
+      if ((id_word == 0) && (llhr_cal > 20)) {
+	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
+      }
+    }
+
+    if (GetDebugBit(8)) {
+      if ((id_word == 0) && (llhr_cal < -20)) {
+	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
+				     track->P(),track->Dt(),tp->fEp));
+      }
+    }
+
+    track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
   }
 
   return 0;

@@ -223,7 +223,7 @@ void TCosmicsAnaModule::BookTrackIDHistograms(TStnTrackID::Hist_t* Hist, const c
     HBook1F(Hist->fTanDip [i],Form("tandip_%i" ,i) ,Form("%s: TanDip [%i]"         ,Folder,i), 400,   0  ,   4. ,Folder);
     HBook1F(Hist->fD0     [i],Form("d0_%i"     ,i) ,Form("%s: D0     [%i]"         ,Folder,i), 400, -200., 200. ,Folder);
     HBook1F(Hist->fRMax   [i],Form("rmax_%i"   ,i) ,Form("%s: RMax   [%i]"         ,Folder,i), 400,    0., 800. ,Folder);
-    HBook1F(Hist->fDtQual [i],Form("dtqual_%i" ,i) ,Form("%s: DTQual [%i]"         ,Folder,i), 200,  -0.5,   1.5,Folder);
+    HBook1F(Hist->fTrkQual[i],Form("trkqual_%i",i) ,Form("%s: TrkQual[%i]"         ,Folder,i), 200,  -0.5,   1.5,Folder);
   }
 
   HBook1F(Hist->fPassed    ,"passed"     ,Form("%s: Passed     "         ,Folder),  5,  0,   5,Folder);

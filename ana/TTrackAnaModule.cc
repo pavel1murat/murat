@@ -796,7 +796,7 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 
 	  FillEventHistograms(fHist.fEvent[HistSet+3]);
 	  
-	  if ((id_word & TStnTrackID::kDtQualBit) == 0) {
+	  if ((id_word & TStnTrackID::kTrkQualBit) == 0) {
 	    FillEventHistograms(fHist.fEvent[HistSet+4]);
 	    
 	    if ((id_word & TStnTrackID::kT0Bit) == 0) {

@@ -14,6 +14,7 @@
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 //  7  : events with N(set "C" CalPatRec tracks)  > 0
 //  8  : events with CalPatRec tracks with P > 105
+//  9  : events with TRKPATREC DMVA > 0.3
 //
 // call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
@@ -1106,7 +1107,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 // on-the-fly MVA calculation
 //-----------------------------------------------------------------------------
-    tp->fMVAOut[0] = -1.e6;
+    tp->fMVAOut[0] = track->DaveTrkQual();
 
     if (fUseMVA) {
       vector<double>  pmva;
@@ -1129,6 +1130,13 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
       if      (alg == 0) tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
       else if (alg == 1) tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
+
+      if (GetDebugBit(9)) {
+	if ((alg == 0) && (tp->fMVAOut[0] - track->DaveTrkQual() > 0.3)) {
+	  GetHeaderBlock()->Print(Form("TRKPATREC TrkQual, MVAOut: %10.5f %10.5f",
+				       track->DaveTrkQual(),tp->fMVAOut[0]));
+	}
+      }
     }
 //-----------------------------------------------------------------------------
 // finally, the track ID

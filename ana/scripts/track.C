@@ -179,10 +179,7 @@ void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, 
   m_tcm->SetGeneratorCode(GeneratorCode);
   m_tcm->SetWriteTmvaTree(TrkRecoAlg);
 
-  if (DebugBit >= 0) {
-    m_tcm->SetDebugBit(DebugBit,1);
-    if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
-  }
+  if (DebugBit >= 0) m_tcm->SetDebugBit(DebugBit,1);
 }
 
 //-----------------------------------------------------------------------------
@@ -201,11 +198,6 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1
   
   const char* MVAWeightsFile = "../../alaha/dev/TrkQualExponentialWeights/TMVAClassification_MLP.weights.xml";
 
-  if (MVAWeightsFile != NULL) m_tcm->SetMVAWeightsFile(MVAWeightsFile);
-
-  if (DebugBit >= 0) {
-    m_tcm->SetDebugBit(DebugBit,1);
-    if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
-  }
+  if (DebugBit >= 0) m_tcm->SetDebugBit(DebugBit,1);
 }
 

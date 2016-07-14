@@ -14,7 +14,8 @@
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 //  7  : events with N(set "C" CalPatRec tracks)  > 0
 //  8  : events with CalPatRec tracks with P > 105
-//  9  : events with TRKPATREC DMVA > 0.3
+//  9  : all events - print DMVA
+// 10  : events with TRKPATREC DMVA > 0.3 - print DMVA
 //
 // call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
@@ -1117,7 +1118,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
       pmva[0] = na;
       pmva[1] = na/track->NHits();
-      pmva[2] = track->Chi2Dof();
+      pmva[2] = -1.e6; 			// defined below
       pmva[3] = track->FitMomErr();
       pmva[4] = track->T0Err();
       pmva[5] = track->D0();
@@ -1128,10 +1129,28 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
       int alg = track->BestAlg();
 
-      if      (alg == 0) tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
-      else if (alg == 1) tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
+      if      (alg == 0) {
+//-----------------------------------------------------------------------------
+// TrkPatRec track - log(fitcons) used for training
+//-----------------------------------------------------------------------------
+	pmva[2] = log10(track->FitCons());
+	tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
+      }
+      else if (alg == 1) {
+//-----------------------------------------------------------------------------
+// CalPatRec track - chi2/N(dof) used
+//-----------------------------------------------------------------------------
+	pmva[2] = track->Chi2Dof();
+	tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
+      }
 
       if (GetDebugBit(9)) {
+	if (alg == 0) {
+	  GetHeaderBlock()->Print(Form("TRKPATREC TrkQual, MVAOut: %10.5f %10.5f",
+				       track->DaveTrkQual(),tp->fMVAOut[0]));
+	}
+      }
+      if (GetDebugBit(10)) {
 	if ((alg == 0) && (tp->fMVAOut[0] - track->DaveTrkQual() > 0.3)) {
 	  GetHeaderBlock()->Print(Form("TRKPATREC TrkQual, MVAOut: %10.5f %10.5f",
 				       track->DaveTrkQual(),tp->fMVAOut[0]));

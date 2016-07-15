@@ -170,7 +170,7 @@ public:
     float    fTanDip;
     float    fNActive;
     float    fNaFract;
-    float    fChi2Dof;
+    float    fFitCons;
     float    fMomErr;
     float    fT0Err;
     float    fD0;
@@ -178,6 +178,7 @@ public:
     float    fNdaOverNa;
     float    fNzaOverNa;
     float    fNmaOverNa;
+    float    fZ1;			// Z-coordinate of the first hit
     float    fWeight;
   };
 
@@ -187,7 +188,7 @@ public:
     TBranch*  fTanDip;
     TBranch*  fNActive;
     TBranch*  fNaFract;
-    TBranch*  fChi2Dof;
+    TBranch*  fFitCons;
     TBranch*  fMomErr;
     TBranch*  fT0Err;
     TBranch*  fD0;
@@ -195,6 +196,7 @@ public:
     TBranch*  fNdaOverNa;
     TBranch*  fNzaOverNa;
     TBranch*  fNmaOverNa;
+    TBranch*  fZ1;			// Z-coordinate of the first hit
     TBranch*  fWeight;			// for background only
   };
 //-----------------------------------------------------------------------------
@@ -248,17 +250,17 @@ public:
 //-----------------------------------------------------------------------------
 // TMVA training ntuples
 //-----------------------------------------------------------------------------
-  int                     fDoLittle;
   int                     fWriteTmvaTree;
+  int                     fTmvaAlgorithm;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
 
   TFile*                  fTmvaFile;
 
   TTree*                  fSigTree;
-  TTree*                  fBgrTree;
+  //  TTree*                  fBgrTree;
 
   TmvaTrainingData_t      fTmvaData;
   TmvaTrainingBranches_t  fSigBranch;
-  TmvaTrainingBranches_t  fBgrBranch;
+  //  TmvaTrainingBranches_t  fBgrBranch;
 
   int                     fUseMVA;
   int                     fNMVA;	// number of MVA classifiers used for tracks of the same type
@@ -292,7 +294,11 @@ public:
   }
   
   void    SetUseMVA        (int Flag) { fUseMVA        = Flag; }
-  void    SetWriteTmvaTree (int Flag) { fWriteTmvaTree = Flag; }
+
+  void    SetWriteTmvaTree (int Algo) { 
+    fWriteTmvaTree = 1; 
+    fTmvaAlgorithm = Algo; 
+  }
 
   void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }
   void    SetCprWeightsFile(const char* Fn) { if (Fn[0] != 0) fCprWeightsFile = Fn; }

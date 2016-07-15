@@ -49,7 +49,6 @@ void TValCalPatRecModule::BookTrackHistograms(TrackHist_t* Hist, const char* Fol
   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fNDof       ,"ndof"     ,Form("%s: Number of DOF"     ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
-  HBook1F(Hist->fChi2DofC   ,"chi2dc"   ,Form("%s: track chi2/N calc" ,Folder), 500, 0, 10,Folder);
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
@@ -204,7 +203,7 @@ void TValCalPatRecModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 void TValCalPatRecModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, TrackPar_t* Tp) {
 
-  double dp, dpfst, chi2c;
+  double dp, dpfst;
 
   Hist->fP->Fill (Track->fP);
   Hist->fPt->Fill(Track->fPt);
@@ -231,9 +230,6 @@ void TValCalPatRecModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Trac
   Hist->fD0->Fill(Track->fD0);
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
-
-  chi2c = Track->fChi2C/(Track->NActive()-5.);
-  Hist->fChi2DofC->Fill(chi2c);
 
   int nh, nst_with_nh[10];
 

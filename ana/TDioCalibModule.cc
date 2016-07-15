@@ -167,7 +167,6 @@ void TDioCalibModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fNDof       ,"ndof"     ,Form("%s: Number of DOF"     ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
-  HBook1F(Hist->fChi2DofC   ,"chi2dc"   ,Form("%s: track chi2/N calc" ,Folder), 500, 0, 10,Folder);
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
@@ -819,7 +818,7 @@ void TDioCalibModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
 void TDioCalibModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 
   TLorentzVector  mom;
-  double          chi2c, r;
+  double          r;
   int             itrk;
   TrackPar_t*     tp;
 					// pointer to local track parameters
@@ -863,9 +862,6 @@ void TDioCalibModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fAlgMask->Fill(Track->AlgMask());
-
-  chi2c = Track->fChi2C/(Track->NActive()-5.);
-  Hist->fChi2DofC->Fill(chi2c);
 
   //  int nh, nst_with_nh[10];
 					// 2014-04-29: currently not saved

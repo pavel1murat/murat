@@ -57,7 +57,6 @@ public:
     TH1F*    fChi2;
     TH1F*    fNDof;
     TH1F*    fChi2Dof;
-    TH1F*    fChi2DofC;
     TH1F*    fNActive;
     TH1F*    fT0;
     TH1F*    fQ;

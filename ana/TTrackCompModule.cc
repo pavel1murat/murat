@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// Validation of CalPatREc: compare CalPatRec tracks to TrkPatRec ones
+// CalPatRec validation: compare CalPatRec tracks to TrkPatRec ones
 // assume running on stntuple with 3 tracking branches
 //
 // use of tmp:
@@ -96,8 +96,8 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // ntuples for TMVA training
 //-----------------------------------------------------------------------------
-  fDoLittle       = 0;
   fWriteTmvaTree  = 0;
+  fTmvaAlgorithm  = -1;
 
   fUseMVA         = 0;
   fNMVA           = 0;
@@ -133,53 +133,57 @@ int TTrackCompModule::BeginJob() {
 // initialize likelihood histograms
 //-----------------------------------------------------------------------------
   if (fWriteTmvaTree != 0) {
-    fDoLittle = 1;
     TDirectory* dir = gDirectory;
 
     const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
 
-    if      (fWriteTmvaTree == 1) {
+    if      (fTmvaAlgorithm == 0) {
       fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
     }
-    else if (fWriteTmvaTree == 2) {
+    else if (fTmvaAlgorithm == 1) {
       fTmvaFile  = new TFile(Form("%s.tmva_training_calpatrec.root",dsname),"recreate");
     }
 
-    fSigTree  = new TTree("signal"    ,"TMVA Signal Tree");
-    fBgrTree  = new TTree("background","TMVA Background Tree");
+    fSigTree  = new TTree("tmva_training_tree","TMVA Signal Tree");
+
+    //    fBgrTree  = new TTree("background","TMVA Background Tree");
 
 					// signal tree
 
-    fSigBranch.fP         = fSigTree->Branch("p"       ,&fTmvaData.fP        ,"F");
-    fSigBranch.fPMC       = fSigTree->Branch("pmc"     ,&fTmvaData.fPMC      ,"F");
-    fSigBranch.fTanDip    = fSigTree->Branch("tdip"    ,&fTmvaData.fTanDip   ,"F");
-    fSigBranch.fNActive   = fSigTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
-    fSigBranch.fNaFract   = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
-    fSigBranch.fChi2Dof   = fSigTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
-    fSigBranch.fMomErr    = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
-    fSigBranch.fT0Err     = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
-    fSigBranch.fD0        = fSigTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
-    fSigBranch.fRMax      = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
-    fSigBranch.fNdaOverNa = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
-    fSigBranch.fNzaOverNa = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
-    fSigBranch.fNmaOverNa = fSigTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
+    fSigBranch.fP          = fSigTree->Branch("p"       ,&fTmvaData.fP         ,"F");
+    fSigBranch.fPMC        = fSigTree->Branch("pmc"     ,&fTmvaData.fPMC       ,"F");
+    fSigBranch.fTanDip     = fSigTree->Branch("tdip"    ,&fTmvaData.fTanDip    ,"F");
+    fSigBranch.fNActive    = fSigTree->Branch("nactive" ,&fTmvaData.fNActive   ,"F");
+    fSigBranch.fNaFract    = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract   ,"F");
+    fSigBranch.fFitCons    = fSigTree->Branch("fcons"   ,&fTmvaData.fFitCons   ,"F");
+    fSigBranch.fMomErr     = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr    ,"F");
+    fSigBranch.fT0Err      = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err     ,"F");
+    fSigBranch.fD0         = fSigTree->Branch("d0"      ,&fTmvaData.fD0        ,"F");
+    fSigBranch.fRMax       = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax      ,"F");
+    fSigBranch.fNdaOverNa  = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa ,"F");
+    fSigBranch.fNzaOverNa  = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa ,"F");
+    fSigBranch.fNmaOverNa  = fSigTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa ,"F");
+    fSigBranch.fZ1         = fSigTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
+    fSigBranch.fWeight     = fSigTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
 
 					// background tree
 
-    fBgrBranch.fP         = fBgrTree->Branch("p"       ,&fTmvaData.fP        ,"F");
-    fBgrBranch.fPMC       = fBgrTree->Branch("pmc"     ,&fTmvaData.fPMC      ,"F");
-    fBgrBranch.fTanDip    = fBgrTree->Branch("tdip"    ,&fTmvaData.fTanDip   ,"F");
-    fBgrBranch.fNActive   = fBgrTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
-    fBgrBranch.fNaFract   = fBgrTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
-    fBgrBranch.fChi2Dof   = fBgrTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
-    fBgrBranch.fMomErr    = fBgrTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
-    fBgrBranch.fT0Err     = fBgrTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
-    fBgrBranch.fD0        = fBgrTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
-    fBgrBranch.fRMax      = fBgrTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
-    fBgrBranch.fNdaOverNa = fBgrTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
-    fBgrBranch.fNzaOverNa = fBgrTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
-    fBgrBranch.fNmaOverNa = fBgrTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
-    fBgrBranch.fWeight    = fBgrTree->Branch("weight"  ,&fTmvaData.fWeight   ,"F");
+//     fBgrBranch.fP         = fBgrTree->Branch("p"       ,&fTmvaData.fP        ,"F");
+//     fBgrBranch.fPMC       = fBgrTree->Branch("pmc"     ,&fTmvaData.fPMC      ,"F");
+//     fBgrBranch.fTanDip    = fBgrTree->Branch("tdip"    ,&fTmvaData.fTanDip   ,"F");
+//     fBgrBranch.fNActive   = fBgrTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
+//     fBgrBranch.fNaFract   = fBgrTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
+//     fBgrBranch.fLogFcons  = fBgrTree->Branch("logfcons",&fTmvaData.fLogFcons ,"F");
+//     fBgrBranch.fChi2Dof   = fBgrTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
+//     fBgrBranch.fMomErr    = fBgrTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
+//     fBgrBranch.fT0Err     = fBgrTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
+//     fBgrBranch.fD0        = fBgrTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
+//     fBgrBranch.fRMax      = fBgrTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
+//     fBgrBranch.fNdaOverNa = fBgrTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
+//     fBgrBranch.fNzaOverNa = fBgrTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
+//     fBgrBranch.fNmaOverNa = fBgrTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
+//     fBgrBranch.fZ1        = fBgrTree->Branch("z1"      ,&fTmvaData.fZ1       ,"F");
+//     fBgrBranch.fWeight    = fBgrTree->Branch("wt"      ,&fTmvaData.fWeight   ,"F");
 
     dir->cd();
   }
@@ -729,8 +733,8 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 int TTrackCompModule::FillTmvaTree() {
   int rc(0), loc(-1);
 
-  if      (fWriteTmvaTree == 1) loc = 0; // trkpatrec
-  else if (fWriteTmvaTree == 2) loc = 1; // calpatrec
+  if      (fTmvaAlgorithm == 0) loc = 0; // trkpatrec
+  else if (fTmvaAlgorithm == 1) loc = 1; // calpatrec
 
   if (fTrackBlock[loc]->NTracks() != 1) return rc;
 
@@ -739,31 +743,33 @@ int TTrackCompModule::FillTmvaTree() {
   TStnTrack* trk = fTrackBlock[loc]->Track(0);
   TrackPar_t* tp = &fTrackPar[loc][0];
 
-  float na = trk->NActive();
+  float na       = trk->NActive();
 
-  fTmvaData.fP         = tp->fP;
-  fTmvaData.fPMC       = trk->fPFront;
-  fTmvaData.fTanDip    = trk->TanDip();
-  fTmvaData.fNActive   = na;
-  fTmvaData.fNaFract   = na/trk->NHits();
-  fTmvaData.fChi2Dof   = trk->Chi2Dof();
-  fTmvaData.fMomErr    = trk->FitMomErr();
-  fTmvaData.fT0Err     = trk->T0Err();
-  fTmvaData.fD0        = trk->D0();
-  fTmvaData.fRMax      = trk->RMax();
-  fTmvaData.fNdaOverNa = trk->NDoubletsAct()/na;
-  fTmvaData.fNzaOverNa = trk->NHitsAmbZero()/na;
-  fTmvaData.fNmaOverNa = trk->NMatActive()/na;
-  fTmvaData.fWeight    = 1.;
+  fTmvaData.fP          = tp->fP;
+  fTmvaData.fPMC        = trk->fPFront;
+  fTmvaData.fTanDip     = trk->TanDip();
+  fTmvaData.fNActive    = na;
+  fTmvaData.fNaFract    = na/trk->NHits();
+  fTmvaData.fFitCons    = trk->FitCons();
+  fTmvaData.fMomErr     = trk->FitMomErr();
+  fTmvaData.fT0Err      = trk->T0Err();
+  fTmvaData.fD0         = trk->D0();
+  fTmvaData.fRMax       = trk->RMax();
+  fTmvaData.fNdaOverNa  = trk->NDoubletsAct()/na;
+  fTmvaData.fNzaOverNa  = trk->NHitsAmbZero()/na;
+  fTmvaData.fNmaOverNa  = trk->NMatActive()/na;
+  fTmvaData.fWeight     = 1.;
 
-  // there should be two trees - signal and background
+// try one! // there should be two trees - signal and background
+// 
+//   if (tp->fDpF > 0.7) {
+//     fBgrTree->Fill();
+//   }
+//   else if (fabs(tp->fDpF) < 0.25) {
+//     fSigTree->Fill();
+//   }
 
-  if (tp->fDpF > 0.7) {
-    fBgrTree->Fill();
-  }
-  else if (fabs(tp->fDpF) < 0.25) {
-    fSigTree->Fill();
-  }
+  fSigTree->Fill();
 
   return rc;
 }
@@ -963,9 +969,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // fill little tree if requested
 //-----------------------------------------------------------------------------
-  if (fDoLittle != 0) {
-    if (fWriteTmvaTree) FillTmvaTree();
-  }
+  if (fWriteTmvaTree) FillTmvaTree();
 }
 
 
@@ -1393,7 +1397,7 @@ int TTrackCompModule::EndJob() {
     delete fTmvaFile;
     fTmvaFile  = 0;
     fSigTree   = 0;
-    fBgrTree   = 0;
+    //    fBgrTree   = 0;
   }
 
   return 0;

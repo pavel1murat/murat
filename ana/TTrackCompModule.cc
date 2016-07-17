@@ -67,13 +67,12 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     if (i > 0) {
       fTrackID[i]->SetMaxMomErr (100);
       fTrackID[i]->SetMaxT0Err     (100);
-      //      fTrackID[i]->SetMinNActive   ( 10);
+      fTrackID[i]->SetMinNActive   ( -1);
       fTrackID[i]->SetMinFitCons   (-1.);
-      fTrackID[i]->SetMinTrkQual   (0.1*i+0.1);
+      fTrackID[i]->SetMinTrkQual   (0.1*i);
     }
   }
-
-					// ID = 4: no hits on the number of active hits
+					// ID = 9: no cuts on the number of active hits
   fTrackID[9] = new TStnTrackID();
   fTrackID[9]->SetMaxMomErr (100);
   fTrackID[9]->SetMaxT0Err     (100);
@@ -103,7 +102,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fNMVA           = 0;
 
   fTprWeightsFile = "TrkDiag/test/TrkQual.weights.xml";
-  fCprWeightsFile = "CalPatRec/test/MLP_weights_exp2.xml";
+  fCprWeightsFile = "CalPatRec/data/v5_7_7/MLP_weights_2_exp.xml";
 }
 
 //-----------------------------------------------------------------------------
@@ -155,6 +154,7 @@ int TTrackCompModule::BeginJob() {
     fSigBranch.fTanDip     = fSigTree->Branch("tdip"    ,&fTmvaData.fTanDip    ,"F");
     fSigBranch.fNActive    = fSigTree->Branch("nactive" ,&fTmvaData.fNActive   ,"F");
     fSigBranch.fNaFract    = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract   ,"F");
+    fSigBranch.fChi2Dof    = fSigTree->Branch("chi2d"   ,&fTmvaData.fChi2Dof   ,"F");
     fSigBranch.fFitCons    = fSigTree->Branch("fcons"   ,&fTmvaData.fFitCons   ,"F");
     fSigBranch.fMomErr     = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr    ,"F");
     fSigBranch.fT0Err      = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err     ,"F");
@@ -166,43 +166,26 @@ int TTrackCompModule::BeginJob() {
     fSigBranch.fZ1         = fSigTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
     fSigBranch.fWeight     = fSigTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
 
-					// background tree
-
-//     fBgrBranch.fP         = fBgrTree->Branch("p"       ,&fTmvaData.fP        ,"F");
-//     fBgrBranch.fPMC       = fBgrTree->Branch("pmc"     ,&fTmvaData.fPMC      ,"F");
-//     fBgrBranch.fTanDip    = fBgrTree->Branch("tdip"    ,&fTmvaData.fTanDip   ,"F");
-//     fBgrBranch.fNActive   = fBgrTree->Branch("nactive" ,&fTmvaData.fNActive  ,"F");
-//     fBgrBranch.fNaFract   = fBgrTree->Branch("nafract" ,&fTmvaData.fNaFract  ,"F");
-//     fBgrBranch.fLogFcons  = fBgrTree->Branch("logfcons",&fTmvaData.fLogFcons ,"F");
-//     fBgrBranch.fChi2Dof   = fBgrTree->Branch("chi2dof" ,&fTmvaData.fChi2Dof  ,"F");
-//     fBgrBranch.fMomErr    = fBgrTree->Branch("momerr"  ,&fTmvaData.fMomErr   ,"F");
-//     fBgrBranch.fT0Err     = fBgrTree->Branch("t0err"   ,&fTmvaData.fT0Err    ,"F");
-//     fBgrBranch.fD0        = fBgrTree->Branch("d0"      ,&fTmvaData.fD0       ,"F");
-//     fBgrBranch.fRMax      = fBgrTree->Branch("rmax"    ,&fTmvaData.fRMax     ,"F");
-//     fBgrBranch.fNdaOverNa = fBgrTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa,"F");
-//     fBgrBranch.fNzaOverNa = fBgrTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa,"F");
-//     fBgrBranch.fNmaOverNa = fBgrTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa,"F");
-//     fBgrBranch.fZ1        = fBgrTree->Branch("z1"      ,&fTmvaData.fZ1       ,"F");
-//     fBgrBranch.fWeight    = fBgrTree->Branch("wt"      ,&fTmvaData.fWeight   ,"F");
-
     dir->cd();
   }
 //-----------------------------------------------------------------------------
 // init two MVA-based classifiers - TrkPatRec (TPR) and CalPatRec (CPR) 
 //-----------------------------------------------------------------------------
   if (fUseMVA) {
-    fhicl::ParameterSet mvapset, pset_cpr;
+    fhicl::ParameterSet pset_tpr, pset_cpr;
 
     string              s1(fTprWeightsFile.Data());
     string              s2(fCprWeightsFile.Data());
 
     fNMVA = 1;
 
-    mvapset.put<string>("MVAWeights",s1);
-    fTprQualMva = new mu2e::MVATools(mvapset);
+    printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
+    pset_tpr.put<string>("MVAWeights",s1);
+    fTprQualMva = new mu2e::MVATools(pset_tpr);
     fTprQualMva->initMVA();
     //    fTrkQualMva->showMVA();
 
+    printf(">>> [TTrackCompModule::BeginJob] Init CalPatRec MVA from %s\n",s2.data());
     pset_cpr.put<string>("MVAWeights",s2);
     fCprQualMva = new mu2e::MVATools(pset_cpr);
     fCprQualMva->initMVA();
@@ -750,6 +733,7 @@ int TTrackCompModule::FillTmvaTree() {
   fTmvaData.fTanDip     = trk->TanDip();
   fTmvaData.fNActive    = na;
   fTmvaData.fNaFract    = na/trk->NHits();
+  fTmvaData.fChi2Dof    = trk->Chi2Dof();
   fTmvaData.fFitCons    = trk->FitCons();
   fTmvaData.fMomErr     = trk->FitMomErr();
   fTmvaData.fT0Err      = trk->T0Err();
@@ -828,6 +812,7 @@ void TTrackCompModule::FillHistograms() {
       }
     }
   }
+
 //-----------------------------------------------------------------------------
 // TRK_3 : an attempt to define best track
 //-----------------------------------------------------------------------------
@@ -1114,7 +1099,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
     tp->fMVAOut[0] = track->DaveTrkQual();
 
-    if (fUseMVA) {
+    if (fUseMVA != 0) {
       vector<double>  pmva;
       pmva.resize(10);
 
@@ -1138,14 +1123,20 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // TrkPatRec track - log(fitcons) used for training
 //-----------------------------------------------------------------------------
 	pmva[2] = log10(track->FitCons());
-	tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
+	//	tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
+	tp->fMVAOut[0] = track->DaveTrkQual();
+	tp->fMVAOut[1] = fTprQualMva->evalMVA(pmva);
       }
       else if (alg == 1) {
 //-----------------------------------------------------------------------------
-// CalPatRec track - chi2/N(dof) used
+// CalPatRec track - for fUseMva=101 chi2/N(dof) used (our initial training)
 //-----------------------------------------------------------------------------
-	pmva[2] = track->Chi2Dof();
+	int use_chi2d = fUseMVA / 100;
+	if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
+	else                     pmva[2] = track->Chi2Dof();
+
 	tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
+	tp->fMVAOut[1] = tp->fMVAOut[0];
       }
 
       if (GetDebugBit(9)) {
@@ -1169,7 +1160,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 // redefine IDWord to use TQ ANN for TrkPatRec and CQ ANN for CalPatRec tracks
 //-----------------------------------------------------------------------------
-      idw &= (!TStnTrackID::kTrkQualBit);
+      idw &= (~TStnTrackID::kTrkQualBit);
       if (tp->fMVAOut[0] < fTrackID[idd]->MinTrkQual()) idw |= TStnTrackID::kTrkQualBit;
 
       tp->fIDWord[idd] = idw;

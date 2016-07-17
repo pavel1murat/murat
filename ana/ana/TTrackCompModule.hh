@@ -170,6 +170,7 @@ public:
     float    fTanDip;
     float    fNActive;
     float    fNaFract;
+    float    fChi2Dof;
     float    fFitCons;
     float    fMomErr;
     float    fT0Err;
@@ -188,6 +189,7 @@ public:
     TBranch*  fTanDip;
     TBranch*  fNActive;
     TBranch*  fNaFract;
+    TBranch*  fChi2Dof;
     TBranch*  fFitCons;
     TBranch*  fMomErr;
     TBranch*  fT0Err;

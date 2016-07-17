@@ -168,7 +168,7 @@ void  track_comp(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, double
 
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
-// TrkRrecoAlg = 1: TrkPatRec    =2:CalPatRec
+// TrkRrecoAlg = 0:TrkPatRec    =1:CalPatRec
 //-----------------------------------------------------------------------------
 void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
@@ -184,9 +184,10 @@ void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, 
 
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
-// TrkRrecoAlg = 1: TrkPatRec    =2:CalPatRec
+// MVAMode : 100 + Mode (chi2)
+//         :       Mode (logfcons)
 //-----------------------------------------------------------------------------
-void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1) {
+void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMva = -1, int CprMva = 202, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------
@@ -194,10 +195,38 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1
   m_tcm->SetPdgCode      (11);
   m_tcm->SetGeneratorCode(GeneratorCode);
 
-  m_tcm->SetUseMVA(1);
-  
-  const char* MVAWeightsFile = "../../alaha/dev/TrkQualExponentialWeights/TMVAClassification_MLP.weights.xml";
+  m_tcm->SetUseMVA(CprMva);
 
+  TString fn;
+
+  if (CprMva >= 0) {
+    int use_chi2d = CprMva / 100;
+					// 
+    int weight_type = CprMva % 100;
+
+    if (use_chi2d == 0) {
+      if      (weight_type == 0) fn = "CalPatRec/data/v5_7_7/MLP_weights_logfcons_0_uni.xml";
+      else if (weight_type == 1) fn = "CalPatRec/data/v5_7_7/MLP_weights_logfcons_1_lin.xml";
+      else if (weight_type == 2) fn = "CalPatRec/data/v5_7_7/MLP_weights_logfcons_2_exp.xml";
+      else if (weight_type == 3) fn = "CalPatRec/data/v5_7_7/MLP_weights_logfcons_3_pol.xml";
+      else if (weight_type == 4) fn = "CalPatRec/data/v5_7_7/MLP_weights_logfcons_4_exp.xml";
+    }
+    else if (use_chi2d == 1) {
+      if      (weight_type == 0) fn = "CalPatRec/data/v5_7_7/MLP_weights_chi2d_0_uni.xml";
+      else if (weight_type == 1) fn = "CalPatRec/data/v5_7_7/MLP_weights_chi2d_1_lin.xml";
+      else if (weight_type == 2) fn = "CalPatRec/data/v5_7_7/MLP_weights_chi2d_2_exp.xml";
+      else if (weight_type == 3) fn = "CalPatRec/data/v5_7_7/MLP_weights_chi2d_3_pol.xml";
+      else if (weight_type == 4) fn = "CalPatRec/data/v5_7_7/MLP_weights_chi2d_4_exp.xml";
+    }
+    else if (use_chi2d == 2) {
+      // Arpan's  chi2-based training
+      fn = "CalPatRec/data/v5_7_6/MLP_weights_exp2.xml";
+      m_tcm->SetUseMVA(202);
+    }
+  }
+  
+  m_tcm->SetCprWeightsFile(fn.Data());
+  
   if (DebugBit >= 0) m_tcm->SetDebugBit(DebugBit,1);
 }
 

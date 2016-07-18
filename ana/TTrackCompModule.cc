@@ -61,27 +61,20 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 // TrackID[0] : "SetC"
 // i = 1..6 : cut on DaveTrkQual > 0.1*i instead
 //-----------------------------------------------------------------------------
-  fNID  = 10;
-  for (int i=0; i<fNID-1; i++) {
+  fNID  = 20;  // this is the limit ....
+  for (int i=0; i<fNID; i++) {
     fTrackID[i] = new TStnTrackID();
     if (i > 0) {
       fTrackID[i]->SetMaxMomErr (100);
-      fTrackID[i]->SetMaxT0Err     (100);
-      fTrackID[i]->SetMinNActive   ( -1);
-      fTrackID[i]->SetMinFitCons   (-1.);
-      fTrackID[i]->SetMinTrkQual   (0.1*i);
+      fTrackID[i]->SetMaxT0Err  (100);
+      fTrackID[i]->SetMinNActive( -1);
+      fTrackID[i]->SetMinFitCons(-1.);
+      fTrackID[i]->SetMinTrkQual(0.05*i);
     }
   }
-					// ID = 9: no cuts on the number of active hits
-  fTrackID[9] = new TStnTrackID();
-  fTrackID[9]->SetMaxMomErr (100);
-  fTrackID[9]->SetMaxT0Err     (100);
-  fTrackID[9]->SetMinNActive   ( -1);
-  fTrackID[9]->SetMinFitCons   (-1.);
-  fTrackID[9]->SetMinTrkQual   (0.4);
 
-  fBestTrackID = fTrackID[9];  // Dave's default: DaveTrkQual > 0.4, no N(active) cut 
-  fBestID      = 9;
+  fBestTrackID = fTrackID[8];  // Dave's default: DaveTrkQual > 0.4, no N(active) cut 
+  fBestID      = 8;
 
   fLogLH       = new TEmuLogLH();
 //-----------------------------------------------------------------------------
@@ -136,10 +129,12 @@ int TTrackCompModule::BeginJob() {
 
     const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
 
-    if      (fTmvaAlgorithm == 0) {
+    int algo = fTmvaAlgorithm % 100;
+
+    if      (algo == 0) {
       fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
     }
-    else if (fTmvaAlgorithm == 1) {
+    else if (algo == 1) {
       fTmvaFile  = new TFile(Form("%s.tmva_training_calpatrec.root",dsname),"recreate");
     }
 
@@ -396,6 +391,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[117] = 1;          // TrkPatRec TrackID[7]
   book_track_histset[118] = 1;          // TrkPatRec TrackID[8]
   book_track_histset[119] = 1;          // TrkPatRec TrackID[9]
+  book_track_histset[120] = 1;          // TrkPatRec TrackID[10]
+  book_track_histset[121] = 1;          // TrkPatRec TrackID[11]
+  book_track_histset[122] = 1;          // TrkPatRec TrackID[12]
+  book_track_histset[123] = 1;          // TrkPatRec TrackID[13]
+  book_track_histset[124] = 1;          // TrkPatRec TrackID[14]
+  book_track_histset[125] = 1;          // TrkPatRec TrackID[15]
+  book_track_histset[126] = 1;          // TrkPatRec TrackID[16]
+  book_track_histset[127] = 1;          // TrkPatRec TrackID[17]
+  book_track_histset[128] = 1;          // TrkPatRec TrackID[18]
+  book_track_histset[129] = 1;          // TrkPatRec TrackID[19]
 
   book_track_histset[200] = 1;		// CalPatRec all  tracks 
   book_track_histset[201] = 1;		// CalPatRec BestTrackID tracks 
@@ -414,6 +419,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[217] = 1;          // CalPatRec TrackID[7]
   book_track_histset[218] = 1;          // CalPatRec TrackID[8]
   book_track_histset[219] = 1;          // CalPatRec TrackID[9]
+  book_track_histset[220] = 1;          // CalPatRec TrackID[10]
+  book_track_histset[221] = 1;          // CalPatRec TrackID[11]
+  book_track_histset[222] = 1;          // CalPatRec TrackID[12]
+  book_track_histset[223] = 1;          // CalPatRec TrackID[13]
+  book_track_histset[224] = 1;          // CalPatRec TrackID[14]
+  book_track_histset[225] = 1;          // CalPatRec TrackID[15]
+  book_track_histset[226] = 1;          // CalPatRec TrackID[16]
+  book_track_histset[227] = 1;          // CalPatRec TrackID[17]
+  book_track_histset[228] = 1;          // CalPatRec TrackID[18]
+  book_track_histset[229] = 1;          // CalPatRec TrackID[19]
 
   book_track_histset[300] = 1;		// TrkPatRec not CalPatRec all  tracks 
   book_track_histset[301] = 1;		// TrkPatRec not CalPatRec BestTrackID tracks 
@@ -432,6 +447,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[317] = 1;          // TrkPatRec not CalPatRec TrackID[7]
   book_track_histset[318] = 1;          // TrkPatRec not CalPatRec TrackID[8]
   book_track_histset[319] = 1;          // TrkPatRec not CalPatRec TrackID[9]
+  book_track_histset[320] = 1;          // TrkPatRec not CalPatRec TrackID[10]
+  book_track_histset[321] = 1;          // TrkPatRec not CalPatRec TrackID[11]
+  book_track_histset[322] = 1;          // TrkPatRec not CalPatRec TrackID[12]
+  book_track_histset[323] = 1;          // TrkPatRec not CalPatRec TrackID[13]
+  book_track_histset[324] = 1;          // TrkPatRec not CalPatRec TrackID[14]
+  book_track_histset[325] = 1;          // TrkPatRec not CalPatRec TrackID[15]
+  book_track_histset[326] = 1;          // TrkPatRec not CalPatRec TrackID[16]
+  book_track_histset[327] = 1;          // TrkPatRec not CalPatRec TrackID[17]
+  book_track_histset[328] = 1;          // TrkPatRec not CalPatRec TrackID[18]
+  book_track_histset[329] = 1;          // TrkPatRec not CalPatRec TrackID[19]
 
   book_track_histset[400] = 1;		// CalPatRec not TrkPatRec all  tracks 
   book_track_histset[401] = 1;		// CalPatRec not TrkPatRec BestTrackID tracks 
@@ -450,6 +475,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[417] = 1;          // CalPatRec not TrkPatRec TrackID[7]
   book_track_histset[418] = 1;          // CalPatRec not TrkPatRec TrackID[8]
   book_track_histset[419] = 1;          // CalPatRec not TrkPatRec TrackID[9]
+  book_track_histset[420] = 1;          // TrkPatRec not CalPatRec TrackID[10]
+  book_track_histset[421] = 1;          // CalPatRec not TrkPatRec TrackID[11]
+  book_track_histset[422] = 1;          // CalPatRec not TrkPatRec TrackID[12]
+  book_track_histset[423] = 1;          // CalPatRec not TrkPatRec TrackID[13]
+  book_track_histset[424] = 1;          // CalPatRec not TrkPatRec TrackID[14]
+  book_track_histset[425] = 1;          // CalPatRec not TrkPatRec TrackID[15]
+  book_track_histset[426] = 1;          // CalPatRec not TrkPatRec TrackID[16]
+  book_track_histset[427] = 1;          // CalPatRec not TrkPatRec TrackID[17]
+  book_track_histset[428] = 1;          // CalPatRec not TrkPatRec TrackID[18]
+  book_track_histset[429] = 1;          // CalPatRec not TrkPatRec TrackID[19]
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -713,11 +748,12 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 
 
 //-----------------------------------------------------------------------------
+// TmvaAlgorithm: 100*usez + algorigthm
+//-----------------------------------------------------------------------------
 int TTrackCompModule::FillTmvaTree() {
   int rc(0), loc(-1);
 
-  if      (fTmvaAlgorithm == 0) loc = 0; // trkpatrec
-  else if (fTmvaAlgorithm == 1) loc = 1; // calpatrec
+  loc = fTmvaAlgorithm % 100 ;		// 0:trkpatrec , 1:calpatrec)
 
   if (fTrackBlock[loc]->NTracks() != 1) return rc;
 
@@ -742,6 +778,7 @@ int TTrackCompModule::FillTmvaTree() {
   fTmvaData.fNdaOverNa  = trk->NDoubletsAct()/na;
   fTmvaData.fNzaOverNa  = trk->NHitsAmbZero()/na;
   fTmvaData.fNmaOverNa  = trk->NMatActive()/na;
+  fTmvaData.fZ1         = trk->fZ1;
   fTmvaData.fWeight     = 1.;
 
 // try one! // there should be two trees - signal and background
@@ -1105,16 +1142,17 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
       float na = track->NActive();
 
-      pmva[0] = na;
-      pmva[1] = na/track->NHits();
-      pmva[2] = -1.e6; 			// defined below
-      pmva[3] = track->FitMomErr();
-      pmva[4] = track->T0Err();
-      pmva[5] = track->D0();
-      pmva[6] = track->RMax();
-      pmva[7] = track->NDoubletsAct()/na;
-      pmva[8] = track->NHitsAmbZero()/na;
-      pmva[9] = track->NMatActive()/na;
+      pmva[ 0] = na;
+      pmva[ 1] = na/track->NHits();
+      pmva[ 2] = -1.e6; 			// defined below
+      pmva[ 3] = track->FitMomErr();
+      pmva[ 4] = track->T0Err();
+      pmva[ 5] = track->D0();
+      pmva[ 6] = track->RMax();
+      pmva[ 7] = track->NDoubletsAct()/na;
+      pmva[ 8] = track->NHitsAmbZero()/na;
+      pmva[ 9] = track->NMatActive()/na;
+      //      pmva[10] = track->fZ1;
 
       int alg = track->BestAlg();
 

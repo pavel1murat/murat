@@ -28,6 +28,8 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+#include "murat/ana/prob_dist.hh"
+
 namespace mu2e { 
   class MVATools;
 };
@@ -237,8 +239,8 @@ public:
 					// [0]: SetC, [1-6]: TrkQual 0.1 ... 0.6
   int               fNID;
   TStnTrackID*      fTrackID[20];
-  TStnTrackID*      fBestTrackID;
-  int               fBestID;
+  TStnTrackID*      fBestTrackID[2];
+  int               fBestID[2];
 
   TEmuLogLH*        fLogLH;
 
@@ -274,6 +276,9 @@ public:
 
   mu2e::MVATools*         fTprQualMva;
   mu2e::MVATools*         fCprQualMva;
+
+  TString                 fTrkQualFile;
+  prob_dist*              fTrackProb[2];// 0:TrkPatRec, 1:CalPatRec
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

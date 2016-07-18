@@ -73,8 +73,11 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     }
   }
 
-  fBestTrackID = fTrackID[8];  // Dave's default: DaveTrkQual > 0.4, no N(active) cut 
-  fBestID      = 8;
+  fBestID[0]      = 8;		  // Dave's default: DaveTrkQual > 0.4
+  fBestID[1]      = 17;		  // CalPatRec     : CprQual     > 0.85
+
+  fBestTrackID[0] = fTrackID[fBestID[0]];
+  fBestTrackID[1] = fTrackID[fBestID[1]];
 
   fLogLH       = new TEmuLogLH();
 //-----------------------------------------------------------------------------
@@ -184,6 +187,11 @@ int TTrackCompModule::BeginJob() {
     pset_cpr.put<string>("MVAWeights",s2);
     fCprQualMva = new mu2e::MVATools(pset_cpr);
     fCprQualMva->initMVA();
+
+    fTrkQualFile = Form("hist/e11s5731.track_comp_use_mva_%03i.hist",fUseMVA);
+
+    fTrackProb[0] = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
+    fTrackProb[1] = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
   }
 
   return 0;
@@ -824,7 +832,7 @@ void TTrackCompModule::FillHistograms() {
 // what does CalPatRec add ?
 // TRK_0 : TrkPatRec tracks, BEST_ID
 //-----------------------------------------------------------------------------
-  if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
+  if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID[0]] == 0)) {
     TStnTrack* trk = fTrackBlock[0]->Track(0);
     TrackPar_t* tp = &fTrackPar[0][0];
     FillTrackHistograms(fHist.fTrack[0],trk,tp);
@@ -849,37 +857,62 @@ void TTrackCompModule::FillHistograms() {
       }
     }
   }
-
 //-----------------------------------------------------------------------------
-// TRK_3 : an attempt to define best track
+// TRK_3 : an attempt to define the best track
 //-----------------------------------------------------------------------------
-    TStnTrack*  best_track(0);
-    TrackPar_t* best_tp;
+  TStnTrack  *tpr(0), *cpr(0), *best_track(0);
+  TrackPar_t *best_tp, *tprp, *cprp;
 
-    if (fTrackBlock[1]->NTracks() > 0) {
-      if (fTrackPar[1][0].fIDWord[fBestID] == 0) {
-	best_track = fTrackBlock[1]->Track(0);
-	best_tp    = &fTrackPar[1][0];
-      }
-      else if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
-	best_track = fTrackBlock[0]->Track(0);
-	best_tp    = &fTrackPar[0][0];
-      }
-      else if (fTrackPar[1][0].fIDWord[2] == 0) {
-	best_track = fTrackBlock[1]->Track(0);
-	best_tp    = &fTrackPar[1][0];
-      }
+  int ntpr = fTrackBlock[0]->NTracks();
+  int ncpr = fTrackBlock[1]->NTracks();
+
+  if ((ntpr > 0) && (fTrackPar[0][0].fIDWord[fBestID[0]] == 0)) {
+    tpr  = fTrackBlock[0]->Track(0);
+    tprp = &fTrackPar[0][0];
+  }
+
+  if ((ncpr > 0) && (fTrackPar[1][0].fIDWord[fBestID[1]] == 0)) {
+    cpr  = fTrackBlock[1]->Track(0);
+    cprp = &fTrackPar[1][0];
+  }
+
+  if      (tpr != NULL) {
+    if (cpr == NULL) {
+//-----------------------------------------------------------------------------
+// only TrkPatRec track is present
+//-----------------------------------------------------------------------------
+      best_track = tpr;
+      best_tp    = tprp;
     }
     else {
-      if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID] == 0)) {
-	best_track = fTrackBlock[0]->Track(0);
-	best_tp    = &fTrackPar[0][0];
+//-----------------------------------------------------------------------------
+// general case: both tracks present and passsed the ID cuts, figure which one 
+// is the best
+//-----------------------------------------------------------------------------
+      double tpr_prob = fTrackProb[0]->prob(tprp->fMVAOut[0]);
+      double cpr_prob = fTrackProb[1]->prob(cprp->fMVAOut[0]);
+
+      if (tpr_prob > cpr_prob) {
+	best_track = tpr;
+	best_tp    = tprp;
+      }
+      else {
+	best_track = cpr;
+	best_tp    = cprp;
       }
     }
+  }
+  else if (cpr != NULL) {
+//-----------------------------------------------------------------------------
+// only CalPatRec track is present
+//-----------------------------------------------------------------------------
+    best_track = cpr;
+    best_tp    = cprp;
+  }
 
-    if (best_track != 0) {
-      FillTrackHistograms(fHist.fTrack[3],best_track,best_tp);
-    }
+  if (best_track != 0) {
+    FillTrackHistograms(fHist.fTrack[3],best_track,best_tp);
+  }
 
 //-----------------------------------------------------------------------------
 // TrkPatRec and CalPatRec histograms, inclusive, ihist defines the offset
@@ -898,7 +931,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_101, TRK_201: BestID 
 //-----------------------------------------------------------------------------
-      if (tp->fIDWord[fBestID] == 0) {
+      if (tp->fIDWord[fBestID[i]] == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp);
 	n_setc_tracks[i] += 1;
       }
@@ -906,13 +939,13 @@ void TTrackCompModule::FillHistograms() {
 // TRK_102, TRK_202: (BestID - FitConsBit - T0ErrBit - MomErrBit) tracks 
 //-----------------------------------------------------------------------------
       int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kMomErrBit;
-      if ((tp->fIDWord[fBestID] & ~mask) == 0) {
+      if ((tp->fIDWord[fBestID[i]] & ~mask) == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
       }
 //-----------------------------------------------------------------------------
 // IHIST+3: (SetC + (dpf > 1)tracks 
 //-----------------------------------------------------------------------------
-      if ((tp->fIDWord[fBestID] == 0) & (tp->fDpF > 1)) {
+      if ((tp->fIDWord[fBestID[i]] == 0) & (tp->fDpF > 1)) {
 	FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp);
       }
 //-----------------------------------------------------------------------------
@@ -947,7 +980,7 @@ void TTrackCompModule::FillHistograms() {
 	//-----------------------------------------------------------------------------
 	// IHIST+1: Set C selection
 	//-----------------------------------------------------------------------------
-	if (tp->fIDWord[fBestID] == 0) {
+	if (tp->fIDWord[fBestID[i]] == 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp);
 	  n_setc_tracks[i] += 1;
 	}
@@ -955,13 +988,13 @@ void TTrackCompModule::FillHistograms() {
 	// IHIST+2: (SetC - FitConsBit - T0ErrBit - MomErrBit) tracks 
 	//-----------------------------------------------------------------------------
 	int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kMomErrBit;
-	if ((tp->fIDWord[fBestID] & ~mask) == 0) {
+	if ((tp->fIDWord[fBestID[i]] & ~mask) == 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
 	}
 	//-----------------------------------------------------------------------------
 	// IHIST+3: (SetC + (dpf > 1)tracks 
 	//-----------------------------------------------------------------------------
-	if ((tp->fIDWord[fBestID] == 0) & (tp->fDpF > 1)) {
+	if ((tp->fIDWord[fBestID[i]] == 0) & (tp->fDpF > 1)) {
 	  FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp);
 	}
 	//-----------------------------------------------------------------------------
@@ -985,8 +1018,8 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // efficiency histograms, use fTrkQual > 0.4 for the cuts
 //-----------------------------------------------------------------------------
-  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID],&fTrackPar[0][0],10);
-  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID],&fTrackPar[1][0],20);
+  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID[0]],&fTrackPar[0][0],10);
+  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID[1]],&fTrackPar[1][0],20);
 
 //-----------------------------------------------------------------------------
 // fill little tree if requested
@@ -1004,7 +1037,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 				   TrackPar_t*       TrackPar    ) {
   TrackPar_t*           tp;
   TStnTrack*            track;
-  int                   icorr;
+  int                   track_type(-999);
   double                xs;
   TEmuLogLH::PidData_t  dat;
 //-----------------------------------------------------------------------------
@@ -1015,11 +1048,10 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
-  if      (strcmp(block_name,"TrkPatRec" ) == 0) icorr = 0;
-  else if (strcmp(block_name,"CalPatRec" ) == 0) icorr = 1;
-  else if (strcmp(block_name,"TrackBlock") == 0) icorr = 2;
+  if      (strcmp(block_name,"TrkPatRec" ) == 0) track_type = 0;
+  else if (strcmp(block_name,"CalPatRec" ) == 0) track_type = 1;
+  else if (strcmp(block_name,"TrackBlock") == 0) track_type = 2;
   else {
-    icorr = -999;
     Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
     return -1;
   }
@@ -1054,9 +1086,9 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // in case of MergePatRec use BestAlg - 
 // hopefully, TTrackComp will never use MergePatRec branch
 //-----------------------------------------------------------------------------
-    if (icorr == 2) icorr = track->BestAlg();
+    if (track_type == 2) track_type = track->BestAlg();
 
-    tp->fP     = track->fP2    +kMomentumCorr[icorr];		// correcting
+    tp->fP     = track->fP2    +kMomentumCorr[track_type];		// correcting
     tp->fDpF   = tp->fP        -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;
@@ -1107,7 +1139,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 // v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
 //-----------------------------------------------------------------------------
       tp->fDt  = vr->fDt ; // v4_2_4: - 0.22; // - 1.;
-      if (icorr >= 0) tp->fDt  -= kDtTcmCorr[icorr];
+      if (track_type >= 0) tp->fDt  -= kDtTcmCorr[track_type];
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
@@ -1217,7 +1249,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
     double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
 
-    int id_word = tp->fIDWord[fBestID];
+    int id_word = tp->fIDWord[fBestID[track_type]];
 
     if (GetDebugBit(7)) {
       if ((id_word == 0) && (llhr_cal > 20)) {

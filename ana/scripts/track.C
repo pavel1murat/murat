@@ -220,8 +220,8 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMva = -1, 
     }
     else if (use_chi2d == 2) {
       // Arpan's  chi2-based training
-      fn = "CalPatRec/data/v5_7_6/MLP_weights_exp2.xml";
-      m_tcm->SetUseMVA(202);
+       if      (weight_type == 2) fn = "CalPatRec/data/v5_7_6/MLP_weights_exp2.xml";
+       else if (weight_type == 4) fn = "../../alaha/dev/TrkQualPExp4Weights/TMVAClassification_MLP.weights.xml";
     }
   }
   

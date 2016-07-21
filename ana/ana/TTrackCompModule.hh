@@ -29,6 +29,7 @@
 #include "Stntuple/alg/TEmuLogLH.hh"
 
 #include "murat/ana/prob_dist.hh"
+#include "murat/ana/mva_data.hh"
 
 namespace mu2e { 
   class MVATools;
@@ -271,8 +272,11 @@ public:
 //-----------------------------------------------------------------------------
 // MVA-based classifiers for TrkPatRec and CalPatRec tracks separately
 //-----------------------------------------------------------------------------
-  TString                 fTprWeightsFile;
-  TString                 fCprWeightsFile;
+//   TString                 fTprWeightsFile;
+//   TString                 fCprWeightsFile;
+
+  mva_data*               fTprMVA;
+  mva_data*               fCprMVA;
 
   mu2e::MVATools*         fTprQualMva;
   mu2e::MVATools*         fCprQualMva;
@@ -295,20 +299,21 @@ public:
 //-----------------------------------------------------------------------------
   void    SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void    SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
+
   void    SetDebugCut(int I, double XMin, double XMax) {
     fDebugCut[I].fXMin = XMin;
     fDebugCut[I].fXMax = XMax;
   }
   
-  void    SetUseMVA        (int Flag) { fUseMVA        = Flag; }
+  void    SetMVA          (const char* TrkRecAlgorithm, const char* Dataset, int MvaType);
 
-  void    SetWriteTmvaTree (int Algo) { 
+  void    SetWriteTmvaTree (int Algo) {
     fWriteTmvaTree = 1; 
     fTmvaAlgorithm = Algo; 
   }
 
-  void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }
-  void    SetCprWeightsFile(const char* Fn) { if (Fn[0] != 0) fCprWeightsFile = Fn; }
+//   void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }
+//   void    SetCprWeightsFile(const char* Fn) { if (Fn[0] != 0) fCprWeightsFile = Fn; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

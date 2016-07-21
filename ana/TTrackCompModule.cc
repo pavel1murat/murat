@@ -35,7 +35,8 @@
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
-#include "ana/TTrackCompModule.hh"
+#include "murat/ana/TTrackCompModule.hh"
+#include "murat/ana/mva_data.hh"
 
 // framework
 #include "fhiclcpp/ParameterSet.h"
@@ -73,11 +74,12 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     }
   }
 
-  fBestID[0]      = 8;		  // Dave's default: DaveTrkQual > 0.4
-  fBestID[1]      = 17;		  // CalPatRec     : CprQual     > 0.85
+  fNMVA           = 0;
 
-  fBestTrackID[0] = fTrackID[fBestID[0]];
-  fBestTrackID[1] = fTrackID[fBestID[1]];
+  fUseMVA         = 0;
+
+  fTprMVA         = new mva_data("trkpatrec","dave"    ,002);
+  fCprMVA         = new mva_data("calpatrec","e11s5731",002);
 
   fLogLH       = new TEmuLogLH();
 //-----------------------------------------------------------------------------
@@ -93,18 +95,35 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
   fWriteTmvaTree  = 0;
   fTmvaAlgorithm  = -1;
-
-  fUseMVA         = 0;
-  fNMVA           = 0;
-
-  fTprWeightsFile = "TrkDiag/test/TrkQual.weights.xml";
-  fCprWeightsFile = "CalPatRec/data/v5_7_7/MLP_weights_2_exp.xml";
 }
 
 //-----------------------------------------------------------------------------
 TTrackCompModule::~TTrackCompModule() {
   delete fLogLH;
   for (int i=0; i<fNID; i++) delete fTrackID[i];
+
+  delete fTprMVA;
+  delete fCprMVA;
+}
+
+//-----------------------------------------------------------------------------
+void TTrackCompModule::SetMVA(const char* TrkRecAlgorithm, const char* TrainingDataset, int MvaType) {
+
+  fUseMVA        = 1;
+
+  TString trk_alg = TrkRecAlgorithm;
+  trk_alg.ToUpper();
+
+  fTmvaAlgorithm  = MvaType;
+
+  if (trk_alg == "CALPATREC") {
+    if (fCprMVA) delete fCprMVA;
+    fCprMVA = new mva_data("CALPATREC",TrainingDataset,MvaType);
+  }
+  else if (trk_alg == "TRKPATREC") {
+    if (fTprMVA) delete fTprMVA;
+    fTprMVA = new mva_data("CALPATREC",TrainingDataset,MvaType);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -172,10 +191,10 @@ int TTrackCompModule::BeginJob() {
   if (fUseMVA) {
     fhicl::ParameterSet pset_tpr, pset_cpr;
 
-    string              s1(fTprWeightsFile.Data());
-    string              s2(fCprWeightsFile.Data());
-
     fNMVA = 1;
+
+    string              s1(fTprMVA->XmlWeightsFile());
+    string              s2(fCprMVA->XmlWeightsFile());
 
     printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
     pset_tpr.put<string>("MVAWeights",s1);
@@ -193,6 +212,9 @@ int TTrackCompModule::BeginJob() {
     fTrackProb[0] = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
     fTrackProb[1] = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
   }
+
+  fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
+  fBestID[1]      = fCprMVA->BestID();		  // CalPatRec     : CprQual     > 0.85
 
   return 0;
 }
@@ -761,7 +783,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 int TTrackCompModule::FillTmvaTree() {
   int rc(0), loc(-1);
 
-  loc = fTmvaAlgorithm % 100 ;		// 0:trkpatrec , 1:calpatrec)
+  loc = fTmvaAlgorithm % 100 ;		// 0:trkpatrec , 1:calpatrec
 
   if (fTrackBlock[loc]->NTracks() != 1) return rc;
 
@@ -1199,9 +1221,9 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       }
       else if (alg == 1) {
 //-----------------------------------------------------------------------------
-// CalPatRec track - for fUseMva=101 chi2/N(dof) used (our initial training)
+// CalPatRec track - for fTmvaAlgorithm=101 chi2/N(dof) used (our initial training)
 //-----------------------------------------------------------------------------
-	int use_chi2d = fUseMVA / 100;
+	int use_chi2d = fTmvaAlgorithm / 100;
 	if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
 	else                     pmva[2] = track->Chi2Dof();
 

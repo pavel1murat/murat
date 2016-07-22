@@ -134,9 +134,13 @@ void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double
   f2->SetFillStyle(3003);
   f2->GetHistogram()->Draw("same");
 
-  double total = _Func->Integral(XMin,XMax);
+  double total = Hist->Integral(1,Hist->GetNbinsX());
 
-  double htail = _Func->Integral(0,XMax)-f2->Integral(0,XMax);
+  double x0 = _Func->GetParameter(1);
+
+  printf("x0 = %10.4f\n",x0);
+
+  double htail = (_Func->Integral(x0,XMax)-f2->Integral(x0,XMax))/Hist->GetBinWidth(1);
 
   printf("total = %12.5f, HTail = %12.5f, htail/total : %12.5e\n",total,htail,htail/total);
 }

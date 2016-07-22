@@ -188,7 +188,7 @@ void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, 
 // MVAMode : 100 + Mode (chi2)
 //         :       Mode (logfcons)
 //-----------------------------------------------------------------------------
-void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMva = -1, int CprMvaType = 202, int DebugBit = -1) {
+void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = -1, int CprMvaType = 202, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------
@@ -196,7 +196,8 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMva = -1, 
   m_tcm->SetPdgCode      (11);
   m_tcm->SetGeneratorCode(GeneratorCode);
 
-  m_tcm->SetMVA("calpatrec","e11s5731",CprMvaType);
+  if (TprMvaType >= 0) m_tcm->SetMVA("trkpatrec","e11s5731",TprMvaType);
+  if (CprMvaType >= 0) m_tcm->SetMVA("calpatrec","e11s5731",CprMvaType);
 
   if (DebugBit >= 0) m_tcm->SetDebugBit(DebugBit,1);
 }

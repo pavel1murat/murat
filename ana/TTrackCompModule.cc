@@ -93,8 +93,9 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // ntuples for TMVA training
 //-----------------------------------------------------------------------------
-  fWriteTmvaTree  = 0;
-  fTmvaAlgorithm  = -1;
+  fWriteTmvaTree     = -1;
+  fTmvaAlgorithmTpr  = -1;
+  fTmvaAlgorithmCpr  = -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -114,15 +115,15 @@ void TTrackCompModule::SetMVA(const char* TrkRecAlgorithm, const char* TrainingD
   TString trk_alg = TrkRecAlgorithm;
   trk_alg.ToUpper();
 
-  fTmvaAlgorithm  = MvaType;
-
   if (trk_alg == "CALPATREC") {
     if (fCprMVA) delete fCprMVA;
     fCprMVA = new mva_data("CALPATREC",TrainingDataset,MvaType);
+    fTmvaAlgorithmCpr  = MvaType;
   }
   else if (trk_alg == "TRKPATREC") {
     if (fTprMVA) delete fTprMVA;
-    fTprMVA = new mva_data("CALPATREC",TrainingDataset,MvaType);
+    fTprMVA = new mva_data("TRKPATREC",TrainingDataset,MvaType);
+    fTmvaAlgorithmTpr  = MvaType;
   }
 }
 
@@ -146,12 +147,12 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // initialize likelihood histograms
 //-----------------------------------------------------------------------------
-  if (fWriteTmvaTree != 0) {
+  if (fWriteTmvaTree >= 0) {
     TDirectory* dir = gDirectory;
 
     const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
 
-    int algo = fTmvaAlgorithm % 100;
+    int algo = fWriteTmvaTree;
 
     if      (algo == 0) {
       fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
@@ -783,7 +784,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 int TTrackCompModule::FillTmvaTree() {
   int rc(0), loc(-1);
 
-  loc = fTmvaAlgorithm % 100 ;		// 0:trkpatrec , 1:calpatrec
+  loc = fWriteTmvaTree;			// 0:trkpatrec , 1:calpatrec
 
   if (fTrackBlock[loc]->NTracks() != 1) return rc;
 
@@ -1046,7 +1047,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // fill little tree if requested
 //-----------------------------------------------------------------------------
-  if (fWriteTmvaTree) FillTmvaTree();
+  if (fWriteTmvaTree >= 0) FillTmvaTree();
 }
 
 
@@ -1214,16 +1215,23 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 // TrkPatRec track - log(fitcons) used for training
 //-----------------------------------------------------------------------------
-	pmva[2] = log10(track->FitCons());
-	//	tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
-	tp->fMVAOut[0] = track->DaveTrkQual();
+	if (fTmvaAlgorithmTpr < 0) {
+	  tp->fMVAOut[0] = track->DaveTrkQual();
+	}
+	else {
+	  int use_chi2d = fTmvaAlgorithmTpr / 100;
+	  if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
+	  else                     pmva[2] = track->Chi2Dof();
+
+	  tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
+	}
 	tp->fMVAOut[1] = fTprQualMva->evalMVA(pmva);
       }
       else if (alg == 1) {
 //-----------------------------------------------------------------------------
 // CalPatRec track - for fTmvaAlgorithm=101 chi2/N(dof) used (our initial training)
 //-----------------------------------------------------------------------------
-	int use_chi2d = fTmvaAlgorithm / 100;
+	int use_chi2d = fTmvaAlgorithmCpr / 100;
 	if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
 	else                     pmva[2] = track->Chi2Dof();
 
@@ -1474,7 +1482,7 @@ void TTrackCompModule::Debug() {
 int TTrackCompModule::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
 
-  if (fWriteTmvaTree) {
+  if (fWriteTmvaTree >= 0) {
     printf("[TTrackCompModule::EndJob] Writing output TMVA training file %s\n",fTmvaFile->GetName());
     fTmvaFile->Write();
     delete fTmvaFile;

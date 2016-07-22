@@ -256,7 +256,8 @@ public:
 // TMVA training ntuples
 //-----------------------------------------------------------------------------
   int                     fWriteTmvaTree;
-  int                     fTmvaAlgorithm;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
+  int                     fTmvaAlgorithmTpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
+  int                     fTmvaAlgorithmCpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
 
   TFile*                  fTmvaFile;
 
@@ -308,8 +309,7 @@ public:
   void    SetMVA          (const char* TrkRecAlgorithm, const char* Dataset, int MvaType);
 
   void    SetWriteTmvaTree (int Algo) {
-    fWriteTmvaTree = 1; 
-    fTmvaAlgorithm = Algo; 
+    fWriteTmvaTree = Algo; 
   }
 
 //   void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }

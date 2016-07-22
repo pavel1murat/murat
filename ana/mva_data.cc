@@ -100,6 +100,13 @@ mva_data::data_t  mva_trkpatrec_dave_002 = {
   0.40, 8
 };
 
+mva_data::data_t  mva_trkpatrec_e115731_001 = {
+  "trkpatrec_e11s5731_logfcons_001",
+  "CalPatRec/data/v5_7_7/MLP_weights_trkpatrec_logfcons_1_uni.xml",
+  "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_001_000.hist",
+  0.40, 8
+};
+
 
 //-----------------------------------------------------------------------------
 mva_data::~mva_data() {
@@ -143,6 +150,9 @@ mva_data::mva_data(const char* TrkRecAlgorithm, const char* Dataset, int Type) {
   else if (algo == "TRKPATREC") {
     if (ds == "DAVE") {
       if (Type == 2)  fData = mva_trkpatrec_dave_002;
+    }
+    else if (ds = "E11S5731") {
+      if (Type == 1) fData = mva_trkpatrec_e115731_001;
     }
   }
   else {

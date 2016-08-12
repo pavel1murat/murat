@@ -123,8 +123,8 @@ murat : {
 #------------------------------------------------------------------------------
 # Stntuple modules
 #------------------------------------------------------------------------------
-	@table::CalPatRec.filters
 	@table::Stntuple.filters
+	@table::CalPatRec.filters
     }
 
     outputs: {

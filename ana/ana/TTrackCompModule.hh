@@ -209,7 +209,7 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlock[2];	// [0]: TrkPatRec tracks, [1]:all CalPatRec
+  TStnTrackBlock*   fTrackBlock[3];	// [0]: TrkPatRec tracks, [1]:all CalPatRec
   TStnClusterBlock* fClusterBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
@@ -345,6 +345,7 @@ public:
 		       TrackPar_t*       TrackPar    );
 
   void    Debug();
+  void    PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const ;
 //-----------------------------------------------------------------------------
 // test
 //-----------------------------------------------------------------------------

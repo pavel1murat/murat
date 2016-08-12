@@ -16,6 +16,7 @@
 //  8  : events with CalPatRec tracks with P > 105
 //  9  : all events - print DMVA
 // 10  : events with TRKPATREC DMVA > 0.3 - print DMVA
+// 11  : validate MergePatRec
 //
 // call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,6 +141,10 @@ int TTrackCompModule::BeginJob() {
   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"         ,&fSimpBlock    );
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"         ,&fGenpBlock    );
   RegisterDataBlock("VdetBlock"     ,"TVdetDataBlock"     ,&fVdetBlock    );
+//-----------------------------------------------------------------------------
+// for validation purposes
+//-----------------------------------------------------------------------------
+  RegisterDataBlock("TrackBlock"     ,"TStnTrackBlock"    ,&fTrackBlock[2]);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -888,6 +893,7 @@ void TTrackCompModule::FillHistograms() {
 
   int ntpr = fTrackBlock[0]->NTracks();
   int ncpr = fTrackBlock[1]->NTracks();
+  //  int nmpr = fTrackBlock[2]->NTracks();
 
   if ((ntpr > 0) && (fTrackPar[0][0].fIDWord[fBestID[0]] == 0)) {
     tpr  = fTrackBlock[0]->Track(0);
@@ -1226,6 +1232,8 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 	  tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
 	}
 	tp->fMVAOut[1] = fTprQualMva->evalMVA(pmva);
+
+	tp->fProb = fTrackProb[0]->prob(tp->fMVAOut[0]);
       }
       else if (alg == 1) {
 //-----------------------------------------------------------------------------
@@ -1237,6 +1245,8 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
 	tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
 	tp->fMVAOut[1] = tp->fMVAOut[0];
+
+	tp->fProb      = fTrackProb[1]->prob(tp->fMVAOut[0]);
       }
 
       if (GetDebugBit(9)) {
@@ -1308,6 +1318,7 @@ int TTrackCompModule::Event(int ientry) {
 
   fTrackBlock[0]->GetEntry(ientry);
   fTrackBlock[1]->GetEntry(ientry);
+  fTrackBlock[2]->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
@@ -1476,6 +1487,15 @@ void TTrackCompModule::Debug() {
   }
 
 
+  if (GetDebugBit(11) == 1) {
+    if ((fNTracks[0] == 1) && (fNTracks[1] == 1)) {
+      GetHeaderBlock()->Print(Form("TTrackCompModule :bit011"));
+      PrintTrack(fTrackBlock[0]->Track(0),&fTrackPar[0][0],"");
+      PrintTrack(fTrackBlock[1]->Track(0),&fTrackPar[1][0],"data");
+      PrintTrack(fTrackBlock[2]->Track(0),&fTrackPar[2][0],"data");
+    }
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1498,3 +1518,40 @@ int TTrackCompModule::EndJob() {
 void TTrackCompModule::Test001() {
 }
 
+
+//_____________________________________________________________________________
+void TTrackCompModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const {
+
+  TString opt(Option);
+
+  opt.ToLower();
+					// "non-const *this" for printing purposes
+  TStnTrack* t = (TStnTrack*) Track;
+
+  if ((opt == "") || (opt.Index("banner") >= 0)) {
+//-----------------------------------------------------------------------------
+// print banner
+//-----------------------------------------------------------------------------
+    printf("------------------------------------------------------------------------------------------------");
+    printf("----------------------------------------------------------------------------------\n");
+    printf(" i  nh  na nw nosd nssd na0 ncl  alg_mask    id_word   q     p     momerr    T0     T0Err     D0");
+    printf("      Z0    TanDip   TBack   chi2/dof   fcon  TrkQual MvaOut[0]  MVAOut[1]   Prob \n");
+    printf("------------------------------------------------------------------------------------------------");
+    printf("----------------------------------------------------------------------------------\n");
+  }
+
+  if ((opt == "") || (opt.Index("data") >= 0)) {
+    printf("%2i %3i %3i %2i %4i %4i %3i %3i 0x%08x",
+	   t->fNumber,t->NHits(), t->NActive(),t->NWrong(), 
+	   t->NOSDoublets(), t->NSSDoublets(), t->NHitsAmbZero(),
+	   t->NClusters(),
+	   t->AlgorithmID());
+
+    printf(" 0x%08x %1.0f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f %9.4f",
+	   t->fIDWord,
+	   t->fCharge, 
+	   t->fP*t->fCharge, t->fFitMomErr, t->fT0, t->fT0Err, t->fD0, t->fZ0, t->fTanDip, t->TBack(),
+	   t->Chi2Dof(),t->FitCons(),t->DaveTrkQual(),Tp->fMVAOut[0], Tp->fMVAOut[1], Tp->fProb);
+    printf("\n");
+  }
+}

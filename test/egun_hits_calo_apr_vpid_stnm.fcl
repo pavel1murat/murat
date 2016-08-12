@@ -34,7 +34,6 @@ BEGIN_PROLOG
   bgHitFiles                          : @nil
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
-  FlagStrawHits_maximumEnergy         : 0.005
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large

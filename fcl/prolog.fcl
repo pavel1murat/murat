@@ -3,7 +3,11 @@ BEGIN_PROLOG
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
+
+FlagStrawHits_maximumEnergy: 0.005
+
 murat : { 
+
     TCalm002 : { module_type:TCalm002
 	strawHitMaker     : makeSH
 	caloClusterMaker  : MakeCaloCluster

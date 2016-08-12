@@ -22,7 +22,6 @@ BEGIN_PROLOG
   bgHitFiles                          : @nil
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
-  FlagStrawHits_maximumEnergy         : 0.005
 END_PROLOG
 
 #include "murat/fcl/templates.fcl"
@@ -61,7 +60,7 @@ physics: {
 
     @table::murat.paths
 
-    trigger_paths : [ gen_digi_dem_dmm_reco_stn ]
+    trigger_paths : [ path_gen_digi_dem_dmm_reco_stn ]
     out           : []
     end_paths     : [ out ]
 }

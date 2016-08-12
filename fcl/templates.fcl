@@ -181,7 +181,7 @@ murat.ump_reco : [ @sequence::Tracking.TPRUpstreammuPlus  , MergePatRecUmp, @seq
 
 murat.paths : {
 
-    path_gen_digi_tcm_reco_stn : [ @sequence::murat.gen_g4_time_map,
+    path_gen_digi_reco_stn_tcm : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.tpr_reco       ,

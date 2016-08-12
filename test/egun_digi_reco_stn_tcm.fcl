@@ -35,7 +35,7 @@ END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : EgunDigiTcmRecoStn
+process_name : EgunDigiRecoStnTcm
 
 source       : { module_type : EmptyEvent }
 
@@ -51,23 +51,23 @@ physics: {
     }
 
     filters : { @table::murat.filters 
-	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "egun_digi_reco_stn.stn" }
+	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "egun_digi_reco_tcm_stn.stn" }
  	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL  }
     }
 
     @table::murat.paths
 
-    trigger_paths : [ path_gen_digi_tcm_reco_stn ]
+    trigger_paths : [ path_gen_digi_reco_stn_tcm ]
     out           : []
     end_paths     : [ out ]
 }
 
-services.TFileService.fileName            : "egun_digi_reco_stn.hist"
+services.TFileService.fileName            : "egun_digi_reco_stn_tcm.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "egun_digi_reco_stn.art"
+# outputs.detectorOutput.fileName           : "egun_digi_reco_stn_tcm.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

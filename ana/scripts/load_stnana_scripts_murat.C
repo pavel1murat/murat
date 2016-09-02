@@ -10,6 +10,7 @@ int load_stnana_scripts_murat() {
     "cosmics.C",
     "dio_calib.C",
     "genp.C",
+    "hits.C",
     "pid.C",
     "reco_eff_ana.C",
     "track.C",

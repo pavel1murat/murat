@@ -93,7 +93,11 @@ int generate_track_quality_templates() {
   
   const char* fn  = "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_001.hist";
 //-----------------------------------------------------------------------------
-// DT templates
+// track quality templates:
+// ------------------------
+// default: linear weight training
+// TrackComp/trk_100 : TrkPatRec , all reconstructed tracks
+// TrackComp/trk_200 : CalPatRec , all reconstructed tracks
 //-----------------------------------------------------------------------------
   generate_1D_templates(fn,"TrackComp","trk_100/mvaout","tpr_qual.tab");
   generate_1D_templates(fn,"TrackComp","trk_200/mvaout","cpr_qual.tab");

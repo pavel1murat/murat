@@ -9,6 +9,7 @@ def_name track_004("cal_ana");
 def_name track_005("track_ana_tandip_12");
 def_name track_006("track_debug_tandip_12");
 def_name track_007("track_ana_dem");
+def_name track_0071("track_ana_tpr");
 def_name track_007("track_ana_dmm");
 def_name track_008("track_ana_ump");
 def_name track_008("track_ana_umm");
@@ -29,6 +30,20 @@ void  track_ana(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
   m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
   m_trk->SetPdgCode      (PdgCode);
   m_trk->SetGeneratorCode(GeneratorCode);
+  if (DebugBit >= 0) {
+    m_trk->SetDebugBit(DebugBit,1);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void  track_ana_tpr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);
+  m_trk->SetPdgCode      (PdgCode);
+  m_trk->SetGeneratorCode(GeneratorCode);
+  m_trk->SetTrackBlockName("TrkPatRec");
   if (DebugBit >= 0) {
     m_trk->SetDebugBit(DebugBit,1);
   }

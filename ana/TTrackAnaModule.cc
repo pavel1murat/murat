@@ -1376,7 +1376,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
     if (icorr == 2) icorr = track->BestAlg();
 
-    tp->fP = track->fP2;
+    tp->fP = track->fP0;
     if (icorr >= 0) tp->fP  += kMomentumCorr[icorr];		// correcting
 
     tp->fDpF   = tp->fP        -track->fPFront;

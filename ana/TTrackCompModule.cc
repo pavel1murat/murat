@@ -1117,7 +1117,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
     if (track_type == 2) track_type = track->BestAlg();
 
-    tp->fP     = track->fP2    +kMomentumCorr[track_type];		// correcting
+    tp->fP     = track->fP0    +kMomentumCorr[track_type];		// correcting
     tp->fDpF   = tp->fP        -track->fPFront;
     tp->fDp0   = track->fP0    -track->fPFront;
     tp->fDp2   = track->fP2    -track->fPFront;

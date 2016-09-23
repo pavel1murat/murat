@@ -63,9 +63,9 @@ murat : {
   	pgun : { @table::StoppedParticleReactionGun # p(proton)=100 MeV/c
 	    physics : {
 		pdgId            : 2212
-		elow             : 943.3154297476534
-		ehi              : 944.4278691355946
-		spectrumVariable : "totalEnergy"
+		elow             :  99.99
+		ehi              : 100.01
+		spectrumVariable : "momentum"
 		spectrumShape    : "flat"
 	    }
 	}

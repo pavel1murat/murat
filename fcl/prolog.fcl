@@ -74,13 +74,16 @@ murat : {
     }
 
     TTrackRecoAna : { module_type:TTrackRecoAna
-	module_name         : TTrackRecoAna
 	diagLevel           : 0
 	trkPatRecLabel      : TrkPatRecDownstreameMinus
     }
 
     DumpEventNumber : { module_type:DumpEventNumber
-	module_name         : DumpEventNumber
+    }
+
+    ReadGenParticles : { module_type:ReadGenParticles
+	inputModuleLabel    : StoppedParticleReactionGun
+	inputInstanceName   : ""
     }
 }
 
@@ -88,5 +91,9 @@ murat.producers : {
     TrackRecoCheck  : { @table::murat.TrackRecoCheck  }
     DumpEventNumber : { @table::murat.DumpEventNumber }
 }
+
+# murat.analysers : { 
+#    ReadGenParticles : { @table::murat.ReadGenParticles }
+# }
 
 END_PROLOG

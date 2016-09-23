@@ -1,0 +1,164 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# read MIXCD3-v2 background frames
+# make STNTUPLE in one go, without creating an intermediate file
+#------------------------------------------------------------------------------
+
+#VBERTACC: questo script analizza i protoni generati, con 1- selezione iniziale sull'energia (per scartare raggi delta) 2-modifica del timepeakfinder
+
+# --------------------------------------------------
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  pdgCode     : 11
+  bgHitFiles  : @nil
+  min_straw_E : 0.004
+  max_straw_E : 0.011
+  min_time    : 300
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : EgunMergePatRecStnmaker2
+
+source       : {
+    module_type : RootInput 
+   # fileNames : ["/mu2e/app/users/vbertacc/dev/vbertacc/results/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"]
+    fileNames : ["/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"]  
+  #fileNames : ["vbertacc/results/proton_single_gen_OLD.root"]
+}
+
+
+ trkPatRecSeqProt     : [ @sequence::tprPrepHitSeq, TimePeakFinder, NegHelixFinder, TRFDownstreameMinus  ]
+
+physics : { 
+    producers: { @table::Stntuple.producers
+
+	FSHPreStereo : { @table::FSHPreStereo
+	    minimumTime   :  @local::min_time
+	    minimumEnergy :  @local::min_straw_E
+	    maximumEnergy :  @local::max_straw_E
+	}
+
+	FlagStrawHits : { @table::FlagStrawHits
+     	    minimumTime   :  @local::min_time
+	    minimumEnergy :  @local::min_straw_E
+	    maximumEnergy :  @local::max_straw_E
+	}
+
+	TimePeakFinder : { @table::TimePeakFinder
+	    MinNHits : 10
+	    ymin  : 2
+	    OneDPeakThreshold : 1
+	    tmin : 300.0
+	    DtMax : 100  
+	}
+
+	NegHelixFinder : { @table::NegHelixFinder
+	    fitparticle : @local::Particle.proton
+	    fitdirection : @local::FitDir.downstream
+	    RobustHelixFit :{
+		minNHit : 5
+		rcmin : 50
+		targetinit : false
+		targetintersect : false
+       		minDelta : 2000
+		#mindist : 20
+		#maxP : 200
+		#rcmax : 500.0
+		#ErrorFactor : 12.0
+		#minAbsTanDip : 0.000001
+		#maxAbsTanDip : 10000000000
+	    }
+	}
+
+	TRFDownstreameMinus : { @table::Tracking.producers.TRFDownstreamePlus
+	    fitparticle     : @local::Particle.proton
+	    fitdirection    : @local::FitDir.downstream
+
+	    SeedFit : {@table::KalSeedFit
+		minnstraws : 4	
+		hiterr                      :      [ 5.0, 5.0] #  [7.1, 7.1]
+	    }
+
+	    KalFit : { @table::KalFinalFit
+		minnstraws : 4
+		materialCorrection          : false
+		hiterr                      : [ 5.0, 1.5, 1.0] #  [7.1, 2.1, 1.4]  
+		t0Tolerance                 : [ 2.0, 1.0, 1.0] # [2.8, 1.4, 1.4]  
+		weedhits                    : [true, true, true] #@local::PanelAmbig.Weed 
+		AddMaterial		    : [ false, false, false]
+		PanelAmbigResolver          : @local::PanelAmbig.Resolver
+		ambiguityStrategy           : [0,0,0]	# @local::PanelAmbig.Strateg
+	    }
+	}
+    }
+
+    filters : { @table::Stntuple.filters
+
+	StntupleMaker : { @table::Stntuple.filters.StntupleMaker
+	    makeTrackSeeds       : 0
+	    makeClusters         : 0
+	    makePid              : 0
+	    trkRecoModuleLabel   : ["TRFDownstreameMinus"]
+	    fitParticle          : [                        @local::Particle.proton]
+	    fitDirection         : [                        @local::FitDir.downstream ]
+	    trackSeedMaker       : "NegHelixFinder"
+	    g4ModuleLabel        : "protonMixer"
+	    generatorModuleLabel : "protonMixer"
+	}
+
+	MuHitDisplay : { @table::MuHitDisplay
+	    trkRecoModuleLabel           : TRFDownstreameMinus
+	    fitParticle                  : @local::Particle.proton
+	    fitDirection                 : @local::FitDir.downstream
+	    strawHitPosMakerModuleLabel  : MakeStereoHits
+	    strawHitFlagMakerModuleLabel : FlagStrawHits
+	    g4ModuleLabel                : "protonMixer"
+	    generatorModuleLabel         : "protonMixer"
+	}
+
+    }
+#------------------------------------------------------------------------------
+# can use path names specified in 'physics.' context w/o prefixing
+#
+# physics.trigger_paths : [  gen_allpatrec_dem_dmm_reco_display ]
+#------------------------------------------------------------------------------
+    trkpatrec_reco : [
+		      @sequence::timeMapSeq
+		      , @sequence::hitMakerSeq
+		      , @sequence::calRecoSeq
+		      , @sequence::trkPatRecSeqProt
+#		      , MergePatRecTpr
+		      , @sequence::stnmaker_seq
+#		      , MuHitDisplay
+		     ]
+
+    trigger_paths : [  trkpatrec_reco ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+#physics.filters.MuHitDisplay.trkRecoModuleLabel : MergePatRecTpr
+#services.TFileService.fileName            : "vbertacc/bkg_proton_reco_stn.hist"
+physics.filters.InitStntuple.histFileName : "bkg_proton_reco_stn.stn"
+#------------------------------------------------------------------------------
+# uncomment the next 2 lines if you want the DST file to be written out
+#-----------------------------------------------------------------------------
+#physics.out                               : [ detectorOutput ]
+#outputs.detectorOutput.SelectEvents       : { SelectEvents : [ gen_allpatrec_dem_dmm_reco_stnmaker ] }
+#outputs.detectorOutput.fileName           : "vbertacc/proton_single_gen_reco.root"
+#------------------------------------------------------------------------------
+# debuggingSingle
+#------------------------------------------------------------------------------
+# physics.producers.CalPatRecDem.diagLevel : 1
+# physics.producers.CalPatRecDmm.diagLevel : 1
+# physics.producers.AvikPID.debugLevel     : 100
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

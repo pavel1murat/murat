@@ -181,7 +181,7 @@ void TPidAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //   double            cos_th, xv, yv, rv, zv, p;
 //   TLorentzVector    mom;
 
-  Hist->fNTracks->Fill(fNTracks);
+  Hist->fNTracks->Fill(fNTracks[0]);
 }
 
 //-----------------------------------------------------------------------------
@@ -189,11 +189,13 @@ void TPidAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 int TPidAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
-// register data blocks
-// downstream particles
+// register data blocks for downstream electrons and muons
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("PidBlock"      ,"TPidDataBlock"    ,&fPidDataBlock);
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
+  RegisterDataBlock("PidBlockDem"   ,"TPidDataBlock"    ,&fPidDataBlock[0]);
+  RegisterDataBlock("PidBlockDmm"   ,"TPidDataBlock"    ,&fPidDataBlock[1]);
+
+  RegisterDataBlock("TrackBlockDem" ,"TStnTrackBlock"   ,&fTrackBlock  [0]);
+  RegisterDataBlock("TrackBlockDmm" ,"TStnTrackBlock"   ,&fTrackBlock  [1]);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -219,9 +221,9 @@ void TPidAnaModule::FillHistograms() {
   TStnPid*     pid;
   TrackPar_t*  tp;
 
-  for (int i=0; i<fNTracks; i++) {
+  for (int i=0; i<fNTracks[0]; i++) {
     tp  = fTrackPar+i;
-    pid = fPidDataBlock->Pid(i);
+    pid = fPidDataBlock[0]->Pid(i);
     FillPidHistograms(fHist.fPid[0],pid);
     if (tp->fIDWord == 0) {
       FillPidHistograms(fHist.fPid[1],pid);
@@ -254,8 +256,11 @@ int TPidAnaModule::Event(int ientry) {
   //  double                p;
   //  TLorentzVector        mom;
 
-  fPidDataBlock->GetEntry(ientry);
-  fTrackBlock->GetEntry(ientry);
+  fPidDataBlock[0]->GetEntry(ientry);
+  fPidDataBlock[1]->GetEntry(ientry);
+
+  fTrackBlock  [0]->GetEntry(ientry);
+  fTrackBlock  [1]->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
@@ -264,15 +269,16 @@ int TPidAnaModule::Event(int ientry) {
 //  fNGenp      = fGenpBlock->NParticles();
 //  TStnPid* hit;
 
-  fNTracks = fPidDataBlock->NTracks();
+  fNTracks[0] = fTrackBlock[0]->NTracks();
+  fNTracks[1] = fTrackBlock[1]->NTracks();
 
   TrackPar_t*   tp;
   TStnTrack*    track;
 
-  int ntrk = fTrackBlock->NTracks();
+  int ntrk = fTrackBlock[0]->NTracks();
 
-  if (ntrk != fNTracks) {
-    printf(" TPidAnaModule::Event ERROR: ntrk != NTracks. BAIL OUT.\n");
+  if (ntrk != fNTracks[0]) {
+    printf(" TPidAnaModule::Event ERROR: ntrk != NTracks[0]. BAIL OUT.\n");
     return -1;
   }
 
@@ -280,7 +286,7 @@ int TPidAnaModule::Event(int ientry) {
 					// assume less 20 tracks
     tp             = fTrackPar+itrk;
 
-    track          = fTrackBlock->Track(itrk);
+    track          = fTrackBlock[0]->Track(itrk);
     for (int i=0; i<fNID; i++) {
       tp->fIDWord[i] = fTrackID[i]->IDWord(track);
     }

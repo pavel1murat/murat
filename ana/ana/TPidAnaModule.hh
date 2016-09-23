@@ -72,16 +72,18 @@ public:
 //  data members
 //-----------------------------------------------------------------------------
 public:
-					// pointers to the data blocks used
-  TStnPidBlock*         fPidDataBlock;
-  TStnTrackBlock*       fTrackBlock;
+					// pointers to the data blocks used 0:DEM, 1:DMM
+
+  TStnPidBlock*         fPidDataBlock[2];
+  TStnTrackBlock*       fTrackBlock  [2];
+
 					// additional track parameters (assume ntracks < 20)
   int                   fNID;
   TStnTrackID*          fTrackID [20];
   TrackPar_t            fTrackPar[20];
 					// histograms filled
   Hist_t                fHist;
-  int                   fNTracks;
+  int                   fNTracks[2];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

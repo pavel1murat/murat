@@ -402,7 +402,7 @@ void csm_model::add_chanmodel(csm_channel_model *cm, const char *cname)
   Int_t ichan;
 
   ichan = lookup_add_channame(cname);
-  chanmodel[ichan] = cm->Clone();
+  chanmodel[ichan] = cm->clone();
 }
 
 void csm_model::add_npbounds(char *pname, Double_t lowbound, Double_t highbound)

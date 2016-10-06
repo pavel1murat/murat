@@ -20,10 +20,11 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+#include "murat/ana/TrackPar_t.hh"
+
 class TPidAnaModule: public TStnModule {
 public:
 
-#include "murat/ana/TrackPar_t.hh"
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------

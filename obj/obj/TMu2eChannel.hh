@@ -95,7 +95,7 @@ public:
 				const char*        HistSet,
 				int                RunRange,
 				int                Bin     ,
-				const char*        HistName);
+				const char*        HistName) const;
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------

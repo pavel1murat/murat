@@ -19,7 +19,7 @@ TH1KS::~TH1KS() {
 }
 
 //______________________________________________________________________________
-Double_t TH1KS::KolmogorovTest(const TH1 *h2, int NPExp, Option_t *option) const
+Double_t TH1KS::KolmogorovTest_Local(const TH1 *h2, int NPExp, Option_t *option) const
 {
    //  Statistical test of compatibility in shape between
    //  THIS histogram and h2, using Kolmogorov test.
@@ -92,7 +92,7 @@ Double_t TH1KS::KolmogorovTest(const TH1 *h2, int NPExp, Option_t *option) const
    TH1 *h1 = (TH1*)this;
    if (h2 == 0) return 0;
    TAxis *axis1 = h1->GetXaxis();
-   TAxis *axis2 = h2->GetXaxis();
+   const TAxis *axis2 = h2->GetXaxis();
    Int_t ncx1   = axis1->GetNbins();
    Int_t ncx2   = axis2->GetNbins();
 
@@ -214,7 +214,7 @@ Double_t TH1KS::KolmogorovTest(const TH1 *h2, int NPExp, Option_t *option) const
       for (Int_t i=0; i < NPExp; i++) {
          hExpt->Reset();
          hExpt->FillRandom(h1,(Int_t)esum2);
-         dSEXPT = KolmogorovTest(hExpt,NPExp,"M");
+         dSEXPT = KolmogorovTest_Local(hExpt,NPExp,"M");
          if (dSEXPT>dfmax) prb3 += 1.0;
       }
       prb3 /= (Double_t)NPExp;

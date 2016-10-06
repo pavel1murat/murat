@@ -276,7 +276,7 @@ double TMu2eChannel::GetTrEffSF(const aprocess* Process,
 				const char*     HistSet,
 				int             RunRange,
 				int             Bin     ,
-				const char*     HistName) {
+				const char*     HistName) const {
   double trk_eff_sf;
 
   double const k_plug_trk_eff_sf[] = {

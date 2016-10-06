@@ -245,7 +245,7 @@ void csm_channel_model::add_template(TH1 *template_hist,
 // that way the clone can be deleted by itself, and the destructor
 // won't try to delete allocated memory twice
 //-----------------------------------------------------------------------------
-csm_channel_model* csm_channel_model::Clone() {
+csm_channel_model * csm_channel_model::clone() const {
   Int_t     i,j,nnp,ntemplates,nsys;
   Double_t *nps_low   = new Double_t[syserr.size()];
   Double_t *nps_high  = new Double_t[syserr.size()];
@@ -308,7 +308,7 @@ csm_channel_model* csm_channel_model::add(csm_channel_model &a)
   TH1 **highshape = new TH1*[syserr.size()];
   const char **ename = new const char*[syserr.size()];
 
-  csm_channel_model* mclone = a.Clone();
+  csm_channel_model* mclone = a.clone();
 
   ntemplates = (Int_t) histotemplate.size();
   nsys = (Int_t) syserr.size();

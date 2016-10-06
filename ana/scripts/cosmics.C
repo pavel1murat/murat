@@ -32,7 +32,7 @@ void  cosmics_ana(int TrackBlockID = -1, int DebugBit = -1) {
 }
 
 
-int cosmics_ralf() {
+void cosmics_ralf() {
 //-----------------------------------------------------------------------------
 // strip cosmic-like Z's 
 //-----------------------------------------------------------------------------

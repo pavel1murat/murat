@@ -28,15 +28,15 @@
 
 #include "murat/ana/AnaDefs.hh"
 
+#include "murat/ana/HistBase_t.h"
+#include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/SimPar_t.hh"
+
 class TCosmicsAnaModule: public TStnModule {
 public:
 //-----------------------------------------------------------------------------
 // track and sim particle additional parameters
 //-----------------------------------------------------------------------------
-#include "murat/ana/HistBase_t.h"
-#include "murat/ana/TrackPar_t.hh"
-#include "murat/ana/SimPar_t.hh"
-
   enum { kNDisks        =   2 } ;
   enum { kNTrackBlocks  =   8 } ; // dem:dmm:dep:dmp:uem:umm:uep:ump
   enum { kMaxTrackID    =  10 } ;

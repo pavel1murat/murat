@@ -141,7 +141,7 @@ class csm_channel_model: public TNamed {
                                   // signal histograms, and 0 for background histograms.
 
 
-  csm_channel_model* Clone();    // make an exact copy of this channel model -- all the internal
+  csm_channel_model* clone() const;    // make an exact copy of this channel model -- all the internal
                                  // cloned histograms are cloned again.  Better than just
                                  // assigning a new model to this one because the
                                  // destructors won't delete the same memory twice.

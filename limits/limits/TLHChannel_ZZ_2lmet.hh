@@ -1,5 +1,5 @@
 #ifndef zzx_limits_TLHChannel_ZZ_llvv
-#define zzx_limits_TLHChannel_ZZ_2l2v
+#define zzx_limits_TLHChannel_ZZ_llvv
 
 #include "TLHChannel.hh"
 

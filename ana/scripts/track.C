@@ -10,9 +10,9 @@ def_name track_005("track_ana_tandip_12");
 def_name track_006("track_debug_tandip_12");
 def_name track_007("track_ana_dem");
 def_name track_0071("track_ana_tpr");
-def_name track_007("track_ana_dmm");
+def_name track_0072("track_ana_dmm");
 def_name track_008("track_ana_ump");
-def_name track_008("track_ana_umm");
+def_name track_0081("track_ana_umm");
 def_name track_011("track_ana_nocorr");
 
 def_name track_051("track_comp");
@@ -119,14 +119,14 @@ void  track_ana_umm() {
 //-----------------------------------------------------------------------------
 void  track_ana_tandip_12(int GeneratorCode = 2) {
   m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
-  m_trk->GetTrackID()->SetMinTanDip(1.);
-  m_trk->GetTrackID()->SetMaxTanDip(2.);
+  m_trk->GetTrackID(0)->SetMinTanDip(1.);
+  m_trk->GetTrackID(0)->SetMaxTanDip(2.);
 }
 
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
 //-----------------------------------------------------------------------------
-void  track_anaB(int PdgCode = 11, int GeneratorCode = 2, const char* DebugBits) {
+void  track_anaB(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
 
   m_trka = (TTrackAnaModuleA*) g.x->AddModule("TTrackAnaModuleA",0);  
   m_trka->SetPdgCode(PdgCode);
@@ -152,8 +152,8 @@ void  val_cpr(int Bit = -1) {
 //-----------------------------------------------------------------------------
 void  track_debug_tandip_12(int Bit, int GeneratorCode = 2) {
   m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);  
-  m_trk->GetTrackID()->SetMinTanDip(1.);
-  m_trk->GetTrackID()->SetMaxTanDip(2.);
+  m_trk->GetTrackID(0)->SetMinTanDip(1.);
+  m_trk->GetTrackID(0)->SetMaxTanDip(2.);
   m_trk->SetDebugBit(Bit,1);
 }
 

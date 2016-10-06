@@ -10,7 +10,7 @@ public:
   TH1KS(const char* Name, const char* Title, int NBins, float XLow, float XHigh);
   ~TH1KS();
 
-  double KolmogorovTest(const TH1* Hist, int NPExp=1000, Option_t* Opt="") const;
+  double KolmogorovTest_Local(const TH1* Hist, int NPExp=1000, Option_t* Opt="") const;
 
   ClassDef(TH1KS,0)
 };

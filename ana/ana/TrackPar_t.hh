@@ -3,7 +3,8 @@
 
 #include "TrackParBase_t.hh"
 
-struct TrackPar_t : public TrackParBase_t {
+class TrackPar_t : public TrackParBase_t {
+public:
   int     fNHPl;
   int     fNEPl;
   int     fNDPl;

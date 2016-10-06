@@ -214,8 +214,8 @@ int TTrackCompModule::BeginJob() {
     fCprQualMva->initMVA();
   }
 
-  string hist_dir      = gEnv->GetValue("mu2e.TrkQualHistDir","_none_");
-  string trk_qual_dsid = gEnv->GetValue("mu2e.TrkQualDsid"   ,"_none_");
+  string hist_dir      = gEnv->GetValue("mu2e.TrkQual.HistDir","_none_");
+  string trk_qual_dsid = gEnv->GetValue("mu2e.TrkQual.Dsid"   ,"_none_");
 
   fTrkQualFile    = Form("%s/%s.track_comp_use_mva_%03i.hist",
 			 hist_dir.data(),trk_qual_dsid.data(),fUseMVA);

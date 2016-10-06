@@ -118,13 +118,13 @@ void TTrackCompModule::SetMVA(const char* TrkRecAlgorithm, const char* TrainingD
 
   if (trk_alg == "CALPATREC") {
     if (fCprMVA) delete fCprMVA;
-    fCprMVA = new mva_data("CALPATREC",TrainingDataset,MvaType);
-    fTmvaAlgorithmCpr  = MvaType;
+    fCprMVA           = new mva_data("CALPATREC",TrainingDataset,MvaType);
+    fTmvaAlgorithmCpr = MvaType;
   }
   else if (trk_alg == "TRKPATREC") {
     if (fTprMVA) delete fTprMVA;
-    fTprMVA = new mva_data("TRKPATREC",TrainingDataset,MvaType);
-    fTmvaAlgorithmTpr  = MvaType;
+    fTprMVA           = new mva_data("TRKPATREC",TrainingDataset,MvaType);
+    fTmvaAlgorithmTpr = MvaType;
   }
 }
 
@@ -212,12 +212,16 @@ int TTrackCompModule::BeginJob() {
     pset_cpr.put<string>("MVAWeights",s2);
     fCprQualMva = new mu2e::MVATools(pset_cpr);
     fCprQualMva->initMVA();
-
-    fTrkQualFile = Form("hist/e11s5731.track_comp_use_mva_%03i.hist",fUseMVA);
-
-    fTrackProb[0] = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
-    fTrackProb[1] = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
   }
+
+  string hist_dir      = gEnv->GetValue("mu2e.TrkQualHistDir","_none_");
+  string trk_qual_dsid = gEnv->GetValue("mu2e.TrkQualDsid"   ,"_none_");
+
+  fTrkQualFile    = Form("%s/%s.track_comp_use_mva_%03i.hist",
+			 hist_dir.data(),trk_qual_dsid.data(),fUseMVA);
+
+  fTrackProb[0]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
+  fTrackProb[1]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
 
   fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
   fBestID[1]      = fCprMVA->BestID();		  // CalPatRec     : CprQual     > 0.85

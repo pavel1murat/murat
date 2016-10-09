@@ -1411,12 +1411,16 @@ void TTrackCompModule::Debug() {
   TStnTrack* trk;
   TrackPar_t* tp(NULL);
   char        text[500];
-  int         calpatrec(1);
+  int         trkpatrec(0), calpatrec(1);
 //-----------------------------------------------------------------------------
 // bit 0: All Events
 //-----------------------------------------------------------------------------
   if (GetDebugBit(0) == 1) {
     GetHeaderBlock()->Print(Form("TTrackCompModule :bit000:"));
+    printf("TrkPatRec:\n");
+    fTrackBlock[trkpatrec]->Print();
+    printf("CalPatRec:\n");
+    fTrackBlock[calpatrec]->Print();
   }
 
   TStnTrackBlock* cprb = fTrackBlock[calpatrec];

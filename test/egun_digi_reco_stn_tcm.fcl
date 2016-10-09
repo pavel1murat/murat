@@ -39,6 +39,8 @@ process_name : EgunDigiRecoStnTcm
 
 source       : { module_type : EmptyEvent }
 
+outputs      : { @table::murat.outputs }
+
 physics: { 
     producers : { 
 	@table::murat.producers 
@@ -66,8 +68,8 @@ services.TFileService.fileName            : "egun_digi_reco_stn_tcm.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
-# physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "egun_digi_reco_stn_tcm.art"
+physics.out : [detectorOutput]
+outputs.detectorOutput.fileName           : "egun_digi_reco_stn_tcm.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

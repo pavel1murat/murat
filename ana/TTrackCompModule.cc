@@ -1419,8 +1419,17 @@ void TTrackCompModule::Debug() {
     GetHeaderBlock()->Print(Form("TTrackCompModule :bit000:"));
     printf("TrkPatRec:\n");
     fTrackBlock[trkpatrec]->Print();
+
+    for (int i=0; i<fNTracks[trkpatrec]; i++) { 
+      PrintTrack(fTrackBlock[trkpatrec]->Track(i),&fTrackPar[trkpatrec][i],"data");
+    }
+
     printf("CalPatRec:\n");
     fTrackBlock[calpatrec]->Print();
+
+    for (int i=0; i<fNTracks[calpatrec]; i++) { 
+      PrintTrack(fTrackBlock[calpatrec]->Track(i),&fTrackPar[calpatrec][i],"data");
+    }
   }
 
   TStnTrackBlock* cprb = fTrackBlock[calpatrec];
@@ -1542,7 +1551,7 @@ void TTrackCompModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Op
 //-----------------------------------------------------------------------------
     printf("------------------------------------------------------------------------------------------------");
     printf("----------------------------------------------------------------------------------\n");
-    printf(" i  nh  na nw nosd nssd na0 ncl  alg_mask    id_word   q     p     momerr    T0     T0Err     D0");
+    printf(" i  nh  na nw nosd nssd na0 ncl  alg_mask    id_word   q     p     p(corr) momerr    T0     T0Err     D0");
     printf("      Z0    TanDip   TBack   chi2/dof   fcon  TrkQual MvaOut[0]  MVAOut[1]   Prob \n");
     printf("------------------------------------------------------------------------------------------------");
     printf("----------------------------------------------------------------------------------\n");
@@ -1555,10 +1564,10 @@ void TTrackCompModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Op
 	   t->NClusters(),
 	   t->AlgorithmID());
 
-    printf(" 0x%08x %1.0f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f %9.4f",
+    printf(" 0x%08x %1.0f %8.3f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f %9.4f",
 	   t->fIDWord,
 	   t->fCharge, 
-	   t->fP*t->fCharge, t->fFitMomErr, t->fT0, t->fT0Err, t->fD0, t->fZ0, t->fTanDip, t->TBack(),
+	   t->fP*t->fCharge, Tp->fP*t->fCharge, t->fFitMomErr, t->fT0, t->fT0Err, t->fD0, t->fZ0, t->fTanDip, t->TBack(),
 	   t->Chi2Dof(),t->FitCons(),t->DaveTrkQual(),Tp->fMVAOut[0], Tp->fMVAOut[1], Tp->fProb);
     printf("\n");
   }

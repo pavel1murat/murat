@@ -53,7 +53,7 @@ physics: {
     }
 
     filters : { @table::murat.filters 
-	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "cePhotos_digi_reco_stn_tcm.stn" }
+	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "ce_photos_digi_reco_stn_tcm.stn" }
  	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL  }
     }
 
@@ -64,7 +64,7 @@ physics: {
     end_paths     : [ out ]
 }
 
-services.TFileService.fileName            : "cdPhotos_digi_reco_stn_tcm.hist"
+services.TFileService.fileName            : "ce_photos_digi_reco_stn_tcm.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------

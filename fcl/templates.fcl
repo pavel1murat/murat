@@ -50,6 +50,17 @@ murat : {
 	    }
 	}
 
+  	cePhotos : { @table::StoppedParticleReactionGun # CE + rad corr
+	    physics : {
+		pdgId            :  11
+		elow             :   0
+		ehi              : 105
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "tabulated"
+		spectrumFileName : "murat/data/ce_photos.tbl"
+	    }
+	}
+
   	mgun : { @table::StoppedParticleReactionGun # p(mu)=105 MeV/c
 	    physics : {
 		pdgId            :  13

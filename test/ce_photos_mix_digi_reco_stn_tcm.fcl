@@ -1,0 +1,102 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# read pre-generated [CE] or [HE] files, mix, run full reco and stntuple
+# force to define bgHitFiles
+#
+# - dataset datasets/ccd35600       to run on the grid
+# - dataset datasets/ccd35600-local for local tests
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
+# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
+# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
+# -          datasets/cd3-detmix-cut-v2 for the grid
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  meanBackground : -1        # fixed at 1
+  g4ModuleLabel                        : "g4run"           # for normal generators
+#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
+  G4_MODULE_LABEL                      : "g4run"          # for normal generators
+#  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
+#------------------------------------------------------------------------------
+# note 1: background files below correspond to the TDR geometry 
+# note 2: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+#------------------------------------------------------------------------------
+#  bgHitFiles : @nil
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
+# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
+# CD3
+# bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
+# bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local-v2/sim.mu2e.cd3-detmix-cut.v566.000003_00000000.art" ]
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : CePhotosMixDigiRecoStnTcm
+
+# source       : { module_type : RootInput }  # this is the default....
+
+physics: { 
+    producers : { 
+	@table::murat.producers 
+
+	generate : { @table::murat.producers.cePhotos }
+
+	FlagStrawHits : { @table::FlagStrawHits 
+	    maximumEnergy: @local::FlagStrawHits_maximumEnergy  # defined in murat/fcl/prolog.fcl
+	}
+    }
+
+    filters : { @table::murat.filters 
+	InitStntuple      : { @table::murat.filters.InitStntuple      histFileName  : "ce_photos_digi_reco_stn_tcm.stn" }
+
+ 	StntupleMakerTcm       : { @table::murat.filters.StntupleMakerTcm  
+	    g4ModuleLabel      : @local::G4_MODULE_LABEL
+	    makeTrackStrawHits : 1
+	    makeVirtualHits    : 1
+	}
+    }
+
+    @table::murat.paths
+
+    trigger_paths : [  path_gen_mix_digi_reco_stn_tcm ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+physics.filters.flashMixer.detail.mean   : @local::meanBackground
+physics.filters.ootMixer.detail.mean     : @local::meanBackground
+physics.filters.dioMixer.detail.mean     : @local::meanBackground
+physics.filters.neutronMixer.detail.mean : @local::meanBackground
+physics.filters.photonMixer.detail.mean  : @local::meanBackground
+physics.filters.protonMixer.detail.mean  : @local::meanBackground
+
+services.TFileService.fileName            : "ce_photos_mix_digi_reco_stn_tcm.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "ce_photos_mix_digi_reco_stn_tcm.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

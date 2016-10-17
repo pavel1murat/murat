@@ -1,0 +1,63 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate DIO electrions LO spectrum , field 0.5 T
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+#  meanBackground                      : -1        # fixed at 1
+  bgHitFiles                          : @nil
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : DioAlloDigiRecoStnTcm050T
+
+services.user.GeometryService.inputFile   : "murat/geom/geom_cd3_half_field.txt"
+services.TFileService.fileName            : "dioallo_digi_reco_stn_tcm_050T.hist"
+
+source       : { module_type : EmptyEvent }
+outputs      : { @table::murat.outputs }
+
+physics: { 
+    producers : { 
+	@table::murat.producers 
+
+	generate : { @table::murat.producers.dioallo }
+
+	FlagStrawHits : { @table::FlagStrawHits 
+	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
+	}
+
+	CalPatRec : { @table::murat.producers.CalPatRec
+	    minClusterEnergy : 25
+	}
+    }
+
+    filters : { @table::murat.filters 
+	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "dioallo_digi_reco_stn_tcm_050T.stn" }
+ 	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL  }
+    }
+
+    @table::murat.paths
+
+    trigger_paths : [ path_gen_digi_reco_stn_tcm ]
+    out           : []
+    end_paths     : [ out ]
+}
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "dioallo_digi_reco_stn_tcm_050T.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

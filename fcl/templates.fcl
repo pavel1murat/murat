@@ -4,9 +4,9 @@
 #------------------------------------------------------------------------------
 services : {
     message               : @local::default_message
-    TFileService          : { fileName : "Stntuple_fcl_templates_fcl.hist" }
+    TFileService          : { fileName : "murat_fcl_templates_fcl.hist" }
     RandomNumberGenerator : { }
-    #   Timing                : { }fcl/
+    #   Timing                : { }
 
     user : {
         GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
@@ -79,6 +79,28 @@ murat : {
 		ehi              : 148.9585
 		spectrumVariable : "totalEnergy"
 		spectrumShape    : "flat"
+	    }
+	}
+
+  	dioallo : { @table::StoppedParticleReactionGun # DIO LO 
+	    physics : {
+		pdgId            :  11
+		elow             : 105.0010
+		ehi              : 105.0015
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "tabulated"
+		spectrumFileName : "ConditionsService/data/czarnecki_Al.tbl"
+	    }
+	}
+
+  	dioalll : { @table::StoppedParticleReactionGun # DIO LO 
+	    physics : {
+		pdgId            :  11
+		elow             : 105.0010
+		ehi              : 105.0015
+		spectrumVariable : "totalEnergy"
+		spectrumShape    : "tabulated"
+		spectrumFileName : "murat/data/czarnecki_szafron_Al_LL.tbl"
 	    }
 	}
 

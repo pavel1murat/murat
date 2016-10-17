@@ -92,6 +92,8 @@ physics.filters.photonMixer.detail.mean  : @local::meanBackground
 physics.filters.protonMixer.detail.mean  : @local::meanBackground
 
 services.TFileService.fileName            : "ce_photos_mix_digi_reco_stn_tcm.hist"
+
+physics.producers.CalPatRec.minClusterEnergy : 25           # MeV/c
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------

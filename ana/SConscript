@@ -17,7 +17,7 @@ helper = murat_helper();
 helper.handle_dictionaries();
 
 skip_list = []
-libs      = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop', 'Stntuple_obj', 'Stntuple_base',
+libs      = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop', 'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base',
               'mu2e_Mu2eUtilities',
               'fhiclcpp',
               'cetlib',

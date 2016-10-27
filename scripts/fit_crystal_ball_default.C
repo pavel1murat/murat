@@ -27,6 +27,10 @@ Double_t CrystalBall(Double_t *x,Double_t *par) {
 }
 
 -- */
+#include "TH1F.h"
+#include "TF1.h"
+#include "TMath.h"
+#include "Stntuple/val/stntuple_val_functions.hh"
 
 //-----------------------------------------------------------------------------
 // A1*exp((x-x0)^2/2sig^2 for (x-x0)/sig > -alp
@@ -76,9 +80,9 @@ void cb_init_parameters(TF1* F, double P0, double P1, double P2, double P3, doub
 }
 
 //-----------------------------------------------------------------------------
-void cb_fit(double XMin, double XMax) {
+void cb_fit(double XMin, double XMax, const char* FitOpt = "") {
   h->GetXaxis()->SetRangeUser(XMin,XMax);
-  h->Fit(f,"","",XMin,XMax);
+  h->Fit(f,FitOpt,"",XMin,XMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -98,7 +102,7 @@ void fit_crystal_ball(const char* File, const char* Module, const char* Hist,
   f->SetParLimits(2,0.,5.);
 
   double anorm = h->GetEntries()/10;
-  cb_init_parameters(f,anorm,X0,0.02.,0.05,3.);
+  cb_init_parameters(f,anorm,X0,0.02,0.05,3.);
   cb_fit(XMin,XMax);
 
   // h->Draw();
@@ -128,3 +132,27 @@ void fit_crystal_ball_norm(const char* File, const char* Module, const char* His
   cb_init_parameters(f,anorm,X0,2.,3.,1.);
   cb_fit(XMin,XMax);
 }
+
+
+//-----------------------------------------------------------------------------
+// 
+//-----------------------------------------------------------------------------
+void cb_fit_ep(TH1* Hist, double X0, double XMin, double XMax, const char* FitOpt) {
+
+  h      = (TH1F*) Hist;
+  double anorm = h->GetEntries()/15;
+
+
+  f = new TF1("f_crystal_ball",f_crystal_ball,XMin,XMax,5);
+
+  f->SetParName(0,"anorm");
+  f->SetParName(1,"mean");
+  f->SetParName(2,"sigma");
+  f->SetParName(3,"alpha");
+  f->SetParName(4,"N");
+
+
+  cb_init_parameters(f,anorm,X0,0.02,0.2,10.);
+  cb_fit            (XMin,XMax,FitOpt);
+}
+

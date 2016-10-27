@@ -57,7 +57,7 @@
 #include "Stntuple/obj/TCalDataBlock.hh"
 #include "Stntuple/obj/TStrawDataBlock.hh"
 
-#include "Stntuple/obj/TDiskCalorimeter.hh"
+#include "Stntuple/geom/TDiskCalorimeter.hh"
 
 #include "Stntuple/mod/THistModule.hh"
 

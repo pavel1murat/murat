@@ -683,7 +683,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
   Hist->fP[0]->Fill (Tp->fP);
   Hist->fP[1]->Fill (Tp->fP);
   Hist->fP[2]->Fill (Tp->fP);
-					// track fP0 and track fP2 are supposed to be the same...
+					// fP0: momentum in the first point,  fP2 - in the last
   Hist->fP0->  Fill (Track->fP0);
   Hist->fP2->  Fill (Track->fP2);
 
@@ -1479,8 +1479,11 @@ void TTrackCompModule::Debug() {
 //-----------------------------------------------------------------------------
   if ((GetDebugBit(6) == 1) && (ntrk > 0)) {
     trk = cprb->Track(0);
+    tp  = &fTrackPar[calpatrec][0];
 
-    if ((trk->fIDWord == 0) && (tp->fDpF >= fDebugCut[6].fXMin) && (tp->fDpF < fDebugCut[6].fXMax)) {
+    int best_id = fBestID[calpatrec];
+
+    if ((tp->fIDWord[best_id] == 0) && (tp->fDpF >= fDebugCut[6].fXMin) && (tp->fDpF < fDebugCut[6].fXMax)) {
       GetHeaderBlock()->Print(Form("TTrackCompModule bit006: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
 				   tp->fDpF, trk->fP,trk->fPFront));
     }

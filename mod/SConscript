@@ -24,6 +24,7 @@ libs      = [ 'murat_alg',
               'Stntuple_mod',
               'Stntuple_alg',
               'Stntuple_obj',
+              'Stntuple_geom',
               'Stntuple_base',
 #
               'mu2e_KalmanTests',

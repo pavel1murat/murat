@@ -93,15 +93,6 @@ void cb2_create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 }
 
 //-----------------------------------------------------------------------------
-void cb2_fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
-			  double X0, double XMin, double XMax, double Sigma = -1.) {
-
-  _Hist = (TH1F*) gh1(File,Module,Hist)->Clone("h_cb2_fit_crystal_ball");
-
-  cb2_fit_crystal_ball(_Hist,X0,XMin,XMax,Sigma);
-}
-
-//-----------------------------------------------------------------------------
 void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1.) {
 
   TH1F* h      = (TH1F*) Hist;
@@ -110,7 +101,7 @@ void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double
   printf("anorm = %12.5e\n",anorm);
 
   cb2_create_fit_function(_Func,X0,XMin,XMax);
-  cb2_init_parameters    (_Func,anorm,X0,0.180,1,.4.,1.,10);
+  cb2_init_parameters    (_Func,anorm,X0,0.180,1,.4,1.,10);
 
 //   h->Draw();
 //   _Func->Draw("same");
@@ -144,3 +135,13 @@ void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double
 
   printf("total = %12.5f, HTail = %12.5f, htail/total : %12.5e\n",total,htail,htail/total);
 }
+
+//-----------------------------------------------------------------------------
+void cb2_fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
+			  double X0, double XMin, double XMax, double Sigma = -1.) {
+
+  _Hist = (TH1F*) gh1(File,Module,Hist)->Clone("h_cb2_fit_crystal_ball");
+
+  cb2_fit_crystal_ball(_Hist,X0,XMin,XMax,Sigma);
+}
+

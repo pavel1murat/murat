@@ -22,7 +22,7 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/obj/TDisk.hh"
+#include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
 // Mu2e offline includes
@@ -62,7 +62,7 @@ void TCalAnaModule::BookCalHitHistograms(CalHitHist_t* Hist, const char* Folder)
 
 
 //-----------------------------------------------------------------------------
-void TCalAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
+void TCalAnaModule::BookCrystalHistograms(CrystalHist_t* Hist, const char* Folder) {
   //     char name [200];
   //     char title[200];
   //-----------------------------------------------------------------------------
@@ -271,22 +271,22 @@ void TCalAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book calorimeter histograms
 //-----------------------------------------------------------------------------
-  int book_calo_histset[kNCaloHistSets];
-  for (int i=0; i<kNCaloHistSets; i++) book_calo_histset[i] = 0;
+  int book_crystal_histset[kNCrystalHistSets];
+  for (int i=0; i<kNCrystalHistSets; i++) book_crystal_histset[i] = 0;
 
-  book_calo_histset[0] = 1;		// all crystals
-  book_calo_histset[1] = 1;		// all crystals, e > 0
-  book_calo_histset[2] = 1;		// all crystals, e > 0.1
-  book_calo_histset[3] = 1;		// all crystals, e > 0.5
-  book_calo_histset[4] = 1;		// all crystals, e > 1.0
+  book_crystal_histset[0] = 1;		// all crystals
+  book_crystal_histset[1] = 1;		// all crystals, e > 0
+  book_crystal_histset[2] = 1;		// all crystals, e > 0.1
+  book_crystal_histset[3] = 1;		// all crystals, e > 0.5
+  book_crystal_histset[4] = 1;		// all crystals, e > 1.0
 
-  for (int i=0; i<kNCaloHistSets; i++) {
-    if (book_calo_histset[i] != 0) {
+  for (int i=0; i<kNCrystalHistSets; i++) {
+    if (book_crystal_histset[i] != 0) {
       sprintf(folder_name,"cal_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fCalo[i] = new CaloHist_t;
-      BookCaloHistograms(fHist.fCalo[i],Form("Hist/%s",folder_name));
+      fHist.fCrystal[i] = new CrystalHist_t;
+      BookCrystalHistograms(fHist.fCrystal[i],Form("Hist/%s",folder_name));
     }
   }
 //-----------------------------------------------------------------------------
@@ -309,7 +309,7 @@ void TCalAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TCalAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
+void TCalAnaModule::FillCrystalHistograms(CrystalHist_t* Hist, TStnCrystal* Cr) {
 
   int                    nhits, idisk;
   float                  t, e, r, e700, n700;
@@ -657,18 +657,18 @@ void TCalAnaModule::FillHistograms() {
     disk = fDiskCalorimeter->Disk(i);
     for (int ic=0; ic<disk->NCrystals(); ic++) {
       cr = disk->Crystal(ic);
-      FillCaloHistograms(fHist.fCalo[0],cr);
+      FillCrystalHistograms(fHist.fCrystal[0],cr);
       if (cr->Energy() > 0) {
-	FillCaloHistograms(fHist.fCalo[1],cr);
+	FillCrystalHistograms(fHist.fCrystal[1],cr);
       }
       if (cr->Energy() > 0.1) {
-	FillCaloHistograms(fHist.fCalo[2],cr);
+	FillCrystalHistograms(fHist.fCrystal[2],cr);
       }
       if (cr->Energy() > 0.5) {
-	FillCaloHistograms(fHist.fCalo[3],cr);
+	FillCrystalHistograms(fHist.fCrystal[3],cr);
       }
       if (cr->Energy() > 1.0) {
-	FillCaloHistograms(fHist.fCalo[4],cr);
+	FillCrystalHistograms(fHist.fCrystal[4],cr);
       }
     }
   }
@@ -794,9 +794,9 @@ int TCalAnaModule::Event(int ientry) {
 
   fNCalHits   = fCalDataBlock->NHits();
 
-//   fDiskCalorimeter->InitEvent(fCalDataBlock);
+  fDiskCalorimeter->InitEvent(fCalDataBlock);
 
-//   FillHistograms();
+  FillHistograms();
 
   Debug();
 

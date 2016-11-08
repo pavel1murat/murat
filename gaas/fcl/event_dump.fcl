@@ -1,0 +1,59 @@
+#
+# fcl config file to perform Geant4 studies using the Mu2e framework infrastructure and simple geometry
+#
+#
+# $Id: g4studyCalo_01.fcl,v 1.1 2014/08/29 16:16:17 knoepfel Exp $
+# $Author: knoepfel $
+# $Date: 2014/08/29 16:16:17 $
+#
+# Original author K. Genser
+#
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  meanBackground : -1        # fixed at 1
+  bgHitFiles : @nil
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+# Give this job a name.
+process_name : GaasEventDump
+
+# Start form an empty source
+# source : {
+#   module_type : RootInput
+#   maxEvents : 100
+# }
+
+physics : {
+
+  producers:  { @table::murat.producers }
+  filters  :  { @table::murat.filters   }
+
+  @table::murat.paths
+
+  p1 : [ StntupleEventDump ]
+  e1 : [ ]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+}
+
+outputs:  {
+}
+
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20
+
+// This tells emacs to view this file in the JavaScript mode.
+// Local Variables:
+// mode:js
+// End:

@@ -73,7 +73,7 @@ namespace mu2e {
 
     G4Colour  orange  (.75, .55, .0);
 
-    VolumeInfo box(nestBox( "Box",
+    VolumeInfo box(nestBox( "GaasLayer",
 			    boxParams,
 			    boxMaterial,
 			    0, // no rotation
@@ -89,10 +89,6 @@ namespace mu2e {
 			    placePV,
 			    doSurfaceCheck
 			    ));
-
-    G4UserLimits* stepLimit = new G4UserLimits(1.e-3);
-    box.logical->SetUserLimits(stepLimit);
-
   } // constructGaasEnv_v002;
 
 }

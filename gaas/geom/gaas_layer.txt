@@ -86,11 +86,11 @@ vector<double> g4.eKineMinPDG     = {};
 
 // event track debug list
 vector<int> g4.trackingActionEventList = {1,2,3,4,5};
+// vector<int> g4.trackingActionEventList = {};
 bool g4.printTrackTiming = true;
 
 // event track step debug list
 vector<int> g4.steppingActionEventList = {1,2,3,4,5};
-// empty track list means all if the event list is not empty
 // vector<int> g4.steppingActionTrackList = {};
 
 // the "World Box"

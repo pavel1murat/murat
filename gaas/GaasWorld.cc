@@ -72,34 +72,31 @@ using namespace std;
 
 namespace mu2e {
 
-  GaasWorld::GaasWorld()
+  GaasWorld::GaasWorld() : Mu2eUniverse()
+			 , sdHelper_(NULL)
+			 , writeGDML_(false)
+			 , gdmlFileName_("gaas.gdml")
   {}
 
-  GaasWorld::~GaasWorld(){
+  GaasWorld::~GaasWorld() {
     // Do not destruct the solids, logical volumes or physical volumes.
     // G4 looks after that itself.
   }
 
-  GaasWorld::GaasWorld(const fhicl::ParameterSet& pset,
-                                 SensitiveDetectorHelper *sdHelper/*no ownership passing*/)
-    : sdHelper_(sdHelper)
-    , pset_(pset)
-    , writeGDML_(pset.get<bool>("debug.writeGDML"))
-    , gdmlFileName_(pset.get<std::string>("debug.GDMLFileName"))
-    , g4stepperName_(pset.get<std::string>("physics.stepper"))
-    , bfieldMaxStep_(pset.get<double>("physics.bfieldMaxStep"))//unused
+  GaasWorld::GaasWorld(const fhicl::ParameterSet& pset    ,
+		       SensitiveDetectorHelper*   sdHelper /*no ownership passing*/)
   {
-    _verbosityLevel = pset.get<int>("debug.worldVerbosityLevel");
+    sdHelper_      = sdHelper;
+    writeGDML_     = pset.get<bool>("debug.writeGDML",false);
+    gdmlFileName_  = pset.get<std::string>("debug.GDMLFileName","gaas.gdml");
 
+    Mu2eUniverse::_verbosityLevel = pset.get<int>("debug.worldVerbosityLevel");
   }
 
   // This is the callback called by G4
-  G4VPhysicalVolume * GaasWorld::construct(){
+  G4VPhysicalVolume * GaasWorld::construct() {
 
     // Construct all of the world
-
-    gdmlFileName_ = "GaasWorld.gdml";
-    writeGDML_    = true;
     _verbosityLevel =  max(_verbosityLevel,_config.getInt("world.verbosityLevel", 0));
 
     // we will only use very few elements of the geometry service;
@@ -177,7 +174,8 @@ namespace mu2e {
 
     // Create magnetic fields and managers only after all volumes have been defined.
     //    constructBFieldAndManagers();
-    //    constructStepLimiters();
+
+    constructStepLimiters();
 
     // Write out geometry into a gdml file.
     if (writeGDML_) {
@@ -188,17 +186,23 @@ namespace mu2e {
     return worldVInfo.physical;
   }
 
-  // Adding a step limiter is a two step process.
-  // 1) In the physics list constructor add a G4StepLimiter to the list of discrete
-  //    physics processes attached to each particle species of interest.
-  //
-  // 2) In this code, create a G4UserLimits object and attach it to the logical
-  //    volumes of interest.
-  // The net result is specifying a step limiter for pairs of (logical volume, particle species).
-  //
-  void GaasWorld::constructStepLimiters(){
+//-----------------------------------------------------------------------------
+// Adding a step limiter is a two step process.
+// 1) In the physics list constructor add a G4StepLimiter to the list of discrete
+//    physics processes attached to each particle species of interest.
+//
+// 2) In this code, create a G4UserLimits object and attach it to the logical
+//    volumes of interest.
+// The net result is specifying a step limiter for pairs of (logical volume, particle species).
+//-----------------------------------------------------------------------------
+  void GaasWorld::constructStepLimiters() {
 
-    // Maximum step length, in mm.
+    // this is a possible memory leak
+     G4LogicalVolume* layer      = _helper->locateVolInfo("GaasLayer").logical;
+     G4UserLimits* stepLimit  = new G4UserLimits(1.e-3);
+     layer->SetUserLimits(stepLimit);
+
+     // Maximum step length, in mm.
 
     // AntiLeakRegistry& reg = art::ServiceHandle<G4Helper>()->antiLeakRegistry();
     // G4UserLimits* stepLimit = reg.add( G4UserLimits(bfieldMaxStep_) );
@@ -213,6 +217,6 @@ namespace mu2e {
     // G4UserLimits* stepLimit = reg.add( G4UserLimits(maxStep) );
     // tracker->SetUserLimits( stepLimit );
 
-  } // end GaasWorld::constructStepLimiters(){
+  }
 
-} // end namespace mu2e
+}

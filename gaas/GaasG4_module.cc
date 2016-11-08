@@ -96,10 +96,10 @@ namespace mu2e {
 
   void setMinimumRangeCut(double minRangeCut);
 
-  class GaasStudy : public art::EDProducer {
+  class GaasG4 : public art::EDProducer {
 
   public:
-    GaasStudy(fhicl::ParameterSet const& pSet);
+    GaasG4(fhicl::ParameterSet const& pSet);
     // Accept compiler supplied d'tor
 
     virtual void produce(art::Event& e);
@@ -118,8 +118,10 @@ namespace mu2e {
     void BeamOnDoOneEvent( int eventNumber );
     void BeamOnEndEvent();
     void BeamOnEndRun();
-
-    unique_ptr<G4RunManager> _runManager;
+    
+    fhicl::ParameterSet const _pset;
+    
+    unique_ptr<G4RunManager>  _runManager;
 
     // Do we issue warnings about multiple runs?
     bool _warnEveryNewRun;
@@ -175,7 +177,8 @@ namespace mu2e {
 
   }; // end G4 header
 
-  GaasStudy::GaasStudy(fhicl::ParameterSet const& pSet):
+  GaasG4::GaasG4(fhicl::ParameterSet const& pSet):
+    _pset(pSet),
     _runManager(nullptr),
     _warnEveryNewRun(pSet.get<bool>("warnEveryNewRun",false)),
     _exportPDTStart(pSet.get<bool>("exportPDTStart",false)),
@@ -217,14 +220,14 @@ namespace mu2e {
     // The string "G4Engine" is magic; see the docs for RandomNumberGenerator.
     createEngine( art::ServiceHandle<SeedService>()->getSeed(), "G4Engine");
 
-  } // end GaasStudy:GaasStudy(fhicl::ParameterSet const& pSet);
+  } // end GaasG4:GaasG4(fhicl::ParameterSet const& pSet);
 
   // Create an instance of the run manager.
-  void GaasStudy::beginJob(){
+  void GaasG4::beginJob(){
     _runManager = unique_ptr<G4RunManager>(new G4RunManager);
   }
 
-  void GaasStudy::beginRun( art::Run &run){
+  void GaasG4::beginRun( art::Run &run){
 
     static int ncalls(0);
     ++ncalls;
@@ -283,7 +286,7 @@ namespace mu2e {
 
   }
 
-  void GaasStudy::initializeG4( GeometryService& geom, art::Run const& run ){
+  void GaasG4::initializeG4( GeometryService& geom, art::Run const& run ){
 
     // we use GeometryService for SimpleConfig only now
     // there is still the dependence on the geometry service itself
@@ -299,11 +302,21 @@ namespace mu2e {
 
     // Create user actions and register them with G4.
 
-    WorldMaker<GaasWorld>* allMu2e    = new WorldMaker<GaasWorld>();
+    G4VUserDetectorConstruction* world;
+
+    bool write_gdml = _pset.get<bool>("writeGDML",false);
+
+    printf("write_gdml = %d\n",write_gdml);
+    
+    GaasWorld* pw = new GaasWorld(_pset, &_sensitiveDetectorHelper);
+   
+    //   std::unique_ptr<ConstructMaterials> pm = std::make_unique<ConstructMaterials>(_pset);
+   
+    world = new WorldMaker<GaasWorld>(std::unique_ptr<GaasWorld>(pw));
 
     _runManager->SetVerboseLevel(_rmvlevel);
 
-    _runManager->SetUserInitialization(allMu2e);
+    _runManager->SetUserInitialization(world);
 
 
     G4VUserPhysicsList* pL = new GaasPhysicsList();
@@ -371,12 +384,12 @@ namespace mu2e {
 
     // Book some diagnostic histograms.
     art::ServiceHandle<art::TFileService> tfs;
-    //    _diagnostics.book("Outputs");
+  }
 
-  } // end GaasStudy::initializeG4
-
-  // Create one G4 event and copy its output to the art::event.
-  void GaasStudy::produce(art::Event& event) {
+//-----------------------------------------------------------------------------
+// Create one G4 event and copy its output to the art::event.
+//-----------------------------------------------------------------------------
+  void GaasG4::produce(art::Event& event) {
 
     // Handle to the generated particles; need when building art::Ptr to a GenParticle.
     art::Handle<GenParticleCollection> gensHandle;
@@ -512,11 +525,11 @@ namespace mu2e {
   }
 
   // Tell G4 that this run is over.
-  void GaasStudy::endRun(art::Run & run){
+  void GaasG4::endRun(art::Run & run){
     BeamOnEndRun();
   }
 
-  void GaasStudy::endJob(){
+  void GaasG4::endJob(){
 
     if ( _exportPDTEnd ) exportG4PDT( "End:" );
 
@@ -532,7 +545,7 @@ namespace mu2e {
 
 
   // Do the "begin run" parts of BeamOn.
-  void GaasStudy::BeamOnBeginRun( unsigned int runNumber, const char* macroFile, G4int n_select){
+  void GaasG4::BeamOnBeginRun( unsigned int runNumber, const char* macroFile, G4int n_select){
 
     _runManager->SetRunIDCounter(runNumber);
 
@@ -556,18 +569,18 @@ namespace mu2e {
   }
 
   // Do the "per event" part of DoEventLoop.
-  void GaasStudy::BeamOnDoOneEvent( int eventNumber){
+  void GaasG4::BeamOnDoOneEvent( int eventNumber){
 
     _runManager->ProcessOneEvent(eventNumber);
 
   }
 
-  void GaasStudy::BeamOnEndEvent(){
+  void GaasG4::BeamOnEndEvent(){
     _runManager->TerminateOneEvent();
   }
 
   // Do the "end of run" parts of DoEventLoop and BeamOn.
-  void GaasStudy::BeamOnEndRun(){
+  void GaasG4::BeamOnEndRun(){
 
     _runManager->TerminateEventLoop();
 
@@ -577,5 +590,5 @@ namespace mu2e {
 
 } // End of namespace mu2e
 
-using mu2e::GaasStudy;
-DEFINE_ART_MODULE(GaasStudy);
+using mu2e::GaasG4;
+DEFINE_ART_MODULE(GaasG4);

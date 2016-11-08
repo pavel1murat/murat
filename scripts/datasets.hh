@@ -18,6 +18,50 @@
   };
 
 //-----------------------------------------------------------------------------
+// v600 v0 datasets 
+//-----------------------------------------------------------------------------
+dataset_t g50s6000 = { "g50s6000",                       // DIO LL B=0.5 T
+		       "~/hist/mu2e/v6_0_0/g50s6000.track_comp_use_mva.hist",
+		       "~/hist/mu2e/v6_0_0/g50s6000.track_ana.hist",   // missing 
+		       "DIO-LL-B=0.5T",
+		       1,
+		       10000000};
+
+dataset_t d50s6000 = { "d50s6000",                       // DIO LO B=0.5 T
+		       "~/hist/mu2e/v6_0_0/d50s6000.track_comp_use_mva.hist",
+		       "~/hist/mu2e/v6_0_0/d50s6000.track_ana.hist",   // missing 
+		       "DIO-LO-B=0.5T",
+		       1,
+		       10000000};
+
+dataset_t e31s6000 = { "e31s6000",                       // CE LL + MIX-CD3 x1
+		       "~/hist/mu2e/v6_0_0/e31s6000.track_comp_use_mva.hist",
+		       "~/hist/mu2e/v6_0_0/e12s5740.track_ana.hist",   // missing 
+		       "CE-photos+mixcd3.x1",
+		       1,
+		       475000};
+
+dataset_t e30s6000 = { "e30s6000",                       // CE LL
+		       "~/hist/mu2e/v6_0_0/e30s6000.track_comp_use_mva.hist",
+		       "~/hist/mu2e/v6_0_0/e30s6000.track_ana.hist",   // missing 
+		       "CE-photos",
+		       1,
+		       900000};
+
+dataset_t e21s6000 = { "e21s6000",
+		       "~/hist/mu2e/v6_0_0/e21s6000.track_comp_use_mva.hist",
+		       "~/hist/mu2e/v6_0_0/e21s6000.track_ana.hist",
+		       "CE+cd3-detmix-cut.v566b",
+		       1,
+		       900000};
+
+dataset_t e00s6000 = { "e00s6000",                       // E105 .. TCM
+		       "~/hist/mu2e/v6_0_0/e00s6000.track_comp_use_mva.hist",
+		       "~/hist/mu2e/v6_0_0/e00s6000.track_ana.hist",   // missing 
+		       "E105-v600",
+		       1,
+		       1000000};
+//-----------------------------------------------------------------------------
 // 574 v0 datasets 
 //-----------------------------------------------------------------------------
 dataset_t e12s5740 = { "e12s5740",

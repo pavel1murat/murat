@@ -56,6 +56,7 @@ def murat_gaas():
     helper.handle_dictionaries();
 
     libs      = [ 'mu2e_Mu2eG4',
+                  'mu2e_G4Helper_G4Helper_service',
                   'mu2e_ConfigTools',
                   'mu2e_GeometryService',
                   'mu2e_ConditionsService',

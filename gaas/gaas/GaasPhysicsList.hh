@@ -11,20 +11,15 @@
 // Original author Rob Kutschke
 //
 
-#include "G4VUserPhysicsList.hh"
+#include "G4VModularPhysicsList.hh"
 
 namespace mu2e {
-  class GaasPhysicsList: public G4VUserPhysicsList {
+  class GaasPhysicsList: public G4VModularPhysicsList {
   public:
     GaasPhysicsList();
-    ~GaasPhysicsList();
+    virtual ~GaasPhysicsList();
 
-  protected:
-
-    // These methods are called by G4 not by users.
-    void ConstructParticle();
-    void ConstructProcess();
-    void SetCuts();
+    virtual void SetCuts();
 
   };
 

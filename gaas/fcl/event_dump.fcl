@@ -27,10 +27,9 @@ END_PROLOG
 process_name : GaasEventDump
 
 # Start form an empty source
-# source : {
-#   module_type : RootInput
-#   maxEvents : 100
-# }
+source : {
+  module_type : RootInput
+}
 
 physics : {
 

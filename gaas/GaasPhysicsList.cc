@@ -14,80 +14,58 @@
 
 // Geant4 includes
 #include "murat/gaas/GaasPhysicsList.hh"
-#include "Mu2eG4/inc/addStepLimiter.hh"
+#include "murat/gaas/GaasStepLimiterPhysConstructor.hh"
 
 #include "G4ParticleTypes.hh"
 #include "G4ProcessManager.hh"
 #include "G4StepLimiter.hh"
 #include "G4ParticleTable.hh"
 #include "G4Alpha.hh"
+#include "G4String.hh"
+
+#include "G4DecayPhysics.hh"
+#include "G4RadioactiveDecayPhysics.hh"
+#include "G4EmStandardPhysics.hh"
+#include "G4EmExtraPhysics.hh"
+#include "G4IonQMDPhysics.hh"
+#include "G4StoppingPhysics.hh"
+#include "G4HadronElasticPhysicsHP.hh"
+#include "G4HadronElasticPhysicsLEND.hh"
+#include "G4DataQuestionaire.hh"
+
+#include <vector>
+
+using namespace std;
 
 namespace mu2e {
-  GaasPhysicsList::GaasPhysicsList():  G4VUserPhysicsList(){
+  GaasPhysicsList::GaasPhysicsList():  G4VModularPhysicsList(){
     defaultCutValue = 1.0*CLHEP::cm;
     SetVerboseLevel(1);
+
+    int verbose = 1;
+    
+    G4DataQuestionaire it(photon, neutron, radioactive);
+
+    // EM Physics
+    this->RegisterPhysics( new G4EmStandardPhysics(verbose));
+
+    // Synchroton Radiation & GN Physics
+    this->RegisterPhysics( new G4EmExtraPhysics(verbose) );
+
+    // Decays 
+    this->RegisterPhysics( new G4DecayPhysics(verbose) );
+    //if ( rad == true ) this->RegisterPhysics( new G4RadioactiveDecayPhysics(verbose) );
+    this->RegisterPhysics( new G4RadioactiveDecayPhysics(verbose) );
+
+    // The modular physics list takes ownership of the StepLimiterPhysConstructor.
+    this->RegisterPhysics( new GaasStepLimiterPhysConstructor() );
   }
 
   GaasPhysicsList::~GaasPhysicsList(){
   }
 
-  void GaasPhysicsList::ConstructParticle(){
-
-    G4ChargedGeantino::ChargedGeantinoDefinition();
-    G4Electron::ElectronDefinition();
-    G4Positron::PositronDefinition();
-    G4MuonPlus::MuonPlusDefinition();
-    G4MuonMinus::MuonMinusDefinition();
-    G4Gamma::GammaDefinition();
-    G4Proton::Definition();
-    G4AntiProton::Definition();
-    G4Alpha::Definition();
-    G4GenericIon::GenericIonDefinition();
-
-  }
-
-  void GaasPhysicsList::ConstructProcess(){
-    AddTransportation();
-
-    // Add step limiters to a standard list of particles.
-
-    vector<G4String> list;
-    list.push_back( "e+"  );
-    list.push_back( "e-"  );
-    list.push_back( "mu+" );
-    list.push_back( "mu-" );
-    list.push_back( "pi+" );
-    list.push_back( "pi-" );
-    list.push_back( "kaon+"  );
-    list.push_back( "kaon-"  );
-    list.push_back( "proton" );
-    list.push_back( "anti_proton"     );
-    list.push_back( "chargedgeantino" );
-    list.push_back( "alpha" );
-
-    G4ParticleTable* ptable = G4ParticleTable::GetParticleTable();
-    G4ParticleTable::G4PTblDicIterator* iter = ptable->GetIterator();
     
-    // See note 1.
-    iter->reset();
-    
-    // Check each existing particle to see if it is in the list.  See note 1.
-    while( (*iter)() ){
-      G4ParticleDefinition* particle = iter->value();
-      G4ProcessManager* pmanager     = particle->GetProcessManager();
-      G4String particleName          = particle->GetParticleName();
-      
-      // Is this particle in the list?
-      if ( find( list.begin(), list.end(), particleName ) != list.end() ){
-
-        // The process manager takes ownership of the G4StepLimiter object.
-        pmanager->AddDiscreteProcess(new G4StepLimiter);
-      }
-
-    }
-  }
-
-  void GaasPhysicsList::SetCuts(){
+  void GaasPhysicsList::SetCuts() {
   }
 
 }  // end namespace mu2e

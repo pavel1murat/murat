@@ -129,7 +129,7 @@ namespace mu2e {
 //     art::TFileDirectory tfdir = tfs->mkdir( "CosmicDYB" );
 //     _cosmicMultiplicityH = tfdir.make<TH1D>( "MultiplicityH", "Cosmic Multiplicity", 20, -0.5, 19.5);
 
-    fHist.fEDep = tfs->make<TH1F>("edep" ,"Deposited Energy", 100,0, 2);
+    fHist.fEDep = tfs->make<TH1F>("edep" ,"Deposited Energy", 250,0, 2.5);
 //-----------------------------------------------------------------------------
 // define collection names to be used for initialization
 //-----------------------------------------------------------------------------

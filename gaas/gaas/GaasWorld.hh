@@ -67,22 +67,19 @@ namespace mu2e {
     // by G4VUserDetectorConstruction::Construct();
     G4VPhysicalVolume * construct();
 
+    VolumeInfo& locateVolInfo(const std::string Name) { return _helper->locateVolInfo(Name); }
+
   private:
 
     void constructStepLimiters();
 
     SensitiveDetectorHelper *sdHelper_; // Non-owning
 
-    fhicl::ParameterSet pset_;
-
     // _verbosityLevel in the base class
  
-    bool writeGDML_;
+    bool        writeGDML_;
     std::string gdmlFileName_;
     std::string g4stepperName_;
-    double bfieldMaxStep_;
- 
-
   };
 
 } // end namespace mu2e

@@ -31,12 +31,16 @@ double fit_f(double* X, double* P) {
 //-----------------------------------------------------------------------------
 void fit_dio_rc_spectrum(double EMin = 40., double EMax = 55.) {
 
-  TH1F* h1 = (TH1F*) gh1("hist/d50s6000.track_comp_use_mva.hist","TrackComp","trk_3/p0")->Clone("hd");
+  char fn_lo[200], fn_ll[200];
 
-  TH1F* hg = (TH1F*) gh2("hist/g50s6000.track_comp_use_mva.hist","TrackComp","trk_3/p0")->Clone("hg");
+  sprintf(fn_lo,"%s/%s",gEnv->GetValue("mu2e.HistDir","none"),"v6_0_0/d50s6000.track_comp_use_mva.hist");
+  sprintf(fn_ll,"%s/%s",gEnv->GetValue("mu2e.HistDir","none"),"v6_0_0/g50s6000.track_comp_use_mva.hist");
 
-  h1->Rebin(2);
-  smooth* s = new smooth(h1,30,60);
+  TH1F* hd = (TH1F*) gh1(fn_lo,"TrackComp","trk_3/p0")->Clone("hd");
+  TH1F* hg = (TH1F*) gh2(fn_ll,"TrackComp","trk_3/p0")->Clone("hg");
+
+  hd->Rebin(2);
+  smooth* s = new smooth(hd,30,60);
   
   func = s->GetFunc();
 
@@ -45,6 +49,4 @@ void fit_dio_rc_spectrum(double EMin = 40., double EMax = 55.) {
   ff->SetParameters(0.5,0.);
 
   hg->Fit(ff,"","",EMin,EMax);
-
-  
 }

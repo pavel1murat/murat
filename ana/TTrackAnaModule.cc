@@ -588,12 +588,11 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
     ekin = sqrt(p*p+m*m)-m;
   }
 
-  double ecal = fDiskCalorimeter->Energy();
-
   Hist->fECl->Fill(tp->fEcl);
   Hist->fEClEKin->Fill(tp->fEcl/ekin);
 
-  Hist->fECalP->Fill(ecal/tp->fP);
+  Hist->fECalP->Fill(tp->fECalP);
+  Hist->fEDiskP->Fill(tp->fEDiskP);
   Hist->fEp->Fill(tp->fEp);
   Hist->fEpVsPath->Fill(tp->fPath,tp->fEp);
 
@@ -1340,13 +1339,19 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     if (fSimPar.fTMid ) tp->fDtZ0   = track->T0()-fSimPar.fTMid->Time();
     if (fSimPar.fTBack) tp->fDtBack = track->TBack()-fSimPar.fTBack->Time();
 //-----------------------------------------------------------------------------
-// track residuals
+// track residuals 
+// 2016-10-26: replase VMaxEp with VMinS
 //-----------------------------------------------------------------------------
-    TStnTrack::InterData_t*  vr = track->fVMaxEp; 
+    TStnTrack::InterData_t*  vr = track->fVMinS; 
     double    nx, ny;
 
+    tp->fDiskID    = -1;
     tp->fEcl       = -1.e6;
     tp->fEp        = -1.e6;
+    tp->fEDiskP    = -1.e6;
+
+    double ecal    = fDiskCalorimeter->Energy();
+    tp->fECalP     = ecal/track->fP2;
 
     tp->fDu        = -1.e6;
     tp->fDv        = -1.e6;
@@ -1355,7 +1360,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Tcm = -1.e6;
+    tp->fChi2Tcm   = -1.e6;
     tp->fChi2XY    = -1.e6;
     tp->fChi2T     = -1.e6;
     tp->fPath      = -1.e6;
@@ -1364,12 +1369,15 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fSInt      = -1.e6;
 
     if (vr) {
-      tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/track->fP2;
+      tp->fDiskID  = vr->fID;
+      tp->fEcl     = vr->fEnergy;
+      tp->fEp      = tp->fEcl/track->fP2;
+      tp->fDx      = vr->fDx;
+      tp->fDy      = vr->fDy;
+      tp->fDz      = vr->fDz;
 
-      tp->fDx  = vr->fDx;
-      tp->fDy  = vr->fDy;
-      tp->fDz  = vr->fDz;
+      double edisk = fDiskCalorimeter->Disk(vr->fID)->Energy();
+      tp->fEDiskP  = edisk/track->fP2;
 //-----------------------------------------------------------------------------
 // correct TrkpatRec and CalPatRec tracks differently
 //-----------------------------------------------------------------------------

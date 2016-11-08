@@ -206,6 +206,7 @@ public:
     TH1F*    fECl;
     TH1F*    fEClEKin;
     TH1F*    fECalP;			// total energy in the calorimeter / P
+    TH1F*    fEDiskP;			// total energy in the hit disk / P
     TH1F*    fEp;
     TH2F*    fEpVsPath;
 //     TH1F*    fEp_eMinus;

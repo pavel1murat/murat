@@ -33,8 +33,7 @@ source       : {
   #fileNames : ["vbertacc/results/proton_single_gen_OLD.root"]
 }
 
-
- trkPatRecSeqProt     : [ @sequence::tprPrepHitSeq, TimePeakFinder, NegHelixFinder, TRFDownstreameMinus  ]
+trkPatRecSeqProt     : [ @sequence::tprPrepHitSeq, TimePeakFinder, NegHelixFinder, TRFDownstreameMinus  ]
 
 physics : { 
     producers: { @table::Stntuple.producers
@@ -52,22 +51,22 @@ physics : {
 	}
 
 	TimePeakFinder : { @table::TimePeakFinder
-	    MinNHits : 10
-	    ymin  : 2
+	    MinNHits          : 10
+	    ymin              : 2
 	    OneDPeakThreshold : 1
-	    tmin : 300.0
-	    DtMax : 100  
+	    tmin              : 300.0
+	    DtMax             : 100
 	}
 
 	NegHelixFinder : { @table::NegHelixFinder
 	    fitparticle : @local::Particle.proton
 	    fitdirection : @local::FitDir.downstream
 	    RobustHelixFit :{
-		minNHit : 5
-		rcmin : 50
-		targetinit : false
+		minNHit         : 5
+		rcmin           : 50
+		targetinit      : false
 		targetintersect : false
-       		minDelta : 2000
+       		minDelta        : 2000
 		#mindist : 20
 		#maxP : 200
 		#rcmax : 500.0
@@ -105,9 +104,9 @@ physics : {
 	    makeTrackSeeds       : 0
 	    makeClusters         : 0
 	    makePid              : 0
-	    trkRecoModuleLabel   : ["TRFDownstreameMinus"]
-	    fitParticle          : [                        @local::Particle.proton]
-	    fitDirection         : [                        @local::FitDir.downstream ]
+	    trkRecoModuleLabel   : ["TRFDownstreameMinus"      ]
+	    fitParticle          : [ @local::Particle.proton   ]
+	    fitDirection         : [ @local::FitDir.downstream ]
 	    trackSeedMaker       : "NegHelixFinder"
 	    g4ModuleLabel        : "protonMixer"
 	    generatorModuleLabel : "protonMixer"
@@ -134,9 +133,9 @@ physics : {
 		      , @sequence::hitMakerSeq
 		      , @sequence::calRecoSeq
 		      , @sequence::trkPatRecSeqProt
-#		      , MergePatRecTpr
-		      , @sequence::stnmaker_seq
-#		      , MuHitDisplay
+		      , MergePatRec
+#		      , @sequence::stnmaker_seq
+		      , MuHitDisplay
 		     ]
 
     trigger_paths : [  trkpatrec_reco ]

@@ -111,7 +111,7 @@ TTrackCompModule::~TTrackCompModule() {
 //-----------------------------------------------------------------------------
 void TTrackCompModule::SetMVA(const char* TrkRecAlgorithm, const char* TrainingDataset, int MvaType) {
 
-  fUseMVA        = 1;
+  fUseMVA         = 1;
 
   TString trk_alg = TrkRecAlgorithm;
   trk_alg.ToUpper();

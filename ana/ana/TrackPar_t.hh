@@ -8,6 +8,7 @@ public:
   int     fNHPl;
   int     fNEPl;
   int     fNDPl;
+  int     fDiskID;			// 0: first disk, 1:socond disk
   int     fIDWord[20];
 
   double  fMVAOut[20];			// outputs of different MVA classifiers
@@ -29,6 +30,8 @@ public:
   
   double  fEcl;
   double  fEp;
+  double  fEDiskP;
+  double  fECalP;
   double  fDx;
   double  fDy;
   double  fDz;

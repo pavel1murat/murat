@@ -9,6 +9,7 @@
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
+#include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"
 #------------------------------------------------------------------------------
 # local changes to global variables
@@ -19,15 +20,18 @@ BEGIN_PROLOG
   ehi                                 : 105.0015
   TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDem
   bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : g4run
 END_PROLOG
 
-#include "Stntuple/fcl/templates.fcl"
+#include "murat/fcl/templates.fcl"
 
 process_name : ReadHitsAllPatRecDemDmmRecoStnmaker
 
 source       : { 
     module_type : RootInput
     #    fileNames   : [ {INPUT_DATA_FILE} ]
+ Ray's file
+    fileNames : ["/mu2e/data/users/rlc/data/CRV/target5/579_rec0/sim.mu2e.cd3-cosmic-g4s2-target5.0901a_geom0.001600_00005167.art"]
     #    fileNames : ["/mu2e/data/tdr/beam/g4s4p5/tdr.beam.g4s4.conversion.1504a.15729672/good/00000/dsStopsToHitsConversion.root"]
     #    maxEvents   : 100
     inputCommands : ['keep *_*_*_*'
@@ -41,21 +45,35 @@ source       : {
 		    ]
 }
 
-physics: { @table::physics 
-    filters : { @table::physics.filters 
-	InitStntuple   : { @table::InitStntuple 
-	    histFileName           : "egun_stnmaker.stn" 
-	}
-	TrackRecoCheck : { @table::TrackRecoCheck
-	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
-	    debugBits            : { bit11:1 }
-	}
+physics: { 
+
+    producers : { @table::murat.producers  }
+    
+    filters : { @table::murat.filters 
+	InitStntuple         : { @table::murat.filters.InitStntuple        histFileName  : "read_allpatrec_dem_dmm_reco_stnmaker.stn" }
+ 	StntupleMakerDemDmm  : { @table::murat.filters.StntupleMakerDemDmm g4ModuleLabel : @local::G4_MODULE_LABEL  }
     }
 
-    p1 : [ @sequence::physics.trkpatrec_dem_dmm_reco_stnmaker ]
+    @table::murat.paths
+
+    p1 : [ @sequence::murat.cal_reco       ,
+	   @sequence::murat.dem_reco       ,
+	   @sequence::murat.dmm_reco       ,
+	   @sequence::Stntuple.stnmaker_dem_dmm
+	  ]
 
     trigger_paths : [ p1  ]
+#    out           : [ detectorOutput ]
+    out           : []
     end_paths     : [ out ]
+}
+
+outputs: {
+    detectorOutput : {
+	module_type : RootOutput
+	SelectEvents: { SelectEvents: [] }
+	outputCommands:   [ "keep *_*_*_*"]
+    }
 }
 #
 # can use path names specified in 'physics.' context w/o prefixing

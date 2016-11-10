@@ -25,7 +25,7 @@
 #include "G4Helper/inc/G4Helper.hh"
 
 #include "murat/gaas/constructGaasLayer.hh"
-
+#include "murat/gaas/constructGaasPbSandwich.hh"
 
 #include "murat/gaas/GaasWorld.hh"
 #include "Mu2eG4/inc/SensitiveDetectorHelper.hh"
@@ -74,8 +74,8 @@ namespace mu2e {
 
   GaasWorld::GaasWorld() : Mu2eUniverse()
 			 , sdHelper_(NULL)
-			 , writeGDML_(false)
-			 , gdmlFileName_("gaas.gdml")
+			 , _writeGDML(false)
+			 , _gdmlFileName("gaas.gdml")
   {}
 
   GaasWorld::~GaasWorld() {
@@ -87,8 +87,8 @@ namespace mu2e {
 		       SensitiveDetectorHelper*   sdHelper /*no ownership passing*/)
   {
     sdHelper_      = sdHelper;
-    writeGDML_     = pset.get<bool>("debug.writeGDML",false);
-    gdmlFileName_  = pset.get<std::string>("debug.GDMLFileName","gaas.gdml");
+    _writeGDML     = pset.get<bool>("debug.writeGDML",false);
+    _gdmlFileName  = pset.get<std::string>("debug.GDMLFileName","gaas.gdml");
 
     Mu2eUniverse::_verbosityLevel = pset.get<int>("debug.worldVerbosityLevel");
   }
@@ -154,12 +154,13 @@ namespace mu2e {
                                           placePV, 
                                           doSurfaceCheck));
 
-    const int seVer = _config.getInt("mu2e.studyEnvVersion",0);
+    _example = _config.getInt("mu2e.studyEnvVersion",0);
 
-    if ( seVer == 2 ) constructGaasLayer(boxInTheWorldVInfo, _config);
+    if ( _example == 2 ) constructGaasLayer     (boxInTheWorldVInfo, _config);
+    if ( _example == 3 ) constructGaasPbSandwich(boxInTheWorldVInfo, _config);
     else {
       throw cet::exception("CONFIG")
-        << __func__ << ": unknown study environment: " << seVer << "\n";
+        << __func__ << ": unknown study environment: " << _example << "\n";
     }
 
     if ( _verbosityLevel > 0) {
@@ -178,9 +179,9 @@ namespace mu2e {
     constructStepLimiters();
 
     // Write out geometry into a gdml file.
-    if (writeGDML_) {
+    if (_writeGDML) {
       G4GDMLParser parser;
-      parser.Write(gdmlFileName_, worldVInfo.logical);
+      parser.Write(_gdmlFileName, worldVInfo.logical);
     }
 
     return worldVInfo.physical;
@@ -198,10 +199,35 @@ namespace mu2e {
   void GaasWorld::constructStepLimiters() {
 
     // this is a possible memory leak
-     G4LogicalVolume* layer      = _helper->locateVolInfo("GaasLayer").logical;
-     G4UserLimits* stepLimit  = new G4UserLimits(1.e-3);
-     layer->SetUserLimits(stepLimit);
+    
+    G4LogicalVolume*  layer;
+    G4UserLimits*     stepLimit;    
 
+    stepLimit = new G4UserLimits(1.e-3);
+
+    if (_example == 2) {
+      layer     = _helper->locateVolInfo("GaasLayer").logical;
+      layer->SetUserLimits(stepLimit);
+    }
+    else if (_example == 3) {
+				// lead
+      char name[10];
+      for (int i=0; i<400; i++) {
+	int copy = 500+i;
+	sprintf(name,"lead_%i",copy);
+	layer    = _helper->locateVolInfo(name).logical;
+	layer->SetUserLimits(stepLimit);
+      }
+				// GaAs
+      for (int i=0; i<400; i++) {
+	int copy = 100+i;
+	sprintf(name,"gaas_%i",copy);
+	layer    = _helper->locateVolInfo(name).logical;
+	layer->SetUserLimits(stepLimit);
+      }
+      
+    }
+    
      // Maximum step length, in mm.
 
     // AntiLeakRegistry& reg = art::ServiceHandle<G4Helper>()->antiLeakRegistry();

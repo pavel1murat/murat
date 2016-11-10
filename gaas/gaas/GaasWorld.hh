@@ -77,9 +77,11 @@ namespace mu2e {
 
     // _verbosityLevel in the base class
  
-    bool        writeGDML_;
-    std::string gdmlFileName_;
-    std::string g4stepperName_;
+    bool        _writeGDML;
+    std::string _gdmlFileName;
+    std::string _g4stepperName;
+    int         _example;        // example version
+    
   };
 
 } // end namespace mu2e

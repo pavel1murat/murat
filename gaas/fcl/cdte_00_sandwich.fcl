@@ -23,19 +23,17 @@ source : {
 }
 
 services : {
-
   message               : @local::default_message
-  TFileService          : { fileName : "ingaas_sandwich.hist" }
+  TFileService          : { fileName : "cdte_00_sandwich.hist" }
   RandomNumberGenerator : { }
 
   user : {
-    GeometryService        : { inputFile      : "murat/gaas/geom/ingaas_sandwich.txt"  }
+    GeometryService        : { inputFile      : "murat/gaas/geom/cdte_00_sandwich.txt"  }
     ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
     GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
     G4Helper               : { }
     SeedService            : @local::automaticSeeds
   }
-
 }
 
 physics : {
@@ -56,7 +54,7 @@ physics : {
 
 	debug : {
 	    writeGDML            : false
-	    GDMLFileName         : "ingaas_sandwich.gdml"
+	    GDMLFileName         : "cdte_00_sandwich.gdml"
 	    worldVerbosityLevel  : 0
 	}
  
@@ -123,12 +121,10 @@ outputs:  {
 
   outfile : {
     module_type   :   RootOutput
-    fileName      :   "ingaas_sandwich.art"
+    fileName      :   "cdte_00_sandwich.art"
   }
 
 }
-
-g4run.debug.writeGDML : true 
 
 // Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
 services.user.SeedService.baseSeed         :  0

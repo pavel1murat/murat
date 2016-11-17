@@ -1,5 +1,5 @@
 //
-// GaAs-Pb sandwich (400 layers)x(10 um lead + 100um GaAs) x 4x4 mm
+// GaAs-Pb sandwich (400 layers)x(10 um lead + 80um GaAs) x 4x4 mm = 36x4x4 mm^3
 //
 // 10% lead translates into the radiation length of 1.7cm
 // Units are mm, MeV
@@ -63,7 +63,7 @@ int            calo.passiveVolumeStartingCopyNumber = 500;
 
 double         calo.moduleStartingLongitPosition   = 6.0;
 int            calo.moduleNumberOfLayers           = 400;
-vector<double> calo.moduleLayerHalfLengths         = {0.005 , 0.050}; // mm, 10 um lead and 100 um GaAs
+vector<double> calo.moduleLayerHalfLengths         = {0.005 , 0.040}; // mm, 10 um lead and 100 um GaAs
 vector<string> calo.moduleLayerMaterials           = {"G4_Pb", "GaAs"};
 
 //

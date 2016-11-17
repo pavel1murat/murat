@@ -90,6 +90,28 @@ namespace mu2e {
       lyso->AddElement( Y ,  4.0*CLHEP::perCent );
     }
 
+    mat = G4Material::GetMaterial("CdTe",false);
+    if (mat == NULL) {
+      G4Material* cdte = new G4Material("CdTe", 6.2*CLHEP::g/CLHEP::cm3, 2 );
+
+      G4Element* Cd  = nistMan->FindOrBuildElement("Cd",true);
+      G4Element* Te  = nistMan->FindOrBuildElement("Te",true);
+      
+      cdte->AddElement( Cd, 1.);
+      cdte->AddElement( Te, 1.);      
+    }
+
+    mat = G4Material::GetMaterial("GaSb",false);
+    if (mat == NULL) {
+      G4Material* GaSb = new G4Material("GaSb", 5.6*CLHEP::g/CLHEP::cm3, 2 );
+
+      G4Element* Ga  = nistMan->FindOrBuildElement("Ga",true);
+      G4Element* Sb  = nistMan->FindOrBuildElement("Sb",true);
+      
+      GaSb->AddElement( Ga, 1.);
+      GaSb->AddElement( Sb, 1.);      
+    }
+
     // it will be a set of thin plates (G4Box'es)
 
     G4int  verbosityLevel  = config.getInt("calo.verbosityLevel",-1);

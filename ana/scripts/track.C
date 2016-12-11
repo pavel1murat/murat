@@ -20,6 +20,7 @@ def_name track_052("track_comp_tmva");
 def_name track_053("track_comp_use_mva");
 
 def_name track_100("track_anaB");
+def_name track_101("track_evd");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -219,5 +220,15 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = 
     m_tcm->SetDebugBit(DebugBit,1);
     if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
   }
+}
+
+//-----------------------------------------------------------------------------
+void  track_evd(int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module to write TMVA training trees
+//-----------------------------------------------------------------------------
+  m_evd = (TEventDisplayModule*) g.x->AddModule("TEventDisplayModule",0);  
+
+  if (DebugBit >= 0) m_evd->SetDebugBit(DebugBit,1);
 }
 

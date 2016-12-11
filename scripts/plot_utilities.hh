@@ -2,6 +2,9 @@
 #ifndef __murat_scripts_plot_utilities__
 #define __murat_scripts_plot_utilities__
 
+#include "TPaveStats.h"
+#include "TLatex.h"
+
 //-----------------------------------------------------------------------------
 // redraw the stat box, witht eh color of the histogram itself
 //-----------------------------------------------------------------------------
@@ -18,6 +21,16 @@ void draw_label_ndc(const char* Text, double X1, double Y1, double FontSize, dou
 
   TLatex* label = new TLatex(X1,Y1,Text);
   label->SetNDC();
+  label->SetTextSize(FontSize);
+  label->SetTextFont(Font);
+  label->Draw();
+}
+
+//-----------------------------------------------------------------------------
+void draw_label_abs(const char* Text, double X1, double Y1, double FontSize, double Font = 52) {
+
+  TLatex* label = new TLatex(X1,Y1,Text);
+  label->SetNDC(kFALSE);
   label->SetTextSize(FontSize);
   label->SetTextFont(Font);
   label->Draw();

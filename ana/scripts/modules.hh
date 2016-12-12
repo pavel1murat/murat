@@ -14,9 +14,6 @@
 #include "murat/ana/TTrackRecoEffAnaModule.hh"
 #include "murat/ana/TValCalPatRecModule.hh"
 #include "murat/ana/TVdetAnaModule.hh"
-#include "murat/ana/TEventDisplayModule.hh"
-
-
 //-----------------------------------------------------------------------------
 // modules defined in 'murat' package (libmurat_ana.so)
 //-----------------------------------------------------------------------------
@@ -24,7 +21,6 @@ TCalAnaModule*           m_cal   = NULL;
 TCosmicsAnaModule*       m_cos   = NULL;
 TDioCalibModule*         m_dio   = NULL;
 // TGenAnaModule*           m_gen   = NULL;
-TEventDisplayModule*     m_evd   = NULL;
 TPidAnaModule*           m_pid   = NULL;
 TStrawHitAnaModule*      m_strh  = NULL;
 TTrackAnaModule*         m_trk   = NULL;

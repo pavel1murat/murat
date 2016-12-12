@@ -9,17 +9,8 @@ Import('murat_helper')
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
 rootlibs = env['ROOTLIBS']
-if ( not ("EG" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Physics")+1,"EG");
-
-if ( not ("Eve" in rootlibs)):
-    rootlibs.insert(rootlibs.index("EG")+1,"Eve");
-
-if ( not ("Geom" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Eve")+1,"Geom");
-
-if ( not ("RGL" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Geom")+1,"RGL");
+if ( not ("EG"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+if ( not ("Geom" in rootlibs)): rootlibs.insert(rootlibs.index("Eve"    )+1,"Geom");
 
 helper = murat_helper();
 

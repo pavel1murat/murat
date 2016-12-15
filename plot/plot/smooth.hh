@@ -3,20 +3,24 @@
 
 #include "TH1.h"
 #include "TF1.h"
+#include "TGraph.h"
 
 class smooth {
 public:
 
   int     fIndex;
+  int     fN   ;
   double* fP0  ;
   double* fP1  ;
   double* fP2  ;
-  TH1*    fHist;
+  double* fX   ;
   TF1*    fFunc;
 //-----------------------------------------------------------------------------
 // constructiors and destructor
 //-----------------------------------------------------------------------------
-  smooth(const TH1* Hist = 0, double XMin = 1., double XMax = -1.);
+  smooth();
+  smooth(const TH1*    Hist , double XMin = 1., double XMax = -1.);
+  smooth(const TGraph* Graph, double XMin = 1., double XMax = -1.);
   virtual ~smooth();
 
   double Eval(double* X);

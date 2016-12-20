@@ -10,19 +10,14 @@ Import('murat_helper')
 #------------------------------------------------------------------------------
 rootlibs = env['ROOTLIBS']
 if ( not ("EG"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
-if ( not ("Geom" in rootlibs)): rootlibs.insert(rootlibs.index("Eve"    )+1,"Geom");
 
 helper = murat_helper();
 
 helper.handle_dictionaries();
 
 skip_list = []
-libs      = [ 'Stntuple_val', 'Stntuple_gui', 'Stntuple_alg', 'Stntuple_loop',
+libs      = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
               'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base',
-              'mu2e_BeamlineGeom',
-              'mu2e_BFieldGeom',
-              'mu2e_GeometryService',
-              'mu2e_ConfigTools',
               'mu2e_Mu2eUtilities',
               'fhiclcpp',
               'cetlib',

@@ -1376,7 +1376,8 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       tp->fDy      = vr->fDy;
       tp->fDz      = vr->fDz;
 
-      double edisk = fDiskCalorimeter->Disk(vr->fID)->Energy();
+      double edisk(-1.);
+      if (fDiskCalorimeter->NDisks() > 0) edisk = fDiskCalorimeter->Disk(vr->fID)->Energy();
       tp->fEDiskP  = edisk/track->fP2;
 //-----------------------------------------------------------------------------
 // correct TrkpatRec and CalPatRec tracks differently

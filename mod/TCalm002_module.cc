@@ -19,9 +19,9 @@
 
 #include "murat/mod/TCalm002_module.hh"
 #include "Stntuple/alg/TStnTrackID.hh"
-#include "Stntuple/obj/TStnCrystal.hh"
-
-// #include "murat/gui/TEvdCrystal.hh"
+#include "Stntuple/geom/TStnCrystal.hh"
+#include "Stntuple/geom/TDisk.hh"
+#include "Stntuple/base/TObjHandle.hh"
 
 #include "Stntuple/val/stntuple_val_functions.hh"
 #include "Stntuple/mod/TAnaDump.hh"
@@ -42,10 +42,6 @@
 #include "BTrkData/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 #include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"
-
-#include "Stntuple/obj/TDiskCalorimeter.hh"
-#include "Stntuple/obj/TDisk.hh"
-#include "Stntuple/base/TObjHandle.hh"
 
 namespace mu2e {
 

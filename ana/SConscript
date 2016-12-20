@@ -9,21 +9,23 @@ Import('murat_helper')
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
 rootlibs = env['ROOTLIBS']
-if ( not ("EG" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+if ( not ("EG"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
 
 helper = murat_helper();
 
 helper.handle_dictionaries();
 
 skip_list = []
-libs      = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop', 'Stntuple_obj', 'Stntuple_base',
+libs      = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
+              'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base',
               'mu2e_Mu2eUtilities',
               'fhiclcpp',
               'cetlib',
               'xerces-c',
-              rootlibs
-              ]
+              rootlibs,
+              'boost_filesystem',
+              'boost_system'
+];
 
 list_of_cc_files = Glob('*.cc',strings=True);
 helper.build_libs(list_of_cc_files,skip_list,libs);

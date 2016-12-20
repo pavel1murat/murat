@@ -15,7 +15,7 @@
 
 #include "Stntuple/base/TStnArrayI.hh"
 
-#include "Stntuple/obj/TDiskCalorimeter.hh"
+#include "Stntuple/geom/TDiskCalorimeter.hh"
 
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"

@@ -1,0 +1,157 @@
++TITLE  :Test 
+#+AUTHOR: Pavel Murat
+#+EMAIL : murat@fnal.gov
+#+BABEL: :session *R* :cache yes :results output graphics :exports both :tangle yes 
+
+
+* shell example
+#+begin_src sh
+  echo "This file takes up `du -h org-babel.org |sed 's/\([0-9k]*\)[ ]*org-babel.org/\1/'`"
+#+end_src
+
+#+RESULTS:
+: This file takes up
+
+
+* Example of Org-Babel for R Literate Programming
+** R text output
+A simple summary. 
+
+#+begin_src R 
+  x <- rnorm(10)
+  summary(x)
+#+end_src
+
+#+RESULTS:
+
+
+** R graphics output
+Note we use the object =x= generated in previous code block, thanks to
+the header option =:session *R*=.  The output graphics file is =a.png=. 
+
+#+begin_src R  :file a.png
+  x <- rnorm(10)
+  y <- rnorm(10)
+  plot(x, y)
+#+end_src
+
+#+RESULTS:
+[[file:a.png]]
+
+Same plot with larger dimension:
+
+#+begin_src R  :file b.png :width 800 :height 800
+  plot(x, y)
+#+end_src
+
+#+RESULTS:
+[[file:b.png]]
+
+
+* RUBY example
+
+#+begin_src ruby
+require 'date'
+"This file was last evaluated on #{Date.today}"
+#+end_src
+
+#+RESULTS:
+: This file was last evaluated on 2015-12-17
+
+* PYTHON examples
+
+# #to execute a block: 'C-c C-c'
+#+name: test1
+#+begin_src python :var x=5
+import time
+print("Hello, today's date is %s" % time.ctime())
+print('Two plus three is')
+return 5 + 3+x
+#+end_src
+
+#+RESULTS: test1
+: 13
+
+# to execute call : 'C-c C-v C-e'
+#+call: test1(41)
+
+#+RESULTS:
+: 49
+
+#+begin_src python :session :results file
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+fig=plt.figure(figsize=(3,2))
+plt.plot([1,3,2])
+fig.tight_layout()
+plt.savefig('images/myfig.pdf')
+'images/myfig.pdf'                          # return this to org-mode
+#+end_src
+
+#+RESULTS:
+[[file:images/myfig.pdf]]
+
+
+* STNTUPLE Mu2e event mixing job performance vs the background level (use PYTHON)
+
+  - this is really cool
+
+#+begin_src python :session :results file
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+fig=plt.figure(figsize=(10,10))
+
+plt.plot([0,1,2,4],[0.3,1.5,2.8,6.6])
+fig.tight_layout()
+fn='mu2e_mixing_timing.pdf';
+plt.savefig(fn)
+fn                                         # return this to org-mode
+#+end_src
+
+#+RESULTS:
+[[file:mu2e_mixing_timing.pdf]]
+
+
+* R example
+
+#+begin_src R  :results file 
+
+x <- c(0,1,2,4); y <- c(0.3,1.5,2.8,10.6)    # create some data 
+par(pch=22, col="red")                       # plotting symbol and color 
+
+# opts = c("p","l","o","b","c","s","S","h")  # 
+# par(mfrow=c(2,4))                          # all plots on one page 
+
+par(mfrow=c(1,1))                            # just one graphics option
+opts = c("b")                                # 
+
+fn = 'aa.pdf'
+pdf(file=fn)
+
+for(i in 1:length(opts)){ 
+  heading = paste("type=",opts[i]) 
+  plot(x, y, type="n", main=heading) ; lines(x, y, type=opts[i]) 
+}
+dev.off();
+n = 100
+fn
+#+end_src
+
+#+RESULTS:
+[[file:aa.pdf]]
+
+#+begin_src R :results file 
+fn = 'cc.pdf'
+pdf(file=fn)
+# plot(1:100, rnorm(100) * 1:100)
+n = 50
+plot(1:n, rnorm(n) * 1:n)
+fn
+#+end_src
+
+#+RESULTS:
+[[file:cc.pdf]]
+

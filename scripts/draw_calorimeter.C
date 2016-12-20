@@ -1,9 +1,20 @@
 // draw Mu2e Calorimeter : v4_0_6
 
-namespace {
-  TGeoManager* gm(0);
-};
+#include "TGeoManager.h"
 
+
+class TDrawMu2eGeometry {
+  TGeoManager* gm;
+
+  
+}
+
+
+
+
+void init_gm(const char* Fn);
+
+//-----------------------------------------------------------------------------
 void init_gm(const char* Fn = "/home/murat/figures/mu2e/gdml/mu2e_v4_0_6.gdml") {
   if (gm == 0) {
     gm = new TGeoManager();
@@ -11,6 +22,7 @@ void init_gm(const char* Fn = "/home/murat/figures/mu2e/gdml/mu2e_v4_0_6.gdml") 
   }
 }
 
+//-----------------------------------------------------------------------------
 void draw_mu2e_calorimeter() {
 
   init_gm();
@@ -238,8 +250,8 @@ void draw_detector_solenoid_dev2(const char* Fn = "/home/murat/figures/mu2e/gdml
     }
   }
 
-  gm->GetVolume("protonabs184c0")->SetLineColor(804);
-  gm->GetVolume("protonabs38770")->SetLineColor(808);
+  gm->GetVolume("protonabs1")->SetLineColor(804);
+  gm->GetVolume("protonabs3")->SetLineColor(808);
 
   gm->GetVolume("InternalNeutronAbsorber18440")->SetLineColor(900); // default = 920
   gm->GetVolume("InternalNeutronAbsorber281b0")->SetLineColor(850); // default = 920

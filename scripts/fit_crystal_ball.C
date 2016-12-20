@@ -301,7 +301,7 @@ void cbe_create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 
 //-----------------------------------------------------------------------------
 void cbe_fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
-	     double X0, double XMin, double XMax) {
+			  double X0, double XMin, double XMax, double Sigma = 0.18) {
 
   TH1F* h = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit");
 
@@ -311,7 +311,7 @@ void cbe_fit_crystal_ball(const char* File, const char* Module, const char* Hist
 
   cbe_create_fit_function(f,X0,XMin,XMax);
 
-  cbe_init_parameters    (f,anorm,X0,0.18,1.,3.,X0+0.6,0.5);
+  cbe_init_parameters    (f,anorm,X0,Sigma,1.,3.,X0+0.6,0.5);
 
   h->Draw();
   //  f->Draw("same");
@@ -319,6 +319,8 @@ void cbe_fit_crystal_ball(const char* File, const char* Module, const char* Hist
   cbe_fit                (h,f,XMin,XMax);
 }
 
+//-----------------------------------------------------------------------------
+// initial parameter setting assumes fit of delta(p) = P(reco)-P(MC) distribution
 //-----------------------------------------------------------------------------
 void cbe_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 
@@ -328,7 +330,7 @@ void cbe_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax) {
 
 
   cbe_create_fit_function(f,X0,XMin,XMax);
-  cbe_init_parameters    (f,anorm,X0,0.120,2.,1.,X0+0.6,0.5);
+  cbe_init_parameters    (f,anorm,X0,0.180,2.,1.,X0+0.6,0.5);
   cbe_fit                (h,f,XMin,XMax);
 }
 

@@ -14,8 +14,6 @@
 #include "murat/ana/TTrackRecoEffAnaModule.hh"
 #include "murat/ana/TValCalPatRecModule.hh"
 #include "murat/ana/TVdetAnaModule.hh"
-
-
 //-----------------------------------------------------------------------------
 // modules defined in 'murat' package (libmurat_ana.so)
 //-----------------------------------------------------------------------------

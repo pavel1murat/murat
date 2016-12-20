@@ -19,10 +19,11 @@
 
 #include "Stntuple/base/TStnArrayI.hh"
 
-#include "Stntuple/obj/TDiskCalorimeter.hh"
+#include "Stntuple/geom/TDiskCalorimeter.hh"
 
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
+#include "Stntuple/geom/TStnCrystal.hh"
 
 class TCalAnaModule: public TStnModule {
 public:
@@ -30,7 +31,7 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct CaloHist_t {
+  struct CrystalHist_t {
     TH1F*    fDiskID;		       // per crystal hit
     TH1F*    fEnergy  [kNDisks];
     TH1F*    fTime    [kNDisks];
@@ -119,7 +120,7 @@ public:
   enum { kNEventHistSets   = 100 };
   enum { kNClusterHistSets = 100 };
   enum { kNCalHitHistSets  =  10 };
-  enum { kNCaloHistSets    = 100 };
+  enum { kNCrystalHistSets = 100 };
   enum { kNGenpHistSets    = 100 };
   enum { kNSimpHistSets    = 100 };
 
@@ -128,7 +129,7 @@ public:
     EventHist_t*   fEvent   [kNEventHistSets];
     ClusterHist_t* fCluster [kNClusterHistSets];
     CalHitHist_t*  fCalHit  [kNCalHitHistSets];
-    CaloHist_t*    fCalo    [kNCaloHistSets];
+    CrystalHist_t* fCrystal [kNCrystalHistSets];
     GenpHist_t*    fGenp    [kNGenpHistSets];
 //     SimpHist_t*    fSimp    [kNSimpHistSets];
   };
@@ -188,14 +189,14 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms    (CaloHist_t*    Hist, const char* Folder);
+  void    BookCrystalHistograms (CrystalHist_t* Hist, const char* Folder);
   void    BookClusterHistograms (ClusterHist_t* Hist, const char* Folder);
   void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
   void    BookCalHitHistograms  (CalHitHist_t*  Hist, const char* Folder);
   void    BookGenpHistograms    (GenpHist_t*    Hist, const char* Folder);
   //  void    BookSimpHistograms    (SimpHist_t*    Hist, const char* Folder);
 
-  void    FillCaloHistograms     (CaloHist_t*    Hist, TStnCrystal*  Crystal);
+  void    FillCrystalHistograms  (CrystalHist_t* Hist, TStnCrystal*  Crystal);
   void    FillCalHitHistograms   (CalHitHist_t*  Hist, TCalHitData*  Hit    );
   void    FillClusterHistograms  (ClusterHist_t* Hist, TStnCluster*  Cluster);
   void    FillEventHistograms    (EventHist_t*   Hist, double        EMin , double TMin);

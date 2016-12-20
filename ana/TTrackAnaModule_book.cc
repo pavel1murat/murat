@@ -10,7 +10,6 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/obj/TDisk.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
@@ -184,6 +183,8 @@ void TTrackAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder)
   HBook1F(Hist->fZTrk       ,"ztrk"     ,Form("%s: track ZTrk"        ,Folder), 200,-1000,1000,Folder);
   HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
   HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 200, 0   ,2,Folder);
+  HBook1F(Hist->fECalP      ,"ecalp"    ,Form("%s: E(caltot)/trackP"  ,Folder), 300, 0   ,1.5,Folder);
+  HBook1F(Hist->fEDiskP     ,"ediskp"   ,Form("%s: E(disk)/trackP"    ,Folder), 300, 0   ,1.5,Folder);
   HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
   HBook2F(Hist->fEpVsPath   ,"ep_vs_path",Form("%s: E/P Vs Path"      ,Folder),  50,   0 ,500,150,  0.,  1.5,Folder);
   HBook2F(Hist->fNHVsStation,"nh_vs_st" ,Form("%s: N(hits) Vs Station",Folder),  40, 0,40,10,-0.5,9.5,Folder);

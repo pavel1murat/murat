@@ -1,0 +1,80 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate DIO electrions LO spectrum , field 0.5 T
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+#  meanBackground                      : -1        # fixed at 1
+  bgHitFiles                          : @nil
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : DioAlloDigiRecoStnTcm
+
+source       : { module_type : EmptyEvent }
+
+outputs      : { @table::murat.outputs }
+
+physics: { 
+    producers : { 
+	@table::murat.producers 
+
+	generate : { @table::murat.producers.egun 
+	    physics : {
+		pdgId            :  11
+		elow             : 49.999
+		ehi              : 50.001
+		spectrumVariable : "momentum"
+		spectrumShape    : "flat"
+	    }
+	    
+	}
+
+	FlagStrawHits : { @table::FlagStrawHits 
+	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
+	}
+    }
+
+    filters : { @table::murat.filters 
+	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "egun50_digi_reco_stn_tcm.stn" }
+ 	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL  }
+    }
+
+    @table::murat.paths
+#                                                                 no DetectorFilter
+    path_egun50 : [ generate, g4run,  
+		    @sequence::EventMixing.TimeMaps,
+		    @sequence::murat.digis          ,
+		    @sequence::murat.cal_reco       ,
+		    @sequence::murat.tpr_reco       ,
+		    @sequence::murat.cpr_reco       ,
+		    @sequence::murat.mpr_reco       ,
+		    @sequence::Stntuple.stnmaker_tcm
+		   ]
+
+    trigger_paths : [ path_egun50 ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+services.TFileService.fileName            : "egun50_digi_reco_stn_tcm.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "egun50_digi_reco_stn_tcm.art"
+services.user.GeometryService.inputFile   : "murat/geom/geom_cd3_half_field.txt"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------
+physics.producers.CalPatRec.minClusterEnergy : 30

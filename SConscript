@@ -31,6 +31,7 @@ def murat_gen_rootcint(source, target, env, for_signature):
     includes = includes + " -I"+os.environ['CETLIB_INC'  ];
     includes = includes + " -I"+os.environ['CANVAS_INC'  ];
     includes = includes + " -I"+os.environ['FHICLCPP_INC'];
+    includes = includes + " -I"+os.environ['BOOST_INC'];
 
     dict        = str(target[0]);
     tmp_lib_dir = os.path.dirname(dict);                # env['MURAT_TMP_LIB_DIR']

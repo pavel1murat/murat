@@ -1,0 +1,131 @@
+# -*- mode: tcl -*- 
+# fcl config file to perform Geant4 studies using the Mu2e framework infrastructure and simple geometry
+#
+#
+# $Id: g4studyCalo_01.fcl,v 1.1 2014/08/29 16:16:17 knoepfel Exp $
+# $Author: knoepfel $
+# $Date: 2014/08/29 16:16:17 $
+#
+# Original author K. Genser
+#
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+# Give this job a name.
+process_name : GaasLayer
+
+# Start form an empty source
+source : {
+  module_type : EmptyEvent
+  maxEvents : 100
+}
+
+services : {
+  message               : @local::default_message
+  TFileService          : { fileName : "gaas_00_sandwich.hist" }
+  RandomNumberGenerator : { }
+
+  user : {
+    GeometryService        : { inputFile      : "murat/gaas/geom/gaas_00_sandwich.txt"  }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+    G4Helper               : { }
+    SeedService            : @local::automaticSeeds
+  }
+}
+
+physics : {
+
+  producers:  {
+
+    generate:  {
+	module_type          : EventGenerator
+	inputfile            : "murat/gaas/fcl/petPhotonGun.txt"
+	allowReplacement     : true
+	messageOnReplacement : true
+    }
+
+    g4run : {
+	module_type          : GaasG4
+	diagLevel            : 0
+	generatorModuleLabel : generate
+
+	debug : {
+	    writeGDML            : false
+	    GDMLFileName         : "gaas_00_sandwich.gdml"
+	    worldVerbosityLevel  : 0
+	}
+ 
+      // Can selectively enable sensitive detectors here
+      SDConfig : {  
+      // enableAllSDs : true  // this will activate all SDs listed in StepInstanceName enum
+      enableSD : [] // activate just the explicitly listed SDs
+      // // Make arbitrary LogicalVolumes sensitive:
+      // sensitiveVolumes: []
+
+      }
+# visGUIMacro is used with the Qt GUI
+       visGUIMacro          : "Mu2eG4/test/visqtGUI.mac"
+#try this first, but qt requires ./buildopts --g4vis=qt ...
+#      visMacro             : "Mu2eG4/test/vismqt.mac"
+#      visMacro             : "Mu2eG4/test/visxy.mac"
+#      visMacro             : "Mu2eG4/test/visxz.mac"
+
+#      visMacro             : "Mu2eG4/test/visyz.mac" 
+
+#      visMacro             : "Mu2eG4/test/vis45.mac"
+#      visMacro             : "Mu2eG4/test/vis4530.mac"
+#      visMacro             : "Mu2eG4/test/visTree.mac"
+    }
+
+    randomsaver          : @local::randomsaver
+  }
+
+  filters : {
+      GaasLayerAna : {
+	  module_type        : GaasLayerAna
+	  g4ModuleLabel      : "g4run"
+	  debugBits          : {}
+      }
+      
+      GaasSandwichAna : {
+	  module_type        : GaasSandwichAna
+	  g4ModuleLabel      : "g4run"
+	  debugBits          : {}
+      }
+  } 
+
+#  analyzers: {
+#    checkhits: {
+#      module_type            : Mu2eG4StudyCalo01ReadBack
+#      generatorModuleLabel   : generate
+#      g4ModuleLabel          : g4run
+#      minimumEnergy          : 0.000
+#      maxPrint               : 1
+#      diagLevel              : 0
+#    }
+#  } 
+
+  p1 : [generate , g4run, GaasSandwichAna ]
+#  e1 : [ outfile ]
+  e1 : [ ]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}
+
+outputs:  {
+
+  outfile : {
+    module_type   :   RootOutput
+    fileName      :   "gaas_00_sandwich.art"
+  }
+
+}
+
+// Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.user.SeedService.baseSeed         :  0
+services.user.SeedService.maxUniqueEngines :  20

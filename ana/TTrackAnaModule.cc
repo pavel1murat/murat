@@ -41,7 +41,7 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/obj/TDisk.hh"
+#include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 #include "DataProducts/inc/VirtualDetectorId.hh"
@@ -236,123 +236,63 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 // crystals - count crystals with E > 1MeV
 //-----------------------------------------------------------------------------
-  TCalHitData* cch;
+  int          ndisks, n_hit_crystals[kNDisks], n_hit_crystals_tot;
+  double       etot[kNDisks];
+  //  TCalHitData* cch;
 
-  int n_cch_1mev = 0;
+  //  int n_cch_1mev = 0;
 
-  if (fCalorimeterType == 1) {
-//-----------------------------------------------------------------------------
-// vane calorimeter
-//-----------------------------------------------------------------------------
-    int  nhits_vane[2][kNDisks], nhits_row [2][20], nhits_col[2][50];
-    int  crystal_id, vane_id, local_id, vane_row, vane_col;
+  //  int   nhits_vane[2][kNDisks], nhits_row [2][20], nhits_col[2][50];
+  //  int   crystal_id, vane_id, local_id, vane_row, vane_col;
+  int   bin, hit_id, idisk, nhits;
+  int   nhits_r[kNDisks][100], n_hit_crystals_r[kNDisks][100];
 
-    for (int i=0; i<kNDisks; i++) {
-      nhits_vane[0][i] = 0;
-      nhits_vane[1][i] = 0;
-    }
-      
-    for (int i=0; i<20; i++) {
-      nhits_row[0][i] = 0;
-      nhits_row[1][i] = 0;
-    }
-
-    for (int i=0; i<50; i++) {
-      nhits_col[0][i] = 0;
-      nhits_col[1][i] = 0;
-    }
-      
-    for (int ic=0; ic<fNCalHits; ic++) {
-      cch        = fCalDataBlock->CalHitData(ic);
-      crystal_id = cch->ID();
-
-      if (cch->Energy() > 1.) {
-	n_cch_1mev += 1;
-      }
-      // for each crystal determine its row and column
-      // the following is for vanes
-      vane_id  = crystal_id/484.;
-      local_id = crystal_id-vane_id*484;
-      vane_row = local_id/44;
-      vane_col = local_id-vane_row*44;
-      
-      nhits_vane[0][vane_id ] += 1;
-      nhits_row [0][vane_row] += 1;
-      nhits_col [0][vane_col] += 1;
-      
-      if (cch->Energy() > 1.) {
-	nhits_row [1][vane_row] += 1;
-	nhits_col [1][vane_col] += 1;
-	nhits_vane[1][vane_id ] += 1;
-      }
-    }
-
-    Hist->fNCaloCrystalHits[0]->Fill(fNCalHits);
-    Hist->fNCaloCrystalHits[1]->Fill(n_cch_1mev);
-
-    for (int iv=0; iv<4; iv++) {
-      Hist->fNCaloHitsVsDisk[0]->Fill(iv,nhits_vane[0][iv]);
-      Hist->fNCaloHitsVsDisk[1]->Fill(iv,nhits_vane[1][iv]);
-    }
-
-    for (int ir=0; ir<20; ir++) {
-      Hist->fNCaloHitsVsRow[0]->Fill(ir,nhits_row[0][ir]);
-      Hist->fNCaloHitsVsRow[1]->Fill(ir,nhits_row[1][ir]);
-    }
-
-    for (int ic=0; ic<50; ic++) {
-      Hist->fNCaloHitsVsCol[0]->Fill(ic,nhits_col[0][ic]);
-      Hist->fNCaloHitsVsCol[1]->Fill(ic,nhits_col[1][ic]);
-    }
-  }
-  else if (fCalorimeterType == 2) {
+  if (fCalorimeterType == 2) {
 //-----------------------------------------------------------------------------
 // disk calorimeter
 //-----------------------------------------------------------------------------
-    int      ndisks, n_hit_crystals[4], n_hit_crystals_tot;
-    double   etot[4];
 
     TCalHitData* hit;
 
     ndisks = fDiskCalorimeter->NDisks();
 
-    int   bin, hit_id, idisk, nhits;
-    int   nhits_r[kNDisks][100], n_hit_crystals_r[kNDisks][100];
+    if (ndisks > 0) {
 
-    for (int id=0; id<kNDisks; id++) {
-      n_hit_crystals[id] = 0;
-      etot[id]           = 0;
-
-      for (int ib=0; ib<100; ib++) {
-	nhits_r         [id][ib] = 0;
-	n_hit_crystals_r[id][ib] = 0;
+      for (int id=0; id<kNDisks; id++) {
+	n_hit_crystals[id] = 0;
+	etot[id]           = 0;
+	
+	for (int ib=0; ib<100; ib++) {
+	  nhits_r         [id][ib] = 0;
+	  n_hit_crystals_r[id][ib] = 0;
+	}
       }
-    }
 
-    nhits = fCalDataBlock->NHits();
+      nhits = fCalDataBlock->NHits();
 
-    for (int i=0; i< nhits; i++) {
-      hit    = fCalDataBlock->CalHitData(i);
-
-      hit_id = hit->ID();
-      idisk  = fDiskCalorimeter->DiskNumber(hit_id);
-      r      = fDiskCalorimeter->CrystalRadius(hit_id);
-      e      = hit->Energy(); 
-
-      etot          [idisk] += e;
-      n_hit_crystals[idisk] += 1;
-
-      Hist->fECrVsR[idisk]->Fill(r,e);
-      Hist->fNCrVsR[idisk]->Fill(r,1);
-
-      bin  = (int) (r/10.);
-
-      nhits_r         [idisk][bin] += 1;
+      for (int i=0; i< nhits; i++) {
+	hit    = fCalDataBlock->CalHitData(i);
+	
+	hit_id = hit->ID();
+	idisk  = fDiskCalorimeter->DiskNumber(hit_id);
+	r      = fDiskCalorimeter->CrystalRadius(hit_id);
+	e      = hit->Energy(); 
+      
+	etot          [idisk] += e;
+	n_hit_crystals[idisk] += 1;
+	
+	Hist->fECrVsR[idisk]->Fill(r,e);
+	Hist->fNCrVsR[idisk]->Fill(r,1);
+	
+	bin  = (int) (r/10.);
+	
+	nhits_r         [idisk][bin] += 1;
 //-----------------------------------------------------------------------------
 // this is not correct, one needs to check whether this crystal has been hit,
 // for the moment, to get going, ignore that
 //-----------------------------------------------------------------------------
-      n_hit_crystals_r[idisk][bin] += 1;
+	n_hit_crystals_r[idisk][bin] += 1;
+      }
     }
 
     n_hit_crystals_tot = 0;
@@ -392,7 +332,6 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
       ekin = sqrt(p*p+m*m)-m;
     }
     Hist->fECalOverEKin->Fill(ecal/ekin);
-
   }
 
   Hist->fInstLumi->Fill(GetHeaderBlock()->InstLum());
@@ -651,6 +590,9 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 
   Hist->fECl->Fill(tp->fEcl);
   Hist->fEClEKin->Fill(tp->fEcl/ekin);
+
+  Hist->fECalP->Fill(tp->fECalP);
+  Hist->fEDiskP->Fill(tp->fEDiskP);
   Hist->fEp->Fill(tp->fEp);
   Hist->fEpVsPath->Fill(tp->fPath,tp->fEp);
 
@@ -1397,13 +1339,19 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     if (fSimPar.fTMid ) tp->fDtZ0   = track->T0()-fSimPar.fTMid->Time();
     if (fSimPar.fTBack) tp->fDtBack = track->TBack()-fSimPar.fTBack->Time();
 //-----------------------------------------------------------------------------
-// track residuals
+// track residuals 
+// 2016-10-26: replase VMaxEp with VMinS
 //-----------------------------------------------------------------------------
-    TStnTrack::InterData_t*  vr = track->fVMaxEp; 
+    TStnTrack::InterData_t*  vr = track->fVMinS; 
     double    nx, ny;
 
+    tp->fDiskID    = -1;
     tp->fEcl       = -1.e6;
     tp->fEp        = -1.e6;
+    tp->fEDiskP    = -1.e6;
+
+    double ecal    = fDiskCalorimeter->Energy();
+    tp->fECalP     = ecal/track->fP2;
 
     tp->fDu        = -1.e6;
     tp->fDv        = -1.e6;
@@ -1412,7 +1360,7 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Tcm = -1.e6;
+    tp->fChi2Tcm   = -1.e6;
     tp->fChi2XY    = -1.e6;
     tp->fChi2T     = -1.e6;
     tp->fPath      = -1.e6;
@@ -1421,12 +1369,16 @@ int TTrackAnaModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fSInt      = -1.e6;
 
     if (vr) {
-      tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/track->fP2;
+      tp->fDiskID  = vr->fID;
+      tp->fEcl     = vr->fEnergy;
+      tp->fEp      = tp->fEcl/track->fP2;
+      tp->fDx      = vr->fDx;
+      tp->fDy      = vr->fDy;
+      tp->fDz      = vr->fDz;
 
-      tp->fDx  = vr->fDx;
-      tp->fDy  = vr->fDy;
-      tp->fDz  = vr->fDz;
+      double edisk(-1.);
+      if (fDiskCalorimeter->NDisks() > 0) edisk = fDiskCalorimeter->Disk(vr->fID)->Energy();
+      tp->fEDiskP  = edisk/track->fP2;
 //-----------------------------------------------------------------------------
 // correct TrkpatRec and CalPatRec tracks differently
 //-----------------------------------------------------------------------------
@@ -1585,7 +1537,6 @@ int TTrackAnaModule::Event(int ientry) {
     disk_geom.fNDisks = fCalDataBlock->NDisks();
 
     for (int i=0; i<disk_geom.fNDisks; i++) {
-      //      disk_geom.fNCrystals[i] = fCalDataBlock->fNCrystals[i];
       disk_geom.fRMin[i]      = fCalDataBlock->fRMin[i];
       disk_geom.fRMax[i]      = fCalDataBlock->fRMax[i];
       disk_geom.fZ0  [i]      = fCalDataBlock->fZ0  [i];

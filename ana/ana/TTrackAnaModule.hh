@@ -24,7 +24,8 @@
 
 #include "Stntuple/base/TStnArrayI.hh"
 
-#include "Stntuple/obj/TDiskCalorimeter.hh"
+#include "Stntuple/geom/TDiskCalorimeter.hh"
+#include "Stntuple/geom/TStnCrystal.hh"
 
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
@@ -204,6 +205,8 @@ public:
     TH1F*    fZ1;
     TH1F*    fECl;
     TH1F*    fEClEKin;
+    TH1F*    fECalP;			// total energy in the calorimeter / P
+    TH1F*    fEDiskP;			// total energy in the hit disk / P
     TH1F*    fEp;
     TH2F*    fEpVsPath;
 //     TH1F*    fEp_eMinus;

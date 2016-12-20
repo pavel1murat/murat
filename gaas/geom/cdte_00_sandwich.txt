@@ -1,0 +1,71 @@
+//
+// crystal: 4x4x44 mm^3 of GaAs = (400 layers) x 110um
+// 110 um of GaAs implemented as 109.8 + 0.2 um (a kludge to emulate pure GaAs)
+//
+// Units are mm, MeV
+
+#include "Mu2eG4/test/g4studyGeom.txt"
+
+// Change the name.
+string detector.name           = "CdTeSandwich";
+
+// event track step debug list
+// vector<int> g4.trackingActionEventList = {1,2,3,4,5};
+vector<int> g4.trackingActionEventList = {};
+// vector<int> g4.steppingActionEventList = {1,2,3,4,5};
+vector<int> g4.steppingActionEventList = {};
+bool        g4.printTrackTiming = true;
+
+// overlaps check
+bool g4.doSurfaceCheck         = true;
+
+// version of the target geometry configuration
+
+int            mu2e.studyEnvVersion   = 3;
+
+// verbosity flag pertaining to the world construction
+int world.verbosityLevel         = 2;
+
+// a very "thin" vacuum
+string world.materialName        = "G4_Galactic";
+
+// make the world boundaries invisible
+bool   world.boxVisible          = false;
+// make the volume transparent
+bool   world.boxSolid            = false;
+
+double world.halfLength          = 2000.0;
+double world.outerLayerThickness = 0.001;// the world "outer layer" to force a step point
+
+// copyNumber for volume tracking purposes
+// 0 & 1 are World and an auxiliary 
+// volume almost filling up the world
+
+// calorimeter type target with the dimensions and materials specified by vectors of data
+
+// verbosity 
+int    calo.verbosityLevel         = 1;
+
+bool   calo.visible = true;
+bool   calo.solid   = true;
+
+vector<double> calo.transverseHalfLengths   = {2.,2.}; // mm
+vector<double> calo.transverseCenterInWorld = {0., 0.};
+
+// the copy numbers will increase by one starting from then numbers below (0 & 1 are taken...)
+
+int            calo.activeVolumeStartingCopyNumber  = 100;
+int            calo.passiveVolumeStartingCopyNumber = 500;
+
+// we make the world big enough to start the first surface at z=0.0
+
+double         calo.moduleStartingLongitPosition   = 6.0;
+int            calo.moduleNumberOfLayers           = 400;
+vector<double> calo.moduleLayerHalfLengths         = {0.0001 , 0.0349}; // mm, 0.2+69.8 um CdTe
+vector<string> calo.moduleLayerMaterials           = {"CdTe" , "CdTe"};
+
+//
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

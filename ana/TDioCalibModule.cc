@@ -36,7 +36,7 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/obj/TDisk.hh"
+#include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
 // Mu2e offline includes

@@ -44,9 +44,9 @@ murat : {
   	egun : { @table::StoppedParticleReactionGun # p(e)=105 MeV/c
 	    physics : {
 		pdgId            :  11
-		elow             : 105.0010
-		ehi              : 105.0015
-		spectrumVariable : "totalEnergy"
+		elow             : 104.97175
+		ehi              : 104.97176
+		spectrumVariable : "momentum"
 		spectrumShape    : "flat"
 	    }
 	}
@@ -56,7 +56,7 @@ murat : {
 		pdgId            :  11
 		elow             :  95
 		ehi              : 105
-		spectrumVariable : "totalEnergy"
+		spectrumVariable : "momentum"
 		spectrumShape    : "flat"
 	    }
 	}
@@ -75,9 +75,9 @@ murat : {
   	mgun : { @table::StoppedParticleReactionGun # p(mu)=105 MeV/c
 	    physics : {
 		pdgId            :  13
-		elow             : 148.9583      
-		ehi              : 148.9585
-		spectrumVariable : "totalEnergy"
+		elow             : 104.97175
+		ehi              : 104.97176
+		spectrumVariable : "momentum"
 		spectrumShape    : "flat"
 	    }
 	}
@@ -204,6 +204,9 @@ murat.mpr_reco : [ @sequence::Tracking.TPRDownstreameMinus ,
 		   MergePatRec, 
 		   @sequence::TrackCaloMatching.matching ]
 
+murat.trk_reco_dem : [ @sequence::Tracking.TPRDownstreameMinus  , @sequence::CalPatRec.dem_reco, MergePatRecDem, 
+		       @sequence::TrackCaloMatching.matching_dem, AvikPIDNewDem ]
+
 murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus  , @sequence::CalPatRec.dem_reco, MergePatRecDem, 
 		   @sequence::TrackCaloMatching.matching_dem, AvikPIDNewDem ]
 
@@ -238,6 +241,13 @@ murat.paths : {
 				   @sequence::murat.digis          ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.dem_reco       ,
+				   @sequence::Stntuple.stnmaker_dem
+				  ]
+    
+    path_gen_digi_reco_stn_dem : [ @sequence::murat.gen_g4_time_map,
+				   @sequence::murat.digis          ,
+				   @sequence::murat.cal_reco       ,
+				   @sequence::murat.trk_reco_dem       ,
 				   @sequence::Stntuple.stnmaker_dem
 				  ]
     

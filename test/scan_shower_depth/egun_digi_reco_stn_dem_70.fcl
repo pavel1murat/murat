@@ -1,0 +1,78 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate single 105 MeV/c electrons, run full electron reco, make ntuple
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
+# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
+# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
+# -          datasets/cd3-detmix-cut-v2 for the grid
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+#  meanBackground                      : -1        # fixed at 1
+  bgHitFiles                          : @nil
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+  MEAN_INTERACTION_DEPTH              : 70  # mm
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : EgunDigiRecoStnDem
+
+source       : { module_type : EmptyEvent }
+
+outputs      : { @table::murat.outputs }
+
+physics: { 
+    producers : { 
+	@table::murat.producers 
+
+	generate      : { @table::murat.producers.egun }
+	FlagStrawHits : { @table::FlagStrawHits                
+	    maximumEnergy        : @local::FlagStrawHits_maximumEnergy 
+	}
+	TrackCaloMatchingDem : { @table::TrackCaloMatchingDem  
+	    meanInteractionDepth : @local::MEAN_INTERACTION_DEPTH
+	}
+    }
+
+    filters : { @table::murat.filters 
+	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "egun_digi_reco_stn_dem.stn" }
+ 	StntupleMakerDem  : { @table::murat.filters.StntupleMakerDem g4ModuleLabel : @local::G4_MODULE_LABEL  }
+    }
+
+    @table::murat.paths
+
+    trigger_paths : [ path_gen_digi_reco_stn_dem ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+services.TFileService.fileName            : "egun_digi_reco_stn_dem.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "egun_digi_reco_stn_dem.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

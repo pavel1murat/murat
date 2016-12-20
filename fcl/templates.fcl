@@ -182,6 +182,9 @@ murat.mpr_reco : [ @sequence::Tracking.TPRDownstreameMinus ,
 		   MergePatRec, 
 		   @sequence::TrackCaloMatching.matching ]
 
+murat.trk_reco_dem : [ @sequence::Tracking.TPRDownstreameMinus  , @sequence::CalPatRec.dem_reco, MergePatRecDem, 
+		       @sequence::TrackCaloMatching.matching_dem, AvikPIDNewDem ]
+
 murat.dem_reco : [ @sequence::Tracking.TPRDownstreameMinus  , @sequence::CalPatRec.dem_reco, MergePatRecDem, 
 		   @sequence::TrackCaloMatching.matching_dem, AvikPIDNewDem ]
 
@@ -216,6 +219,13 @@ murat.paths : {
 				   @sequence::murat.digis          ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.dem_reco       ,
+				   @sequence::Stntuple.stnmaker_dem
+				  ]
+    
+    path_gen_digi_reco_stn_dem : [ @sequence::murat.gen_g4_time_map,
+				   @sequence::murat.digis          ,
+				   @sequence::murat.cal_reco       ,
+				   @sequence::murat.trk_reco_dem       ,
 				   @sequence::Stntuple.stnmaker_dem
 				  ]
     

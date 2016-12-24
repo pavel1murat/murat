@@ -431,7 +431,7 @@ namespace mu2e {
       }
 
       wpos          = shp->wireDist();
-      errpos        = shp->posRes(StrawHitPosition::phi);   
+      errpos        = shp->posRes(StrawHitPosition::wire);   
 
       fHist.fDt->Fill(dt);
       fHist.fNStepsPerHit->Fill(nsteps_per_hit);

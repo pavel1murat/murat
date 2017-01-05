@@ -18,6 +18,51 @@
   };
 
 //-----------------------------------------------------------------------------
+// cd33-pion-branch datasets 
+//-----------------------------------------------------------------------------
+dataset_t e00scd30 = { "e00scd30",                       // e105
+		       "~/hist/mu2e/cd3-pion/e00scd30.track_comp_use_mva.hist", // missing
+		       "~/hist/mu2e/cd3-pion/e00scd30.track_ana.hist", 
+		       "CE",
+		       1,
+		       2000000};
+
+dataset_t e01scd30 = { "e01scd30",                       // electron + MIX-CD3 x1
+		       "~/hist/mu2e/cd3-pion/e01scd30.track_comp_use_mva.hist", // missing
+		       "~/hist/mu2e/cd3-pion/e01scd30.track_ana.hist", 
+		       "CE+mixcd3.x1",
+		       1,
+		       1970000};
+
+dataset_t e02scd30 = { "e02scd30",                       // electron + MIX-CD3 x2
+		       "~/hist/mu2e/cd3-pion/e02scd30.track_comp_use_mva.hist", // missing
+		       "~/hist/mu2e/cd3-pion/e02scd30.track_ana.hist", 
+		       "CE+mixcd3.x2",
+		       1,
+		       965000};
+
+dataset_t m00scd30 = { "m00scd30",                       // single muon
+		       "~/hist/mu2e/cd3-pion/m00scd30.track_comp_use_mva.hist", // missing
+		       "~/hist/mu2e/cd3-pion/m00scd30.track_ana.hist", 
+		       "muon",
+		       1,
+		       200000};
+
+dataset_t m01scd30 = { "m01scd30",                       // muon + MIX-CD3 x1
+		       "~/hist/mu2e/cd3-pion/m01scd30.track_comp_use_mva.hist", // missing
+		       "~/hist/mu2e/cd3-pion/m01scd30.track_ana.hist", 
+		       "muon+mixcd3.x1",
+		       1,
+		       1960000};
+
+dataset_t m02scd30 = { "m02scd30",                       // muon + MIX-CD3 x2
+		       "~/hist/mu2e/cd3-pion/m02scd30.track_comp_use_mva.hist", // missing
+		       "~/hist/mu2e/cd3-pion/m02scd30.track_ana.hist", 
+		       "CE+mixcd3.x2",
+		       1,
+		       945000};
+
+//-----------------------------------------------------------------------------
 // v600 v0 datasets 
 //-----------------------------------------------------------------------------
 dataset_t g50s6000 = { "g50s6000",                       // DIO LL B=0.5 T

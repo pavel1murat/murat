@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // 10 numbers per line are assumed ?
 ///////////////////////////////////////////////////////////////////////////////
+#include "murat/scripts/datasets.hh"
 
 //-----------------------------------------------------------------------------
 TH1* get_mu2e_hist(const char* Filename, const char* Histname) {
@@ -220,11 +221,15 @@ int generate_pid_templates_v5_7() {
 //-----------------------------------------------------------------------------
 // generate the calorimeter PID templates offline branch cd3_pion_branch
 // do not update dE/dX and tracker-only timing templates
+// use ele/muo + MIXCD3x1 background
 //-----------------------------------------------------------------------------
 int generate_pid_templates_cd3_pion() {
-  
-  const char* ele_track_ana_fn  = "~/hist/mu2e/cd3-pion/e00scd30.track_ana.hist";
-  const char* muo_track_ana_fn  = "~/hist/mu2e/cd3-pion/m00scd30.track_ana.hist";
+
+  dataset_t* ele = &e01scd30;
+  dataset_t* muo = &m01scd30;
+
+  // const char* ele_track_ana_fn  = "~/hist/mu2e/cd3-pion/e01scd30.track_ana.hist";
+  // const char* muo_track_ana_fn  = "~/hist/mu2e/cd3-pion/m01scd30.track_ana.hist";
 
   // const char* ele_pid_ana_fn    = "~/hist/mu2e/cd3_pion/e00scd30.pid_ana.hist";
   // const char* muo_pid_ana_fn    = "~/hist/mu2e/cd3_pion/m00scd30.pid_ana.hist";
@@ -235,14 +240,14 @@ int generate_pid_templates_cd3_pion() {
 //-----------------------------------------------------------------------------
 // DT templates
 //-----------------------------------------------------------------------------
-  generate_dt_templates(ele_track_ana_fn,"TrackAna","trk_19/dt","pid_ele_dt.tab");
-  generate_dt_templates(muo_track_ana_fn,"TrackAna","trk_19/dt","pid_muo_dt.tab");
+  generate_dt_templates(ele->fn_track_ana,"TrackAna","trk_19/dt","pid_ele_dt.tab");
+  generate_dt_templates(muo->fn_track_ana,"TrackAna","trk_19/dt","pid_muo_dt.tab");
   
 //-----------------------------------------------------------------------------
 // E/P templates
 //-----------------------------------------------------------------------------
-  generate_ep_templates(ele_track_ana_fn,"TrackAna","trk_19/ep_vs_path","pid_ele_ep_vs_path.tab");
-  generate_ep_templates(muo_track_ana_fn,"TrackAna","trk_19/ep_vs_path","pid_muo_ep_vs_path.tab");
+  generate_ep_templates(ele->fn_track_ana,"TrackAna","trk_19/ep_vs_path","pid_ele_ep_vs_path.tab");
+  generate_ep_templates(muo->fn_track_ana,"TrackAna","trk_19/ep_vs_path","pid_muo_ep_vs_path.tab");
   
 //-----------------------------------------------------------------------------
 // X(dR/dS) templates

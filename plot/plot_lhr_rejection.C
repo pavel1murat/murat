@@ -198,6 +198,14 @@ void plot_llhr_cal_rejection(int OffVer = 421, int Print = 0) {
     ele_x2 = &e22s5731;
     muo_x2 = &m02s5731;
   }
+  else if (OffVer == 579) {
+    ele_x0 = &e00scd30;
+    muo_x0 = &m00scd30;
+    ele_x1 = &e01scd30;
+    muo_x1 = &m01scd30;
+    ele_x2 = &e02scd30;
+    muo_x2 = &m02scd30;
+  }
 
   TCanvas* c = new TCanvas("c_llhr_cal_rejection","LLHR CAL rejection",1400,800);
 

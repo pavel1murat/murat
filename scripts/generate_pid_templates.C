@@ -179,7 +179,7 @@ void generate_dedx_templates(const char* HistFile, const char* HistName, const c
 //-----------------------------------------------------------------------------
 // generate the PID templates for the offline version v5_7
 //-----------------------------------------------------------------------------
-int generate_pid_templates() {
+int generate_pid_templates_v5_7() {
   
   const char* ele_track_ana_fn  = "~/hist/mu2e/v5_7_0/e00s5700.track_ana.hist";
   const char* muo_track_ana_fn  = "~/hist/mu2e/v5_7_0/m00s5700.track_ana.hist";
@@ -213,4 +213,48 @@ int generate_pid_templates() {
 //-----------------------------------------------------------------------------
   generate_dedx_templates(fn_ele_dedx,"TrackRecoCheck/ehit_vs_path","e","pid_ele_dedx.root");
   generate_dedx_templates(fn_muo_dedx,"TrackRecoCheck/ehit_vs_path","m","pid_muo_dedx.root");
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+// generate the calorimeter PID templates offline branch cd3_pion_branch
+// do not update dE/dX and tracker-only timing templates
+//-----------------------------------------------------------------------------
+int generate_pid_templates_cd3_pion() {
+  
+  const char* ele_track_ana_fn  = "~/hist/mu2e/cd3-pion/e00scd30.track_ana.hist";
+  const char* muo_track_ana_fn  = "~/hist/mu2e/cd3-pion/m00scd30.track_ana.hist";
+
+  // const char* ele_pid_ana_fn    = "~/hist/mu2e/cd3_pion/e00scd30.pid_ana.hist";
+  // const char* muo_pid_ana_fn    = "~/hist/mu2e/cd3_pion/m00scd30.pid_ana.hist";
+
+  // const char* fn_ele_dedx       = "~/hist/mu2e/v5_7_0/e00s5700.egun_stnmaker.hist";
+  // const char* fn_muo_dedx       = "~/hist/mu2e/v5_7_0/m00s5700.mgun_stnmaker.hist";
+
+//-----------------------------------------------------------------------------
+// DT templates
+//-----------------------------------------------------------------------------
+  generate_dt_templates(ele_track_ana_fn,"TrackAna","trk_19/dt","pid_ele_dt.tab");
+  generate_dt_templates(muo_track_ana_fn,"TrackAna","trk_19/dt","pid_muo_dt.tab");
+  
+//-----------------------------------------------------------------------------
+// E/P templates
+//-----------------------------------------------------------------------------
+  generate_ep_templates(ele_track_ana_fn,"TrackAna","trk_19/ep_vs_path","pid_ele_ep_vs_path.tab");
+  generate_ep_templates(muo_track_ana_fn,"TrackAna","trk_19/ep_vs_path","pid_muo_ep_vs_path.tab");
+  
+//-----------------------------------------------------------------------------
+// X(dR/dS) templates
+//-----------------------------------------------------------------------------
+  // generate_xs_templates(ele_pid_ana_fn,"PidAna","pid_1/xdrds_vadim_ele","pid_ele_xdrds.tab");
+  // generate_xs_templates(muo_pid_ana_fn,"PidAna","pid_1/xdrds_vadim_ele","pid_muo_xdrds.tab");
+  
+//-----------------------------------------------------------------------------
+// de/dx templates: read 2D histograms, store 10 slices in 1mm step
+//-----------------------------------------------------------------------------
+  // generate_dedx_templates(fn_ele_dedx,"TrackRecoCheck/ehit_vs_path","e","pid_ele_dedx.root");
+  // generate_dedx_templates(fn_muo_dedx,"TrackRecoCheck/ehit_vs_path","m","pid_muo_dedx.root");
+
+  return 0;
 }

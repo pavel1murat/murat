@@ -940,9 +940,9 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
     if (trk->P() > 103.5) FillTrackHistograms(fHist.fTrack[11],trk);
 //-----------------------------------------------------------------------------
-// TRK 12: tracks with fcon < 1e-4
-// TRK 13: "Set C" tracks with 100 <= P < 110 
-// TRK 14: tracks with fcon < 1e-2
+// TRK_12: tracks with fcon < 1e-4
+// TRK_13: "Set C" tracks with 100 <= P < 110 
+// TRK_14: tracks with fcon < 1e-2
 //-----------------------------------------------------------------------------
     if (trk->fFitCons < 1.e-4) FillTrackHistograms(fHist.fTrack[12],trk);
 
@@ -966,13 +966,13 @@ void TTrackAnaModule::FillHistograms() {
       FillTrackHistograms(fHist.fTrack[17],trk);
     }
 //-----------------------------------------------------------------------------
-// TRK_18: Set "C" tracks with T0 > 700
+// TRK_18: BEST_ID tracks with T0 > 700
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (trk->T0() > 700)) {
       FillTrackHistograms(fHist.fTrack[18],trk);
     }
 //-----------------------------------------------------------------------------
-// TRK_19: Set "C" tracks with an associated cluster
+// TRK_19: BEST_ID tracks with an associated cluster
 //-----------------------------------------------------------------------------
     if ((trk->fIDWord == 0) && (trk->Ep() > 0)) {
       FillTrackHistograms(fHist.fTrack[19],trk);

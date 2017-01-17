@@ -26,19 +26,26 @@ public:
   TF1*   fun_rad_corr;
 
   void   rad_corr();
+  void   print();
 };
 
 double cerc::alpha = 1./137.036;
-double cerc::mmu   = 104.971; // use Ee(max) instead of mmu (105.658);
+double cerc::mmu   = 104.971;    // use Ee(max) instead of mmu (105.658);
 double cerc::me    =   0.511;
 double cerc::pi    = TMath::Pi();
 
 //-----------------------------------------------------------------------------
+// formula comes from mu2e-7615
+//-----------------------------------------------------------------------------
 double cerc::f_rad_corr(double* X, double* P) {
-  double dg_de;
+  double dg_de(0);
   double ee = X[0];
-  if (ee < mmu) dg_de = alpha/(2*pi*mmu)*(log(4*(ee*ee)/(me*me))-2)*(ee*ee+mmu*mmu)/mmu/(mmu-ee);
-  else          dg_de = 0;
+  if      ((ee < me ) || (ee >= mmu)) dg_de = 0;
+  else {
+    dg_de = alpha/(2*pi*mmu)*(log(4*(ee*ee)/(me*me))-2)*(ee*ee+mmu*mmu)/mmu/(mmu-ee);
+    if (dg_de < 0) dg_de = 0;
+  }
+  
   return dg_de;
 }
 
@@ -49,7 +56,7 @@ void cerc::rad_corr() {
 
   double p[10]; // used only for interfacing
 
-  int    nbx = 11000;
+  int    nbx = 11000; // 11000;
   double bin = (xmax-xmin)/nbx;
   
   h1 = new TH1F("th","th",nbx,xmin,xmax);
@@ -90,10 +97,8 @@ void cerc::rad_corr() {
 
   printf( " a1, a2, a3: %10.6lf %10.6lf %10.6lf\n",a1,a2,a3);
   printf( " b1, b2, b3: %10.6lf %10.6lf %10.6lf\n",b1,b2,b3);
-
-
 //-----------------------------------------------------------------------------
-// rebin to have bin = 20 keV
+// distribution from mu2e-7615, rebin to have bin = 20 keV
 //-----------------------------------------------------------------------------
   h1->SetLineColor(2);
   h1->SetLineWidth(2);
@@ -109,4 +114,32 @@ void cerc::rad_corr() {
   h2->SetMarkerStyle(20);
   h2->SetMarkerSize(0.5);
   h2->DrawNormalized("sames",h1->Integral());
+}
+
+//-----------------------------------------------------------------------------
+void cerc::print() {
+  double x, x1, y, y1;
+  double xmin(0),xmax(110.);
+
+  double p[10]; // used only for interfacing
+
+  int    nbx = 105;
+  double bin = 0.1;
+
+  double integral = 0;
+  for (double x=0; x <=105; x+=bin) {
+    if (x < 104.8999) {
+      y         = cerc::f_rad_corr(&x,p);
+      x1        = x+bin;
+      y1        = cerc::f_rad_corr(&x1,p);
+    }
+    else {
+      y         = (1-integral)/bin;
+      y1        = y;
+    }
+    integral += (y+y1)/2*bin;
+    
+    printf("%10.5f  %12.5e %12.5e \n",x,y,integral);
+  }
+
 }

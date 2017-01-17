@@ -1,53 +1,51 @@
 +TITLE  :Test 
 #+AUTHOR: Pavel Murat
 #+EMAIL : murat@fnal.gov
-#+BABEL: :session *R* :cache yes :results output graphics :exports both :tangle yes 
+#+BABEL: :cache yes :results output graphics :exports both :tangle yes 
 
 
 * shell example
 #+begin_src sh
-  echo "This file takes up `du -h org-babel.org |sed 's/\([0-9k]*\)[ ]*org-babel.org/\1/'`"
+  echo "This file takes down `du -h org-babel.org |sed 's/\([0-9k]*\)[ ]*org-babel.org/\1/'`"
 #+end_src
 
 #+RESULTS:
-: This file takes up
+: This file takes down
 
 
-* Example of Org-Babel for R Literate Programming
-** R text output
-A simple summary. 
+* R graphics output
 
-#+begin_src R 
-  x <- rnorm(10)
-  summary(x)
+#+begin_src R :exports results :results graphics :file test_001.pdf :width 6 :height 4
+
+x1=seq(0,5,0.1) 
+plot(x1,dchisq(x1*6,6),main="Chi-distribution with NDF=6",type="l",col="blue") 
+
 #+end_src
 
 #+RESULTS:
+[[file:test_001.pdf]]
 
-
-** R graphics output
-Note we use the object =x= generated in previous code block, thanks to
-the header option =:session *R*=.  The output graphics file is =a.png=. 
-
-#+begin_src R  :file a.png
+#+begin_src :file a.png R :session
   x <- rnorm(10)
   y <- rnorm(10)
   plot(x, y)
 #+end_src
 
 #+RESULTS:
-[[file:a.png]]
 
 Same plot with larger dimension:
 
-#+begin_src R  :file b.png :width 800 :height 800
+#+begin_src R  :session :results output :file b.png :width 800 :height 800
+  x <- rnorm(10)
+  y <- rnorm(10)
   plot(x, y)
+  png();
 #+end_src
 
 #+RESULTS:
 [[file:b.png]]
 
-
+  
 * RUBY example
 
 #+begin_src ruby
@@ -85,12 +83,13 @@ import matplotlib.pyplot as plt
 fig=plt.figure(figsize=(3,2))
 plt.plot([1,3,2])
 fig.tight_layout()
-plt.savefig('images/myfig.pdf')
-'images/myfig.pdf'                          # return this to org-mode
+plt.show()
+# plt.savefig(myfig.pdf')
+# 'myfig.pdf'                          # return this to org-mode
 #+end_src
 
 #+RESULTS:
-[[file:images/myfig.pdf]]
+[[file:myfig.pdf]]
 
 
 * STNTUPLE Mu2e event mixing job performance vs the background level (use PYTHON)
@@ -115,8 +114,32 @@ fn                                         # return this to org-mode
 [[file:mu2e_mixing_timing.pdf]]
 
 
-* R example
+* R examples
 
+** R example 000 : naming of the output file 
+#+attr_latex: width=8cm placement=[htbp]
+#+begin_src R :results output graphics :exports results :file (org-babel-temp-file "./figure-" ".pdf")                                                                                                                                                                                                 
+    require(ggplot2)                                                                                                                           
+    a <- rnorm(100)                                                                                                                            
+    b <- 2*a + rnorm(100)                                                                                                                      
+    d <- data.frame(a,b)                                                                                                                       
+    ggplot(d,aes(a,b)) + geom_point()                                                                                                          
+#+end_src                                     
+
+#+RESULTS:
+[[file:/tmp/babel-23439G_8/figure-23439hRs.pdf]]
+
+** R example 000
+#+begin_src R :results output graphics :exports results :file (org-babel-temp-file "./figure-" ".pdf")
+  require(ggplot2)                                                                                                                           
+  x1=seq(0,5,0.1) 
+  plot(x1,dchisq(x1*6,6),main="Chi-distribution with df=6",type="l",col="blue") 
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-23439G_8/figure-23439G1k.pdf]]
+
+** R example 001
 #+begin_src R  :results file 
 
 x <- c(0,1,2,4); y <- c(0.3,1.5,2.8,10.6)    # create some data 
@@ -143,6 +166,7 @@ fn
 #+RESULTS:
 [[file:aa.pdf]]
 
+** R example 002
 #+begin_src R :results file 
 fn = 'cc.pdf'
 pdf(file=fn)
@@ -155,3 +179,18 @@ fn
 #+RESULTS:
 [[file:cc.pdf]]
 
+
+
+* PYTHON interactive graphics example 
+#+begin_src python :results none
+import numpy as np
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+graylevel = 0.75
+mpl.rc('figure', facecolor = (graylevel, graylevel, graylevel), edgecolor ='r')
+X = np.linspace(0, 7, 1024)
+plt.plot(X, np.sin(X))
+plt.plot(X, np.cos(X))
+plt.draw()
+plt.show()
+#+end_src]

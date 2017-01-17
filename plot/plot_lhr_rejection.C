@@ -246,9 +246,14 @@ void plot_llhr_cal_rejection(int OffVer = 421, int Print = 0) {
 // ------------------- print efficiency and rejection numbers for e42s5721 and m40s5721 
 // i, llhr , qe, qm, prob(e) , rej(mu) :  99      0.000   1960.000 103332.000    0.95041    126.180
 // i, llhr , qe, qm, prob(e) , rej(mu) : 100      1.000   2696.000 104020.000    0.94398    195.568
+//-------------- e10scd30 and m10scd0
+// i, llhr , qe, qm, prob(e) , rej(mu) : 200      0.500   2401.000 104036.000    0.95770    142.544
+// i, llhr , qe, qm, prob(e) , rej(mu) : 201      1.000   3222.000 104403.000    0.95485    181.178
+// i, llhr , qe, qm, prob(e) , rej(mu) : 202      1.500   4346.000 104728.000    0.95094    238.395
+// i, llhr , qe, qm, prob(e) , rej(mu) : 203      2.000   5863.000 104973.000    0.94567    312.884
 //-----------------------------------------------------------------------------
-  TLatex* t1 = new TLatex(0.94398+0.001 , 195.568+5,"LLHR < 1.0");
-  TLatex* t2 = new TLatex(0.95041+0.001 , 126.180+5,"LLHR < 0.0");
+  TLatex* t1 = new TLatex(0.95485+0.001 , 181.178,"LLHR < 1.0"); // 0.95485    181.178
+  TLatex* t2 = new TLatex(0.95094+0.001 , 238.395,"LLHR < 1.5"); // 0.95094    238.395
   t1->SetTextSize(0.025);
   t2->SetTextSize(0.025);
   t1->Draw();

@@ -13,4 +13,5 @@ CVS
 */*/*.*~
 */*.d
 */*.so
+*.png
 *_rdict.pcm

@@ -27,7 +27,6 @@ libs      = [ 'murat_alg',
               'Stntuple_geom',
               'Stntuple_base',
 #
-              'mu2e_KalmanTests',
               'mu2e_TrkReco',
               'mu2e_Mu2eBTrk',
               'mu2e_GeometryService',

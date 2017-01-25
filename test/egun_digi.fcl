@@ -1,0 +1,63 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate single 105 MeV/c electrons, run full electron reco, make ntuple
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : EgunDigi
+
+source       : { module_type : EmptyEvent }
+outputs      : { @table::murat.outputs }
+
+physics      : { 
+    producers : { 
+	@table::murat.producers 
+
+	generate : { @table::murat.producers.egun }
+
+	FlagStrawHits : { @table::FlagStrawHits 
+	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
+	}
+    }
+
+    filters : { @table::murat.filters }
+
+    @table::murat.paths
+
+    trigger_paths : [ path_gen_digi ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+services.TFileService.fileName            : "egun_digi.hist"
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+physics.out : [ detectorOutput ]
+outputs.detectorOutput.fileName           : "egun_digi.art"
+outputs.detectorOutput.SelectEvents       : { SelectEvents: [ path_gen_digi] }
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

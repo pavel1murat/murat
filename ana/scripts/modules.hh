@@ -12,24 +12,26 @@
 #include "murat/ana/TTrackCompModule.hh"
 #include "murat/ana/TTrackPidAnaModule.hh"
 #include "murat/ana/TTrackRecoEffAnaModule.hh"
+#include "murat/ana/TTrackStrawHitAnaModule.hh"
 #include "murat/ana/TValCalPatRecModule.hh"
 #include "murat/ana/TVdetAnaModule.hh"
 //-----------------------------------------------------------------------------
 // modules defined in 'murat' package (libmurat_ana.so)
 //-----------------------------------------------------------------------------
-TCalAnaModule*           m_cal   = NULL;
-TCosmicsAnaModule*       m_cos   = NULL;
-TDioCalibModule*         m_dio   = NULL;
+TCalAnaModule*             m_cal   = NULL;
+TCosmicsAnaModule*         m_cos   = NULL;
+TDioCalibModule*           m_dio   = NULL;
 // TGenAnaModule*           m_gen   = NULL;
-TPidAnaModule*           m_pid   = NULL;
-TStrawHitAnaModule*      m_strh  = NULL;
-TTrackAnaModule*         m_trk   = NULL;
-TTrackAnaModuleA*        m_trka  = NULL;
-TTrackCompModule*        m_tcm   = NULL;
-TTrackPidAnaModule*      m_tpa   = NULL;
-TTrackRecoEffAnaModule*  m_eff   = NULL;
-TValCalPatRecModule*     m_vcpr  = NULL;
-TVdetAnaModule*          m_vdt   = NULL;
+TPidAnaModule*             m_pid   = NULL;
+TStrawHitAnaModule*        m_strh  = NULL;
+TTrackStrawHitAnaModule*   m_tsh   = NULL;
+TTrackAnaModule*           m_trk   = NULL;
+TTrackAnaModuleA*          m_trka  = NULL;
+TTrackCompModule*          m_tcm   = NULL;
+TTrackPidAnaModule*        m_tpa   = NULL;
+TTrackRecoEffAnaModule*    m_eff   = NULL;
+TValCalPatRecModule*       m_vcpr  = NULL;
+TVdetAnaModule*            m_vdt   = NULL;
 
 // TStnTrackID*             trk_id  = NULL;
 // TAnalysisDataset*        a_dset  = NULL;

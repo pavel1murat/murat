@@ -45,8 +45,6 @@ physics: {
     producers : { 
 	@table::murat.producers 
 
-	generate : { @table::murat.producers.egun }
-
 	FlagStrawHits : { @table::FlagStrawHits 
 	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
 	}

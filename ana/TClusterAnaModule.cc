@@ -35,10 +35,8 @@ ClassImp(TClusterAnaModule)
 TClusterAnaModule::TClusterAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
-
   fDiskCalorimeter = new TDiskCalorimeter();
-
-  fMinT0 = 0; // do not cut on time by default
+  fMinT0           = 0;                 // do not cut on time by default
 }
 
 //-----------------------------------------------------------------------------
@@ -149,9 +147,11 @@ void TClusterAnaModule::BookHistograms() {
   for (int i=0; i<kNClusterHistSets; i++) book_cluster_histset[i] = 0;
 
   book_cluster_histset[0] = 1;		// all clusters
-  book_cluster_histset[1] = 1;		// E > 20 MeV
-  book_cluster_histset[2] = 1;		// E > 50 MeV
-  book_cluster_histset[3] = 1;		// E > 70 MeV
+  book_cluster_histset[1] = 1;		// clusters disk=0
+  book_cluster_histset[2] = 1;		// clusters disk=1
+  book_cluster_histset[3] = 1;		// E > 20 MeV
+  book_cluster_histset[4] = 1;		// E > 50 MeV
+  book_cluster_histset[5] = 1;		// E > 70 MeV
 
   for (int i=0; i<kNClusterHistSets; i++) {
     if (book_cluster_histset[i] != 0) {
@@ -210,19 +210,21 @@ void TClusterAnaModule::FillEventHistograms(EventHist_t* Hist, double EMin, doub
   double            cos_th, xv, yv, rv, zv, p;
   TLorentzVector    mom;
 
-  fElectron->Momentum(mom);
+  if (fElectron) {
+    fElectron->Momentum(mom);
 
-  p      = mom.P();
-  cos_th = mom.Pz()/p;
+    p      = mom.P();
+    cos_th = mom.Pz()/p;
 
-  xv     = fElectron->Vx()+3904.;
-  yv     = fElectron->Vy();
-  rv     = sqrt(xv*xv+yv*yv);
-  zv     = fElectron->Vz();
+    xv     = fElectron->Vx()+3904.;
+    yv     = fElectron->Vy();
+    rv     = sqrt(xv*xv+yv*yv);
+    zv     = fElectron->Vz();
 
-  Hist->fEleCosTh->Fill(cos_th);
-  Hist->fRv->Fill(rv);
-  Hist->fZv->Fill(zv);
+    Hist->fEleCosTh->Fill(cos_th);
+    Hist->fRv->Fill(rv);
+    Hist->fZv->Fill(zv);
+  }
 
   Hist->fNClusters->Fill(fNClusters);
 //   Hist->fNCl20->Fill(fNCl20);
@@ -261,7 +263,7 @@ void TClusterAnaModule::FillEventHistograms(EventHist_t* Hist, double EMin, doub
   n_hits_tot         = 0;
   n_hit_crystals_tot = 0;
 
-  for (int idisk=0; idisk<kNDisks; idisk++) {
+  for (int idisk=0; idisk<ndisks; idisk++) {
 
     TDisk* disk = fDiskCalorimeter->Disk(idisk);
 
@@ -385,20 +387,13 @@ void TClusterAnaModule::FillHistograms() {
 
     FillClusterHistograms(fHist.fCluster[0],cl);
 
-    if (cl->Energy() > 20.) {
-      FillClusterHistograms(fHist.fCluster[1],cl);
-    }
+    if (cl->DiskID() == 0)  FillClusterHistograms(fHist.fCluster[1],cl);
+    if (cl->DiskID() == 1)  FillClusterHistograms(fHist.fCluster[2],cl);
 
-    if (cl->Energy() > 50.) {
-      FillClusterHistograms(fHist.fCluster[2],cl);
-    }
-
-    if (cl->Energy() > 70.) {
-      FillClusterHistograms(fHist.fCluster[3],cl);
-    }
+    if (cl->Energy() > 20.) FillClusterHistograms(fHist.fCluster[3],cl);
+    if (cl->Energy() > 50.) FillClusterHistograms(fHist.fCluster[4],cl);
+    if (cl->Energy() > 70.) FillClusterHistograms(fHist.fCluster[5],cl);
   }
-
-  //  first_entry = 0;
 }
 
 
@@ -426,6 +421,8 @@ int TClusterAnaModule::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   //  fGenpBlock->GetEntry(ientry);
   //  fSimpBlock->GetEntry(ientry);
+
+  fElectron = NULL;
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed

@@ -18,7 +18,7 @@
 #include "GeometryService/inc/GeomHandle.hh"
 
 #include "TTrackerGeom/inc/TTracker.hh"
-#include "CalorimeterGeom/inc/VaneCalorimeter.hh"
+// #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
@@ -398,7 +398,7 @@ namespace mu2e {
     if ((row < 0) || (row > 9999)) row = -9999;
     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(cl->sectionId());
+    Hist->fVaneID->Fill(cl->diskId());
     Hist->fEnergy->Fill(cl->energyDep());
     Hist->fT0->Fill(cl->time());
     Hist->fRow->Fill(row);

@@ -278,8 +278,8 @@ namespace mu2e {
       inside = -1;
       for (int idisk=0; idisk<2; idisk++) {
 	disk = &cal->disk(idisk);
-	clen = cal->caloGeomInfo().crystalHalfLength();
-	dz   = z0-disk->origin().z();
+	clen = cal->caloInfo().crystalHalfLength();
+	dz   = z0-disk->geomInfo().origin().z();
 					// add 1mm safety margins 
 	if ((fabs(dz) < clen+1.) && (r0 > rin[idisk]-1.) && (r0 < rout[idisk]+1.)) {
 	  inside = idisk;

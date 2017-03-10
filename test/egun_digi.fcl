@@ -37,6 +37,10 @@ physics      : {
 
 	generate : { @table::murat.producers.egun }
 
+	CaloShowerStepFromStepPt : { @table::murat.producers.CaloShowerStepFromStepPt 
+	    physVolInfoInput : "g4run"
+	}
+
 	FlagStrawHits : { @table::FlagStrawHits 
 	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
 	}
@@ -57,7 +61,7 @@ services.TFileService.fileName            : "egun_digi.hist"
 #------------------------------------------------------------------------------
 physics.out : [ detectorOutput ]
 outputs.detectorOutput.fileName           : "egun_digi.art"
-outputs.detectorOutput.SelectEvents       : { SelectEvents: [ path_gen_digi] }
+outputs.detectorOutput.SelectEvents       : [ path_gen_digi ]
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

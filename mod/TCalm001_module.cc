@@ -351,7 +351,7 @@ namespace mu2e {
 //     if ((row < 0) || (row > 9999)) row = -9999;
 //     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(Cluster->sectionId());
+    Hist->fVaneID->Fill(Cluster->diskId());
     Hist->fEnergy->Fill(Cluster->energyDep());
     Hist->fT0->Fill(Cluster->time());
     Hist->fRow->Fill(row);

@@ -7,6 +7,7 @@ int load_stnana_scripts_murat() {
   const char* script[] = { 
     //    "global_vars.cc",
     //    "init_geometry.C",
+    "calorimeter.C",
     "cosmics.C",
     "dio_calib.C",
     "genp.C",

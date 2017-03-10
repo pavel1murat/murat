@@ -35,7 +35,7 @@
 #include "GeometryService/inc/VirtualDetector.hh"
 
 #include "TTrackerGeom/inc/TTracker.hh"
-#include "CalorimeterGeom/inc/VaneCalorimeter.hh"
+// #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
 #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"

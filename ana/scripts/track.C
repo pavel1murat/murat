@@ -5,7 +5,6 @@
 
 def_name track_001("track_ana");
 def_name track_002("val_cpr");
-def_name track_004("cal_ana");
 def_name track_005("track_ana_tandip_12");
 def_name track_006("track_debug_tandip_12");
 def_name track_007("track_ana_dem");
@@ -155,14 +154,6 @@ void  track_debug_tandip_12(int Bit, int GeneratorCode = 2) {
   m_trk->GetTrackID(0)->SetMinTanDip(1.);
   m_trk->GetTrackID(0)->SetMaxTanDip(2.);
   m_trk->SetDebugBit(Bit,1);
-}
-
-//-----------------------------------------------------------------------------
-void  cal_ana() {
-//-----------------------------------------------------------------------------
-// configure analysis module
-//-----------------------------------------------------------------------------
-  m_cal = (TCalAnaModule*) g.x->AddModule("TCalAnaModule",0);  
 }
 
 //-----------------------------------------------------------------------------

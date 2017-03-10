@@ -12,7 +12,7 @@
 #include "GeometryService/inc/GeomHandle.hh"
 
 #include "TTrackerGeom/inc/TTracker.hh"
-#include "CalorimeterGeom/inc/VaneCalorimeter.hh"
+// #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"

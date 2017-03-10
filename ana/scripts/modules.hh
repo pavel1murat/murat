@@ -2,6 +2,7 @@
 #define murat_ana_scripts_modules_hh
 
 #include "murat/ana/TCalAnaModule.hh"
+#include "murat/ana/TClusterAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
 // #include "murat/ana/TGenAnaModule.hh"
@@ -18,6 +19,7 @@
 // modules defined in 'murat' package (libmurat_ana.so)
 //-----------------------------------------------------------------------------
 TCalAnaModule*           m_cal   = NULL;
+TClusterAnaModule*       m_cls   = NULL;
 TCosmicsAnaModule*       m_cos   = NULL;
 TDioCalibModule*         m_dio   = NULL;
 // TGenAnaModule*           m_gen   = NULL;

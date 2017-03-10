@@ -73,8 +73,8 @@ physics: {
 physics.producers.MergePatRec.calPatRecModuleLabel   : CalTrkFit
 physics.producers.MergePatRecCpr.calPatRecModuleLabel: CalTrkFit
 physics.filters.StntupleMakerTcm.trkRecoModuleLabel  : ["MergePatRec", "KFFDeM", "MergePatRecCpr" ]
-#
-services.TFileService.fileName            : "reco_stn_tcn.hist"
+physics.filters.InitStntuple.histFileName            : "read_reco_stn_tcn.stn"
+services.TFileService.fileName                       : "reco_stn_tcn.hist"
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------

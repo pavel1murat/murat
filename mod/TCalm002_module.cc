@@ -30,7 +30,7 @@
 #include "GeometryService/inc/GeomHandle.hh"
 
 #include "TTrackerGeom/inc/TTracker.hh"
-#include "CalorimeterGeom/inc/VaneCalorimeter.hh"
+// #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
@@ -455,10 +455,11 @@ namespace mu2e {
 
       art::ServiceHandle<mu2e::GeometryService> geom;
 
-      if (geom->hasElement<mu2e::VaneCalorimeter>() ) {
-	fCalorimeterType = 1;
-      }
-      else if (geom->hasElement<mu2e::DiskCalorimeter>() ) {
+      // if (geom->hasElement<mu2e::VaneCalorimeter>() ) {
+      // 	fCalorimeterType = 1;
+      // }
+      //      else if (geom->hasElement<mu2e::DiskCalorimeter>() ) {
+      if (geom->hasElement<mu2e::DiskCalorimeter>() ) {
 //-----------------------------------------------------------------------------
 // create disk calorimeter and initialize it
 //-----------------------------------------------------------------------------
@@ -473,9 +474,9 @@ namespace mu2e {
 	  disk = &cal->disk(i);
 	  data.fRMin[i] = disk->innerRadius();
 	  data.fRMax[i] = disk->outerRadius();
-	  data.fZ0  [i] = disk->origin().z();
+	  data.fZ0  [i] = disk->geomInfo().origin().z();
 	}
-	data.fHexSize     = cal->caloGeomInfo().crystalHalfTrans();
+	data.fHexSize     = cal->caloInfo().crystalHalfTrans();
 	data.fMinFraction = fMinCrystalFr;
 
 	fDiskCalorimeter  = new TDiskCalorimeter(&data);
@@ -554,7 +555,7 @@ namespace mu2e {
     if ((row < 0) || (row > 9999)) row = -9999;
     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(cl->sectionId());
+    Hist->fVaneID->Fill(cl->diskId());
     Hist->fEnergy->Fill(cl->energyDep());
     Hist->fT0->Fill(cl->time());
     Hist->fRow->Fill(row);

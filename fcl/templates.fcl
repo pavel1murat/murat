@@ -8,16 +8,14 @@ services : {
     RandomNumberGenerator : { }
     #   Timing                : { }
 
-    user : {
-        GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
-        ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"        }
-        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"   }
-        BTrkHelper             : @local::BTrkHelperDefault
-        G4Helper               : { }
-        SeedService            : { @table::automaticSeeds
-	    baseSeed         :  0
-	    maxUniqueEngines :  20
-	}
+    GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"        }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"   }
+    BTrkHelper             : @local::BTrkHelperDefault
+    G4Helper               : { }
+    SeedService            : { @table::automaticSeeds
+	baseSeed         :  0
+	maxUniqueEngines :  20
     }
 }
 #------------------------------------------------------------------------------
@@ -116,20 +114,24 @@ murat : {
 #------------------------------------------------------------------------------
 # hit makers
 #------------------------------------------------------------------------------
-	MakeCaloCompressedHits : { @table::MakeCaloCompressedHits }
-	MakeCaloReadoutHits    : { @table::MakeCaloReadoutHits    }
-	MakeCaloCrystalHits    : { @table::MakeCaloCrystalHitsNew }
+#	MakeCaloCompressedHits : { @table::MakeCaloCompressedHits }
+#	MakeCaloReadoutHits    : { @table::MakeCaloReadoutHits    }
+#	MakeCaloCrystalHits    : { @table::MakeCaloCrystalHitsNew }
 #------------------------------------------------------------------------------
 # calorimeter digi maker
 #------------------------------------------------------------------------------
-	CaloDigisFromStepPointMCs   :{ @table::CaloDigisFromStepPointMCs   }
-	CaloHitsFromCaloDigis       :{ @table::CaloHitsFromCaloDigis       }
-	CaloCrystalHitsFromCaloHits :{ @table::CaloCrystalHitsFromCaloHits }
+#	CaloDigisFromStepPointMCs   :{ @table::CaloDigisFromStepPointMCs   }
+#	CaloHitsFromCaloDigis       :{ @table::CaloHitsFromCaloDigis       }
+#	CaloCrystalHitsFromCaloHits :{ @table::CaloCrystalHitsFromCaloHits }
 #------------------------------------------------------------------------------
 # TrkPatRec and CalPatRec modules
 #------------------------------------------------------------------------------
 	@table::Tracking.producers      # defined in TrkPatRec
+	@table::CaloDigiMC.producers    # defined in CaloDigiMC
+	@table::CaloDigiMC.producersMC  # defined in CaloDigiMC
+	@table::CaloReco.producers      # defined in CaloReco
 	@table::CaloCluster.producers   # defined in CaloCluster
+	@table::CaloCluster.producersMC # defined in CaloCluster
 	@table::CalPatRec.producers
 	@table::TrackCaloMatching.producers
 	@table::ParticleID.producers
@@ -187,9 +189,14 @@ murat.gen_g4_time_map     : [ @sequence::murat.gen_g4, @sequence::EventMixing.Ti
 murat.mix                 : [ dioMixer, protonMixer, neutronMixer, photonMixer, ootMixer, flashMixer ]
 murat.mix_time_map        : [ @sequence::murat.mix, @sequence::EventMixing.TimeMaps ]
 murat.gen_g4_mix_time_map : [ @sequence::murat.gen_g4, @sequence::murat.mix, @sequence::EventMixing.TimeMaps ]
-murat.digis               : [ MakeCaloReadoutHits, @sequence::Tracking.DigiSim ]
+# murat.digis               : [ MakeCaloReadoutHits, @sequence::Tracking.DigiSim ]
+murat.digis               : [ @sequence::CaloDigiMC.DigiSim, @sequence::Tracking.DigiSim ]
 
-murat.cal_reco : [ MakeCaloCrystalHits, MakeCaloProtoCluster, MakeCaloCluster ]
+# murat.cal_reco : [ MakeCaloCrystalHits, MakeCaloProtoCluster, MakeCaloCluster ]
+murat.cal_reco : [ @sequence::CaloReco.Reco          , 
+		   @sequence::CaloDigiMC.TruthMatch  , 
+		   @sequence::CaloCluster.Reco       , 
+		   @sequence::CaloCluster.TruthMatch ]
 
 murat.cpr_reco : [ @sequence::CalPatRec.reco, 
 		   MergePatRecCpr, 

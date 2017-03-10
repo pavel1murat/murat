@@ -70,11 +70,14 @@ physics: {
     end_paths     : [ out ]
 }
 
+# <disable it> physics.filters.CalSeedFit.rescueHits              : 0
 physics.producers.MergePatRec.calPatRecModuleLabel   : CalTrkFit
 physics.producers.MergePatRecCpr.calPatRecModuleLabel: CalTrkFit
+physics.filters.InitStntuple.histFileName            : "reco_stn_tcn.stn"
 physics.filters.StntupleMakerTcm.trkRecoModuleLabel  : ["MergePatRec", "KFFDeM", "MergePatRecCpr" ]
 physics.filters.InitStntuple.histFileName            : "read_reco_stn_tcn.stn"
 services.TFileService.fileName                       : "reco_stn_tcn.hist"
+physics.filters.StntupleMakerTcm.makeTrackStrawHits  : 0 # 1
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------

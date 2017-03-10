@@ -4,16 +4,18 @@
 #include "murat/ana/scripts/modules.hh"
 
 def_name hit_001("straw_hit_ana");
+def_name hit_002("track_straw_hit_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  straw_hit_ana(int DebugBit = -1) {
+// by default, assume murat/test/read_reco_stn_tcn.fcl and TrkPatRec tracks
 //-----------------------------------------------------------------------------
-// configure analysis module
-//-----------------------------------------------------------------------------
-  m_strh = (TStrawHitAnaModule*) g.x->AddModule("TStrawHitAnaModule",0);  
+void  track_straw_hit_ana(int DebugBit = -1) {
+  m_tsh = (TTrackStrawHitAnaModule*) g.x->AddModule("TTrackStrawHitAnaModule",0);  
+
+  m_tsh->SetHitBlockName("TrackHitBlockTpr");
   
-  if (DebugBit >= 0) m_strh->SetDebugBit(DebugBit,1);
+  if (DebugBit >= 0) m_tsh->SetDebugBit(DebugBit,1);
 }
 
 

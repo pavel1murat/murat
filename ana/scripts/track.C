@@ -3,20 +3,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/ana/scripts/modules.hh"
 
-def_name track_001("track_ana");
-def_name track_002("val_cpr");
-def_name track_005("track_ana_tandip_12");
-def_name track_006("track_debug_tandip_12");
-def_name track_007("track_ana_dem");
+def_name track_0010("track_ana");
+def_name track_0020("val_cpr");
+def_name track_0050("track_ana_tandip_12");
+def_name track_0060("track_debug_tandip_12");
+def_name track_0070("track_ana_dem");
 def_name track_0071("track_ana_tpr");
-def_name track_0072("track_ana_dmm");
-def_name track_008("track_ana_ump");
+def_name track_0072("track_ana_cpr");
+def_name track_0073("track_ana_dmm");
+def_name track_0080("track_ana_ump");
 def_name track_0081("track_ana_umm");
-def_name track_011("track_ana_nocorr");
+def_name track_0110("track_ana_nocorr");
 
-def_name track_051("track_comp");
-def_name track_052("track_comp_tmva");
-def_name track_053("track_comp_use_mva");
+def_name track_0510("track_comp");
+def_name track_0520("track_comp_tmva");
+def_name track_0530("track_comp_use_mva");
 
 def_name track_100("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,6 +44,20 @@ void  track_ana_tpr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) 
   m_trk->SetPdgCode      (PdgCode);
   m_trk->SetGeneratorCode(GeneratorCode);
   m_trk->SetTrackBlockName("TrkPatRec");
+  if (DebugBit >= 0) {
+    m_trk->SetDebugBit(DebugBit,1);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void  track_ana_cpr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_trk = (TTrackAnaModule*) g.x->AddModule("TTrackAnaModule",0);
+  m_trk->SetPdgCode      (PdgCode);
+  m_trk->SetGeneratorCode(GeneratorCode);
+  m_trk->SetTrackBlockName("CalPatRec");
   if (DebugBit >= 0) {
     m_trk->SetDebugBit(DebugBit,1);
   }

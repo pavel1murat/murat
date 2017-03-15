@@ -16,17 +16,25 @@ helper = murat_helper();
 helper.handle_dictionaries();
 
 skip_list = []
-libs      = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
-              'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base',
-              'mu2e_Mu2eUtilities',
-              'fhiclcpp',
-              'cetlib',
-              'cetlib_except',
-              'xerces-c',
-              rootlibs,
-              'boost_filesystem',
-              'boost_system'
-];
+
+stntuple_libs = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
+                  'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base'
+                  ];
+
+if (os.getenv("STNTUPLE_MC_GEN") != None): 
+    stntuple_libs = stntuple_libs + ["mc_photos", "mc_base"];
+
+libs          = stntuple_libs + [
+                'mc_photos', 'mc_base',
+                'mu2e_Mu2eUtilities',
+                'fhiclcpp',
+                'cetlib',
+                'cetlib_except',
+                'xerces-c',
+                rootlibs,
+                'boost_filesystem',
+                'boost_system'
+                ];
 
 list_of_cc_files = Glob('*.cc',strings=True);
 helper.build_libs(list_of_cc_files,skip_list,libs);

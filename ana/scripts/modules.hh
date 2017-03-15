@@ -6,8 +6,10 @@
 #include "murat/ana/TCosmicsAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
 // #include "murat/ana/TGenAnaModule.hh"
+// #include "murat/ana/TPhotosAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
+// #include "murat/ana/TStnGeneratorModule.hh"
 #include "murat/ana/TTrackAnaModule.hh"
 #include "murat/ana/TTrackAnaModuleA.hh"
 #include "murat/ana/TTrackCompModule.hh"
@@ -23,8 +25,10 @@ TCalAnaModule*             m_cal   = NULL;
 TClusterAnaModule*         m_cls   = NULL;
 TCosmicsAnaModule*         m_cos   = NULL;
 TDioCalibModule*           m_dio   = NULL;
-// TGenAnaModule*           m_gen   = NULL;
+TGenAnaModule*             m_gen   = NULL;
+// TPhotosAnaModule*          m_pho   = NULL;
 TPidAnaModule*             m_pid   = NULL;
+// TStnGeneratorModule*       m_stg   = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
 TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackAnaModule*           m_trk   = NULL;

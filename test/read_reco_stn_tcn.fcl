@@ -78,6 +78,15 @@ physics.filters.StntupleMakerTcm.trkRecoModuleLabel  : ["MergePatRec", "KFFDeM",
 physics.filters.InitStntuple.histFileName            : "read_reco_stn_tcn.stn"
 services.TFileService.fileName                       : "read_reco_stn_tcn.hist"
 physics.filters.StntupleMakerTcm.makeTrackStrawHits  : 0 # 1
+physics.filters.CalTimePeakFinder.diagLevel          : 1
+physics.filters.CalHelixFinder.diagLevel             : 1
+physics.filters.CalSeedFit.diagLevel                 : 1
+physics.filters.CalTrkFit.diagLevel                  : 1
+#------------------------------------------------------------------------------
+# parameters to redefine
+#------------------------------------------------------------------------------
+physics.filters.CalTrkFit.Fitter.DoubletAmbigResolver.sigmaSlope     : 0.05
+physics.filters.CalTrkFit.Fitter.DoubletAmbigResolver.maxDoubletChi2 : 10.
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------

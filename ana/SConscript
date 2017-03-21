@@ -21,11 +21,11 @@ stntuple_libs = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
                   'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base'
                   ];
 
-if (os.getenv("STNTUPLE_MC_GEN") != None): 
-    stntuple_libs = stntuple_libs + ["mc_photos", "mc_base"];
+mc_libs = []
 
-libs          = stntuple_libs + [
-                'mc_photos', 'mc_base',
+if (os.getenv("STNTUPLE_MC_GEN") != None): mc_libs = ["mc_photos", "mc_base"];
+
+libs          = stntuple_libs + mc_libs + [
                 'mu2e_Mu2eUtilities',
                 'fhiclcpp',
                 'cetlib',

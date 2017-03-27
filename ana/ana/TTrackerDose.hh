@@ -72,11 +72,14 @@ public :
     DiskHist_t*     fDisk[kMaxDiskHistSets ];
   };
 
+  TString   fProcess;
+
   Hist_t    fHist;
 
-  float     fNPerPOT;   // efficiency for a given bgr source
-  float     fNPOT   ;   // number of protons on target (expected)
+  float     fNPerPOT;    // efficiency for a given bgr source
+  float     fNPOT   ;    // number of protons on target (expected)
   long int  fNEvents;
+  long int  fNSimulated; // total number of events simulated by Giani
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 

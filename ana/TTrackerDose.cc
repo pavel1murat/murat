@@ -1,12 +1,9 @@
 #define TTrackerDose_cxx
-#include "Calo.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
 #include "murat/ana/TTrackerDose.hh"
-
-
 //-----------------------------------------------------------------------------
 // z range for different stations
 //-----------------------------------------------------------------------------
@@ -67,9 +64,14 @@ int plane_number(float Z) {
 }
 
 //-----------------------------------------------------------------------------
-TTrackerDose::TTrackerDose(const char* Name) : TStnModule(Name,Name) {
+// estimate radiation dose absorbed by the tracker electronics due to a given 'Process'
+// Process = "FLASH","DIO" etc
+//-----------------------------------------------------------------------------
+TTrackerDose::TTrackerDose(const char* Process) : TStnModule("TrackerDose","TrackerDose") {
 
-  fNPOT = 3.6e20;           // "3 years of running"
+  fProcess = Process;
+
+  fNPOT = 1.2e20;           // "per year of running"
 
   TH1::AddDirectory(0);
 
@@ -92,8 +94,8 @@ int TTrackerDose::BookTrackerHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fEKin[3] ,"ekin_n",Form("%s: E(kin)[n]",Folder), 200,     0,   100,Folder);
   HBook1F(Hist->fEKin[4] ,"ekin_m",Form("%s: E(kin)[m]",Folder), 200,     0,   100,Folder);
 
-  HBook2F(Hist->fEDepVsPlane[0],"edep_vs_plane_0",Form("%s: E(dep) vs Plane Raw ",Folder), 40,0,40,200,650,850,Folder);
-  HBook2F(Hist->fEDepVsPlane[1],"edep_vs_plane_1",Form("%s: E(dep) vs Plane Norm",Folder), 40,0,40,200,650,850,Folder);
+  HBook2F(Hist->fEDepVsPlane[0],"edep_vs_plane_0",Form("%s: E(dep) vs Plane Raw ",Folder), 40,0,40,20,650,850,Folder);
+  HBook2F(Hist->fEDepVsPlane[1],"edep_vs_plane_1",Form("%s: E(dep) vs Plane Norm",Folder), 40,0,40,20,650,850,Folder);
 
   return 0;
 }
@@ -277,13 +279,12 @@ void TTrackerDose::Loop(Long64_t NEvents) {
 
   if (fChain == 0) return;
 
-  Long64_t nentries = fChain->GetEntriesFast();
+  Long64_t nentries = fChain->GetEntries();
 
   Long64_t nent = NEvents;
   if (nent < 0) nent = nentries;
   
   Long64_t nbytes = 0, nb = 0;
-
   long int nev = 0;
 
   for (Long64_t jentry=0; jentry<nent;jentry++) {
@@ -304,17 +305,45 @@ void TTrackerDose::Loop(Long64_t NEvents) {
 //-----------------------------------------------------------------------------
 // remaining part : normalize histograms to the total N(POT)
 // last term, 1.e6, accounts for energies being measured in MeV
+// material used to calculate losses: 3mm thick G10 disks 
 //-----------------------------------------------------------------------------
+  float thickness     = 0.3;
+  float density       = 1.8;
   float mev_per_joule = 1.6e-19*1.e6;
-  float sf            = fNPOT*fNPerPOT/(fNEvents+1.e-12)*mev_per_joule;
+  float krad_per_gray = 10.;
 
-  fHist.fUp[0]->fEDepVsPlane[0]->Copy(*fHist.fUp[0]->fEDepVsPlane[1]);
-  fHist.fUp[0]->fEDepVsPlane[1]->SetName("edep_vs_plane_1");
-  fHist.fUp[0]->fEDepVsPlane[1]->Scale(sf);
+  int nx   =  fHist.fUp[0]->fEDepVsPlane[1]->GetNbinsX();
+  int ny   =  fHist.fUp[0]->fEDepVsPlane[1]->GetNbinsY();
+  float dr =  fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinWidth(1)/10.; //  // convert to cm
 
-  fHist.fDn[0]->fEDepVsPlane[0]->Copy(*fHist.fDn[0]->fEDepVsPlane[1]);
-  fHist.fDn[0]->fEDepVsPlane[1]->SetName("edep_vs_plane_1");
-  fHist.fDn[0]->fEDepVsPlane[1]->Scale(sf);
+  for (int i=0; i<nx; i++) {
+    for (int ir=0; ir<ny; ir++) {
+      float r     = fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinCenter(ir+1)/10.; // convert to cm
+      float mass  = 2*M_PI*r*dr*thickness*density/1.e3; // in kG
+      float sf    = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass/krad_per_gray;
+      
+      double x    = fHist.fUp[0]->fEDepVsPlane[0]->GetBinContent(i,ir);
+      double e    = fHist.fUp[0]->fEDepVsPlane[0]->GetBinError  (i,ir);
+
+      fHist.fUp[0]->fEDepVsPlane[1]->SetBinContent(i,ir,x*sf);
+      fHist.fUp[0]->fEDepVsPlane[1]->SetBinError  (i,ir,e*sf);
+    }
+  }
+
+  for (int i=0; i<nx; i++) {
+    for (int ir=0; ir<ny; ir++) {
+      float r     = fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinCenter(ir+1)/10.;  // convert to cm
+      float mass  = 2*M_PI*r*dr*thickness*density/1.e3; // in kG
+      float sf    = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass/krad_per_gray;
+      
+      double x    = fHist.fDn[0]->fEDepVsPlane[0]->GetBinContent(i,ir);
+      double e    = fHist.fDn[0]->fEDepVsPlane[0]->GetBinError  (i,ir);
+
+      fHist.fDn[0]->fEDepVsPlane[1]->SetBinContent(i,ir,x*sf);
+      fHist.fDn[0]->fEDepVsPlane[1]->SetBinError  (i,ir,e*sf);
+    }
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -503,9 +532,7 @@ int TTrackerDose::InitChain() {
 
   TChain* chain = new TChain("//calorimeterDose/Calo","Calo");
 
-  TString sname (GetName());
-
-  if (sname == "FLASH") {
+  if (fProcess == "FLASH") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_0.root");
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_1.root");
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_2.root");
@@ -517,31 +544,38 @@ int TTrackerDose::InitChain() {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_8.root");
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_9.root");
 
-    fNPerPOT = 1.;
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9;
   }
-  else if (sname == "DIO") {
+  else if (fProcess == "DIO") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDIO.root");
-    fNPerPOT = 7.27e-4;
+    fNPerPOT    = 7.27e-4;
+    fNSimulated = 1.0e7;
   }
-  else if (sname == "OOT") {
+  else if (fProcess == "OOT") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerOOT.root");
-    fNPerPOT = 3.97e-3;
+    fNPerPOT    = 3.97e-3;
+    fNSimulated = 3.0e7;
   }
-  else if (sname == "PHOTON") {
+  else if (fProcess == "PHOTON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPHOTON.root");
-    fNPerPOT = 2.28e-3;
+    fNPerPOT    = 2.28e-3;
+    fNSimulated = 1.0e8;
   }
-  else if (sname == "PROTON") {
+  else if (fProcess == "PROTON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPROTON.root");
-    fNPerPOT = 5.69e-5;
+    fNPerPOT    = 5.69e-5;
+    fNSimulated = 1.0e8;
   }
-  else if (sname == "DEUTERON") {
+  else if (fProcess == "DEUTERON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDEUTERON.root");
-    fNPerPOT = 2.84e-5;
+    fNPerPOT    = 2.84e-5;
+    fNSimulated = 1.0e8;
   }
-  else if (sname == "NEUTRON") {
+  else if (fProcess == "NEUTRON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerNEUTRON.root");
-    fNPerPOT = 1.37e-3;
+    fNPerPOT    = 1.37e-3;
+    fNSimulated = 1.0e8;
   }
 
   fChain = chain;

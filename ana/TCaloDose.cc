@@ -222,7 +222,7 @@ int TCaloDose::BookHistograms() {
 //-----------------------------------------------------------------------------
 int TCaloDose::FillEventHistograms(EventHist_t* Hist) {
 
-  Hist->fNCrystals->Fill(nCrystal);
+  Hist->fNCrystals->Fill(_nCrystal);
   return 0;
 }
 
@@ -236,31 +236,32 @@ int TCaloDose::FillHistograms() {
 
   FillEventHistograms(fHist.fEvent[0]);
 
-  for (int i=0; i<nCrystal; i++) {
-    int idisk = crystalSectionId[i];
-    int icr   = crystalId[i];
+  for (int i=0; i<_nCrystal; i++) {
+    int idisk = _crystalSectionId[i];
+    int icr   = _crystalId[i];
 
     TDisk* disk = fCal->Disk(idisk);
 
     int icc   = icr-disk->FirstChanOffset();  // index within the disk
 
-    float x = crystalPosX[i];
-    float y = crystalPosY[i];
-    float z = crystalPosZ[i];
+    float x = _crystalPosX[i];
+    float y = _crystalPosY[i];
+    float z = _crystalPosZ[i];
+    float e = _crystalEdep[i];
 
     float dz = z-fZMin[idisk];   // ranges from 0 to 200 mm
     //    int   iz = dz/10.;           // in cm
     
     float r = sqrt(x*x+y*y);
 
-    fEDisk[idisk]  +=crystalEdep[i];
+    fEDisk[idisk]  += e;
 
-    fE[idisk][icc] +=crystalEdep[i];
+    fE[idisk][icc] += e;
 
-    disk->Crystal(icc)->AddEnergy(crystalEdep[i]);
+    disk->Crystal(icc)->AddEnergy(e);
 
-    fHist.fDisk[idisk]->fDzVsIc->Fill(icc,dz,crystalEdep[i]);
-    fHist.fDisk[idisk]->fRVsDz->Fill(dz  ,r ,crystalEdep[i]);
+    fHist.fDisk[idisk]->fDzVsIc->Fill(icc, dz, e);
+    fHist.fDisk[idisk]->fRVsDz ->Fill(dz , r , e);
   }
 
   return 0;
@@ -326,17 +327,11 @@ void TCaloDose::Loop(Long64_t NEvents) {
 
   printf("processed %li events, e[0] = %12.3f e[1] = %12.3f\n",nev,fEDisk[0],fEDisk[1]);
 
-  // printf(" fZMin[0], fZMax[0], fZMin[1], fZMax[1] = %10.4f %10.4f %10.4f %10.4f\n",
-  // 	 fZMin[0], fZMax[0], fZMin[1], fZMax[1]);
-
   fNEvents = nev;
 //-----------------------------------------------------------------------------
 // remaining part : normalize histograms to the total N(POT)
 // last term, 1.e6, accounts for energies being measured in MeV
 //-----------------------------------------------------------------------------
-  // float mev_per_joule = 1.6e-19*1.e6;
-  // float sf            = fNPOT*fNPerPOT/(fNEvents+1.e-12)*mev_per_joule;
-
   int  nbr = fHist.fDisk[0]->fNVsR->GetNbinsX();
   float dr = fHist.fDisk[0]->fNVsR->GetXaxis()->GetBinWidth(1);
 
@@ -344,9 +339,6 @@ void TCaloDose::Loop(Long64_t NEvents) {
     for (int ic=0; ic<678; ic++) {
 
       TStnCrystal* cr = fCal->Disk(i)->Crystal(ic);
-      //      float x = cr->Center()->X();
-      //      float y = cr->Center()->Y();
-      //      float r = sqrt(x*x+y*y);
 
       for (int ib=1; ib<=nbr; ib++) {
 	float r        = fHist.fDisk[i]->fNVsR->GetBinCenter(ib);
@@ -372,7 +364,6 @@ void TCaloDose::Loop(Long64_t NEvents) {
     int nz = fHist.fDisk[i]->fRVsDz->GetNbinsX();
     int nr = fHist.fDisk[i]->fRVsDz->GetNbinsY();
 
-    //    float dr =  fHist.fDisk[i]->fRVsDz->GetYaxis()->GetBinWidth(1)/10.; //  // convert to cm
     float dz =  fHist.fDisk[i]->fRVsDz->GetXaxis()->GetBinWidth(1)/10.; //  // convert to cm
 
     for (int iz=1; iz<=nz; iz++) {
@@ -381,7 +372,6 @@ void TCaloDose::Loop(Long64_t NEvents) {
 
       for (int ir=1; ir<=nr; ir++) {  // do not include underflows and overflows
 
-	//	float r     = fHist.fDisk[i]->fRVsDz->GetYaxis()->GetBinCenter(ir)/10.; // convert to cm
 	float ncr     = fHist.fDisk[i]->fNVsR->GetBinContent(ir);
 	float mass  = ncr*crystal_area*dz*density/1.e3; // in kG
 	float sf(0);
@@ -400,8 +390,6 @@ void TCaloDose::Loop(Long64_t NEvents) {
       TH1D* hp = fHist.fDisk[i]->fRVsDz->ProjectionX(name,ir,ir);
       float ncr  = fHist.fDisk[i]->fNVsR->GetBinContent(ir);
       for (int iz=1; iz<=nz; iz++) {
-	//	float r     = fHist.fDisk[i]->fRVsDz->GetYaxis()->GetBinCenter(ir)/10.; // convert to cm
-	//	float mass  = 2*M_PI*r*dr*dz*density/1.e3; // in kG
 	float mass  = ncr*crystal_area*dz*density/1.e3; // in kG
 	float sf(0);
 	if (mass > 0) sf = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass/krad_per_gray;
@@ -472,97 +460,97 @@ void TCaloDose::Init(TChain* Chain) {
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("evt", &evt, &b_evt);
-   fChain->SetBranchAddress("run", &run, &b_run);
-   fChain->SetBranchAddress("caloCrystals", &caloCrystals, &b_caloCrystals);
-   fChain->SetBranchAddress("caloDisk0Crystals", &caloDisk0Crystals, &b_caloDisk0Crystals);
-   fChain->SetBranchAddress("caloDisk1Crystals", &caloDisk1Crystals, &b_caloDisk1Crystals);
-   fChain->SetBranchAddress("caloVolume", &caloVolume, &b_caloVolume);
-   fChain->SetBranchAddress("crystalVolume", &crystalVolume, &b_crystalVolume);
-   fChain->SetBranchAddress("nGen", &nGen, &b_nGen);
-   fChain->SetBranchAddress("genId", genId, &b_genId);
-   fChain->SetBranchAddress("genCrCode", genCrCode, &b_genCrCode);
-   fChain->SetBranchAddress("genMomX", genMomX, &b_genMomX);
-   fChain->SetBranchAddress("genMomY", genMomY, &b_genMomY);
-   fChain->SetBranchAddress("genMomZ", genMomZ, &b_genMomZ);
-   fChain->SetBranchAddress("genStartX", genStartX, &b_genStartX);
-   fChain->SetBranchAddress("genStartY", genStartY, &b_genStartY);
-   fChain->SetBranchAddress("genStartZ", genStartZ, &b_genStartZ);
-   fChain->SetBranchAddress("genStartT", genStartT, &b_genStartT);
-   fChain->SetBranchAddress("nCrystal", &nCrystal, &b_nCrystal);
-   fChain->SetBranchAddress("crystalId", &crystalId, &b_crystalId);
-   fChain->SetBranchAddress("crystalSectionId", &crystalSectionId, &b_crystalSectionId);
-   fChain->SetBranchAddress("crystalPosX", &crystalPosX, &b_crystalPosX);
-   fChain->SetBranchAddress("crystalPosY", &crystalPosY, &b_crystalPosY);
-   fChain->SetBranchAddress("crystalPosZ", &crystalPosZ, &b_crystalPosZ);
-   fChain->SetBranchAddress("crystalEdep", &crystalEdep, &b_crystalEdep);
-   fChain->SetBranchAddress("crystalDose", &crystalDose, &b_crystalDose);
-   fChain->SetBranchAddress("crystalDose0", &crystalDose0, &b_crystalDose0);
-   fChain->SetBranchAddress("crystalDose1", &crystalDose1, &b_crystalDose1);
-   fChain->SetBranchAddress("crystalDose2", &crystalDose2, &b_crystalDose2);
-   fChain->SetBranchAddress("crystalDose3", &crystalDose3, &b_crystalDose3);
-   fChain->SetBranchAddress("crystalDose4", &crystalDose4, &b_crystalDose4);
-   fChain->SetBranchAddress("crystalDose5", &crystalDose5, &b_crystalDose5);
-   fChain->SetBranchAddress("crystalDose6", &crystalDose6, &b_crystalDose6);
-   fChain->SetBranchAddress("crystalDose7", &crystalDose7, &b_crystalDose7);
-   fChain->SetBranchAddress("crystalDose8", &crystalDose8, &b_crystalDose8);
-   fChain->SetBranchAddress("crystalDose9", &crystalDose9, &b_crystalDose9);
-   fChain->SetBranchAddress("crystalDose10", &crystalDose10, &b_crystalDose10);
-   fChain->SetBranchAddress("crystalDose11", &crystalDose11, &b_crystalDose11);
-   fChain->SetBranchAddress("crystalDose12", &crystalDose12, &b_crystalDose12);
-   fChain->SetBranchAddress("crystalDose13", &crystalDose13, &b_crystalDose13);
-   fChain->SetBranchAddress("crystalDose14", &crystalDose14, &b_crystalDose14);
-   fChain->SetBranchAddress("crystalDose15", &crystalDose15, &b_crystalDose15);
-   fChain->SetBranchAddress("crystalDose16", &crystalDose16, &b_crystalDose16);
-   fChain->SetBranchAddress("crystalDose17", &crystalDose17, &b_crystalDose17);
-   fChain->SetBranchAddress("crystalDose18", &crystalDose18, &b_crystalDose18);
-   fChain->SetBranchAddress("crystalDose19", &crystalDose19, &b_crystalDose19);
-   fChain->SetBranchAddress("nCrystalRO", &nCrystalRO, &b_nCrystalRO);
-   fChain->SetBranchAddress("crystalROSectionId", crystalROSectionId, &b_crystalROSectionId);
-   fChain->SetBranchAddress("crystalROCrystalId", crystalROCrystalId, &b_crystalROCrystalId);
-   fChain->SetBranchAddress("crystalROEdep", crystalROEdep, &b_crystalROEdep);
-   fChain->SetBranchAddress("crystalRODose", crystalRODose, &b_crystalRODose);
-   fChain->SetBranchAddress("crystalROX", crystalROX, &b_crystalROX);
-   fChain->SetBranchAddress("crystalROY", crystalROY, &b_crystalROY);
-   fChain->SetBranchAddress("crystalROZ", crystalROZ, &b_crystalROZ);
-   fChain->SetBranchAddress("crystalROR", crystalROR, &b_crystalROR);
-   fChain->SetBranchAddress("nCrystalROCard", &nCrystalROCard, &b_nCrystalROCard);
-   fChain->SetBranchAddress("crystalROCardSectionId", crystalROCardSectionId, &b_crystalROCardSectionId);
-   fChain->SetBranchAddress("crystalROCardCrystalId", crystalROCardCrystalId, &b_crystalROCardCrystalId);
-   fChain->SetBranchAddress("crystalROCardEdep", crystalROCardEdep, &b_crystalROCardEdep);
-   fChain->SetBranchAddress("crystalROCardDose", crystalROCardDose, &b_crystalROCardDose);
-   fChain->SetBranchAddress("crystalROCardX", crystalROCardX, &b_crystalROCardX);
-   fChain->SetBranchAddress("crystalROCardY", crystalROCardY, &b_crystalROCardY);
-   fChain->SetBranchAddress("crystalROCardZ", crystalROCardZ, &b_crystalROCardZ);
-   fChain->SetBranchAddress("crystalROCardR", crystalROCardR, &b_crystalROCardR);
-   fChain->SetBranchAddress("nCrateHits", &nCrateHits, &b_nCrateHits);
-   fChain->SetBranchAddress("crateEdep", crateEdep, &b_crateEdep);
+   fChain->SetBranchAddress("evt", &_evt, &b_evt);
+   fChain->SetBranchAddress("run", &_run, &b_run);
+   fChain->SetBranchAddress("caloCrystals", &_caloCrystals, &b_caloCrystals);
+   fChain->SetBranchAddress("caloDisk0Crystals", &_caloDisk0Crystals, &b_caloDisk0Crystals);
+   fChain->SetBranchAddress("caloDisk1Crystals", &_caloDisk1Crystals, &b_caloDisk1Crystals);
+   fChain->SetBranchAddress("caloVolume", &_caloVolume, &b_caloVolume);
+   fChain->SetBranchAddress("crystalVolume", &_crystalVolume, &b_crystalVolume);
+   fChain->SetBranchAddress("nGen", &_nGen, &b_nGen);
+   fChain->SetBranchAddress("genId", _genId, &b_genId);
+   fChain->SetBranchAddress("genCrCode", _genCrCode, &b_genCrCode);
+   fChain->SetBranchAddress("genMomX", _genMomX, &b_genMomX);
+   fChain->SetBranchAddress("genMomY", _genMomY, &b_genMomY);
+   fChain->SetBranchAddress("genMomZ", _genMomZ, &b_genMomZ);
+   fChain->SetBranchAddress("genStartX", _genStartX, &b_genStartX);
+   fChain->SetBranchAddress("genStartY", _genStartY, &b_genStartY);
+   fChain->SetBranchAddress("genStartZ", _genStartZ, &b_genStartZ);
+   fChain->SetBranchAddress("genStartT", _genStartT, &b_genStartT);
+   fChain->SetBranchAddress("nCrystal",  &_nCrystal, &b_nCrystal);
+   fChain->SetBranchAddress("crystalId", &_crystalId, &b_crystalId);
+   fChain->SetBranchAddress("crystalSectionId", &_crystalSectionId, &b_crystalSectionId);
+   fChain->SetBranchAddress("crystalPosX",  &_crystalPosX, &b_crystalPosX);
+   fChain->SetBranchAddress("crystalPosY",  &_crystalPosY, &b_crystalPosY);
+   fChain->SetBranchAddress("crystalPosZ",  &_crystalPosZ, &b_crystalPosZ);
+   fChain->SetBranchAddress("crystalEdep",  &_crystalEdep, &b_crystalEdep);
+   fChain->SetBranchAddress("crystalDose",  &_crystalDose, &b_crystalDose);
+   fChain->SetBranchAddress("crystalDose0", &_crystalDose0, &b_crystalDose0);
+   fChain->SetBranchAddress("crystalDose1", &_crystalDose1, &b_crystalDose1);
+   fChain->SetBranchAddress("crystalDose2", &_crystalDose2, &b_crystalDose2);
+   fChain->SetBranchAddress("crystalDose3", &_crystalDose3, &b_crystalDose3);
+   fChain->SetBranchAddress("crystalDose4", &_crystalDose4, &b_crystalDose4);
+   fChain->SetBranchAddress("crystalDose5", &_crystalDose5, &b_crystalDose5);
+   fChain->SetBranchAddress("crystalDose6", &_crystalDose6, &b_crystalDose6);
+   fChain->SetBranchAddress("crystalDose7", &_crystalDose7, &b_crystalDose7);
+   fChain->SetBranchAddress("crystalDose8", &_crystalDose8, &b_crystalDose8);
+   fChain->SetBranchAddress("crystalDose9", &_crystalDose9, &b_crystalDose9);
+   fChain->SetBranchAddress("crystalDose10", &_crystalDose10, &b_crystalDose10);
+   fChain->SetBranchAddress("crystalDose11", &_crystalDose11, &b_crystalDose11);
+   fChain->SetBranchAddress("crystalDose12", &_crystalDose12, &b_crystalDose12);
+   fChain->SetBranchAddress("crystalDose13", &_crystalDose13, &b_crystalDose13);
+   fChain->SetBranchAddress("crystalDose14", &_crystalDose14, &b_crystalDose14);
+   fChain->SetBranchAddress("crystalDose15", &_crystalDose15, &b_crystalDose15);
+   fChain->SetBranchAddress("crystalDose16", &_crystalDose16, &b_crystalDose16);
+   fChain->SetBranchAddress("crystalDose17", &_crystalDose17, &b_crystalDose17);
+   fChain->SetBranchAddress("crystalDose18", &_crystalDose18, &b_crystalDose18);
+   fChain->SetBranchAddress("crystalDose19", &_crystalDose19, &b_crystalDose19);
+   fChain->SetBranchAddress("nCrystalRO", &_nCrystalRO, &b_nCrystalRO);
+   fChain->SetBranchAddress("crystalROSectionId", _crystalROSectionId, &b_crystalROSectionId);
+   fChain->SetBranchAddress("crystalROCrystalId", _crystalROCrystalId, &b_crystalROCrystalId);
+   fChain->SetBranchAddress("crystalROEdep", _crystalROEdep, &b_crystalROEdep);
+   fChain->SetBranchAddress("crystalRODose", _crystalRODose, &b_crystalRODose);
+   fChain->SetBranchAddress("crystalROX", _crystalROX, &b_crystalROX);
+   fChain->SetBranchAddress("crystalROY", _crystalROY, &b_crystalROY);
+   fChain->SetBranchAddress("crystalROZ", _crystalROZ, &b_crystalROZ);
+   fChain->SetBranchAddress("crystalROR", _crystalROR, &b_crystalROR);
+   fChain->SetBranchAddress("nCrystalROCard", &_nCrystalROCard, &b_nCrystalROCard);
+   fChain->SetBranchAddress("crystalROCardSectionId", _crystalROCardSectionId, &b_crystalROCardSectionId);
+   fChain->SetBranchAddress("crystalROCardCrystalId", _crystalROCardCrystalId, &b_crystalROCardCrystalId);
+   fChain->SetBranchAddress("crystalROCardEdep", _crystalROCardEdep, &b_crystalROCardEdep);
+   fChain->SetBranchAddress("crystalROCardDose", _crystalROCardDose, &b_crystalROCardDose);
+   fChain->SetBranchAddress("crystalROCardX", _crystalROCardX, &b_crystalROCardX);
+   fChain->SetBranchAddress("crystalROCardY", _crystalROCardY, &b_crystalROCardY);
+   fChain->SetBranchAddress("crystalROCardZ", _crystalROCardZ, &b_crystalROCardZ);
+   fChain->SetBranchAddress("crystalROCardR", _crystalROCardR, &b_crystalROCardR);
+   fChain->SetBranchAddress("nCrateHits", &_nCrateHits, &b_nCrateHits);
+   fChain->SetBranchAddress("crateEdep", _crateEdep, &b_crateEdep);
    //   fChain->SetBranchAddress("crateDose", crateDose, &b_crateDose);
-   fChain->SetBranchAddress("crateX", crateX, &b_crateX);
-   fChain->SetBranchAddress("crateY", crateY, &b_crateY);
-   fChain->SetBranchAddress("crateZ", crateZ, &b_crateZ);
-   fChain->SetBranchAddress("crateR", crateR, &b_crateR);
-   fChain->SetBranchAddress("cratePdgId", cratePdgId, &b_cratePdgId);
-   fChain->SetBranchAddress("crateE", crateE, &b_crateE);
-   fChain->SetBranchAddress("crateEkin", crateEkin, &b_crateEkin);
-   fChain->SetBranchAddress("crateMass", crateMass, &b_crateMass);
-   fChain->SetBranchAddress("crateL", crateL, &b_crateL);
-   fChain->SetBranchAddress("vNHits", &vNHits, &b_vNHits);
-   fChain->SetBranchAddress("vId", vId, &b_vId);
-   fChain->SetBranchAddress("vPdgId", vPdgId, &b_vPdgId);
-   fChain->SetBranchAddress("vP", vP, &b_vP);
-   fChain->SetBranchAddress("vPx", vPx, &b_vPx);
-   fChain->SetBranchAddress("vPy", vPy, &b_vPy);
-   fChain->SetBranchAddress("vPz", vPz, &b_vPz);
-   fChain->SetBranchAddress("vE", vE, &b_vE);
-   fChain->SetBranchAddress("vEKin", vEKin, &b_vEKin);
-   fChain->SetBranchAddress("vM", vM, &b_vM);
-   fChain->SetBranchAddress("vT", vT, &b_vT);
-   fChain->SetBranchAddress("vX", vX, &b_vX);
-   fChain->SetBranchAddress("vY", vY, &b_vY);
-   fChain->SetBranchAddress("vZ", vZ, &b_vZ);
-   fChain->SetBranchAddress("vCosth", vCosth, &b_vCosth);
-   fChain->SetBranchAddress("vRadius", vRadius, &b_vRadius);
+   fChain->SetBranchAddress("crateX", _crateX, &b_crateX);
+   fChain->SetBranchAddress("crateY", _crateY, &b_crateY);
+   fChain->SetBranchAddress("crateZ", _crateZ, &b_crateZ);
+   fChain->SetBranchAddress("crateR", _crateR, &b_crateR);
+   fChain->SetBranchAddress("cratePdgId", _cratePdgId, &b_cratePdgId);
+   fChain->SetBranchAddress("crateE", _crateE, &b_crateE);
+   fChain->SetBranchAddress("crateEkin", _crateEkin, &b_crateEkin);
+   fChain->SetBranchAddress("crateMass", _crateMass, &b_crateMass);
+   fChain->SetBranchAddress("crateL", _crateL, &b_crateL);
+   fChain->SetBranchAddress("vNHits", &_vNHits, &b_vNHits);
+   fChain->SetBranchAddress("vId", _vId, &b_vId);
+   fChain->SetBranchAddress("vPdgId", _vPdgId, &b_vPdgId);
+   fChain->SetBranchAddress("vP" , _vP, &b_vP);
+   fChain->SetBranchAddress("vPx", _vPx, &b_vPx);
+   fChain->SetBranchAddress("vPy", _vPy, &b_vPy);
+   fChain->SetBranchAddress("vPz", _vPz, &b_vPz);
+   fChain->SetBranchAddress("vE" , _vE, &b_vE);
+   fChain->SetBranchAddress("vEKin", _vEKin, &b_vEKin);
+   fChain->SetBranchAddress("vM", _vM, &b_vM);
+   fChain->SetBranchAddress("vT", _vT, &b_vT);
+   fChain->SetBranchAddress("vX", _vX, &b_vX);
+   fChain->SetBranchAddress("vY", _vY, &b_vY);
+   fChain->SetBranchAddress("vZ", _vZ, &b_vZ);
+   fChain->SetBranchAddress("vCosth", _vCosth, &b_vCosth);
+   fChain->SetBranchAddress("vRadius", _vRadius, &b_vRadius);
 
    Notify();
 }
@@ -646,9 +634,15 @@ int TCaloDose::InitChain() {
 //-----------------------------------------------------------------------------
 // leave only tracker branches active
 //-----------------------------------------------------------------------------
-  fChain->SetBranchStatus("*",1);
+  fChain->SetBranchStatus("*",0);
 
-  // fChain->SetBranchStatus("nTtsUpHits",1);
+  fChain->SetBranchStatus("nCrystal"        ,1);
+  fChain->SetBranchStatus("crystalSectionId",1);
+  fChain->SetBranchStatus("crystalId"       ,1);
+  fChain->SetBranchStatus("crystalPosX"     ,1);
+  fChain->SetBranchStatus("crystalPosY"     ,1);
+  fChain->SetBranchStatus("crystalPosZ"     ,1);
+  fChain->SetBranchStatus("crystalEdep"     ,1);
   // fChain->SetBranchStatus("ttsUpEdep" ,1);
   // fChain->SetBranchStatus("ttsUpX"    ,1);
   // fChain->SetBranchStatus("ttsUpY"    ,1);

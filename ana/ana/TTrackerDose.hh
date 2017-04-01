@@ -38,10 +38,11 @@ public :
 
   enum { kMaxTrackHistSets = 200 };
   enum { kMaxEventHistSets =  10 };
-  enum { kMaxDiskHistSets  =  10 };
+  enum { kMaxVDetHistSets  =  10 };
 
   struct EventHist_t {
     TH1F*     fNumber;
+    TH1F*     fNVDHits;
   };
 
   struct TrackHist_t {
@@ -53,24 +54,41 @@ public :
     TH2F*     fEDepVsPlane[2];
   };
 
-  struct DiskHist_t {
-    TH1F*     fNHits;
-    TH1F*     fPdgID[2];
+  struct VDetHist_t {
+    TH1F*     fPdgId;
+    TH1F*     fE[2];   // different scales
     TH1F*     fR;
-    TH1F*     fZ;
-    TH1F*     fEKin[5];
-    TH2F*     fEDepVsZ[2];
+    TH1F*     fCosth;
   };
 
   TChain*     fChain;   //! pointer to the analyzed TTree or TChain
   Int_t       fCurrent; //! current Tree number in a TChain
 
   struct Hist_t {
-    EventHist_t*    fEvt [kMaxEventHistSets];
-    TrackHist_t*    fUp  [kMaxTrackHistSets];
-    TrackHist_t*    fDn  [kMaxTrackHistSets];
-    DiskHist_t*     fDisk[kMaxDiskHistSets ];
+    EventHist_t*    fEvent[kMaxEventHistSets];
+    TrackHist_t*    fUp   [kMaxTrackHistSets];
+    TrackHist_t*    fDn   [kMaxTrackHistSets];
+    VDetHist_t*     fVDet [kMaxVDetHistSets ];
   };
+
+  struct VDetData_t {
+    Int_t           Id;   //[vNHits]
+    Int_t           PdgId;   //[vNHits]
+    Float_t         P;   //[vNHits]
+    Float_t         Px;   //[vNHits]
+    Float_t         Py;   //[vNHits]
+    Float_t         Pz;   //[vNHits]
+    Float_t         E ;   //[vNHits]
+    Float_t         EKin;   //[vNHits]
+    Float_t         M;   //[vNHits]
+    Float_t         T;   //[vNHits]
+    Float_t         X;   //[vNHits]
+    Float_t         Y;   //[vNHits]
+    Float_t         Z;   //[vNHits]
+    Float_t         Costh;
+    Float_t         Radius;
+  } fVDet;
+
 
   TString   fProcess;
 
@@ -314,14 +332,18 @@ public :
 
   int     InitChain      ();
 
+  int     BookEventHistograms  (EventHist_t* Hist, const char* Folder);
   int     BookTrackerHistograms(TrackHist_t* Hist, const char* Folder);
-  int     BookHistograms ();
+  int     BookVDetHistograms   (VDetHist_t*  Hist, const char* Folder);
+  int     BookHistograms       ();
 
-  int     FillTrackerHistograms (TrackHist_t* Up, TrackHist_t* Dn);
-  int     FillHistograms ();
+  int     FillEventHistograms  (EventHist_t* Hist);
+  int     FillTrackerHistograms(TrackHist_t* Up  , TrackHist_t* Dn  );
+  int     FillVDetHistograms   (VDetHist_t*  Hist, VDetData_t*  VDet);
+  int     FillHistograms       ();
 
-  int     ResetTrackerHistograms (TrackHist_t* Up, TrackHist_t* Dn);
-  int     ResetHistograms();
+  int     ResetTrackerHistograms(TrackHist_t* Up, TrackHist_t* Dn);
+  int     ResetHistograms       ();
 
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);

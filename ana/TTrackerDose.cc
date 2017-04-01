@@ -81,6 +81,14 @@ TTrackerDose::TTrackerDose(const char* Process) : TStnModule("TrackerDose","Trac
 }
 
 //-----------------------------------------------------------------------------
+int TTrackerDose::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+  HBook1F(Hist->fNumber   ,"evnumber",Form("%s: nhits "    ,Folder), 200, 0, 1e8,Folder);
+  HBook1F(Hist->fNVDHits,"nvdhits"   ,Form("%s: N(VD hits)",Folder), 250, 0, 500,Folder);
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 int TTrackerDose::BookTrackerHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fNHits   ,"nhits" ,Form("%s: nhits ",Folder), 200,   0  ,200,Folder);
   HBook1F(Hist->fPdgID[0],"pdg_0" ,Form("%s: PDG ID",Folder), 200, -5000, 5000,Folder);
@@ -101,6 +109,17 @@ int TTrackerDose::BookTrackerHistograms(TrackHist_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
+int TTrackerDose::BookVDetHistograms(VDetHist_t* Hist, const char* Folder) {
+  HBook1F(Hist->fPdgId   ,"pdg"   ,Form("%s: PDG ID",Folder), 500, -5000, 5000,Folder);
+  HBook1F(Hist->fE[0]    ,"e_0"   ,Form("%s: e[0]"  ,Folder), 200,     0,   100,Folder);
+  HBook1F(Hist->fE[1]    ,"e_1"   ,Form("%s: e[1]"  ,Folder), 200,     0,     2,Folder);
+  HBook1F(Hist->fR       ,"radius",Form("%s: radius",Folder), 200,   650,   850,Folder);
+  HBook1F(Hist->fCosth   ,"costh" ,Form("%s: costh" ,Folder), 200,    -1,     1,Folder);
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 int TTrackerDose::BookHistograms() {
 
   TFolder*    fol;
@@ -109,13 +128,28 @@ int TTrackerDose::BookHistograms() {
  
   hist_folder = (TFolder*) GetFolder()->FindObject("Hist");
 
-  int book_histset[kMaxTrackHistSets];
-  for (int i=0; i<kMaxTrackHistSets; i++) book_histset[i] = 0;
+  int book_event_histset[kMaxEventHistSets];
+  for (int i=0; i<kMaxEventHistSets; i++) book_event_histset[i] = 0;
 
-  book_histset[  0] = 1;     		// all hits
+  book_event_histset[  0] = 1;     		// all hits
+
+  for (int i=0; i<kMaxEventHistSets; i++) {
+    if (book_event_histset[i] != 0) {
+      sprintf(folder_name,"evt_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fEvent[i] = new EventHist_t;
+      BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
+    }
+  }
+
+  int book_tracker_histset[kMaxTrackHistSets];
+  for (int i=0; i<kMaxTrackHistSets; i++) book_tracker_histset[i] = 0;
+
+  book_tracker_histset[  0] = 1;     		// all hits
 
   for (int i=0; i<kMaxTrackHistSets; i++) {
-    if (book_histset[i] != 0) {
+    if (book_tracker_histset[i] != 0) {
       sprintf(folder_name,"up_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
@@ -129,6 +163,31 @@ int TTrackerDose::BookHistograms() {
       BookTrackerHistograms(fHist.fDn[i],Form("Hist/%s",folder_name));
     }
   }
+
+  int book_vdet_histset[kMaxVDetHistSets];
+  for (int i=0; i<kMaxVDetHistSets; i++) book_vdet_histset[i] = 0;
+
+  book_vdet_histset[  0] = 0;     		// all hits - do not fill
+  book_vdet_histset[  1] = 1;     		// hits in the tracker front detector 71 < R < 80
+
+  for (int i=0; i<kMaxVDetHistSets; i++) {
+    if (book_vdet_histset[i] != 0) {
+      sprintf(folder_name,"vdet_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fVDet[i] = new VDetHist_t;
+      BookVDetHistograms(fHist.fVDet[i],Form("Hist/%s",folder_name));
+    }
+  }
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+int TTrackerDose::FillEventHistograms(EventHist_t* Hist) {
+
+  Hist->fNumber->Fill(evt);
+  Hist->fNVDHits->Fill(vNHits);
+
   return 0;
 }
 
@@ -200,9 +259,44 @@ int TTrackerDose::FillTrackerHistograms(TrackHist_t* Hup, TrackHist_t* Hdn) {
 }
 
 //-----------------------------------------------------------------------------
+int TTrackerDose::FillVDetHistograms(VDetHist_t* Hist, VDetData_t* VDet) {
+
+  Hist->fPdgId->Fill(VDet->PdgId);
+  Hist->fE[0] ->Fill(VDet->E);
+  Hist->fE[1] ->Fill(VDet->E);
+  Hist->fR    ->Fill(VDet->Radius);
+  Hist->fCosth->Fill(VDet->Costh);
+
+  return 0;
+}
+//-----------------------------------------------------------------------------
 int TTrackerDose::FillHistograms() {
 
   FillTrackerHistograms(fHist.fUp[0], fHist.fDn[0]);
+
+
+  for (int i=0; i<vNHits; i++) {
+    fVDet.Id     = vId[i];
+    fVDet.PdgId  = vPdgId[i];
+    fVDet.P      = vP[i];   
+    fVDet.Px     = vPx[i];  
+    fVDet.Py     = vPy[i];  
+    fVDet.Pz     = vPz[i];  
+    fVDet.E      = vE[i];  
+    fVDet.EKin   = vEKin[i];
+    fVDet.M      = vM[i];   
+    fVDet.T      = vT[i];   
+    fVDet.X      = vX[i];   
+    fVDet.Y      = vY[i];   
+    fVDet.Z      = vZ[i];   
+    fVDet.Costh  = vCosth[i];   
+    fVDet.Radius = vRadius[i];   
+
+    if ((fVDet.Id == 13) && (fVDet.Radius > 710) && (fVDet.Radius < 800)) {
+      FillVDetHistograms(fHist.fVDet[1],&fVDet);
+    }
+  }
+
 
   return 0;
 }
@@ -246,6 +340,7 @@ int TTrackerDose::ResetHistograms() {
 
   return 0;
 }
+
 
 
 //-----------------------------------------------------------------------------
@@ -292,8 +387,6 @@ void TTrackerDose::Loop(Long64_t NEvents) {
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-    //    InitEvent();
-    
     FillHistograms();
 
     nev += 1;
@@ -607,6 +700,23 @@ int TTrackerDose::InitChain() {
   fChain->SetBranchStatus("ttsDwEkin" ,1);
   fChain->SetBranchStatus("ttsDwMass" ,1);
   fChain->SetBranchStatus("ttsDwL"    ,1);
+  
+  fChain->SetBranchStatus("vNHits"    ,1);
+  fChain->SetBranchStatus("vId"       ,1);
+  fChain->SetBranchStatus("vPdgId"    ,1);
+  fChain->SetBranchStatus("vP"        ,1);
+  fChain->SetBranchStatus("vPx"       ,1);
+  fChain->SetBranchStatus("vPy"       ,1);
+  fChain->SetBranchStatus("vPz"       ,1);
+  fChain->SetBranchStatus("vE"        ,1);
+  fChain->SetBranchStatus("vEKin"     ,1);
+  fChain->SetBranchStatus("vM"        ,1);
+  fChain->SetBranchStatus("vT"        ,1);
+  fChain->SetBranchStatus("vX"        ,1);
+  fChain->SetBranchStatus("vY"        ,1);
+  fChain->SetBranchStatus("vZ"        ,1);
+  fChain->SetBranchStatus("vCosth"    ,1);
+  fChain->SetBranchStatus("vRadius"   ,1);
   
   return 0;
 }

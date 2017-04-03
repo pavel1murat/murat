@@ -31,6 +31,7 @@ BEGIN_PROLOG
   TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+  maxDoubletChi2                      : 10
 END_PROLOG
 
 #include "murat/fcl/templates.fcl"
@@ -98,3 +99,5 @@ outputs.detectorOutput.fileName           : "aaa.murat.bbb.ccc.egun_digi_reco_st
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------
+physics.filters.CalTrkFit.KalFitter.DoubletAmbigResolver.maxDoubletChi2: @local::maxDoubletChi2
+physics.filters.StntupleMaker.DoubletAmbigResolver.maxDoubletChi2      : @local::maxDoubletChi2

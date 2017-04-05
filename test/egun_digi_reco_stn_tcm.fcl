@@ -45,15 +45,12 @@ physics: {
     producers : { 
 	@table::murat.producers 
 
-	generate : { @table::murat.producers.egun }
-
-	FlagStrawHits : { @table::FlagStrawHits 
-	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
-	}
+	generate      : { @table::murat.producers.egun }
+	FlagStrawHits : { @table::FlagStrawHits maximumEnergy: @local::FlagStrawHits_maximumEnergy }
 
 	CaloShowerStepFromStepPt : { @table::murat.producers.CaloShowerStepFromStepPt 
 # for CE, not old background mixing - default: 'compressPVDetector'
-	    physVolInfoInput : "g4run"
+#	    physVolInfoInput : "g4run"
 	}
     }
 

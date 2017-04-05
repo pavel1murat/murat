@@ -5,7 +5,7 @@ order=$2
 
 stage_dir="/mu2e/data/outstage/murat/"`ls /mu2e/data/outstage/murat | grep $1`;
 
-echo $stage_dir; 
+echo ">>> job output directory:" $stage_dir; 
 
 #exit
 
@@ -15,37 +15,48 @@ nfailed=0
 ntotal=0
 nsuccess=0
 
-if [ ".$order" == "." ] ; then list_of_sections=`ls     $stage_dir`
-else                           list_of_sections=`ls -tr $stage_dir`
-fi
+list_of_subjobs=`ls $stage_dir`
 
-for d in $list_of_sections ; do 
+
+for subdir in $list_of_subjobs ; do
+
+    sdir=$stage_dir/$subdir
+    echo ">>> subdirectory        :" $sdir; 
+
+    if [ ".$order" == "." ] ; then list_of_sections=`ls     $sdir`
+    else                           list_of_sections=`ls -tr $sdir`
+    fi
+
+    for d in $list_of_sections ; do 
 #    echo $d
 #------------------------------------------------------------------------------
 # skip directories corresponding to non-completed sections like '00015.wuue'
+# now it is just one .log file per subdirectory
 #------------------------------------------------------------------------------
-    nf=`echo $d | awk -F . '{print NF}'` 
-    if [ $nf == 1 ] ; then
-	x=`cat $stage_dir/$d/mu2e.log | grep "mu2egrid exit status"`; 
-	if [ ."$x" == "." ] ; then
+	nf=`echo $d | awk -F . '{print NF}'` 
+	if [ $nf == 1 ] ; then
+	    logfile=`ls $sdir/$d/*.log` ;
+	    x=`cat $logfile | grep "mu2egrid exit status"`; 
+	    if [ ."$x" == "." ] ; then
 #------------------------------------------------------------------------------
 # no return code - assume staging failure
 #------------------------------------------------------------------------------
-	    n_staging_failures=$((n_staging_failures+1))
+		n_staging_failures=$((n_staging_failures+1))
+	    else
+		rc=`echo $x | awk '{print $4}'`
+		host=`cat $logfile | grep "Starting on host" | awk '{print $5}'`;
+		   y=`cat $logfile | grep "TrigReport Events total"`
+		
+		printf " %5s : section %-10s was running on %-20s , mu2egrid exit status: %3i $y\n" $nsections $d $host $rc
+		
+		if [ $rc != 0 ] ; then nfailed=$((nfailed+1)) ; else nsuccess=$((nsuccess+1)) ; fi
+	    fi
+	    nsections=$((nsections+1))
 	else
-	    rc=`echo $x | awk '{print $4}'`
-	    host=`cat $stage_dir/$d/sysinfo.log | grep "Starting on host" | awk '{print $5}'`;
-	    y=`cat $stage_dir/$d/mu2e.log | grep "TrigReport Events total"`
-	
-	    printf " %5s : section %-10s was running on %-20s , mu2egrid exit status: %3i $y\n" $nsections $d $host $rc
-
-	    if [ $rc != 0 ] ; then nfailed=$((nfailed+1)) ; else nsuccess=$((nsuccess+1)) ; fi
+	    printf " %10s : GRID ERROR, job not completed\n" $d
 	fi
-	nsections=$((nsections+1))
-    else
-	printf " %10s : GRID ERROR, job not completed\n" $d
-    fi
-    ntotal=$((ntotal+1))
+	ntotal=$((ntotal+1))
+    done
 done
 
 echo output of $ntotal sections checked : total of $nsections sections completed \; $nsuccess sections completed successfully \; \

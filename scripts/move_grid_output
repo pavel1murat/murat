@@ -39,77 +39,90 @@ if [ ! -d $od/hist ] ; then mkdir $od/hist ; fi
 
 dir=$stage_dir/$job
 echo dir=$dir
+for sd1 in `ls $dir` ; do
+#------------------------------------------------------------------------------
+# now there is an intermediate subdirectory level
+#------------------------------------------------------------------------------
+    list_of_subdirs=`ls $dir/$sd1`
 
-for subdir in `ls $dir` ; do
+    for sd2 in $list_of_subdirs ; do
 #------------------------------------------------------------------------------
 # check if the job finished with RC=0
 # skip directories corresponding to non-completed sections like '00015.wuue'
 # skip segments with RC != 0
 #------------------------------------------------------------------------------
- 
-#  echo $subdir
-   sd=$dir/$subdir
-   nf=`echo $subdir | awk -F . '{print NF}'` 
-   if [ $nf == 1 ] ; then
+#       echo $subdir
+	sd=$dir/$sd1/$sd2
 
-       index=`echo $subdir | awk '{printf "%04i", $1}'`
-       echo ------------------------ sd=$sd section=$index: 
+	nf=`echo $sd2 | awk -F . '{print NF}'` 
+	if [ $nf == 1 ] ; then
 
-       x=`cat $sd/mu2e.log | grep "mu2egrid exit status"`; 
-       rc=`echo $x | awk '{print $4}'`
+	    index0=`echo $sd2 | awk '{printf "%04i", $1}'`
+	    index=$sd1.`echo $sd2 | awk '{printf "%04i", $1}'`
+	    echo ------------------------ sd=$sd section=$index: 
+	    
+	    logfile=`ls $sd/log.*.log`
+	    fclfile=`ls $sd/*.fcl`
+	    
+	    x=`cat $logfile | grep "mu2egrid exit status"`; 
+	    rc=`echo $x | awk '{print $4}'`
 
-       rc=0
+	    rc=0
 
-       if [ ".$rc" == ".0" ] ; then
-	   if [ ${dsname:3:1} != "s" ] ; then 
+	    if [ ".$rc" == ".0" ] ; then
+		if [ ${dsname:3:1} != "s" ] ; then 
 #------------------------------------------------------------------------------
-# PRODUCTION dataset: move stntuple files
+# PRODUCTION dataset: move stntuple and histogram files
 #------------------------------------------------------------------------------
-	       $cmd_prefix mv $sd/$jobname.stn  $od/$dsname.000001$index
-	       $cmd_prefix mv $sd/$jobname.hist $od/hist/$jobname.$index.hist
-	   else 
+		    stn_files=`ls $sd/*.stn`
+		    for f in $stn_files ; do
+			$cmd_prefix mv $f  $od/$dsname.000001$index0
+		    done
+
+		    $cmd_prefix mv $sd/$jobname.hist $od/hist/$jobname.$index0.hist
+		else 
 #------------------------------------------------------------------------------
 # SNTUPLE dataset: move stntuple files
 # STNTUPLE dataset may also have DST files woth the extention .art produced 
 #------------------------------------------------------------------------------
-	       stn_files=`ls $sd/*.stn`
-	       for f in $stn_files ; do
-		   $cmd_prefix mv $f  $od/$dsname.000001$index
-	       done
+		    stn_files=`ls $sd/*.stn`
+		    for f in $stn_files ; do
+			$cmd_prefix mv $f  $od/$dsname.000001$index0
+		    done
 
-	       dst_files=`ls $sd/*.art`
-	       dst_dsname=${dsname:0:3}"a"${dsname:4}
-
-	       odd=$output_dir/$dst_dsname
-	       if [ ! -d $odd ] ; then mkdir -p $odd ; fi
-
-	       for f in $dst_files ; do
-		   $cmd_prefix mv $f $odd/$dst_dsname.000001$index
-	       done
+		    dst_files=`ls $sd/*.art`
+		    dst_dsname=${dsname:0:3}"a"${dsname:4}
+		    
+		    odd=$output_dir/$dst_dsname
+		    if [ ! -d $odd ] ; then mkdir -p $odd ; fi
+		    
+		    for f in $dst_files ; do
+			$cmd_prefix mv $f $odd/$dst_dsname.000001$index0
+		    done
 #------------------------------------------------------------------------------
 # move histogram files
 #------------------------------------------------------------------------------
-	       hist_files=`ls $sd/*.hist`
-	       for f in $hist_files ; do
-		   $cmd_prefix mv $f  $od/hist/`basename $f`.$index
-	       done
-	   fi
+		    hist_files=`ls $sd/*.root`
+		    for f in $hist_files ; do
+			$cmd_prefix mv $f  $od/hist/`basename $f`
+		    done
+		fi
 #------------------------------------------------------------------------------
 # move log files
 #------------------------------------------------------------------------------
-	   $cmd_prefix mv $sd/mu2e.log      $od/log/$jobname.$index.log
-	   $cmd_prefix mv $sd/mu2e.fcl      $od/log/$jobname.$index.fcl
-	   $cmd_prefix mv $sd/sysinfo.log   $od/log/$jobname.$index.sysinfo.log
-       else
-	   if [ ".$rc" == "." ] ; then
-	       x=`cat $sd/mu2e.log | grep "Art has completed"`;
-	       rc=`echo $x | awk '{print $9}'`
-	   fi
-	   echo .... ERROR: job finished with RC=$rc, do not move its output
-       fi
-   else
-	printf " %10s : GRID ERROR, job not completed, IGNORE ITS OUTPUT\n" $subdir
-   fi
+		$cmd_prefix mv $logfile    $od/log/$jobname.$index0.log
+		$cmd_prefix mv $fclfile    $od/log/$jobname.$index0.fcl
+	    else
+		if [ ".$rc" == "." ] ; then
+		    x=`cat $logfile | grep "Art has completed"`;
+		    rc=`echo $x | awk '{print $9}'`
+		fi
+		echo .... ERROR: job finished with RC=$rc, do not move its output
+	    fi
+	else
+	    printf " %10s : GRID ERROR, job not completed, IGNORE ITS OUTPUT\n" $subdir
+	fi
+    done
 done
 # 
 #------------------------------------------------------------------------------

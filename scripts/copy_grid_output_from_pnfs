@@ -1,0 +1,46 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# call: copy_grid_output_from_pnfs ce jobid
+#
+# need to     setup ifdhc
+#------------------------------------------------------------------------------
+job_type=$1
+job_id=$2
+
+dir1=/pnfs/mu2e/scratch/users/murat/workflow/$job_type/outstage/$job_id
+dir2=/mu2e/data/outstage/murat/$job_id
+
+if [ ! -d $dir2 ] ; then 
+    echo --------------- creating $dir2
+    mkdir $dir2 ; 
+fi
+
+sd1=`ls $dir1`
+
+for d1 in $sd1 ; do
+
+    dd1=$dir1/$d1
+
+    td1=$dir2/$d1
+    echo --------------- creating $td1
+    if [ ! -d $td1 ] ; then mkdir $td1 ; fi
+
+    sd2=`ls $dd1`
+
+    for d2 in $sd2 ; do
+	dd2=$dd1/$d2
+	echo $dd2
+
+# td2 - target
+	td2=$td1/$d2
+	echo -- creating $td2
+	if [ ! -d $td2 ] ; then mkdir $td2 ; fi
+#------------------------------------------------------------------------------
+# finally, do the copy
+#------------------------------------------------------------------------------
+	for f in `ls $dd2` ; do
+	    ifdh cp $dd2/$f $td2/$f
+	done
+	
+    done
+done

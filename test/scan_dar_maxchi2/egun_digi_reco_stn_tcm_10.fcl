@@ -85,7 +85,7 @@ physics.filters.StntupleMakerTcm. g4ModuleLabel      : @local::G4_MODULE_LABEL
 # services.TFileService.fileName             : "egun_digi_reco_stn_tcn.hist"
 # physics.filters.InitStntuple.histFileName  : "egun_digi_reco_stn_tcn.stn"
 services.TFileService.fileName             : "nts.murat.egun_digi_reco_stn_tcn.bbb.hist.root"
-physics.filters.InitStntuple.histFileName  : "nts.murat.egun_digi_reco_stn_tcn.bbb.stntuple.root"
+physics.filters.InitStntuple.histFileName  : "nts.murat.egun_digi_reco_stn_tcn.bbb.stntuple.stn"
 
 physics.filters.CalTimePeakFinder.diagLevel          : 1
 physics.filters.CalHelixFinder.diagLevel             : 1

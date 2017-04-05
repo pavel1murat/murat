@@ -1,20 +1,23 @@
+#------------------------------------------------------------------------------
 # -*- mode: tcl -*-
 #------------------------------------------------------------------------------
-BEGIN_PROLOG
-#  muStops    : [ @local::mergedMuonStops ]
-  pdgCode    : 11
-  bgHitFiles : @nil
-END_PROLOG
-
 #include "minimalMessageService.fcl"
 #include "standardProducers.fcl"
 #include "standardServices.fcl"
 
+#include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"
 
-#include "murat/fcl/templates.fcl"
+BEGIN_PROLOG
+#  muStops    : [ @local::mergedMuonStops ]
+  pdgCode    : 11
+#  bgHitFiles : @nil
+  bgHitFiles : [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art" ]
+END_PROLOG
 
-process_name : trackerMCCheck
+#include "murat/fcl/templates.fcl"
+#------------------------------------------------------------------------------
+process_name : ReadMixCD3X1TrackerMCCheck
 source : {
     module_type :  RootInput
     maxEvents   :  -1
@@ -25,13 +28,15 @@ outputs      : { @table::murat.outputs   }
 producers    : { @table::murat.producers }
 filters      : { @table::murat.filters   }
 paths        : { @table::murat.paths     }
-
 #------------------------------------------------------------------------------
 # physics
 #------------------------------------------------------------------------------
-physics : { @table::physics 
-    filters : { @table::physics.filters 
-	TrackerMCCheck: @local::TrackerMCCheck
+physics : { 
+    producers: { @table::producers }
+
+    filters: { 
+	@table::filters 
+#	TrackerMCCheck : @table::murat.TrackerMCCheck
     }
 #------------------------------------------------------------------------------
 # paths
@@ -39,8 +44,7 @@ physics : { @table::physics
     p1 : [ @sequence::murat.mix_time_map, 
 	   @sequence::Tracking.DigiSim    , 
 	   @sequence::Tracking.PrepareHits, 
-	   TrackerMCCheck                 
-	  ]
+	   TrackerMCCheck                 ]
     e1 : []
 }
 #------------------------------------------------------------------------------

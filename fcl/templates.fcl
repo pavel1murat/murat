@@ -28,18 +28,22 @@ services : {
 # 2016-10-14: this command is no longer supported (needed ?)
 #------------------------------------------------------------------------------
 services.scheduler.wantSummary: true
-# services.scheduler.fileMode   : MERGE
 
-murat : { 
-    producers : {
+#------------------------------------------------------------------------------
+# at this point I start redefining @table::murat
+#------------------------------------------------------------------------------
+murat : { @table::murat 
+
+    producers : { @table::murat.producers
+
 	generate: { @table::StoppedMuonConversionGun    }
 	g4run   : { @table::mu2eg4runDefaultSingleStage }
 	@table::EventMixing.producers
     }
 }
 
-murat : {
-    producers: {
+murat : { @table::murat 
+    producers: { 
 	@table::murat.producers
 
   	egun : { @table::StoppedParticleReactionGun # p(e)=105 MeV/c
@@ -143,7 +147,7 @@ murat : {
 # event mixing modules - all clones of the same module.
 # each clone takes certain collections from the input file and adds them to the event
 #------------------------------------------------------------------------------
-    filters: {
+    filters: { @table::murat.filters
 #	@table::EventMixing.filters
 	flashMixer    : { @table::mixerTemplate 
 	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:flashMixer genModuleLabel:flashMixer }

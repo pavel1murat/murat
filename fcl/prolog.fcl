@@ -49,7 +49,7 @@ murat : {
 #
 # track reco validation
 #------------------------------------------------------------------------------
-    TrackerMCCheck: { module_type:TrackerMCCheck # the class name
+    TrackerMCCheck                   : { module_type:TrackerMCCheck # the class name
 	g4ModuleLabel                : g4run
 	strawHitMakerModuleLabel     : makeSH
 	strawHitPosMakerModuleLabel  : MakeStereoHits
@@ -88,12 +88,16 @@ murat : {
 }
 
 murat.producers : { 
-    TrackRecoCheck  : { @table::murat.TrackRecoCheck  }
-    DumpEventNumber : { @table::murat.DumpEventNumber }
 }
 
-# murat.analysers : { 
+murat.filters : {
+    TrackerMCCheck  : { @table::murat.TrackerMCCheck  }
+    TrackRecoCheck  : { @table::murat.TrackRecoCheck  }
+}
+
+murat.analysers : { 
+    DumpEventNumber : { @table::murat.DumpEventNumber }
 #    ReadGenParticles : { @table::murat.ReadGenParticles }
-# }
+}
 
 END_PROLOG

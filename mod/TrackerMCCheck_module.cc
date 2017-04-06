@@ -94,8 +94,8 @@ namespace mu2e {
 // Module labels 
 //-----------------------------------------------------------------------------
     std::string        fModuleLabel;	             // this module label
-    std::string        processName_;
-    std::string        fG4ModuleLabel;
+    std::string        _processName;
+    std::string        _g4ModuleLabel;
     
     std::string        producerName_;
     std::string        fStrawHitMaker;
@@ -170,8 +170,8 @@ namespace mu2e {
   TrackerMCCheck::TrackerMCCheck(fhicl::ParameterSet const& pset): 
     StntupleModule            (pset,"TrackerMCCheck"),
     fModuleLabel              (pset.get<std::string>("module_label"                )),
-    processName_              (pset.get<std::string>("processName"          ,""    )),
-    fG4ModuleLabel            (pset.get<std::string>("g4ModuleLabel"               )),
+    _processName              (pset.get<std::string>("processName"          ,""    )),
+    _g4ModuleLabel            (pset.get<std::string>("g4ModuleLabel"               )),
 
     fStrawHitMaker            (pset.get<std::string>("strawHitMakerModuleLabel"    )),
     fStrawHitPosMaker         (pset.get<std::string>("strawHitPosMakerModuleLabel" )),
@@ -252,8 +252,8 @@ namespace mu2e {
 
     art::Handle<StepPointMCCollection> stepsHandle;
     art::Selector getTrackerSteps(art::ProductInstanceNameSelector("tracker") &&
-				  art::ProcessNameSelector(processName_) &&
-				  art::ModuleLabelSelector(fG4ModuleLabel)  );
+				  art::ProcessNameSelector(_processName) &&
+				  art::ModuleLabelSelector(_g4ModuleLabel)  );
     Evt->get(getTrackerSteps, stepsHandle);
     if (stepsHandle.isValid()) fSteps =  (const mu2e::StepPointMCCollection*) &(*stepsHandle);
     else                       fSteps = NULL;
@@ -282,7 +282,7 @@ namespace mu2e {
 
     // 12 - 11 -2013 giani added some MC info of the straws
     art::Handle<mu2e::PtrStepPointMCVectorCollection> mcptrHandleStraw;
-    Evt->getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandleStraw);
+    Evt->getByLabel(fStrawHitMaker,"",mcptrHandleStraw);
 
     if (mcptrHandleStraw.isValid()) fStepPointMCVectorCollection = mcptrHandleStraw.product();
     else                            fStepPointMCVectorCollection = NULL;
@@ -327,7 +327,7 @@ namespace mu2e {
     fCePitch = -1.;
 
     if (vdg->nDet() > 0) {
-      Evt.getByLabel(fG4ModuleLabel,"virtualdetector",vdhits);
+      Evt.getByLabel(_g4ModuleLabel,"virtualdetector",vdhits);
       if (!vdhits.isValid()) {
 	printf("ERROR %s : No valid VD step points\n",oname);
       }

@@ -558,10 +558,10 @@ void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
   p      = mom.P();
   cos_th = mom.Pz()/p;
 
-  xv = fParticle->Vx()+3904.;
-  yv = fParticle->Vy();
-  rv = sqrt(xv*xv+yv*yv);
-  zv = fParticle->Vz();
+  // xv = fParticle->Vx()+3904.;
+  // yv = fParticle->Vy();
+  // rv = sqrt(xv*xv+yv*yv);
+  // zv = fParticle->Vz();
 
   Hist->fLumWt->Fill(fLumWt);
   Hist->fRv->Fill(rv);
@@ -569,10 +569,18 @@ void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
 
   TSimParticle* simp = fSimPar.fParticle;
 
-  Hist->fPdgCode->Fill(simp->fPdgCode);
-  Hist->fMomTargetEnd->Fill(simp->fMomTargetEnd);
-  Hist->fMomTrackerFront->Fill(simp->fMomTrackerFront);	// 
-  Hist->fNshCE->Fill(simp->fNStrawHits);
+  if (simp) {
+    Hist->fPdgCode->Fill(simp->fPdgCode);
+    Hist->fMomTargetEnd->Fill(simp->fMomTargetEnd);
+    Hist->fMomTrackerFront->Fill(simp->fMomTrackerFront);	// 
+    Hist->fNshCE->Fill(simp->fNStrawHits);
+  }
+  else {
+    Hist->fPdgCode->Fill(-1.e6);
+    Hist->fMomTargetEnd->Fill(-1.);
+    Hist->fMomTrackerFront->Fill(-1.);	// 
+    Hist->fNshCE->Fill(-1);
+  }
 
   Hist->fEleMom->Fill(p);
   Hist->fEleCosTh->Fill(cos_th);
@@ -609,6 +617,8 @@ void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 						TStnTrackID*     TrackID   , 
 						TrackPar_t*      TPar      ,
 						int              HistSet   ) {
+  if (fSimPar.fParticle == NULL) return;
+
   if (fSimPar.fParticle->NStrawHits() >= 20) {
     FillEventHistograms(fHist.fEvent[HistSet]);
 
@@ -1370,6 +1380,10 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fSimp             = fSimpBlock->Particle(0);
   fSimPar.fParticle = fSimp;
+  fSimPar.fTFront   = NULL;
+  fSimPar.fTMid     = NULL;
+  fSimPar.fTBack    = NULL;
+  fSimPar.fGenp     = NULL;
 //-----------------------------------------------------------------------------
 // virtual detectors - for fSimp need parameters at the tracker front
 //-----------------------------------------------------------------------------

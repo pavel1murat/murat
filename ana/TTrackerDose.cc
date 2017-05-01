@@ -832,6 +832,18 @@ int TTrackerDose::InitChain() {
     fNSimulated = 5.1e9*5/51.;
     fDensity[0] = 1.7;
   }
+  else if (fProcess == "FLASH_LEAD_2MM") {  // updated 2017-04-29
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
   else if (fProcess == "DIO") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDIO.root");
     fNPerPOT    = 7.27e-4;

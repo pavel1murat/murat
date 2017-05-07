@@ -214,9 +214,9 @@ murat.cpr_reco : [ @sequence::CalPatRec.reco,
 		   @sequence::TrackCaloMatching.matching_cpr ]
 
 # to use this sequence need to redefine CalTrkFit->CalPatRec in MergePatRecCpr inputs
-murat.cpr_reco_old : [ @sequence::CalPatRec.old_reco, 
-		       MergePatRecCpr,
-		       @sequence::TrackCaloMatching.matching_cpr ]
+# murat.cpr_reco_old : [ @sequence::CalPatRec.old_reco, 
+#		       MergePatRecCpr,
+#		       @sequence::TrackCaloMatching.matching_cpr ]
 
 murat.tpr_reco : [ @sequence::Tracking.TPRDeM , 
 		   MergePatRecTpr, 
@@ -228,10 +228,10 @@ murat.mpr_reco : [ @sequence::Tracking.TPRDeM ,
 		   @sequence::TrackCaloMatching.matching ]
 
 # to use this sequence need to redefine CalTrkFit->CalPatRec in MergePatRec inputs
-murat.mpr_reco_old : [ @sequence::Tracking.TPRDeM , 
-		       @sequence::CalPatRec.old_reco, 
-		       MergePatRec, 
-		       @sequence::TrackCaloMatching.matching ]
+# murat.mpr_reco_old : [ @sequence::Tracking.TPRDeM , 
+#		       @sequence::CalPatRec.old_reco, 
+#		       MergePatRec, 
+#		       @sequence::TrackCaloMatching.matching ]
 
 murat.dem_reco : [ @sequence::Tracking.TPRDeM  , 
 		   @sequence::CalPatRec.dem_reco, 

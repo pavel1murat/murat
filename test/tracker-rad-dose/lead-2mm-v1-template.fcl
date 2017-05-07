@@ -1,0 +1,8 @@
+#include "JobConfig/cd3/beam/beam_g4s4_flash.fcl"
+
+mu2emetadata.mc.generator_type: "beam"
+mu2emetadata.mc.simulation_stage: 4
+mu2emetadata.mc.primary_particle: "proton"
+
+physics.producers.g4run.debug.smartCopperDensitySF : 1.
+services.GeometryService.inputFile: "murat/test/tracker-rad-dose/lead-2mm-v1-geom.txt"

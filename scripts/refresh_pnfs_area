@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+for f in `find /pnfs/mu2e/scratch/users/murat/workflow` ; do echo $f ; touch $f ; done
+for f in `find /pnfs/mu2e/scratch/users/murat/datasets` ; do echo $f ; touch $f ; done
+

@@ -1,0 +1,7 @@
+#include "JobConfig/cd3/beam/beam_g4s4_flash.fcl"
+
+mu2emetadata.mc.generator_type: "beam"
+mu2emetadata.mc.simulation_stage: 4
+mu2emetadata.mc.primary_particle: "proton"
+
+services.GeometryService.inputFile: "murat/test/tracker-rad-dose/c360brass-01-geom.txt"

@@ -1,0 +1,26 @@
+#include "JobConfig/cd3/beam/beam_g4s4_flash.fcl"
+
+
+mu2emetadata.mc.generator_type: "beam"
+mu2emetadata.mc.simulation_stage: 4
+mu2emetadata.mc.primary_particle: "proton"
+
+services.GeometryService.inputFile                            : "murat/test/tracker-rad-dose/geom-stiff-ring-al.txt"
+mu2e.physics.producers.g4run.flash.debug.smartCopperDensitySF : 2.15
+#----------------------------------------------------------------
+# Code added by generate_fcl:
+services.SeedService.policy:  autoIncrement
+services.SeedService.maxUniqueEngines: 20
+services.SeedService.baseSeed: 622121879
+source.fileNames : [
+"/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-cs3-mothers/v533_v543_v563/10/ed/sim.mu2e.cd3-beam-cs3-mothers.v533_v543_v563.001002_00170003.art"
+]
+services.TFileService.fileName: "nts.MU2EGRIDDSOWNER.cd3-beam-g4s4-flash.MU2EGRIDDSCONF.001002_00170003.root"
+outputs.crvOutput.fileName : "sim.MU2EGRIDDSOWNER.cd3-beam-g4s4-crvflash.MU2EGRIDDSCONF.001002_00170003.art"
+outputs.detectorOutput.fileName : "sim.MU2EGRIDDSOWNER.cd3-beam-g4s4-detflash.MU2EGRIDDSCONF.001002_00170003.art"
+outputs.truncatedEvtsOutput.fileName : "sim.MU2EGRIDDSOWNER.cd3-beam-g4s4-flash-truncated.MU2EGRIDDSCONF.001002_00170003.art"
+mu2emetadata.fcl.prologkeys: [  ]
+mu2emetadata.fcl.inkeys: [ "source.fileNames" ]
+mu2emetadata.fcl.outkeys: [ "services.TFileService.fileName", "outputs.crvOutput.fileName", "outputs.detectorOutput.fileName", "outputs.truncatedEvtsOutput.fileName" ]
+# End code added by generate_fcl:
+#----------------------------------------------------------------

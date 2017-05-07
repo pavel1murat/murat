@@ -1,0 +1,14 @@
+//
+#include "JobConfig/cd3/geom_baseline.txt"
+// changes to the tracker...
+//
+
+double ttrackerSupport.electronics.cu.halfLength   =  1.0;
+string ttrackerSupport.electronics.cu.material     =  "G4_Pb";
+
+string ttrackerSupport.endRing.material            = "G4_Al";
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

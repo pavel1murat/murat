@@ -36,8 +36,8 @@ murat : { @table::murat
 
     producers : { @table::murat.producers
 
-	generate: { @table::StoppedMuonConversionGun    }
-	g4run   : { @table::mu2eg4runDefaultSingleStage }
+	generate: { @table::StoppedMuonConversionGun }
+	g4run   : { @table::Mu2eG4.producers.g4run   }
 	@table::EventMixing.producers
     }
 }

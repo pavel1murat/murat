@@ -36,7 +36,9 @@ physics : {
 
     filters: { 
 	@table::filters 
-#	TrackerMCCheck : @table::murat.TrackerMCCheck
+	TrackerMCCheck : { @table::filters.TrackerMCCheck
+	    processName : MixPBI
+	}		       
     }
 #------------------------------------------------------------------------------
 # paths

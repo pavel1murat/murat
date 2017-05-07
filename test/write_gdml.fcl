@@ -41,3 +41,5 @@ physics : {
     trigger_paths  : [p1]
     end_paths      : [e1]
 }
+
+# physics.producers.g4run.physics.physicsListName:  "Shielding_MU2E01"

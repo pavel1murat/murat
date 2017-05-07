@@ -9,6 +9,7 @@ class Submitter:
 #------------------------------------------------------------------------------
     def __init__(self):
         self._parser = argparse.ArgumentParser();
+
         self._parser.add_argument("-c","--config"   , dest="fclFile"         , default="none" , help="FCL file name");
         self._parser.add_argument("-d","--dsid"     , dest="dsid"            , default="none" , help="input dataset ID");
         self._parser.add_argument("-f","--file"     , dest="fileName"        , default="none" , help="define filename");
@@ -28,6 +29,8 @@ class Submitter:
 
         self._exefile = subprocess.check_output('which mu2e',shell=True).strip();
 
+        print "EXE: "+self._exefile
+
 #------------------------------------------------------------------------------
     def ParseCommandLine(self):
         self._args = self._parser.parse_args();
@@ -38,12 +41,14 @@ class Submitter:
         self._job = os.path.basename(self._args.fclFile).strip('.fcl')
         print 'JOB: %s'%self._job;
 
-        self._dataset_dir = '/grid/fermiapp/mu2e/personal/murat/'+self._args.dsid;
+        self._dataset_dir = '/grid/fermiapp/mu2e/personal/murat/datasets/'+self._args.dsid;
 # if the directory above exists, take a filelist from there
 
         self._dataset = self._dataset_dir;
-        if (os.path.exists(dataset_dir)):
-            self._dataset = dataset_dir+'/'+self._args.dsid+'.filelist';
+        print "dataset:",self._dataset_dir
+
+        if (os.path.exists(self._dataset_dir)):
+            self._dataset = self._dataset_dir+'/'+self._args.dsid+'.filelist';
 
 #------------------------------------------------------------------------------
     def Execute(self):
@@ -51,6 +56,7 @@ class Submitter:
         cmd = self._exefile
 
         print 'Execute: %s'%cmd
+        subprocess.call(['./test_pubmit.sh']);
 
 
 #------------------------------------------------------------------------------
@@ -61,5 +67,3 @@ if (__name__ == '__main__'):
     submitter = Submitter();
     submitter.ParseCommandLine();
     submitter.Execute();
-
-#    subprocess.call(['./test.sh']);

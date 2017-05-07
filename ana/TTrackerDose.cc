@@ -7,45 +7,47 @@
 //-----------------------------------------------------------------------------
 // z range for different stations
 //-----------------------------------------------------------------------------
-double zplane[36][2] = {
-   8660., 8720.,         // 0
-   8720., 8780.,         // 0
-   8820., 8880.,         // 1
-   8880., 8920.,         // 1
-   8980., 9030.,         // 2
-   9030., 9080.,         // 2
-   9140., 9180.,         // 3
-   9180., 9230.,         // 3
-   9300., 9340.,         // 4
-   9340., 9390.,         // 4
-   9450., 9500.,         // 5
-   9500., 9550.,         // 5
-
-   9760., 9800.,         // 6
-   9800., 9860.,         // 6
-   9920., 9960.,         // 7
-   9960.,  10010.,       // 7
-   10080., 10120.,       // 8
-   10120., 10180.,       // 8
-   10220., 10280.,       // 9
-   10280., 10320.,       // 9
-   10380., 10440.,       // 10
-   10440., 10480.,       // 10
-   10540., 10580.,       // 11
-   10580., 10640.,       // 11
-
-   10850., 10900.,       // 12
-   10950., 10950.,       // 12
-   11010., 11050.,       // 13
-   11050., 11100.,       // 13
-   11160., 11210.,       // 14
-   11210., 11260.,       // 14
-   11320., 11360.,       // 15
-   11360., 11420.,       // 15
-   11480., 11520.,       // 16
-   11520., 11580.,       // 16
-   11620., 11680.,       // 17
-   11680., 11720.        // 17
+double zplane[40][2] = {
+   8660. , 8720. ,       // 0
+   8720. , 8780. ,       // 0
+   8820. , 8880. ,       // 1
+   8880. , 8920. ,       // 1
+   8980. , 9030. ,       // 2
+   9030. , 9080. ,       // 2
+   9140. , 9180. ,       // 3
+   9180. , 9230. ,       // 3
+   9300. , 9340. ,       // 4
+   9340. , 9390. ,       // 4
+   9450. , 9500. ,       // 5
+   9500. , 9550. ,       // 5
+   0.    , -1.   ,       // 6 missing
+   0.    , -1.   ,       // 6 missing
+   9760. , 9800. ,       // 7
+   9800. , 9860. ,       // 7
+   9920. , 9960. ,       // 8
+   9960. , 10010.,       // 8
+   10080., 10120.,       // 9
+   10120., 10180.,       // 9
+   10220., 10280.,       // 10
+   10280., 10320.,       // 10
+   10380., 10440.,       // 11
+   10440., 10480.,       // 11
+   10540., 10580.,       // 12
+   10580., 10640.,       // 12
+   0.    , -1.   ,       // 13 missing
+   0.    , -1.   ,       // 13 missing
+   10850., 10900.,       // 14
+   10900., 10950.,       // 14
+   11010., 11050.,       // 15
+   11050., 11100.,       // 15
+   11160., 11210.,       // 16
+   11210., 11260.,       // 16
+   11320., 11360.,       // 17
+   11360., 11420.,       // 17
+   11480., 11520.,       // 18
+   11520., 11580.,       // 18
+   11620., 11680.,       // 19
+   11680., 11720.        // 19
 };
   
 
@@ -53,7 +55,7 @@ double zplane[36][2] = {
 int plane_number(float Z) {
   int ist(-1);
 
-  for (int i=0; i<36; i++) {
+  for (int i=0; i<40; i++) {
     if ((Z > zplane[i][0]) && (Z < zplane[i][1])) {
       ist = i;
       break;
@@ -72,6 +74,8 @@ TTrackerDose::TTrackerDose(const char* Process) : TStnModule("TrackerDose","Trac
   fProcess = Process;
 
   fNPOT = 1.2e20;           // "per year of running"
+  fDensity[1] = 1.8;        // G10
+  fDensity[0] = 0  ;        // make sure the code crashes 
 
   TH1::AddDirectory(0);
 
@@ -104,6 +108,8 @@ int TTrackerDose::BookTrackerHistograms(TrackHist_t* Hist, const char* Folder) {
 
   HBook2F(Hist->fEDepVsPlane[0],"edep_vs_plane_0",Form("%s: E(dep) vs Plane Raw ",Folder), 40,0,40,20,650,850,Folder);
   HBook2F(Hist->fEDepVsPlane[1],"edep_vs_plane_1",Form("%s: E(dep) vs Plane Norm",Folder), 40,0,40,20,650,850,Folder);
+  HBook2F(Hist->fEDepVsPlane[2],"edep_vs_plane_2",Form("%s: E(dep) vs Plane ele" ,Folder), 40,0,40,20,650,850,Folder);
+  HBook2F(Hist->fEDepVsPlane[3],"edep_vs_plane_3",Form("%s: E(dep) vs Plane gam" ,Folder), 40,0,40,20,650,850,Folder);
 
   return 0;
 }
@@ -113,7 +119,7 @@ int TTrackerDose::BookVDetHistograms(VDetHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fPdgId   ,"pdg"   ,Form("%s: PDG ID",Folder), 500, -5000, 5000,Folder);
   HBook1F(Hist->fE[0]    ,"e_0"   ,Form("%s: e[0]"  ,Folder), 200,     0,   100,Folder);
   HBook1F(Hist->fE[1]    ,"e_1"   ,Form("%s: e[1]"  ,Folder), 200,     0,     2,Folder);
-  HBook1F(Hist->fR       ,"radius",Form("%s: radius",Folder), 200,   650,   850,Folder);
+  HBook1F(Hist->fR       ,"radius",Form("%s: radius",Folder), 850,     0,   850,Folder);
   HBook1F(Hist->fCosth   ,"costh" ,Form("%s: costh" ,Folder), 200,    -1,     1,Folder);
 
   return 0;
@@ -167,8 +173,15 @@ int TTrackerDose::BookHistograms() {
   int book_vdet_histset[kMaxVDetHistSets];
   for (int i=0; i<kMaxVDetHistSets; i++) book_vdet_histset[i] = 0;
 
-  book_vdet_histset[  0] = 0;     		// all hits - do not fill
+  book_vdet_histset[  0] = 1;     		// all hits
   book_vdet_histset[  1] = 1;     		// hits in the tracker front detector 71 < R < 80
+  book_vdet_histset[  2] = 1;     		// electr hits in the tracker front detector 71 < R < 80
+  book_vdet_histset[  3] = 1;     		// photon hits in the tracker front detector 71 < R < 80
+  book_vdet_histset[  4] = 1;     		// other  hits in the tracker front detector 71 < R < 80
+
+  book_vdet_histset[100] = 1;     		// all hits - tracker mid
+
+  book_vdet_histset[200] = 1;     		// all hits - tracker back 
 
   for (int i=0; i<kMaxVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
@@ -221,6 +234,9 @@ int TTrackerDose::FillTrackerHistograms(TrackHist_t* Hup, TrackHist_t* Hdn) {
     int plane = plane_number(z);
 
     Hup->fEDepVsPlane[0] ->Fill(plane,r,ttsUpEdep[i]);
+
+    if (abs(pdg_id) ==   11) Hup->fEDepVsPlane[2] ->Fill(plane,r,ttsUpEdep[i]);
+    if (abs(pdg_id) ==   22) Hup->fEDepVsPlane[3] ->Fill(plane,r,ttsUpEdep[i]);
     
   }
 
@@ -253,7 +269,9 @@ int TTrackerDose::FillTrackerHistograms(TrackHist_t* Hup, TrackHist_t* Hdn) {
     int plane = plane_number(z);
 
     Hdn->fEDepVsPlane[0] ->Fill(plane,r,ttsDwEdep[i]);
-    
+
+    if (abs(pdg_id) ==   11)  Hdn->fEDepVsPlane[2] ->Fill(plane,r,ttsDwEdep[i]);
+    if (abs(pdg_id) ==   22)  Hdn->fEDepVsPlane[3] ->Fill(plane,r,ttsDwEdep[i]);
   }
   return 0;
 }
@@ -292,8 +310,24 @@ int TTrackerDose::FillHistograms() {
     fVDet.Costh  = vCosth[i];   
     fVDet.Radius = vRadius[i];   
 
-    if ((fVDet.Id == 13) && (fVDet.Radius > 710) && (fVDet.Radius < 800)) {
-      FillVDetHistograms(fHist.fVDet[1],&fVDet);
+    if (fVDet.Id == 13) {
+      FillVDetHistograms(fHist.fVDet[0],&fVDet);
+      
+      if ((fVDet.Id == 13) && (fVDet.Radius > 710) && (fVDet.Radius < 800)) {
+	FillVDetHistograms(fHist.fVDet[1],&fVDet);
+
+	if      (abs(fVDet.PdgId) == 11) FillVDetHistograms(fHist.fVDet[2],&fVDet);
+	else if (abs(fVDet.PdgId) == 22) FillVDetHistograms(fHist.fVDet[3],&fVDet);
+	else                             FillVDetHistograms(fHist.fVDet[4],&fVDet);
+      }
+    }
+
+    if (fVDet.Id == 11) {
+      FillVDetHistograms(fHist.fVDet[100],&fVDet);
+    }
+
+    if (fVDet.Id == 15) {
+      FillVDetHistograms(fHist.fVDet[200],&fVDet);
     }
   }
 
@@ -401,7 +435,6 @@ void TTrackerDose::Loop(Long64_t NEvents) {
 // material used to calculate losses: 3mm thick G10 disks 
 //-----------------------------------------------------------------------------
   float thickness     = 0.3;
-  float density       = 1.8;
   float mev_per_joule = 1.6e-19*1.e6;
   float krad_per_gray = 10.;
 
@@ -409,31 +442,53 @@ void TTrackerDose::Loop(Long64_t NEvents) {
   int ny   =  fHist.fUp[0]->fEDepVsPlane[1]->GetNbinsY();
   float dr =  fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinWidth(1)/10.; //  // convert to cm
 
+//-----------------------------------------------------------------------------
+// "upstream" layer of "electronics"
+//-----------------------------------------------------------------------------
   for (int i=0; i<nx; i++) {
+    int binx = i+1;
     for (int ir=0; ir<ny; ir++) {
-      float r     = fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinCenter(ir+1)/10.; // convert to cm
-      float mass  = 2*M_PI*r*dr*thickness*density/1.e3; // in kG
-      float sf    = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass/krad_per_gray;
-      
-      double x    = fHist.fUp[0]->fEDepVsPlane[0]->GetBinContent(i,ir);
-      double e    = fHist.fUp[0]->fEDepVsPlane[0]->GetBinError  (i,ir);
 
-      fHist.fUp[0]->fEDepVsPlane[1]->SetBinContent(i,ir,x*sf);
-      fHist.fUp[0]->fEDepVsPlane[1]->SetBinError  (i,ir,e*sf);
+      int biny = ir+1;
+
+      float r     = fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinCenter(biny)/10.; // convert to cm
+      float mass  = 2*M_PI*r*dr*thickness*fDensity[0]/1.e3; // in kG
+
+      // the first and the last 1cm bins are effectively more narrow, not 1 cm, but 1-0.27 cm wide
+      if ((r > 71.) && (r < 72.)) mass = mass*(1-0.27);
+      if ((r > 79.) && (r < 80.)) mass = mass*(1-0.27);
+
+      float sf    = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass/krad_per_gray;
+     
+      double x    = fHist.fUp[0]->fEDepVsPlane[0]->GetBinContent(binx,biny);
+      double e    = fHist.fUp[0]->fEDepVsPlane[0]->GetBinError  (binx,biny);
+
+      fHist.fUp[0]->fEDepVsPlane[1]->SetBinContent(binx,biny,x*sf);
+      fHist.fUp[0]->fEDepVsPlane[1]->SetBinError  (binx,biny,e*sf);
     }
   }
-
+//-----------------------------------------------------------------------------
+// "downstream" layer of "electronics"
+//-----------------------------------------------------------------------------
   for (int i=0; i<nx; i++) {
+    int binx = i+1;
     for (int ir=0; ir<ny; ir++) {
-      float r     = fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinCenter(ir+1)/10.;  // convert to cm
-      float mass  = 2*M_PI*r*dr*thickness*density/1.e3; // in kG
+      int biny    = ir+1;
+      float r     = fHist.fUp[0]->fEDepVsPlane[1]->GetYaxis()->GetBinCenter(biny)/10.;  // convert to cm
+      float mass  = 2*M_PI*r*dr*thickness*fDensity[1]/1.e3; // in kG
+
+      // the first and the last 1cm bins are effectively more narrow, not 1 cm, but 1-0.27 cm wide
+      if ((r > 71.) && (r < 72.)) mass = mass*(1-0.27);
+      if ((r > 79.) && (r < 80.)) mass = mass*(1-0.27);
+
+
       float sf    = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass/krad_per_gray;
       
-      double x    = fHist.fDn[0]->fEDepVsPlane[0]->GetBinContent(i,ir);
-      double e    = fHist.fDn[0]->fEDepVsPlane[0]->GetBinError  (i,ir);
+      double x    = fHist.fDn[0]->fEDepVsPlane[0]->GetBinContent(binx,biny);
+      double e    = fHist.fDn[0]->fEDepVsPlane[0]->GetBinError  (binx,biny);
 
-      fHist.fDn[0]->fEDepVsPlane[1]->SetBinContent(i,ir,x*sf);
-      fHist.fDn[0]->fEDepVsPlane[1]->SetBinError  (i,ir,e*sf);
+      fHist.fDn[0]->fEDepVsPlane[1]->SetBinContent(binx,biny,x*sf);
+      fHist.fDn[0]->fEDepVsPlane[1]->SetBinError  (binx,biny,e*sf);
     }
   }
 
@@ -639,36 +694,191 @@ int TTrackerDose::InitChain() {
 
     fNPerPOT    = 1.;
     fNSimulated = 5.1e9;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "FLASH_MURAT") {
+    chain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-ring-al100-700-ele-g10-0001/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*1/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_G4V10") {
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-0.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-1.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-2.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-3.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-4.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-5.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-6.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-7.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-8.root");
+    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-9.root");
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_CU050") { // updated 2017-04-11
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 8.96*0.50;
+  }
+  else if (fProcess == "FLASH_CU100") {
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 8.96*1.00;
+  }
+  else if (fProcess == "FLASH_CU100_MURAT") {
+    chain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-ring-cu100-700-ele-g10-0001/step2/nts.stntuple.bbb.ccc.template.root");
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9;
+    fDensity[0] = 8.96*1.00;
+  }
+  else if (fProcess == "FLASH_CU215") {  // updated 2017-04-11
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 8.96*2.15;
+  }
+  else if (fProcess == "FLASH_CU100_680") {  // updated 2017-04-11
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00000/nts.gianipez.bbb.g4v10innerRing680.001002_00170003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00001/nts.gianipez.bbb.g4v10innerRing680.001002_00210003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00002/nts.gianipez.bbb.g4v10innerRing680.001002_00230003.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00003/nts.gianipez.bbb.g4v10innerRing680.001002_00380101.root");
+    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00004/nts.gianipez.bbb.g4v10innerRing680.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 8.96*1.00;
+  }
+  else if (fProcess == "FLASH_CU100_RING_ONLY") {  // updated 2017-04-21
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_CU100_IR_CU") {  // updated 2017-04-23
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_SMCO_X1") {  // updated 2017-04-27
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_SMCO_X2") {  // updated 2017-04-27
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_SMCO_X3") {  // updated 2017-04-27
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_LEAD_2MM") {  // updated 2017-04-29
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00170003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00210003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00230003.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00380101.root");
+    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "DIO") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDIO.root");
     fNPerPOT    = 7.27e-4;
     fNSimulated = 1.0e7;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "OOT") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerOOT.root");
     fNPerPOT    = 3.97e-3;
     fNSimulated = 3.0e7;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "PHOTON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPHOTON.root");
     fNPerPOT    = 2.28e-3;
     fNSimulated = 1.0e8;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "PROTON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPROTON.root");
     fNPerPOT    = 5.69e-5;
     fNSimulated = 1.0e8;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "DEUTERON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDEUTERON.root");
     fNPerPOT    = 2.84e-5;
     fNSimulated = 1.0e8;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "NEUTRON") {
     chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerNEUTRON.root");
     fNPerPOT    = 1.37e-3;
     fNSimulated = 1.0e8;
+    fDensity[0] = 1.7;
   }
 
   fChain = chain;

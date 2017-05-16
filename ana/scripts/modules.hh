@@ -8,6 +8,7 @@
 // #include "murat/ana/TGenAnaModule.hh"
 // #include "murat/ana/TPhotosAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
+#include "murat/ana/TStepPointMCAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
 // #include "murat/ana/TStnGeneratorModule.hh"
 #include "murat/ana/TTrackAnaModule.hh"
@@ -30,6 +31,7 @@ TGenAnaModule*             m_gen   = NULL;
 TPidAnaModule*             m_pid   = NULL;
 // TStnGeneratorModule*       m_stg   = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
+TStepPointMCAnaModule*     m_spmc  = NULL;
 TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackAnaModule*           m_trk   = NULL;
 TTrackAnaModuleA*          m_trka  = NULL;

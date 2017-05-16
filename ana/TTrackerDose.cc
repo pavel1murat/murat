@@ -111,6 +111,16 @@ int TTrackerDose::BookTrackerHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook2F(Hist->fEDepVsPlane[2],"edep_vs_plane_2",Form("%s: E(dep) vs Plane ele" ,Folder), 40,0,40,20,650,850,Folder);
   HBook2F(Hist->fEDepVsPlane[3],"edep_vs_plane_3",Form("%s: E(dep) vs Plane gam" ,Folder), 40,0,40,20,650,850,Folder);
 
+  HBook1D(Hist->fMeanDoseVsPlane,"dmean_vs_plane",Form("%s: Mean Dose Vs Plane"   ,Folder), 40,0,40,Folder);
+  HBook1D(Hist->fMaxDoseVsPlane ,"dmax_vs_plane" ,Form("%s: Dose Vs Plane 71<r<72",Folder), 40,0,40,Folder);
+  HBook1D(Hist->fDose73VsPlane  ,"d73_vs_plane"  ,Form("%s: Dose Vs Plane 73<r<74",Folder), 40,0,40,Folder);
+  HBook1D(Hist->fDose75VsPlane  ,"d75_vs_plane"  ,Form("%s: Dose Vs Plane 75<r<76",Folder), 40,0,40,Folder);
+
+  for (int i=0;i<40; i++) {
+    int ipl = i+1;
+    HBook1D(Hist->fDoseVsR[i],Form("dose_vs_r_%02i",ipl),Form("%s: Dose Vs R Plane %02i",Folder,ipl), 20,650,850,Folder); // 
+  }
+
   return 0;
 }
 
@@ -291,8 +301,15 @@ int TTrackerDose::FillVDetHistograms(VDetHist_t* Hist, VDetData_t* VDet) {
 int TTrackerDose::FillHistograms() {
 
   FillTrackerHistograms(fHist.fUp[0], fHist.fDn[0]);
+//-----------------------------------------------------------------------------
+// fill per-plane histograms (for up only)
+//-----------------------------------------------------------------------------
+  
 
 
+//-----------------------------------------------------------------------------
+// fill virtual detecotr histograms
+//-----------------------------------------------------------------------------
   for (int i=0; i<vNHits; i++) {
     fVDet.Id     = vId[i];
     fVDet.PdgId  = vPdgId[i];
@@ -467,6 +484,24 @@ void TTrackerDose::Loop(Long64_t NEvents) {
       fHist.fUp[0]->fEDepVsPlane[1]->SetBinError  (binx,biny,e*sf);
     }
   }
+
+  float rmax = 79.73;
+  float rmin = 71.27;
+
+  float mass_up = M_PI*(rmax*rmax-rmin*rmin)*thickness*fDensity[0]/1.e3; // in kG
+  float sf_up   = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass_up/krad_per_gray;
+
+  fHist.fUp[0]->fMeanDoseVsPlane->Add(fHist.fUp[0]->fEDepVsPlane[0]->ProjectionX());
+  fHist.fUp[0]->fMeanDoseVsPlane->Scale(sf_up); 
+
+  fHist.fUp[0]->fMaxDoseVsPlane->Add(fHist.fUp[0]->fEDepVsPlane[1]->ProjectionX("px07_up", 7, 7));
+  fHist.fUp[0]->fDose73VsPlane ->Add(fHist.fUp[0]->fEDepVsPlane[1]->ProjectionX("px09_up", 9, 9));
+  fHist.fUp[0]->fDose75VsPlane ->Add(fHist.fUp[0]->fEDepVsPlane[1]->ProjectionX("px11_up",11,11));
+
+  for (int i=0; i<40; i++) {
+    int ipl = i+1;
+    fHist.fUp[0]->fDoseVsR[i]->Add(fHist.fUp[0]->fEDepVsPlane[1]->ProjectionY(Form("py%2i_up",ipl),ipl,ipl));
+  }
 //-----------------------------------------------------------------------------
 // "downstream" layer of "electronics"
 //-----------------------------------------------------------------------------
@@ -492,6 +527,21 @@ void TTrackerDose::Loop(Long64_t NEvents) {
     }
   }
 
+  fHist.fDn[0]->fMeanDoseVsPlane->Add(fHist.fDn[0]->fEDepVsPlane[0]->ProjectionX());
+
+  float mass_dn = M_PI*(rmax*rmax-rmin*rmin)*thickness*fDensity[1]/1.e3; // in kG
+  float sf_dn   = (fNPOT*fNPerPOT)/(nent+1.e-12)*(nentries/(fNSimulated+1.e-12))*mev_per_joule/mass_dn/krad_per_gray;
+
+  fHist.fDn[0]->fMeanDoseVsPlane->Scale(sf_dn); // full range: (71.3 - 79.7 cm)
+
+  fHist.fDn[0]->fMaxDoseVsPlane->Add(fHist.fDn[0]->fEDepVsPlane[1]->ProjectionX("px07_dn", 7, 7));
+  fHist.fDn[0]->fDose73VsPlane ->Add(fHist.fDn[0]->fEDepVsPlane[1]->ProjectionX("px09_dn", 9, 9));
+  fHist.fDn[0]->fDose75VsPlane ->Add(fHist.fDn[0]->fEDepVsPlane[1]->ProjectionX("px11_dn",11,11));
+
+  for (int i=0; i<40; i++) {
+    int ipl = i+1;
+    fHist.fDn[0]->fDoseVsR[i]->Add(fHist.fDn[0]->fEDepVsPlane[1]->ProjectionY(Form("py%02i_dn",ipl),ipl,ipl));
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -673,87 +723,154 @@ void TTrackerDose::Show(Long64_t entry) {
 }
 
 //-----------------------------------------------------------------------------
+int TTrackerDose::AddFiles(const char* Fn) {
+
+  char   name[200], c[1000];
+
+  FILE* f = fopen(Fn,"r");
+  if (f) {
+    while ( (c[0]=getc(f)) != EOF) {
+//-----------------------------------------------------------------------------
+// skip comment lines starting from '#'
+//-----------------------------------------------------------------------------
+      if ((c[0] != '#') && (c[0] != '\n')) {
+	ungetc(c[0],f);
+	fscanf(f,"%s",name);
+	printf("file : %s\n",name);
+	fChain->Add(name);
+      }
+      fgets(c,100,f);
+    }
+    fclose(f);
+    return 0;
+  }
+  else {				// can't open the file
+    printf(" CANT open %s, BAIL OUT\n",Fn);
+    return -1;
+  }
+  
+}
+
+//-----------------------------------------------------------------------------
 // fNPetPOT for non-flash backgrounds is a product of the number of stopped 
 // muons per POT and average yiled of a given particle species per muon stop
 //-----------------------------------------------------------------------------
 int TTrackerDose::InitChain() {
 
-  TChain* chain = new TChain("//calorimeterDose/Calo","Calo");
+  fChain = new TChain("//calorimeterDose/Calo","Calo");
 
+  if (fProcess == "FLASH_C360BRASS_01") { // read catalog file
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-01-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "FLASH_C360BRASS_02") { // read catalog file
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-02-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "FLASH_C360BRASS_03") { // read catalog file
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-03-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "FLASH_C360BRASS_04") { // read catalog file
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-04-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "FLASH_C360BRASS_05") { // read catalog file
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-05-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "FLASH_C360BRASS_06") { // read catalog file
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-06-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
   if (fProcess == "FLASH") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_0.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_1.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_2.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_3.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_4.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_5.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_6.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_7.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_8.root");
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerFLASH_9.root");
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-default-giani-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
 
     fNPerPOT    = 1.;
     fNSimulated = 5.1e9;
     fDensity[0] = 1.7;
   }
-  if (fProcess == "FLASH_MURAT") {
-    chain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-ring-al100-700-ele-g10-0001/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+  if (fProcess == "FLASH_PASHA") {
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-default-pasha-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
-    fNSimulated = 5.1e9*1/51.;
+    fNSimulated = 5.1e9*5/51.;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_G4V10") {
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-0.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-1.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-2.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-3.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-4.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-5.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-6.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-7.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-8.root");
-    chain->Add("/mu2e/data/users/gianipez/Dose-2017-04-TTree-files/tree-FLASH-g4v10-9.root");
+    fDataset = Form("%s/datasets/tracker-rad-dose/flash-g4v10-giani-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
 
     fNPerPOT    = 1.;
     fNSimulated = 5.1e9;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_CU050") { // updated 2017-04-11
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748704/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
     fNSimulated = 5.1e9*5/51.;
     fDensity[0] = 8.96*0.50;
   }
   else if (fProcess == "FLASH_CU100") {
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18671676/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
     fNSimulated = 5.1e9*5/51.;
     fDensity[0] = 8.96*1.00;
   }
   else if (fProcess == "FLASH_CU100_MURAT") {
-    chain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-ring-cu100-700-ele-g10-0001/step2/nts.stntuple.bbb.ccc.template.root");
+    // stiffener ring out of Cu (x1), the rest - default
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/cu100/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/cu100/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/cu100/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/cu100/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/cu100/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
     fNPerPOT    = 1.;
-    fNSimulated = 5.1e9;
-    fDensity[0] = 8.96*1.00;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_CU215") {  // updated 2017-04-11
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00000/nts.gianipez.bbb.g4v10.001002_00170003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00001/nts.gianipez.bbb.g4v10.001002_00210003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00002/nts.gianipez.bbb.g4v10.001002_00230003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00003/nts.gianipez.bbb.g4v10.001002_00380101.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18748681/00/00004/nts.gianipez.bbb.g4v10.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -761,11 +878,11 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 8.96*2.15;
   }
   else if (fProcess == "FLASH_CU100_680") {  // updated 2017-04-11
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00000/nts.gianipez.bbb.g4v10innerRing680.001002_00170003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00001/nts.gianipez.bbb.g4v10innerRing680.001002_00210003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00002/nts.gianipez.bbb.g4v10innerRing680.001002_00230003.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00003/nts.gianipez.bbb.g4v10innerRing680.001002_00380101.root");
-    chain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00004/nts.gianipez.bbb.g4v10innerRing680.001002_00410125.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00000/nts.gianipez.bbb.g4v10innerRing680.001002_00170003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00001/nts.gianipez.bbb.g4v10innerRing680.001002_00210003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00002/nts.gianipez.bbb.g4v10innerRing680.001002_00230003.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00003/nts.gianipez.bbb.g4v10innerRing680.001002_00380101.root");
+    fChain->Add("/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-ana-g4v10/outstage/18817868/00/00004/nts.gianipez.bbb.g4v10innerRing680.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -773,11 +890,11 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 8.96*1.00;
   }
   else if (fProcess == "FLASH_CU100_RING_ONLY") {  // updated 2017-04-21
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00170003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00210003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00230003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00380101.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00410125.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10/nts.gianipez.bbb.g4v10innerRingCu10.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -785,11 +902,11 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_CU100_IR_CU") {  // updated 2017-04-23
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/sr-cu100-700-ele-g10-ir-cu/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -797,11 +914,11 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_SMCO_X1") {  // updated 2017-04-27
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -809,11 +926,11 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_SMCO_X2") {  // updated 2017-04-27
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00170003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00210003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00230003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00380101.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00410125.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_2/step2/nts.MU2EGRIDDSOWNER.flash-sf-2.MU2EGRIDDSCONF.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -821,11 +938,23 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_SMCO_X3") {  // updated 2017-04-27
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00170003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00210003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00230003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00380101.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00410125.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/smart_copper_sf_3/step2/nts.MU2EGRIDDSOWNER.flash-sf-3.MU2EGRIDDSCONF.001002_00410125.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*5/51.;
+    fDensity[0] = 1.7;
+  }
+  else if (fProcess == "FLASH_DEFAULT") {  // updated 2017-05-03
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/default/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/default/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/default/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/default/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/default/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
@@ -833,55 +962,62 @@ int TTrackerDose::InitChain() {
     fDensity[0] = 1.7;
   }
   else if (fProcess == "FLASH_LEAD_2MM") {  // updated 2017-04-29
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00170003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00210003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00230003.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00380101.root");
-    chain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00410125.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00170003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00210003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00380101.root");
+    fChain->Add("/mu2e/data/users/gianipez/g4v10-flash-tracker/lead_2mm/step2/nts.MU2EGRIDDSOWNER.flash_lead_2mm.MU2EGRIDDSCONF.001002_00410125.root");
 
     fNPerPOT    = 1.;
     //    fNSimulated = 5.1e9;
     fNSimulated = 5.1e9*5/51.;
     fDensity[0] = 1.7;
   }
+  else if (fProcess == "FLASH_LEAD_2MM_V1") {  // updated 2017-05-03
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-lead-2mm-v1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00230003.root");
+    fChain->Add("/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-lead-2mm-v1/step2/nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00380101.root");
+
+    fNPerPOT    = 1.;
+    //    fNSimulated = 5.1e9;
+    fNSimulated = 5.1e9*2/51.;
+    fDensity[0] = 1.7;
+  }
   else if (fProcess == "DIO") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDIO.root");
+    fChain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDIO.root");
     fNPerPOT    = 7.27e-4;
     fNSimulated = 1.0e7;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "OOT") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerOOT.root");
+    fChain->Add("/mu2e/data/users/gianipez/hist/treeTrackerOOT.root");
     fNPerPOT    = 3.97e-3;
     fNSimulated = 3.0e7;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "PHOTON") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPHOTON.root");
+    fChain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPHOTON.root");
     fNPerPOT    = 2.28e-3;
     fNSimulated = 1.0e8;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "PROTON") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPROTON.root");
+    fChain->Add("/mu2e/data/users/gianipez/hist/treeTrackerPROTON.root");
     fNPerPOT    = 5.69e-5;
     fNSimulated = 1.0e8;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "DEUTERON") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDEUTERON.root");
+    fChain->Add("/mu2e/data/users/gianipez/hist/treeTrackerDEUTERON.root");
     fNPerPOT    = 2.84e-5;
     fNSimulated = 1.0e8;
     fDensity[0] = 1.7;
   }
   else if (fProcess == "NEUTRON") {
-    chain->Add("/mu2e/data/users/gianipez/hist/treeTrackerNEUTRON.root");
+    fChain->Add("/mu2e/data/users/gianipez/hist/treeTrackerNEUTRON.root");
     fNPerPOT    = 1.37e-3;
     fNSimulated = 1.0e8;
     fDensity[0] = 1.7;
   }
-
-  fChain = chain;
 
   Init(fChain);
 //-----------------------------------------------------------------------------

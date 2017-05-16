@@ -12,9 +12,10 @@
 
 #include "TNamed.h"
 
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
+#include "TROOT.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TString.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -52,6 +53,11 @@ public :
     TH1F*     fZ;
     TH1F*     fEKin[5];
     TH2F*     fEDepVsPlane[4];
+    TH1D*     fMeanDoseVsPlane;
+    TH1D*     fMaxDoseVsPlane;
+    TH1D*     fDose73VsPlane;
+    TH1D*     fDose75VsPlane;
+    TH1D*     fDoseVsR[40];
   };
 
   struct VDetHist_t {
@@ -91,6 +97,7 @@ public :
 
 
   TString   fProcess;
+  TString   fDataset;
 
   Hist_t    fHist;
 
@@ -333,7 +340,8 @@ public :
   TTrackerDose(const char* Name);
   virtual ~TTrackerDose();
 
-  int     InitChain      ();
+  int     AddFiles (const char* Fn);
+  int     InitChain();
 
   int     BookEventHistograms  (EventHist_t* Hist, const char* Folder);
   int     BookTrackerHistograms(TrackHist_t* Hist, const char* Folder);

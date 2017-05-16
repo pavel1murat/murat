@@ -1,0 +1,26 @@
+///////////////////////////////////////////////////////////////////////////////
+// configuration 6:
+// ----------------
+// - stiffener ring                     : C360 brass, inner radius 690 mm
+// - cover and central manifold plates  : C360 brass
+// - inner manifold ring                : C360 brass 
+// - extra shielding of the electronics : 3 mm of lead
+///////////////////////////////////////////////////////////////////////////////
+#include "JobConfig/cd3/geom_baseline.txt"
+// changes to the tracker...
+//
+
+double ttrackerSupport.electronics.cu.halfLength   =  1.5;   // in mm
+string ttrackerSupport.electronics.cu.material     =  "G4_Pb";
+
+string ttrackerSupport.endRing.material            = "C360Brass";
+double ttrackerSupport.endRing.innerRadius         =  690.;   // default:700
+
+string ttrackerSupport.centerPlate.material        = "C360Brass";
+string ttrackerSupport.cover.material              = "C360Brass";
+string ttrackerSupport.innerRing.material          = "C360Brass"; // default:"TrackerManifold"
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

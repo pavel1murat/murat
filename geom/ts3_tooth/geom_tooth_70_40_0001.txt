@@ -1,0 +1,12 @@
+// mode: -*- c++ -*-
+//
+// geometry file for Mu2e.
+//
+
+#include "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt" 
+bool   ts.useFlashBlockUp          =  true;
+double ts.flashBlockUp.Width       =  70.0;    // mm
+double ts.flashBlockUp.Height      =  40.0;    // mm
+double ts.flashBlockUp.Length      =   0.1;    // mm full length
+double ts.flashBlockUp.TransOffset = -15.0;    // mm, neg = West
+string ts.flashBlockUp.Material    = "CollCu"; //

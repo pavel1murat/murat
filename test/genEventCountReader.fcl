@@ -1,0 +1,51 @@
+// Ivan Logashenko, 2015
+//
+// This is an example of how to read output of second stage
+// of CD3 simulation and save data to virtual detectors ntuples
+//
+
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Analyses/fcl/prolog.fcl"
+
+# Give this job a name.
+process_name : GenEventCountReader
+
+source : { 
+  module_type : RootInput 
+# maxEvents : 1000
+}
+
+services : {
+
+    message               : @local::default_message
+    TFileService          : { fileName : "genEventCountReader.hist" }
+    RandomNumberGenerator : { }
+
+    GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt" }
+    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+    G4Helper               : { }
+    SeedService            : @local::automaticSeeds
+}
+
+physics : {
+
+   analyzers: {
+       GenEventCountReader: { module_type: GenEventCountReader 
+	   makeHistograms: false        
+       }
+   }
+
+   e1        : [GenEventCountReader]
+   end_paths : [e1]
+}
+
+outputs: {}
+
+services.SeedService.baseSeed         :  0
+services.SeedService.maxUniqueEngines :  20
+

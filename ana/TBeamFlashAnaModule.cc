@@ -1,4 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
+// 2017-05-22: to run on output of Stage1 simulation
+// proton is the first TSimParticle number 0
+// 
 // use of tmp:
 //
 // Tmp(0) : nax seg
@@ -9,9 +12,9 @@
 // 1  : passed events
 // 2  : rejected events
 // 
-// 3  : UNUSED
-// 4  : events with NHitsTF > 1
-// 5  : UNUSED
+// 3  : events with P(muon gp) > 8000
+// 4  : events with electron or muon gparent=NULL
+// 5  : events with electron or muon grandparent PDG code > 2500
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -28,11 +31,11 @@
 //-----------------------------------------------------------------------------
 // #include "CalorimeterGeom/inc/HexMap.hh"
 
-#include "ana/TStepPointMCAnaModule.hh"
+#include "ana/TBeamFlashAnaModule.hh"
 
-ClassImp(TStepPointMCAnaModule)
+ClassImp(TBeamFlashAnaModule)
 //-----------------------------------------------------------------------------
-TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title):
+TBeamFlashAnaModule::TBeamFlashAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
   // fPdgCode       = 11;
@@ -40,12 +43,12 @@ TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title
 }
 
 //-----------------------------------------------------------------------------
-TStepPointMCAnaModule::~TStepPointMCAnaModule() {
+TBeamFlashAnaModule::~TBeamFlashAnaModule() {
 }
 
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const char* Folder) {
+void TBeamFlashAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const char* Folder) {
   //     char name [200];
   //     char title[200];
   StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
@@ -54,12 +57,12 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
   HBook1F(hist->fGenIndex,"gen_index",Form("%s: GenIndex"       ,Folder), 200,    0, 10000,Folder);
   HBook1F(hist->fSimID   ,"sim_id"   ,Form("%s: SimID"          ,Folder), 200,    0,  1000,Folder);
 
-  HBook1F(hist->fPDGCode[0] ,"pdg_0" ,Form("%s: PDG code"       ,Folder),  500,  -250,   250,Folder);
-  HBook1F(hist->fPDGCode[1] ,"pdg_1" ,Form("%s: PDG code"       ,Folder), 2000, -10000, 10000,Folder);
+  HBook1F(hist->fPDGCode[0] ,"pdg_0" ,Form("%s: PDG code"       ,Folder),  700,  -350,   350,Folder);
+  HBook1F(hist->fPDGCode[1] ,"pdg_1" ,Form("%s: PDG code"       ,Folder),  700, -3500,  3500,Folder);
 
-  HBook1F(hist->fCreationCode   ,"cr_code",Form("%s: Creation code",Folder), 200,   0,   200,Folder);
-  HBook1F(hist->fParentSimID    ,"psim_id",Form("%s: Parent SimID",Folder), 200,   0,  1000,Folder);
-  HBook1F(hist->fParentPDGCode  ,"ppdg"   ,Form("%s: Parent PDG code",Folder), 200, -100,   100,Folder);
+  HBook1F(hist->fCreationCode   ,"cr_code" ,Form("%s: Creation code",Folder), 200,   0,   200,Folder);
+  HBook1F(hist->fParentSimID    ,"psim_id" ,Form("%s: Parent SimID",Folder), 200,   0,  1000,Folder);
+  HBook1F(hist->fParentPDGCode  ,"ppdg"    ,Form("%s: Parent PDG code",Folder), 700, -350,   350,Folder);
   HBook1F(hist->fEndProcessCode ,"end_code",Form("%s: End process code",Folder), 200,   0,   200,Folder);
   HBook1F(hist->fEDepTot        ,"edep_tot",Form("%s: EDEP tot"        ,Folder), 200,   0,   10 ,Folder);
   HBook1F(hist->fEDepNio        ,"edep_nio",Form("%s: EDEP NIO"        ,Folder), 200,   0,   10 ,Folder);
@@ -70,11 +73,14 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
   HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 500, -250,  250, 500, -250, 250, Folder);
 
+  HBook1F(hist->fGpPDGCode[0]   ,"gp_pdg_0"        ,Form("%s: Grand Parent PDG code",Folder), 700, -350, 350,Folder);
+  HBook1F(hist->fGpPDGCode[1]   ,"gp_pdg_1"        ,Form("%s: Grand Parent PDG code",Folder), 700, -3500,3500,Folder);
+  HBook2F(hist->fGpCosThVsMom   ,"gp_mom_vs_costh" ,Form("%s: Grand Parent Momentum",Folder), 500,  0, 10000, 100,-1,1,Folder);
 }
 
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
+void TBeamFlashAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
   EventHist_t* hist = (EventHist_t*) Hist;
@@ -84,7 +90,7 @@ void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Fo
 }
 
 //_____________________________________________________________________________
-void TStepPointMCAnaModule::BookHistograms() {
+void TBeamFlashAnaModule::BookHistograms() {
 
   //  char name [200];
   //  char title[200];
@@ -130,15 +136,19 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_spmc_histset[8] = 1;		// protons+antiprotons
   book_spmc_histset[9] = 1;		// everything else
 
-  book_spmc_histset[101] = 1;		// electrons with P > 60 MeV/c
+  book_spmc_histset[101] = 1;		// electrons with P > 50 MeV/c
   book_spmc_histset[102] = 1;		// electrons with T > 400 ns
   book_spmc_histset[103] = 1;		// electrons with p < 2 MeV/c
   book_spmc_histset[104] = 1;		// electrons with 2 < p < 3 MeV/c
   book_spmc_histset[105] = 1;		// electrons with p > 3 MeV/c
+  book_spmc_histset[106] = 1;		// electrons with p > 20 MeV/c
+  book_spmc_histset[107] = 1;		// electrons with p < 20 MeV/c
 
   book_spmc_histset[203] = 1;		// positrons with p < 2 MeV/c
   book_spmc_histset[204] = 1;		// positrons with 2 < p < 3 MeV/c
   book_spmc_histset[205] = 1;		// positrons with p > 3 MeV/c
+
+  book_spmc_histset[301] = 1;		// muons with P > 50 MeV/c
 
   for (int i=0; i<kNStepPointMCHistSets; i++) {
     if (book_spmc_histset[i] != 0) {
@@ -152,7 +162,7 @@ void TStepPointMCAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step) {
+void TBeamFlashAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* Sd) {
 
   StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
   
@@ -180,12 +190,32 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
 
   hist->fYVsX->Fill(x,y);		// useful for stage 2
   hist->fYVsZ->Fill(z,y);		// useful for stage 1
+
+  double mom(-1), cos_th(-10);
+  int gp_pdg_code(-1000000);
+  TSimParticle* gp = Sd->fGParent;
+
+  
+  if (gp) {
+    TLorentzVector* v1 = &fProton->fStartMom;
+    TLorentzVector* v2 = &gp->fStartMom;
+
+    cos_th = (v1->Px()*v2->Px()+v1->Py()*v2->Py()+v1->Pz()*v2->Pz())/v1->P()/v2->P()/(1+1.e-10);
+    
+    gp_pdg_code = gp->fPdgCode;
+    mom         = gp->fStartMom.P();
+  }
+
+  hist->fGpPDGCode[0]->Fill(gp_pdg_code);
+  hist->fGpPDGCode[1]->Fill(gp_pdg_code);
+  hist->fGpCosThVsMom->Fill(mom,cos_th);
+  
 }
 
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
+void TBeamFlashAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //   double            cos_th, xv, yv, rv, zv, p;
 //   TLorentzVector    mom;
 
@@ -202,12 +232,13 @@ void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
-int TStepPointMCAnaModule::BeginJob() {
+int TBeamFlashAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-//  RegisterDataBlock("SpmcBlock" ,"TStepPointMCBlock" ,&fStepPointMCBlock);
-  RegisterDataBlock("StepPointMCBlock" ,"TStepPointMCBlock" ,&fStepPointMCBlock);
+  RegisterDataBlock("SpmcBlock" ,"TStepPointMCBlock" ,&fStepPointMCBlock);
+  //  RegisterDataBlock("StepPointMCBlock" ,"TStepPointMCBlock" ,&fStepPointMCBlock);
+  RegisterDataBlock("SimpBlock" ,"TSimpBlock" ,&fSimpBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -218,7 +249,7 @@ int TStepPointMCAnaModule::BeginJob() {
 
 
 //_____________________________________________________________________________
-void TStepPointMCAnaModule::FillHistograms() {
+void TBeamFlashAnaModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
 // event histograms
@@ -227,39 +258,75 @@ void TStepPointMCAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
 //-----------------------------------------------------------------------------
-// straw hit histograms
+// StepPointMC histograms
 //-----------------------------------------------------------------------------
   TStepPointMC* spmc;
+  SpmcData_t*   sd;
 
   int nsteps = fStepPointMCBlock->NStepPoints();
   for (int i=0; i<nsteps; i++) {
-    spmc    = fStepPointMCBlock->StepPointMC(i);
+    spmc = fStepPointMCBlock->StepPointMC(i);
+    sd   = fSpmcData+i;
+
     float p = spmc->Mom()->Mag();
     float t = spmc->Time();
 
-    FillStepPointMCHistograms(fHist.fStepPointMC[0],spmc);
+    FillStepPointMCHistograms(fHist.fStepPointMC[0],spmc,sd);
 
     if      (spmc->PDGCode() ==   11) {
-      FillStepPointMCHistograms(fHist.fStepPointMC[1],spmc);
-      if (p >  60) FillStepPointMCHistograms(fHist.fStepPointMC[101],spmc);
-      if (t > 400) FillStepPointMCHistograms(fHist.fStepPointMC[102],spmc);
-      if (p <   2)              FillStepPointMCHistograms(fHist.fStepPointMC[103],spmc);
-      if ((p >=  2) && (p < 3)) FillStepPointMCHistograms(fHist.fStepPointMC[104],spmc);
-      if (p >   3)              FillStepPointMCHistograms(fHist.fStepPointMC[105],spmc);
+      FillStepPointMCHistograms(fHist.fStepPointMC[1],spmc,sd);
+      if (p >  50) FillStepPointMCHistograms(fHist.fStepPointMC[101],spmc,sd);
+      if (t > 400) FillStepPointMCHistograms(fHist.fStepPointMC[102],spmc,sd);
+      if (p <   2)              FillStepPointMCHistograms(fHist.fStepPointMC[103],spmc,sd);
+      if ((p >=  2) && (p < 3)) FillStepPointMCHistograms(fHist.fStepPointMC[104],spmc,sd);
+      if (p >   3)              FillStepPointMCHistograms(fHist.fStepPointMC[105],spmc,sd);
+      if (p >= 20)              FillStepPointMCHistograms(fHist.fStepPointMC[106],spmc,sd);
+      if (p <  20)              FillStepPointMCHistograms(fHist.fStepPointMC[107],spmc,sd);
+
+      if (GetDebugBit(4) == 1) {
+	if (sd->fGParent == NULL) {
+	  GetHeaderBlock()->Print(Form("electron GP = NULL"));
+	}
+      }
+      if (GetDebugBit(5) == 1) {
+	if (sd->fGParent && (sd->fGParent->PDGCode() > 2500)) {
+	  GetHeaderBlock()->Print(Form("electron GP PDG code: %i",sd->fGParent->PDGCode()));
+	}
+      }
     }
     else if (spmc->PDGCode() ==  -11) {
-      FillStepPointMCHistograms(fHist.fStepPointMC[2],spmc);
-      if (p <   2)              FillStepPointMCHistograms(fHist.fStepPointMC[203],spmc);
-      if ((p >=  2) && (p < 3)) FillStepPointMCHistograms(fHist.fStepPointMC[204],spmc);
-      if (p >   3)              FillStepPointMCHistograms(fHist.fStepPointMC[205],spmc);
+      FillStepPointMCHistograms(fHist.fStepPointMC[2],spmc,sd);
+      if (p <   2)              FillStepPointMCHistograms(fHist.fStepPointMC[203],spmc,sd);
+      if ((p >=  2) && (p < 3)) FillStepPointMCHistograms(fHist.fStepPointMC[204],spmc,sd);
+      if (p >   3)              FillStepPointMCHistograms(fHist.fStepPointMC[205],spmc,sd);
     }
-    else if (spmc->PDGCode() ==   13) FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc);
-    else if (spmc->PDGCode() ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc);
-    else if (spmc->PDGCode() ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc);
-    else if (spmc->PDGCode() == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc);
-    else if (spmc->PDGCode() ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc);
-    else if (abs(spmc->PDGCode() == 2212)) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc);
-    else                              FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc);
+    else if (spmc->PDGCode() ==   13) {
+      FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc,sd);
+      if (p >  50) FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,sd);
+
+      if (GetDebugBit(3) == 1) {
+	p = sd->fGParent->fStartMom.P();
+	if (p > 8000) {
+	  GetHeaderBlock()->Print(Form("muon GP mom : %10.3f",p));
+	}
+      }
+      if (GetDebugBit(4) == 1) {
+	if (sd->fGParent == NULL) {
+	  GetHeaderBlock()->Print(Form("muon GP = NULL"));
+	}
+      }
+      if (GetDebugBit(5) == 1) {
+	if (sd->fGParent && (sd->fGParent->PDGCode() > 2500)) {
+	  GetHeaderBlock()->Print(Form("muon     GP PDG code: %i",sd->fGParent->PDGCode()));
+	}
+      }
+    }
+    else if (spmc->PDGCode() ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,sd);
+    else if (spmc->PDGCode() ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,sd);
+    else if (spmc->PDGCode() == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,sd);
+    else if (spmc->PDGCode() ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,sd);
+    else if (abs(spmc->PDGCode() == 2212)) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc,sd);
+    else                              FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc,sd);
 
   }
 }
@@ -267,7 +334,7 @@ void TStepPointMCAnaModule::FillHistograms() {
 
 
 //_____________________________________________________________________________
-int TStepPointMCAnaModule::BeginRun() {
+int TBeamFlashAnaModule::BeginRun() {
   int rn = GetHeaderBlock()->RunNumber();
   TStntuple::Init(rn);
   return 0;
@@ -275,17 +342,52 @@ int TStepPointMCAnaModule::BeginRun() {
 
 
 //_____________________________________________________________________________
-int TStepPointMCAnaModule::Event(int ientry) {
+int TBeamFlashAnaModule::Event(int ientry) {
 
   //  double                p;
   //  TLorentzVector        mom;
 
   fStepPointMCBlock->GetEntry(ientry);
+  fSimpBlock->GetEntry(ientry);
+
+  fProton = fSimpBlock->Particle(0);
 //-----------------------------------------------------------------------------
-// assume electron in the first particle, otherwise the logic will need to 
-// be changed
-// if there are several hits, use the first one
+// loop over "steps" in StepPointMCBlock
 //-----------------------------------------------------------------------------
+  int nsteps = fStepPointMCBlock->NStepPoints();
+  //  int nsimp  = fSimpBlock->NParticles();
+
+  for (int i=0; i<nsteps; i++) {
+    TStepPointMC* s       = fStepPointMCBlock->StepPointMC(i);
+    SpmcData_t* spmc_data = fSpmcData+i;
+
+    int id = s->GetUniqueID();
+    spmc_data->fParticle = fSimpBlock->FindParticle(id);
+
+    spmc_data->fGParent = NULL;
+
+    // search for particle's oldest parent with parent code = 1
+
+    int parent_id = s->ParentSimID();
+
+    TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
+
+    while(1) {
+      parent_id = parent->ParentID();
+      TSimParticle* p = fSimpBlock->FindParticle(parent_id);
+      if (p            == NULL) break; 
+      if (p->PDGCode() == 2212) break;
+      parent = p;
+//-----------------------------------------------------------------------------
+// sometimes history tree includes a scattered proton, which produces a pion,
+// decaying into a muon. In this case call pion a 'grandparent'
+//-----------------------------------------------------------------------------
+      if (parent_id == 1) break;
+    }
+    
+    spmc_data->fGParent = parent;
+  }
+
   FillHistograms();
 
   Debug();
@@ -294,7 +396,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::Debug() {
+void TBeamFlashAnaModule::Debug() {
 
 //-----------------------------------------------------------------------------
 // bit 4: events with NHitsTF > 1
@@ -305,12 +407,12 @@ void TStepPointMCAnaModule::Debug() {
 }
 
 //_____________________________________________________________________________
-int TStepPointMCAnaModule::EndJob() {
+int TBeamFlashAnaModule::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
   return 0;
 }
 
 //_____________________________________________________________________________
-void TStepPointMCAnaModule::Test001() {
+void TBeamFlashAnaModule::Test001() {
 }
 

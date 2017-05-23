@@ -58,3 +58,4 @@ physics.end_paths     : [ e1 ]
 
 physics.filters.TrackerMCCheck.g4ModuleLabel : "protonMixer"
 physics.filters.TrackerMCCheck.debugBits     : { bit4:1 }
+physics.producers.makeSH._diagLevel          : 1

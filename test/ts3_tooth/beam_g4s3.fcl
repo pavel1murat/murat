@@ -1,0 +1,7 @@
+# -*- mode: tcl -*-
+
+#include "JobConfig/cd3/beam/beam_g4s3.fcl"
+
+services.GeometryService.inputFile:  "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
+source.fileNames : [ "/mu2e/data/users/murat/datasets/ts3_tooth/v1/art/beam_g4s2/sim.murat.cd3-beam-g4s2-mubeam.v622.001002_00010600.art" ]
+

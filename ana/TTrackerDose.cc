@@ -815,6 +815,14 @@ int TTrackerDose::InitChain() {
     fNSimulated = 5.1e9;
     fDensity[0] = 1.7;
   }
+  if (fProcess == "FLASH_V2") {
+    fDataset = Form("%s/datasets/ts3-tooth/flash-v2-nt",getenv("MU2E_BASE_RELEASE"));
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 8e6;
+    fDensity[0] = 1.7;
+  }
   if (fProcess == "FLASH_PASHA") {
     fDataset = Form("%s/datasets/tracker-rad-dose/flash-default-pasha-nt",getenv("MU2E_BASE_RELEASE"));
     AddFiles(fDataset.Data());

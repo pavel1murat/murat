@@ -127,8 +127,8 @@ a2_mpr() {
   TH1F* h_cnv00202_mergepatrec = new TH1F("h_cnv00202_mergepatrec","Efficiency",10,0,10);
 
 
-    float val;
-    for (int i=1; i<=10; i++) {
+  float val;
+  for (int i=1; i<=10; i++) {
     h_cnv00202_mergepatrec->GetXaxis()->SetBinLabel(i,cut_label[i-1]);
 
     if (i == 1) val = 1;
@@ -137,7 +137,7 @@ a2_mpr() {
     h_cnv00202_mergepatrec->SetBinContent(i,val);
   }
 
-    h_cnv00202_mergepatrec->SetMaximum(1.5);
+  h_cnv00202_mergepatrec->SetMaximum(1.5);
   h_cnv00202_mergepatrec->SetTitle("Mergepatrec+CalPatRec efficiency");
   h_cnv00202_mergepatrec->SetStats(0);
   h_cnv00202_mergepatrec->SetMinimum(0.);

@@ -25,7 +25,7 @@ public:
   
   int          fTransp;
 
-  DrawMu2eGeometry(const char* Fn = "/home/murat/figures/mu2e/gdml/mu2e_v4_0_6.gdml", int OriginalColors = 0);
+  DrawMu2eGeometry(const char* Fn = "/home/murat/figures/mu2e/gdml/mu2e_geometry_v4_0_6.gdml", int OriginalColors = 0);
   ~DrawMu2eGeometry();
   
   void SetRecursiveVisibility(TGeoVolume* Vol, int OnOff);
@@ -56,21 +56,22 @@ public:
   TGeoNode* FindNodeByVolumeName(TGeoVolume* Top, const char* VolumeName);
     
   void DrawCRV();
-  void DrawStrawTracker();
   void DrawCalorimeter();
   void DrawCalorimeterDisk();
   void DrawExtShielding();
   void DrawDetectorSolenoid();
   void DrawDetectorSolenoidDev2();
+  void DrawProductionTarget();
+  void DrawStrawTracker();
 };
 
 
 //-----------------------------------------------------------------------------
-DrawMu2eGeometry::DrawMu2eGeometry(const char* Fn, int OriginalColors) {
+DrawMu2eGeometry::DrawMu2eGeometry(const char* Fn, int KeepOriginalColors) {
   gm = new TGeoManager();
   gm->Import(Fn);
 
-  fTop = gGeoManager->GetTopNode();
+  fTop       = gGeoManager->GetTopNode();
 
   fDs2Vacuum = FindNodeByVolumeName(fTop,"DS2Vacuum");
   fDs3Vacuum = FindNodeByVolumeName(fTop,"DS3Vacuum");
@@ -83,7 +84,7 @@ DrawMu2eGeometry::DrawMu2eGeometry(const char* Fn, int OriginalColors) {
 
   fTransp = 40;
   
-  HideBuilding(OriginalColors);
+  HideBuilding(KeepOriginalColors);
 }
 
 //-----------------------------------------------------------------------------
@@ -220,27 +221,6 @@ void DrawMu2eGeometry::SetRecursiveVisibilityByMaterial(TGeoNode* Node, const ch
 }
 
 //-----------------------------------------------------------------------------
-void DrawMu2eGeometry::SetRecursiveColorTransp(TGeoVolume *Vol, Int_t Color, Int_t Transp) {
-
-  TString name = Vol->GetName();
-  
-  int col    = Color;
-  int transp = Transp;
-
-  if      (name.Index("TargetFoil") >= 0) { col = kBlue+4;  transp = 10; }
-  else if (name.Index("CaloPipe"  ) >= 0) { col = kOrange+7; }
-    
-  if (col    >=0 ) Vol->SetLineColor   (col   );
-  if (Transp >=0 ) Vol->SetTransparency(transp);
-     
-  int nd = Vol->GetNdaughters();
-  for (int i=0; i<nd; i++) {
-    TGeoVolume* vd = Vol->GetNode(i)->GetVolume();
-    SetRecursiveColorTransp(vd, Color, transp);
-  }
-}
-
-//-----------------------------------------------------------------------------
 void DrawMu2eGeometry::SetRecursiveColorTranspByName(TGeoNode* Node, const char* Name, Int_t Color, Int_t Transp) {
 
   
@@ -303,10 +283,51 @@ void DrawMu2eGeometry::SetRecursiveVisibilityColorTranspByNameAndMaterial(TGeoNo
 }
 
 //-----------------------------------------------------------------------------
-void DrawMu2eGeometry::SetDefaultColorTransp() {
-  SetRecursiveColorTransp(fTop->GetVolume(),kCyan-10,fTransp);
+void DrawMu2eGeometry::SetRecursiveColorTransp(TGeoVolume *Vol, Int_t Color, Int_t Transp) {
+
+  TString name = Vol->GetName();
+  
+  int col    = Color;
+  int transp = Transp;
+
+  if      (name.Index("TargetFoil") >= 0) { col = kBlue+4;  transp = 10; }
+  else if (name.Index("CaloPipe"  ) >= 0) { col = kOrange+7; }
+    
+  if (col    >=0 ) Vol->SetLineColor   (col   );
+  if (Transp >=0 ) Vol->SetTransparency(transp);
+     
+  int nd = Vol->GetNdaughters();
+  for (int i=0; i<nd; i++) {
+    TGeoVolume* vd = Vol->GetNode(i)->GetVolume();
+    SetRecursiveColorTransp(vd, Color, transp);
+  }
 }
 
+//-----------------------------------------------------------------------------
+// everything is kCyan by default
+// production tsrget is kRed+3
+//-----------------------------------------------------------------------------
+void DrawMu2eGeometry::SetDefaultColorTransp() {
+  SetRecursiveColorTransp(fTop->GetVolume(),kCyan-10,fTransp);
+
+//-----------------------------------------------------------------------------
+// color production target
+//-----------------------------------------------------------------------------
+  TGeoVolume* ptarget = gm->GetVolume("ProductionTargetMother");
+  int col             = kRed+2;
+  int nd              = ptarget->GetNdaughters();
+  const char*  name;
+  
+  for (int i=0; i<nd; i++) {
+    TGeoVolume* vd = ptarget->GetNode(i)->GetVolume();
+    name = vd->GetName();
+    printf(" production target daughter: %s\n",name);
+    if      (strcmp(name,"ProductionTargetSupportWheel") == 0) col = kGray;
+    else if (strcmp(name,"ClampSupportWheel_R")          == 0) col = kGray+3;
+    else                                                       col = kRed+2;
+    SetRecursiveColorTransp(vd,col,fTransp);
+  }
+}
 
 //-----------------------------------------------------------------------------
 void DrawMu2eGeometry::HideBuilding(int KeepOriginalColors) {
@@ -497,6 +518,11 @@ void DrawMu2eGeometry::DrawStrawTracker() {
 //-----------------------------------------------------------------------------
 void DrawMu2eGeometry::DrawCalorimeterDisk() {
   gm->GetVolume("DiskCalorimeter_0")->Draw("ogl");
+}
+
+//-----------------------------------------------------------------------------
+void DrawMu2eGeometry::DrawProductionTarget() {
+  gm->GetVolume("ProductionTargetMother")->Draw("ogl");
 }
 
 //-----------------------------------------------------------------------------

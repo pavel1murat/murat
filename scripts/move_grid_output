@@ -74,18 +74,21 @@ for sd1 in `ls $dir` ; do
 #------------------------------------------------------------------------------
 # PRODUCTION dataset: move stntuple and histogram files
 #------------------------------------------------------------------------------
-		    stn_files=`ls $sd/*.stn`
+		    stn_files=`ls $sd/*.stntuple.root`
 		    for f in $stn_files ; do
 			$cmd_prefix mv $f  $od/$dsname.000001$index0
 		    done
 
-		    $cmd_prefix mv $sd/$jobname.hist $od/hist/$jobname.$index0.hist
+		    hist_files=`ls $sd/*.root | grep -v stntuple`
+		    for f in $hist_files ; do
+			$cmd_prefix mv $f  $od/hist/`basename $f`
+		    done
 		else 
 #------------------------------------------------------------------------------
 # SNTUPLE dataset: move stntuple files
 # STNTUPLE dataset may also have DST files woth the extention .art produced 
 #------------------------------------------------------------------------------
-		    stn_files=`ls $sd/*.stn`
+		    stn_files=`ls $sd/*.stntuple.root`
 		    for f in $stn_files ; do
 			$cmd_prefix mv $f  $od/$dsname.000001$index0
 		    done
@@ -102,7 +105,7 @@ for sd1 in `ls $dir` ; do
 #------------------------------------------------------------------------------
 # move histogram files
 #------------------------------------------------------------------------------
-		    hist_files=`ls $sd/*.root`
+		    hist_files=`ls $sd/*.root | grep -v stntuple`
 		    for f in $hist_files ; do
 			$cmd_prefix mv $f  $od/hist/`basename $f`
 		    done

@@ -1,0 +1,113 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# generate 105 MeV/c muons, mix, make STNTUPLE in one go
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
+# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
+# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
+# -          datasets/cd3-detmix-cut-v2 for the grid
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+# by commenting out bgHitFiles below force definition on the command line
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  maxIterations                       : 3
+  meanBackground                      : -1        # fixed at 1
+  pdgId                               : 11
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  bgHitFiles                          : [ 
+					 "/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000002.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000003.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000004.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000005.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000006.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000007.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000008.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000009.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000010.art"
+					 ,"/mu2e/data/users/gianipez/data/sim.mu2e.cd3-detmix-cut.v566b.000004_00000011.art"
+					]
+#  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+ G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+#------------------------------------------------------------------------------
+# note 1: background files below correspond to the TDR geometry 
+# note 2: MixP3 files are about 9.3 GBytes large
+# mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
+#------------------------------------------------------------------------------
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : TreeMaker
+
+source       : { 
+    module_type : RootInput
+}
+
+physics: { 
+
+    # @table::CaloDigiMC.producers
+    # @table::CaloReco.producers
+    # @table::CaloCluster.producers
+
+    analyzers : {
+	calorimeterDose        : { 
+	    module_type            : CalorimeterDose
+	    diagLevel              : 0
+	    addCaloInfo            : 1
+	    addTrackerInfo         : 1
+	    crystalDensity         : 4.51 #g/cm3
+	    zCrystalStep           : 10   # mm
+	    g4ModuleLabel          : @local::G4_MODULE_LABEL
+	    generatorModuleLabel   : generate
+	}
+    }
+
+    
+
+    out: [calorimeterDose]
+    p2 : []
+
+    trigger_paths : [ p2  ]
+    end_paths     : [ out ]
+}
+
+
+services.scheduler.fileMode: MERGE
+
+services.GeometryService.inputFile: "murat/test/tracker-rad-dose/geom-stiff-ring-cu.txt"
+services.scheduler.wantSummary: true
+
+#----------------------------------------------------------------
+# Code added by generate_fcl:
+services.SeedService.policy:  autoIncrement
+services.SeedService.maxUniqueEngines: 20
+services.SeedService.baseSeed: 442518267
+source.fileNames : [
+"/mu2e/data/users/murat/datasets/tracker-rad-dose/flash-ring-cu215-700-ele-g10-0001/sim.MU2EGRIDDSOWNER.cd3-beam-g4s4-detflash.MU2EGRIDDSCONF.001002_00170003.art"
+
+# "/pnfs/mu2e/scratch/users/gianipez/workflow/tracker-dose-g4v10/outstage/15735797/00/00000/sim.gianipez.cd3-beam-g4s4-detflash.g4v10.001002_00170003.art"
+]
+# services.TFileService.fileName: "nts.MU2EGRIDDSOWNER.bbb.MU2EGRIDDSCONF.001002_00170003.root"
+# outputs.detectorOutput.fileName : "sim.MU2EGRIDDSOWNER.cd3-beam-g4s4-detflash.MU2EGRIDDSCONF.001002_00170003.art"
+mu2emetadata.fcl.prologkeys: [  ]
+mu2emetadata.fcl.inkeys: [ "source.fileNames" ]
+mu2emetadata.fcl.outkeys: [ "services.TFileService.fileName", "outputs.detectorOutput.fileName" ]
+# End code added by generate_fcl:
+#----------------------------------------------------------------

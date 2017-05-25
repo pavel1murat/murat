@@ -1,0 +1,90 @@
+# -*- mode: tcl -*-
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+#  muStops    : [ @local::mergedMuonStops ]
+  pdgCode    : @local::Particle.eminus
+#  bgHitFiles : @nil
+  bgHitFiles : [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art" ]
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+#------------------------------------------------------------------------------
+process_name : ReadMixCD3X1TestTiming
+#------------------------------------------------------------------------------
+source : {
+    module_type :  RootInput
+    maxEvents   :  -1
+    fileNames   : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"]
+}
+
+services: { @table::services
+    TimeTracker: { 
+	#      printSummary : (( true | false ))  # default is 'true'
+	dbOutput     : {
+	    filename :  "read_mixcd3_x1_test_timing_2.db"  # default is "" 
+	    overwrite:  true  # default is 'false'
+	    
+	}
+    }
+}
+
+outputs      : { @table::murat.outputs   }
+producers    : { @table::murat.producers }
+filters      : { @table::murat.filters   }
+paths        : { @table::murat.paths     }
+#------------------------------------------------------------------------------
+# physics
+#------------------------------------------------------------------------------
+physics : { 
+    producers: { @table::producers 
+	makeSH1 : {
+	    module_type : StrawHitsFromStrawDigisA
+	    StrawDigis : makeSD
+	}
+
+	makeSH2 : {
+	    module_type : StrawHitsFromStrawDigisA
+	    StrawDigis : makeSD
+	}
+    }
+
+    filters: { 
+	@table::filters 
+#	TrackerMCCheck : @table::murat.TrackerMCCheck
+    }
+#------------------------------------------------------------------------------
+# paths
+#------------------------------------------------------------------------------
+    p1 : [ # @sequence::murat.mix, 
+	   # dioMixer, protonMixer, neutronMixer, photonMixer, ootMixer, 
+
+	   flashMixer,
+
+	   @sequence::EventMixing.TimeMaps,
+
+	   # @sequence::Tracking.DigiSim    , 
+	   makeSH1,
+	   makeSD,
+
+	   makeSH2
+	   #	   @sequence::Tracking.PrepareHits
+	   #	   , TrackerMCCheck                 
+	  ]
+    e1 : []
+}
+#------------------------------------------------------------------------------
+# print per event timing for ::event entry points
+#------------------------------------------------------------------------------
+#     services.Timing: { }
+physics.trigger_paths : [ p1 ]
+physics.end_paths     : [ e1 ]
+
+physics.filters.TrackerMCCheck.g4ModuleLabel : "protonMixer"
+physics.filters.TrackerMCCheck.debugBits     : { bit4:1 }

@@ -1,0 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////
+// stiffener ring out of Cu (bronze), no shielding
+///////////////////////////////////////////////////////////////////////////////
+#include "JobConfig/cd3/geom_baseline.txt"
+// changes to the tracker...
+//
+
+double ttrackerSupport.electronics.cu.halfLength   =  0.01;
+string ttrackerSupport.electronics.cu.material     =  "G4_AIR";
+
+string ttrackerSupport.endRing.material            = "SmartCopper";
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

@@ -1,0 +1,47 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles                          : @nil
+  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : TreeMaker
+
+source       : { 
+    module_type : RootInput
+}
+
+physics: { 
+
+    analyzers : {
+	calorimeterDose        : { 
+	    module_type            : CalorimeterDose
+	    diagLevel              : 0
+	    addCaloInfo            : 1
+	    addTrackerInfo         : 1
+	    crystalDensity         : 4.51 #g/cm3
+	    zCrystalStep           : 10   # mm
+	    g4ModuleLabel          : @local::G4_MODULE_LABEL
+	    generatorModuleLabel   : generate
+	}
+    }
+    
+    out: [calorimeterDose]
+    p2 : []
+    
+    trigger_paths : [ p2  ]
+    end_paths     : [ out ]
+}
+
+services.GeometryService.inputFile: "murat/test/tracker-rad-dose/c360brass-03-geom.txt"
+services.scheduler.wantSummary    : true

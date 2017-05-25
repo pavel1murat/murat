@@ -1,6 +1,7 @@
 #ifndef murat_ana_scripts_modules_hh
 #define murat_ana_scripts_modules_hh
 
+#include "murat/ana/TBeamFlashAnaModule.hh"
 #include "murat/ana/TCalAnaModule.hh"
 #include "murat/ana/TClusterAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
@@ -8,6 +9,7 @@
 // #include "murat/ana/TGenAnaModule.hh"
 // #include "murat/ana/TPhotosAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
+#include "murat/ana/TStepPointMCAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
 // #include "murat/ana/TStnGeneratorModule.hh"
 #include "murat/ana/TTrackAnaModule.hh"
@@ -21,6 +23,7 @@
 //-----------------------------------------------------------------------------
 // modules defined in 'murat' package (libmurat_ana.so)
 //-----------------------------------------------------------------------------
+TBeamFlashAnaModule*       m_bfl   = NULL;
 TCalAnaModule*             m_cal   = NULL;
 TClusterAnaModule*         m_cls   = NULL;
 TCosmicsAnaModule*         m_cos   = NULL;
@@ -30,6 +33,7 @@ TGenAnaModule*             m_gen   = NULL;
 TPidAnaModule*             m_pid   = NULL;
 // TStnGeneratorModule*       m_stg   = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
+TStepPointMCAnaModule*     m_spmc  = NULL;
 TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackAnaModule*           m_trk   = NULL;
 TTrackAnaModuleA*          m_trka  = NULL;

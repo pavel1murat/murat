@@ -1,0 +1,6 @@
+// mode:c++
+// 
+#include "Mu2eG4/geom/geom_common_cd3_s4p2_backgroundSim.txt"
+
+string ttrackerSupport.endRing.material    = "G4_Al";
+// string ttrackerSupport.endRing.material    = "SmartCopper";

@@ -1,0 +1,18 @@
+///////////////////////////////////////////////////////////////////////////////
+// stiffener ring out of Cu (bronze), no special electronics shielding
+// inner radius of the stiffener ring reduced down to 680 mm
+///////////////////////////////////////////////////////////////////////////////
+#include "JobConfig/cd3/geom_baseline.txt"
+// changes to the tracker...
+//
+
+double ttrackerSupport.electronics.cu.halfLength   =  0.01;
+string ttrackerSupport.electronics.cu.material     =  "G4_AIR";
+
+string ttrackerSupport.endRing.material            = "SmartCopper";
+double ttrackerSupport.endRing.innerRadius         =  680.;
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

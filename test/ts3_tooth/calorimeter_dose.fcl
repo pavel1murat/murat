@@ -1,0 +1,56 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+    bgHitFiles                     : @nil
+    G4_MODULE_LABEL                : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+process_name : CalorimeterDose
+
+source       : { 
+    module_type : RootInput
+}
+
+physics: { 
+    analyzers : {
+	calorimeterDose        : { 
+	    module_type            : CalorimeterDose
+	    diagLevel              : 0
+	    addCaloInfo            : 1
+	    addTrackerInfo         : 1
+	    crystalDensity         : 4.51 #g/cm3
+	    zCrystalStep           : 10   # mm
+	    g4ModuleLabel          : @local::G4_MODULE_LABEL
+	    generatorModuleLabel   : generate
+	}
+    }
+
+    out: [calorimeterDose]
+    p2 : []
+
+    trigger_paths : [ p2  ]
+    end_paths     : [ out ]
+}
+
+services.scheduler.fileMode: MERGE
+
+services.GeometryService.inputFile: "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
+services.scheduler.wantSummary: true
+
+source.fileNames : [ 
+  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00000/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00010600.art",
+  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00001/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00085700.art",
+  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00002/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00142083.art",
+  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00003/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00183203.art",
+  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00004/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00281768.art"
+  ]

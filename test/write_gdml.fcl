@@ -1,9 +1,6 @@
 # -*- mode: tcl -*-
 ###############################################################################
 # write GDML file with the Mu2e geometry
-#
-# copy Mu2eG4/test/geom_01.txt into Mu2eG4/test/geom_01_gdml.txt 
-# and set writeGDML to true
 # need to process at least one event for GDML file to be written out
 ################################################################################
 #include "minimalMessageService.fcl"
@@ -30,7 +27,10 @@ source : {
 physics : {
     producers: { @table::murat.producers 
 	g4run: { @table::g4run
-	    debug  : { @table::g4run.debug writeGDML:true }
+	    debug  : { @table::g4run.debug 
+		writeGDML    : true 
+		GDMLFileName : "mu2e_geometry_v614_c360brass-05.gdml"
+	    }
 	}
     }
     filters  : { @table::murat.filters   }
@@ -41,3 +41,6 @@ physics : {
     trigger_paths  : [p1]
     end_paths      : [e1]
 }
+
+# template for changing the geometry file, if needed
+# services.GeometryService.inputFile: "murat/test/tracker-rad-dose/c360brass-05-geom.txt"

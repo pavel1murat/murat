@@ -12,9 +12,10 @@
 
 #include "TNamed.h"
 
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
+#include "TROOT.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TString.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -36,9 +37,9 @@ public :
     float fStep;
   };
 
-  enum { kMaxTrackHistSets = 200 };
-  enum { kMaxEventHistSets =  10 };
-  enum { kMaxVDetHistSets  =  10 };
+  enum { kMaxTrackHistSets =  200 };
+  enum { kMaxEventHistSets =   10 };
+  enum { kMaxVDetHistSets  = 1000 };
 
   struct EventHist_t {
     TH1F*     fNumber;
@@ -51,7 +52,12 @@ public :
     TH1F*     fR;
     TH1F*     fZ;
     TH1F*     fEKin[5];
-    TH2F*     fEDepVsPlane[2];
+    TH2F*     fEDepVsPlane[4];
+    TH1D*     fMeanDoseVsPlane;
+    TH1D*     fMaxDoseVsPlane;
+    TH1D*     fDose73VsPlane;
+    TH1D*     fDose75VsPlane;
+    TH1D*     fDoseVsR[40];
   };
 
   struct VDetHist_t {
@@ -91,6 +97,7 @@ public :
 
 
   TString   fProcess;
+  TString   fDataset;
 
   Hist_t    fHist;
 
@@ -98,6 +105,7 @@ public :
   float     fNPOT   ;    // number of protons on target (expected)
   long int  fNEvents;
   long int  fNSimulated; // total number of events simulated by Giani
+  float     fDensity[2];
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -193,26 +201,28 @@ public :
    Float_t         vZ[82];   //[vNHits]
    Float_t         vCosth[82];   //[vNHits]
    Float_t         vRadius[82];   //[vNHits]
+
    Int_t           nTtsUpHits;
-   Float_t         ttsUpEdep[167];   //[nTtsUpHits]
-   Float_t         ttsUpX[167];   //[nTtsUpHits]
-   Float_t         ttsUpY[167];   //[nTtsUpHits]
-   Float_t         ttsUpZ[167];   //[nTtsUpHits]
-   Float_t         ttsUpR[167];   //[nTtsUpHits]
+   Float_t         ttsUpEdep [167];   //[nTtsUpHits]
+   Float_t         ttsUpX    [167];   //[nTtsUpHits]
+   Float_t         ttsUpY    [167];   //[nTtsUpHits]
+   Float_t         ttsUpZ    [167];   //[nTtsUpHits]
+   Float_t         ttsUpR    [167];   //[nTtsUpHits]
    Int_t           ttsUpPdgId[167];   //[nTtsUpHits]
-   Float_t         ttsUpEkin[167];   //[nTtsUpHits]
-   Float_t         ttsUpMass[167];   //[nTtsUpHits]
-   Float_t         ttsUpL[167];   //[nTtsUpHits]
+   Float_t         ttsUpEkin [167];   //[nTtsUpHits]
+   Float_t         ttsUpMass [167];   //[nTtsUpHits]
+   Float_t         ttsUpL    [167];   //[nTtsUpHits]
+
    Int_t           nTtsDwHits;
-   Float_t         ttsDwEdep[186];   //[nTtsDwHits]
-   Float_t         ttsDwX[186];   //[nTtsDwHits]
-   Float_t         ttsDwY[186];   //[nTtsDwHits]
-   Float_t         ttsDwZ[186];   //[nTtsDwHits]
-   Float_t         ttsDwR[186];   //[nTtsDwHits]
+   Float_t         ttsDwEdep [186];   //[nTtsDwHits]
+   Float_t         ttsDwX    [186];   //[nTtsDwHits]
+   Float_t         ttsDwY    [186];   //[nTtsDwHits]
+   Float_t         ttsDwZ    [186];   //[nTtsDwHits]
+   Float_t         ttsDwR    [186];   //[nTtsDwHits]
    Int_t           ttsDwPdgId[186];   //[nTtsDwHits]
-   Float_t         ttsDwEkin[186];   //[nTtsDwHits]
-   Float_t         ttsDwMass[186];   //[nTtsDwHits]
-   Float_t         ttsDwL[186];   //[nTtsDwHits]
+   Float_t         ttsDwEkin [186];   //[nTtsDwHits]
+   Float_t         ttsDwMass [186];   //[nTtsDwHits]
+   Float_t         ttsDwL    [186];   //[nTtsDwHits]
 
    // List of branches
    TBranch        *b_evt;   //!
@@ -330,7 +340,8 @@ public :
   TTrackerDose(const char* Name);
   virtual ~TTrackerDose();
 
-  int     InitChain      ();
+  int     AddFiles (const char* Fn);
+  int     InitChain();
 
   int     BookEventHistograms  (EventHist_t* Hist, const char* Folder);
   int     BookTrackerHistograms(TrackHist_t* Hist, const char* Folder);

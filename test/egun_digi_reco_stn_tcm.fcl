@@ -50,7 +50,7 @@ physics: {
 
 	CaloShowerStepFromStepPt : { @table::murat.producers.CaloShowerStepFromStepPt 
 # for CE, not old background mixing - default: 'compressPVDetector'
-#	    physVolInfoInput : "g4run"
+	    physVolInfoInput : "g4run"
 	}
     }
 

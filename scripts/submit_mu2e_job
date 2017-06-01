@@ -157,8 +157,11 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
      esac
 done
 #------------------------------------------------------------------------------
-# done with parsing the parameters
+# done with parsing the parameters, assume have .base_release file with 
+# on line like '622' in it
 #------------------------------------------------------------------------------
+export OFFVER=`cat .base_release`
+
 if [ -f $DATASET_DIR/$DSID.fcl ] ; then
     export DATASET_FCL=$DATASET_DIR/$DSID.fcl;
 fi
@@ -228,8 +231,10 @@ done
 # replace whats left
 #------------------------------------------------------------------------------
 cat $TMP_FCL | \
-    awk -v v1='{DATASET}' -v v2="$DSID"    '{sub(v1,v2);print}' | \
-    awk -v v1='{JOB}'     -v v2="$JOB"     '{sub(v1,v2);print}'   \
+    awk -v v1='{DATASET}' -v v2="$DSID"    '{gsub(v1,v2);print}' | \
+    awk -v v1='{JOB}'     -v v2="$JOB"     '{gsub(v1,v2);print}' | \
+    awk -v v1='{USER}'    -v v2="$USER"    '{gsub(v1,v2);print}' | \
+    awk -v v1='{OFFVER}'  -v v2="$OFFVER"  '{gsub(v1,v2);print}'   \
     > $TMP_FCL.1
 
 mv $TMP_FCL.1 $TMP_FCL
@@ -323,7 +328,8 @@ if [ ".$GRID_CLUSTER" == ".local" ] ; then
     fi
 
     if [ $VERBOSE != "no" ] ; then 
-	echo [submit_mu2e_job:$LINENO]: PWD=$PWD, submitting "$cmd >>$LOGFILE 2>&1";
+	echo [submit_mu2e_job:$LINENO]: PWD=$PWD, submitting: ;
+	echo [submit_mu2e_job:$LINENO]: "$cmd >> $LOGFILE 2>&1";
     fi
 
     if [ $DRY_RUN != "yes" ] ; then
@@ -335,9 +341,9 @@ if [ ".$GRID_CLUSTER" == ".local" ] ; then
 	echo  \# fcl    : $TMP_FCL                                                                   >> $LOGFILE
 	echo  \#-----------------------------------------------------------------------------------  >> $LOGFILE
 	cat   $TMP_FCL                                                                               >> $LOGFILE
-	echo "\#-----------------------------------------------------------------------------------" >> $LOGFILE
+	echo  \#-----------------------------------------------------------------------------------  >> $LOGFILE
 	echo  \# to be executed: $cmd                                                                >> $LOGFILE
-	echo "\#-----------------------------------------------------------------------------------" >> $LOGFILE
+	echo  \#------------------------------------------------------------------------------------ >> $LOGFILE
 	$cmd                                                                                         >> $LOGFILE 2>&1 
 	RC=$? 
 	echo "RC=$RC"                                                                                >> $LOGFILE

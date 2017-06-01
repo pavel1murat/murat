@@ -85,9 +85,9 @@ handle_output() {
 #------------------------------------------------------------------------------
 # make file catalogs for different streams
 #------------------------------------------------------------------------------
+	mkdir $odir/catalog
 	for stream in "mothers" "ootstops" "tgtstops" "truncated" ; do
-	    mkdir $odir/$stream
-	    ls $grid_dir/*/*/*/*.art | grep $stream >| $odir/$stream/AAA_CATALOG
+	    ls $grid_dir/*/*/*/*.art | grep $stream >| $odir/catalog/g4s23_${stream}_$x
 	done
     done    
 }

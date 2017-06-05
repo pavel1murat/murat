@@ -55,13 +55,10 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
             ;;
         d)                                          # dataset ID
             export DSID=${OPTARG}
-	    export DATASET=/grid/fermiapp/mu2e/personal/murat/$DSID
-	    if [ -d $DATASET ]      ; then 
-		export DATASET_DIR=$DATASET
-		export     DATASET=$DATASET_DIR/$DSID.filelist ; 
-	    else
-		export DATASET_DIR=`dirname $DATASET`
-	    fi
+	    
+	    subdir=`echo $DSID | sed 's#\.#\/#g'`;
+	    export DATASET_DIR=/grid/fermiapp/mu2e/personal/murat/catalogs/$subdir
+	    export     DATASET=$DATASET_DIR/$DSID.files
 
             if [ $VERBOSE != "no" ] ; then echo DSID=$DSID ; fi
             ;;
@@ -128,7 +125,7 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
 #------------------------------------------------------------------------------
         S)                                          # dataset
             export DATASET=$OPTARG
-	    export DSID=`echo $DATASET | awk -F / '{print $NF}' | awk -F . '{print $1}'`
+	    export DSID=`echo $DATASET | awk -F / '{print $NF}' | sed 's/.files//' | sed 's/\./\_/g'`
 	    if [ -d $DATASET ]      ; then 
 		export DATASET=$DATASET/$DSID.filelist ; 
 		export DATASET_DIR=$DATASET

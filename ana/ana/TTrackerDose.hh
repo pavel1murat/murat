@@ -44,6 +44,8 @@ public :
   struct EventHist_t {
     TH1F*     fNumber;
     TH1F*     fNVDHits;
+    TH1F*     fEDepTot;
+    TH1F*     fETotVDet13;
   };
 
   struct TrackHist_t {
@@ -100,6 +102,9 @@ public :
   TString   fDataset;
 
   Hist_t    fHist;
+
+  float     fEDepTot;
+  float     fETotVDet13;
 
   float     fNPerPOT;    // efficiency for a given bgr source
   float     fNPOT   ;    // number of protons on target (expected)
@@ -347,6 +352,8 @@ public :
   int     BookTrackerHistograms(TrackHist_t* Hist, const char* Folder);
   int     BookVDetHistograms   (VDetHist_t*  Hist, const char* Folder);
   int     BookHistograms       ();
+
+  int     InitEvent();
 
   int     FillEventHistograms  (EventHist_t* Hist);
   int     FillTrackerHistograms(TrackHist_t* Up  , TrackHist_t* Dn  );

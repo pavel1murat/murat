@@ -37,6 +37,7 @@ TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title
 {
   // fPdgCode       = 11;
   // fGeneratorCode = 28;
+  fSpmcBlockName = "SpmcBlock";
 }
 
 //-----------------------------------------------------------------------------
@@ -204,10 +205,9 @@ void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //-----------------------------------------------------------------------------
 int TStepPointMCAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
-// register data blocks
+// register data blocks 'SpmcBlock' or 'StepPointMCBlock' (old)
 //-----------------------------------------------------------------------------
-//  RegisterDataBlock("SpmcBlock" ,"TStepPointMCBlock" ,&fStepPointMCBlock);
-  RegisterDataBlock("StepPointMCBlock" ,"TStepPointMCBlock" ,&fStepPointMCBlock);
+  RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock" ,&fStepPointMCBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------

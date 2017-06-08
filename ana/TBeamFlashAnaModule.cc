@@ -149,6 +149,7 @@ void TBeamFlashAnaModule::BookHistograms() {
   book_spmc_histset[205] = 1;		// positrons with p > 3 MeV/c
 
   book_spmc_histset[301] = 1;		// muons with P > 50 MeV/c
+  book_spmc_histset[310] = 1;		// muons with P < 50 MeV/c
 
   for (int i=0; i<kNStepPointMCHistSets; i++) {
     if (book_spmc_histset[i] != 0) {
@@ -302,7 +303,8 @@ void TBeamFlashAnaModule::FillHistograms() {
     }
     else if (spmc->PDGCode() ==   13) {
       FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc,sd);
-      if (p >  50) FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,sd);
+      if (p >=  50) FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,sd);
+      if (p <   50) FillStepPointMCHistograms(fHist.fStepPointMC[310],spmc,sd);
 
       if (GetDebugBit(3) == 1) {
 	p = sd->fGParent->fStartMom.P();
@@ -352,7 +354,8 @@ int TBeamFlashAnaModule::Event(int ientry) {
 
   fProton = fSimpBlock->Particle(0);
 //-----------------------------------------------------------------------------
-// loop over "steps" in StepPointMCBlock
+// loop over "steps" in StepPointMCBlock - assume that this block has 
+// one steppoint per particle, like "DsVolume"
 //-----------------------------------------------------------------------------
   int nsteps = fStepPointMCBlock->NStepPoints();
   //  int nsimp  = fSimpBlock->NParticles();
@@ -362,13 +365,17 @@ int TBeamFlashAnaModule::Event(int ientry) {
     SpmcData_t* spmc_data = fSpmcData+i;
 
     int id = s->GetUniqueID();
+//-----------------------------------------------------------------------------
+// find particle in SimpBlock
+//-----------------------------------------------------------------------------
     spmc_data->fParticle = fSimpBlock->FindParticle(id);
-
-    spmc_data->fGParent = NULL;
+    spmc_data->fParent   = NULL;
+    spmc_data->fGParent  = NULL;
 
     // search for particle's oldest parent with parent code = 1
 
     int parent_id = s->ParentSimID();
+    int pdg_code  = s->PDGCode();
 
     TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
 
@@ -376,6 +383,10 @@ int TBeamFlashAnaModule::Event(int ientry) {
       parent_id = parent->ParentID();
       TSimParticle* p = fSimpBlock->FindParticle(parent_id);
       if (p            == NULL) break; 
+      if ((spmc_data->fParent == NULL) && (p->PDGCode() != pdg_code)) {
+	spmc_data->fParent = p;
+      }
+
       if (p->PDGCode() == 2212) break;
       parent = p;
 //-----------------------------------------------------------------------------

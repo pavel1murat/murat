@@ -1,83 +1,98 @@
 ///////////////////////////////////////////////////////////////////////////////
-//
+// analysis of the distributions for muons stopped in the ST
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TStepPointMCAnaModule_hh
-#define murat_ana_TStepPointMCAnaModule_hh
+#ifndef murat_ana_TMuonStopAnaModule_hh
+#define murat_ana_TMuonStopAnaModule_hh
 
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
 
 #include "Stntuple/loop/TStnModule.hh"
-
-#include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStepPointMCBlock.hh"
 
-#include "Stntuple/base/TStnArrayI.hh"
-
-#include "Stntuple/alg/TStnTrackID.hh"
-#include "Stntuple/alg/TEmuLogLH.hh"
-
 #include "murat/ana/HistBase_t.h"
-
 #include "murat/ana/AnaDefs.hh"
 
-class TStepPointMCAnaModule: public TStnModule {
+class TMuonStopAnaModule: public TStnModule {
 public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct StepPointMCHist_t : public HistBase_t {
-    TH1F*      fVolumeID;		       //
-    TH1F*      fGenIndex;		       //
-    TH1F*      fSimID;
-    TH1F*      fPDGCode[2];  // just different ranges
-    TH1F*      fCreationCode;
-    TH1F*      fParentSimID;
-    TH1F*      fParentPDGCode;
-    TH1F*      fEndProcessCode;
+  struct SimpHist_t : public HistBase_t {
+    TH1F*    fVolumeID;		       //
+    TH1F*    fGeneratorID;
+    TH1F*    fTime;
+    TH1F*    fParentPDG;
+    TH1F*    fParentMom;
 
-    TH1F*      fEDepTot;
-    TH1F*      fEDepNio;
-    TH1F*      fTime;
-    TH1F*      fStepLength;
+    TH2F*    fYVsX;
+    TH2F*    fYVsX_2480;
+    TH2F*    fYVsX_2513;
 
-    TH1F*      fMomentum;
-
-    TH2F*      fYVsZ;
-    TH2F*      fYVsX;
   };
 
   struct EventHist_t : public HistBase_t {
-    TH1F*      fRunNumber;
-    TH1F*      fEventNumber;
+    TH1F*    fRunNumber  ;
+    TH1F*    fEventNumber;
+    TH1F*    fNVdetHits  ;
+    TH1F*    fNVdetHits_9;
+    TH1F*    fNVdetHits_13;
+    TH1F*    fETot_13;
+  };
+
+  struct VdetHist_t : public HistBase_t {
+    TH1F*    fIndex   ;
+    TH1F*    fPDGCode ;		       //
+    TH1F*    fGenCode ;		       // generator code
+    TH1F*    fMomentum;
+    TH1F*    fTime    ;
+    TH2F*    fYVsX    ;
+  };
+
+  struct SimpData_t {
+    int           fIndex;		// so far, not used
+    TSimParticle* fParent;              // muon parent
   };
 
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets        =  100 };
-  enum { kNStepPointMCHistSets  = 1000 };
+  enum { kNEventHistSets =  100 };
+  enum { kNSimpHistSets  = 1000 };
+  enum { kNVdetHistSets  = 1000 };
 
   struct Hist_t {
-    EventHist_t*        fEvent       [kNEventHistSets];
-    StepPointMCHist_t*  fStepPointMC [kNStepPointMCHistSets];
+    EventHist_t* fEvent[kNEventHistSets];
+    SimpHist_t*  fSimp [kNSimpHistSets ];
+    VdetHist_t*  fVdet [kNVdetHistSets ];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStepPointMCBlock*    fStepPointMCBlock;
+  //  TStepPointMCBlock*    fStepPointMCBlock;
+  TSimpBlock*           fSimpBlock;  
+  TStepPointMCBlock*    fVdetBlock;
+					// transient data
+  SimpData_t            fSimpData[100];
+
+  TSimParticle*         fMuon;
+  TSimParticle*         fParent;
+  TSimParticle*         fProton;
+
+  int                   fNVdetHits  ;
+  int                   fNVdetHits_9;
+  int                   fNVdetHits_13;
+  float                 fETot_13;
 					// histograms filled
   Hist_t                fHist;
-
-  TString               fSpmcBlockName;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TStepPointMCAnaModule(const char* name="StepPointMCAna", const char* title="StepPointMCAna");
-  ~TStepPointMCAnaModule();
+  TMuonStopAnaModule(const char* name="MuonStopAna", const char* title="MuonStopAna");
+  ~TMuonStopAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -85,7 +100,6 @@ public:
 //-----------------------------------------------------------------------------
 // setters
 //-----------------------------------------------------------------------------
-  void SetSpmcBlockName(const char* Name) { fSpmcBlockName = Name; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
@@ -96,15 +110,16 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
-  void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
+  void    BookSimpHistograms  (HistBase_t* Hist, const char* Folder);
+  void    BookVdetHistograms  (HistBase_t* Hist, const char* Folder);
+  void    BookEventHistograms (HistBase_t* Hist, const char* Folder);
 
-  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step);
-  void    FillEventHistograms        (HistBase_t* Hist);
+  void    FillEventHistograms (HistBase_t* Hist);
+  void    FillSimpHistograms  (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData);
+  void    FillVdetHistograms  (HistBase_t* Hist, TStepPointMC* Step);
 
   void    BookHistograms();
   void    FillHistograms();
-
 
   void    Debug();
 //-----------------------------------------------------------------------------
@@ -112,7 +127,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TStepPointMCAnaModule,0)
+  ClassDef(TMuonStopAnaModule,0)
 };
 
 #endif

@@ -1,0 +1,5 @@
+// -*- mode:c++ -*-
+
+#include "Mu2eG4/geom/geom_common.txt"
+
+int vd.verbosityLevel = 1;

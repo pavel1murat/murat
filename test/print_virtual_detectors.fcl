@@ -1,0 +1,47 @@
+# -*- mode: tcl -*-
+###############################################################################
+# write GDML file with the Mu2e geometry
+# need to process at least one event for GDML file to be written out
+################################################################################
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles : @nil
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+services.GeometryService.inputFile: "murat/geom/geom_print_vd.txt"
+
+process_name : PrintVD
+
+source : {
+  module_type : EmptyEvent
+  maxEvents   : 1
+  firstRun    : 1
+}
+
+physics : {
+    producers: { @table::murat.producers 
+	g4run: { @table::g4run
+#	    debug  : { @table::g4run.debug 
+#		writeGDML    : true 
+#		GDMLFileName : "mu2e_geometry_v614_c360brass-05.gdml"
+#	    }
+	}
+    }
+    filters  : { @table::murat.filters   }
+    
+    p1 : [ @sequence::murat.gen_g4 ] 
+    e1 : [ ]
+    
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}
+
+# template for changing the geometry file, if needed

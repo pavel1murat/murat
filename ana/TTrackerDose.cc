@@ -86,8 +86,10 @@ TTrackerDose::TTrackerDose(const char* Process) : TStnModule("TrackerDose","Trac
 
 //-----------------------------------------------------------------------------
 int TTrackerDose::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
-  HBook1F(Hist->fNumber   ,"evnumber",Form("%s: nhits "    ,Folder), 200, 0, 1e8,Folder);
-  HBook1F(Hist->fNVDHits,"nvdhits"   ,Form("%s: N(VD hits)",Folder), 250, 0, 500,Folder);
+  HBook1F(Hist->fNumber ,"evnumber",Form("%s: nhits "    ,Folder),  200, 0, 1e8,Folder);
+  HBook1F(Hist->fNVDHits,"nvdhits" ,Form("%s: N(VD hits)",Folder),  250, 0, 500,Folder);
+  HBook1F(Hist->fEDepTot,"edeptot" ,Form("%s: E(Dep)tot ",Folder), 1000, 0, 10.,Folder);
+  HBook1F(Hist->fETotVDet13,"etot_vdet13" ,Form("%s: ETot VDet13", Folder), 1000, 0, 50.,Folder);
 
   return 0;
 }
@@ -184,10 +186,11 @@ int TTrackerDose::BookHistograms() {
   for (int i=0; i<kMaxVDetHistSets; i++) book_vdet_histset[i] = 0;
 
   book_vdet_histset[  0] = 1;     		// all hits
-  book_vdet_histset[  1] = 1;     		// hits in the tracker front detector 71 < R < 80
+  book_vdet_histset[  1] = 1;     		// all    hits in the tracker front detector 71 < R < 80
   book_vdet_histset[  2] = 1;     		// electr hits in the tracker front detector 71 < R < 80
   book_vdet_histset[  3] = 1;     		// photon hits in the tracker front detector 71 < R < 80
   book_vdet_histset[  4] = 1;     		// other  hits in the tracker front detector 71 < R < 80
+  book_vdet_histset[  5] = 1;     		// all    hits in the tracker front detector 40 < R < 80
 
   book_vdet_histset[100] = 1;     		// all hits - tracker mid
 
@@ -206,19 +209,51 @@ int TTrackerDose::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-int TTrackerDose::FillEventHistograms(EventHist_t* Hist) {
+int TTrackerDose::InitEvent() {
 
-  Hist->fNumber->Fill(evt);
-  Hist->fNVDHits->Fill(vNHits);
+  fEDepTot = 0;
+
+  for (int i=0; i<nTtsUpHits; i++) {
+    fEDepTot += ttsUpEdep[i];
+  }
+
+  for (int i=0; i<nTtsDwHits; i++) {
+    fEDepTot += ttsDwEdep[i];
+  }
+
+  fETotVDet13  = 0;
+  
+  for (int i=0; i<vNHits; i++) {
+    if (vId[i] == 13) {
+      if ((vRadius[i] > 400.) && (vRadius[i] < 800.)) {
+	fETotVDet13 += vEKin[i];
+      }
+    }
+  }
 
   return 0;
 }
 
 //-----------------------------------------------------------------------------
+int TTrackerDose::FillEventHistograms(EventHist_t* Hist) {
+
+  Hist->fNumber->Fill(evt);
+  Hist->fNVDHits->Fill(vNHits);
+  Hist->fEDepTot->Fill(fEDepTot);
+  Hist->fETotVDet13->Fill(fETotVDet13);
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+// by placing fEDepTot calculation here, implicitly assume that 
+// FillTrackerHistograms is called just once. 
+// in the calculation, however, do not assume that 
+//-----------------------------------------------------------------------------
 int TTrackerDose::FillTrackerHistograms(TrackHist_t* Hup, TrackHist_t* Hdn) {
 
   Hup->fNHits->Fill(nTtsUpHits);
-  
+
   for (int i=0; i<nTtsUpHits; i++) {
 
     int pdg_id = ttsUpPdgId[i];
@@ -241,16 +276,14 @@ int TTrackerDose::FillTrackerHistograms(TrackHist_t* Hup, TrackHist_t* Hdn) {
     if (abs(pdg_id) == 2112) Hup->fEKin[3] ->Fill(ekin);
     if (abs(pdg_id) ==   13) Hup->fEKin[4] ->Fill(ekin);
 
-    int plane = plane_number(z);
+    int plane  = plane_number(z);
+    float edep = ttsUpEdep[i];
 
-    Hup->fEDepVsPlane[0] ->Fill(plane,r,ttsUpEdep[i]);
+    Hup->fEDepVsPlane[0] ->Fill(plane,r,edep);
 
-    if (abs(pdg_id) ==   11) Hup->fEDepVsPlane[2] ->Fill(plane,r,ttsUpEdep[i]);
-    if (abs(pdg_id) ==   22) Hup->fEDepVsPlane[3] ->Fill(plane,r,ttsUpEdep[i]);
-    
+    if (abs(pdg_id) ==   11) Hup->fEDepVsPlane[2] ->Fill(plane,r,edep);
+    if (abs(pdg_id) ==   22) Hup->fEDepVsPlane[3] ->Fill(plane,r,edep);
   }
-
-
 
   Hdn->fNHits->Fill(nTtsDwHits);
 
@@ -276,12 +309,13 @@ int TTrackerDose::FillTrackerHistograms(TrackHist_t* Hup, TrackHist_t* Hdn) {
     if (abs(pdg_id) == 2112) Hdn->fEKin[3] ->Fill(ekin);
     if (abs(pdg_id) ==   13) Hdn->fEKin[4] ->Fill(ekin);
 
-    int plane = plane_number(z);
+    int plane  = plane_number(z);
+    float edep = ttsDwEdep[i];
 
-    Hdn->fEDepVsPlane[0] ->Fill(plane,r,ttsDwEdep[i]);
+    Hdn->fEDepVsPlane[0] ->Fill(plane,r,edep);
 
-    if (abs(pdg_id) ==   11)  Hdn->fEDepVsPlane[2] ->Fill(plane,r,ttsDwEdep[i]);
-    if (abs(pdg_id) ==   22)  Hdn->fEDepVsPlane[3] ->Fill(plane,r,ttsDwEdep[i]);
+    if (abs(pdg_id) ==   11)  Hdn->fEDepVsPlane[2] ->Fill(plane,r,edep);
+    if (abs(pdg_id) ==   22)  Hdn->fEDepVsPlane[3] ->Fill(plane,r,edep);
   }
   return 0;
 }
@@ -300,15 +334,16 @@ int TTrackerDose::FillVDetHistograms(VDetHist_t* Hist, VDetData_t* VDet) {
 //-----------------------------------------------------------------------------
 int TTrackerDose::FillHistograms() {
 
+//-----------------------------------------------------------------------------
+// 1. fill event histograms 
+//-----------------------------------------------------------------------------
+  FillEventHistograms(fHist.fEvent[0]);
+//-----------------------------------------------------------------------------
+// 2. fill tracker histograms 
+//-----------------------------------------------------------------------------
   FillTrackerHistograms(fHist.fUp[0], fHist.fDn[0]);
 //-----------------------------------------------------------------------------
-// fill per-plane histograms (for up only)
-//-----------------------------------------------------------------------------
-  
-
-
-//-----------------------------------------------------------------------------
-// fill virtual detecotr histograms
+// 3. fill virtual detecotr histograms
 //-----------------------------------------------------------------------------
   for (int i=0; i<vNHits; i++) {
     fVDet.Id     = vId[i];
@@ -330,12 +365,16 @@ int TTrackerDose::FillHistograms() {
     if (fVDet.Id == 13) {
       FillVDetHistograms(fHist.fVDet[0],&fVDet);
       
-      if ((fVDet.Id == 13) && (fVDet.Radius > 710) && (fVDet.Radius < 800)) {
+      if ((fVDet.Radius > 710) && (fVDet.Radius < 800)) {
 	FillVDetHistograms(fHist.fVDet[1],&fVDet);
 
 	if      (abs(fVDet.PdgId) == 11) FillVDetHistograms(fHist.fVDet[2],&fVDet);
 	else if (abs(fVDet.PdgId) == 22) FillVDetHistograms(fHist.fVDet[3],&fVDet);
 	else                             FillVDetHistograms(fHist.fVDet[4],&fVDet);
+
+      }
+      if ((fVDet.Radius > 400) && (fVDet.Radius < 800)) {
+	FillVDetHistograms(fHist.fVDet[5],&fVDet);
       }
     }
 
@@ -437,6 +476,8 @@ void TTrackerDose::Loop(Long64_t NEvents) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+    InitEvent();
 
     FillHistograms();
 
@@ -765,6 +806,46 @@ int TTrackerDose::InitChain() {
 
     fNPerPOT    = 1.;
     fNSimulated = 5.1e9 * 5./51.;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0000") {
+    fDataset = Form("%s/ts3_tooth/g4s4_flash_%s/ts3_tooth.g4s4_flash_%s.cal_dose",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 15.6e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "g4s3_622_0001") {
+    fDataset = Form("%s/ts3_tooth/%s/ts3_tooth.%s.mothers.g4s4_flash.cal_dose",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 21.2e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0002") {
+    fDataset = Form("%s/ts3_tooth/cal_dose_%s/ts3_tooth.cal_dose_%s",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 50.e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0003") {
+    fDataset = Form("%s/ts3_tooth/cal_dose_%s/ts3_tooth.cal_dose_%s",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 50.e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0004") {
+    fDataset = Form("%s/ts3_tooth/cal_dose_%s/ts3_tooth.cal_dose_%s",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 1.e6;
     fDensity[0] = 1.7;
   }
   if (fProcess == "FLASH_C360BRASS_02") { // read catalog file

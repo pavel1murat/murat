@@ -60,6 +60,7 @@ public:
 
   struct SpmcData_t {
     TSimParticle*  fParticle;
+    TSimParticle*  fParent;
     TSimParticle*  fGParent;
   };
 

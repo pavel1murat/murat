@@ -1,0 +1,9 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# example: murat/scripts/prestage_list_of_files datasets/cd3-beam-cs1-mubeam.0506a/filesets/cd3-beam-cs1-mubeam.0506a.001002_00000000
+#------------------------------------------------------------------------------
+list_of_files=$1
+
+for f in `cat $list_of_files` ; do 
+    file $f ; 
+done

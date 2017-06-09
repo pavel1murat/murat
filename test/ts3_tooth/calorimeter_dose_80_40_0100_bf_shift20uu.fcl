@@ -2,6 +2,7 @@
 #------------------------------------------------------------------------------
 #  input: output of the (modified) stage4 simulation with the tracker electronics 
 #         and calorimeter SIPMs and crates added as sensitive volumes
+#         "-detflash.*.*.art" files
 #------------------------------------------------------------------------------
 #include "minimalMessageService.fcl"
 #include "standardProducers.fcl"
@@ -43,17 +44,11 @@ physics: {
     end_paths     : [ out ]
 }
 
-services.scheduler.fileMode: MERGE
+# services.scheduler.fileMode: MERGE
 
-services.GeometryService.inputFile: "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
+services.GeometryService.inputFile: "murat/geom/ts3_tooth/geom_tooth_80_40_0100_bf_shift20uu.txt"
 services.scheduler.wantSummary: true
 
-source.fileNames : [ 
-  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00000/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00010600.art",
-  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00001/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00085700.art",
-  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00002/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00142083.art",
-  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00003/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00183203.art",
-  "/mu2e/data/users/murat/datasets/ts3_tooth/v2/g4s4_flash/00004/sim.murat.cd3-beam-g4s4-detflash.v622.001002_00281768.art"
-  ]
+source.fileNames : [ "sim.do.not.forget.to_specify.art" ]
 
-outputs.detectorOutput.fileName : "sim.file.name.left.undefined.art"
+outputs.detectorOutput.fileName : "sim.file_name.intentionally.left.undefined.art"

@@ -192,6 +192,8 @@ else
     export TMP_FCL=$WORK_DIR/tmp/fcl/$JOB.$$.fcl
 fi
 
+# echo [submit_mu2e_job:$LINENO]: FCLFILE: $FCLFILE
+
 if [ $FCLFILE == "undefined" ] ; then template_fcl_file=$WORK_DIR/murat/test/$JOB.fcl
 else                                  template_fcl_file=$FCLFILE
 fi
@@ -204,6 +206,7 @@ if [ -f $TMP_FCL ] ; then rm $TMP_FCL ; fi
 #------------------------------------------------------------------------------
 # substitute variables, if requested
 #------------------------------------------------------------------------------
+# echo [submit_mu2e_job:$LINENO]: template_fcl_file: $template_fcl_file
 cp $template_fcl_file $TMP_FCL
 chmod u+w $TMP_FCL
 

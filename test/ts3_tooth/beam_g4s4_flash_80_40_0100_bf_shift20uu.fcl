@@ -5,12 +5,13 @@
 #
 # Beam flash particles.
 #
-# can use for all TS3 tooth configurations with default field - simulate only DS
+# can use for all TS3 tooth configurations with shift20uu field - simulate only DS
 #------------------------------------------------------------------------------
 #include "JobConfig/cd3/beam/beam_g4s4_flash.fcl"
 
-# 2017-05-02 P.Murat: use standard CD3 geometry + [ beam flash tooth ] + [ modified tracker ]
-services.GeometryService.inputFile: "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
+# 2017-06-07 P.Murat: use standard CD3 geometry + [ beam flash tooth ] + [ modified tracker ] + [shifted TS coils]
+# services.GeometryService.inputFile: "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
+services.GeometryService.inputFile :  "murat/geom/ts3_tooth/geom_tooth_80_40_0100_bf_shift20uu.txt"
 services.scheduler.wantSummary: true
 
 # follow changes in the JobConfig/cd3/beam/prolog.fcl

@@ -1,0 +1,27 @@
+
+|----+----------------+---------+-------------------------+-----------+-------+------------------------------------------------------------------------|
+|  N | physics list   | status  | timing/100 events (sec) | mubeamout | dsout | comments                                                               |
+|----+----------------+---------+-------------------------+-----------+-------+------------------------------------------------------------------------|
+|  1 | FTFP_BERT      | OK      |                      70 |        45 |    19 | 3726 / 1746                                                            |
+|  2 | FTFP_BERT_TRV  | OK      |                      86 |        34 |    19 |                                                                        |
+|  3 | FTFP_BERT_ATL  | OK      |                      75 |        28 |    18 |                                                                        |
+|  4 | FTFP_BERT_HP   | OK      |                     485 |        36 |    42 |                                                                        |
+|  5 | FTFP_INCLXX    | OK      |                      78 |        33 |     9 |                                                                        |
+|  6 | FTFP_INCLXX_HP | OK      |                     318 |        33 |    17 |                                                                        |
+|  7 | FTF_BIC        | OK      |                      49 |        35 |    16 |                                                                        |
+|  8 | LBE            | crashed |                         |           |       |                                                                        |
+|  9 | QBBC           | OK      |                      47 |        36 |    16 |                                                                        |
+| 10 | QGSP_BERT      | OK      |                      70 |        28 |    18 | 2852 / 1660                                                            |
+| 11 | QGSP_BERT_HP   | OK      |                     555 |        19 |    33 |                                                                        |
+| 12 | QGSP_BIC       | OK      |                      49 |        48 |    14 |                                                                        |
+| 13 | QGSP_BIC_HP    | OK      |                     365 |        41 |    32 |                                                                        |
+| 14 | QGSP_BIC_AllHP | crashed |                         |           |       | Please setenv G4PROTONHPDATA to point to the proton cross-section file |
+| 15 | QGSP_FTFP_BERT | OK      |                      77 |        37 |    13 |                                                                        |
+| 16 | QGSP_INCLXX    | OK      |                      80 |        33 |     9 |                                                                        |
+| 17 | QGSP_INCLXX_HP | OK      |                     347 |        33 |    17 |                                                                        |
+| 18 | QGS_BIC        | OK      |                      46 |        38 |    11 |                                                                        |
+| 19 | Shielding      | .       |                     479 |        34 |    31 |                                                                        |
+| 20 | ShieldingLEND  | crashed |                         |           |       | Please set the environmental variable G4LENDDATA                       |
+| 21 | ShieldingM     | OK      |                     552 |        26 |    30 | default for MU2E                                                       |
+| 22 | NuBeam         | OK      |                      76 |        37 |    17 |                                                                        |
+|----+----------------+---------+-------------------------+-----------+-------+------------------------------------------------------------------------|

@@ -1,0 +1,7 @@
+# -*- mode: tcl -*-
+
+#include "JobConfig/cd3/beam/beam_g4s1.fcl"
+
+services.GeometryService.inputFile:  "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
+
+physics.producers.g4run.physics.physicsListName : "FTF_BIC"

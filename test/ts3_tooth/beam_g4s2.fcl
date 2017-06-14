@@ -2,6 +2,6 @@
 
 #include "JobConfig/cd3/beam/beam_g4s2.fcl"
 
-services.GeometryService.inputFile:  "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt"
-source.fileNames : [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-cs1-mubeam/0506a/art/00/01/sim.mu2e.cd3-beam-cs1-mubeam.0506a.001002_00488421.art" ]
+services.GeometryService.inputFile:  "Mu2eG4/geom/geom_common.txt"
+source.fileNames : [ "do_not_forget_to_specify" ]
 

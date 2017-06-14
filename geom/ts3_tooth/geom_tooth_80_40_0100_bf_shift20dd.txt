@@ -1,0 +1,21 @@
+// mode: -*- c++ -*-
+//
+// geometry file for Mu2e.
+//
+#include "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt" 
+
+double ts.flashBlockUp.Width       =  80.0;    // mm
+double ts.flashBlockUp.Height      =  40.0;    // mm
+double ts.flashBlockUp.Length      =  10.0;    // mm full length
+double ts.flashBlockUp.TransOffset = -15.0;    // mm, neg = West
+string ts.flashBlockUp.Material    = "CollCu"; //
+
+vector<string> bfield.innerMaps = {
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20dd/SolCalc_ShiftYm20m20_DS.header" , // "GA05/DSMap.header",
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20dd/SolCalc_ShiftYm20m20_PS.header" , // "GA05/PSMap.header",
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20dd/SolCalc_ShiftYm20m20_TSu.header", // "GA05/TSuMap.header",
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20dd/SolCalc_ShiftYm20m20_TSd.header", // "GA05/TSdMap.header",
+  "BFieldMaps/Mau9/PStoDumpAreaMap.header",
+  "BFieldMaps/Mau9/ProtonDumpAreaMap.header",
+  "BFieldMaps/Mau9/DSExtension.header"
+};

@@ -1,0 +1,7 @@
+// mode: -*- c++ -*-
+//
+// geometry file for Mu2e.
+//
+
+#include "Mu2eG4/geom/studies/studyCOL3FlashBlock.txt" 
+bool   ts.useFlashBlockUp          = false;

@@ -166,8 +166,10 @@ void TBeamFlashAnaModule::BookHistograms() {
 void TBeamFlashAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* Sd) {
 
   StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
+
+  int vol_id = Step->VolumeID();
   
-  hist->fVolumeID->Fill(Step->VolumeID());
+  hist->fVolumeID->Fill(vol_id);
   hist->fGenIndex->Fill(Step->GenIndex());
   hist->fSimID   ->Fill(Step->SimID());
   hist->fPDGCode[0] ->Fill(Step->PDGCode());
@@ -184,6 +186,18 @@ void TBeamFlashAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoint
 
   double p = Step->Mom()->Mag();
   hist->fMomentum->Fill(p);
+
+//   float tan_th;
+
+//   if ((vol_id == 1) || (vol_id == 2) || (vol_id == 91) || (vol_id == 92) ) {
+//     tan_th = Step->Mom()->Pt()/Step->Mom()->Pz();
+//   }
+//   else if ((vol_id == 98) || (vol_id == 99)) {
+// //-----------------------------------------------------------------------------
+// // TS2 and TS4 bend - do not consider
+// //-----------------------------------------------------------------------------
+//     tan_th = -1.e6;
+//   }
 
   float x = Step->Pos()->X();
   float y = Step->Pos()->Y();
@@ -323,14 +337,37 @@ void TBeamFlashAnaModule::FillHistograms() {
 	}
       }
     }
-    else if (spmc->PDGCode() ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,sd);
-    else if (spmc->PDGCode() ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,sd);
-    else if (spmc->PDGCode() == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,sd);
-    else if (spmc->PDGCode() ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,sd);
+    else if (spmc->PDGCode()     ==   -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,sd);
+    else if (spmc->PDGCode()     ==    22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,sd);
+    else if (spmc->PDGCode()     ==  -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,sd);
+    else if (spmc->PDGCode()     ==   211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,sd);
     else if (abs(spmc->PDGCode() == 2212)) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc,sd);
-    else                              FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc,sd);
+    else                                   FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc,sd);
 
   }
+//-----------------------------------------------------------------------------
+// VDet histograms - for all virtual detectors
+//-----------------------------------------------------------------------------
+  // TStepPointMC* spvd;
+  // VDetData_t*   vdd;
+
+  // int n_vd_pts = fVDetBlock->NStepPoints();
+  // for (int i=0; i<n_vd_pts; i++) {
+  //   spvd = fVDetBlock->StepPointMC(i);
+  //   vdd  = fVDetData+i;
+
+  //   float p = spvd->Mom()->Mag();
+  //   float t = spvd->Time();
+
+  //   int vol_id = spvd->VolumeID();
+
+  //   if (vol_id == 91) {
+  //     FillVDetHistograms(fHist.fVDet[910],spvd,vdd);
+  //     if      (spvd->PDGCode() ==   11) FillVDetHistograms(fHist.fVDet[911],spvd,vdd);
+  //     if      (spvd->PDGCode() ==   13) FillVDetHistograms(fHist.fVDet[913],spvd,vdd);
+
+  //   }
+  // }
 }
 
 

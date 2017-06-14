@@ -28,6 +28,31 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
+  struct VDetHist_t : public HistBase_t {
+    TH1F*      fVolumeID;		       //
+    TH1F*      fGenIndex;		       //
+    TH1F*      fSimID;
+    TH1F*      fPDGCode[2];  // just different ranges
+    TH1F*      fCreationCode;
+    TH1F*      fParentSimID;
+    TH1F*      fParentPDGCode;
+    TH1F*      fEndProcessCode;
+
+    TH1F*      fEDepTot;
+    TH1F*      fEDepNio;
+    TH1F*      fTime;
+    TH1F*      fStepLength;
+
+    TH1F*      fMomentum;
+    TH1F*      fTanTheta;		// pitch
+
+    TH2F*      fYVsZ;
+    TH2F*      fYVsX;
+
+    TH1F*      fGpPDGCode[2];
+    TH2F*      fGpCosThVsMom;
+  };
+
   struct StepPointMCHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
     TH1F*      fGenIndex;		       //
@@ -64,13 +89,21 @@ public:
     TSimParticle*  fGParent;
   };
 
+  struct VDetData_t {
+    TSimParticle*  fParticle;
+    TSimParticle*  fParent;
+    TSimParticle*  fGParent;
+  };
+
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets        =  100 };
   enum { kNStepPointMCHistSets  = 1000 };
+  enum { kNVDetHistSets         = 1000 };
 
   struct Hist_t {
     EventHist_t*        fEvent       [kNEventHistSets];
     StepPointMCHist_t*  fStepPointMC [kNStepPointMCHistSets];
+    VDetHist_t*         fVDet        [kNVDetHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -80,7 +113,8 @@ public:
   TStepPointMCBlock*    fStepPointMCBlock;
   TSimpBlock*           fSimpBlock;  
 					// transient data
-  SpmcData_t            fSpmcData[100];
+  SpmcData_t            fSpmcData[1000];
+  VDetData_t            fVDetData[1000];
 
   TSimParticle*         fProton;
 					// histograms filled
@@ -110,9 +144,11 @@ public:
 //-----------------------------------------------------------------------------
   void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
+  void    BookVDetHistograms         (HistBase_t* Hist, const char* Folder);
 
   void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* Sd);
   void    FillEventHistograms        (HistBase_t* Hist);
+  void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step, VDetData_t* Vd);
 
   void    BookHistograms();
   void    FillHistograms();

@@ -55,6 +55,8 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
             ;;
         d)                                          # dataset ID
             export DSID=${OPTARG}
+
+#	    export DSID=`echo $DATASET | awk -F / '{print $NF}' | sed 's/.files//' | sed 's/\./\_/g'`
 	    
 	    subdir=`echo $DSID | sed 's#\.#\/#g'`;
 	    export DATASET_DIR=/grid/fermiapp/mu2e/personal/murat/catalogs/$subdir

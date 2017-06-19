@@ -85,12 +85,12 @@ double zplane[40][2] = {
    10963., 10967.,       // 13
    11086., 11090.,       // 14
    11137., 11141.,       // 14
-   11260., 11264.,       // 15
-   11311., 11315.,       // 15
-   11434., 11348.,       // 16
-   11485., 11489.,       // 16
-   11608., 11612.,       // 17
-   11659., 11663.,       // 17
+   11250., 11270.,       // 15
+   11310., 11320.,       // 15
+   11430., 11440.,       // 16
+   11480., 11490.,       // 16
+   11600., 11620.,       // 17
+   11650., 11670.,       // 17
    -1.,    -1.,
    -1.,    -1.,
    -1.,    -1.,
@@ -926,6 +926,39 @@ int TTrackerDose::InitChain() {
     fNSimulated = 100e6;
     fDensity[0] = 1.7;
   }
+  if (fProcess == "622_0011") {
+    fDataset = Form("%s/ts3_tooth/%s/cal_dose/ts3_tooth.%s_cal_dose",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 6.00e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0012") {
+    fDataset = Form("%s/ts3_tooth/%s/cal_dose/ts3_tooth.%s_cal_dose",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.91e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0013") {
+    fDataset = Form("%s/ts3_tooth/%s/cal_dose/ts3_tooth.%s_cal_dose",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.91e6;
+    fDensity[0] = 1.7;
+  }
+  if (fProcess == "622_0014") {
+    fDataset = Form("%s/ts3_tooth/%s/cal_dose/ts3_tooth.%s_cal_dose",getenv("CATALOG_DIR"),fProcess.Data(),fProcess.Data());
+    AddFiles(fDataset.Data());
+
+    fNPerPOT    = 1.;
+    fNSimulated = 5.97e6;
+    fDensity[0] = 1.7;
+  }
+
   if (fProcess == "FLASH_C360BRASS_02") { // read catalog file
     fDataset = Form("%s/datasets/tracker-rad-dose/flash-c360brass-02-nt",getenv("MU2E_BASE_RELEASE"));
     AddFiles(fDataset.Data());

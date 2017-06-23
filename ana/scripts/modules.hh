@@ -6,6 +6,7 @@
 #include "murat/ana/TClusterAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
+#include "murat/ana/TG4ValidationModule.hh"
 #include "murat/ana/TMuonStopAnaModule.hh"
 // #include "murat/ana/TGenAnaModule.hh"
 // #include "murat/ana/TPhotosAnaModule.hh"
@@ -29,6 +30,7 @@ TCalAnaModule*             m_cal   = NULL;
 TClusterAnaModule*         m_cls   = NULL;
 TCosmicsAnaModule*         m_cos   = NULL;
 TDioCalibModule*           m_dio   = NULL;
+TG4ValidationModule*       m_g4val = NULL;
 TGenAnaModule*             m_gen   = NULL;
 TMuonStopAnaModule*        m_must  = NULL;
 // TPhotosAnaModule*          m_pho   = NULL;

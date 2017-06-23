@@ -22,7 +22,7 @@ int tracker_dose(const char* ProcessName, int NEvents = -1, int SaveHistograms =
   mtd->Loop(NEvents);
 
   if (SaveHistograms) {
-    x->SaveHist(Form("tracker_dose_%s.hist",ProcessName));
+    x->SaveHist(Form("ts3_tooth.%s.cal_dose.hist",ProcessName));
   }
 
   return 0;

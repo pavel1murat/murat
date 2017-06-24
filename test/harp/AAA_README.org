@@ -1,0 +1,4 @@
+#
+
+# .fcl files in this directory are derived from Mu2e/geon/g4study2.fcl by Krzysztof 
+

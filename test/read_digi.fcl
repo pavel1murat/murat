@@ -1,18 +1,8 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
-# read input file, run digitization 
+# read input file with pre-mixed (at a level of StepPointMC's) background events, 
+# run digitization 
 #
-# make STNTUPLE in one go, without creating an intermediate file
-# if not running on the grid, need to specify the background hit file 
-# or use murat/scripts/submit_mu2e_job
-#
-# see examples in the PROLOG section
-# - old background files (x050) had 0.5 expected background, to generate nominal 
-#   background, need to set meanBackground to 2
-# - for the CD3c background files don't need to do that
-# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
-# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
-# -          datasets/cd3-detmix-cut-v2 for the grid
 # example:
 # --------
 # murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
@@ -35,7 +25,7 @@ END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : ReadRecoStnTcm
+process_name : ReadDigi
 
 source       : { 
     module_type : EmptyEvent 
@@ -58,7 +48,8 @@ physics: {
 
     p1: [ @sequence::murat.mix_time_map ,
 	  @sequence::Tracking.DigiSim   ,
-	  @sequence::Tracking.PrepareHits
+#	  @sequence::Tracking.PrepareHits
+	  makeSH, MakeStrawHitPositions
 	 ]
 
     trigger_paths : [  p1 ]

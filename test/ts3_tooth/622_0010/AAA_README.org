@@ -1,0 +1,5 @@
+#
+<2017-06-10 Sat> 
+- to speed up the execution, try different G4 physics list in hope to renormalize to the stopped muon rate
+- compare QGSP_BERT to ShieldingM, which is the current default
+

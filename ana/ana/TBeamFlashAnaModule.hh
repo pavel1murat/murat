@@ -30,30 +30,27 @@ public:
 //-----------------------------------------------------------------------------
   struct VDetHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
-    TH1F*      fGenIndex;		       //
-    TH1F*      fSimID;
-    TH1F*      fPDGCode[2];  // just different ranges
-    TH1F*      fCreationCode;
-    TH1F*      fParentSimID;
-    TH1F*      fParentPDGCode;
-    TH1F*      fEndProcessCode;
+    // TH1F*      fGenIndex;		       //
+    // TH1F*      fSimID;
+    // TH1F*      fPDGCode[2];  // just different ranges
+    // TH1F*      fCreationCode;
+    // TH1F*      fParentSimID;
+    // TH1F*      fParentPDGCode;
+    // TH1F*      fEndProcessCode;
 
-    TH1F*      fEDepTot;
-    TH1F*      fEDepNio;
-    TH1F*      fTime;
-    TH1F*      fStepLength;
+    // TH1F*      fTime;
 
-    TH1F*      fMomentum;
-    TH1F*      fTanTheta;		// pitch
+    // TH1F*      fMomentum;
+    // TH1F*      fTanTheta;		// pitch
 
-    TH2F*      fYVsZ;
-    TH2F*      fYVsX;
+    //    TH2F*      fYVsZ;
+    TH2F*      fYVsX;			// local coordinates
 
-    TH1F*      fGpPDGCode[2];
-    TH2F*      fGpCosThVsMom;
+    // TH1F*      fGpPDGCode[2];
+    // TH2F*      fGpCosThVsMom;
   };
 
-  struct StepPointMCHist_t : public HistBase_t {
+  struct SpmcHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
     TH1F*      fGenIndex;		       //
     TH1F*      fSimID;
@@ -93,24 +90,27 @@ public:
     TSimParticle*  fParticle;
     TSimParticle*  fParent;
     TSimParticle*  fGParent;
+    float          fX;			// local horizontal coord (X or Z)
+    float          fY;			// local vertical   coord
   };
 
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets        =  100 };
-  enum { kNStepPointMCHistSets  = 1000 };
-  enum { kNVDetHistSets         = 1000 };
+  enum { kNEventHistSets =  100 };
+  enum { kNSpmcHistSets  = 1000 };
+  enum { kNVDetHistSets  = 1000 };
 
   struct Hist_t {
-    EventHist_t*        fEvent       [kNEventHistSets];
-    StepPointMCHist_t*  fStepPointMC [kNStepPointMCHistSets];
-    VDetHist_t*         fVDet        [kNVDetHistSets];
+    EventHist_t*        fEvent[kNEventHistSets];
+    SpmcHist_t*  fSpmc        [kNSpmcHistSets];
+    VDetHist_t*         fVDet [kNVDetHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStepPointMCBlock*    fStepPointMCBlock;
+  TStepPointMCBlock*    fSpmcBlock;
+  TStepPointMCBlock*    fVDetBlock;
   TSimpBlock*           fSimpBlock;  
 					// transient data
   SpmcData_t            fSpmcData[1000];
@@ -142,12 +142,12 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
+  void    BookSpmcHistograms         (HistBase_t* Hist, const char* Folder);
   void    BookVDetHistograms         (HistBase_t* Hist, const char* Folder);
 
-  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* Sd);
   void    FillEventHistograms        (HistBase_t* Hist);
+  void    FillSpmcHistograms         (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* Sd);
   void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step, VDetData_t* Vd);
 
   void    BookHistograms();

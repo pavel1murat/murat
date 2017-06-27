@@ -1,0 +1,15 @@
+// mode: -*- c++ -*-
+//
+// geometry file for Mu2e.
+//
+#include "Mu2eG4/geom/studies/studyTrackerShielding.txt" 
+
+vector<string> bfield.innerMaps = {
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20du/SolCalc_ShiftY20du_DS.header" , // "GA05/DSMap.header",
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20du/SolCalc_ShiftY20du_PS.header" , // "GA05/PSMap.header",
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20du/SolCalc_ShiftY20du_TSu.header", // "GA05/TSuMap.header",
+  "BFieldMaps/SolcMau9fix6/SolcMau9fix6_ShiftY20du/SolCalc_ShiftY20du_TSd.header", // "GA05/TSdMap.header",
+  "BFieldMaps/Mau9/PStoDumpAreaMap.header",
+  "BFieldMaps/Mau9/ProtonDumpAreaMap.header",
+  "BFieldMaps/Mau9/DSExtension.header"
+};

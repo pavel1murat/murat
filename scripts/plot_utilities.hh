@@ -22,15 +22,19 @@ void plot_stat_box(TH1* Hist, double X1, double Y1, double X2, double Y2) {
 }
 
 //-----------------------------------------------------------------------------
+// draw label in normalized coordinates (x and y range from 0 to 1
+//-----------------------------------------------------------------------------
 void draw_label_ndc(const char* Text, double X1, double Y1, double FontSize, int Font = 52) {
 
   TLatex* label = new TLatex(X1,Y1,Text);
-  label->SetNDC();
+  label->SetNDC(kTRUE);
   label->SetTextSize(FontSize);
   label->SetTextFont(Font);
   label->Draw();
 }
 
+//-----------------------------------------------------------------------------
+// draw a label in absolute coordinates
 //-----------------------------------------------------------------------------
 void draw_label_abs(const char* Text, double X1, double Y1, double FontSize, int Font = 52) {
 

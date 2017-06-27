@@ -1,0 +1,39 @@
+# -*- mode: tcl -*-
+#------------------------------------------------------------------------------
+# combine simulation stages 2 and 3 
+#------------------------------------------------------------------------------
+#include "JobConfig/cd3/beam/beam_g4s3.fcl"
+
+process_name                       : beamg4s23
+
+services.GeometryService.inputFile :  "murat/test/ts3_tooth/622_0013/geom_tooth_bf_shift20du.txt"
+services.scheduler.wantSummary     : true
+
+source.fileNames : [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-cs1-mubeam/0506a/art/00/01/sim.mu2e.cd3-beam-cs1-mubeam.0506a.001002_00488421.art" ]
+
+physics : { @table::physics
+
+    producers : { @table::physics.producers 
+	g4run : { @table::physics.producers.g4run 
+	    MultiStageParameters : { @table::physics.producers.g4run.MultiStageParameters 
+		genInputHits:["muonBeamFilter:mubeam"] 
+	    }
+	    SDConfig             : { @table::physics.producers.g4run.SDConfig
+		enableSD:[virtualdetector] 
+	    }
+	}
+    }
+
+    trigger_paths            : [motherFilter, tgtFilter, ootFilter, g4StatusFilter]
+    out                      : [mothersOutput, tgtStopOutput, ootStopOutput, truncatedEvtsOutput]
+}
+
+outputs : { 
+    mothersOutput       : { @table::outputs.mothersOutput       }
+    tgtStopOutput       : { @table::outputs.tgtStopOutput       }
+    ootStopOutput       : { @table::outputs.ootStopOutput       }
+    truncatedEvtsOutput : { @table::outputs.truncatedEvtsOutput }
+}
+#------------------------------------------------------------------------------
+# this is it
+#------------------------------------------------------------------------------

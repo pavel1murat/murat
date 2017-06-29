@@ -44,6 +44,8 @@ TBeamFlashAnaModule::TBeamFlashAnaModule(const char* name, const char* title):
 {
   // fPdgCode       = 11;
   // fGeneratorCode = 28;
+
+  fSpmcBlockName = "SpmcBlock";
 }
 
 //-----------------------------------------------------------------------------
@@ -73,6 +75,7 @@ void TBeamFlashAnaModule::BookSpmcHistograms(HistBase_t* Hist, const char* Folde
   HBook1F(hist->fTime           ,"time"    ,Form("%s: Time"            ,Folder), 200,   0,  2000,Folder);
   HBook1F(hist->fStepLength     ,"step"    ,Form("%s: Ltep Length"     ,Folder), 200,   0,   100,Folder);
   HBook1F(hist->fMomentum       ,"mom"     ,Form("%s: Momentum"        ,Folder), 500,   0,   250,Folder);
+  HBook1F(hist->fCosTh          ,"cos_th"  ,Form("%s: Cos_TH"          ,Folder), 200,  -1,   1  ,Folder);
 
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
   HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 500, -250,  250, 500, -250, 250, Folder);
@@ -80,6 +83,11 @@ void TBeamFlashAnaModule::BookSpmcHistograms(HistBase_t* Hist, const char* Folde
   HBook1F(hist->fGpPDGCode[0]   ,"gp_pdg_0"        ,Form("%s: Grand Parent PDG code",Folder), 700, -350, 350,Folder);
   HBook1F(hist->fGpPDGCode[1]   ,"gp_pdg_1"        ,Form("%s: Grand Parent PDG code",Folder), 700, -3500,3500,Folder);
   HBook2F(hist->fGpCosThVsMom   ,"gp_mom_vs_costh" ,Form("%s: Grand Parent Momentum",Folder), 500,  0, 10000, 100,-1,1,Folder);
+  HBook1F(hist->fGpTheta        ,"gp_theta"        ,Form("%s: GP Theta"             ,Folder), 16,  -0.05,   3.15  ,Folder);
+
+  HBook1F(hist->fGpPionTheta    ,"gpp_theta"        ,Form("%s: GP Pion Theta"     ,Folder), 16,  -0.05,   3.15  ,Folder);
+  HBook1F(hist->fGpPionCosTh    ,"gpp_costh"        ,Form("%s: GP Pion Cos Theta" ,Folder),200,     -1,      1  ,Folder);
+  HBook1F(hist->fGpPionMom      ,"gpp_mom"          ,Form("%s: GP Pion Momentum"  ,Folder),250,      0,   2500  ,Folder);
 }
 
 
@@ -92,21 +100,34 @@ void TBeamFlashAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folde
 
   HBook1F(hist->fVolumeID,"vol_id"   ,Form("%s: VolumeID"       ,Folder), 200,    0, 200,Folder);
 
-  // HBook1F(hist->fGenIndex,"gen_index",Form("%s: GenIndex"       ,Folder), 200,    0, 10000,Folder);
-  // HBook1F(hist->fSimID   ,"sim_id"   ,Form("%s: SimID"          ,Folder), 200,    0,  1000,Folder);
+  HBook1F(hist->fGenIndex,"gen_index",Form("%s: GenIndex"       ,Folder), 200,    0, 10000,Folder);
+  HBook1F(hist->fSimID   ,"sim_id"   ,Form("%s: SimID"          ,Folder), 200,    0,  1000,Folder);
 
-  // HBook1F(hist->fPDGCode[0] ,"pdg_0" ,Form("%s: PDG code"       ,Folder),  700,  -350,   350,Folder);
-  // HBook1F(hist->fPDGCode[1] ,"pdg_1" ,Form("%s: PDG code"       ,Folder),  700, -3500,  3500,Folder);
+  HBook1F(hist->fPDGCode[0] ,"pdg_0" ,Form("%s: PDG code"       ,Folder),  700,  -350,   350,Folder);
+  HBook1F(hist->fPDGCode[1] ,"pdg_1" ,Form("%s: PDG code"       ,Folder),  700, -3500,  3500,Folder);
 
-  // HBook1F(hist->fCreationCode   ,"cr_code" ,Form("%s: Creation code",Folder), 200,   0,   200,Folder);
-  // HBook1F(hist->fParentSimID    ,"psim_id" ,Form("%s: Parent SimID",Folder), 200,   0,  1000,Folder);
-  // HBook1F(hist->fParentPDGCode  ,"ppdg"    ,Form("%s: Parent PDG code",Folder), 700, -350,   350,Folder);
-  // HBook1F(hist->fEndProcessCode ,"end_code",Form("%s: End process code",Folder), 200,   0,   200,Folder);
-  // HBook1F(hist->fTime           ,"time"    ,Form("%s: Time"            ,Folder), 200,   0,  2000,Folder);
-  // HBook1F(hist->fMomentum       ,"mom"     ,Form("%s: Momentum"        ,Folder), 500,   0,   250,Folder);
+  HBook1F(hist->fCreationCode   ,"cr_code" ,Form("%s: Creation code",Folder), 200,   0,   200,Folder);
+  HBook1F(hist->fParentSimID    ,"psim_id" ,Form("%s: Parent SimID",Folder), 200,   0,  1000,Folder);
+  HBook1F(hist->fParentPDGCode  ,"ppdg"    ,Form("%s: Parent PDG code",Folder), 700, -350,   350,Folder);
+  HBook1F(hist->fEndProcessCode ,"end_code",Form("%s: End process code",Folder), 200,   0,   200,Folder);
+  HBook1F(hist->fEDepTot        ,"edep_tot",Form("%s: EDEP tot"        ,Folder), 200,   0,   10 ,Folder);
+  HBook1F(hist->fEDepNio        ,"edep_nio",Form("%s: EDEP NIO"        ,Folder), 200,   0,   10 ,Folder);
+  HBook1F(hist->fTime           ,"time"    ,Form("%s: Time"            ,Folder), 200,   0,  2000,Folder);
+  HBook1F(hist->fStepLength     ,"step"    ,Form("%s: Ltep Length"     ,Folder), 200,   0,   100,Folder);
+  HBook1F(hist->fMomentum       ,"mom"     ,Form("%s: Momentum"        ,Folder), 500,   0,   250,Folder);
+  HBook1F(hist->fCosTh          ,"cos_th"  ,Form("%s: Cos_TH"          ,Folder), 200,  -1,   1  ,Folder);
 
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
-  // HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 500, -250,  250, 500, -250, 250, Folder);
+  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 500, -250,  250, 500, -250, 250, Folder);
+
+  HBook1F(hist->fGpPDGCode[0]   ,"gp_pdg_0"        ,Form("%s: Grand Parent PDG code",Folder), 700, -350, 350,Folder);
+  HBook1F(hist->fGpPDGCode[1]   ,"gp_pdg_1"        ,Form("%s: Grand Parent PDG code",Folder), 700, -3500,3500,Folder);
+  HBook2F(hist->fGpCosThVsMom   ,"gp_mom_vs_costh" ,Form("%s: Grand Parent Momentum",Folder), 500,  0, 10000, 100,-1,1,Folder);
+  HBook1F(hist->fGpTheta        ,"gp_theta"        ,Form("%s: GP Theta"          ,Folder), 16,  -0.05,   3.15  ,Folder);
+
+  HBook1F(hist->fGpPionTheta    ,"gpp_theta"        ,Form("%s: GP Pion Theta"     ,Folder), 16,  -0.05,   3.15  ,Folder);
+  HBook1F(hist->fGpPionCosTh    ,"gpp_costh"        ,Form("%s: GP Pion Cos Theta" ,Folder),200,     -1,      1  ,Folder);
+  HBook1F(hist->fGpPionMom      ,"gpp_mom"          ,Form("%s: GP Pion Momentum"  ,Folder),250,      0,   2500  ,Folder);
 }
 
 
@@ -156,16 +177,16 @@ void TBeamFlashAnaModule::BookHistograms() {
   int book_spmc_histset[kNSpmcHistSets];
   for (int i=0; i<kNSpmcHistSets; i++) book_spmc_histset[i] = 0;
 
-  book_spmc_histset[0] = 1;		// all steps
-  book_spmc_histset[1] = 1;		// electrons
-  book_spmc_histset[2] = 1;		// positrons
-  book_spmc_histset[3] = 1;		// mu-
-  book_spmc_histset[4] = 1;		// mu+
-  book_spmc_histset[5] = 1;		// photons
-  book_spmc_histset[6] = 1;		// negative pions
-  book_spmc_histset[7] = 1;		// positive pions
-  book_spmc_histset[8] = 1;		// protons+antiprotons
-  book_spmc_histset[9] = 1;		// everything else
+  book_spmc_histset[  0] = 1;		// all steps
+  book_spmc_histset[  1] = 1;		// electrons
+  book_spmc_histset[  2] = 1;		// positrons
+  book_spmc_histset[  3] = 1;		// mu-
+  book_spmc_histset[  4] = 1;		// mu+
+  book_spmc_histset[  5] = 1;		// photons
+  book_spmc_histset[  6] = 1;		// negative pions
+  book_spmc_histset[  7] = 1;		// positive pions
+  book_spmc_histset[  8] = 1;		// protons+antiprotons
+  book_spmc_histset[  9] = 1;		// everything else
 
   book_spmc_histset[101] = 1;		// electrons with P > 50 MeV/c
   book_spmc_histset[102] = 1;		// electrons with T > 400 ns
@@ -198,10 +219,17 @@ void TBeamFlashAnaModule::BookHistograms() {
   int book_vdet_histset[kNVDetHistSets];
   for (int i=0; i<kNVDetHistSets; i++) book_vdet_histset[i] = 0;
 
+  book_vdet_histset[ 91] = 1;		// electrons at VDET ID=9 - in front of ST
+  book_vdet_histset[ 92] = 1;		// positrons
+  book_vdet_histset[ 93] = 1;		// mu-
+  book_vdet_histset[ 94] = 1;		// mu+
+
   book_vdet_histset[911] = 1;		// electrons at VDET ID=91 PBAR window
   book_vdet_histset[912] = 1;		// positrons
   book_vdet_histset[913] = 1;		// mu-
   book_vdet_histset[914] = 1;		// mu+
+
+  book_vdet_histset[915] = 1;		// mu- with P< 2 MeV/c
 
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
@@ -239,18 +267,6 @@ void TBeamFlashAnaModule::FillSpmcHistograms(HistBase_t* Hist, TStepPointMC* Ste
   double p = Step->Mom()->Mag();
   hist->fMomentum->Fill(p);
 
-//   float tan_th;
-
-//   if ((vol_id == 1) || (vol_id == 2) || (vol_id == 91) || (vol_id == 92) ) {
-//     tan_th = Step->Mom()->Pt()/Step->Mom()->Pz();
-//   }
-//   else if ((vol_id == 98) || (vol_id == 99)) {
-// //-----------------------------------------------------------------------------
-// // TS2 and TS4 bend - do not consider
-// //-----------------------------------------------------------------------------
-//     tan_th = -1.e6;
-//   }
-
   float x = Step->Pos()->X();
   float y = Step->Pos()->Y();
   float z = Step->Pos()->Z();
@@ -258,23 +274,31 @@ void TBeamFlashAnaModule::FillSpmcHistograms(HistBase_t* Hist, TStepPointMC* Ste
   hist->fYVsX->Fill(x,y);		// useful for stage 2
   hist->fYVsZ->Fill(z,y);		// useful for stage 1
 
-  double mom(-1), cos_th(-10);
-  int gp_pdg_code(-1000000);
+  double        gp_mom(-1), gp_cos_th(-10), gp_theta(-10.);
+  int           gp_pdg_code(-1000000);
   TSimParticle* gp = Sd->fGParent;
   
   if (gp) {
     TLorentzVector* v1 = &fProton->fStartMom;
     TLorentzVector* v2 = &gp->fStartMom;
 
-    cos_th = (v1->Px()*v2->Px()+v1->Py()*v2->Py()+v1->Pz()*v2->Pz())/v1->P()/v2->P()/(1+1.e-10);
+    gp_cos_th = (v1->Px()*v2->Px()+v1->Py()*v2->Py()+v1->Pz()*v2->Pz())/v1->P()/v2->P()/(1+1.e-10);
+    gp_theta  = TMath::ACos(gp_cos_th);
     
     gp_pdg_code = gp->fPdgCode;
-    mom         = gp->fStartMom.P();
+    gp_mom      = gp->fStartMom.P();
   }
 
   hist->fGpPDGCode[0]->Fill(gp_pdg_code);
   hist->fGpPDGCode[1]->Fill(gp_pdg_code);
-  hist->fGpCosThVsMom->Fill(mom,cos_th);
+  hist->fGpTheta->Fill(gp_theta);
+  hist->fGpCosThVsMom->Fill(gp_mom,gp_cos_th);
+
+  if (abs(gp_pdg_code) == 211) {
+    hist->fGpPionCosTh->Fill(gp_cos_th);
+    hist->fGpPionTheta->Fill(gp_theta);
+    hist->fGpPionMom->Fill(gp_mom);
+  }
   
 }
 
@@ -286,7 +310,49 @@ void TBeamFlashAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Ste
   int vol_id = Step->VolumeID();
   
   hist->fVolumeID->Fill(vol_id);
+  hist->fGenIndex->Fill(Step->GenIndex());
+  hist->fSimID   ->Fill(Step->SimID());
+  hist->fPDGCode[0] ->Fill(Step->PDGCode());
+  hist->fPDGCode[1] ->Fill(Step->PDGCode());
+  hist->fCreationCode->Fill(Step->CreationCode());
+  hist->fParentSimID ->Fill(Step->ParentSimID());
+  hist->fParentPDGCode->Fill(Step->ParentPDGCode());
+  hist->fEndProcessCode->Fill(Step->EndProcessCode());
+
+  hist->fEDepTot->Fill(Step->EDepTot());
+  hist->fEDepNio->Fill(Step->EDepNio());
+  hist->fTime   ->Fill(Step->Time());
+  hist->fStepLength->Fill(Step->StepLength());
+
   hist->fYVsX->Fill(Vdd->fX,Vdd->fY);
+
+  double gp_mom(-1), gp_cos_th(-10.), gp_theta(-10.);
+  int    gp_pdg_code(-1000000);
+  TSimParticle* gp = Vdd->fGParent;
+  
+  if (gp) {
+    TLorentzVector* v1 = &fProton->fStartMom;
+    TLorentzVector* v2 = &gp->fStartMom;
+
+    gp_cos_th   = (v1->Px()*v2->Px()+v1->Py()*v2->Py()+v1->Pz()*v2->Pz())/v1->P()/v2->P()/(1+1.e-10);
+    gp_theta    = TMath::ACos(gp_cos_th);
+    gp_pdg_code = gp->fPdgCode;
+    gp_mom      = gp->fStartMom.P();
+  }
+
+  hist->fMomentum->Fill(Vdd->fP);
+  hist->fCosTh->Fill(Vdd->fCosTh);
+
+  hist->fGpPDGCode[0]->Fill(gp_pdg_code);
+  hist->fGpPDGCode[1]->Fill(gp_pdg_code);
+  hist->fGpCosThVsMom->Fill(gp_mom,gp_cos_th);
+  hist->fGpTheta->Fill(gp_theta);
+  if (abs(gp_pdg_code) == 211) {
+    hist->fGpPionCosTh->Fill(gp_cos_th);
+    hist->fGpPionTheta->Fill(gp_theta);
+    hist->fGpPionMom->Fill(gp_mom);
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -305,26 +371,6 @@ void TBeamFlashAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fRunNumber->Fill(run_number);
 
 }
-
-//-----------------------------------------------------------------------------
-// register data blocks and book histograms
-//-----------------------------------------------------------------------------
-int TBeamFlashAnaModule::BeginJob() {
-//-----------------------------------------------------------------------------
-// register data blocks
-//-----------------------------------------------------------------------------
-  RegisterDataBlock("SpmcBlock" ,"TStepPointMCBlock" ,&fSpmcBlock);
-  RegisterDataBlock("VdetBlock" ,"TStepPointMCBlock" ,&fVDetBlock);
-  //  RegisterDataBlock("StepPointMCBlock" ,"TStepPointMCBlock" ,&fSpmcBlock);
-  RegisterDataBlock("SimpBlock" ,"TSimpBlock" ,&fSimpBlock);
-//-----------------------------------------------------------------------------
-// book histograms
-//-----------------------------------------------------------------------------
-  BookHistograms();
-
-  return 0;
-}
-
 
 //_____________________________________________________________________________
 void TBeamFlashAnaModule::FillHistograms() {
@@ -411,7 +457,7 @@ void TBeamFlashAnaModule::FillHistograms() {
   }
 //-----------------------------------------------------------------------------
 // VDet histograms - for all virtual detectors
-// currently, fill only for VDET ID=91 (TS1 proton absorber window)
+// currently, fill only for VDET ID=9 and 91 (TS1 proton absorber window)
 //-----------------------------------------------------------------------------
   TStepPointMC* spvd;
   VDetData_t*   vdd;
@@ -426,11 +472,21 @@ void TBeamFlashAnaModule::FillHistograms() {
 
     int vol_id = spvd->VolumeID();
 
-    if (vol_id == 91) {
+    if      (vol_id == 9) {
+       if      (spvd->PDGCode() ==   11) FillVDetHistograms(fHist.fVDet[ 91],spvd,vdd);
+       if      (spvd->PDGCode() ==  -11) FillVDetHistograms(fHist.fVDet[ 92],spvd,vdd);
+       if      (spvd->PDGCode() ==   13) FillVDetHistograms(fHist.fVDet[ 93],spvd,vdd);
+       if      (spvd->PDGCode() ==  -13) FillVDetHistograms(fHist.fVDet[ 94],spvd,vdd);
+    }
+    else if (vol_id == 91) {
        if      (spvd->PDGCode() ==   11) FillVDetHistograms(fHist.fVDet[911],spvd,vdd);
-       if      (spvd->PDGCode() ==  -11) FillVDetHistograms(fHist.fVDet[911],spvd,vdd);
+       if      (spvd->PDGCode() ==  -11) FillVDetHistograms(fHist.fVDet[912],spvd,vdd);
        if      (spvd->PDGCode() ==   13) FillVDetHistograms(fHist.fVDet[913],spvd,vdd);
        if      (spvd->PDGCode() ==  -13) FillVDetHistograms(fHist.fVDet[914],spvd,vdd);
+
+       if (vdd->fP < 2) {
+	 if (spvd->PDGCode() ==   11) FillVDetHistograms(fHist.fVDet[915],spvd,vdd);
+       }
     }
   }
 }
@@ -444,6 +500,25 @@ int TBeamFlashAnaModule::BeginRun() {
   return 0;
 }
 
+
+//-----------------------------------------------------------------------------
+// register data blocks and book histograms
+//-----------------------------------------------------------------------------
+int TBeamFlashAnaModule::BeginJob() {
+//-----------------------------------------------------------------------------
+// register data blocks
+//-----------------------------------------------------------------------------
+  RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock",&fSpmcBlock);
+  RegisterDataBlock("VdetBlock"          ,"TStepPointMCBlock",&fVDetBlock);
+  //  RegisterDataBlock("StepPointMCBlock" ,"TStepPointMCBlock" ,&fSpmcBlock);
+  RegisterDataBlock("SimpBlock"          ,"TSimpBlock"       ,&fSimpBlock);
+//-----------------------------------------------------------------------------
+// book histograms
+//-----------------------------------------------------------------------------
+  BookHistograms();
+
+  return 0;
+}
 
 //_____________________________________________________________________________
 int TBeamFlashAnaModule::Event(int ientry) {
@@ -466,23 +541,20 @@ int TBeamFlashAnaModule::Event(int ientry) {
   for (int i=0; i<nsteps; i++) {
     TStepPointMC* s       = fSpmcBlock->StepPointMC(i);
     SpmcData_t* spmc_data = fSpmcData+i;
-
-    int id = s->GetUniqueID();
+    int id                = s->GetUniqueID();
 //-----------------------------------------------------------------------------
 // find particle in SimpBlock
 //-----------------------------------------------------------------------------
-    spmc_data->fParticle = fSimpBlock->FindParticle(id);
-    spmc_data->fParent   = NULL;
-    spmc_data->fGParent  = NULL;
-
-    // search for particle's oldest parent with parent code = 1
-
+    spmc_data->fParticle  = fSimpBlock->FindParticle(id);
+    spmc_data->fParent    = NULL;
+    spmc_data->fGParent   = NULL;
+					// search for particle's oldest parent with parent code = 1
     int parent_id = s->ParentSimID();
     int pdg_code  = s->PDGCode();
 
     TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
 
-    while(1) {
+    while(parent) {
       parent_id = parent->ParentID();
       TSimParticle* p = fSimpBlock->FindParticle(parent_id);
       if (p            == NULL) break; 
@@ -498,7 +570,6 @@ int TBeamFlashAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
       if (parent_id == 1) break;
     }
-    
     spmc_data->fGParent = parent;
   }
 
@@ -506,14 +577,55 @@ int TBeamFlashAnaModule::Event(int ientry) {
 
   for (int i=0; i<nvds; i++) {
     TStepPointMC* s       = fVDetBlock->StepPointMC(i);
+    int id                = s->GetUniqueID();
     VDetData_t* vdet_data = fVDetData+i;
+//-----------------------------------------------------------------------------
+// find particle in SimpBlock
+//-----------------------------------------------------------------------------
+    vdet_data->fParticle  = fSimpBlock->FindParticle(id);
+    vdet_data->fParent    = NULL;
+    vdet_data->fGParent   = NULL;
+    vdet_data->fP         = s->Mom()->Mag();
+					// search for particle's oldest parent with parent code = 1
+    int parent_id = s->ParentSimID();
+    int pdg_code  = s->PDGCode();
+
+    TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
+
+    while(parent) {
+      parent_id = parent->ParentID();
+      TSimParticle* p = fSimpBlock->FindParticle(parent_id);
+      if (p            == NULL) break; 
+      if ((vdet_data->fParent == NULL) && (p->PDGCode() != pdg_code)) {
+	vdet_data->fParent = p;
+      }
+
+      if (p->PDGCode() == 2212) break;
+      parent = p;
+//-----------------------------------------------------------------------------
+// sometimes history tree includes a scattered proton, which produces a pion,
+// decaying into a muon. In this case call pion a 'grandparent'
+//-----------------------------------------------------------------------------
+      if (parent_id == 1) break;
+    }
+    vdet_data->fGParent = parent;
+
     int vol_id = s->VolumeID();
-    if (vol_id == 91) {
+    if (vol_id == 9) {
 //-----------------------------------------------------------------------------
 // TS1 proton absorber window
 //-----------------------------------------------------------------------------
-      vdet_data->fX = s->Pos()->X()-3904;
-      vdet_data->fY = s->Pos()->Y() ;
+      vdet_data->fX     = s->Pos()->X()-3904;
+      vdet_data->fY     = s->Pos()->Y() ;
+      vdet_data->fCosTh = s->Mom()->Pt()/vdet_data->fP;
+    }
+    else if (vol_id == 91) {
+//-----------------------------------------------------------------------------
+// TS1 proton absorber window
+//-----------------------------------------------------------------------------
+      vdet_data->fX     = s->Pos()->X()-3904;
+      vdet_data->fY     = s->Pos()->Y() ;
+      vdet_data->fCosTh = s->Mom()->Pt()/vdet_data->fP;
     }
   }
 

@@ -30,24 +30,31 @@ public:
 //-----------------------------------------------------------------------------
   struct VDetHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
-    // TH1F*      fGenIndex;		       //
-    // TH1F*      fSimID;
-    // TH1F*      fPDGCode[2];  // just different ranges
-    // TH1F*      fCreationCode;
-    // TH1F*      fParentSimID;
-    // TH1F*      fParentPDGCode;
-    // TH1F*      fEndProcessCode;
+    TH1F*      fGenIndex;		       //
+    TH1F*      fSimID;
+    TH1F*      fPDGCode[2];                    // just different ranges
+    TH1F*      fCreationCode;
+    TH1F*      fParentSimID;
+    TH1F*      fParentPDGCode;
+    TH1F*      fEndProcessCode;
 
-    // TH1F*      fTime;
+    TH1F*      fEDepTot;
+    TH1F*      fEDepNio;
+    TH1F*      fTime;
+    TH1F*      fStepLength;
 
-    // TH1F*      fMomentum;
-    // TH1F*      fTanTheta;		// pitch
+    TH1F*      fMomentum;
+    TH1F*      fCosTh;
 
-    //    TH2F*      fYVsZ;
+    TH2F*      fYVsZ;
     TH2F*      fYVsX;			// local coordinates
 
-    // TH1F*      fGpPDGCode[2];
-    // TH2F*      fGpCosThVsMom;
+    TH1F*      fGpPDGCode[2];
+    TH2F*      fGpCosThVsMom;
+    TH1F*      fGpTheta;
+    TH1F*      fGpPionCosTh;
+    TH1F*      fGpPionTheta;
+    TH1F*      fGpPionMom;
   };
 
   struct SpmcHist_t : public HistBase_t {
@@ -66,12 +73,17 @@ public:
     TH1F*      fStepLength;
 
     TH1F*      fMomentum;
+    TH1F*      fCosTh;
 
     TH2F*      fYVsZ;
     TH2F*      fYVsX;
 
     TH1F*      fGpPDGCode[2];
     TH2F*      fGpCosThVsMom;
+    TH1F*      fGpTheta;
+    TH1F*      fGpPionCosTh;
+    TH1F*      fGpPionTheta;
+    TH1F*      fGpPionMom;
   };
 
   struct EventHist_t : public HistBase_t {
@@ -79,17 +91,26 @@ public:
     TH1F*      fEventNumber;
   };
 
-
   struct SpmcData_t {
     TSimParticle*  fParticle;
     TSimParticle*  fParent;
     TSimParticle*  fGParent;
+    float          fGpTheta;
+    float          fP;
+    float          fCosTh;
+    float          fTime;
+    float          fX;			// local horizontal coord (X or Z)
+    float          fY;			// local vertical   coord
   };
 
   struct VDetData_t {
     TSimParticle*  fParticle;
     TSimParticle*  fParent;
     TSimParticle*  fGParent;
+    float          fGpTheta;
+    float          fP;
+    float          fCosTh;
+    float          fTime;
     float          fX;			// local horizontal coord (X or Z)
     float          fY;			// local vertical   coord
   };
@@ -100,9 +121,9 @@ public:
   enum { kNVDetHistSets  = 1000 };
 
   struct Hist_t {
-    EventHist_t*        fEvent[kNEventHistSets];
-    SpmcHist_t*  fSpmc        [kNSpmcHistSets];
-    VDetHist_t*         fVDet [kNVDetHistSets];
+    EventHist_t* fEvent[kNEventHistSets];
+    SpmcHist_t*  fSpmc [kNSpmcHistSets ];
+    VDetHist_t*  fVDet [kNVDetHistSets ];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -112,6 +133,8 @@ public:
   TStepPointMCBlock*    fSpmcBlock;
   TStepPointMCBlock*    fVDetBlock;
   TSimpBlock*           fSimpBlock;  
+
+  TString               fSpmcBlockName;
 					// transient data
   SpmcData_t            fSpmcData[1000];
   VDetData_t            fVDetData[1000];
@@ -153,8 +176,9 @@ public:
   void    BookHistograms();
   void    FillHistograms();
 
-
   void    Debug();
+
+  void    SetSpmcBlockName(const char* Name) { fSpmcBlockName = Name; }
 //-----------------------------------------------------------------------------
 // test
 //-----------------------------------------------------------------------------

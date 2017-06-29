@@ -17,8 +17,12 @@ void  spmc_ana(int DebugBit = -1) {
   if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
 }
 
-void  bflash_ana(int DebugBit = -1) {
-  m_bfl = (TBeamFlashAnaModule*) g.x->AddModule("TBeamFlashAnaModule",0);  
+//-----------------------------------------------------------------------------
+// output of stage 3 has only one StepPointMCCollection - ::virtualdetectors
+//-----------------------------------------------------------------------------
+void  bflash_ana(int Stage = 1, int DebugBit = -1) {
+  m_bfl = (TBeamFlashAnaModule*) g.x->AddModule("TBeamFlashAnaModule",0);
+  if (Stage == 3) m_bfl->SetSpmcBlockName("VdetBlock");
   if (DebugBit >= 0) m_bfl->SetDebugBit(DebugBit,1);
 }
 

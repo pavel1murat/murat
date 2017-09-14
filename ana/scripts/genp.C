@@ -8,6 +8,11 @@ def_name genp_002("spmc_ana");
 def_name genp_003("mustop_ana");
 def_name genp_004("bflash_ana");
 def_name genp_005("g4val_ana");
+def_name genp_006("dose_ana");
+def_name genp_007("pbarabs_dose_ana");
+def_name genp_008("coll31_dose_ana");
+def_name genp_009("coll32_dose_ana");
+def_name genp_010("coll3_dose_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -34,5 +39,39 @@ void  mustop_ana(int DebugBit = -1) {
 void  g4val_ana(int DebugBit = -1) {
   m_g4val = (TG4ValidationModule*) g.x->AddModule("TG4ValidationModule",0);  
   if (DebugBit >= 0) m_g4val->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+void  dose_ana(const char* Name="SpmcBlock",int DebugBit = -1) {
+  m_dose = (TDoseAnaModule*) g.x->AddModule("TDoseAnaModule",0);  
+  m_dose->SetSpmcBlockName(Name);
+  if (DebugBit >= 0) m_g4val->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+void  pbarabs_dose_ana(int DebugBit = -1) {
+  m_dose = (TDoseAnaModule*) g.x->AddModule("TDoseAnaModule",0);  
+  m_dose->SetSpmcBlockName("PbarAbsSpmcBlock");
+  if (DebugBit >= 0) m_dose->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+void  coll31_dose_ana(int DebugBit = -1) {
+  m_dose = (TDoseAnaModule*) g.x->AddModule("TDoseAnaModule",0);  
+  m_dose->SetSpmcBlockName("Coll31SpmcBlock");
+  if (DebugBit >= 0) m_dose->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+void  coll32_dose_ana(int DebugBit = -1) {
+  m_dose = (TDoseAnaModule*) g.x->AddModule("TDoseAnaModule",0);  
+  m_dose->SetSpmcBlockName("Coll32SpmcBlock");
+  if (DebugBit >= 0) m_dose->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+void  coll3_dose_ana(int DebugBit = -1) {
+  m_coll3 = (TColl3DoseAnaModule*) g.x->AddModule("TColl3DoseAnaModule",0);  
+  if (DebugBit >= 0) m_coll3->SetDebugBit(DebugBit,1);
 }
 

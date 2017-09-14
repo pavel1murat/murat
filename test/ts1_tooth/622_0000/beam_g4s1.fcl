@@ -1,0 +1,18 @@
+# -*- mode: tcl -*-
+
+#include "Analyses/fcl/prolog.fcl"
+#include "JobConfig/cd3/beam/beam_g4s1.fcl"
+
+services.GeometryService.inputFile              : "murat/test/ts1_tooth/622_0000/geom.txt"
+services.scheduler.wantSummary                  : true
+physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
+
+physics.analyzers : { @table::physics.analyzers
+    stepPointMCDumper : { @table::StepPointMCDumper
+	SelectEvents      : ["trigmubeam"]
+	useTimeOffsets    : false
+	hitsInputTag      : "muonBeamFilter:mubeam"
+    }
+}
+
+physics.an: [ genCountLogger, collectionSizes, stepPointMCDumper ]

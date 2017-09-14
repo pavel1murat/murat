@@ -1,0 +1,21 @@
+//
+// Redirection to the current Mu2e top level geometry file.
+// The file that is included will be time dependent.
+//
+
+#include "Mu2eG4/geom/geom_common_current.txt"
+#include "Mu2eG4/geom/ttracker_v4.txt"
+
+// All dimensions specified here are full dimensions, not half lengths, etc
+bool   ts.coll1.useFlashBlock          = true;
+double ts.coll1.flashBlock.Height      =  20.0;    // mm
+double ts.coll1.flashBlock.Width       =  80.0;    // mm
+double ts.coll1.flashBlock.TransOffset =   0.0;    // mm, neg = West
+double ts.coll1.flashBlock.LongOffset  = 200.0;    // from Center:  neg = upstream
+double ts.coll1.flashBlock.Length      =  50.0;    // mm full length
+string ts.coll1.flashBlock.Material    = "CollCu"; //
+
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

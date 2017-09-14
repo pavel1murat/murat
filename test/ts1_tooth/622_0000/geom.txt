@@ -1,0 +1,4 @@
+// mode: -*- c++ -*-
+#include "Mu2eG4/geom/studies/studyTrackerShielding_TS1.txt"
+
+bool ts.coll1.useFlashBlock  = false;

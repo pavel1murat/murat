@@ -1,0 +1,45 @@
+# -*- mode: tcl -*-
+###############################################################################
+# write GDML file with the Mu2e geometry
+# need to process at least one event for GDML file to be written out
+################################################################################
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+  bgHitFiles : @nil
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+services.GeometryService.inputFile:  "murat/test/ts1_tooth/622_0002/geom.txt"
+
+process_name : WriteGdml
+
+source : {
+  module_type : EmptyEvent
+  maxEvents   : 1
+  firstRun    : 1
+}
+
+physics : {
+    producers: { @table::murat.producers 
+	g4run: { @table::g4run
+	    debug  : { @table::g4run.debug 
+		writeGDML    : true 
+		GDMLFileName : "mu2e_geometry_ts1_tooth_622_0002.gdml"
+	    }
+	}
+    }
+    filters  : { @table::murat.filters   }
+    
+    p1 : [ @sequence::murat.gen_g4 ] 
+    e1 : [ ]
+    
+    trigger_paths  : [p1]
+    end_paths      : [e1]
+}

@@ -1,0 +1,50 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+#  input: output of the (modified) stage4 simulation with the tracker electronics 
+#         and calorimeter SIPMs and crates added as sensitive volumes
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+    bgHitFiles                     : @nil
+    G4_MODULE_LABEL                : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "Stntuple/fcl/templates.fcl"
+
+services.GeometryService.inputFile:  "murat/test/ts1_tooth/622_0002/geom.txt"
+services.scheduler.wantSummary: true
+
+process_name : CalorimeterDose
+
+source       : { 
+    module_type : RootInput
+}
+
+physics: { 
+    analyzers : {
+	calorimeterDose        : { 
+	    module_type            : CalorimeterDose
+	    diagLevel              : 0
+	    addCaloInfo            : 1
+	    addTrackerInfo         : 1
+	    crystalDensity         : 4.51 #g/cm3
+	    zCrystalStep           : 10   # mm
+	    g4ModuleLabel          : @local::G4_MODULE_LABEL
+	    generatorModuleLabel   : generate
+	}
+    }
+
+    out: [calorimeterDose]
+    p2 : []
+
+    trigger_paths : [ p2  ]
+    end_paths     : [ out ]
+}
+
+source.fileNames                : [ "do.not.forget.to.specify.art" ]
+outputs.detectorOutput.fileName : "sim.file.name.left.undefined.art"

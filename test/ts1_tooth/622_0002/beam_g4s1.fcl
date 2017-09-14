@@ -2,5 +2,5 @@
 
 #include "JobConfig/cd3/beam/beam_g4s1.fcl"
 
-services.GeometryService.inputFile              : "murat/test/ts1_tooth/622_0001/geom.txt"
+services.GeometryService.inputFile              : "murat/test/ts1_tooth/622_0002/geom.txt"
 physics.producers.g4run.physics.physicsListName : "QGSP_BERT"

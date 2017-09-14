@@ -7,7 +7,7 @@
 
 process_name                       : beamg4s23
 
-services.GeometryService.inputFile:  "murat/test/ts1_tooth/622_0001/geom.txt"
+services.GeometryService.inputFile:  "murat/test/ts1_tooth/622_0000/geom.txt"
 services.scheduler.wantSummary     : true
 
 source.fileNames : [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-cs1-mubeam/0506a/art/00/01/sim.mu2e.cd3-beam-cs1-mubeam.0506a.001002_00488421.art" ]

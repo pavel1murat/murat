@@ -1,0 +1,103 @@
+#
+
+* directory: file:./
+
+* file:studyTrackerShielding_TS1.txt has to be placed into Mu2eG4/geom/studies,
+  it is included by all local geom.txt files, like file:622_0000/geom.txt
+
+  three different test configurations of the TS1 tooth:
+
+  622_0000: no tooth
+  622_0001: 20x80x80  mm^2 (full dimensions )
+  622_0002: 20x150x30  mm^2 (full dimensions)
+
+* use murat/scripts/write_ts1_tooth_scan_fcl_files.rb to generate fcl files for grid submission
+  Six different heights - 5,10,20,30,40,50 mm - correspond to 6 subdirectories 622_0001 through 622_0006:
+
+  /mu2e/app/users/murat/grid_fcl/ts1_tooth:
+  total used in directory 92 available 879832768
+  drwxr-xr-x  9 murat mu2e  2048 Jul  6 09:13 .
+  drwxr-xr-x  3 murat mu2e 10240 Jun 30 13:59 ..
+  drwxr-xr-x  3 murat mu2e  2048 Jul  6 09:13 622_0000
+  drwxr-xr-x 66 murat mu2e 10240 Jun 30 15:50 622_0001
+  drwxr-xr-x 66 murat mu2e 10240 Jun 30 15:50 622_0002
+  drwxr-xr-x 66 murat mu2e 10240 Jun 30 15:50 622_0003
+  drwxr-xr-x 66 murat mu2e 10240 Jun 30 15:50 622_0004
+  drwxr-xr-x 66 murat mu2e 10240 Jun 30 15:50 622_0005
+  drwxr-xr-x 66 murat mu2e 10240 Jun 30 15:51 622_0006
+
+  622_000 subdirectory - no beam flash block
+
+  in each *622_000x* subdirectory, there are 64 subdirectories, each configuring a single job
+
+  *012_001_004* means job #12, width 1, length: 4
+
+
+* code changes:
+
+** GeometryService/src/BeamlineMaker.cc
+
+diff --git a/GeometryService/src/BeamlineMaker.cc b/GeometryService/src/BeamlineMaker.cc
+index 99d05f821..1975e2d92 100644
+--- a/GeometryService/src/BeamlineMaker.cc
++++ b/GeometryService/src/BeamlineMaker.cc
+@@ -492,6 +492,16 @@ namespace mu2e {
+     coll1._material2 = c.getString("ts.coll1.material2Name");
+     coll1._material3 = c.getString("ts.coll1.material3Name","None");
+ 
++    // TS1 tooth (studies)
++    coll1._useFlashBlock     = c.getBool  ("ts.coll1.useFlashBlock"         , false);
++    coll1._flashBlockHeight  = c.getDouble("ts.coll1.flashBlock.Height"     , 0.0  );
++    coll1._flashBlockWidth   = c.getDouble("ts.coll1.flashBlock.Width"      , 0.0  );
++    coll1._flashBlockLength  = c.getDouble("ts.coll1.flashBlock.Length"     , 0.0  );
++    coll1._flashBlockTO      = c.getDouble("ts.coll1.flashBlock.TransOffset", 0.0  );
++    coll1._flashBlockLO      = c.getDouble("ts.coll1.flashBlock.LongOffset" , 0.0  );
++    coll1._flashBlockMaterial= c.getString("ts.coll1.flashBlock.Material"   ,"CollCu");
++
++
+     // TS3
+     coll32._hole             = coll31._hole              = c.getDouble("ts.coll3.hole",0.);
+     coll32._holeRadius       = coll31._holeRadius        = c.getDouble("ts.coll3.holeRadius",0.);
+
+** Mu2eG4/src/constructTS.cc
+diff --git a/Mu2eG4/src/constructTS.cc b/Mu2eG4/src/constructTS.cc
+index 500a491af..ec187c39a 100644
+--- a/Mu2eG4/src/constructTS.cc
++++ b/Mu2eG4/src/constructTS.cc
+@@ -870,6 +870,28 @@ namespace mu2e {
+ 
+     } // end of adding sheath to Coll1
+ 
++    AntiLeakRegistry& reg = art::ServiceHandle<G4Helper>()->antiLeakRegistry();
++    G4RotationMatrix* coll1Rot = reg.add(G4RotationMatrix());
++
++    if (coll1.useFlashBlock()) {
++      std::vector<double> boxPars = { coll1.flashBlockWidth ()/2.0*CLHEP::mm,
++				      coll1.flashBlockHeight()/2.0*CLHEP::mm,
++				      coll1.flashBlockLength()/2.0*CLHEP::mm};
++
++      CLHEP::Hep3Vector displaceColl1FB(coll1.flashBlockTranOff()*CLHEP::mm,
++					0., 
++					coll1.flashBlockLength()/2.0 - coll1.halfLength());
++
++      nestBox( "flashBlockColl1",
++	       boxPars,
++	       findMaterialOrThrow(coll1.flashBlockMaterial()),
++	       coll1Rot,
++	       coll1.getLocal()+displaceColl1FB,
++	       _helper->locateVolInfo("TS1Vacuum").logical,
++	       0,
++	       G4Colour::Red(),
++	       "TSColl");
++    }
+ 
+     if ( verbosityLevel > 0) {
+       cout << __func__ << " TS1  OffsetInMu2e    : " << ts1in->getGlobal()       << endl;
+@@ -929,7 +951,6 @@ namespace mu2e {
+                                               G4ThreeVector(0,coll32.holeDisplacement(),0));
+ 
+     // Now use finishNesting to place collimators 31 and 32
+-    AntiLeakRegistry& reg = art::ServiceHandle<G4Helper>()->antiLeakRegistry();
+ 
+     G4RotationMatrix* coll31Rot = reg.add(G4RotationMatrix());
+     G4RotationMatrix* coll32Rot = reg.add(G4RotationMatrix());

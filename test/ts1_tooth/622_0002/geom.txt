@@ -1,5 +1,5 @@
 // mode: -*- c++ -*-
 #include "Mu2eG4/geom/studies/studyTrackerShielding_TS1.txt"
 double ts.coll1.flashBlock.Height      =   20.0;    // mm
-double ts.coll1.flashBlock.Width       =   80.0;    // mm
-double ts.coll1.flashBlock.Length      =   80.0;    // mm full length
+double ts.coll1.flashBlock.Width       =  150.0;    // mm
+double ts.coll1.flashBlock.Length      =   30.0;    // mm full length

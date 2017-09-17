@@ -327,6 +327,20 @@ void DrawMu2eGeometry::SetDefaultColorTransp() {
     else                                                       col = kRed+2;
     SetRecursiveColorTransp(vd,col,fTransp);
   }
+//-----------------------------------------------------------------------------
+// color proton absorber
+//-----------------------------------------------------------------------------
+  TGeoVolume* ts3_vacuum = gm->GetVolume("TS3Vacuum");
+  col             = kRed+2;
+  nd              = ts3_vacuum->GetNdaughters();
+  
+  for (int i=0; i<nd; i++) {
+    TGeoVolume* vd = ts3_vacuum->GetNode(i)->GetVolume();
+    name = vd->GetName();
+    printf(" TS3Vacuum daughter: %s\n",name);
+    if      (strcmp(name,"PbarAbs"     ) == 0) SetRecursiveColorTransp(vd,kRed+1,fTransp);
+    else if (strcmp(name,"PbarAbsWedge") == 0) SetRecursiveColorTransp(vd,kRed+3,fTransp);
+  }
 }
 
 //-----------------------------------------------------------------------------

@@ -2,41 +2,10 @@
 #ifndef __murat_scripts_init_datasets__
 #define __murat_scripts_init_datasets__
 
-
+#include "murat/scripts/dataset.hh"
 //-----------------------------------------------------------------------------
-// description of a histogram file
+// output of stage 2 - step point MC's
 //-----------------------------------------------------------------------------
-struct dataset_t {
-
-  TString  fName  ;			// dataset name
-  TString  fFn    ;			// full name of the histogram file
-  TString  fLabel ;			// label to appear on a plot
-  int      fLineColor;
-  int      fMarkerStyle;
-  int      fMarkerColor;
-  float    fXMin;
-  float    fXMax;
-  float    fYMin;
-  float    fYMax;
-  long int fNPOT;			// number of generated events (for MC dataset)
-
-  dataset_t() {
-    fName        = "";
-    fFn          = "";
-    fLabel       = "";
-    fMarkerStyle = -1;
-    fMarkerColor = -1;
-    fXMin        =  0;
-    fXMax        = -1;
-    fYMax        = -1;
-    fNPOT        = -1;
-  }
-  
-};
-
-//-----------------------------------------------------------------------------
-					// output of stage 2 - step point MC's
-
 dataset_t  cd3_beam_cs1_mubeam_0506a_0000;
 
 dataset_t  g4s2_622_0000_mubeam;
@@ -46,7 +15,6 @@ dataset_t  g4s3_622_0000_tgtstops;
 dataset_t  g4s3_622_0000_ootstops; 
 dataset_t  g4s3_622_0001_tgtstops;
 dataset_t  g4s3_622_0001_ootstops;
-
 //-----------------------------------------------------------------------------
 // see catalogs for more information about the datasets
 //-----------------------------------------------------------------------------
@@ -66,16 +34,23 @@ dataset_t  d_622_0012_cal_dose;
 dataset_t  d_622_0013_cal_dose;
 dataset_t  d_622_0014_cal_dose;
 
+dataset_t  d_pion_yields_622_0003_ftfp_bert_atl;
+dataset_t  d_pion_yields_622_0004_ftfp_bert_hp;
 dataset_t  d_pion_yields_622_0010_qgsp_bert;
 
-//-----------------------------------------------------------------------------
-void init_datasets() {
+dataset_t  d_harp_622_0007_ftf_bic;
+dataset_t  d_harp_622_0021_shieldingm;
 
+dataset_t  d_ts3_tooth_622_0001_g4s3_tgtstops;
+//-----------------------------------------------------------------------------
+void init_tracker_dose_datasets() {
+
+  const char* HistDir    = "/projects/hist/mu2e/v6_1_4";
+  
   cd3_beam_cs1_mubeam_0506a_0000.fName  = "g4s1_01_mubeam_0506a_0000";
   cd3_beam_cs1_mubeam_0506a_0000.fFn    = Form("%s/cd3_beam_cs1_mubeam_0506a_0000.stn_01.bflash_ana.hist",HistDir);
   cd3_beam_cs1_mubeam_0506a_0000.fLabel = "stage1";
   cd3_beam_cs1_mubeam_0506a_0000.fNPOT  = -1;
-
 //-----------------------------------------------------------------------------
 // v621 datasets (first stage of the rad dose studies)
 //-----------------------------------------------------------------------------
@@ -172,6 +147,26 @@ void init_datasets() {
   d_622_0014_cal_dose.fLabel = "Shift20dd";
   d_622_0014_cal_dose.fNPOT  = 5.97e6;
 
+  d_ts3_tooth_622_0001_g4s3_tgtstops.fName  = "ts3_tooth_622_0001_g4s3_tgtstops";
+  d_ts3_tooth_622_0001_g4s3_tgtstops.fFn    = Form("%s/ts3_tooth.622_0001.g4s3_tgtstops.bflash_ana_spmc.hist",HistDir);
+  d_ts3_tooth_622_0001_g4s3_tgtstops.fLabel = "622_0001.g4s3_tgtstops.bflash_ana_spmc";
+  d_ts3_tooth_622_0001_g4s3_tgtstops.fNPOT  = -1;
+
+}
+
+//-----------------------------------------------------------------------------
+void init_pion_yields_datasets() {
+  const char* HistDir    = "/projects/hist/mu2e/v6_1_4";
+
+  d_pion_yields_622_0003_ftfp_bert_atl.fName = "622_0003_ftfp_bert_atl";
+  d_pion_yields_622_0003_ftfp_bert_atl.fFn    = Form("%s/pion_yields.622_0003_ftfp_bert_atl.g4s2_mubeam.bflash_ana.hist",HistDir);
+  d_pion_yields_622_0003_ftfp_bert_atl.fLabel = "FTFP_BERT_ATL";
+  d_pion_yields_622_0003_ftfp_bert_atl.fNPOT  = 5000.;
+
+  d_pion_yields_622_0004_ftfp_bert_hp.fName = "622_0004_ftfp_bert_hp";
+  d_pion_yields_622_0004_ftfp_bert_hp.fFn    = Form("%s/pion_yields.622_0004_ftfp_bert_hp.g4s2_mubeam.bflash_ana.hist",HistDir);
+  d_pion_yields_622_0004_ftfp_bert_hp.fLabel = "FTFP_BERT_HP";
+  d_pion_yields_622_0004_ftfp_bert_hp.fNPOT  = 5000.;
 
   d_pion_yields_622_0010_qgsp_bert.fName = "622_0010_qgsp_bert";
   d_pion_yields_622_0010_qgsp_bert.fFn    = Form("%s/pion_yields.622_0010_qgsp_bert.g4s2_mubeam.bflash_ana.hist",HistDir);
@@ -179,4 +174,25 @@ void init_datasets() {
   d_pion_yields_622_0010_qgsp_bert.fNPOT  = 5000.;
 }
 
+//-----------------------------------------------------------------------------
+void init_harp_datasets() {
+  const char* HistDir    = "/projects/hist/mu2e/v6_1_4";
+  
+  d_harp_622_0021_shieldingm.fName = "harp_622_0021_shieldingm";
+  d_harp_622_0021_shieldingm.fFn    = Form("%s/harp.622_0021_shieldingm.g4val_ana.hist",HistDir);
+  d_harp_622_0021_shieldingm.fLabel = "p+Ta, 8 GeV/c, ShieldingM";
+  d_harp_622_0021_shieldingm.fNPOT  = 100000.;
+
+  d_harp_622_0007_ftf_bic.fName = "harp_622_0007_ftf_bic";
+  d_harp_622_0007_ftf_bic.fFn    = Form("%s/harp.622_0007_ftf_bic.g4val_ana.hist",HistDir);
+  d_harp_622_0007_ftf_bic.fLabel = "p+Ta, 8 GeV/c, FTF_BIC";
+  d_harp_622_0007_ftf_bic.fNPOT  = 100000.;
+}
+
+//-----------------------------------------------------------------------------
+void init_datasets() {
+  init_tracker_dose_datasets();
+  init_pion_yields_datasets();
+  init_harp_datasets();
+}
 #endif

@@ -1,2 +1,0 @@
-// mode: -*- c++ -*-
-#include "Mu2eG4/geom/studies/studyTrackerShielding_TS1.txt"

@@ -1,0 +1,142 @@
+# -*- mode: tcl -*-
+# fcl config file to perform Geant4 studies using the Mu2e framework infrastructure and simple geometry
+#
+# Original author K.L. Genser
+#
+
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+BEGIN_PROLOG
+stepperout: {
+   type: constant
+   value: false
+   write: "stepper"
+}
+END_PROLOG
+
+# Give this job a name.
+process_name : g4study2
+
+# Start form an empty source
+source : {
+  module_type : EmptyEvent
+  maxEvents : 100
+}
+
+services : {
+
+  message               : @local::default_message
+  TFileService          : { fileName : "g4study2.root" }
+  RandomNumberGenerator : { }
+
+  GeometryService        : { inputFile      : "murat/geom/harp/g4study2_harp_Ta.txt"  }
+  ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+  GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+  G4Helper               : { }
+  SeedService            : @local::automaticSeeds
+
+}
+
+# Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.
+services.SeedService.baseSeed         :  0
+services.SeedService.maxUniqueEngines :  20
+
+# inform the geometry service it is not the standard Mu2e Detector
+services.GeometryService.standardMu2eDetector: false
+
+
+physics : {
+    producers:  {
+	generate: {
+	    module_type          : EventGenerator
+	    inputfile            : "Mu2eG4/test/g4studyParticleGun.txt"
+	    allowReplacement     : true
+	    messageOnReplacement : true
+	}
+      
+	g4run        :  { @table::g4run
+
+	    physics : { @table::g4run.physics 
+		physicsListName : "QGSP_FTFP_BERT"
+		# bfieldMaxStep   : 500000. // not implemented (no field)
+	    }
+
+	    TrajectoryControl: { @table::g4run.TrajectoryControl
+		mcTrajectoryMinSteps:     0
+		mcTrajectoryMomentumCut : 0. // MeV/c
+		saveTrajectoryMomentumCut : 0.  // MeV/c
+		perVolumeMinDistance : {}
+	    }
+
+	    #physics.producers.g4run.Mu2eG4CommonCut: { type: kineticEnergy cut: 1000000. }
+	    SDConfig: {
+		enableSD: [] // not implemented
+		TimeVD: { times: [0.01] }
+	    }
+
+	    debug    :  { @table::g4run.debug
+		diagLevel                  : 1
+		printElements              : true
+		worldVerbosityLevel        : 2
+		fillDiagnosticHistograms   : true
+		printPhysicsProcessSummary : true
+		# checkFieldMap : 0 // not implemented (no field)
+	    }
+
+	    Mu2eG4SteppingOnlyCut : @local::stepperout
+	    Mu2eG4StackingOnlyCut : @local::mu2eg4NoCut
+	}
+	randomsaver  : @local::randomsaver
+
+#	visualization: { @table::g4run.visualization
+	    #initMacro : "Mu2eG4/test/visxz.mac"
+	    #initMacro : "Mu2eG4/test/vismqt.mac"
+#	}
+    }
+
+// The line below causes a StepPointMC being stored for each step; comment it out to disable it
+
+  analyzers: {
+
+    checkhits: {
+      module_type            : Mu2eG4StudyReadBack
+      generatorModuleLabel   : generate
+      g4ModuleLabel          : g4run
+      physVolInfoInput       : g4run
+      minimumEnergy          : 0.000
+      maxPrint               : 100
+      diagLevel              : 2
+    }
+
+  } 
+
+  p1 : [generate , g4run , randomsaver]
+#  e1 : [dumper, outfile]
+#  e1 : [dumper, checkhits , outfile]
+  e1 : [outfile]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}
+
+outputs:  {
+  outfile : {
+    module_type   :   RootOutput
+    fileName      :   "data_g4study2.root"
+      outputCommands : ['keep *_*_*_*'
+			, 'drop mu2eStepPointMCs_*_*_*'
+#                   , 'drop mu2eSimParticles_*_*_*'
+# Uncomment the above line to reduce file size.
+                     ]  
+  }
+
+  dumper : {
+      module_type              : FileDumperOutput
+      wantProductFullClassName : true
+  }
+}
+
+

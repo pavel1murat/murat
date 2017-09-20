@@ -5,6 +5,18 @@
 #include "TPaveStats.h"
 #include "TLatex.h"
 
+#include "murat/scripts/dataset.hh"
+//-----------------------------------------------------------------------------
+void set_draw_options(TH1* Hist, dataset_t* Ds) {
+  if (Ds->fLineColor   > 0) Hist->SetLineColor(Ds->fLineColor);
+  if (Ds->fMarkerSize  > 0) Hist->SetMarkerSize (Ds->fMarkerSize);
+  if (Ds->fMarkerColor > 0) Hist->SetMarkerColor(Ds->fMarkerColor);
+  if (Ds->fMarkerStyle > 0) Hist->SetMarkerStyle(Ds->fMarkerStyle);
+
+  if (Ds->fXMin < Ds->fXMax) Hist->GetXaxis()->SetRangeUser(Ds->fXMin,Ds->fXMax);
+  if (Ds->fYMin < Ds->fYMax) Hist->GetYaxis()->SetRangeUser(Ds->fYMin,Ds->fYMax);
+}
+
 //-----------------------------------------------------------------------------
 // redraw the stat box, with the color of the histogram itself
 //-----------------------------------------------------------------------------

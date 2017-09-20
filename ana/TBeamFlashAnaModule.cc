@@ -202,6 +202,7 @@ void TBeamFlashAnaModule::BookHistograms() {
 
   book_spmc_histset[301] = 1;		// muons with P > 50 MeV/c
   book_spmc_histset[310] = 1;		// muons with P < 50 MeV/c
+  book_spmc_histset[320] = 1;		// muons with GP listed as pi-
 
   for (int i=0; i<kNSpmcHistSets; i++) {
     if (book_spmc_histset[i] != 0) {
@@ -429,6 +430,8 @@ void TBeamFlashAnaModule::FillHistograms() {
       FillSpmcHistograms(fHist.fSpmc[3],spmc,sd);
       if (p >=  50) FillSpmcHistograms(fHist.fSpmc[301],spmc,sd);
       if (p <   50) FillSpmcHistograms(fHist.fSpmc[310],spmc,sd);
+
+      if (sd->fGParent->PDGCode() == -211) FillSpmcHistograms(fHist.fSpmc[320],spmc,sd);
 
       if (GetDebugBit(3) == 1) {
 	p = sd->fGParent->fStartMom.P();

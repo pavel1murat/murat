@@ -6,8 +6,9 @@
 def_name genp_001("genp_ana");
 def_name genp_002("spmc_ana");
 def_name genp_003("mustop_ana");
-def_name genp_004("bflash_ana");
-def_name genp_005("g4val_ana");
+def_name genp_004("bflash_ana_spmc");
+def_name genp_005("bflash_ana_vdet");
+def_name genp_006("g4val_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -20,9 +21,15 @@ void  spmc_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // output of stage 3 has only one StepPointMCCollection - ::virtualdetectors
 //-----------------------------------------------------------------------------
-void  bflash_ana(int Stage = 1, int DebugBit = -1) {
+void  bflash_ana_spmc(int Stage = 1, int DebugBit = -1) {
   m_bfl = (TBeamFlashAnaModule*) g.x->AddModule("TBeamFlashAnaModule",0);
-  if (Stage == 3) m_bfl->SetSpmcBlockName("VdetBlock");
+  m_bfl->SetSpmcBlockName("SpmcBlock");
+  if (DebugBit >= 0) m_bfl->SetDebugBit(DebugBit,1);
+}
+
+void  bflash_ana_vdet(int Stage = 1, int DebugBit = -1) {
+  m_bfl = (TBeamFlashAnaModule*) g.x->AddModule("TBeamFlashAnaModule",0);
+  m_bfl->SetSpmcBlockName("VdetBlock");
   if (DebugBit >= 0) m_bfl->SetDebugBit(DebugBit,1);
 }
 

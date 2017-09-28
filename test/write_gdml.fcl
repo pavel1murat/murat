@@ -2,6 +2,7 @@
 ###############################################################################
 # write GDML file with the Mu2e geometry
 # need to process at least one event for GDML file to be written out
+# to speed up the job, use G4 physics table QGSP_BERT
 ################################################################################
 #include "minimalMessageService.fcl"
 #include "standardProducers.fcl"
@@ -29,7 +30,7 @@ physics : {
 	g4run: { @table::g4run
 	    debug  : { @table::g4run.debug 
 		writeGDML    : true 
-		GDMLFileName : "mu2e_geometry_v614_c360brass-05.gdml"
+		GDMLFileName : "mu2e_geometry.gdml"
 	    }
 	}
     }
@@ -41,6 +42,8 @@ physics : {
     trigger_paths  : [p1]
     end_paths      : [e1]
 }
+
+physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
 
 # template for changing the geometry file, if needed
 # services.GeometryService.inputFile: "murat/test/tracker-rad-dose/c360brass-05-geom.txt"

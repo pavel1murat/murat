@@ -72,15 +72,15 @@ void TColl3DoseAnaModule::BookColl31SpmcHistograms(HistBase_t* Hist, const char*
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 1000,     0, 1000,  60, -300, 300, Folder);
   HBook2F(hist->fYVsXWtE        ,"y_vs_x_wte" ,Form("%s: Y vs X wt(E)" ,Folder), 1000,     0, 1000,  60, -300, 300, Folder);
 
-  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder),  60,  -300,  300,  60, -300, 300, Folder);
-  HBook2F(hist->fYVsZWtE        ,"y_vs_z_wte" ,Form("%s: Y vs Z wt(E)" ,Folder),  60,  -300,  300,  60, -300, 300, Folder);
+  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 120,  -300,  300, 120, -300, 300, Folder);
+  HBook2F(hist->fYVsZWtE        ,"y_vs_z_wte" ,Form("%s: Y vs Z wt(E)" ,Folder), 120,  -300,  300, 120, -300, 300, Folder);
 
   for (int i=0; i<kNSlices; i++) {
     HBook2F(hist->fYVsZWtESlice[i],Form("y_vs_z_wte_%i",i) ,Form("%s: Y vs Z wt(E) slice %i" ,Folder,i),  
-	    60,  -300,  300,  60, -300, 300, Folder);
+	   120,  -300,  300, 120, -300, 300, Folder);
 
     HBook2F(hist->fYVsZDose[i],Form("y_vs_z_dose_%i",i) ,Form("%s: Y vs Z Doze slice %i" ,Folder,i),  
-	    60,  -300,  300,  60, -300, 300, Folder);
+	   120,  -300,  300, 120, -300, 300, Folder);
   }
 }
 
@@ -111,15 +111,15 @@ void TColl3DoseAnaModule::BookColl32SpmcHistograms(HistBase_t* Hist, const char*
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 1000,  -1000,   0,  60, -300, 300, Folder);
   HBook2F(hist->fYVsXWtE        ,"y_vs_x_wte" ,Form("%s: Y vs X wt(E)" ,Folder), 1000,  -1000,   0,  60, -300, 300, Folder);
 
-  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder),  60,   -300, 300,  60, -300, 300, Folder);
-  HBook2F(hist->fYVsZWtE        ,"y_vs_z_wte" ,Form("%s: Y vs Z wt(E)" ,Folder),  60,   -300, 300,  60, -300, 300, Folder);
+  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 120,   -300, 300, 120, -300, 300, Folder);
+  HBook2F(hist->fYVsZWtE        ,"y_vs_z_wte" ,Form("%s: Y vs Z wt(E)" ,Folder), 120,   -300, 300, 120, -300, 300, Folder);
 
   for (int i=0; i<kNSlices; i++) {
     HBook2F(hist->fYVsZWtESlice[i],Form("y_vs_z_wte_%i",i) ,Form("%s: Y vs Z wt(E) slice %i" ,Folder,i),  
-	    60,  -300,  300,  60, -300, 300, Folder);
+	   120,  -300,  300, 120, -300, 300, Folder);
 
     HBook2F(hist->fYVsZDose[i],Form("y_vs_z_dose_%i",i) ,Form("%s: Y vs Z Doze slice %i" ,Folder,i),  
-	    60,  -300,  300,  60, -300, 300, Folder);
+	   120,  -300,  300, 120, -300, 300, Folder);
   }
 }
 
@@ -152,15 +152,15 @@ void TColl3DoseAnaModule::BookPbrAbsSpmcHistograms(HistBase_t* Hist, const char*
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder),  100,   -0.5,  0.5, 300,  -300, 300, Folder);
   HBook2F(hist->fYVsXWtE        ,"y_vs_x_wte" ,Form("%s: Y vs X wt(E)" ,Folder),  100,   -0.5,  0.5, 300,  -300, 300, Folder);
 
-  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder),  60,  -300,   300,  60,  -300, 300, Folder);
-  HBook2F(hist->fYVsZWtE        ,"y_vs_z_wte" ,Form("%s: Y vs Z wt(E)" ,Folder),  60,  -300,   300,  60,  -300, 300, Folder);
+  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 120,  -300,   300, 120,  -300, 300, Folder);
+  HBook2F(hist->fYVsZWtE        ,"y_vs_z_wte" ,Form("%s: Y vs Z wt(E)" ,Folder), 120,  -300,   300, 120,  -300, 300, Folder);
 
   for (int i=0; i<kNSlices; i++) {
     HBook2F(hist->fYVsZWtESlice[i],Form("y_vs_z_wte_%i",i) ,Form("%s: Y vs Z wt(E) slice %i" ,Folder,i),  
-	    60,  -300,  300,  60, -300, 300, Folder);
+	   120,  -300,  300, 120, -300, 300, Folder);
 
     HBook2F(hist->fYVsZDose[i],Form("y_vs_z_dose_%i",i) ,Form("%s: Y vs Z Doze slice %i" ,Folder,i),  
-	    60,  -300,  300,  60, -300, 300, Folder);
+	   120,  -300,  300, 120, -300, 300, Folder);
   }
 }
 
@@ -542,21 +542,26 @@ int TColl3DoseAnaModule::EndJob() {
 //
 //-----------------------------------------------------------------------------
   double mev_per_joule = 1.6e-19*1.e6;
-  double krad_per_gray = 10.;
+  //  double gray_per_krad = 10.;
   double rhoCu         = 8.815e-3 ;	// kg/cm^3
-  double rhoCapton     = 1.42e-3  ;	// kg/cm^3
+  double rhoBe         = 1.848e-3  ;	// Berillium, kg/cm^3
 //-----------------------------------------------------------------------------
 // all Y:Z histograms have the same number of bins
 //-----------------------------------------------------------------------------
   int nx   =  fHist.fColl31Spmc[0]->fYVsZWtESlice[0]->GetNbinsX();
   int ny   =  fHist.fColl31Spmc[0]->fYVsZWtESlice[0]->GetNbinsY();
 
-  int n_pot_dataset = 200000; //  GetAna()->NProcessedEvents();
+  float dx = fHist.fPbrAbsSpmc[0]->fYVsZWtESlice[0]->GetXaxis()->GetBinWidth(1)/10.; // in cm
+  float dy = fHist.fPbrAbsSpmc[0]->fYVsZWtESlice[0]->GetYaxis()->GetBinWidth(1)/10.; // in cm
+
+  //  int n_pot_dataset = 200000; //  GetAna()->NProcessedEvents();
+  //  int n_pot_dataset = 650000; //  622_0000, rerunning the second time
+  int n_pot_dataset = 1000000; //  622_0001, rerunning the second time
 
   for (int i=0; i<kNSlices; i++) {
 
-    float mass = rhoCu*0.1;                          // in g/cm^2
-    float sf   = (fNPOT*fNPerPOT)/(n_pot_dataset+1.e-12)*mev_per_joule/mass/krad_per_gray;
+    float mass = rhoCu*0.1*dx*dy;                      // in g/cm^2
+    float sf   = (fNPOT*fNPerPOT)/(n_pot_dataset+1.e-12)*mev_per_joule/mass;
 
 //-----------------------------------------------------------------------------
 // Coll31
@@ -570,7 +575,7 @@ int TColl3DoseAnaModule::EndJob() {
 	double e    = h1->GetBinError  (ix,iy);
 
 	h2->SetBinContent(ix,iy,x*sf);
-	h2->SetBinContent(ix,iy,e*sf);
+	h2->SetBinError  (ix,iy,e*sf);
       }
     }
 //-----------------------------------------------------------------------------
@@ -585,15 +590,16 @@ int TColl3DoseAnaModule::EndJob() {
 	double e    = h1->GetBinError  (ix,iy);
 
 	h2->SetBinContent(ix,iy,x*sf);
-	h2->SetBinContent(ix,iy,e*sf);
+	h2->SetBinError  (ix,iy,e*sf);
       }
     }
 //-----------------------------------------------------------------------------
-// Pbar absorber - capton, different Dx bin - 10 um
-// unlike in thick collimator, assume that energy is distributed uniformly here
+// as simulated (Mu2eG4/geom/TransportSolenoid_v02.txt), Pbar absorber: Be, 164um thick 
+// unlike in a thick collimator, assume that energy is distributed uniformly
+// over the length
 //-----------------------------------------------------------------------------
-    mass   = rhoCapton*0.02;       // in g/cm^2, slice thickness 200 um
-    sf     = (fNPOT*fNPerPOT)/(n_pot_dataset+1.e-12)*mev_per_joule/mass/krad_per_gray;
+    mass   = rhoBe*0.0164*dx*dy;     // in g/cm^2, slice thickness 200 um
+    sf     = (fNPOT*fNPerPOT)/(n_pot_dataset+1.e-12)*mev_per_joule/mass;
 
     h1 = fHist.fPbrAbsSpmc[0]->fYVsZWtE;
     h2 = fHist.fPbrAbsSpmc[0]->fYVsZDose    [i];
@@ -604,7 +610,7 @@ int TColl3DoseAnaModule::EndJob() {
 	double e    = h1->GetBinError  (ix,iy);
 
 	h2->SetBinContent(ix,iy,x*sf);
-	h2->SetBinContent(ix,iy,e*sf);
+	h2->SetBinError  (ix,iy,e*sf);
       }
     }
   }

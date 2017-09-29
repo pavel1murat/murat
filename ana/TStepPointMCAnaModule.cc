@@ -141,6 +141,12 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_spmc_histset[204] = 1;		// positrons with 2 < p < 3 MeV/c
   book_spmc_histset[205] = 1;		// positrons with p > 3 MeV/c
 
+  book_spmc_histset[ 900] = 1;		// all particles , VD=9
+  book_spmc_histset[ 913] = 1;		// mu- in VD=9
+
+  book_spmc_histset[9100] = 1;		// all particles , VD=91
+  book_spmc_histset[9113] = 1;		// mu- in VD=91
+
   for (int i=0; i<kNStepPointMCHistSets; i++) {
     if (book_spmc_histset[i] != 0) {
       sprintf(folder_name,"spmc_%i",i);
@@ -253,13 +259,25 @@ void TStepPointMCAnaModule::FillHistograms() {
       if ((p >=  2) && (p < 3)) FillStepPointMCHistograms(fHist.fStepPointMC[204],spmc);
       if (p >   3)              FillStepPointMCHistograms(fHist.fStepPointMC[205],spmc);
     }
-    else if (spmc->PDGCode() ==   13) FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc);
+    else if (spmc->PDGCode() ==   13) {
+      FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc);
+    }
     else if (spmc->PDGCode() ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc);
     else if (spmc->PDGCode() ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc);
     else if (spmc->PDGCode() == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc);
     else if (spmc->PDGCode() ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc);
     else if (abs(spmc->PDGCode() == 2212)) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc);
     else                              FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc);
+
+    if (spmc->VolumeID() == 9) {
+      FillStepPointMCHistograms(fHist.fStepPointMC[900],spmc);
+      if (spmc->PDGCode() == 13) FillStepPointMCHistograms(fHist.fStepPointMC[913],spmc);
+    }
+
+    if (spmc->VolumeID() == 91) {
+      FillStepPointMCHistograms(fHist.fStepPointMC[9100],spmc);
+      if (spmc->PDGCode() == 13) FillStepPointMCHistograms(fHist.fStepPointMC[9113],spmc);
+    }
 
   }
 }

@@ -42,8 +42,8 @@ public:
   };
 
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets    = 100 };
-  enum { kNVdetHitHistSets  = 100 };
+  enum { kNEventHistSets    =  100 };
+  enum { kNVdetHitHistSets  = 2000 };
 
   struct Hist_t {
     EventHist_t*    fEvent   [kNEventHistSets];

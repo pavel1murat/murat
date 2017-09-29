@@ -110,7 +110,9 @@ void TVdetAnaModule::BookHistograms() {
   int book_vdethit_histset[kNVdetHitHistSets];
   for (int i=0; i<kNVdetHitHistSets; i++) book_vdethit_histset[i] = 0;
 
-  book_vdethit_histset[0] = 1;		// all clusters
+  book_vdethit_histset[  0] = 1;		// all hits on all virtual detectors
+  book_vdethit_histset[ 91] = 1;		// all hits on detector # 91 (before TS1 coll)
+  book_vdethit_histset[391] = 1;		// mu- hits on detector # 91 (before TS1 coll)
 
   for (int i=0; i<kNVdetHitHistSets; i++) {
     if (book_vdethit_histset[i] != 0) {
@@ -186,6 +188,13 @@ void TVdetAnaModule::FillHistograms() {
   for (int i=0; i<fNVdetHits; i++) {
     hit = fVdetDataBlock->Hit(i);
     FillVdetHitHistograms(fHist.fVdetHit[0],hit);
+
+    if (hit->Index() == 91) {
+      FillVdetHitHistograms(fHist.fVdetHit[91],hit);
+      if (hit->PdgCode() == 13) {
+	FillVdetHitHistograms(fHist.fVdetHit[391],hit);
+      }
+    }
   }
 //-----------------------------------------------------------------------------
 // fill GENP histograms

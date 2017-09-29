@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TStepPointMCAnaModule_hh
-#define murat_ana_TStepPointMCAnaModule_hh
+#ifndef murat_ana_TColl1DoseAnaModule_hh
+#define murat_ana_TColl1DoseAnaModule_hh
 
 #include "TH1.h"
 #include "TH2.h"
@@ -21,14 +21,28 @@
 
 #include "murat/ana/HistBase_t.h"
 
-#include "murat/ana/AnaDefs.hh"
-
-class TStepPointMCAnaModule: public TStnModule {
+class TColl1DoseAnaModule: public TStnModule {
 public:
+  enum {kMaxNSteps = 1000};
+  enum {kNSlices   =   10};
+
+  struct SpmcData_t {
+    TSimParticle*  fParticle;
+    TSimParticle*  fParent;
+    TSimParticle*  fGParent;
+    float          fGpTheta;
+    float          fP;
+    float          fCosTh;
+    float          fTime;
+    float          fX;			// local horizontal coord (X or Z)
+    float          fY;			// local vertical   coord
+    int            fBinX;               // depth bin
+  };
+
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct StepPointMCHist_t : public HistBase_t {
+  struct SpmcHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
     TH1F*      fGenIndex;		       //
     TH1F*      fSimID;
@@ -44,40 +58,53 @@ public:
     TH1F*      fStepLength;
 
     TH1F*      fMomentum;
+    TH1F*      fCosTh;
 
-    TH2F*      fYVsZ;
     TH2F*      fYVsX;
+    TH2F*      fYVsXWtE;
+    TH2F*      fYVsXDose;
   };
 
   struct EventHist_t : public HistBase_t {
     TH1F*      fRunNumber;
     TH1F*      fEventNumber;
+    TH1F*      fNPbrAbsSteps;
   };
 
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets        =   100 };
-  enum { kNStepPointMCHistSets  = 10000 };
+  enum { kNEventHistSets = 100  };
+  enum { kNSpmcHistSets  = 1000 };
 
   struct Hist_t {
-    EventHist_t*        fEvent       [kNEventHistSets];
-    StepPointMCHist_t*  fStepPointMC [kNStepPointMCHistSets];
+    EventHist_t* fEvent      [kNEventHistSets];
+    SpmcHist_t*  fPbarAbsSpmc[kNSpmcHistSets ];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStepPointMCBlock*    fStepPointMCBlock;
+
+  TStepPointMCBlock*    fPbarAbsSpmcBlock;
+
 					// histograms filled
   Hist_t                fHist;
 
-  TString               fSpmcBlockName;
+  int                   fNPbrAbsSteps;
+
+  int                   fPdgCode;
+  int                   fGeneratorCode;
+
+  float                 fNPOT;
+  int                   fNPerPOT;
+
+  SpmcData_t            fPbarAbsSpmcData[1000];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TStepPointMCAnaModule(const char* name="StepPointMCAna", const char* title="StepPointMCAna");
-  ~TStepPointMCAnaModule();
+  TColl1DoseAnaModule(const char* name="Coll1DoseAna", const char* title="Coll1DoseAna");
+  ~TColl1DoseAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -85,7 +112,8 @@ public:
 //-----------------------------------------------------------------------------
 // setters
 //-----------------------------------------------------------------------------
-  void SetSpmcBlockName(const char* Name) { fSpmcBlockName = Name; }
+  void    SetPdgCode      (int Code) { fPdgCode       = Code; }
+  void    SetGeneratorCode(int Code) { fGeneratorCode = Code; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
@@ -96,15 +124,16 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
-  void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
+  void    BookPbrAbsSpmcHistograms(HistBase_t* Hist, const char* Folder);
 
-  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step);
-  void    FillEventHistograms        (HistBase_t* Hist);
+  void    BookEventHistograms(HistBase_t* Hist, const char* Folder);
+
+  void    FillSpmcHistograms (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t*  Sd);
+
+  void    FillEventHistograms(HistBase_t* Hist);
 
   void    BookHistograms();
   void    FillHistograms();
-
 
   void    Debug();
 //-----------------------------------------------------------------------------
@@ -112,7 +141,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TStepPointMCAnaModule,0)
+  ClassDef(TColl1DoseAnaModule,0)
 };
 
 #endif

@@ -23,7 +23,7 @@
 
 class TColl3DoseAnaModule: public TStnModule {
 public:
-  enum {kMaxNSteps = 1000};
+  enum {kMaxNSteps = 10000};
   enum {kNSlices   =   10};
 
   struct SpmcData_t {

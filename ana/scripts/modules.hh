@@ -4,6 +4,7 @@
 #include "murat/ana/TBeamFlashAnaModule.hh"
 #include "murat/ana/TCalAnaModule.hh"
 #include "murat/ana/TClusterAnaModule.hh"
+#include "murat/ana/TColl1DoseAnaModule.hh"
 #include "murat/ana/TColl3DoseAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
@@ -30,6 +31,7 @@
 TBeamFlashAnaModule*       m_bfl   = NULL;
 TCalAnaModule*             m_cal   = NULL;
 TClusterAnaModule*         m_cls   = NULL;
+TColl1DoseAnaModule*       m_coll1 = NULL;
 TColl3DoseAnaModule*       m_coll3 = NULL;
 TCosmicsAnaModule*         m_cos   = NULL;
 TDioCalibModule*           m_dio   = NULL;

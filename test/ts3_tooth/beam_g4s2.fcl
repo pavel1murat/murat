@@ -1,7 +1,0 @@
-# -*- mode: tcl -*-
-
-#include "JobConfig/cd3/beam/beam_g4s2.fcl"
-
-services.GeometryService.inputFile:  "Mu2eG4/geom/geom_common.txt"
-source.fileNames : [ "do_not_forget_to_specify" ]
-

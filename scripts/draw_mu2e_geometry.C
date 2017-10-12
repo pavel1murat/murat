@@ -1,10 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // draw different parts of Mu2e
 //
-// dmg = new DrawMu2eGeometry("mu2e.gdml")
+// dmg = new DrawMu2eGeometry("/home/murat/figures/mu2e/gdml/mu2e_geometry_v6_1_4.gdml")
 // dmg->HideBuilding()
 // dmg->gm->GetVolume("HallAir")->Draw("ogl")
 //
+// comment: TGeoManager::Import chokes on filenames like "~/mu2e.gdml") 
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "TGeoVolume.h"
@@ -340,6 +341,19 @@ void DrawMu2eGeometry::SetDefaultColorTransp() {
     printf(" TS3Vacuum daughter: %s\n",name);
     if      (strcmp(name,"PbarAbs"     ) == 0) SetRecursiveColorTransp(vd,kRed+1,fTransp);
     else if (strcmp(name,"PbarAbsWedge") == 0) SetRecursiveColorTransp(vd,kRed+3,fTransp);
+  }
+//-----------------------------------------------------------------------------
+// color TS5 collimator
+//-----------------------------------------------------------------------------
+  TGeoVolume* ts5_vacuum = gm->GetVolume("TS5Vacuum");
+  nd              = ts5_vacuum->GetNdaughters();
+  
+  for (int i=0; i<nd; i++) {
+    TGeoVolume* vd = ts5_vacuum->GetNode(i)->GetVolume();
+    name = vd->GetName();
+    printf(" TS5Vacuum daughter: %s\n",name);
+    if      (strcmp(name,"Coll51") == 0) SetRecursiveColorTransp(vd,kRed+1,fTransp);
+    else if (strcmp(name,"Coll52") == 0) SetRecursiveColorTransp(vd,kRed+3,fTransp);
   }
 }
 

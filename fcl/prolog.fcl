@@ -8,7 +8,34 @@ FlagStrawHits_maximumEnergy: 0.005
 
 murat : { 
 
-    TCalm002 : { module_type:TCalm002
+    FilterEcalMVATrigger: { module_type : FilterEcalMVATrigger
+	diagLevel              : 2
+	MVAMethod              : BDT
+	_caloDigiModuleLabel   : CaloDigiFromShower
+	weightsfile            : "Trigger/data/ce_bkg_BDT.weights.xml"
+	TimeOffsets            : { inputs : [ "protonTimeMap", "muonTimeMap" ] }
+	ADC2MeV                : 0.0076 # MeV/ADC
+	PEAK2CE                : 6.04 # peak amplitude to waveform integral
+	DigiThreshold          : 1. # MeV
+	PEAKmin                : 20 # MeV
+	DTmax                  : 6 # ns
+	RINGRmin0              : 0 # mm
+	RINGRmin1              : 0 # mm
+	RINGRmin2              : 0 # mm
+	wcry                   : 34.3 # mm
+	MVAhighcut0            : 0.6
+	MVArpivot0             : 445 # mm
+	MVApivotcut0           : 0.5
+	MVAlowcut0             : 0.4
+	MVAhighcut1            : 0.5
+	MVArpivot1             : 445 # mm
+	MVApivotcut1           : 0.5
+	MVAlowcut1             : 0.5
+	step                   : 4
+	downscale500factor     : 0
+    }
+
+     TCalm002 : { module_type:TCalm002
 	strawHitMaker     : makeSH
 	caloClusterMaker  : MakeCaloCluster
 	trkPatRecDem      : TrkPatRec

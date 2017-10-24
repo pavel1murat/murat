@@ -9,6 +9,7 @@
 #include "murat/scripts/init_harp_datasets.hh"
 #include "murat/scripts/init_pion_yields_datasets.hh"
 #include "murat/scripts/init_beamline_dose_datasets.hh"
+#include "murat/scripts/init_delta_finder_datasets.hh"
 
 //-----------------------------------------------------------------------------
 void init_datasets() {
@@ -16,5 +17,6 @@ void init_datasets() {
   init_pion_yields_datasets();
   init_harp_datasets();
   init_beamline_dose_datasets();
+  init_delta_finder_datasets();
 }
 #endif

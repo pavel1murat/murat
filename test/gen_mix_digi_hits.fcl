@@ -1,0 +1,84 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# read input file with pre-mixed (at a level of StepPointMC's) background events, 
+# run digitization 
+#
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "minimalMessageService.fcl"
+#include "standardProducers.fcl"
+#include "standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+#  meanBackground                      : -1        # fixed at 1
+bgHitFiles                          : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art"]
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : ReadDigi
+
+source       : { 
+    module_type : EmptyEvent 
+#    module_type : RootInput 
+#    fileNames: [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art" ]
+#    fileNames: [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-g4s4-detconversion/v566/50/b6/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art" ]
+}
+
+producers    : { @table::murat.producers }
+outputs      : { @table::murat.outputs   }
+filters      : { @table::murat.filters   }
+paths        : { @table::murat.paths     }
+
+physics: { 
+    producers : { @table::producers 
+	generate : { @table::murat.producers.egun 
+	    physics : {
+		pdgId            : 11
+		elow             : 104.99
+		ehi              : 105.01
+		spectrumVariable : "momentum"
+		spectrumShape    : "flat"
+	    }
+	    
+	}
+
+	CaloShowerStepFromStepPt : { @table::murat.producers.CaloShowerStepFromStepPt 
+	    physVolInfoInput : "g4run"
+	}
+    }
+
+    filters : { @table::filters }
+
+    @table::paths
+
+    p1: [ generate, g4run,  
+	  @sequence::murat.mix_time_map, 
+	  # @sequence::EventMixing.TimeMaps, 
+	  @sequence::Tracking.DigiSim   ,
+	  @sequence::Tracking.PrepareHits
+	  #	  makeSH, MakeStrawHitPositions
+	]
+    
+    trigger_paths : [  p1 ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+physics.out : [detectorOutput]
+outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.read_reco_stn_tcn.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

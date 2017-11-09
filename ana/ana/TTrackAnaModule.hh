@@ -55,6 +55,7 @@ public:
     TH1F*    fNGoodSH;
     TH1F*    fMomTF;                    // signal particle momentuum @ Tracker Front
     TH1F*    fPitchTF;		        // SIM tan(pitch) @ Tracker Front
+    TH1F*    fAlgMask;                  // algorithm mask
     TH1F*    fDtClT;
     TH1F*    fEMax;			// energy of the first reco cluster
     TH1F*    fDtClS;
@@ -353,6 +354,7 @@ public:
   TEmuLogLH*        fLogLH;
 
   double            fMinT0;
+  double            fMinETrig;          // minimal energy of the cluster to trigger on
 					// Tcm - track-cluster matching
   double            fMinDtTcm;
   double            fMaxDtTcm;

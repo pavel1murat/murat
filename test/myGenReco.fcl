@@ -1,0 +1,30 @@
+# -*- mode: tcl -*-
+
+#include "Analyses/test/genReco.fcl"
+
+physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
+
+
+physics : { @table::physics
+
+    x1 : [ @sequence::generatorSeq, 
+	   @sequence::make_digis,
+	   @sequence::calRecoSeq,       # defined in genReco.fcl
+	   @sequence::Tracking.TPRDeM,
+	   @sequence::cprMakeHitSeq, 
+	   @sequence::CalPatRec.dem_reco
+	  ]
+
+    trigger_paths : [ x1 ]
+    out           : [ ]
+    end_paths     : [ out ]
+}
+
+
+physics.filters.CalTimePeakFinderDem.diagLevel  : 1
+physics.filters.CalHelixFinderDem.diagLevel     : 1
+physics.filters.CalSeedFitDem.diagLevel         : 1
+physics.filters.CalTrkFitDem.diagLevel          : 1
+
+# physics.producers.MergePatRecDem.diagLevel : 1
+# physics.producers.MergePatRecDmm.diagLevel : 1

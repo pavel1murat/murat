@@ -66,6 +66,7 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title):
   fFillDioHist     = 1;
 
   fMinT0           = 700; 
+  fMinETrig        = 50.;               // MeV
 					// track-cluster matching timing cut
   fMinDtTcm        = -5.;
   fMaxDtTcm        =  8.;
@@ -204,14 +205,17 @@ void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
   }
 
   double t0_trk = -1;
+  int    alg_mask(-1);
   if (track) {
-    t0_trk = track->fT0;
+    t0_trk   = track->fT0;
+    alg_mask = track->AlgMask();
   }
 
   if (track && cluster) {
     dt = t0_cls-t0_trk;
   }
 
+  Hist->fAlgMask->Fill(alg_mask);
   Hist->fDtClT->Fill(dt);
   Hist->fEMax->Fill(emax);
 
@@ -816,7 +820,7 @@ void TTrackAnaModule::FillHistograms() {
     }
   }
 
-  if ((cl_e > 60.) && (cl0->Time() > 500)) {
+  if ((cl_e > fMinETrig) && (cl0->Time() > 500)) {
     FillEventHistograms(fHist.fEvent[7]); 
 
     if (GetDebugBit(34)) {

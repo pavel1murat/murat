@@ -60,7 +60,7 @@ physics: { @table::physics
     }
 
     aaaa : [ @sequence::generatorSeq, @sequence::hitMakerSeq ,
-	     @sequence::calRecoSeq  , 
+	     @sequence::CaloCluster.Reco , 
 	     @sequence::allPatRecDemSeq,
 	     @sequence::trkCaloMatchingDemSeq,
 	     @sequence::allPatRecDmmSeq,

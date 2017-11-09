@@ -9,7 +9,7 @@
 //  1  : passed events
 //  2  : rejected events
 //  3  : events with CalPatRec tracks with DPF > 5
-//  4  : events with TrkPatRec track and a 60+ MeV cluster, but with no CalPatRec track
+//  4  : events with TrkPatRec track and a 50+ MeV cluster, but with no CalPatRec track
 //  5  : events with CalPatRec tracks with P > 106
 //  6  : events with CalPatRec tracks with 1.5 < DPF < 5
 //  7  : events with N(set "C" CalPatRec tracks)  > 0
@@ -75,6 +75,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     }
   }
 
+  fMinETrig       = 50.;
   fNMVA           = 0;
 
   fUseMVA         = 0;
@@ -386,7 +387,7 @@ void TTrackCompModule::BookHistograms() {
   for (int i=0; i<kNEventHistSets; i++) book_event_histset[i] = 0;
 
   book_event_histset[ 0] = 1;		// all events
-  book_event_histset[ 1] = 1;		// events with EclMax > 60 and TClMax > 550
+  book_event_histset[ 1] = 1;		// events with EclMax > fMinETrig and TClMax > 550
 
 					// TrkPatRec eff: histsets 10:19, CalpatRec efficiency:20-29
 
@@ -866,7 +867,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // EVT_2: events with 50 MeV+ cluster and both tracks T0 > 550
 //-----------------------------------------------------------------------------
-  if ((fEClMax > 50.) && (fTClMax > 550)) {
+  if ((fEClMax > fMinETrig) && (fTClMax > 550)) {
     FillEventHistograms(fHist.fEvent[1]);
   }
 
@@ -1470,7 +1471,7 @@ void TTrackCompModule::Debug() {
 //-----------------------------------------------------------------------------
   if (GetDebugBit(4) == 1) {
     if ((fNTracks[0] > 0) && (fNClusters > 0) && (fNTracks[1] == 0)) {
-      if (fEClMax > 60.) {
+      if (fEClMax > fMinETrig) {
 	sprintf(text,"TTrackCompModule bit004: N(TPR) = %i N(CPR) = %i E(cl) = %10.3f",
 		fNTracks[0],fNTracks[1],fEClMax);
 	GetHeaderBlock()->Print(text);

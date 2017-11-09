@@ -61,12 +61,11 @@ physics: {
 
     @table::paths
 
-    p1: [ generate, g4run,  
+    p1: [ generate, g4run, 
 	  @sequence::murat.mix_time_map, 
-	  # @sequence::EventMixing.TimeMaps, 
-	  @sequence::Tracking.DigiSim   ,
-	  @sequence::Tracking.PrepareHits
-	  #	  makeSH, MakeStrawHitPositions
+	  @sequence::murat.digis,
+	  @sequence::murat.cal_hits,
+	  @sequence::murat.tpr_hits
 	]
     
     trigger_paths : [  p1 ]
@@ -74,6 +73,16 @@ physics: {
     end_paths     : [ out ]
 }
 
+#------------------------------------------------------------------------------
+# redefine location of the mixer's background files
+#------------------------------------------------------------------------------
+physics.filters.flashMixer.fileNames    : @local::bgHitFiles
+physics.filters.ootMixer.fileNames      : @local::bgHitFiles
+physics.filters.dioMixer.fileNames      : @local::bgHitFiles
+physics.filters.neutronMixer.fileNames  : @local::bgHitFiles
+physics.filters.photonMixer.fileNames   : @local::bgHitFiles
+physics.filters.protonMixer.fileNames   : @local::bgHitFiles
+physics.filters.deuteronMixer.fileNames : @local::bgHitFiles
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------

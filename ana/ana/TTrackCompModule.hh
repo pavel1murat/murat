@@ -245,6 +245,8 @@ public:
 
   TEmuLogLH*        fLogLH;
 
+  double            fMinETrig;
+
   double            fMinT0;
   double            fLumWt;
 

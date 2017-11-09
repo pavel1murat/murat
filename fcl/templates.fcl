@@ -20,6 +20,14 @@ services : {
 	baseSeed         :  0
 	maxUniqueEngines :  20
     }
+
+    TimeTracker : {
+	printSummary : true
+	dbOutput : {
+	    filename  : ""
+	    overwrite : false
+	}
+    }
 }
 #------------------------------------------------------------------------------
 # looks that services.scheduler doesn't exist by default
@@ -119,18 +127,6 @@ murat : { @table::murat
 	    }
 	}
 #------------------------------------------------------------------------------
-# hit makers
-#------------------------------------------------------------------------------
-#	MakeCaloCompressedHits : { @table::MakeCaloCompressedHits }
-#	MakeCaloReadoutHits    : { @table::MakeCaloReadoutHits    }
-#	MakeCaloCrystalHits    : { @table::MakeCaloCrystalHitsNew }
-#------------------------------------------------------------------------------
-# calorimeter digi maker
-#------------------------------------------------------------------------------
-#	CaloDigisFromStepPointMCs   :{ @table::CaloDigisFromStepPointMCs   }
-#	CaloHitsFromCaloDigis       :{ @table::CaloHitsFromCaloDigis       }
-#	CaloCrystalHitsFromCaloHits :{ @table::CaloCrystalHitsFromCaloHits }
-#------------------------------------------------------------------------------
 # TrkPatRec and CalPatRec modules
 #------------------------------------------------------------------------------
 	@table::Tracking.producers      # defined in TrkPatRec
@@ -147,26 +143,9 @@ murat : { @table::murat
 # event mixing modules - all clones of the same module.
 # each clone takes certain collections from the input file and adds them to the event
 #------------------------------------------------------------------------------
-    filters: { @table::murat.filters
-#	@table::EventMixing.filters
-	flashMixer    : { @table::mixerTemplate 
-	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:flashMixer genModuleLabel:flashMixer }
-	}
-	ootMixer      : { @table::mixerTemplate
-	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:ootMixer genModuleLabel:ootMixer     }
-	}
-	dioMixer      : { @table::mixerTemplate
-	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:dioMixer genModuleLabel:dioMixer     }
-	}
-	neutronMixer  : { @table::mixerTemplate 
-	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:neutronMixer genModuleLabel:neutronMixer}
-	}
-	photonMixer   : { @table::mixerTemplate
-	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:photonMixer genModuleLabel:photonMixer }
-	}
-	protonMixer   : { @table::mixerTemplate
-	    fileNames : @local::bgHitFiles detail:{ @table::mixerTemplate.detail g4ModuleLabel:protonMixer genModuleLabel:protonMixer }
-	}
+    filters: { 
+	@table::murat.filters
+ 	@table::EventMixing.filters
 #------------------------------------------------------------------------------
 # Andrej's filter
 # Reject events with no hits from signal-like tracks in the detectors.  
@@ -189,26 +168,39 @@ murat : { @table::murat
     }
 }
 #------------------------------------------------------------------------------
+# redefine location of the mixer's background files
+#------------------------------------------------------------------------------
+flashMixer.fileNames    : @local::bgHitFiles
+ootMixer.fileNames      : @local::bgHitFiles
+dioMixer.fileNames      : @local::bgHitFiles
+neutronMixer.fileNames  : @local::bgHitFiles
+photonMixer.fileNames   : @local::bgHitFiles
+protonMixer.fileNames   : @local::bgHitFiles
+deuteronMixer.fileNames : @local::bgHitFiles
+#------------------------------------------------------------------------------
 # sequences: can't define recursively within one namespace
 #------------------------------------------------------------------------------
 murat.gen_g4              : [ generate, g4run, detectorFilter]
 murat.gen_g4_time_map     : [ @sequence::murat.gen_g4, @sequence::EventMixing.TimeMaps ]
-murat.mix                 : [ dioMixer, protonMixer, neutronMixer, photonMixer, ootMixer, flashMixer ]
-murat.mix_time_map        : [ @sequence::murat.mix, @sequence::EventMixing.TimeMaps ]
-murat.gen_g4_mix_time_map : [ @sequence::murat.gen_g4, @sequence::murat.mix, @sequence::EventMixing.TimeMaps ]
+murat.CD3Mixers           : [ @sequence::EventMixing.CD3Mixers ]
+murat.mix_time_map        : [ @sequence::murat.CD3Mixers, @sequence::EventMixing.TimeMaps ]
+murat.gen_g4_mix_time_map : [ @sequence::murat.gen_g4, @sequence::EventMixing.CD3Mixers, @sequence::EventMixing.TimeMaps ]
 
 murat.digis               : [ @sequence::CaloDigiMC.DigiSim, @sequence::Tracking.DigiSim ]
 
 #------------------------------------------------------------------------------
 # calorimeter reconstruction
 #------------------------------------------------------------------------------
-murat.cal_reco : [ @sequence::CaloReco.Reco          , 
-		   @sequence::CaloDigiMC.TruthMatch  , 
+murat.cal_hits : [ @sequence::CaloReco.Reco, @sequence::CaloDigiMC.TruthMatch ]
+
+murat.cal_reco : [ @sequence::murat.cal_hits, 
 		   @sequence::CaloCluster.Reco       , 
 		   @sequence::CaloCluster.TruthMatch ]
 #------------------------------------------------------------------------------
 # downstream track reconstruction
 #------------------------------------------------------------------------------
+murat.tpr_hits : [ @sequence::Tracking.PrepareHits ]
+
 murat.cpr_reco : [ @sequence::CalPatRec.reco, 
 		   MergePatRecCpr, 
 		   @sequence::TrackCaloMatching.matching_cpr ]
@@ -375,7 +367,7 @@ murat.paths : {
 #
 #------------------------------------------------------------------------------
     path_gen_mix_digi_reco_stn_tcm : [ @sequence::murat.gen_g4         ,
-				       @sequence::murat.mix            ,
+				       @sequence::EventMixing.CD3Mixers,
 				       @sequence::EventMixing.TimeMaps ,
 				       @sequence::murat.digis          ,
 				       @sequence::murat.cal_reco       , 

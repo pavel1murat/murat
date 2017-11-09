@@ -131,7 +131,7 @@ physics : {
     trkpatrec_reco : [
 		      @sequence::timeMapSeq
 		      , @sequence::hitMakerSeq
-		      , @sequence::calRecoSeq
+		      , @sequence::CaloCluster.Reco
 		      , @sequence::trkPatRecSeqProt
 		      , MergePatRec
 #		      , @sequence::stnmaker_seq

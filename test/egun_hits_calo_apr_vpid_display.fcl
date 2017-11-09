@@ -43,7 +43,7 @@ process_name : EgunHitsCaloAprVpidStnmP1
 path_make_hits                      : [ @sequence::generatorSeq, 
 					@sequence::hitMakerSeq ]
 
-path_reco_display                   : [ @sequence::calRecoSeq  , 
+path_reco_display                   : [ @sequence::CaloCluster.Reco  , 
 					#					    @sequence::allPatRecSeq,
 					@sequence::calPatRecSeq,
 					@sequence::trkCaloMatchingSeq,
@@ -52,7 +52,7 @@ path_reco_display                   : [ @sequence::calRecoSeq  ,
 
 path_gen_hits_calo_cpr_vpid_display : [ @sequence::generatorSeq, 
 					@sequence::hitMakerSeq ,
-					@sequence::calRecoSeq  , 
+					@sequence::CaloCluster.Reco  , 
 					#					    @sequence::allPatRecSeq,
 					@sequence::calPatRecSeq,
 					@sequence::trkCaloMatchingSeq,

@@ -35,11 +35,11 @@ END_PROLOG
 
 #include "murat/fcl/templates.fcl"
 
-process_name : EgunDigiRecoStnTcn
+process_name : EgunDigiRecoStnTcm
 
 source       : { module_type : EmptyEvent }
 
-outputs      : { @table::murat.outputs }
+outputs      : { @table::murat.outputs    }
 
 physics: { 
     producers : { 
@@ -90,7 +90,7 @@ physics.filters.CalTrkFit.diagLevel                  : 1
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
-# physics.out : [detectorOutput]
+physics.out : [detectorOutput]
 outputs.detectorOutput.fileName           : "aaa.murat.bbb.ccc.egun_digi_reco_stn_tcn.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job

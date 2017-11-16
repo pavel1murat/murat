@@ -6,10 +6,15 @@
 
 #include "murat/gui/TEvdNumerology.hh"
 
+class TEvdPanel;
+
 class TEvdStraw : public TEveGeoShape {
 public:
   int        fNumber;
-  int        fIndex;  // straw index - channel ID
+  int        fID;       // straw index - channel ID
+  int        fPlane;
+  int        fPanel;
+  int        fLayer;
   double     fZ;
   double     fRho;
   double     fNx;
@@ -19,11 +24,11 @@ public:
   TEvdStraw(int I = -1);
   ~TEvdStraw();
   
-  void Init(int Index, double rho, double z, double nx, double ny, double HalfLength);
+  void Init(int Index, int Plane, int Panel, int Layer, double rho, double z, double nx, double ny, double HalfLength);
 
   double   Z    () { return fZ    ; }  // *MENU*
   double   Rho  () { return fRho  ; }  // *MENU*
-  int      Index() { return fIndex; }  // *MENU*
+  int      ID   () { return fID   ; }  // *MENU*
   void     Print(Option_t* Opt) const; // *MENU*
 
   ClassDef(TEvdStraw,0);

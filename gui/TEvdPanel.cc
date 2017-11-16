@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/gui/TEvdStraw.hh"
 #include "murat/gui/TEvdPanel.hh"
+#include "murat/gui/TEvdTracker.hh"
 #include "TGeoXtru.h"
 #include "TEveTrans.h"
 
@@ -59,42 +60,47 @@ TEvdPanel::TEvdPanel(int I): TEveGeoShape() {
 void TEvdPanel::InitGeometry() {
 
   double zpanel = (fStraw[0]->Z() + fStraw[1]->Z())/2;
-  double rho    = 0;
-  this->RefMainTrans().SetPos(rho,0,zpanel);
+  this->RefMainTrans().SetPos(0,0,zpanel);
+  this->RefMainTrans().RotatePF(1,2,fPhi);
 
-  double phi = atan2(fNy,fNx);
-  this->RefMainTrans().RotatePF(1,2,phi);
-
-  SetMainTransparency(90);
+  SetMainTransparency(95);
   SetMainColor(kGray+1);
-
+  //-----------------------------------------------------------------------------
+  // by default, straws are drawn along the Z axis
+  // panels are orthogonal to the Z axis, synchronize
+  //-----------------------------------------------------------------------------
   for (int i=0; i<kNStraws; i++) {
     TEvdStraw* s = fStraw[i];
-    
+   
     double dz = s->Z()-zpanel;
     s->RefMainTrans().SetPos(s->Rho(),0,dz);
     
     s->RefMainTrans().RotateLF(2,3,TMath::Pi()/2);
-    //    double phi = atan2(s->fNy,s->fNx)+TMath::Pi()/2;;
     s->RefMainTrans().RotatePF(1,2,TMath::Pi()/2);
-
-    //   s->RefMainTrans().RotateLF(1,2,TMath::Pi()/2);
 
     s->SetMainTransparency(80);
     s->SetMainColor(kRed-9);
   }
 
-  SetRnrChildren(false);
+  SetRnrSelfChildren(true,false);
 }
 
 
 //-----------------------------------------------------------------------------
-void TEvdPanel::InitStraw(int straw, int StrawIndex, double rho, double z,
+void TEvdPanel::InitStraw(int straw, int StrawID, int Plane, int Panel, int Layer,
+			  double rho, double z,
 			  double nx, double ny, double half_length)
 {
-  fStraw[straw]->Init(StrawIndex,rho,z,nx,ny,half_length);
+  fStraw[straw]->Init(StrawID,Plane,Panel,Layer,rho,z,nx,ny,half_length);
 }
 
 //-----------------------------------------------------------------------------
 TEvdPanel::~TEvdPanel() {
+}
+
+
+//-----------------------------------------------------------------------------
+void TEvdPanel::Print(Option_t* Opt) const {
+  printf("panel: plane: %02i index: %1i nx: %8.5f ny: %8.5f phi: %8.5f z: %9.3f\n",
+	 fPlane->Number(),fNumber,fNx,fNy,fPhi,Z());
 }

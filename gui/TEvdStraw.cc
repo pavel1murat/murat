@@ -20,9 +20,12 @@ TEvdStraw::~TEvdStraw() {
 //-----------------------------------------------------------------------------
 // rotation is related to the direction of the view...
 //-----------------------------------------------------------------------------
-void TEvdStraw::Init(int Index, double Rho, double Z, double nx, double ny, double HalfLength) {
+void TEvdStraw::Init(int ID, int Plane, int Panel, int Layer, double Rho, double Z, double nx, double ny, double HalfLength) {
 
-  fIndex      = Index;
+  fID         = ID;
+  fPlane      = Plane;
+  fPanel      = Panel;
+  fLayer      = Layer;
   fZ          = Z;
   fRho        = Rho;
   fNx         = nx;
@@ -35,5 +38,6 @@ void TEvdStraw::Init(int Index, double Rho, double Z, double nx, double ny, doub
 
 //-----------------------------------------------------------------------------
 void TEvdStraw::Print(Option_t* Opt) const {
-  printf("straw : fNumber : %5i,  fIndex: %5i\n",fNumber,fIndex);
+  printf("straw: fIndex: %5i P:P:L:S = %02i:%1i:%1i:%02i rho:%8.2f halfL:%8.2f nx:%8.4f ny: %8.4f \n",
+	 fID,fPlane,fPanel,fLayer,fNumber,fRho,fHalfLength,fNx,fNy);
 }

@@ -11,6 +11,8 @@ Import('murat_helper')
 rootlibs = env['ROOTLIBS']
 if ( not ("Eve"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"Eve" );
 if ( not ("Geom"  in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"Geom");
+if ( not ("RGL"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"RGL");
+if ( not ("GuiHtml" in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"GuiHtml");
 
 helper = murat_helper();
 

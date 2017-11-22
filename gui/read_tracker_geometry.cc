@@ -21,13 +21,13 @@ TEvdTracker*        _tracker;
 TEvdStrawHitHolder* _strawHitHolder(NULL);
 
 //-----------------------------------------------------------------------------
-int read_hits() {
-  const char* fn = "validation_640_0003_0050_hits.txt";
+int read_hits(const char* HitsFile) {
+  //  const char* fn = "validation_640_0003_0050_hits.txt";
   
-  FILE* f = fopen(fn,"r");
+  FILE* f = fopen(HitsFile,"r");
 
   if (f == NULL) {
-    printf("ERROR: can\'t open %s, BAIL OUT\n",fn);
+    printf("ERROR: can\'t open %s, BAIL OUT\n",HitsFile);
     return -1;
   }
 
@@ -81,6 +81,21 @@ int read_hits() {
       TEvdStrawHit* hit = new TEvdStrawHit();
       hit->Init(index,straw_index,plane,panel,layer,straw_number,delta_id,
 		time,dt,edep,wdist,wres,x,y,z);
+					// thiese are not always defined
+      hit->SetPdgID(pdg_id);
+      hit->SetSimID(pdg_id);
+
+      if (delta_id >= 0) {
+	hit->SetMainColor(4);
+	hit->SetMainTransparency(0);
+	hit->fErrorBars->SetMainColor(4);
+					// leave misidentified CE hits bright
+	if ((pdg_id == 11) && (p > 90.)) {
+	  hit->SetMainColor(kGreen+3);
+	  hit->SetMainTransparency(0);
+	  hit->fErrorBars->SetMainColor(kGreen+3);
+	}
+      }
 
       // 'straw_number' - number within the panel (0:95)
       TEvdStraw* s  = evd_panel->Straw(straw_number);
@@ -108,7 +123,7 @@ int read_hits() {
 }
 
 //-----------------------------------------------------------------------------
-int read_tracker_geometry() {
+int read_tracker_geometry(const char* HitsFile) {
 
   const char* fn = "trackerNumerology.txt";
   // const char* fn = "a.txt";
@@ -201,14 +216,16 @@ int read_tracker_geometry() {
   // at this point the geometry is initialized, need to create a view
   // add stations to the scene - this is to be done just once
   //-----------------------------------------------------------------------------
-  for (int is=0; is<20; is++) {
-    for (int iplane=0; iplane<2; iplane++) {
-      for (int ip=0; ip<6; ip+=1) {
-	TEvdPanel* panel = _tracker->fStation[is]->fPlane[iplane]->fPanel[ip];
-	scene->AddElement(panel);
-      }
-    }
-  }
+  // for (int is=0; is<20; is++) {
+  //   for (int iplane=0; iplane<2; iplane++) {
+  //     for (int ip=0; ip<6; ip+=1) {
+  // 	TEvdPanel* panel = _tracker->fStation[is]->fPlane[iplane]->fPanel[ip];
+  // 	scene->AddElement(panel);
+  //     }
+  //   }
+  // }
+
+  scene->AddElement(_tracker);
 //-----------------------------------------------------------------------------
 // read hits
 //-----------------------------------------------------------------------------
@@ -236,7 +253,7 @@ int read_tracker_geometry() {
     }
   }
 
-  read_hits();
+  read_hits(HitsFile);
   //-----------------------------------------------------------------------------
   // so far, hits are not displayed
   gEve->GetDefaultViewer()->AddScene(scene);

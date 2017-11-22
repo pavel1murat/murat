@@ -66,6 +66,8 @@ void TEvdStrawHit::Init(int Index, int StrawIndex, int Plane, int Panel, int Lay
 
 //-----------------------------------------------------------------------------
 void TEvdStrawHit::Print(Option_t* Opt) const {
-  printf("hit: index: %5i, strawindex: %5i P:P:L:S %02i:%1i:%1i:%02i time: %8.2f dt: %8.2f edep: %8.3f x: %8.3f y: %8.3f z: %9.3f wdist: %8.3f wres: %8.3f \n",
-	 fIndex,fStrawIndex,fPlane,fPanel,fLayer,fStraw,fTime,fDt,fEDep,fX,fY,fZ,fWDist,fWRes);
+  printf("hit: index: %5i, strawindex: %5i P:P:L:S %02i:%1i:%1i:%02i ",
+	 fIndex,fStrawIndex,fPlane,fPanel,fLayer,fStraw);
+  printf(" time: %8.2f dt: %8.2f edep: %8.3f x: %8.3f y: %8.3f z: %9.3f wdist: %8.3f wres: %8.3f\n",
+	 fTime,fDt,fEDep,fX,fY,fZ,fWDist,fWRes);
 }

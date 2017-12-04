@@ -16,9 +16,93 @@
 #include "murat/gui/TEvdStrawHit.hh"
 #include "murat/gui/TEvdTracker.hh"
 #include "murat/gui/TEvdStrawHitHolder.hh"
+#include "murat/gui/TEvdHelix.hh"
 
+TEveScene*          _scene;
 TEvdTracker*        _tracker;
 TEvdStrawHitHolder* _strawHitHolder(NULL);
+TEveElementList*    _trackHolder(NULL);
+
+//-----------------------------------------------------------------------------
+int read_tracks(const char* TracksFile) {
+  //  const char* fn = "validation_640_0004_0205_tracks.txt";
+  
+  FILE* f = fopen(TracksFile,"r");
+
+  if (f == NULL) {
+    printf("ERROR: read_tracks can\'t open %s, BAIL OUT\n",TracksFile);
+    return -1;
+  }
+  
+  if (_trackHolder == NULL) {
+    _trackHolder = new TEveElementList("Tracks"); 
+    //    _trackHolder->SetLineWidth(2);
+    _scene->AddElement(_trackHolder);
+  }
+
+  _trackHolder->DestroyElements();
+
+  char   c[1000];
+  float  x0, y0, z0, r, phi0, dphidz, zmin(-1600.), zmax(1600.);
+
+  while ((c[0]=getc(f)) != EOF) {
+					// check if it is a comment line
+    if (c[0] != '#') {
+      ungetc(c[0],f);
+      // read hit data 
+      fscanf(f,"%f" ,&x0 );
+      fscanf(f,"%f" ,&y0 );
+      fscanf(f,"%f" ,&z0 );
+      fscanf(f,"%f" ,&r );
+      fscanf(f,"%f" ,&phi0 );
+      fscanf(f,"%f" ,&dphidz );
+
+      if (phi0 < 0) phi0 += 2*TMath::Pi();
+
+      printf(" %8.3f %8.3f %8.3f %8.3f %8.5f %8.5f\n",x0,y0,z0,r,phi0,dphidz);
+      //-----------------------------------------------------------------------------
+      // initialize the corresponding object
+      // find the right panel
+      //-----------------------------------------------------------------------------
+      double omega  = 1./r;
+      double d0     = sqrt(x0*x0+y0*y0)-r;
+      double tandip = r*dphidz;
+
+      TEvdHelix* helix = new TEvdHelix(z0,d0,phi0+TMath::Pi()/2,omega,tandip,zmin,zmax);
+
+      _trackHolder->AddElement(helix);
+
+      int npt = kNStations*2*2*2; // nplanes*2*nlayers
+      TEvePointSet* pset = new TEvePointSet(npt);
+
+      TVector3  v;
+      for (int ist=0; ist<kNStations; ist++) {
+	for (int ipln=0; ipln<2; ipln++) {
+	  for (int ip=0; ip<2; ip++) {
+	    TEvdPanel* panel = _tracker->Panel(ist,ipln,ip);
+	    for (int iw=0; iw<2; iw++) {
+	      TEvdStraw* straw = panel->Straw(iw);
+	      double z = straw->Z();
+	      helix->GetPointAtZ(z,&v);
+	      printf("helix point : ist: %2i %12.5f %12.5f %12.5f\n",ist, v.x(),v.y(),v.z());
+	      pset->SetNextPoint(v.x(),v.y(),v.z());
+	    }
+	  }
+	}
+      }
+      pset->SetMarkerColor(4);
+      pset->SetMarkerSize(1.0);
+
+      _scene->AddElement(pset);
+    }
+    fgets(c,1000,f);
+  }
+
+  fclose(f);
+  
+  
+  return 0;
+}
 
 //-----------------------------------------------------------------------------
 int read_hits(const char* HitsFile) {
@@ -123,7 +207,7 @@ int read_hits(const char* HitsFile) {
 }
 
 //-----------------------------------------------------------------------------
-int read_tracker_geometry(const char* HitsFile) {
+int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
 
   const char* fn = "trackerNumerology.txt";
   // const char* fn = "a.txt";
@@ -196,8 +280,8 @@ int read_tracker_geometry(const char* HitsFile) {
   TColor::SetPalette(1, 0);
   gRandom = new TRandom3(0);
 
-  TEveScene *scene = gEve->SpawnNewScene("MyScene", "Tracker");
-  scene->SetHierarchical(kTRUE);
+  _scene = gEve->SpawnNewScene("MyScene", "Tracker");
+  _scene->SetHierarchical(kTRUE);
 
   //-----------------------------------------------------------------------------
   // position and rotate panels
@@ -220,19 +304,19 @@ int read_tracker_geometry(const char* HitsFile) {
   //   for (int iplane=0; iplane<2; iplane++) {
   //     for (int ip=0; ip<6; ip+=1) {
   // 	TEvdPanel* panel = _tracker->fStation[is]->fPlane[iplane]->fPanel[ip];
-  // 	scene->AddElement(panel);
+  // 	_scene->AddElement(panel);
   //     }
   //   }
   // }
 
-  scene->AddElement(_tracker);
+  _scene->AddElement(_tracker);
 //-----------------------------------------------------------------------------
 // read hits
 //-----------------------------------------------------------------------------
   if (_strawHitHolder == NULL) {
     _strawHitHolder = new TEvdStrawHitHolder();
     _strawHitHolder->IncDenyDestroy();              // protect against destruction
-    scene->AddElement(_strawHitHolder);
+    _scene->AddElement(_strawHitHolder);
   //-----------------------------------------------------------------------------
   // define transformations such that hits could be placed into the local reference
   // frame of the panel
@@ -254,9 +338,10 @@ int read_tracker_geometry(const char* HitsFile) {
   }
 
   read_hits(HitsFile);
+  read_tracks(TracksFile);
   //-----------------------------------------------------------------------------
   // so far, hits are not displayed
-  gEve->GetDefaultViewer()->AddScene(scene);
+  gEve->GetDefaultViewer()->AddScene(_scene);
   gEve->Redraw3D(kTRUE);
   
   return 0;

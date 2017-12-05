@@ -113,7 +113,8 @@ void run_eve_mu2e() {
     _tracker = new TEvdTracker();
     _tracker->InitGeometry("trackerNumerology.txt");
     
-    gEve->AddGlobalElement(_tracker);
+    //    gEve->AddGlobalElement(_tracker);
+    gEve->AddElement(_tracker);
 
     if (_strawHitHolder == NULL) {
       _strawHitHolder = new TEvdStrawHitHolder();

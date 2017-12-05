@@ -173,21 +173,16 @@ SplitGLView::SplitGLView(const TGWindow *p, UInt_t w, UInt_t h, Bool_t embed) :
    but3->Connect("Clicked(TGLViewerBase*)", "SplitGLView", this, "SwapToMainView(TGLViewerBase*)");
    but4 = new TGLOverlayButton(fViewer1, "Undock", 70.0, -10.0, 55.0, 16.0);
    but4->Connect("Clicked(TGLViewerBase*)", "SplitGLView", this, "UnDock(TGLViewerBase*)");
-   frm->AddFrame(fViewer1->GetFrame(), new TGLayoutHints(kLHintsExpandX |
-                  kLHintsExpandY));
+   frm->AddFrame(fViewer1->GetFrame(),new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
 
    // set the camera to orthographic (XOY) for this viewer
    fViewer1->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
    // connect signal we are interested to
-   fViewer1->Connect("MouseOver(TGLPhysicalShape*)", "SplitGLView", this,
-                      "OnMouseOver(TGLPhysicalShape*)");
-   fViewer1->Connect("Activated()", "SplitGLView", this,
-                      "OnViewerActivated()");
-   fViewer1->Connect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",
-                      "SplitGLView", this,
-                      "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
-   fViewer1->Connect("Clicked(TObject*)", "SplitGLView", this,
-                      "OnClicked(TObject*)");
+   fViewer1->Connect("MouseOver(TGLPhysicalShape*)", "SplitGLView", this,"OnMouseOver(TGLPhysicalShape*)");
+   fViewer1->Connect("Activated()"                 , "SplitGLView", this,"OnViewerActivated()");
+   fViewer1->Connect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)","SplitGLView",this,"OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
+   fViewer1->Connect("Clicked(TObject*)", "SplitGLView", this,"OnClicked(TObject*)");
+   
    fViewer[1] = new TEveViewer("SplitGLViewer[1]");
    fViewer[1]->SetGLViewer(fViewer1, fViewer1->GetFrame());
    fViewer[1]->IncDenyDestroy();
@@ -280,25 +275,23 @@ SplitGLView::~SplitGLView()
    // Clean up main frame...
    //Cleanup();
 
-   fMenuFile->Disconnect("Activated(Int_t)", this, "HandleMenu(Int_t)");
+   fMenuFile->Disconnect  ("Activated(Int_t)", this, "HandleMenu(Int_t)");
    fMenuCamera->Disconnect("Activated(Int_t)", this, "HandleMenu(Int_t)");
-   fMenuScene->Disconnect("Activated(Int_t)", this, "HandleMenu(Int_t)");
-   fMenuHelp->Disconnect("Activated(Int_t)", this, "HandleMenu(Int_t)");
-   fViewer0->Disconnect("MouseOver(TGLPhysicalShape*)", this,
-                         "OnMouseOver(TGLPhysicalShape*)");
-   fViewer0->Disconnect("Activated()", this, "OnViewerActivated()");
-   fViewer0->Disconnect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",
-                         this, "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
-   fViewer1->Disconnect("MouseOver(TGLPhysicalShape*)", this,
-                         "OnMouseOver(TGLPhysicalShape*)");
+   fMenuScene->Disconnect ("Activated(Int_t)", this, "HandleMenu(Int_t)");
+   fMenuHelp->Disconnect  ("Activated(Int_t)", this, "HandleMenu(Int_t)");
+   
+   fViewer0->Disconnect   ("MouseOver(TGLPhysicalShape*)", this,"OnMouseOver(TGLPhysicalShape*)");
+   fViewer0->Disconnect   ("Activated()"     , this, "OnViewerActivated()");
+   fViewer0->Disconnect   ("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",this, "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
+
+   fViewer1->Disconnect("MouseOver(TGLPhysicalShape*)", this,"OnMouseOver(TGLPhysicalShape*)");
    fViewer1->Disconnect("Activated()", this, "OnViewerActivated()");
-   fViewer1->Disconnect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",
-                         this, "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
-   fViewer2->Disconnect("MouseOver(TGLPhysicalShape*)", this,
-                         "OnMouseOver(TGLPhysicalShape*)");
+   fViewer1->Disconnect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",this, "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
+
+   fViewer2->Disconnect("MouseOver(TGLPhysicalShape*)", this,"OnMouseOver(TGLPhysicalShape*)");
    fViewer2->Disconnect("Activated()", this, "OnViewerActivated()");
-   fViewer2->Disconnect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",
-                         this, "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
+   fViewer2->Disconnect("MouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)",this, "OnMouseIdle(TGLPhysicalShape*,UInt_t,UInt_t)");
+
    if (!fIsEmbedded) {
       delete fViewer[0];
       delete fViewer[1];

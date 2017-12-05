@@ -8,6 +8,8 @@
 
 #include "TNamed.h"
 
+class TEvdTracker;
+
 class TEvdPanelStrawHitHolder: public TEveElement, public TNamed {
 public:
   int              fNumber;                      // panel number
@@ -28,7 +30,7 @@ public:
 
   TEvdPlaneStrawHitHolder(int Number = -1);
   ~TEvdPlaneStrawHitHolder();
-  
+
   void Clear(Option_t* Opt = ""); 
   
   ClassDef(TEvdPlaneStrawHitHolder,0)
@@ -62,6 +64,8 @@ public:
   TEvdPanelStrawHitHolder* Panel(int Station, int Plane, int Panel) {
     return fStationHitHolder[Station]->fPlaneHitHolder[Plane]->fPanelHitHolder[Panel];
   }
+  
+  int ReadHits(const char* Filename, TEvdTracker* Tracker);
   
   ClassDef(TEvdStrawHitHolder,0)    // Tracker Straw Hits, structured
 };

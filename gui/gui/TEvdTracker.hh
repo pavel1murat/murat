@@ -19,6 +19,8 @@ public:
     return fStation[Station]->fPlane[Plane]->fPanel[Panel];
   }
 
+  int InitGeometry(const char* Fn);
+
   ClassDef(TEvdTracker,0)
 };
 

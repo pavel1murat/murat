@@ -18,10 +18,12 @@
 #include "murat/gui/TEvdStrawHitHolder.hh"
 #include "murat/gui/TEvdHelix.hh"
 
-TEveScene*          _scene;
-TEvdTracker*        _tracker;
-TEvdStrawHitHolder* _strawHitHolder(NULL);
-TEveElementList*    _trackHolder(NULL);
+namespace {
+  TEveScene*          _scene;
+  TEvdTracker*        _tracker;
+  TEvdStrawHitHolder* _strawHitHolder(NULL);
+  TEveElementList*    _trackHolder(NULL);
+}
 
 //-----------------------------------------------------------------------------
 int read_tracks(const char* TracksFile) {
@@ -222,58 +224,7 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
   TEveManager::Create();
 
   _tracker = new TEvdTracker();
-  
-  // read input file
-  char   c[1000];
-
-  int    station, plane, face, panel, layer, straw, straw_id;
-  float  r, x, y, z, rho, half_length, phi, nx, ny;
-  
-  while ((c[0]=getc(f)) != EOF) {
-					// check if it is a comment line
-    if (c[0] != '#') {
-      ungetc(c[0],f);
-      // read channel number
-      fscanf(f,"%i" ,&station   );
-      fscanf(f,"%i" ,&plane    );
-      fscanf(f,"%i" ,&face );
-      fscanf(f,"%i" ,&panel );
-      fscanf(f,"%i" ,&layer );
-      fscanf(f,"%i" ,&straw );
-      fscanf(f,"%i" ,&straw_id );
-      fscanf(f,"%f" ,&r );
-      fscanf(f,"%f" ,&x );
-      fscanf(f,"%f" ,&y );
-      fscanf(f,"%f" ,&z );
-      fscanf(f,"%f" ,&rho );
-      fscanf(f,"%f" ,&half_length );
-      fscanf(f,"%f" ,&phi );
-      fscanf(f,"%f" ,&nx );
-      fscanf(f,"%f" ,&ny );
-
-//      printf("  %3i %6i %5i %4i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
-//	     station,plane,face, panel,
-//	     layer,straw, straw_index,r,x,y,z,rho, half_length,phi,nx,ny);
-      //-----------------------------------------------------------------------------
-      // initialize the corresponding object
-      //-----------------------------------------------------------------------------
-      TEvdStation* s       = _tracker->fStation[station];
-      int ip               = plane % 2;
-      TEvdPlane* pln       = s->fPlane[ip];
-      TEvdPanel* evd_panel = pln->fPanel[panel];
-
-      if (straw == 0) {
-	evd_panel->fNx = nx;
-	evd_panel->fNy = ny;
-	evd_panel->fPhi = atan2(ny,nx)-TMath::Pi();
-	if (evd_panel->fPhi < -TMath::Pi()) evd_panel->fPhi += 2*TMath::Pi();
-      }
-      
-      evd_panel->InitStraw(straw,straw_id,plane,panel,layer,rho,z,nx,ny,half_length);
-    }
-    fgets(c,1000,f);
-  }
-  fclose(f);
+  _tracker->InitGeometry(fn);
 //-----------------------------------------------------------------------------
 // create scene
 //-----------------------------------------------------------------------------
@@ -283,32 +234,6 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
   _scene = gEve->SpawnNewScene("MyScene", "Tracker");
   _scene->SetHierarchical(kTRUE);
 
-  //-----------------------------------------------------------------------------
-  // position and rotate panels
-  //-----------------------------------------------------------------------------
-  for (int is=0; is<kNStations; is++) {
-    TEvdStation* station = _tracker->fStation[is];
-    for (int ipln=0; ipln<2; ipln++) {
-      TEvdPlane* pln = station->Plane(ipln);
-      for (int ip=0; ip<kNPanels; ip++) {
-	TEvdPanel* p = pln->Panel(ip);
-	p->InitGeometry();
-      }
-    }
-  }
-  //-----------------------------------------------------------------------------
-  // at this point the geometry is initialized, need to create a view
-  // add stations to the scene - this is to be done just once
-  //-----------------------------------------------------------------------------
-  // for (int is=0; is<20; is++) {
-  //   for (int iplane=0; iplane<2; iplane++) {
-  //     for (int ip=0; ip<6; ip+=1) {
-  // 	TEvdPanel* panel = _tracker->fStation[is]->fPlane[iplane]->fPanel[ip];
-  // 	_scene->AddElement(panel);
-  //     }
-  //   }
-  // }
-
   _scene->AddElement(_tracker);
 //-----------------------------------------------------------------------------
 // read hits
@@ -316,11 +241,10 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
   if (_strawHitHolder == NULL) {
     _strawHitHolder = new TEvdStrawHitHolder();
     _strawHitHolder->IncDenyDestroy();              // protect against destruction
-    _scene->AddElement(_strawHitHolder);
-  //-----------------------------------------------------------------------------
-  // define transformations such that hits could be placed into the local reference
-  // frame of the panel
-  //-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------
+    // define transformations such that hits could be placed into the local reference
+    // frame of the panel
+    //-----------------------------------------------------------------------------
     for (int is=0; is<20; is++) {
       for (int iplane=0; iplane<2; iplane++) {
   	for (int ip=0; ip<6; ip+=1) {
@@ -337,7 +261,12 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
     }
   }
 
-  read_hits(HitsFile);
+  _scene->AddElement(_strawHitHolder);
+ 
+  //  read_hits(HitsFile);
+
+  _strawHitHolder->ReadHits(HitsFile,_tracker);
+  
   read_tracks(TracksFile);
   //-----------------------------------------------------------------------------
   // so far, hits are not displayed

@@ -13,6 +13,7 @@ class AliExternalTrackParam;
 #include "TFile.h"
 #include "TTree.h"
 #include "TList.h"
+#include "TEveTrans.h"
 #include "TEveTrack.h"
 #include "TEveGeoShape.h"
 #include "TEveManager.h"
@@ -20,8 +21,12 @@ class AliExternalTrackParam;
 #include "TGFrame.h"
 #include "TGButton.h"
 
+#include "murat/gui/eve_mu2e.hh"
 #include "murat/gui/eve_multiview.hh"
 #include "murat/gui/eve_HtmlSummary.hh"
+
+#include "murat/gui/TEvdTracker.hh"
+#include "murat/gui/TEvdStrawHitHolder.hh"
 
 void       make_gui();
 void       load_event();
@@ -55,26 +60,28 @@ const char* esd_geom_file_name =
 // const char* esd_file_name         = "AliESDs.root";
 // const char* esd_friends_file_name = "AliESDfriends.root";
 
-TFile *esd_file          = 0;
-TFile *esd_friends_file  = 0;
+namespace {
+  // TFile *esd_file          = 0;
+  // TFile *esd_friends_file  = 0;
 
-TTree *esd_tree          = 0;
+  // TTree *esd_tree          = 0;
 
-AliESDEvent  *esd        = 0;
-TList        *esd_objs   = 0;
-AliESDfriend *esd_friend = 0;
+  // AliESDEvent  *esd        = 0;
+  // TList        *esd_objs   = 0;
+  // AliESDfriend *esd_friend = 0;
+  
+  Int_t esd_event_id       = 0; // Current event id.
 
-Int_t esd_event_id       = 0; // Current event id.
+  //  TEveTrackList *gTrackList = 0;
+  
+  TEvdTracker* _tracker     = 0;
+  TEvdStrawHitHolder* _strawHitHolder(NULL);
+  
+  Mu2eMultiView* gMultiView = 0;
 
-TEveTrackList *gTrackList = 0;
-
-TEveGeoShape *gGeomGentle = 0;
-
-Mu2eMultiView* gMultiView = 0;
-
-extern HtmlSummary* fgHtmlSummary;
-TGHtml      *fgHtml        = 0;
-
+  extern HtmlSummary* fgHtmlSummary;
+  //  TGHtml      *fgHtml        = 0;
+}
 /******************************************************************************/
 // Initialization and steering functions
 /******************************************************************************/
@@ -96,13 +103,42 @@ void run_eve_mu2e() {
 // load geometry and let gEve know about it
 //-----------------------------------------------------------------------------
   {
-    TFile* geom = TFile::Open(esd_geom_file_name, "CACHEREAD");
-    if (!geom) return;
-    TEveGeoShapeExtract* gse = (TEveGeoShapeExtract*) geom->Get("Gentle");
-    gGeomGentle = TEveGeoShape::ImportShapeExtract(gse, 0);
-    geom->Close();
-    delete geom;
-    gEve->AddGlobalElement(gGeomGentle);
+  //   TFile* geom = TFile::Open(esd_geom_file_name, "CACHEREAD");
+  //   if (!geom) return;
+  //   TEveGeoShapeExtract* gse = (TEveGeoShapeExtract*) geom->Get("Gentle");
+  //   gGeomGentle = TEveGeoShape::ImportShapeExtract(gse, 0);
+  //   geom->Close();
+  //   delete geom;
+
+    _tracker = new TEvdTracker();
+    _tracker->InitGeometry("trackerNumerology.txt");
+    
+    gEve->AddGlobalElement(_tracker);
+
+    if (_strawHitHolder == NULL) {
+      _strawHitHolder = new TEvdStrawHitHolder();
+      _strawHitHolder->IncDenyDestroy();              // protect against destruction
+      //-----------------------------------------------------------------------------
+      // define transformations such that hits could be placed into the local reference
+      // frame of the panel
+      // tracker need to be constructed at this time
+      //-----------------------------------------------------------------------------
+      for (int is=0; is<20; is++) {
+	for (int iplane=0; iplane<2; iplane++) {
+	  for (int ip=0; ip<6; ip+=1) {
+	    TEvdPanel* panel = _tracker->Panel(is,iplane,ip);
+	    double phi = panel->fPhi;
+	    
+	    double zpanel = panel->Z();
+	    
+	    TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(is,iplane,ip);
+	    phh->RefMainTrans().SetPos(0,0,zpanel);
+	    phh->RefMainTrans().RotatePF(1,2,phi);
+	  }
+	}
+      }
+    }
+    gEve->AddElement(_strawHitHolder,NULL);
   }
 
 //-----------------------------------------------------------------------------
@@ -110,19 +146,19 @@ void run_eve_mu2e() {
 //-----------------------------------------------------------------------------
   gMultiView = new Mu2eMultiView;
 
-  gMultiView->ImportGeomRPhi(gGeomGentle);
-  gMultiView->ImportGeomRhoZ(gGeomGentle);
+  // gMultiView->ImportGeomRPhi(gGeomGentle);
+  // gMultiView->ImportGeomRhoZ(gGeomGentle);
 
 
-   // HTML summary view
-   //===================
+   // // HTML summary view
+   // //===================
 
-   fgHtmlSummary = new HtmlSummary("Alice Event Display Summary Table");
-   TEveWindowSlot* slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
-   fgHtml = new TGHtml(0, 100, 100);
-   TEveWindowFrame *wf = slot->MakeFrame(fgHtml);
-   fgHtml->MapSubwindows();
-   wf->SetElementName("Summary");
+   // fgHtmlSummary = new HtmlSummary("Alice Event Display Summary Table");
+   // TEveWindowSlot* slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
+   // fgHtml = new TGHtml(0, 100, 100);
+   // TEveWindowFrame *wf = slot->MakeFrame(fgHtml);
+   // fgHtml->MapSubwindows();
+   // wf->SetElementName("Summary");
 
 
    // Final stuff
@@ -146,11 +182,13 @@ void load_event() {
 
    printf("Loading event %d.\n", esd_event_id);
 
+   _strawHitHolder->ReadHits("validation_640_0004_0205_hits.txt",_tracker);
+
    gEve->GetViewers()->DeleteAnnotations();
 
-   if (gTrackList) {
-     gTrackList->DestroyElements();
-   }
+   // if (gTrackList) {
+   //   gTrackList->DestroyElements();
+   // }
 
    // esd_tree->GetEntry(esd_event_id);
    // esd_tree->Show();
@@ -183,21 +221,21 @@ class EvNavHandler
 public:
    void Fwd()
    {
-      if (esd_event_id < esd_tree->GetEntries() - 1) {
-         ++esd_event_id;
-         load_event();
-      } else {
-         printf("Already at last event.\n");
-      }
+      // if (esd_event_id < esd_tree->GetEntries() - 1) {
+      //    ++esd_event_id;
+      //    load_event();
+      // } else {
+      //    printf("Already at last event.\n");
+      // }
    }
    void Bck()
    {
-      if (esd_event_id > 0) {
-         --esd_event_id;
-         load_event();
-      } else {
-         printf("Already at first event.\n");
-      }
+      // if (esd_event_id > 0) {
+      //    --esd_event_id;
+      //    load_event();
+      // } else {
+      //    printf("Already at first event.\n");
+      // }
    }
 };
 

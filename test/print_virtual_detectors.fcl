@@ -3,9 +3,9 @@
 # write GDML file with the Mu2e geometry
 # need to process at least one event for GDML file to be written out
 ################################################################################
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"

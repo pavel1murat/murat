@@ -3,9 +3,9 @@
 # read cosmics MC, run 4 reco passes, make STNTUPLE's
 #------------------------------------------------------------------------------
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"

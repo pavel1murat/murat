@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: genParticlesAnalyzer.fcl,v 1.1 2014/04/11 02:09:13 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : GenParticlesAnalyzer
 

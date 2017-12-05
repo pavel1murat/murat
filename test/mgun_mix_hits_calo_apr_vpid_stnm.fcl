@@ -19,9 +19,9 @@
 #                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
 # by commenting out bgHitFiles below force definition on the command line
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 

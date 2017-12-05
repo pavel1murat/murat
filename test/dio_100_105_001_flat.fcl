@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Date: 2014/01/19 19:30:11 $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : dio100105001
 

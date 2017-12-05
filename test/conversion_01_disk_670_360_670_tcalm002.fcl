@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: conversion_01_disk_670_360_670_tcalm002.fcl,v 1.1 2013/09/20 15:00:18 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : tcalm002
 

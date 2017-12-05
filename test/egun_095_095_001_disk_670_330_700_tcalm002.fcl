@@ -4,9 +4,9 @@
 # $Id: egun_095_095_001_disk_670_330_700_tcalm002.fcl,v 1.1 2013/09/20 15:00:18 murat Exp $
 # $Author: murat $
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : tcalm002
 

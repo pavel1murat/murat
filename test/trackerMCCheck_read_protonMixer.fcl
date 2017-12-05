@@ -6,9 +6,9 @@ BEGIN_PROLOG
   bgHitFiles : @nil
 END_PROLOG
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "murat/fcl/prolog.fcl"
 

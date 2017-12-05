@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: conversion_01_disk_670_360_700_Mau8_tcalm002.fcl,v 1.2 2013/06/29 04:02:46 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : Exercise01
 

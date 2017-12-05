@@ -2,9 +2,9 @@
 #------------------------------------------------------------------------------
 # generate 50 MeV electrions LO spectrum , field 0.5 T
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"

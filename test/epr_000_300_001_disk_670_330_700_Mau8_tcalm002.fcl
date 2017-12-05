@@ -4,9 +4,9 @@
 # $Id: epr_000_300_001_disk_670_330_700_Mau8_tcalm002.fcl,v 1.2 2013/09/01 01:57:47 murat Exp $
 # $Author: murat $
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : tcalm002
 

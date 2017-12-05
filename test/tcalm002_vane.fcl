@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: tcalm002_vane.fcl,v 1.3 2013/07/13 18:18:22 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : Exercise01
 

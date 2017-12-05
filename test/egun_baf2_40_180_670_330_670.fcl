@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Date: 2013/11/04 23:37:46 $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : test
 

@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: conversion_01_tcalm002.fcl,v 1.2 2014/01/19 23:45:59 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : tcalm002
 

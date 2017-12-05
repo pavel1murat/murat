@@ -3,9 +3,9 @@
 # optimization of the distance between the two disks
 # tcalm002_800: default disk geometry (disks 800 cm apart)
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : tcalm002x650
 

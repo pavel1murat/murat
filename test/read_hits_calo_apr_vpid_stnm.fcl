@@ -2,9 +2,9 @@
 #------------------------------------------------------------------------------
 # make STNTUPLE in one go, without creating an intermediate file
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #------------------------------------------------------------------------------

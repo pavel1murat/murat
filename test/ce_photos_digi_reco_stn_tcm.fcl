@@ -3,9 +3,9 @@
 # read pre-generated [CE] or [HE] files, mix, run full reco and stntuple
 # force to define bgHitFiles
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"

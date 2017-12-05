@@ -18,9 +18,9 @@
 # murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
 #                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
 #------------------------------------------------------------------------------
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"
@@ -94,7 +94,7 @@ physics.filters.InitStntuple.histFileName              : "aaa.murat.bbb.ccc.read
 physics.filters.StntupleMakerTcm.makeTrackStrawHits  : 0 # 1
 physics.filters.CalTimePeakFinder.diagLevel          : 1
 physics.filters.CalHelixFinder.diagLevel             : 1
-physics.filters.CalSeedFit.diagLevel                 : 1
+# physics.filters.CalSeedFit.diagLevel                 : 1
 physics.filters.CalTrkFit.diagLevel                  : 1
 #------------------------------------------------------------------------------
 # parameters to redefine

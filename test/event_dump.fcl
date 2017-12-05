@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: event_dump.fcl,v 1.5 2013/11/14 17:41:58 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : Exercise02
 

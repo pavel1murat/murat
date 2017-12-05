@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: conversionOnly_01_Mau8_tcalm002.fcl,v 1.1 2013/07/02 16:13:34 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : Exercise01
 #------------------------------------------------------------------------------

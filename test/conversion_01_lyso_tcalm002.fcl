@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: conversion_01_lyso_tcalm002.fcl,v 1.1 2014/01/19 19:30:11 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : tcalm002
 

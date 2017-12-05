@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Date: 2015/01/23 22:11:31 $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : ConversionOnly
 

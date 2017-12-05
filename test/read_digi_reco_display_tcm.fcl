@@ -1,0 +1,109 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# read filewith digitized hits, run full electron reco, make ntuple
+#
+# make STNTUPLE in one go, without creating an intermediate file
+# if not running on the grid, need to specify the background hit file 
+# or use murat/scripts/submit_mu2e_job
+#
+# see examples in the PROLOG section
+# - old background files (x050) had 0.5 expected background, to generate nominal 
+#   background, need to set meanBackground to 2
+# - for the CD3c background files don't need to do that
+# - URL for CD-3C datasets: http://mu2e.fnal.gov/atwork/workgroups/BackgroundWG/cd3-samples/
+# - dataset: datasets/cd3-detmix-cut-local-v2 (local)
+# -          datasets/cd3-detmix-cut-v2 for the grid
+# example:
+# --------
+# murat/scripts/submit_mu2e_job -v -c murat/test/conv_mixcd3_x1_stnmaker.fcl -S $PWD/datasets/ccd35600-local \
+#                               -f 1:@bgHitFiles:datasets/cd3-detmix-cut-local-v2 -n 10 
+#------------------------------------------------------------------------------
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+BEGIN_PROLOG
+#  meanBackground                      : -1        # fixed at 1
+  bgHitFiles                          : @nil
+  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
+  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
+#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+END_PROLOG
+
+#include "murat/fcl/templates.fcl"
+
+process_name : ReadRecoStnTcm
+
+source       : { 
+    module_type : RootInput 
+#    fileNames: [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art" ]
+    fileNames: [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-g4s4-detconversion/v566/50/b6/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art" ]
+}
+
+producers    : { @table::murat.producers }
+outputs      : { @table::murat.outputs   }
+filters      : { @table::murat.filters   }
+paths        : { @table::murat.paths     }
+
+physics: { 
+    producers : { @table::producers 
+
+	generate : { @table::producers.egun }
+
+	FlagStrawHits : { @table::FlagStrawHits 
+	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
+	}
+
+# for CE, not old background mixing - default: 'compressPVDetector'
+	CaloShowerStepFromStepPt : { @table::producers.CaloShowerStepFromStepPt 
+#	    physVolInfoInput : "g4run"
+#	    physVolInfoInput : "compressPVDetector"
+	}
+    }
+
+    filters : { @table::filters }
+
+    @table::paths
+
+    p1: [ @sequence::EventMixing.TimeMaps ,
+	  @sequence::murat.digis          , 
+	  @sequence::murat.cal_reco       , 
+	  @sequence::murat.tpr_reco       ,
+	  @sequence::murat.cpr_reco       ,
+	  @sequence::murat.mpr_reco       ,
+	  MuHitDisplay
+	 ]
+
+    trigger_paths : [  p1 ]
+    out           : []
+    end_paths     : [ out ]
+}
+
+# <disable it> physics.filters.CalSeedFit.rescueHits              : 0
+physics.producers.MergePatRec.calPatRecModuleLabel   : CalTrkFit
+physics.producers.MergePatRecCpr.calPatRecModuleLabel: CalTrkFit
+# services.TFileService.fileName                       : "read_reco_stn_tcn.hist"
+services.TFileService.fileName                         : "nts.murat.bbb.ccc.read_reco_stn_tcn.root"
+physics.filters.InitStntuple.histFileName              : "aaa.murat.bbb.ccc.read_reco_stn_tcn.stn"
+
+physics.filters.CalTimePeakFinder.diagLevel           : 1
+physics.filters.CalHelixFinder.diagLevel              : 1
+# physics.filters.CalTrkFit.diagLevel                   : 1
+# physics.filters.CalTrkFit.Fitter.diagLevel            : 1
+# physics.filters.CalTrkFit.Fitter.DoubletAmbigResolver : 1
+#------------------------------------------------------------------------------
+# parameters to redefine
+#------------------------------------------------------------------------------
+# physics.filters.CalTrkFit.Fitter.DoubletAmbigResolver.sigmaSlope     : 0.05
+# physics.filters.CalTrkFit.Fitter.DoubletAmbigResolver.maxDoubletChi2 : 10.
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "aaa.murat.bbb.ccc.read_reco_stn_tcn.art"
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

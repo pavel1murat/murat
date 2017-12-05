@@ -7,8 +7,8 @@
 # $Author: murat $
 # $Date: 2015/01/23 22:11:31 $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
 
 
 process_name : dumpCaloGeometry

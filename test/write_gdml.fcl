@@ -4,9 +4,9 @@
 # need to process at least one event for GDML file to be written out
 # to speed up the job, use G4 physics table QGSP_BERT
 ################################################################################
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"

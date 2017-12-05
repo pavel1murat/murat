@@ -1,8 +1,8 @@
 # -*- mode: tcl -*-
 # given an art file, print run/event/entry numbers
 #
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
 #include "murat/fcl/prolog.fcl"
 
 

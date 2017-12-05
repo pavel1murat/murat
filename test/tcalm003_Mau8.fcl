@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Id: tcalm003_Mau8.fcl,v 1.2 2013/06/12 06:17:16 murat Exp $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 # optimize the disk Z positions and sizes
 

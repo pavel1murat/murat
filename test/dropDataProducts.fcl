@@ -1,9 +1,9 @@
 # -*- mode:tcl -*- 
 # clean up cosmics stage4 files
 
-#include "minimalMessageService.fcl"
+#include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/prolog.fcl"
 

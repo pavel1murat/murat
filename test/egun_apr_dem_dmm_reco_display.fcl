@@ -13,9 +13,9 @@ BEGIN_PROLOG
 #  bgHitFiles : [ "/mu2e/data/tdr/beam/mixp3-test/tdr.beam.mix.bgonly-test.1516a.15405463/good/00000/data_mixBG.root"]
 END_PROLOG
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 #include "Stntuple/fcl/templates.fcl"
 

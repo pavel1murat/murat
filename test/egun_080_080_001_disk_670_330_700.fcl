@@ -5,9 +5,9 @@
 # $Author: murat $
 # $Date: 2014/01/07 23:13:33 $
 
-#include "minimalMessageService.fcl"
-#include "standardProducers.fcl"
-#include "standardServices.fcl"
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
 
 process_name : egun080080001disk670330700
 

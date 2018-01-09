@@ -136,8 +136,8 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrkPatRec"     ,"TStnTrackBlock"     ,&fTrackBlock[0]);
-  RegisterDataBlock("CalPatRec"     ,"TStnTrackBlock"     ,&fTrackBlock[1]);
+  RegisterDataBlock("TprTrackBlock" ,"TStnTrackBlock"     ,&fTrackBlock[0]);
+  RegisterDataBlock("CprTrackBlock" ,"TStnTrackBlock"     ,&fTrackBlock[1]);
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"   ,&fClusterBlock );
   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"         ,&fSimpBlock    );
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"         ,&fGenpBlock    );
@@ -1092,9 +1092,9 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
-  if      (strcmp(block_name,"TrkPatRec" ) == 0) track_type = 0;
-  else if (strcmp(block_name,"CalPatRec" ) == 0) track_type = 1;
-  else if (strcmp(block_name,"TrackBlock") == 0) track_type = 2;
+  if      (strcmp(block_name,"TprTrackBlock" ) == 0) track_type = 0;
+  else if (strcmp(block_name,"CprTrackBlock" ) == 0) track_type = 1;
+  else if (strcmp(block_name,"TrackBlock"    ) == 0) track_type = 2;
   else {
     Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
     return -1;

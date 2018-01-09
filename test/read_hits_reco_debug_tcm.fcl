@@ -91,8 +91,8 @@ physics.filters.InitStntuple.histFileName              : "aaa.murat.bbb.ccc.read
 
 physics.filters.CalTimePeakFinder.diagLevel                      : 1
 physics.filters.CalHelixFinder.diagLevel                         : 101
-physics.filters.CalHelixFinder.HelixFinderAlg.debugLevel         : 101
-physics.filters.CalHelixFinder.HelixFinderAlg.debugLevel2        : 101
+physics.filters.CalHelixFinder.HelixFinderAlg.debugLevel         : 10
+physics.filters.CalHelixFinder.HelixFinderAlg.debugLevel2        : 10
 
 physics.filters.CalTrkFit.diagLevel                              : 101
 

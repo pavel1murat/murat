@@ -64,6 +64,16 @@ murat : { @table::murat
 	    }
 	}
 
+  	egun005 : { @table::StoppedParticleReactionGun # p(e)=5 MeV/c
+	    physics : {
+		pdgId            :  11
+		elow             : 4.9999
+		ehi              : 5.0001
+		spectrumVariable : "momentum"
+		spectrumShape    : "flat"
+	    }
+	}
+
   	egun95105 : { @table::StoppedParticleReactionGun # p(e)=105 MeV/c
 	    physics : {
 		pdgId            :  11
@@ -168,20 +178,10 @@ murat : { @table::murat
     }
 }
 #------------------------------------------------------------------------------
-# redefine location of the mixer's background files
-#------------------------------------------------------------------------------
-flashMixer.fileNames    : @local::bgHitFiles
-ootMixer.fileNames      : @local::bgHitFiles
-dioMixer.fileNames      : @local::bgHitFiles
-neutronMixer.fileNames  : @local::bgHitFiles
-photonMixer.fileNames   : @local::bgHitFiles
-protonMixer.fileNames   : @local::bgHitFiles
-deuteronMixer.fileNames : @local::bgHitFiles
-#------------------------------------------------------------------------------
 # sequences: can't define recursively within one namespace
 #------------------------------------------------------------------------------
-murat.gen_g4              : [ generate, g4run, detectorFilter]
-murat.gen_g4_detFilter    : [ generate, g4run, detectorFilter]
+murat.gen_g4              : [ generate, g4run ]
+murat.gen_g4_detFilter    : [ generate, g4run, detectorFilter ]
 murat.gen_g4_time_map     : [ @sequence::murat.gen_g4, @sequence::EventMixing.TimeMaps ]
 murat.mix_time_map        : [ @sequence::EventMixing.CD3Mixers, @sequence::EventMixing.TimeMaps ]
 murat.gen_g4_mix_time_map : [ @sequence::murat.gen_g4_detFilter, @sequence::murat.mix_time_map ]

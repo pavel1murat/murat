@@ -39,13 +39,16 @@ process_name : EgunDigiRecoStnTcm
 
 source       : { module_type : EmptyEvent }
 
-outputs      : { @table::murat.outputs    }
+producers    : { @table::murat.producers }
+outputs      : { @table::murat.outputs   }
+filters      : { @table::murat.filters   }
+paths        : { @table::murat.paths     }
 
 physics: { 
     producers : { 
-	@table::murat.producers 
+	@table::producers 
 
-	generate      : { @table::murat.producers.egun }
+	generate      : { @table::producers.egun }
 	FlagStrawHits : { @table::FlagStrawHits maximumEnergy: @local::FlagStrawHits_maximumEnergy }
 
 	CaloShowerStepFromStepPt : { @table::murat.producers.CaloShowerStepFromStepPt 
@@ -54,9 +57,9 @@ physics: {
 	}
     }
 
-    filters : { @table::murat.filters }
+    filters : { @table::filters }
 
-    @table::murat.paths
+    @table::paths
 
     p1: [ @sequence::murat.gen_g4_time_map,
 	  @sequence::murat.digis          ,
@@ -71,11 +74,12 @@ physics: {
     out           : []
     end_paths     : [ out ]
 }
+# dont waste time initializing detailed neutron cross sections 
+physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
 
 physics.producers.MergePatRec.calPatRecModuleLabel   : CalTrkFit
 physics.producers.MergePatRecCpr.calPatRecModuleLabel: CalTrkFit
 
-physics.filters.StntupleMakerTcm.trkRecoModuleLabel  : ["MergePatRec", "KFFDeM", "MergePatRecCpr" ]
 physics.filters.StntupleMakerTcm. g4ModuleLabel      : @local::G4_MODULE_LABEL
 
 # services.TFileService.fileName             : "egun_digi_reco_stn_tcn.hist"

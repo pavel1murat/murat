@@ -65,9 +65,9 @@ class murat_helper:
         self._list_of_object_files = [];
 
         self.dd      = re.search('[^/]*/[^/]*$',env.Dir('.').abspath).group(0)
-        self.dirname = os.path.dirname(self.dd);   # THIS
-        self.subdir  = os.path.basename(self.dd);
-        self.libname = self.dirname+'_'+self.subdir
+        self._dirname = os.path.dirname(self.dd);   # THIS
+        self._subdir  = os.path.basename(self.dd);
+        self.libname = self._dirname+'_'+self._subdir
         self.d1      = self.libname+'-shared';
         self.suffix  = ".hh"
         self._debug  = debug
@@ -85,14 +85,14 @@ class murat_helper:
 #------------------------------------------------------------------------------
 # generate dictionaries
 #------------------------------------------------------------------------------
-        list_of_linkdef_files = Glob(self.subdir+'/dict/*_linkdef.h', strings=True)
+        list_of_linkdef_files = Glob(self._subdir+'/dict/*_linkdef.h', strings=True)
 #        print "[Stntuple/obj] list_of_linkdef_files = \n",list_of_linkdef_files
         list_of_dict_files    = []
 
         for f in list_of_linkdef_files:
             linkdef       = string.split(str(f),'/');
             clname        = string.replace(linkdef[len(linkdef)-1],"_linkdef.h","");
-            include       = self.subdir+'/'+clname+suffix;
+            include       = self._subdir+'/'+clname+suffix;
             
             dict          = '#/tmp/src/'+self.d1+'/'+clname+'_dict.cxx';
             list_of_dict_files.append(dict);
@@ -116,7 +116,7 @@ class murat_helper:
 
     def compile_fortran(self,list_of_f_files, skip_list = []):
         if (self._debug):
-            print  self.dirname+"[build_libs]: list_of_f_files:"+self.subdir,list_of_f_files
+            print  (self._dirname+"[build_libs]: list_of_f_files:"+self._subdir,list_of_f_files);
 
         for f in list_of_f_files:
             if (not f in skip_list):
@@ -126,7 +126,7 @@ class murat_helper:
 
     def build_libs(self,list_of_cc_files, skip_list = [],libs = []):
         if (self._debug):
-            print  self.dirname+"[build_libs]: list_of_cc_files:"+self.subdir,list_of_cc_files
+            print  (self._dirname+"[build_libs]: list_of_cc_files:"+self._subdir,list_of_cc_files);
 
         for cc in list_of_cc_files:
             if (not cc in skip_list):
@@ -146,7 +146,7 @@ class murat_helper:
 
     def build_modules(self,list_of_module_files, skip_list, libs = []):
         if (self._debug):
-            print self.dirname+"[build_modules]: list_of_module_files in murat/"+self.subdir," : ",list_of_module_files
+            print (self._dirname+"[build_modules]: list_of_module_files in murat/"+self._subdir," : ",list_of_module_files);
 
         for module in list_of_module_files:
             if (not module in skip_list):
@@ -155,7 +155,7 @@ class murat_helper:
                 env.SharedObject(o,module)
 
                 mname = string.split(os.path.basename(module),'.')[0];
-                lib   = '#/lib/libmu2e_'+self.dirname+'_'+mname+'.so';
+                lib   = '#/lib/libmu2e_'+self._dirname+'_'+mname+'.so';
                 #    print "o: "+o, "lib:"+lib
                 env.SharedLibrary(lib,o,LIBS = ['libStntuple_mod.so',libs]);
 

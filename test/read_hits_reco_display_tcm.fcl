@@ -74,6 +74,7 @@ physics: {
 	  @sequence::murat.tpr_reco       ,
 	  @sequence::murat.cpr_reco       ,
 	  @sequence::murat.mpr_reco       ,
+	  FlagStrawHits                   , 
 	  MuHitDisplay
 	 ]
 

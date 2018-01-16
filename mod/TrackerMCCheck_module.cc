@@ -105,6 +105,8 @@ namespace mu2e {
     int                fPdgCode;
     int                fGeneratorCode;
 
+    const TTracker*    _tracker;     // straw tracker
+
 					// hit flag bits which should be ON and OFF
 
     mu2e::StrawHitFlag         fGoodHitMask;
@@ -118,6 +120,7 @@ namespace mu2e {
 
     struct Hist_t {
       TH1F*   fDr;                      // radial distance between the StepPointMC and the corresponding hit
+      TH1F*   fDw;                      // residual along the wire
       TH1F*   fNStepsPerHit;		//
       TH1F*   fNStrawHits[2];		// same distribution, different ranges 
       TH1F*   fEHitCE;			// CE straw hit energy 
@@ -153,6 +156,7 @@ namespace mu2e {
     explicit TrackerMCCheck(fhicl::ParameterSet const& pset);
     virtual ~TrackerMCCheck();
 
+    void     bookHistograms();
     void     getData(const art::Event* Evt);
     void     Init   (art::Event* Evt);
     void     Debug_003();   // handles fDr
@@ -161,6 +165,7 @@ namespace mu2e {
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
     virtual void     beginJob();
+    virtual bool     beginRun(art::Run& );
     virtual void     endJob  ();
     virtual bool     filter (art::Event& Evt);
   };
@@ -188,13 +193,14 @@ namespace mu2e {
     //    delete fHist.fDr;
   }
 
-
 //-----------------------------------------------------------------------------
   void TrackerMCCheck::endJob() {
     art::ServiceHandle<art::TFileService> tfs;
   }
+
+
 //-----------------------------------------------------------------------------
-  void TrackerMCCheck::beginJob() {
+  void TrackerMCCheck::bookHistograms() {
 
     art::ServiceHandle<art::TFileService> tfs;
 
@@ -220,6 +226,7 @@ namespace mu2e {
 
     fHist.fNStepsPerHit = tfs->make<TH1F>("nsph","N steps per hit"          , 100,0,  100);
     fHist.fDr           = tfs->make<TH1F>("dr"  ,"Hit DR"            , 100,-100,100);
+    fHist.fDw           = tfs->make<TH1F>("dw"  ,"Hit Dw"            , 100,-250,250);
     fHist.fEHitCE       = tfs->make<TH1F>("ehce","E(hit) CE"         , 300,0,0.03);
     fHist.fEHitMu       = tfs->make<TH1F>("ehmu","E(hit) Muon"       , 300,0,0.03);
     fHist.fEHitProt     = tfs->make<TH1F>("ehpr","E(hit) Proton"     , 300,0,0.03);
@@ -235,11 +242,19 @@ namespace mu2e {
 
     fHist.fEHitCEVsPath = tfs->make<TH2F>("ehce_vs_path","E(hit) CE   Vs Path" , 100,0,10,300,0,0.03);
     fHist.fEHitMuVsPath = tfs->make<TH2F>("ehmu_vs_path","E(hit) muon Vs Path" , 100,0,10,300,0,0.03);
+  }
+//-----------------------------------------------------------------------------
+  void TrackerMCCheck::beginJob() {
+    bookHistograms();
+  }
 
 //-----------------------------------------------------------------------------
-// define collection names to be used for initialization
-//-----------------------------------------------------------------------------
+  bool TrackerMCCheck::beginRun(art::Run& ) {
+    mu2e::GeomHandle<mu2e::TTracker> th;
+    _tracker = th.get();
+    return true;
   }
+
 
 //-----------------------------------------------------------------------------
 // get data from the event record
@@ -368,21 +383,14 @@ namespace mu2e {
 
 
 
-    if (DebugBit(3)) {
-      Debug_003();
-    }
-    else if (DebugBit(4)) {
-      Debug_004();
-    }
+    if      (DebugBit(3)) Debug_003();
+    else if (DebugBit(4)) Debug_004();
 
     return true;
   }
 
 //-----------------------------------------------------------------------------
   void TrackerMCCheck::Debug_004() {
-
-//     mu2e::GeomHandle<mu2e::TTracker> ttHandle;
-//     const mu2e::TTracker* tracker = ttHandle.get();
 
     float                  dt, p, ehit, wpos, errpos;
 
@@ -509,8 +517,6 @@ namespace mu2e {
 
     const mu2e::StepPointMC        *step;
     const mu2e::StrawHitPosition   *hitp, *closest_hitp;
-    //    const mu2e::StrawHit           *sh;
-    //    const mu2e::Straw              *straw;
 
     double   zstep, zhit, dz, dz_min, /* dx, dy, drho, */ rh, rs, dr;
 
@@ -523,6 +529,7 @@ namespace mu2e {
     
     for (int i=0; i<nsteps; i++) {
       step =  &fSteps->at(i);
+      const CLHEP::Hep3Vector* sp = &step->position();
 
       art::Ptr<mu2e::SimParticle> const& simptr = step->simParticle();
       const mu2e::SimParticle* sim  = simptr.operator ->();
@@ -530,9 +537,9 @@ namespace mu2e {
 
       if (gen_id != 0) goto NEXT_STEP;
 
-      zstep = step->position().z();
+      zstep = sp->z();
 
-      // for each steppoint find closest StrawHit
+      // for each StepPointMC find closest StrawHit
 
       jclosest = -1;
       dz_min   = 1e10;
@@ -551,26 +558,26 @@ namespace mu2e {
       if (jclosest >= 0) {
 	closest_hitp = &fStrawHitPosColl->at(jclosest);
 
-	//	dx = step->position().x()-closest_hitp->pos().x();
-	//	dy = step->position().y()-closest_hitp->pos().y();
-
-	//	sh = &fStrawHitColl->at(jclosest);
+	const StrawHit* sh = &fStrawHitColl->at(jclosest);
 	
-	//      mu2e::StrawIndex index = sh->strawIndex();
+	//	mu2e::StrawIndex index = sh->strawIndex();
 
-	//	straw = &tracker->getStraw(sh->strawIndex());
+	const mu2e::Straw* straw = &_tracker->getStraw(sh->strawIndex());
 
-	//	drho = dx*straw->getDirection().x()+dy*straw->getDirection().y();
+	const CLHEP::Hep3Vector* hp = &closest_hitp->pos();
 
-	rs = sqrt(step->position().x()*step->position().x() + 
-		  step->position().y()*step->position().y());
+	double dx = sp->x()-hp->x();
+	double dy = sp->y()-hp->y();
 
-	rh = sqrt(closest_hitp->pos().x()*closest_hitp->pos().x() + 
-		  closest_hitp->pos().y()*closest_hitp->pos().y());
+	double dw = dx*straw->getDirection().x()+dy*straw->getDirection().y();
+
+	rs = sqrt(sp->x()*sp->x()+sp->y()*sp->y());
+	rh = sqrt(hp->x()*hp->x()+hp->y()*hp->y());
 
 	dr = rh-rs;
 
 	fHist.fDr->Fill(dr);
+	fHist.fDw->Fill(dw);
 
 // 	printf("MuHitDisplay::Debug_003: i,z,dz,drho,dr = %5i %10.3f %10.3f %10.3f %10.3f\n",
 // 	       i,zstep,dz_min,drho,dr);

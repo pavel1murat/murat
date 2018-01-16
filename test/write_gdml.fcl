@@ -47,4 +47,3 @@ physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
 
 # template for changing the geometry file, if needed
 # services.GeometryService.inputFile: "murat/test/tracker-rad-dose/c360brass-05-geom.txt"
-physics.producers.g4run.physics.physicsListName : "QGSP_BERT"

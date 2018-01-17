@@ -121,6 +121,10 @@ namespace mu2e {
     struct Hist_t {
       TH1F*   fDr;                      // radial distance between the StepPointMC and the corresponding hit
       TH1F*   fDw;                      // residual along the wire
+      TH1F*   fDwEle;                      // residual along the wire
+      TH1F*   fDwPro;                      // residual along the wire
+      TH1F*   fDwMuo;                      // residual along the wire
+      TH1F*   fDwRest;                  // residual along the wire
       TH1F*   fNStepsPerHit;		//
       TH1F*   fNStrawHits[2];		// same distribution, different ranges 
       TH1F*   fEHitCE;			// CE straw hit energy 
@@ -226,7 +230,11 @@ namespace mu2e {
 
     fHist.fNStepsPerHit = tfs->make<TH1F>("nsph","N steps per hit"          , 100,0,  100);
     fHist.fDr           = tfs->make<TH1F>("dr"  ,"Hit DR"            , 100,-100,100);
-    fHist.fDw           = tfs->make<TH1F>("dw"  ,"Hit Dw"            , 100,-250,250);
+    fHist.fDw           = tfs->make<TH1F>("dw"  ,"Hit Dw"            , 400,-1000,1000);
+    fHist.fDwEle        = tfs->make<TH1F>("dw_ele" ,"Hit Dw Ele"     , 400,-1000,1000);
+    fHist.fDwPro        = tfs->make<TH1F>("dw_pro" ,"Hit Dw Protons" , 400,-1000,1000);
+    fHist.fDwMuo        = tfs->make<TH1F>("dw_muo" ,"Hit Dw Muons"   , 400,-1000,1000);
+    fHist.fDwRest       = tfs->make<TH1F>("dw_rest","Hit Dw Rest"    , 400,-1000,1000);
     fHist.fEHitCE       = tfs->make<TH1F>("ehce","E(hit) CE"         , 300,0,0.03);
     fHist.fEHitMu       = tfs->make<TH1F>("ehmu","E(hit) Muon"       , 300,0,0.03);
     fHist.fEHitProt     = tfs->make<TH1F>("ehpr","E(hit) Proton"     , 300,0,0.03);
@@ -535,7 +543,9 @@ namespace mu2e {
       const mu2e::SimParticle* sim  = simptr.operator ->();
       int gen_id = (int) sim->generatorIndex();
 
-      if (gen_id != 0) goto NEXT_STEP;
+      if (gen_id != 0) continue;
+
+      int pdg_id = simptr->pdgId();
 
       zstep = sp->z();
 
@@ -579,13 +589,25 @@ namespace mu2e {
 	fHist.fDr->Fill(dr);
 	fHist.fDw->Fill(dw);
 
+	if      (abs(pdg_id) ==   11) {
+	  fHist.fDwEle->Fill(dw);
+	}
+	else if (abs(pdg_id) == 2212) {
+	  fHist.fDwPro->Fill(dw);
+	}
+	else if (abs(pdg_id) ==   13) {
+	  fHist.fDwMuo->Fill(dw);
+	}
+	else {
+	  fHist.fDwRest->Fill(dw);
+	}
+
 // 	printf("MuHitDisplay::Debug_003: i,z,dz,drho,dr = %5i %10.3f %10.3f %10.3f %10.3f\n",
 // 	       i,zstep,dz_min,drho,dr);
       }
       else {
 	//	printf("MuHitDisplay::Debug_003: i,z : %5i %10.3f : NO CLOSEST HIT\n",i,zstep);
       }
-    NEXT_STEP:;
     }
 
   }

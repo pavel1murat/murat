@@ -31,7 +31,10 @@ paths        : { @table::murat.paths     }
 # physics
 #------------------------------------------------------------------------------
 physics : { 
-    producers : { @table::producers }
+    producers : { 
+#	@table::TrkHitReco.producers    # defined in TrkHitReco
+	@table::producers 
+    }
     filters   : { @table::filters }
 
     @table::paths
@@ -43,9 +46,13 @@ physics : {
 	   @sequence::Tracking.PrepareHits, 
 	   TrackerMCCheck                 
 	  ]
-
-    p2 : [ TrackerMCCheck ]
-
+    
+    p2 : [ @sequence::EventMixing.TimeMaps, 
+	   @sequence::Tracking.DigiSim    , 
+	   @sequence::Tracking.PrepareHits, 
+	   TrackerMCCheck                 
+	  ]
+    
 
     e1 : []
 }
@@ -53,8 +60,9 @@ physics : {
 # print per event timing for ::event entry points
 #------------------------------------------------------------------------------
 #     services.Timing: { }
-physics.trigger_paths : [ p2 ]
-physics.end_paths     : [ e1 ]
+services.TFileService.fileName : "trackerMCCheck_read.hist"
+physics.trigger_paths          : [ p2 ]
+physics.end_paths              : [ e1 ]
 
 # physics.filters.TrackerMCCheck.g4ModuleLabel : "protonMixer"
 physics.filters.TrackerMCCheck.debugBits     : { bit3:1 }

@@ -139,6 +139,7 @@ murat : { @table::murat
 #------------------------------------------------------------------------------
 # TrkPatRec and CalPatRec modules
 #------------------------------------------------------------------------------
+	@table::TrkHitReco.producers    # defined in TrkHitReco
 	@table::Tracking.producers      # defined in TrkPatRec
 	@table::CaloDigiMC.producers    # defined in CaloDigiMC
 	@table::CaloDigiMC.producersMC  # defined in CaloDigiMC

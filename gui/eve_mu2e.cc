@@ -27,56 +27,30 @@ class AliExternalTrackParam;
 
 #include "murat/gui/TEvdTracker.hh"
 #include "murat/gui/TEvdStrawHitHolder.hh"
+#include "murat/gui/TEvdHelix.hh"
 
 void       make_gui();
-void       load_event();
+void       load_event(int IEvent);
 void       update_html_summary();
-
-// void       alice_esd_read();
-
-// TEveTrack* esd_make_track(TEveTrackPropagator* trkProp, Int_t index,
-//                           AliESDtrack* at,
-//                           AliExternalTrackParam* tp=0);
-
-// Bool_t     trackIsOn(AliESDtrack* t, Int_t mask);
-// void       trackGetPos(AliExternalTrackParam* tp, Double_t r[3]);
-// void       trackGetMomentum(AliExternalTrackParam* tp, Double_t p[3]);
-// Double_t   trackGetP(AliExternalTrackParam* tp);
-
 
 // Configuration and global variables.
 
 const char* esd_file_name = "http://root.cern.ch/files/alice_ESDs.root";
-// Temporarily disable reading of ESD friend.
-// There seems to be no way to get it working without AliRoot.
-// const char* esd_friends_file_name =
-//       "http://root.cern.ch/files/alice_ESDfriends.root";
 const char* esd_friends_file_name = 0;
 
 const char* esd_geom_file_name =
    "http://root.cern.ch/files/alice_ESDgeometry.root";
 
-// For testing
-// const char* esd_file_name         = "AliESDs.root";
-// const char* esd_friends_file_name = "AliESDfriends.root";
-
 namespace {
-  // TFile *esd_file          = 0;
-  // TFile *esd_friends_file  = 0;
-
-  // TTree *esd_tree          = 0;
-
-  // AliESDEvent  *esd        = 0;
-  // TList        *esd_objs   = 0;
-  // AliESDfriend *esd_friend = 0;
   
   Int_t esd_event_id       = 0; // Current event id.
 
   //  TEveTrackList *gTrackList = 0;
   
-  TEvdTracker* _tracker     = 0;
+  TEvdTracker*        _tracker(NULL);
   TEvdStrawHitHolder* _strawHitHolder(NULL);
-  
+  TEveElementList*    _trackHolder(NULL);
+ 
   Mu2eMultiView* gMultiView = 0;
 
   extern HtmlSummary* fgHtmlSummary;
@@ -87,7 +61,7 @@ namespace {
 /******************************************************************************/
 
 //______________________________________________________________________________
-void run_eve_mu2e() {
+void run_eve_mu2e(int IEvent) {
    // Main function, initializes the application.
    //
    // 1. Load the auto-generated library holding ESD classes and
@@ -103,13 +77,6 @@ void run_eve_mu2e() {
 // load geometry and let gEve know about it
 //-----------------------------------------------------------------------------
   {
-  //   TFile* geom = TFile::Open(esd_geom_file_name, "CACHEREAD");
-  //   if (!geom) return;
-  //   TEveGeoShapeExtract* gse = (TEveGeoShapeExtract*) geom->Get("Gentle");
-  //   gGeomGentle = TEveGeoShape::ImportShapeExtract(gse, 0);
-  //   geom->Close();
-  //   delete geom;
-
     _tracker = new TEvdTracker();
     _tracker->InitGeometry("trackerNumerology.txt");
     
@@ -169,22 +136,116 @@ void run_eve_mu2e() {
 
    make_gui();
 
-   load_event();
+   load_event(IEvent);
 
    gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
 }
 
+
+//-----------------------------------------------------------------------------
+int eve_mu2e_read_tracks(const char* TracksFile) {
+  
+  if (_trackHolder == NULL) {
+    _trackHolder = new TEveElementList("Tracks"); 
+    
+    _trackHolder->SetMainColor(6);
+    //    _trackHolder->SetMarkerColor(kYellow);
+    //    _trackHolder->SetMarkerStyle(4);
+    //    _trackHolder->SetMarkerSize(0.5);
+
+    gEve->AddElement(_trackHolder);
+  }
+
+  _trackHolder->DestroyElements();
+
+  FILE* f = fopen(TracksFile,"r");
+
+  if (f == NULL) {
+    printf("ERROR: eve_mu2e_read_tracks can\'t open %s, BAIL OUT\n",TracksFile);
+    return -1;
+  }
+  
+  char   c[1000];
+  float  z0, d0, omega, phi0, tandip, zmin(-1600.), zmax(1600.);
+
+  while ((c[0]=getc(f)) != EOF) {
+					// check if it is a comment line
+    if (c[0] != '#') {
+      ungetc(c[0],f);
+      // read hit data 
+      fscanf(f,"%f" ,&z0    );
+      fscanf(f,"%f" ,&d0    );
+      fscanf(f,"%f" ,&phi0  );
+      fscanf(f,"%f" ,&omega );
+      fscanf(f,"%f" ,&tandip);
+
+      if (phi0 < 0) phi0 += 2*TMath::Pi();
+
+      printf(" %8.3f %8.3f %8.3f %8.3f %8.5f\n",z0,d0,phi0,omega,tandip);
+//-----------------------------------------------------------------------------
+// Helix parameterization assumes that
+// phi0 gives the direction of the particle at a point of closest approach
+// Z0   is the z-coordinate a a point of closest approach
+// omega is the signed 1/R, positive R corresponds to particle going counterclockwize
+// tandip = r*Dphi/Dz
+// d0 is sqrt(x0^2+y0^2)-R, y-coordinate of the point of closest approach in the
+//    rotated coordinate system with Y-axis pointing from (0,0) to (x0,y0)
+//-----------------------------------------------------------------------------
+      TEvdHelix* helix = new TEvdHelix(z0,d0,phi0,omega,tandip,zmin,zmax);
+
+      _trackHolder->AddElement(helix);
+
+      int npt = kNStations*2*2*2; // nplanes*2*nlayers
+      TEvePointSet* pset = new TEvePointSet(npt);
+
+      TVector3  v;
+      for (int ist=0; ist<kNStations; ist++) {
+	for (int ipln=0; ipln<2; ipln++) {
+	  for (int ip=0; ip<2; ip++) {
+	    TEvdPanel* panel = _tracker->Panel(ist,ipln,ip);
+	    for (int iw=0; iw<2; iw++) {
+	      TEvdStraw* straw = panel->Straw(iw);
+	      double z = straw->Z();
+	      helix->GetPointAtZ(z,&v);
+	      printf("helix point : ist: %2i %12.5f %12.5f %12.5f\n",ist, v.x(),v.y(),v.z());
+	      pset->SetNextPoint(v.x(),v.y(),v.z());
+	    }
+	  }
+	}
+      }
+      pset->SetMarkerColor(4);
+      pset->SetMarkerSize(0.8);
+
+      gEve->AddElement(pset);
+    }
+    fgets(c,1000,f);
+  }
+
+  fclose(f);
+  
+  
+  return 0;
+}
 //-----------------------------------------------------------------------------
 // this is the place where an event is getting read in
 //-----------------------------------------------------------------------------
-void load_event() {
+void load_event(int IEvent) {
    // Load event specified in global esd_event_id.
    // The contents of previous event are removed.
 
    printf("Loading event %d.\n", esd_event_id);
 
-   _strawHitHolder->ReadHits("validation_640_0004_0205_hits.txt",_tracker);
+   //   _strawHitHolder->ReadHits("validation_640_0004_0205_hits.txt",_tracker);
+   char HitsFile[200];
+   sprintf(HitsFile,"validation_640_0004_%04i_hits.txt",IEvent);
+   
+   _strawHitHolder->ReadHits(HitsFile,_tracker);
 
+   char TracksFile[200];
+   sprintf(TracksFile,"validation_640_0004_%04i_tracks.txt",IEvent);
+
+   eve_mu2e_read_tracks(TracksFile);
+   
    gEve->GetViewers()->DeleteAnnotations();
 
    // if (gTrackList) {
@@ -276,155 +337,6 @@ void make_gui()
    browser->StopEmbedding();
    browser->SetTabTitle("Event Control", 0);
 }
-
-
-/******************************************************************************/
-// Code for reading AliESD and creating visualization objects
-/******************************************************************************/
-
-enum ESDTrackFlags {
-   kITSin=0x0001,kITSout=0x0002,kITSrefit=0x0004,kITSpid=0x0008,
-   kTPCin=0x0010,kTPCout=0x0020,kTPCrefit=0x0040,kTPCpid=0x0080,
-   kTRDin=0x0100,kTRDout=0x0200,kTRDrefit=0x0400,kTRDpid=0x0800,
-   kTOFin=0x1000,kTOFout=0x2000,kTOFrefit=0x4000,kTOFpid=0x8000,
-   kHMPIDpid=0x20000,
-   kEMCALmatch=0x40000,
-   kTRDbackup=0x80000,
-   kTRDStop=0x20000000,
-   kESDpid=0x40000000,
-   kTIME=0x80000000
-};
-
-// //______________________________________________________________________________
-// void alice_esd_read()
-// {
-//    // Read tracks and associated clusters from current event.
-
-//    AliESDRun    *esdrun = (AliESDRun*)    esd_objs->FindObject("AliESDRun");
-//    TClonesArray *tracks = (TClonesArray*) esd_objs->FindObject("Tracks");
-
-//    // This needs further investigation. Clusters not shown.
-//    // esd_friend = (AliESDfriend*) esd_objs->FindObject("AliESDfriend");
-//    // printf("Friend %p, n_tracks:%d\n",
-//    //        esd_friend,
-//    //        esd_friend->fTracks.GetEntries());
-
-//    //-----------------------------------------------------------------------------
-//    // add track list
-//    //-----------------------------------------------------------------------------
-//    if (gTrackList == 0) {
-//       gTrackList = new TEveTrackList("ESD Tracks");
-//       gTrackList->SetMainColor(6);
-//       gTrackList->SetMarkerColor(kYellow);
-//       gTrackList->SetMarkerStyle(4);
-//       gTrackList->SetMarkerSize(0.5);
-
-//       gEve->AddElement(gTrackList);
-//    }
-
-//    TEveTrackPropagator* trkProp = gTrackList->GetPropagator();
-//    trkProp->SetMagField( 0.1 * esdrun->fMagneticField ); // kGaus to Tesla
-
-//    for (Int_t n=0; n<tracks->GetEntriesFast(); ++n) {
-//       AliESDtrack* at = (AliESDtrack*) tracks->At(n);
-
-//       // If ITS refit failed, take track parameters at inner TPC radius.
-//       AliExternalTrackParam* tp = at;
-//       if (! trackIsOn(at, kITSrefit)) {
-//          tp = at->fIp;
-//       }
-
-//       TEveTrack* track = esd_make_track(trkProp, n, at, tp);
-//       track->SetAttLineAttMarker(gTrackList);
-//       gTrackList->AddElement(track);
-
-//       // This needs further investigation. Clusters not shown.
-//       // if (frnd)
-//       // {
-//       //     AliESDfriendTrack* ft = (AliESDfriendTrack*) frnd->fTracks->At(n);
-//       //     printf("%d friend = %p\n", ft);
-//       // }
-//    }
-
-//    gTrackList->MakeTracks();
-// }
-
-//______________________________________________________________________________
-// TEveTrack* esd_make_track(TEveTrackPropagator*   trkProp,
-//                           Int_t                  index,
-//                           AliESDtrack*           at,
-//                           AliExternalTrackParam* tp)
-// {
-//    // Helper function creating TEveTrack from AliESDtrack.
-//    //
-//    // Optionally specific track-parameters (e.g. at TPC entry point)
-//    // can be specified via the tp argument.
-
-//    Double_t      pbuf[3], vbuf[3];
-//    TEveRecTrack  rt;
-
-//    if (tp == 0) tp = at;
-
-//    rt.fLabel  = at->fLabel;
-//    rt.fIndex  = index;
-//    rt.fStatus = (Int_t) at->fFlags;
-//    rt.fSign   = (tp->fP[4] > 0) ? 1 : -1;
-
-//    trackGetPos(tp, vbuf);      rt.fV.Set(vbuf);
-//    trackGetMomentum(tp, pbuf); rt.fP.Set(pbuf);
-
-//    Double_t ep = trackGetP(at);
-//    Double_t mc = 0.138; // at->GetMass(); - Complicated function, requiring PID.
-
-//    rt.fBeta = ep/TMath::Sqrt(ep*ep + mc*mc);
-
-//    TEveTrack* track = new TEveTrack(&rt, trkProp);
-//    track->SetName(Form("TEveTrack %d", rt.fIndex));
-//    track->SetStdTitle();
-
-//    return track;
-// }
-
-//______________________________________________________________________________
-// Bool_t trackIsOn(AliESDtrack* t, Int_t mask)
-// {
-//    // Check is track-flag specified by mask are set.
-
-//    return (t->fFlags & mask) > 0;
-// }
-
-//______________________________________________________________________________
-// void trackGetPos(AliExternalTrackParam* tp, Double_t r[3])
-// {
-//    // Get global position of starting point of tp.
-
-//   r[0] = tp->fX; r[1] = tp->fP[0]; r[2] = tp->fP[1];
-
-//   Double_t cs=TMath::Cos(tp->fAlpha), sn=TMath::Sin(tp->fAlpha), x=r[0];
-//   r[0] = x*cs - r[1]*sn; r[1] = x*sn + r[1]*cs;
-// }
-
-//______________________________________________________________________________
-// void trackGetMomentum(AliExternalTrackParam* tp, Double_t p[3])
-// {
-//    // Return global momentum vector of starting point of tp.
-
-//    p[0] = tp->fP[4]; p[1] = tp->fP[2]; p[2] = tp->fP[3];
-
-//    Double_t pt=1./TMath::Abs(p[0]);
-//    Double_t cs=TMath::Cos(tp->fAlpha), sn=TMath::Sin(tp->fAlpha);
-//    Double_t r=TMath::Sqrt(1 - p[1]*p[1]);
-//    p[0]=pt*(r*cs - p[1]*sn); p[1]=pt*(p[1]*cs + r*sn); p[2]=pt*p[2];
-// }
-
-//______________________________________________________________________________
-// Double_t trackGetP(AliExternalTrackParam* tp)
-// {
-//    // Return magnitude of momentum of tp.
-
-//    return TMath::Sqrt(1.+ tp->fP[3]*tp->fP[3])/TMath::Abs(tp->fP[4]);
-// }
-
 
 
 //______________________________________________________________________________

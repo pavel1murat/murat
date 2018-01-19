@@ -29,8 +29,8 @@ TEvdHelix::TEvdHelix(double Z0, double D0, double Phi0, double Omega, double Tan
   fZMin   = ZMin;
   fZMax   = ZMax;
 
-  fX0     =  (1/fOmega+fD0)*sin(fPhi0);
-  fY0     =  -(1/fOmega+fD0)*cos(fPhi0);
+  fX0     =  -(1/fOmega+fD0)*sin(fPhi0);
+  fY0     =  +(1/fOmega+fD0)*cos(fPhi0);
 
   double dphi = (ZMax-ZMin)*Omega/TanDip;
 //-----------------------------------------------------------------------------

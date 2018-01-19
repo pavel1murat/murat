@@ -24,12 +24,6 @@ Mu2eMultiView::Mu2eMultiView() {
   fRPhiEventScene = gEve->SpawnNewScene("RPhi Event Data","Scene holding projected event-data for the RPhi view.");
   fRhoZEventScene = gEve->SpawnNewScene("RhoZ Event Data","Scene holding projected event-data for the RhoZ view.");
 
-  fRPhiGeomScene->SetHierarchical(true);
-  fRhoZGeomScene->SetHierarchical(true);
-  
-  fRPhiEventScene->SetHierarchical(true);
-  fRhoZEventScene->SetHierarchical(true);
-  
   // Projection managers
   //=====================
 
@@ -86,6 +80,13 @@ Mu2eMultiView::Mu2eMultiView() {
   pack->NewSlot()->MakeCurrent();
   fRhoZView = gEve->SpawnNewViewer("RhoZ View", "");
   fRhoZView->GetGLViewer()->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
+
+  fRPhiGeomScene->SetHierarchical(true);
+  fRhoZGeomScene->SetHierarchical(true);
+  
+  fRPhiEventScene->SetHierarchical(true);
+  fRhoZEventScene->SetHierarchical(true);
+  
   fRhoZView->AddScene(fRhoZGeomScene);
   fRhoZView->AddScene(fRhoZEventScene);
 

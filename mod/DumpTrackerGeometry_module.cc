@@ -63,10 +63,12 @@ namespace mu2e {
 	int nlayers = panel.nLayers();
 
 	for (int il=0; il<nlayers; il++) {
+//-----------------------------------------------------------------------------
+// assume straw 'il' (0,1) corresponds to the layer 'il'
+//-----------------------------------------------------------------------------
+//	  StrawId sid( panel.id(), il);
 
-	  StrawId sid( panel.id(), il, 0 );
-
-	  Straw const& straw = panel.getStraw(sid);
+	  Straw const& straw = panel.getStraw(il);
 
 	  double x    = straw.getMidPoint().x();  
 	  double y    = straw.getMidPoint().y();  
@@ -80,7 +82,7 @@ namespace mu2e {
 	  double hl   = straw.getHalfLength();
 	  double r    = straw.getRadius();
 	  
-	  printf(" %5i %5i %5i",plane.id(), panel.id().getPanel(), il);
+	  printf(" %5i %5i %5i",plane.id().asUint16(), panel.id().getPanel(), il);
 
 	  double phi1 = phi/M_PI*180.;
 	  printf("  %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",

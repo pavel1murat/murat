@@ -70,7 +70,7 @@ physics: {
 
     p1: [ # @sequence::EventMixing.TimeMaps ,
 	  # @sequence::murat.digis          , 
-	  @sequence::murat.cal_reco       , 
+#	  @sequence::murat.cal_reco       , 
 	  @sequence::murat.tpr_reco       ,
 	  @sequence::murat.cpr_reco 
 #	  , @sequence::murat.mpr_reco       

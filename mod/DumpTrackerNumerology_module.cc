@@ -89,13 +89,13 @@ namespace mu2e {
 	  nlayers = panel->nLayers();
 
 	  for (int il=0; il<nlayers; il++) {
-	    const Layer* lay = &panel->getLayer(il);
+	    //	    const Layer* lay = &panel->getLayer(il);
 	      
 	    // nstraws = zl->nStraws();
 
 	    // 	      for (int is=0; is<nstraws; is++) {
 	    int is = 0;
-	    straw       = &lay->getStraw(is);
+	    straw       = &panel->getStraw(il);
 	    sid         = straw->id();
 	    
 	    double x    = straw->getMidPoint().x();  

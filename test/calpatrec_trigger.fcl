@@ -70,12 +70,12 @@ physics: {
     out           : []
     end_paths     : [ out ]
 }
-
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
+phyiscs.filters.InitStntuple.histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger.stn"}
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.read_reco_stn_tcn.art"
+# outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.calpatrec_trigger.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

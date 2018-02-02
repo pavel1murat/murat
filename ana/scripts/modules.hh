@@ -23,6 +23,7 @@
 #include "murat/ana/TTrackPidAnaModule.hh"
 #include "murat/ana/TTrackRecoEffAnaModule.hh"
 #include "murat/ana/TTrackStrawHitAnaModule.hh"
+#include "murat/ana/TTriggerAnaModule.hh"
 #include "murat/ana/TValCalPatRecModule.hh"
 #include "murat/ana/TVdetAnaModule.hh"
 //-----------------------------------------------------------------------------
@@ -50,6 +51,7 @@ TTrackAnaModuleA*          m_trka  = NULL;
 TTrackCompModule*          m_tcm   = NULL;
 TTrackPidAnaModule*        m_tpa   = NULL;
 TTrackRecoEffAnaModule*    m_eff   = NULL;
+TTriggerAnaModule*         m_trig  = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
 TVdetAnaModule*            m_vdt   = NULL;
 

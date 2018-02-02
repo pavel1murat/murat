@@ -15,6 +15,7 @@ int load_stnana_scripts_murat() {
     "pid.C",
     "reco_eff_ana.C",
     "track.C",
+    "trigger.C",
     "vdet.C",
     0 
   };

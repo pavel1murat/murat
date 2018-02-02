@@ -55,7 +55,10 @@ filters      : { @table::murat.filters   }
 paths        : { @table::murat.paths     }
 
 physics: { 
-    producers : { @table::producers }
+    producers : { @table::producers 
+	CalSeedFit   : { @table::producers.CalSeedFit   diagLevel:1 }
+    }
+
     filters   : { @table::filters   
 	CalTimePeakFinder : { @table::filters.CalTimePeakFinder diagLevel:1 }
 
@@ -68,7 +71,9 @@ physics: {
 	    }
 	}
 
-	InitStntuple      : { @table::filters.InitStntuple      histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger_diag.stn"}
+	CalTrkFit   : { @table::filters.CalTrkFit     diagLevel:1 }
+
+	InitStntuple : { @table::filters.InitStntuple histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger_diag.stn"}
     }
 
 

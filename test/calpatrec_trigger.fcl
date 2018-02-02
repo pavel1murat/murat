@@ -60,7 +60,8 @@ physics: {
 
     analyzers : { }
 
-    p7: [ PrefetchData, 
+    p7: [ "!detectorFilter", 
+	  PrefetchData, 
 	  @sequence::CaloCluster.Reco, @sequence::CaloCluster.TruthMatch, 
 	  @sequence::murat.cpr_reco,
 	  @sequence::Stntuple.stnmaker_cpr
@@ -73,7 +74,7 @@ physics: {
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
-phyiscs.filters.InitStntuple.histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger.stn"}
+physics.filters.InitStntuple.histFileName : "aaa.murat.bbb.ccc.calpatrec_trigger.stn"
 # physics.out : [detectorOutput]
 # outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.calpatrec_trigger.art"
 #------------------------------------------------------------------------------

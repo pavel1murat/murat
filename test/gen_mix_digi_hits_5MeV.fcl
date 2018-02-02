@@ -16,8 +16,11 @@
 #include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
-#  meanBackground                      : -1        # fixed at 1
-bgHitFiles                          : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art"]
+#  meanBackground                      : -1        # fixed at 1, from catalogs/bmxc566b/bmxc566b.0001
+bgHitFiles : [
+	      "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art",
+	      "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/a2/sim.mu2e.cd3-detmix-cut.v566b.000004_00001134.art"
+	     ]
   TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 

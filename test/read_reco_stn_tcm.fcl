@@ -42,26 +42,36 @@ source       : {
     filenames: [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
 }
 
-outputs      : { @table::murat.outputs }
+producers    : { @table::murat.producers }
+outputs      : { @table::murat.outputs   }
+filters      : { @table::murat.filters   }
+paths        : { @table::murat.paths     }
 
 physics: { 
     producers : { 
-	@table::murat.producers 
+	@table::producers 
 
-	generate : { @table::murat.producers.egun }
+	generate : { @table::producers.egun }
 
 	FlagStrawHits : { @table::FlagStrawHits 
 	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
 	}
     }
 
-    filters : { @table::murat.filters }
+    filters : { @table::filters }
 
-    @table::murat.paths
+    @table::paths
 
 #    p1 : [ @sequence::murat.cal_reco, @sequence::murat.cpr_reco_new ]
 
     p1: [ @sequence::murat.cal_reco       , 
+	  @sequence::murat.tpr_reco       ,
+	  @sequence::murat.cpr_reco       ,
+	  @sequence::murat.mpr_reco       ,
+	  @sequence::Stntuple.stnmaker_tcm
+	 ]
+
+    p2: [ @sequence::murat.cal_reco_fast  , 
 	  @sequence::murat.tpr_reco       ,
 	  @sequence::murat.cpr_reco       ,
 	  @sequence::murat.mpr_reco       ,

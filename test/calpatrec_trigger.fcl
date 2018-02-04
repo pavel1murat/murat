@@ -1,5 +1,11 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
+# use murat/scripts/submit_mu2e_job
+# when submitting, need to define TRIGGER_PATH, for example: "-r TRIGGER_PATH=p6"
+# variables which need defaults:
+# -----------------------------
+# :DEFAULT: TRIGGER_PATH=p6 
+#------------------------------------------------------------------------------
 #include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"
 #include "fcl/standardServices.fcl"
@@ -55,19 +61,38 @@ filters      : { @table::murat.filters   }
 paths        : { @table::murat.paths     }
 
 physics: { 
-    producers : { @table::producers }
-    filters   : { @table::filters   }
+    producers : { @table::producers 
+	CaloClusterFromProtoCluster : { @table::producers.CaloClusterFast }
+    }
+
+    filters   : { @table::filters   
+	CalTimePeakFinderP8         : { @table::filters.CalTimePeakFinder 
+	    minClusterSize          : -1
+	}
+    }
 
     analyzers : { }
 
-    p7: [ "!detectorFilter", 
-	  PrefetchData, 
-	  @sequence::CaloCluster.Reco, @sequence::CaloCluster.TruthMatch, 
+    p6: [ PrefetchData, 
+	  @sequence::CaloCluster.Reco, # @sequence::CaloCluster.TruthMatch, 
 	  @sequence::murat.cpr_reco,
 	  @sequence::Stntuple.stnmaker_cpr
 	 ]
 
-    trigger_paths : [ p7 ]
+    p7: [ "!detectorFilter", 
+	  PrefetchData, 
+	  @sequence::CaloCluster.Reco, 
+	  @sequence::murat.cpr_reco,
+	  @sequence::Stntuple.stnmaker_cpr
+	 ]
+
+    p8: [ PrefetchData, 
+	  CaloClusterFromProtoCluster,   # this stands for fast...
+	  @sequence::murat.cpr_reco,
+	  @sequence::Stntuple.stnmaker_cpr
+	 ]
+
+    trigger_paths : [ #TRIGGER_PATH ]
     out           : []
     end_paths     : [ out ]
 }
@@ -75,6 +100,10 @@ physics: {
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 physics.filters.InitStntuple.histFileName : "aaa.murat.bbb.ccc.calpatrec_trigger.stn"
+physics.filters.StntupleMaker.makeTimeClusters   : 1
+physics.filters.StntupleMaker.makeHelices        : 1
+physics.filters.StntupleMaker.makeTrackSeeds     : 1
+physics.filters.StntupleMaker.makeTrackStrawhits : 1
 # physics.out : [detectorOutput]
 # outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.calpatrec_trigger.art"
 #------------------------------------------------------------------------------

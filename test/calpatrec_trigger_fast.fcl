@@ -4,8 +4,7 @@
 # when submitting, need to define TRIGGER_PATH, for example: "-r TRIGGER_PATH=p6"
 # variables which need defaults:
 # -----------------------------
-# :DEFAULT: TRIGGER_PATH=p6
-# :DEFAULT: EMOE=p6
+# :DEFAULT: TRIGGER_PATH=p6 
 #------------------------------------------------------------------------------
 #include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"
@@ -26,7 +25,7 @@ END_PROLOG
 
 services : {
     message               : @local::default_message
-    TFileService          : { fileName : "calpatrec_trigger_diag.root" }
+    TFileService          : { fileName : "calpatrec_trigger.root" }
     RandomNumberGenerator : { }
     #   Timing                : { }
     GeometryService        : { inputFile      : "Mu2eG4/geom/geom_common.txt"      }
@@ -63,38 +62,32 @@ paths        : { @table::murat.paths     }
 
 physics: { 
     producers : { @table::producers 
-	CalSeedFit   : { @table::producers.CalSeedFit   diagLevel:1 }
+	CaloClusterFromProtoCluster : { @table::producers.CaloClusterFast }
     }
 
-    filters   : { @table::filters   
-	CalTimePeakFinder : { @table::filters.CalTimePeakFinder diagLevel:1 }
-
-	CalHelixFinder     : { @table::filters.CalHelixFinder    
-	    diagLevel      : 1 
-	    debugLevel     : 115
-	    HelixFinderAlg : { @table::filters.CalHelixFinder.HelixFinderAlg 
-		debugLevel  : 100
-		debugLevel2 : 100
-	    }
+    filters   : { @table::filters
+	CalTimePeakFinder         : { @table::filters.CalTimePeakFinder 
+	    minClusterSize          : -1
 	}
-
-	CalTrkFit   : { @table::filters.CalTrkFit     diagLevel:1 }
-
-	InitStntuple : { @table::filters.InitStntuple histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger_diag.stn"}
     }
-
 
     analyzers : { }
 
     p6: [ PrefetchData, 
-	  @sequence::CaloCluster.Reco, @sequence::CaloCluster.TruthMatch, 
+	  @sequence::CaloCluster.Reco, # @sequence::CaloCluster.TruthMatch, 
 	  @sequence::murat.cpr_reco,
 	  @sequence::Stntuple.stnmaker_cpr
 	 ]
 
     p7: [ "!detectorFilter", 
 	  PrefetchData, 
-	  @sequence::CaloCluster.Reco, @sequence::CaloCluster.TruthMatch, 
+	  @sequence::CaloCluster.Reco, 
+	  @sequence::murat.cpr_reco,
+	  @sequence::Stntuple.stnmaker_cpr
+	 ]
+
+    p8: [ PrefetchData, 
+	  CaloClusterFromProtoCluster,   # this stands for fast...
 	  @sequence::murat.cpr_reco,
 	  @sequence::Stntuple.stnmaker_cpr
 	 ]
@@ -103,12 +96,16 @@ physics: {
     out           : []
     end_paths     : [ out ]
 }
-
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
+physics.filters.InitStntuple.histFileName : "aaa.murat.bbb.ccc.calpatrec_trigger.stn"
+physics.filters.StntupleMaker.makeTimeClusters   : 1
+physics.filters.StntupleMaker.makeHelices        : 1
+physics.filters.StntupleMaker.makeTrackSeeds     : 1
+physics.filters.StntupleMaker.makeTrackStrawhits : 1
 # physics.out : [detectorOutput]
-# outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.read_reco_stn_tcn.art"
+# outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.calpatrec_trigger.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

@@ -24,14 +24,18 @@ process_name : DioAlloDigiRecoStnTcm
 services.TFileService.fileName            : "egun50_digi_reco_stn_tcm_050T.hist"
 services.user.GeometryService.inputFile   : "murat/geom/geom_cd3_half_field.txt"
 
-source       : { module_type : EmptyEvent }
-outputs      : { @table::murat.outputs }
+source    : { module_type : EmptyEvent }
+
+producers : { @table::murat.producers }
+filters   : { @table::murat.filters   }
+outputs   : { @table::murat.outputs   }
+paths     : { @table::murat.paths     }
 
 physics: { 
     producers : { 
-	@table::murat.producers 
+	@table::producers 
 
-	generate : { @table::murat.producers.egun 
+	generate : { @table::producers.egun 
 	    physics : {
 		pdgId            :  11
 		elow             : 49.999
@@ -46,14 +50,14 @@ physics: {
 	    maximumEnergy: @local::FlagStrawHits_maximumEnergy
 	}
 	
-	CalPatRec : { @table::murat.producers.CalPatRec
+	CalTrkFit : { @table::producers.CalTrkFit
 	    minClusterEnergy : 30
 	}
     }
 
-    filters : { @table::murat.filters 
-	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName  : "egun50_digi_reco_stn_tcm_050T.stn" }
- 	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL  }
+    filters : { @table::filters 
+	InitStntuple      : { @table::filters.InitStntuple     histFileName  : "egun50_digi_reco_stn_tcm_050T.stn" }
+ 	StntupleMakerTcm  : { @table::filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL  }
     }
 
     @table::murat.paths

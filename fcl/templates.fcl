@@ -105,10 +105,10 @@ murat : { @table::murat
 	    }
 	}
 
-  	dioallo : { @table::StoppedParticleReactionGun # DIO LO 
+  	dioallo : { @table::StoppedParticleReactionGun # DIO Al LO 
 	    physics : {
 		pdgId            :  11
-		elow             : 105.0010
+		elow             : 0.511
 		ehi              : 105.0015
 		spectrumVariable : "totalEnergy"
 		spectrumShape    : "tabulated"
@@ -116,7 +116,7 @@ murat : { @table::murat
 	    }
 	}
 
-  	dioalll : { @table::StoppedParticleReactionGun # DIO LO 
+  	dioalll : { @table::StoppedParticleReactionGun # DIO Al Leading Log
 	    physics : {
 		pdgId            :  11
 		elow             : 105.0010
@@ -139,13 +139,14 @@ murat : { @table::murat
 #------------------------------------------------------------------------------
 # TrkPatRec and CalPatRec modules
 #------------------------------------------------------------------------------
-	@table::TrkHitReco.producers    # defined in TrkHitReco
-	@table::Tracking.producers      # defined in TrkPatRec
-	@table::CaloDigiMC.producers    # defined in CaloDigiMC
-	@table::CaloDigiMC.producersMC  # defined in CaloDigiMC
-	@table::CaloReco.producers      # defined in CaloReco
-	@table::CaloCluster.producers   # defined in CaloCluster
-	@table::CaloCluster.producersMC # defined in CaloCluster
+	@table::TrkHitReco.producers      # defined in TrkHitReco
+	@table::Tracking.producers        # defined in TrkPatRec
+	@table::CaloDigiMC.producers      # defined in CaloDigiMC
+	@table::CaloDigiMC.producersMC    # defined in CaloDigiMC
+	@table::CaloReco.producers        # defined in CaloReco
+	@table::CaloCluster.producers     # defined in CaloCluster
+	@table::CaloCluster.producersMC   # defined in CaloCluster
+	@table::CaloClusterFast.producers # defined in CaloCluster
 	@table::CalPatRec.producers
 	@table::TrackCaloMatching.producers
 	@table::ParticleID.producers
@@ -197,6 +198,9 @@ murat.cal_hits : [ @sequence::CaloReco.Reco, @sequence::CaloDigiMC.TruthMatch ]
 murat.cal_reco : [ @sequence::murat.cal_hits, 
 		   @sequence::CaloCluster.Reco       , 
 		   @sequence::CaloCluster.TruthMatch ]
+
+murat.cal_reco_fast : [ @sequence::CaloReco.Reco       , 
+			@sequence::CaloClusterFast.Reco ]
 #------------------------------------------------------------------------------
 # downstream track reconstruction
 #------------------------------------------------------------------------------

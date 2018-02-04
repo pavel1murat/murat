@@ -24,7 +24,7 @@ export  val_INPUT_DATA_FILE=""
 export    val_ART_HIST_FILE=""
 export  val_OUTPUT_STNTUPLE=""
 
-export LIST_OF_REP="INPUT_DATA_FILE ART_HIST_FILE OUTPUT_STNTUPLE OUTPUT_DATA_FILE"
+export LIST_OF_REP=()
 
 export         NEVENTS="-1";
 export SUBMISSION_TIME=`date +'%Y-%m-%d-%H:%M'`
@@ -105,22 +105,15 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
             export PARAMETERS=${OPTARG}
             if [ $VERBOSE != "no" ] ; then echo PARAMETERS=$PARAMETERS ; fi
             ;;
-        r)                                          # job name
-	    var=`echo $OPTARG | awk -F = '{print $1}'`
-	    val="`echo $OPTARG | awk -F = '{print $2}'`"
-		  
-	    if [ $var == "OUTPUT_STNTUPLE" ] ; then val_OUTPUT_STNTUPLE=$val ; fi
-
+        r)                                          # replacing a variable "-r var=val"
+	    var=$OPTARG
             export LIST_OF_REP=$LIST_OF_REP" "$var
 
-            if [ $VERBOSE != "no" ] ; then 
-		echo var=$var ; val=${val_$var}
-		echo LIST_OF_REP=$LIST_OF_REP ; 
-	    fi
+            if [ $VERBOSE != "no" ] ; then echo LIST_OF_REP=$LIST_OF_REP ; fi
             ;;
         s)                                          # input file
             export INPUT_FILE=$OPTARG
-            if [ $VERBOSE != "no" ] ; then echo INPUT_FILE=$INPUT_FILE ; 	    fi
+            if [ $VERBOSE != "no" ] ; then echo INPUT_FILE=$INPUT_FILE ;  fi
             ;;
 #------------------------------------------------------------------------------
 # in the Mu2e language, a 'dataset' is a file list, one filename per line
@@ -212,31 +205,47 @@ if [ -f $TMP_FCL ] ; then rm $TMP_FCL ; fi
 cp $template_fcl_file $TMP_FCL
 chmod u+w $TMP_FCL
 
-for x in $LIST_OF_REP ; do
-    var=`echo $x`
-    n=val_$var
+list_of_defaults=(); 
+for x in `cat $TMP_FCL | grep ":DEFAULT:" | awk '{print $3}'` ; do 
+    list_of_defaults+=($x)
+done
 
-    val=${!n}
+if [ $VERBOSE != "no" ] ; then 
+    echo [submit_mu2e_job:$LINENO]: list_of_defaults=${list_of_defaults[@]}
+fi
 
-    if [ ".$val" == "." ] ; then
-	if   [ $var == "INPUT_DATA_FILE"  ] ; then val="$NAME_STUB.root"
-	elif [ $var == "ART_HIST_FILE"    ] ; then val="$NAME_STUB.hist"
-	elif [ $var == "OUTPUT_STNTUPLE"  ] ; then val="$NAME_STUB.stn"
-	elif [ $var == "OUTPUT_DATA_FILE" ] ; then val="$NAME_STUB.output.root"
+for x in ${LIST_OF_REP[@]} ; do
+    var=`echo $x | awk -F = '{print $1}'`
+    val=`echo $x | awk -F = '{print $2}'`
+    n=${#list_of_defaults[@]}
+    echo ndefaults=$n
+    found=0
+    for i in ${!list_of_defaults[@]} ; do 
+	name=`echo ${list_of_defaults[$i]} | awk -F = '{print $1}'`
+	if [ $name == $var ] ; then
+	   list_of_defaults[$i]=$x
+	   found=1
 	fi
-    fi
+    done
 
-    cat $TMP_FCL | awk -v v1={$var} -v v2=\"$val\" '{sub(v1,v2);print}' > $TMP_FCL.1
+    if [ $found == 0 ] ; then list_of_defaults+=($x) ; fi
+done
+
+for x in ${list_of_defaults[@]} ; do
+    var=`echo $x | awk -F = '{print $1}'`
+    val=`echo $x | awk -F = '{print $2}'`
+#    echo "cat $TMP_FCL | awk -v v1=\#"$var" -v v2=\"$val\" '{sub(v1,v2);print}' "
+    cat $TMP_FCL | awk -v v1=\#"$var" -v v2=\"$val\" '{sub(v1,v2);print}' > $TMP_FCL.1
     mv $TMP_FCL.1 $TMP_FCL
 done
 #------------------------------------------------------------------------------
 # replace whats left
 #------------------------------------------------------------------------------
 cat $TMP_FCL | \
-    awk -v v1='{DATASET}' -v v2="$DSID"    '{gsub(v1,v2);print}' | \
-    awk -v v1='{JOB}'     -v v2="$JOB"     '{gsub(v1,v2);print}' | \
-    awk -v v1='{USER}'    -v v2="$USER"    '{gsub(v1,v2);print}' | \
-    awk -v v1='{OFFVER}'  -v v2="$OFFVER"  '{gsub(v1,v2);print}'   \
+    awk -v v1='${DATASET}' -v v2="$DSID"    '{gsub(v1,v2);print}' | \
+    awk -v v1='${JOB}'     -v v2="$JOB"     '{gsub(v1,v2);print}' | \
+    awk -v v1='${USER}'    -v v2="$USER"    '{gsub(v1,v2);print}' | \
+    awk -v v1='${OFFVER}'  -v v2="$OFFVER"  '{gsub(v1,v2);print}'   \
     > $TMP_FCL.1
 
 mv $TMP_FCL.1 $TMP_FCL

@@ -172,7 +172,7 @@ void TClusterAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* 
   row = Cluster->Ix1();
   col = Cluster->Ix2();
 
-  x   = Cluster->fX+3904.;
+  x   = Cluster->fX; // +3904.;
   y   = Cluster->fY;
   z   = Cluster->fZ;
   r   = sqrt(x*x+y*y);

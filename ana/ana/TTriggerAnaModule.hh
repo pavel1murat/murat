@@ -40,6 +40,8 @@ public:
   struct TrackSeedHist_t : public HistBase_t {
     TH1F* fP;
     TH1F* fNHits;
+    TH1F* fChi2Dof;
+    TH1F* fD0;
   };
 
   struct TrackHist_t : public HistBase_t {
@@ -56,18 +58,19 @@ public:
   struct EventHist_t : public HistBase_t {
     TH1F* fRunNumber;
     TH1F* fEventNumber;
-    TH1F* fNTimePeaks;
-    TH1F* fNHelices   [2];
+    TH1F* fNTimePeaks ;
+    TH1F* fNHelices   ;
     TH1F* fNTrackSeeds[2];
-    TH1F* fNTracks    [2];
-    TH1F* fPassed;
+    TH1F* fNGoodSeeds ;
+    TH1F* fNTracks    ;
+    TH1F* fPassed     ;
   };
 
 //-----------------------------------------------------------------------------
   enum { kNTimePeakHistSets  = 100 };
   enum { kNHelixHistSets     = 100 };
   enum { kNTrackSeedHistSets = 100 };
-  enum { kNTrackHistSets     = 100 };
+  enum { kNTrackHistSets     = 200 };
   enum { kNEventHistSets     =  10 };
 
   struct Hist_t {
@@ -95,8 +98,10 @@ public:
   int                      fNTracks;
   int                      fNTimePeaks;
   int                      fNHelices;
-  int                      fNTrackSeeds;
-  TrackPar_t               fTrackPar[10];
+  int                      fNTrackSeeds[10];
+  int                      fNGoodSeeds;
+  int                      fNGoodTracks;
+  TrackPar_t               fTrackPar   [10];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

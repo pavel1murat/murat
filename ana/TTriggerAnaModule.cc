@@ -61,7 +61,12 @@ void TTriggerAnaModule::BookHelixHistograms(HistBase_t* Hist, const char* Folder
 void TTriggerAnaModule::BookTrackSeedHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
-  //  TrackSeedHist_t* hist = (TrackSeedHist_t*) Hist;
+  TrackSeedHist_t* hist = (TrackSeedHist_t*) Hist;
+
+  HBook1F(hist->fP      ,"p"    ,Form("%s: mom"    ,Folder), 1100,    0,  110,Folder);
+  HBook1F(hist->fNHits  ,"nhits",Form("%s: N(hits)",Folder),  200,    0,  200,Folder);
+  HBook1F(hist->fChi2Dof,"chi2d",Form("%s: Chi2/DOF" ,Folder),  200,    0,   40,Folder);
+  HBook1F(hist->fD0     ,"d0"   ,Form("%s: D0"       ,Folder),  200, -200,  200,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -86,9 +91,13 @@ void TTriggerAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder
   //  char title[200];
   EventHist_t* hist = (EventHist_t*) Hist;
 
-  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number",Folder), 1000, 0,  1.e4,Folder);
-  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number",Folder), 1000, 0,  1.e6,Folder);
-  HBook1F(hist->fPassed     ,"passed",Form("%s: event passed",Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"  ,Folder), 1000, 0,  1.e4,Folder);
+  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"  ,Folder), 1000, 0,  1.e6,Folder);
+  HBook1F(hist->fPassed     ,"passed",Form("%s: event passed"  ,Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fNTrackSeeds[0],"nts_0",Form("%s: N(track seeds)[0]",Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fNTrackSeeds[1],"nts_1",Form("%s: N(track seeds)[1]",Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fNGoodSeeds ,"ngts"  ,Form("%s: N(good seeds)" ,Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fNTracks    ,"ntrk"  ,Form("%s: N(tracks)"     ,Folder),   10, 0,    10,Folder);
 }
 
 //_____________________________________________________________________________
@@ -110,7 +119,8 @@ void TTriggerAnaModule::BookHistograms() {
   for (int i=0; i<kNEventHistSets; i++) book_event_histset[i] = 0;
 
   book_event_histset[ 0] = 1;		// all events
-  book_event_histset[ 1] = 0;		// just an example - this should be the default
+  book_event_histset[ 1] = 1;		// events with N(good seeds) > 0
+  book_event_histset[ 2] = 1;		// events with N(tracks) > 0
 
   for (int i=0; i<kNEventHistSets; i++) {
     if (book_event_histset[i] != 0) {
@@ -122,12 +132,35 @@ void TTriggerAnaModule::BookHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
+// book track seed histograms
+//-----------------------------------------------------------------------------
+  int book_tseed_histset[kNTrackSeedHistSets];
+  for (int i=0; i<kNTrackSeedHistSets; i++) book_tseed_histset[i] = 0;
+
+  book_tseed_histset[ 0] = 1;		// all track seeds
+  book_tseed_histset[ 1] = 1;		// track seeds   |d0| < 200
+  book_tseed_histset[ 2] = 1;		// track seeds   |d0| < 200 , P > 80
+
+  for (int i=0; i<kNTrackSeedHistSets; i++) {
+    if (book_tseed_histset[i] != 0) {
+      sprintf(folder_name,"tseed_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fTrackSeed[i] = new TrackSeedHist_t;
+      BookTrackSeedHistograms(fHist.fTrackSeed[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
 // book track histograms
 //-----------------------------------------------------------------------------
   int book_track_histset[kNTrackHistSets];
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
-  book_track_histset[ 0] = 1;		// all events
+  book_track_histset[  0] = 1;		// all    events
+  book_track_histset[  1] = 1;		// tracks |D0| < 200
+
+  book_track_histset[100] = 1;		// events with fNGoodSeeds > 0
+  book_track_histset[101] = 1;		// NGoodSeeds > 0, tracks |D0| < 200
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -153,7 +186,11 @@ void TTriggerAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* TPeak) 
 
 //-----------------------------------------------------------------------------
 void TTriggerAnaModule::FillTrackSeedHistograms(HistBase_t* Hist, TStnTrackSeed* Seed) {
-  //  TrackSeedHist_t* hist = (TrackSeedHist_t*) Hist;
+  TrackSeedHist_t* hist = (TrackSeedHist_t*) Hist;
+  hist->fP->Fill (Seed->fP);		// corrected momentum in the first point
+  hist->fNHits->Fill(Seed->fNHits);
+  hist->fChi2Dof->Fill(Seed->fChi2/(Seed->fNHits-5.));
+  hist->fD0->Fill(Seed->fD0);
 }
 
 //-----------------------------------------------------------------------------
@@ -197,27 +234,68 @@ void TTriggerAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
   hist->fPassed->Fill(fPassed);
+  hist->fNTrackSeeds[0]->Fill(fNTrackSeeds[0]);
+  hist->fNTrackSeeds[1]->Fill(fNTrackSeeds[1]);
+  hist->fNGoodSeeds->Fill(fNGoodSeeds);
+  hist->fNTracks->Fill(fNTracks);
 }
 
 //_____________________________________________________________________________
 void TTriggerAnaModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
+// track seed histograms
+//
+// TSEED_0: all track seeds
+// TSEED_1: track seeds  |D0| < 200
+//-----------------------------------------------------------------------------
+  for (int i=0; i<fNTrackSeeds[0]; i++) {
+    TStnTrackSeed* tseed = fTrackSeedBlock->TrackSeed(i);
+    FillTrackSeedHistograms(fHist.fTrackSeed[0],tseed);
+    if (fabs(tseed->fD0) < 200.) {
+       FillTrackSeedHistograms(fHist.fTrackSeed[1],tseed);
+       if (tseed->fP > 80.) {
+	 FillTrackSeedHistograms(fHist.fTrackSeed[2],tseed);
+       }
+    }
+  }
+//-----------------------------------------------------------------------------
+// track histograms
+//
+// TRK_0: all tracks
+// TRK_0: tracks    |D0| < 200 mm
+//-----------------------------------------------------------------------------
+  for (int i=0; i<fNTracks; i++) {
+    TStnTrack* trk = fTrackBlock->Track(i);
+    FillTrackHistograms(fHist.fTrack[0],trk);
+    if (fabs(trk->fD0) < 200.) {
+      FillTrackHistograms(fHist.fTrack[1],trk);
+    }
+  }
+//-----------------------------------------------------------------------------
+// TRK_1xx : fNGoodSeeds > 0 (passed events) 
+//
+// TRK_0: all tracks
+// TRK_0: tracks    |D0| < 200 mm
+//-----------------------------------------------------------------------------
+
+  if (fNGoodSeeds > 0) {
+    for (int i=0; i<fNTracks; i++) {
+      TStnTrack* trk = fTrackBlock->Track(i);
+      FillTrackHistograms(fHist.fTrack[100],trk);
+      if (fabs(trk->fD0) < 200.) {
+	FillTrackHistograms(fHist.fTrack[101],trk);
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
 // event histograms
 //
 // EVT_0: all events
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
-
-//-----------------------------------------------------------------------------
-// track histograms
-//
-// TRK_0: all tracks
-//-----------------------------------------------------------------------------
-  for (int i=0; i<fNTracks; i++) {
-    TStnTrack* trk = fTrackBlock->Track(i);
-    FillTrackHistograms(fHist.fTrack[0],trk);
-  }
+  if (fNGoodSeeds  > 0) FillEventHistograms(fHist.fEvent[1]);
+  if (fNGoodTracks > 0) FillEventHistograms(fHist.fEvent[2]);
 
 }
 
@@ -268,10 +346,38 @@ int TTriggerAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // consider an event passed, if there is a track with loosely defined quality
 //-----------------------------------------------------------------------------
-  fPassed  = 0;
-  fNTracks = fTrackBlock->NTracks();
+  fPassed     = 0;
+  fNTracks    = fTrackBlock->NTracks();
+  fNGoodSeeds = 0;
+
+  fNTrackSeeds[0] = fTrackSeedBlock->NTrackSeeds(); // all
+  fNTrackSeeds[1] = 0;
 
   InitTrackPar();
+
+  for (int i=0; i<fNTrackSeeds[0]; i++) {
+    TStnTrackSeed* tseed = fTrackSeedBlock->TrackSeed(i);
+    if (fabs(tseed->fD0) < 200.) {
+      fNTrackSeeds[1] += 1;
+      if (tseed->fP > 80) {
+	fNGoodSeeds += 1;
+      }
+    }
+  }
+
+  if (fNGoodSeeds > 0) fPassed = 1;
+
+  fNGoodTracks = 0;
+  for (int i=0; i<fNTracks; i++) {
+    TStnTrack* trk = fTrackBlock->Track(i);
+    if (fabs(trk->fD0) < 200.) {
+      if (trk->fP > 100) {
+	if ((trk->Chi2Dof() < 5) && (trk->NActive() >= 20)) {
+	  fNGoodTracks += 1;
+	}
+      }
+    }
+  }
 
   FillHistograms();
 

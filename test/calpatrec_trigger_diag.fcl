@@ -80,7 +80,16 @@ physics: {
 
 	CalTrkFit   : { @table::filters.CalTrkFit     diagLevel:1 }
 
-	InitStntuple : { @table::filters.InitStntuple histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger_diag.stn"}
+	InitStntuple                : { @table::filters.InitStntuple 
+	    histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger_diag.stn"
+	}
+
+	StntupleMaker               : { @table::filters.StntupleMakerCpr 
+	    makeTimeClusters        : 1
+	    makeHelices             : 1
+	    makeTrackSeeds          : 1
+	    makeTrackStrawHits      : 1
+	}
     }
 
 

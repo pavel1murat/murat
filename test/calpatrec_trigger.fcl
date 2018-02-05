@@ -61,13 +61,14 @@ filters      : { @table::murat.filters   }
 paths        : { @table::murat.paths     }
 
 physics: { 
-    producers : { @table::producers 
-	CaloClusterFromProtoCluster : { @table::producers.CaloClusterFast }
-    }
+    producers : { @table::producers }
 
-    filters   : { @table::filters   
-	CalTimePeakFinderP8         : { @table::filters.CalTimePeakFinder 
-	    minClusterSize          : -1
+    filters   : { @table::filters  
+	StntupleMaker               : { @table::filters.StntupleMakerCpr 
+	    makeTimeClusters        : 1
+	    makeHelices             : 1
+	    makeTrackSeeds          : 1
+	    makeTrackStrawHits      : 1
 	}
     }
 
@@ -76,20 +77,14 @@ physics: {
     p6: [ PrefetchData, 
 	  @sequence::CaloCluster.Reco, # @sequence::CaloCluster.TruthMatch, 
 	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
+	  @sequence::Stntuple.stnmaker
 	 ]
 
     p7: [ "!detectorFilter", 
 	  PrefetchData, 
 	  @sequence::CaloCluster.Reco, 
 	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
-	 ]
-
-    p8: [ PrefetchData, 
-	  CaloClusterFromProtoCluster,   # this stands for fast...
-	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
+	  @sequence::Stntuple.stnmaker
 	 ]
 
     trigger_paths : [ #TRIGGER_PATH ]
@@ -100,10 +95,6 @@ physics: {
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 physics.filters.InitStntuple.histFileName : "aaa.murat.bbb.ccc.calpatrec_trigger.stn"
-physics.filters.StntupleMaker.makeTimeClusters   : 1
-physics.filters.StntupleMaker.makeHelices        : 1
-physics.filters.StntupleMaker.makeTrackSeeds     : 1
-physics.filters.StntupleMaker.makeTrackStrawhits : 1
 # physics.out : [detectorOutput]
 # outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.calpatrec_trigger.art"
 #------------------------------------------------------------------------------

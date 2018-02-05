@@ -4,7 +4,7 @@
 # when submitting, need to define TRIGGER_PATH, for example: "-r TRIGGER_PATH=p6"
 # variables which need defaults:
 # -----------------------------
-# :DEFAULT: TRIGGER_PATH=p6 
+# :DEFAULT: TRIGGER_PATH=p8
 #------------------------------------------------------------------------------
 #include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"
@@ -66,6 +66,13 @@ physics: {
     }
 
     filters   : { @table::filters
+	StntupleMaker               : { @table::filters.StntupleMakerCpr 
+	    makeTimeClusters        : 1
+	    makeHelices             : 1
+	    makeTrackSeeds          : 1
+	    makeTrackStrawHits      : 1
+	}
+
 	CalTimePeakFinder         : { @table::filters.CalTimePeakFinder 
 	    minClusterSize          : -1
 	}
@@ -73,23 +80,10 @@ physics: {
 
     analyzers : { }
 
-    p6: [ PrefetchData, 
-	  @sequence::CaloCluster.Reco, # @sequence::CaloCluster.TruthMatch, 
-	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
-	 ]
-
-    p7: [ "!detectorFilter", 
-	  PrefetchData, 
-	  @sequence::CaloCluster.Reco, 
-	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
-	 ]
-
     p8: [ PrefetchData, 
 	  CaloClusterFromProtoCluster,   # this stands for fast...
 	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
+	  @sequence::Stntuple.stnmaker
 	 ]
 
     trigger_paths : [ #TRIGGER_PATH ]
@@ -100,10 +94,6 @@ physics: {
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
 physics.filters.InitStntuple.histFileName : "aaa.murat.bbb.ccc.calpatrec_trigger.stn"
-physics.filters.StntupleMaker.makeTimeClusters   : 1
-physics.filters.StntupleMaker.makeHelices        : 1
-physics.filters.StntupleMaker.makeTrackSeeds     : 1
-physics.filters.StntupleMaker.makeTrackStrawhits : 1
 # physics.out : [detectorOutput]
 # outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.calpatrec_trigger.art"
 #------------------------------------------------------------------------------

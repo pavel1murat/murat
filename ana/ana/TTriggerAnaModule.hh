@@ -29,8 +29,10 @@ public:
 //  histograms
 //-----------------------------------------------------------------------------
   struct TimePeakHist_t : public HistBase_t {
-    TH1F* fT0;
+    TH1F* fTime;
     TH1F* fNHits;
+    TH1F* fEnergy;
+    TH1F* fR;
   };
 
   struct HelixHist_t : public HistBase_t {
@@ -58,7 +60,7 @@ public:
   struct EventHist_t : public HistBase_t {
     TH1F* fRunNumber;
     TH1F* fEventNumber;
-    TH1F* fNTimePeaks ;
+    TH1F* fNTimeClusters;
     TH1F* fNHelices   ;
     TH1F* fNTrackSeeds[2];
     TH1F* fNGoodSeeds ;
@@ -85,18 +87,19 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*          fTrackBlock;
-  TStnTrackSeedBlock*      fTrackSeedBlock;
-  TStnClusterBlock*        fClusterBlock;
-  TStnHelixBlock*          fHelixBlock;
+
   TStnTimePeakBlock*       fTimePeakBlock;
+  TStnHelixBlock*          fHelixBlock;
+  TStnTrackSeedBlock*      fTrackSeedBlock;
+  TStnTrackBlock*          fTrackBlock;
+  TStnClusterBlock*        fClusterBlock;
 
 					// histograms filled
   Hist_t                   fHist;
 
   int                      fPassed;
   int                      fNTracks;
-  int                      fNTimePeaks;
+  int                      fNTimeClusters;
   int                      fNHelices;
   int                      fNTrackSeeds[10];
   int                      fNGoodSeeds;

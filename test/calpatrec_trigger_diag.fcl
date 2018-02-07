@@ -84,7 +84,7 @@ physics: {
 	    histFileName:"aaa.murat.bbb.ccc.calpatrec_trigger_diag.stn"
 	}
 
-	StntupleMaker               : { @table::filters.StntupleMakerCpr 
+	StntupleMakerCpr            : { @table::filters.StntupleMakerCpr 
 	    makeTimeClusters        : 1
 	    makeHelices             : 1
 	    makeTrackSeeds          : 1

@@ -1,10 +1,10 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
 # use murat/scripts/submit_mu2e_job
-# when submitting, need to define TRIGGER_PATH, for example: "-r TRIGGER_PATH=p6"
+# when submitting, need to define TRIGGER_PATH, for example: "-r TRIGGER_PATH=p1"
 # variables which need defaults:
 # -----------------------------
-# :DEFAULT: TRIGGER_PATH=p6 
+# :DEFAULT: TRIGGER_PATH=p1
 #------------------------------------------------------------------------------
 #include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"
@@ -25,7 +25,7 @@ END_PROLOG
 
 services : {
     message               : @local::default_message
-    TFileService          : { fileName : "calpatrec_trigger.root" }
+    TFileService          : { fileName : "calo_cluster_check.root" }
     RandomNumberGenerator : { }
     #   Timing                : { }
     GeometryService        : { inputFile      : "Mu2eG4/geom/geom_common.txt"      }
@@ -64,28 +64,18 @@ physics: {
     producers : { @table::producers }
 
     filters   : { @table::filters  
-	StntupleMakerCpr            : { @table::filters.StntupleMakerCpr 
-	    makeTimeClusters        : 1
-	    makeHelices             : 1
-	    makeTrackSeeds          : 1
-	    makeTrackStrawHits      : 1
+	CaloClusterCheck : { @table::filters.CaloClusterCheck 
+	    debugBits : { bit11:1 bit12:1 } 
 	}
     }
 
     analyzers : { }
 
-    p6: [ PrefetchData, 
-	  @sequence::CaloCluster.Reco, # @sequence::CaloCluster.TruthMatch, 
-	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
+    p1: [ @sequence::CaloCluster.Reco,
+	  CaloClusterFast,
+	  CaloClusterCheck
 	 ]
 
-    p7: [ "!detectorFilter", 
-	  PrefetchData, 
-	  @sequence::CaloCluster.Reco, 
-	  @sequence::murat.cpr_reco,
-	  @sequence::Stntuple.stnmaker_cpr
-	 ]
 
     trigger_paths : [ #TRIGGER_PATH ]
     out           : []

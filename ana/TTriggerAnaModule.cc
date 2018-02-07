@@ -47,7 +47,13 @@ TTriggerAnaModule::~TTriggerAnaModule() {
 void TTriggerAnaModule::BookTimePeakHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
-  //  TrackSeedHist_t* hist = (TrackSeedHist_t*) Hist;
+  TimePeakHist_t* hist = (TimePeakHist_t*) Hist;
+
+  HBook1F(hist->fEnergy    ,"e"     ,Form("%s: cluster energy",Folder), 200,    0,  200,Folder);
+  HBook1F(hist->fNHits     ,"nhits" ,Form("%s: nhits"         ,Folder), 200,    0,  200,Folder);
+  HBook1F(hist->fR         ,"r"     ,Form("%s: radius"        ,Folder), 200,    0, 1000,Folder);
+  HBook1F(hist->fTime      ,"time"  ,Form("%s: time"          ,Folder), 200,    0, 2000,Folder);
+  
 }
 
 //-----------------------------------------------------------------------------
@@ -94,6 +100,8 @@ void TTriggerAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder
   HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"  ,Folder), 1000, 0,  1.e4,Folder);
   HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"  ,Folder), 1000, 0,  1.e6,Folder);
   HBook1F(hist->fPassed     ,"passed",Form("%s: event passed"  ,Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fNTimeClusters ,"ntcl",Form("%s: N(time clusters)",Folder),   20, 0,    20,Folder);
+  HBook1F(hist->fNHelices ,"nhel",Form("%s: N(helices)",Folder),   10, 0,    10,Folder);
   HBook1F(hist->fNTrackSeeds[0],"nts_0",Form("%s: N(track seeds)[0]",Folder),   10, 0,    10,Folder);
   HBook1F(hist->fNTrackSeeds[1],"nts_1",Form("%s: N(track seeds)[1]",Folder),   10, 0,    10,Folder);
   HBook1F(hist->fNGoodSeeds ,"ngts"  ,Form("%s: N(good seeds)" ,Folder),   10, 0,    10,Folder);
@@ -129,6 +137,23 @@ void TTriggerAnaModule::BookHistograms() {
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
       fHist.fEvent[i] = new EventHist_t;
       BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book track seed histograms
+//-----------------------------------------------------------------------------
+  int book_tpeak_histset[kNTimePeakHistSets];
+  for (int i=0; i<kNTimePeakHistSets; i++) book_tpeak_histset[i] = 0;
+
+  book_tpeak_histset[ 0] = 1;		// all time clusters
+
+  for (int i=0; i<kNTimePeakHistSets; i++) {
+    if (book_tpeak_histset[i] != 0) {
+      sprintf(folder_name,"tpeak_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fTimePeak[i] = new TimePeakHist_t;
+      BookTimePeakHistograms(fHist.fTimePeak[i],Form("Hist/%s",folder_name));
     }
   }
 //-----------------------------------------------------------------------------
@@ -176,7 +201,16 @@ void TTriggerAnaModule::BookHistograms() {
 
 //-----------------------------------------------------------------------------
 void TTriggerAnaModule::FillTimePeakHistograms(HistBase_t* Hist, TStnTimePeak* TPeak) {
-  //  TimePeakHist_t* hist = (TimePeakHist_t*) Hist;
+  TimePeakHist_t* hist = (TimePeakHist_t*) Hist;
+
+  hist->fNHits->Fill(TPeak->fNHits);
+  hist->fEnergy->Fill(TPeak->fClusterEnergy);
+  hist->fTime->Fill(TPeak->fClusterTime);
+
+  double x = TPeak->fClusterX;
+  double y = TPeak->fClusterY;
+  double r = sqrt(x*x+y*y);
+  hist->fR->Fill(r);
 }
 
 //-----------------------------------------------------------------------------
@@ -234,6 +268,8 @@ void TTriggerAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
   hist->fPassed->Fill(fPassed);
+  hist->fNTimeClusters->Fill(fNTimeClusters);
+  hist->fNHelices->Fill(fNHelices);
   hist->fNTrackSeeds[0]->Fill(fNTrackSeeds[0]);
   hist->fNTrackSeeds[1]->Fill(fNTrackSeeds[1]);
   hist->fNGoodSeeds->Fill(fNGoodSeeds);
@@ -243,6 +279,15 @@ void TTriggerAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //_____________________________________________________________________________
 void TTriggerAnaModule::FillHistograms() {
 
+//-----------------------------------------------------------------------------
+// time peak histograms
+//
+// TPEAK_0: all track seeds
+//-----------------------------------------------------------------------------
+  for (int i=0; i<fNTimeClusters; i++) {
+    TStnTimePeak* tpeak = fTimePeakBlock->TimePeak(i);
+    FillTimePeakHistograms(fHist.fTimePeak[0],tpeak);
+  }
 //-----------------------------------------------------------------------------
 // track seed histograms
 //
@@ -278,7 +323,6 @@ void TTriggerAnaModule::FillHistograms() {
 // TRK_0: all tracks
 // TRK_0: tracks    |D0| < 200 mm
 //-----------------------------------------------------------------------------
-
   if (fNGoodSeeds > 0) {
     for (int i=0; i<fNTracks; i++) {
       TStnTrack* trk = fTrackBlock->Track(i);
@@ -296,7 +340,6 @@ void TTriggerAnaModule::FillHistograms() {
   FillEventHistograms(fHist.fEvent[0]);
   if (fNGoodSeeds  > 0) FillEventHistograms(fHist.fEvent[1]);
   if (fNGoodTracks > 0) FillEventHistograms(fHist.fEvent[2]);
-
 }
 
 //-----------------------------------------------------------------------------
@@ -306,9 +349,11 @@ int TTriggerAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"    ,&fTrackBlock);
-  RegisterDataBlock("TrackSeedBlock","TStnTrackSeedBlock",&fTrackSeedBlock);
-  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"  ,&fClusterBlock);
+  RegisterDataBlock("TimePeakBlock" ,"TStnTimePeakBlock" , &fTimePeakBlock );
+  RegisterDataBlock("HelixBlock"    ,"TStnHelixBlock"    , &fHelixBlock    );
+  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"    , &fTrackBlock    );
+  RegisterDataBlock("TrackSeedBlock","TStnTrackSeedBlock", &fTrackSeedBlock);
+  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"  , &fClusterBlock  );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -340,6 +385,8 @@ int TTriggerAnaModule::Event(int ientry) {
   //  double                p;
   //  TLorentzVector        mom;
 
+  fTimePeakBlock->GetEntry(ientry);
+  fHelixBlock->GetEntry(ientry);
   fTrackBlock->GetEntry(ientry);
   fTrackSeedBlock->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
@@ -347,6 +394,8 @@ int TTriggerAnaModule::Event(int ientry) {
 // consider an event passed, if there is a track with loosely defined quality
 //-----------------------------------------------------------------------------
   fPassed     = 0;
+  fNTimeClusters = fTimePeakBlock->NTimePeaks(); // all
+  fNHelices   = fHelixBlock->NHelices(); // all
   fNTracks    = fTrackBlock->NTracks();
   fNGoodSeeds = 0;
 

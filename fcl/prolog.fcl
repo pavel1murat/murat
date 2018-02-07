@@ -100,6 +100,12 @@ murat : {
 	}
     }
 
+    CaloClusterCheck : { module_type:CaloClusterCheck
+	caloClusterCollTag           : CaloClusterFromProtoCluster
+	fastCaloClusterCollTag       : CaloClusterFast
+	debugBits                    : { } # {bit1:1 }
+    }
+
     TTrackRecoAna : { module_type:TTrackRecoAna
 	diagLevel           : 0
 	trkPatRecLabel      : TrkPatRecDownstreameMinus
@@ -115,16 +121,21 @@ murat : {
 }
 
 murat.producers : { 
+    StrawHitReco2 : {
+	module_type : StrawHitReco2
+	StrawDigis : makeSD
+	#UseCalorimeter : true
+    }
 }
 
 murat.filters : {
-    TrackerMCCheck  : { @table::murat.TrackerMCCheck  }
-    TrackRecoCheck  : { @table::murat.TrackRecoCheck  }
+    TrackerMCCheck   : { @table::murat.TrackerMCCheck   }
+    TrackRecoCheck   : { @table::murat.TrackRecoCheck   }
+    CaloClusterCheck : { @table::murat.CaloClusterCheck }
 }
 
 murat.analysers : { 
     DumpEventNumber : { @table::murat.DumpEventNumber }
-#    ReadGenParticles : { @table::murat.ReadGenParticles }
 }
 
 END_PROLOG

@@ -111,7 +111,7 @@ namespace mu2e {
       peakfit_(pset.get<fhicl::ParameterSet>("PeakFitter",fhicl::ParameterSet()))
   {
       produces<StrawHitCollection>();
-      produces<StrawHitFlagCollection>();
+      //      produces<StrawHitFlagCollection>();
       produces<StrawHitPositionCollection>();
       
       if (printLevel_ > 0) std::cout << "In StrawHitReco2 constructor " << std::endl;
@@ -168,8 +168,8 @@ namespace mu2e {
 
       std::unique_ptr<StrawHitCollection> strawHits(new StrawHitCollection);
       strawHits->reserve(strawdigis.size());
-      std::unique_ptr<StrawHitFlagCollection> strawHitFlags(new StrawHitFlagCollection);
-      strawHitFlags->reserve(strawdigis.size());
+      // std::unique_ptr<StrawHitFlagCollection> strawHitFlags(new StrawHitFlagCollection);
+      // strawHitFlags->reserve(strawdigis.size());
       std::unique_ptr<StrawHitPositionCollection> strawHitPositions(new StrawHitPositionCollection);
       strawHitPositions->reserve(strawdigis.size());      
 
@@ -215,10 +215,10 @@ namespace mu2e {
           const Straw& straw  = tracker.getStraw( digi.strawIndex() );
           StrawHit hit(digi.strawIndex(),times,tots,energy);
           
-          StrawHitFlag flag;
-          if (energy > minE_ && energy < maxE_) flag.merge(StrawHitFlag::energysel);
-          if (time > minT_ && time < maxT_)     flag.merge(StrawHitFlag::timesel);
-          if (usecc_)                           flag.merge(StrawHitFlag::calosel);
+          // StrawHitFlag flag;
+          // if (energy > minE_ && energy < maxE_) flag.merge(StrawHitFlag::energysel);
+          // if (time > minT_ && time < maxT_)     flag.merge(StrawHitFlag::timesel);
+          // if (usecc_)                           flag.merge(StrawHitFlag::calosel);
           
 	  StrawHitPosition shp;
 	  // get distance along wire from the straw center and it's estimated error
@@ -245,7 +245,7 @@ namespace mu2e {
 
           strawHits->push_back(std::move(hit));          
           strawHitPositions->push_back(std::move(shp));
-	  strawHitFlags->push_back(std::move(flag));          
+	  // strawHitFlags->push_back(std::move(flag));          
       }
       
       //flag straw and electronic cross-talk
@@ -267,7 +267,7 @@ namespace mu2e {
              
 
       event.put(std::move(strawHits));
-      event.put(std::move(strawHitFlags));
+      //      event.put(std::move(strawHitFlags));
       event.put(std::move(strawHitPositions));
 
 

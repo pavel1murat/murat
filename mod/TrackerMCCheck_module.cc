@@ -35,7 +35,6 @@
 #include "GeometryService/inc/VirtualDetector.hh"
 
 #include "TTrackerGeom/inc/TTracker.hh"
-// #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
 #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
@@ -51,7 +50,6 @@
 #include "DataProducts/inc/VirtualDetectorId.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
-// #include "BTrk/TrkBase/TrkHotList.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
@@ -61,27 +59,9 @@
 #include "RecoDataProducts/inc/StrawHitPositionCollection.hh"
 #include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
 
-// #include "BTrkData/inc/TrkStrawHit.hh"
-
 #include "Stntuple/mod/StntupleModule.hh"
 
-// ROOT includes
-// #include "TApplication.h"
-// #include "TArc.h"
-// #include "TArrow.h"
-// #include "TCanvas.h"
-// #include "TDirectory.h"
-// #include "TGraph.h"
 #include "TH1F.h"
-// #include "TLine.h"
-// #include "TBox.h"
-// #include "TMarker.h"
-// #include "TEllipse.h"
-// #include "TText.h"
-// #include "TNtuple.h"
-
-// Other includes
-// #include "CLHEP/Units/SystemOfUnits.h"
 
 using namespace std;
 using CLHEP::Hep3Vector;
@@ -574,7 +554,7 @@ namespace mu2e {
 
 	const mu2e::Straw* straw = &_tracker->getStraw(sh->strawIndex());
 
-	const CLHEP::Hep3Vector* hp = &closest_hitp->pos();
+	const XYZVec* hp = &closest_hitp->pos();
 
 	double dx = sp->x()-hp->x();
 	double dy = sp->y()-hp->y();

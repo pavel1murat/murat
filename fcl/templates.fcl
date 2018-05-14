@@ -11,7 +11,9 @@ services : {
 # 2017-04-03: JobConfig/cd3/geom_baseline.txt is the same as Mu2eG4/test/geom_01.txt
 #             both just include Mu2eG4/geom/geom_common.txt
 #------------------------------------------------------------------------------
-    GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
+#    GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
+#    GeometryService        : { inputFile      : "Mu2eG4/geom/geom_common_current.txt"  }
+    GeometryService        : { inputFile      : "Mu2eG4/geom/geom_common.txt"  }
     ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"        }
     GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"   }
     BTrkHelper             : @local::BTrkHelperDefault
@@ -54,36 +56,6 @@ murat : { @table::murat
     producers: { 
 	@table::murat.producers
 
-  	egun : { @table::StoppedParticleReactionGun # p(e)=105 MeV/c
-	    physics : {
-		pdgId            :  11
-		elow             : 104.97175
-		ehi              : 104.97176
-		spectrumVariable : "momentum"
-		spectrumShape    : "flat"
-	    }
-	}
-
-  	egun005 : { @table::StoppedParticleReactionGun # p(e)=5 MeV/c
-	    physics : {
-		pdgId            :  11
-		elow             : 4.9999
-		ehi              : 5.0001
-		spectrumVariable : "momentum"
-		spectrumShape    : "flat"
-	    }
-	}
-
-  	egun95105 : { @table::StoppedParticleReactionGun # p(e)=105 MeV/c
-	    physics : {
-		pdgId            :  11
-		elow             :  95
-		ehi              : 105
-		spectrumVariable : "momentum"
-		spectrumShape    : "flat"
-	    }
-	}
-
   	cePhotos : { @table::StoppedParticleReactionGun # CE + rad corr
 	    physics : {
 		pdgId            :  11
@@ -94,51 +66,11 @@ murat : { @table::murat
 		spectrumFileName : "murat/data/ce_photos.tbl"
 	    }
 	}
-
-  	mgun : { @table::StoppedParticleReactionGun # p(mu)=105 MeV/c
-	    physics : {
-		pdgId            :  13
-		elow             : 104.97175
-		ehi              : 104.97176
-		spectrumVariable : "momentum"
-		spectrumShape    : "flat"
-	    }
-	}
-
-  	dioallo : { @table::StoppedParticleReactionGun # DIO Al LO 
-	    physics : {
-		pdgId            :  11
-		elow             : 0.511
-		ehi              : 105.0015
-		spectrumVariable : "totalEnergy"
-		spectrumShape    : "tabulated"
-		spectrumFileName : "ConditionsService/data/czarnecki_Al.tbl"
-	    }
-	}
-
-  	dioalll : { @table::StoppedParticleReactionGun # DIO Al Leading Log
-	    physics : {
-		pdgId            :  11
-		elow             : 105.0010
-		ehi              : 105.0015
-		spectrumVariable : "totalEnergy"
-		spectrumShape    : "tabulated"
-		spectrumFileName : "murat/data/czarnecki_szafron_Al_LL.tbl"
-	    }
-	}
-
-  	pgun : { @table::StoppedParticleReactionGun # p(proton)=100 MeV/c
-	    physics : {
-		pdgId            : 2212
-		elow             :  99.99
-		ehi              : 100.01
-		spectrumVariable : "momentum"
-		spectrumShape    : "flat"
-	    }
-	}
 #------------------------------------------------------------------------------
 # TrkPatRec and CalPatRec modules
 #------------------------------------------------------------------------------
+	@table::EventGenerator.producers  # defined in EventGenerator
+	@table::TrackerMC.producers       # defined in TrackerMC
 	@table::TrkHitReco.producers      # defined in TrkHitReco
 	@table::Tracking.producers        # defined in TrkPatRec
 	@table::CaloDigiMC.producers      # defined in CaloDigiMC
@@ -187,92 +119,98 @@ murat.gen_g4_detFilter    : [ generate, g4run, detectorFilter ]
 murat.gen_g4_time_map     : [ @sequence::murat.gen_g4, @sequence::EventMixing.TimeMaps ]
 murat.mix_time_map        : [ @sequence::EventMixing.CD3Mixers, @sequence::EventMixing.TimeMaps ]
 murat.gen_g4_mix_time_map : [ @sequence::murat.gen_g4_detFilter, @sequence::murat.mix_time_map ]
-
-murat.digis               : [ @sequence::CaloDigiMC.DigiSim, @sequence::Tracking.DigiSim ]
-
 #------------------------------------------------------------------------------
-# calorimeter reconstruction
+# digitization
 #------------------------------------------------------------------------------
-murat.cal_hits : [ @sequence::CaloReco.Reco, @sequence::CaloDigiMC.TruthMatch ]
-
-murat.cal_reco : [ @sequence::murat.cal_hits, 
-		   @sequence::CaloCluster.Reco       , 
-		   @sequence::CaloCluster.TruthMatch ]
-
-murat.cal_reco_fast : [ @sequence::CaloReco.Reco       , 
-			@sequence::CaloClusterFast.Reco ]
+murat.digis               : [ @sequence::CaloDigiMC.DigiSim, @sequence::TrackerMC.DigiSim ]
+murat.trk_hits            : [ makeSH, makePH ]
+murat.cal_hits            : [ @sequence::CaloReco.Reco, @sequence::CaloDigiMC.TruthMatch ]
+#------------------------------------------------------------------------------
+# calorimeter reconstruction; fast calorimeter reco includes hit reco w/o MC truth
+#------------------------------------------------------------------------------
+murat.cal_reco      : [ @sequence::CaloCluster.Reco,  @sequence::CaloCluster.TruthMatch ]
+murat.cal_reco_fast : [ @sequence::CaloReco.Reco, @sequence::CaloClusterFast.Reco ]
 #------------------------------------------------------------------------------
 # downstream track reconstruction
+# FlagBkgHits is added to all TrkPatRec sequences, rely on ART executing it just once
 #------------------------------------------------------------------------------
-murat.tpr_hits : [ @sequence::Tracking.PrepareHits ]
-
 murat.cpr_reco : [ @sequence::CalPatRec.reco, 
 		   MergePatRecCpr, 
 		   @sequence::TrackCaloMatching.matching_cpr ]
 
-# to use this sequence need to redefine CalTrkFit->CalPatRec in MergePatRecCpr inputs
-# murat.cpr_reco_old : [ @sequence::CalPatRec.old_reco, 
-#		       MergePatRecCpr,
-#		       @sequence::TrackCaloMatching.matching_cpr ]
-
-murat.tpr_reco : [ @sequence::Tracking.TPRDeM , 
+murat.tpr_reco : [ FlagBkgHits, @sequence::Tracking.TPRDeM , 
 		   MergePatRecTpr, 
 		   @sequence::TrackCaloMatching.matching_tpr ]
-
-murat.mpr_reco : [ @sequence::Tracking.TPRDeM , 
+#------------------------------------------------------------------------------
+# track reconstruction DeM, run two algorithms, merge
+#------------------------------------------------------------------------------
+murat.mpr_reco : [ FlagBkgHits, @sequence::Tracking.TPRDeM , 
 		   @sequence::CalPatRec.reco, 
 		   MergePatRec, 
 		   @sequence::TrackCaloMatching.matching ]
 
-# to use this sequence need to redefine CalTrkFit->CalPatRec in MergePatRec inputs
-# murat.mpr_reco_old : [ @sequence::Tracking.TPRDeM , 
-#		       @sequence::CalPatRec.old_reco, 
-#		       MergePatRec, 
-#		       @sequence::TrackCaloMatching.matching ]
-
-murat.dem_reco : [ @sequence::Tracking.TPRDeM  , 
+murat.dem_reco : [ FlagBkgHits, @sequence::Tracking.TPRDeM  , 
 		   @sequence::CalPatRec.dem_reco, 
 		   MergePatRecDem, 
 		   @sequence::TrackCaloMatching.matching_dem, AvikPIDNewDem ]
 
-murat.dmm_reco : [ @sequence::Tracking.TPRDmuM , 
+murat.dmm_reco : [ FlagBkgHits, @sequence::Tracking.TPRDmuM , 
 		   @sequence::CalPatRec.dmm_reco, 
 		   MergePatRecDmm, 
 		   @sequence::TrackCaloMatching.matching_dmm, AvikPIDNewDmm ]
 
-murat.dep_reco : [ @sequence::Tracking.TPRDeP   , 
+murat.dep_reco : [ FlagBkgHits, @sequence::Tracking.TPRDeP   , 
 		   @sequence::CalPatRec.dep_reco, 
 		   MergePatRecDep, 
 		   @sequence::TrackCaloMatching.matching_dep, AvikPIDNewDep ]
 
-murat.dmp_reco : [ @sequence::Tracking.TPRDmuP  , 
+murat.dmp_reco : [ FlagBkgHits, @sequence::Tracking.TPRDmuP  , 
 		   @sequence::CalPatRec.dmp_reco, 
 		   MergePatRecDmp, 
 		   @sequence::TrackCaloMatching.matching_dmp, AvikPIDNewDmp ]
 #----------------------------------------------------------------------------------------------------
 # so far, CalPatRec is not used for upstream reconstruction
 #----------------------------------------------------------------------------------------------------
-murat.uem_reco : [ @sequence::Tracking.TPRUeM  , MergePatRecUem, @sequence::TrackCaloMatching.matching_uem, AvikPIDNewUem ]
-murat.umm_reco : [ @sequence::Tracking.TPRUmuM , MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm, AvikPIDNewUmm ]
-murat.uep_reco : [ @sequence::Tracking.TPRUeP  , MergePatRecUep, @sequence::TrackCaloMatching.matching_uep, AvikPIDNewUep ]
-murat.ump_reco : [ @sequence::Tracking.TPRUmuP , MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump, AvikPIDNewUmp ]
+murat.uem_reco : [ FlagBkgHits   , @sequence::Tracking.TPRUeM  , 
+		   MergePatRecUem, @sequence::TrackCaloMatching.matching_uem, 
+		   AvikPIDNewUem ]
+
+murat.umm_reco : [ FlagBkgHits   , @sequence::Tracking.TPRUmuM , 
+		   MergePatRecUmm, @sequence::TrackCaloMatching.matching_umm, 
+		   AvikPIDNewUmm ]
+
+murat.uep_reco : [ FlagBkgHits, @sequence::Tracking.TPRUeP  , 
+		   MergePatRecUep, @sequence::TrackCaloMatching.matching_uep, 
+		   AvikPIDNewUep ]
+
+murat.ump_reco : [ FlagBkgHits, @sequence::Tracking.TPRUmuP , 
+		   MergePatRecUmp, @sequence::TrackCaloMatching.matching_ump, 
+		   AvikPIDNewUmp ]
 
 murat.paths : {
-
+#------------------------------------------------------------------------------
+# generation and digitization, stop before making hits
+#------------------------------------------------------------------------------
     path_gen_digi              : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis
 				  ]
-    
+#------------------------------------------------------------------------------
+# assume hits are reconstructed, rerun reconstruction
+#------------------------------------------------------------------------------
     path_reco_stn_tcm          : [ @sequence::murat.cal_reco       ,
 				   @sequence::murat.tpr_reco       ,
 				   @sequence::murat.cpr_reco       ,
 				   @sequence::murat.mpr_reco       ,
 				   @sequence::Stntuple.stnmaker_tcm
 				  ]
-    
+#------------------------------------------------------------------------------
+# assume hits are reconstructed, rerun reconstruction
+#------------------------------------------------------------------------------
     path_gen_digi_reco_stn_tcm : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
-				   @sequence::murat.cal_reco       ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
+				   @sequence::murat.cal_reco       , # cal_hits are part of cal_reco
 				   @sequence::murat.tpr_reco       ,
 				   @sequence::murat.cpr_reco       ,
 				   @sequence::murat.mpr_reco       ,
@@ -281,6 +219,8 @@ murat.paths : {
 # new CalPatRec sequence
     path_gen_digi_reco_stn_tcn : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.tpr_reco       ,
 				   @sequence::murat.cpr_reco       ,
@@ -290,6 +230,8 @@ murat.paths : {
     
     path_gen_digi_dem_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.dem_reco       ,
 				   @sequence::Stntuple.stnmaker_dem
@@ -297,6 +239,8 @@ murat.paths : {
     
     path_gen_digi_reco_stn_dem : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,		   
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.dem_reco       ,
 				   @sequence::Stntuple.stnmaker_dem
@@ -304,6 +248,8 @@ murat.paths : {
     
     path_gen_digi_dmm_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.dmm_reco       ,
 				   @sequence::Stntuple.stnmaker_dmm
@@ -311,6 +257,8 @@ murat.paths : {
 
     path_gen_digi_uep_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.uep_reco       ,
 				   @sequence::Stntuple.stnmaker
@@ -318,6 +266,8 @@ murat.paths : {
 
     path_gen_digi_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.ump_reco       ,
 				   @sequence::Stntuple.stnmaker
@@ -325,6 +275,8 @@ murat.paths : {
 
     path_gen_digi_dem_dmm_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				       @sequence::murat.digis          ,
+				       @sequence::murat.trk_hits       ,
+				       @sequence::murat.cal_hits       ,
 				       @sequence::murat.cal_reco       ,
 				       @sequence::murat.dem_reco       ,
 				       @sequence::murat.dmm_reco       ,
@@ -333,6 +285,8 @@ murat.paths : {
 
     path_gen_digi_dem_umm_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				       @sequence::murat.digis          ,
+				       @sequence::murat.trk_hits       ,
+				       @sequence::murat.cal_hits       ,
 				       @sequence::murat.cal_reco       ,
 				       @sequence::murat.dem_reco       ,
 				       @sequence::murat.umm_reco       ,
@@ -341,6 +295,8 @@ murat.paths : {
     
     path_gen_digi_dem_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
 				       @sequence::murat.digis          ,
+				       @sequence::murat.trk_hits       ,
+				       @sequence::murat.cal_hits       ,
 				       @sequence::murat.cal_reco       ,
 				       @sequence::murat.dem_reco       ,
 				       @sequence::murat.ump_reco       ,
@@ -349,6 +305,8 @@ murat.paths : {
 
     path_gen_digi_dem_dmp_ump_reco_stn : [ @sequence::murat.gen_g4_time_map,
 					   @sequence::murat.digis          ,
+					   @sequence::murat.trk_hits       ,
+					   @sequence::murat.cal_hits       ,
 					   @sequence::murat.cal_reco       ,
 					   @sequence::murat.dem_reco       ,
 					   @sequence::murat.dmp_reco       ,
@@ -358,6 +316,8 @@ murat.paths : {
 
     path_gen_digi_dem_dmm_umm_reco_stn : [ @sequence::murat.gen_g4_time_map,
 					   @sequence::murat.digis          ,
+					   @sequence::murat.trk_hits       ,
+					   @sequence::murat.cal_hits       ,
 					   @sequence::murat.cal_reco       ,
 					   @sequence::murat.dem_reco       ,
 					   @sequence::murat.dmm_reco       ,
@@ -371,6 +331,8 @@ murat.paths : {
 				       @sequence::EventMixing.CD3Mixers ,
 				       @sequence::EventMixing.TimeMaps  ,
 				       @sequence::murat.digis           ,
+				       @sequence::murat.trk_hits       ,
+				       @sequence::murat.cal_hits       ,
 				       @sequence::murat.cal_reco        , 
 				       @sequence::murat.tpr_reco        ,
 				       @sequence::murat.cpr_reco        ,
@@ -380,6 +342,8 @@ murat.paths : {
 
     path_mix_hits_calo_apr_vpid_stnm : [ @sequence::murat.mix_time_map   , 
 					 @sequence::murat.digis          ,
+					 @sequence::murat.trk_hits       ,
+					 @sequence::murat.cal_hits       ,
 					 @sequence::murat.cal_reco       , 
 					 @sequence::murat.tpr_reco       ,
 					 @sequence::murat.cpr_reco       ,
@@ -393,6 +357,8 @@ murat.paths : {
 #------------------------------------------------------------------------------
     path_gen_digi_all_reco_ump : [ @sequence::murat.gen_g4_time_map,
 				   @sequence::murat.digis          ,
+				   @sequence::murat.trk_hits       ,
+				   @sequence::murat.cal_hits       ,
 				   @sequence::murat.cal_reco       ,
 				   @sequence::murat.dem_reco       ,
 				   @sequence::murat.dmm_reco       ,

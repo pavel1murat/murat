@@ -49,7 +49,6 @@ physics: {
 	@table::producers 
 
 	generate      : { @table::producers.egun }
-	FlagStrawHits : { @table::FlagStrawHits maximumEnergy: @local::FlagStrawHits_maximumEnergy }
 
 	CaloShowerStepFromStepPt : { @table::murat.producers.CaloShowerStepFromStepPt 
 # for CE, not old background mixing - default: 'compressPVDetector'
@@ -63,6 +62,8 @@ physics: {
 
     p1: [ @sequence::murat.gen_g4_time_map,
 	  @sequence::murat.digis          ,
+	  @sequence::murat.trk_hits       ,
+	  @sequence::murat.cal_hits       ,
 	  @sequence::murat.cal_reco       ,
 	  @sequence::murat.tpr_reco       ,
 	  @sequence::murat.cpr_reco       ,
@@ -93,8 +94,8 @@ physics.filters.CalTrkFit.diagLevel                  : 1
 #------------------------------------------------------------------------------
 # uncomment to write the DST out
 #------------------------------------------------------------------------------
-physics.out : [detectorOutput]
-outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.egun_digi_reco_stn_tcn.art"
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.egun_digi_reco_stn_tcn.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

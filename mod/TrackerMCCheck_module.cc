@@ -552,7 +552,7 @@ namespace mu2e {
 	
 	//	mu2e::StrawIndex index = sh->strawIndex();
 
-	const mu2e::Straw* straw = &_tracker->getStraw(sh->strawIndex());
+	const mu2e::Straw* straw = &_tracker->getStraw(sh->strawId());
 
 	const XYZVec* hp = &closest_hitp->pos();
 

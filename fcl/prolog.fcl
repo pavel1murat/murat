@@ -121,11 +121,6 @@ murat : {
 }
 
 murat.producers : { 
-    StrawHitReco2 : {
-	module_type : StrawHitReco2
-	StrawDigis : makeSD
-	#UseCalorimeter : true
-    }
 }
 
 murat.filters : {

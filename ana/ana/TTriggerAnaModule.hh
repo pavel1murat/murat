@@ -10,7 +10,7 @@
 
 #include "Stntuple/loop/TStnModule.hh"
 
-#include "Stntuple/obj/TStnTimePeakBlock.hh"
+#include "Stntuple/obj/TStnTimeClusterBlock.hh"
 #include "Stntuple/obj/TStnHelixBlock.hh"
 #include "Stntuple/obj/TStnTrackSeedBlock.hh"
 #include "Stntuple/obj/TStnTrackBlock.hh"
@@ -28,7 +28,7 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct TimePeakHist_t : public HistBase_t {
+  struct TimeClusterHist_t : public HistBase_t {
     TH1F* fTime;
     TH1F* fNHits;
     TH1F* fEnergy;
@@ -69,14 +69,14 @@ public:
   };
 
 //-----------------------------------------------------------------------------
-  enum { kNTimePeakHistSets  = 100 };
+  enum { kNTimeClusterHistSets  = 100 };
   enum { kNHelixHistSets     = 100 };
   enum { kNTrackSeedHistSets = 100 };
   enum { kNTrackHistSets     = 200 };
   enum { kNEventHistSets     =  10 };
 
   struct Hist_t {
-    TimePeakHist_t*  fTimePeak [kNTimePeakHistSets ];
+    TimeClusterHist_t*  fTimeCluster [kNTimeClusterHistSets ];
     HelixHist_t*     fHelix    [kNHelixHistSets    ];
     TrackSeedHist_t* fTrackSeed[kNTrackSeedHistSets];
     TrackHist_t*     fTrack    [kNTrackHistSets    ];
@@ -88,7 +88,7 @@ public:
 public:
 					// pointers to the data blocks used
 
-  TStnTimePeakBlock*       fTimePeakBlock;
+  TStnTimeClusterBlock*       fTimeClusterBlock;
   TStnHelixBlock*          fHelixBlock;
   TStnTrackSeedBlock*      fTrackSeedBlock;
   TStnTrackBlock*          fTrackBlock;
@@ -128,14 +128,14 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookTimePeakHistograms (HistBase_t* Hist, const char* Folder);
+  void    BookTimeClusterHistograms (HistBase_t* Hist, const char* Folder);
   void    BookHelixHistograms    (HistBase_t* Hist, const char* Folder);
   void    BookTrackSeedHistograms(HistBase_t* Hist, const char* Folder);
   void    BookTrackHistograms    (HistBase_t* Hist, const char* Folder);
   void    BookEventHistograms    (HistBase_t* Hist, const char* Folder);
   void    BookHistograms();
 
-  void    FillTimePeakHistograms (HistBase_t* Hist, TStnTimePeak*  TPeak);
+  void    FillTimeClusterHistograms (HistBase_t* Hist, TStnTimeCluster*  TPeak);
   void    FillHelixHistograms    (HistBase_t* Hist, TStnHelix*     Helix);
   void    FillTrackSeedHistograms(HistBase_t* Hist, TStnTrackSeed* Seed );
   void    FillTrackHistograms    (HistBase_t* Hist, TStnTrack*     Trk  );

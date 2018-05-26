@@ -44,10 +44,10 @@ TTriggerAnaModule::~TTriggerAnaModule() {
 
 
 //-----------------------------------------------------------------------------
-void TTriggerAnaModule::BookTimePeakHistograms(HistBase_t* Hist, const char* Folder) {
+void TTriggerAnaModule::BookTimeClusterHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
-  TimePeakHist_t* hist = (TimePeakHist_t*) Hist;
+  TimeClusterHist_t* hist = (TimeClusterHist_t*) Hist;
 
   HBook1F(hist->fEnergy    ,"e"     ,Form("%s: cluster energy",Folder), 200,    0,  200,Folder);
   HBook1F(hist->fNHits     ,"nhits" ,Form("%s: nhits"         ,Folder), 200,    0,  200,Folder);
@@ -142,18 +142,18 @@ void TTriggerAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book track seed histograms
 //-----------------------------------------------------------------------------
-  int book_tpeak_histset[kNTimePeakHistSets];
-  for (int i=0; i<kNTimePeakHistSets; i++) book_tpeak_histset[i] = 0;
+  int book_tpeak_histset[kNTimeClusterHistSets];
+  for (int i=0; i<kNTimeClusterHistSets; i++) book_tpeak_histset[i] = 0;
 
   book_tpeak_histset[ 0] = 1;		// all time clusters
 
-  for (int i=0; i<kNTimePeakHistSets; i++) {
+  for (int i=0; i<kNTimeClusterHistSets; i++) {
     if (book_tpeak_histset[i] != 0) {
       sprintf(folder_name,"tpeak_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fTimePeak[i] = new TimePeakHist_t;
-      BookTimePeakHistograms(fHist.fTimePeak[i],Form("Hist/%s",folder_name));
+      fHist.fTimeCluster[i] = new TimeClusterHist_t;
+      BookTimeClusterHistograms(fHist.fTimeCluster[i],Form("Hist/%s",folder_name));
     }
   }
 //-----------------------------------------------------------------------------
@@ -200,8 +200,8 @@ void TTriggerAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TTriggerAnaModule::FillTimePeakHistograms(HistBase_t* Hist, TStnTimePeak* TPeak) {
-  TimePeakHist_t* hist = (TimePeakHist_t*) Hist;
+void TTriggerAnaModule::FillTimeClusterHistograms(HistBase_t* Hist, TStnTimeCluster* TPeak) {
+  TimeClusterHist_t* hist = (TimeClusterHist_t*) Hist;
 
   hist->fNHits->Fill(TPeak->fNHits);
   hist->fEnergy->Fill(TPeak->fClusterEnergy);
@@ -285,8 +285,8 @@ void TTriggerAnaModule::FillHistograms() {
 // TPEAK_0: all track seeds
 //-----------------------------------------------------------------------------
   for (int i=0; i<fNTimeClusters; i++) {
-    TStnTimePeak* tpeak = fTimePeakBlock->TimePeak(i);
-    FillTimePeakHistograms(fHist.fTimePeak[0],tpeak);
+    TStnTimeCluster* tpeak = fTimeClusterBlock->TimeCluster(i);
+    FillTimeClusterHistograms(fHist.fTimeCluster[0],tpeak);
   }
 //-----------------------------------------------------------------------------
 // track seed histograms
@@ -349,7 +349,7 @@ int TTriggerAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TimePeakBlock" ,"TStnTimePeakBlock" , &fTimePeakBlock );
+  RegisterDataBlock("TimeClusterBlock" ,"TStnTimeClusterBlock" , &fTimeClusterBlock );
   RegisterDataBlock("HelixBlock"    ,"TStnHelixBlock"    , &fHelixBlock    );
   RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"    , &fTrackBlock    );
   RegisterDataBlock("TrackSeedBlock","TStnTrackSeedBlock", &fTrackSeedBlock);
@@ -385,7 +385,7 @@ int TTriggerAnaModule::Event(int ientry) {
   //  double                p;
   //  TLorentzVector        mom;
 
-  fTimePeakBlock->GetEntry(ientry);
+  fTimeClusterBlock->GetEntry(ientry);
   fHelixBlock->GetEntry(ientry);
   fTrackBlock->GetEntry(ientry);
   fTrackSeedBlock->GetEntry(ientry);
@@ -394,7 +394,7 @@ int TTriggerAnaModule::Event(int ientry) {
 // consider an event passed, if there is a track with loosely defined quality
 //-----------------------------------------------------------------------------
   fPassed     = 0;
-  fNTimeClusters = fTimePeakBlock->NTimePeaks(); // all
+  fNTimeClusters = fTimeClusterBlock->NTimeClusters(); // all
   fNHelices   = fHelixBlock->NHelices(); // all
   fNTracks    = fTrackBlock->NTracks();
   fNGoodSeeds = 0;

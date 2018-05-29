@@ -204,7 +204,7 @@ namespace mu2e {
     Hep3Vector               hpos;
     const TrkHitVector*      hot_list;
     const mu2e::TrkStrawHit* hit;
-    const mu2e::StrawHit*    sh;
+    const mu2e::ComboHit*    sh;
 
     double   res, resErr, len, dx, dy, dw, path, ehit; // , sigw;
 
@@ -228,7 +228,7 @@ namespace mu2e {
       // TrkStrawHit inherits from TrkHitOnTrk
 
 	hit  = (const mu2e::TrkStrawHit*) (*it);
-	sh   = &hit->strawHit();
+	sh   = &hit->comboHit();
 
 	const mu2e::Straw* straw     = &hit->straw();
 	const CLHEP::Hep3Vector* dir = &straw->direction();

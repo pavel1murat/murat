@@ -1,0 +1,106 @@
+# -*- mode: tcl -*-
+###############################################################################
+# simulate 5.5 MeV alpha particle energy losses in the air
+###############################################################################
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+
+# Give this job a name.
+process_name : AirLayer
+
+# Start form an empty source
+source : {
+  module_type : EmptyEvent
+  maxEvents : 100
+}
+
+services : {
+
+  message               : @local::default_message
+  TFileService          : { fileName : "air_layer.hist" }
+  RandomNumberGenerator : { }
+
+  GeometryService        : {
+      standardMu2eDetector: false
+      inputFile           : "murat/gaas/geom/air_layer.txt"
+  }
+  
+  ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
+  GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
+#  BTrkHelper             : @local::BTrkHelperDefault
+  G4Helper               : { }
+  SeedService            : { @table::automaticSeeds
+      baseSeed         :  0
+      maxUniqueEngines :  20
+  }
+
+  TimeTracker : {
+      printSummary : true
+      dbOutput : {
+	  filename  : ""
+	  overwrite : false
+      }
+  }
+}
+
+physics : {
+  producers:  {
+    generate:  {
+	module_type          : EventGenerator
+	inputfile            : "murat/gaas/fcl/alphaParticleGun.txt"
+	allowReplacement     : true
+	messageOnReplacement : true
+    }
+
+    g4run : { @table::Mu2eG4.producers.g4run
+	diagLevel            : 0
+	generatorModuleLabel : generate
+
+	debug : {
+	    writeGDML            : false
+	    GDMLFileName         : "airLayer.gdml"
+	    worldVerbosityLevel  : 0
+	}
+ 
+# can selectively enable sensitive detectors here
+	SDConfig : {
+	    # this will activate all SDs listed in StepInstanceName enum
+	    # enableAllSDs : true  
+	    enableSD : [] // activate just the explicitly listed SDs
+	    TimeVD: { times: [0.01] }
+	    # Make arbitrary LogicalVolumes sensitive:
+	    # sensitiveVolumes: []
+	}
+    }
+
+    randomsaver          : @local::randomsaver
+  }
+
+  filters : {
+      GaasLayerAna : {
+	  module_type        : GaasLayerAna
+	  g4ModuleLabel      : "g4run"
+	  debugBits          : {}
+      }
+  } 
+
+
+  p1 : [generate , g4run , GaasLayerAna ]
+  e1 : [ outfile ]
+
+  trigger_paths  : [p1]
+  end_paths      : [e1]
+
+}
+
+outputs:  {
+
+  outfile : {
+    module_type   :   RootOutput
+    fileName      :   "air_layer.art"
+  }
+
+}
+
+g4run.debug.writeGDML : true 

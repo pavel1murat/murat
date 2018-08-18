@@ -65,10 +65,18 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // Module labels 
 //-----------------------------------------------------------------------------
-    std::string        _moduleLabel;	             // this module label
-    std::string        _processName;
-    std::string        _g4ModuleLabel;
+    std::string        fModuleLabel;	             // this module label
+    std::string        processName_;
+    std::string        fG4ModuleLabel;
     
+    std::string        producerName_;
+    std::string        fStrawHitMaker;
+    std::string        fStrawHitPosMaker;
+    std::string        fFlagBgrHitsModuleLabel;
+    
+    int                fPdgCode;
+    int                fGeneratorCode;
+
     const mu2e::StepPointMCCollection*           fSteps;            //
 
     struct Hist_t {
@@ -97,9 +105,9 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   GaasLayerAna::GaasLayerAna(fhicl::ParameterSet const& pset): 
     StntupleModule            (pset,"GaasLayerAna"),
-    _moduleLabel              (pset.get<std::string>("module_label"                 )),
-    _processName              (pset.get<std::string>("processName"          ,""     )),
-    _g4ModuleLabel            (pset.get<std::string>("g4ModuleLabel"        ,"g4run"))
+    fModuleLabel              (pset.get<std::string>("module_label"                 )),
+    processName_              (pset.get<std::string>("processName"          ,""     )),
+    fG4ModuleLabel            (pset.get<std::string>("g4ModuleLabel"        ,"g4run"))
   {
 
   }
@@ -121,7 +129,7 @@ namespace mu2e {
 //     art::TFileDirectory tfdir = tfs->mkdir( "CosmicDYB" );
 //     _cosmicMultiplicityH = tfdir.make<TH1D>( "MultiplicityH", "Cosmic Multiplicity", 20, -0.5, 19.5);
 
-    fHist.fEDep = tfs->make<TH1F>("edep" ,"Deposited Energy", 500,0, 10);
+    fHist.fEDep = tfs->make<TH1F>("edep" ,"Deposited Energy", 250,0, 2.5);
 //-----------------------------------------------------------------------------
 // define collection names to be used for initialization
 //-----------------------------------------------------------------------------
@@ -136,8 +144,8 @@ namespace mu2e {
 
     art::Handle<StepPointMCCollection> stepsHandle;
     art::Selector sel(art::ProductInstanceNameSelector("stepper") &&
-		      art::ProcessNameSelector(_processName) &&
-		      art::ModuleLabelSelector(_g4ModuleLabel)  );
+		      art::ProcessNameSelector(processName_) &&
+		      art::ModuleLabelSelector(fG4ModuleLabel)  );
     Evt->get(sel, stepsHandle);
     if (stepsHandle.isValid()) fSteps =  (const mu2e::StepPointMCCollection*) &(*stepsHandle);
     else                       fSteps = NULL;

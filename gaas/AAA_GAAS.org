@@ -1,0 +1,5 @@
+#
+
+* momentum of T = 5.5 MeV alpha particle:
+
+  M = 3727.379 MeV, for  T = p^2/2M = 5.5 MeV, p = 202 MeV/c

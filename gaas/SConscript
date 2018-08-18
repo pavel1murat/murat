@@ -38,15 +38,15 @@ def murat_gaas():
     env['CPPPATH'].append(g4inc);
     env['LIBPATH'].append(os.environ['G4LIB']);
 
-    g4vis = env['G4VIS'];
-    if g4vis == 'qt':
+    mu2eopts = env['MU2EOPTS'];
+
+    if mu2eopts[1] == 'qt':
         G4GS_CPPFLAGS = [ '-DG4VIS_USE_OPENGLX',    '-DG4VIS_USE_OPENGL',
                           '-DG4UI_USE_QT',          '-DG4VIS_USE_OPENGLQT' ]
-    elif  g4vis == 'none':
+    elif  mu2eopts[1] == 'none':
         G4GS_CPPFLAGS = []
     else:
         G4GS_CPPFLAGS = [ '-DG4VIS_USE_OPENGLX',    '-DG4VIS_USE_OPENGL' ]
-
 #
     if ( not ("EG" in rootlibs)):
         rootlibs.insert(rootlibs.index("Physics")+1,"EG");
@@ -78,15 +78,13 @@ def murat_gaas():
                   'art_Persistency_Common',
                   'art_Persistency_Provenance',
                   'art_Utilities',
-                  'canvas',
                   'MF_MessageLogger',
-                  'fhiclcpp',
-                  'art_Persistency_Common',
-                  'art_Persistency_Provenance',
-                  'art_Utilities',
                   rootlibs,
+                  'fhiclcpp',
+                  'canvas_Persistency_Common',
+                  'canvas_Persistency_Provenance',
+                  'canvas_Utilities',
                   'cetlib',
-                  'cetlib_except',
                   'xerces-c',
                   'boost_filesystem',
                   'boost_system',

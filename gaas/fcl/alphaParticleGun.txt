@@ -2,9 +2,9 @@
 // config file to perform Geant4 studies using the Mu2e framework infrastructure and simple geometry
 //
 // Original author K. Genser based on the "standard particle Gun"
-// added ParticleGun process
 
-// enable process
+// use single particle gun
+
 bool particleGun.do = true;
 
 // Limits on cos(polar angle):
@@ -20,7 +20,7 @@ double particleGun.tmin  =  0.0;
 double particleGun.tmax  =  0.0;
 
 // position
-vector<double> particleGun.point = {0., 0., -4.};
+vector<double> particleGun.point = {0., 0., -6.};
 
 vector<double> particleGun.halfLength = { 0., 0., 0. };
 

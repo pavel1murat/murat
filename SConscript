@@ -27,7 +27,7 @@ def murat_gen_rootcint(source, target, env, for_signature):
 #    print "[stntuple_gen_rootcint] class_include = %s"%class_include
 #    print "[stntuple_gen_rootcint] linkdef       = %s"%linkdef
     
-    includes =   "-Iinclude -I"+os.environ['ART_INC'     ];
+    includes =   "-Iinclude -I"+os.environ['ART_DIR'     ]+"/include";
     includes = includes + " -I"+os.environ['CETLIB_INC'  ];
     includes = includes + " -I"+os.environ['CANVAS_INC'  ];
     includes = includes + " -I"+os.environ['FHICLCPP_INC'];

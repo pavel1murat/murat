@@ -1,0 +1,120 @@
+///////////////////////////////////////////////////////////////////////////////
+// config file to perform Geant4 studies using the Mu2e framework infrastructure
+//
+// P.Murat : describe 1cm thick layer of air - need to know the 5.5 MeV alpha-particle
+//           energy losses in the air
+//
+// Units are mm, MeV
+///////////////////////////////////////////////////////////////////////////////
+string detector.name         = "g4study";
+bool   mu2e.standardDetector = false;
+
+// targe geometry: 1 tube; 2 box; 3 "calorimeter", 4 tube and a box
+
+int            mu2e.studyEnvVersion      = 2;
+
+// we do not use mu2e materials as they require geometry service detector info
+// vector<string> mu2e.materials = {"G4_Galactic"};
+
+bool           mu2e.printParticleDataTable = false;
+
+// Use a decent physics list
+string g4.physicsListName      = "Shielding";
+// string g4.physicsListName = "FTFP_BERT_EMZ";
+int g4.physicsListVerbosity = 1;
+
+// Use a specific range cut
+double g4.minRangeCut = 0.01; // mm
+
+// Disable mu2e MuMinusConversionAtRest
+bool g4.doMuMinusConversionAtRest = false;
+
+// make the volume mesh visible
+bool g4.forceAuxEdgeVisible    = true;
+
+// do not check for overlaps
+bool g4.doSurfaceCheck         = false;
+
+// print g4 element table
+bool g4.printElements          = true;
+
+// print g4 material table
+bool g4.printMaterials         = true;
+
+// print g4 processe summary (using a mu2e utility class)
+bool g4.printPhysicsProcessSummary = true;
+
+// maximum allowed number of steps per track per event; 0 is unlimited
+int  g4.steppingActionMaxSteps = 0;
+
+// threshold to store trajectories
+double g4.pointTrajectoryMomentumCut = 0.;
+
+// maximum global time per track per event; 0 is unlimited
+double g4.steppingActionMaxGlobalTime = 0.0;
+
+// times for the time virtual detector when particle steps are recorded
+// when the time threshold is crossed in a step
+
+vector<double> g4.steppingActionTimeVD = {0.01};
+
+// list of volumes when tracks are kiled on entry
+vector<string> g4SteppingAction.killInTheseVolumes = {};
+
+// enable killing of low energy particles
+bool   g4.killLowEKine = false;
+
+// global kinetic energy cut (MeV)
+double g4.eKineMin     = 1000000.0;
+
+// a more selective kinetic energy cut depending on the pdg code
+vector<int>    g4.killLowEKinePDG = {};
+vector<double> g4.eKineMinPDG     = {};
+
+// event track debug list
+vector<int> g4.trackingActionEventList = {1,2,3,4,5};
+// vector<int> g4.trackingActionEventList = {};
+bool g4.printTrackTiming = true;
+
+// event track step debug list
+vector<int> g4.steppingActionEventList = {1,2,3,4,5};
+// vector<int> g4.steppingActionTrackList = {};
+
+// the "World Box"
+
+// verbosity flag pertaining to the world construction
+int world.verbosityLevel         = 2;
+
+// a very "thin" vacuum
+string world.materialName        = "G4_Galactic";
+
+// make the world boundaries visible
+bool   world.boxVisible          = true;
+// make the volume transparent
+bool   world.boxSolid            = false;
+
+double world.halfLength          = 20.0;
+double world.outerLayerThickness = 0.001; // the world "outer layer" to force a step point
+
+// another target (a plane/box) for mu2e.studyEnvVersion == 2
+
+bool           box.visible = true;
+bool           box.solid   = false;
+
+// simulate 1cm thick layer of Air, units - mm
+string         box.wallMaterialName = "G4_AIR";
+
+vector<double> box.halfLengths = {10., 10., 5};
+
+int            box.copyNumber = 2; // non 0 for volume tracking purposes
+                                   // 0 & 1 are World and an auxiliary 
+                                   // volume almost filling up the world
+
+// box position in the world
+vector<double> box.centerInWorld = {0., 0., 0.};
+
+//
+// This tells emacs to view this file in c++ mode.
+// Local Variables:
+// mode:c++
+// End:

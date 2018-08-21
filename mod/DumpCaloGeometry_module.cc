@@ -54,16 +54,18 @@ namespace mu2e {
 
     printf("Calorimeter N(disks): %i\n", ndisks);
 
-    printf("crystal halfLength     : %10.3f\n",ci.crystalHalfLength());
-    printf("crystal halfTrans      : %10.3f\n",ci.crystalHalfTrans ());
-    printf("crystal wrap thickness : %10.3f\n",ci.wrapperThickness());
-    printf("crystal case thickness : %10.3f\n",ci.caseThickness());
+    printf("crystal halfLength     : %10.3f\n",ci.getDouble("crystalZLength")/2.);
+    printf("crystal halfTrans      : %10.3f\n",ci.getDouble("crystalXYLength")/2.);
+    printf("crystal wrap thickness : %10.3f\n",ci.getDouble("wrapperThickness"));
+    printf("crystal case thickness : %10.3f\n",ci.getDouble("crystalFrameThickness"));
 
     for ( int i=0; i<ndisks; i++) {
       const Disk& disk = cal->disk(i);
 
+      int ncrystals = disk.nCrystals();
+
       printf(" -- id, ncrystals, Rin, Rout: %i, %3i, %10.4f, %10.4f",
-	     disk.id(),disk.nCrystals(),disk.innerRadius(),disk.outerRadius());
+	     disk.id(),ncrystals,disk.innerRadius(),disk.outerRadius());
 
       const DiskGeomInfo& gi = disk.geomInfo();
 

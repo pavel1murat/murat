@@ -1,13 +1,6 @@
 //
-// Print the information about the TTracker
+// Print the TTracker geometry
 //
-// $Id: DumpTrackerGeometry_module.cc,v 1.2 2015/03/09 00:56:23 murat Exp $
-// $Author: murat $
-// $Date: 2015/03/09 00:56:23 $
-//
-// Original author Rob Kutschke
-//
-
 
 #include "GeometryService/inc/GeomHandle.hh"
 #include "TTrackerGeom/inc/TTracker.hh"
@@ -57,7 +50,6 @@ namespace mu2e {
     printf("----------------------------------------------------------------------------------------------------------------------\n");
     printf(" Chamber Sector Layer   StrawID  R(straw)  X(straw)   Y(straw)  Z(straw)   Rho(straw)    L/2       phi    wireNx   wireNy\n"); 
     printf("----------------------------------------------------------------------------------------------------------------------\n");
-      //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
 
       for ( auto const& panel : plane.getPanels() ) {
 	int nlayers = panel.nLayers();
@@ -86,7 +78,7 @@ namespace mu2e {
 
 	  double phi1 = phi/M_PI*180.;
 	  printf("  %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
-		 straw.index().asInt(),r,x,y,z,rho, hl,phi1,nx,ny);
+		 straw.id().asUint16(),r,x,y,z,rho, hl,phi1,nx,ny);
 	}
       }
     }

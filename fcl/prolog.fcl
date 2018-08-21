@@ -120,17 +120,20 @@ murat : {
     }
 }
 
-murat.producers : { 
-}
+#------------------------------------------------------------------------------
+# final definition of the table 'murat'
+#------------------------------------------------------------------------------
+murat : { @table::murat 
+    producers : {}
 
-murat.filters : {
-    TrackerMCCheck   : { @table::murat.TrackerMCCheck   }
-    TrackRecoCheck   : { @table::murat.TrackRecoCheck   }
-    CaloClusterCheck : { @table::murat.CaloClusterCheck }
-}
+    filters : {
+	TrackerMCCheck   : { @table::murat.TrackerMCCheck   }
+	TrackRecoCheck   : { @table::murat.TrackRecoCheck   }
+	CaloClusterCheck : { @table::murat.CaloClusterCheck }
+    }
 
-murat.analysers : { 
-    DumpEventNumber : { @table::murat.DumpEventNumber }
+    analysers : { 
+	DumpEventNumber : { @table::murat.DumpEventNumber }
+    }
 }
-
 END_PROLOG

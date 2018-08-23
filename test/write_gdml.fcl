@@ -30,7 +30,7 @@ physics : {
 	g4run: { @table::g4run
 	    debug  : { @table::g4run.debug 
 		writeGDML    : true 
-		GDMLFileName : "mu2e_geometry_v6_5_6.gdml"
+		GDMLFileName : "mu2e_geometry.gdml"
 	    }
 	}
     }
@@ -45,10 +45,11 @@ physics : {
 
 # to save initialization time
 # physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
-physics.producers.g4run.physics.physicsListName : "Minumal"
+physics.producers.g4run.physics.physicsListName : "Minimal"
 
 # 2018-05-17: the default geometry file defined in murat/fcl/templates.fcl defines the CD3 geometry
 # template for changing the geometry file, if needed
-services.GeometryService.inputFile: "Mu2eG4/geom/geom_common_current.txt"
+# services.GeometryService.inputFile: "Mu2eG4/geom/geom_common_current.txt"
+services.GeometryService.inputFile: "Mu2eG4/geom/geom_common_newTargPS.txt"
 
 # another geometry file: "murat/test/tracker-rad-dose/c360brass-05-geom.txt"

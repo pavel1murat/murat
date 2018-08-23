@@ -476,7 +476,7 @@ namespace mu2e {
 	  data.fRMax[i] = disk->outerRadius();
 	  data.fZ0  [i] = disk->geomInfo().origin().z();
 	}
-	data.fHexSize     = cal->caloInfo().crystalHalfTrans();
+	data.fHexSize     = cal->caloInfo().getDouble("crystalXYLength");
 	data.fMinFraction = fMinCrystalFr;
 
 	fDiskCalorimeter  = new TDiskCalorimeter(&data);
@@ -506,7 +506,6 @@ namespace mu2e {
 
     Hist->fEnergy  [idisk]->Fill(e);
     Hist->fNHits   [idisk]->Fill(nhits);
-    //    Hist->fTime    [idisk]->Fill(t);
     Hist->fRadius  [idisk]->Fill(r);
     Hist->fRadiusWE[idisk]->Fill(r,e);
     

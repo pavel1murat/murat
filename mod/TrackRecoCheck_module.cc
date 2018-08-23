@@ -27,7 +27,7 @@
 
 // Mu2e includes.
 #include "ConditionsService/inc/ConditionsHandle.hh"
-#include "ConditionsService/inc/TrackerCalibrations.hh"
+// #include "ConditionsService/inc/TrackerCalibrations.hh"
 
 #include "BTrkHelper/inc/BTrkHelper.hh"
 #include "GeometryService/inc/GeometryService.hh"
@@ -67,23 +67,7 @@
 
 #include "Mu2eBTrk/inc/Mu2eDetectorModel.hh"
 
-// ROOT includes
-// #include "TApplication.h"
-// #include "TArc.h"
-// #include "TArrow.h"
-// #include "TCanvas.h"
-// #include "TDirectory.h"
-// #include "TGraph.h"
 #include "TH1F.h"
-// #include "TLine.h"
-// #include "TBox.h"
-// #include "TMarker.h"
-// #include "TEllipse.h"
-// #include "TText.h"
-// #include "TNtuple.h"
-
-// Other includes
-// #include "CLHEP/Units/SystemOfUnits.h"
 
 using namespace std;
 using CLHEP::Hep3Vector;

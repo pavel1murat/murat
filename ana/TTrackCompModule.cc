@@ -136,8 +136,9 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TprTrackBlock" ,"TStnTrackBlock"     ,&fTrackBlock[0]);
-  RegisterDataBlock("CprTrackBlock" ,"TStnTrackBlock"     ,&fTrackBlock[1]);
+  RegisterDataBlock("TrackBlockTpr" ,"TStnTrackBlock"     ,&fTrackBlock[0]);
+  RegisterDataBlock("TrackBlockCpr" ,"TStnTrackBlock"     ,&fTrackBlock[1]);
+  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"     ,&fTrackBlock[2]);
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"   ,&fClusterBlock );
   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"         ,&fSimpBlock    );
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"         ,&fGenpBlock    );
@@ -145,7 +146,6 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // for validation purposes
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlock"     ,"TStnTrackBlock"    ,&fTrackBlock[2]);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -1092,11 +1092,11 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
-  if      (strcmp(block_name,"TprTrackBlock" ) == 0) track_type = 0;
-  else if (strcmp(block_name,"CprTrackBlock" ) == 0) track_type = 1;
+  if      (strcmp(block_name,"TrackBlockTpr" ) == 0) track_type = 0;
+  else if (strcmp(block_name,"TrackBlockCpr" ) == 0) track_type = 1;
   else if (strcmp(block_name,"TrackBlock"    ) == 0) track_type = 2;
   else {
-    Error("TTrackCompModule::InitTrackPar","IN TROUBLE");
+    Error("TTrackCompModule::InitTrackPar",Form("IN TROUBLE: unknown track block: %s",block_name));
     return -1;
   }
 //-----------------------------------------------------------------------------

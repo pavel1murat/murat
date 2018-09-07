@@ -56,7 +56,6 @@ murat : {
     LLHRFilter : { module_type:LLHRFilter
 	g4ModuleLabel                : g4run
 	strawHitMakerModuleLabel     : makeSH
-	strawHitPosMakerModuleLabel  : MakeStereoHits
 	strawHitFlagMakerModuleLabel : FlagStrawHits
 	caloClusterModuleLabel       : MakeCaloCluster
 	trkExtrapol                  : TrkExtrapol
@@ -78,15 +77,15 @@ murat : {
 #------------------------------------------------------------------------------
     TrackerMCCheck                   : { module_type:TrackerMCCheck # the class name
 	g4ModuleLabel                : g4run
-	strawHitMakerModuleLabel     : makeSH
-	strawHitPosMakerModuleLabel  : MakeStereoHits
-	flagBgrHitsModuleLabel       : FlagBkgHits
+	strawHitCollTag              : makeSH
+	strawDigiMCCollTag           : compressDigiMCs # could've been "makeSD"
+	flagBgrHitsCollTag           : "FlagBkgHits:StrawHits"
 	
 	pdgCode                      : 11
 	generatorCode                : 28
 	
 	debugBits                    : { 
-	    # bit3:1 # bit4:1 # bit5:1 
+	    # bit3:0 # bit4:1 # bit5:1 
 	}
     }
     

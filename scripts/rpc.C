@@ -4,7 +4,7 @@
 
 // Ivano's parameterization from mu2e-665 ? from PiCaptureEffects
 
-double rpc(double E) {
+double rpc_ivano(double E) {
 
   constexpr double emax  = 138.2;
   constexpr double alpha =   2.691;
@@ -31,7 +31,7 @@ void plot_rpc() {
   for (int i=0; i<200; i++) {
     double e = 0.5+i;
 
-    double w = rpc(e);
+    double w = rpc_ivano(e);
 
     h->Fill(e,w);
   }

@@ -62,19 +62,18 @@ require 'date'
 #+name: test1
 #+begin_src python :var x=5
 import time
-print("Hello, today's date is %s" % time.ctime())
-print('Two plus three is')
-return 5 + 3+x
+a = format("Today is %s | x = %12.5f" % (time.ctime(),x))
+return (a, '5+3x = ', 5 + 3*x)
 #+end_src
 
 #+RESULTS: test1
-: 13
+| Today is Wed Sep  5 16:58:35 2018 | x =      5.00000 | 5+3x = | 20 |
 
 # to execute call : 'C-c C-v C-e'
 #+call: test1(41)
 
 #+RESULTS:
-: 49
+| Today is Wed Sep  5 16:59:00 2018 | x =     41.00000 | 5+3x = | 128 |
 
 #+begin_src python :session :results file
 import matplotlib
@@ -137,7 +136,7 @@ fn                                         # return this to org-mode
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-23439G_8/figure-23439G1k.pdf]]
+[[file:/tmp/babel-4318XWU/figure-4318QDp.pdf]]
 
 ** R example 001
 #+begin_src R  :results file 

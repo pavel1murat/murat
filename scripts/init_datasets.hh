@@ -11,6 +11,7 @@
 #include "murat/scripts/init_beamline_dose_datasets.hh"
 #include "murat/scripts/init_delta_finder_datasets.hh"
 #include "murat/scripts/init_trigger_datasets.hh"
+#include "murat/scripts/init_mdc2018_datasets.hh"
 
 //-----------------------------------------------------------------------------
 void init_datasets() {
@@ -20,5 +21,6 @@ void init_datasets() {
   init_beamline_dose_datasets();
   init_delta_finder_datasets();
   init_trigger_datasets();
+  init_mdc2018_datasets();
 }
 #endif

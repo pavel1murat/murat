@@ -1,10 +1,16 @@
-//
+///////////////////////////////////////////////////////////////////////////////
+// digitized plots from J.A.Bistirlich et el, Phys. Rev. C 5, 1867–1883 (1972)
+///////////////////////////////////////////////////////////////////////////////
 // 87
 // e,n
 //
 
 #include "TGraphErrors.h"
+#include "murat/plot/smooth.hh"
 
+//-----------------------------------------------------------------------------
+// digitized figure 7b, efficiency folded in, v1
+//-----------------------------------------------------------------------------
 double data_7b_v1[] = { 
   50.9062, 5.59259e-11,
   51.7342, 9.83393e-13,
@@ -94,7 +100,9 @@ double data_7b_v1[] = {
   135.379, 5.25205e-11,
   -1
 };
-
+//-----------------------------------------------------------------------------
+// digitized figure 7b: efficiency folded in, second digitization attempt
+//-----------------------------------------------------------------------------
 double data_7b[] = { 
 50.5133, 1.64222e-13,
 51.5794, 1.89768e-11,
@@ -184,7 +192,10 @@ double data_7b[] = {
 135.508, 4.48327e-11,
   -1
 };
-
+//-----------------------------------------------------------------------------
+// digitized figure 7a, efficiency divided out, first attempt
+// turns out, the background is subtracted here, this is the plot to use
+//-----------------------------------------------------------------------------
 double data_7a_v1[] = {
   60.6693, 9.39130e-05,
   61.5551, 3.13043e-05,
@@ -263,7 +274,10 @@ double data_7a_v1[] = {
   134.606, 0.0,
   -1
 };
-
+//-----------------------------------------------------------------------------
+// digitized figure 7a, efficiency divided out, second attempt
+// background is subtracted, and this is the plot to use
+//-----------------------------------------------------------------------------
 double data_7a[] = {
 60.6034, 0.000100222,
 61.6116, 3.86105e-05,
@@ -342,7 +356,9 @@ double data_7a[] = {
 134.843, 2.83059e-07,
   -1
 };
-
+//-----------------------------------------------------------------------------
+// efficiency: digitized figure 3 from the paper
+//-----------------------------------------------------------------------------
 double data_eff[] = {
   58.8721,2.31616e-06,
   62.2951,4.01606e-06,
@@ -386,20 +402,19 @@ double data_eff[] = {
   -1
 };
 
+//-----------------------------------------------------------------------------
+TH1F*         h_fig7b;
+TH1F*         h_fig7a;
+TH1F*         h_665;
+TH1F*         h_fig7b_eff;
+TH1F*         h_fig7a_fit(0);
 
-TH1F* h0;
-TH1F* h1;
-TH1F* h2;
-TH1F* h3;
 TGraphErrors* gr_eff;
-
-smooth* sgr_eff;
-
-
+smooth*       sgr_eff;
 //------------------------------------------------------------------------------
 // Ivano's parameterization from mu2e-665 ? from PiCaptureEffects
 //-----------------------------------------------------------------------------
-double rpc(double E) {
+double rpc_ivano(double E) {
 
   constexpr double emax  = 138.2;
   constexpr double alpha =   2.691;
@@ -414,6 +429,23 @@ double rpc(double E) {
 
   return pow(emax-E,alpha) * exp(-(emax-gamma*E)/tau) * (c0 + c1*E)/10000.;
 }
+
+//-----------------------------------------------------------------------------
+void plot_ivano() {
+  
+  TH1F* h = new TH1F("h1","RPC mu2e-665 ?",200,0,200);
+
+  for (int i=0; i<200; i++) {
+    double e = 0.5+i;
+
+    double w = rpc_ivano(e);
+
+    h->Fill(e,w);
+  }
+
+  h->Draw("h");
+}
+
 //-----------------------------------------------------------------------------
 void make_eff() {
 
@@ -433,13 +465,16 @@ void make_eff() {
 
   TCanvas* c_eff = new TCanvas("c_eff","e_eff",1000,600);
 
-  gr_eff->Fit("pol3","w");
+  //  gr_eff->Fit("pol3","w");
   gr_eff->Draw();
 
   sgr_eff = new smooth(gr_eff,60,160);
+  sgr_eff->fFunc->Draw("same");
 }
 
 
+//-----------------------------------------------------------------------------
+// main function to call
 //-----------------------------------------------------------------------------
 void rpc_bistirlich() {
 
@@ -456,10 +491,10 @@ void rpc_bistirlich() {
 
   int n(0);
 
-  h0  = new TH1F("h0","RPC photon spectrum for ^{24}Mg",150,0,150);
-  h1  = new TH1F("h1","RPC photon spectrum for ^{24}Mg, corrected",150,0,150);
-  h2  = new TH1F("h2","Ivano\'s fit from Mu2e Offline",150,0,150);
-  h3  = new TH1F("h3","RPC photon spectrum for ^{24}Mg, eff div off",150,0,150);
+  h_fig7b  = new TH1F("h_fig7b","RPC photon spectrum for ^{24}Mg",150,0,150);
+  h_fig7a  = new TH1F("h_fig7a","RPC photon spectrum for ^{24}Mg, corrected",150,0,150);
+  h_665  = new TH1F("h_665","Ivano\'s fit from Mu2e Offline",150,0,150);
+  h_fig7b_eff  = new TH1F("h_fig7b_eff","RPC photon spectrum for ^{24}Mg, eff div off",150,0,150);
 
 
   make_eff();
@@ -472,13 +507,13 @@ void rpc_bistirlich() {
     ew[n] = 0.;
 
     
-    int bin = h0->GetXaxis()->FindBin(e[n]);
+    int bin = h_fig7b->GetXaxis()->FindBin(e[n]);
 
-    h0->SetBinContent(bin,w[n]);
+    h_fig7b->SetBinContent(bin,w[n]);
 
-    double w_ivano = rpc(e[n]);
+    double w_ivano = rpc_ivano(e[n]);
 
-    h2->SetBinContent(bin,w_ivano);
+    h_665->SetBinContent(bin,w_ivano);
 
     double x = e[n];
 
@@ -490,7 +525,7 @@ void rpc_bistirlich() {
     
     printf(" e = %10.4f w_ivano = %12.4f eff = %12.5e\n",e[n],w_ivano,eff);
 
-    h3->SetBinContent(bin,w[n]/eff);
+    h_fig7b_eff->SetBinContent(bin,w[n]/eff);
 
     n += 1;
     
@@ -500,9 +535,9 @@ void rpc_bistirlich() {
     double energy = data_7a[2*i];
     double weight = data_7a[2*i+1]*1.e4;
 
-    int bin = h1->GetXaxis()->FindBin(energy);
+    int bin = h_fig7a->GetXaxis()->FindBin(energy);
 
-    h1->SetBinContent(bin,weight);
+    h_fig7a->SetBinContent(bin,weight);
   }
 
   //  TGraphErrors* gr = new TGraphErrors(n,e,w,ee,ew);
@@ -511,39 +546,41 @@ void rpc_bistirlich() {
 
   TCanvas* c_dat = new TCanvas("c_dat","e_dat",1100,700);
 
-  h0->SetStats(0);
-  h0->GetXaxis()->SetTitle("E(photon), MeV");
-  h0->DrawNormalized();
+  h_fig7b->SetStats(0);
+  h_fig7b->GetXaxis()->SetTitle("E(photon), MeV");
+  h_fig7b->DrawNormalized();
 
-  h1->SetStats(0);
-  h1->SetLineColor(kBlue+2);
-  h1->SetFillStyle(3002);
-  h1->SetFillColor(kBlue+2);
-  h1->DrawNormalized("same",1);
+  h_fig7a->SetStats(0);
+  h_fig7a->SetLineColor(kBlue+2);
+  h_fig7a->SetFillStyle(3002);
+  h_fig7a->SetFillColor(kBlue+2);
+  h_fig7a->DrawNormalized("same",1);
 
-  h2->SetStats(0);
-  h2->SetLineColor(2);
-  h2->DrawNormalized("same",1);
+  h_665->SetStats(0);
+  h_665->SetLineColor(2);
+  h_665->DrawNormalized("same",1);
 
-  h3->SetStats(0);
-  h3->SetLineColor(kRed-2);
-  h3->SetFillColor(kRed-2);
-  h3->SetFillStyle(3003);
-  h3->DrawNormalized("same",1);
+  h_fig7b_eff->SetStats(0);
+  h_fig7b_eff->SetLineColor(kRed-2);
+  h_fig7b_eff->SetFillColor(kRed-2);
+  h_fig7b_eff->SetFillStyle(3003);
+  h_fig7b_eff->DrawNormalized("same",1);
 
   TLegend* leg = new TLegend(0.15,0.7,0.6,0.8);
   leg->SetLineWidth(0);
 
-  leg->AddEntry(h0 ,"Phys Rev C5 1867 figure 7b");
-  leg->AddEntry(h1 ,"Phys Rev C5 1867 figure 7a");
-  leg->AddEntry(h2 ,"fit from Mu2e Offline, mu2e-665");
-  leg->AddEntry(h3 ,"Phys Rev C5 1867 figure 7b/eff");
+  leg->AddEntry(h_fig7b    ,"Phys Rev C5 1867 figure 7b");
+  leg->AddEntry(h_fig7a    ,"Phys Rev C5 1867 figure 7a");
+  leg->AddEntry(h_665      ,"fit from Mu2e Offline, mu2e-665");
+  leg->AddEntry(h_fig7b_eff,"Phys Rev C5 1867 figure 7b/eff");
 
   leg->Draw();
   
 }
 
-
+//-----------------------------------------------------------------------------
+// fit function
+//-----------------------------------------------------------------------------
 double f_rpc(double* X, double* P) {
 
   double f(0.);
@@ -573,7 +610,21 @@ double f_rpc(double* X, double* P) {
 }
 
 //-----------------------------------------------------------------------------
-void fit_h1() {
+// fit results, function normalized to 1
+//
+// FCN=8.82901 FROM HESSE     STATUS=NOT POSDEF     40 CALLS         993 TOTAL
+//                     EDM=5.49549e-08    STRATEGY= 1      ERR MATRIX NOT POS-DEF
+//  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
+//  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+//   1  p0           1.34530e+02   4.25845e-01   1.17475e-04  -8.14601e-04
+//   2  p1           1.29931e+00   2.39423e-01   1.38819e-06   2.41928e-05
+//   3  p2           9.28705e-01   6.53886e-02   1.96419e-06  -5.20820e-03
+//   4  p3           9.39676e+00   1.01635e+00   5.10886e-05   5.65493e-05
+//   5  p4           4.77611e-02   8.86851e-03   2.33297e-07  -6.48587e-02
+//   6  p5          -3.26349e-04   6.48155e-05   1.98579e-09  -8.57054e+00
+//
+//-----------------------------------------------------------------------------
+void fit_h1_fig7a() {
 
   TF1* f = new TF1("f1",f_rpc,60,140,6);
 
@@ -581,11 +632,23 @@ void fit_h1() {
   f->SetParameter(1,2.691);
   f->SetParameter(2,1.051);
   f->SetParameter(3,8.043);
-  f->SetParameter(4,2.741);
-  f->SetParameter(5,-0.005);
+  f->SetParameter(4,0.016);
+  f->SetParameter(5,-1.1e-4);
 
 
-  TCanvas* c_fit_h1 = new TCanvas("c_fit_h1","fit h1",1100,700);
+  TCanvas* c_fit_h_fig7a = new TCanvas("c_fit_h_fig7a","fit h_fig7a",1100,700);
 
-  h1->Fit(f);
+  if (h_fig7a_fit) delete h_fig7a_fit;
+  
+  h_fig7a_fit = (TH1F*) h_fig7a->Clone("h_fig7a_fit");
+
+  int nb      = h_fig7a_fit->GetNbinsX();
+  double norm = h_fig7a->Integral();
+  
+  for (int i=1; i<=nb; i++) {
+    h_fig7a_fit->SetBinContent(i,h_fig7a->GetBinContent(i)/norm);
+    h_fig7a_fit->SetBinError  (i,h_fig7a->GetBinError  (i)/norm);
+  }
+
+  h_fig7a_fit->Fit(f);
 }

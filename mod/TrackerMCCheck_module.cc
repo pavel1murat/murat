@@ -39,7 +39,7 @@
 #include "Mu2eUtilities/inc/TrackTool.hh"
 #include "GeneralUtilities/inc/TwoLinePCA.hh"
 
-#include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
+#include "MCDataProducts/inc/StrawDigiMCCollection.hh"
 #include "MCDataProducts/inc/GenParticleCollection.hh"
 #include "MCDataProducts/inc/SimParticleCollection.hh"
 #include "MCDataProducts/inc/StepPointMCCollection.hh"
@@ -52,8 +52,7 @@
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/StrawHitPositionCollection.hh"
+#include "RecoDataProducts/inc/ComboHit.hh"
 #include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
@@ -70,13 +69,14 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // Module labels 
 //-----------------------------------------------------------------------------
-    std::string        fModuleLabel;	             // this module label
+    std::string        _moduleLabel;	             // this module label
     std::string        _processName;
     std::string        _g4ModuleLabel;
     
+    
     std::string        producerName_;
-    std::string        fStrawHitMaker;
-    std::string        fStrawHitPosMaker;
+    std::string        fStrawHitMakerTag;
+    art::InputTag      _mcdigisTag;
     std::string        fFlagBgrHitsModuleLabel;
     
     int                fPdgCode;
@@ -89,11 +89,10 @@ namespace mu2e {
     mu2e::StrawHitFlag         fGoodHitMask;
     mu2e::StrawHitFlag         fBadHitMask; 
 
-    const mu2e::StrawHitCollection*              fStrawHitColl;     // 
-    const mu2e::StrawHitPositionCollection*      fStrawHitPosColl;  //
+    const mu2e::ComboHitCollection*              fStrawHitColl;     // 
     const mu2e::StrawHitFlagCollection*          fStrawHitFlagColl; // 
     const mu2e::StepPointMCCollection*           fSteps;            //
-    const mu2e::PtrStepPointMCVectorCollection*  fStepPointMCVectorCollection;
+    const mu2e::StrawDigiMCCollection*           _mcdigis;
 
     struct Hist_t {
       TH1F*   fDr;                      // radial distance between the StepPointMC and the corresponding hit
@@ -104,15 +103,25 @@ namespace mu2e {
       TH1F*   fDwRest;                  // residual along the wire
       TH1F*   fNStepsPerHit;		//
       TH1F*   fNStrawHits[2];		// same distribution, different ranges 
+      TH1F*   fEHitAll;			// straw hit energy , all hits
+      TH1F*   fEHitEle;			// all electrons straw hit energy 
       TH1F*   fEHitCE;			// CE straw hit energy 
+      TH1F*   fEHitEprot;	        // straw hit energy , electrons produced by protons
       TH1F*   fEHitMu;			// CE straw hit energy 
       TH2F*   fEHitCEVsPath;		// CE straw hit energy 
       TH2F*   fEHitMuVsPath;		// muon straw hit energy 
       TH1F*   fEHitProt;		// proton straw hit energy
-      TH1F*   fEHitDelta;		// delta hit energy
+      TH1F*   fEHitDeut;		// deutron hit energy
+      TH1F*   fEHitDelta;		// delta (electron produced by a phootn) hit energy
+      TH1F*   fEHitPos;			// positron hit energy
+      TH1F*   fEHitOther;	        // straw hit energy , unidentified hits
+      TH1F*   fMomEle;			// all electrons  momentum 
       TH1F*   fMomCE;			// CE     momentum 
+      TH1F*   fMomEprot;		// momentum , electrons produced by protons
       TH1F*   fMomMu;			// muon   momentum 
       TH1F*   fMomProt;			// proton momentum 
+      TH1F*   fMomDeut;			// proton momentum 
+      TH1F*   fMomPos;			// proton momentum 
       TH1F*   fMomDelta;		// delta  momentum 
       TH1F*   fNStrawHitsCE[4];		//
       TH1F*   fDt;			// time division difference
@@ -155,13 +164,13 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   TrackerMCCheck::TrackerMCCheck(fhicl::ParameterSet const& pset): 
     StntupleModule            (pset,"TrackerMCCheck"),
-    fModuleLabel              (pset.get<std::string>("module_label"                )),
+    _moduleLabel              (pset.get<std::string>("module_label"                )),
     _processName              (pset.get<std::string>("processName"          ,""    )),
     _g4ModuleLabel            (pset.get<std::string>("g4ModuleLabel"               )),
 
-    fStrawHitMaker            (pset.get<std::string>("strawHitMakerModuleLabel"    )),
-    fStrawHitPosMaker         (pset.get<std::string>("strawHitPosMakerModuleLabel" )),
-    fFlagBgrHitsModuleLabel   (pset.get<std::string>("flagBgrHitsModuleLabel"      )),
+    fStrawHitMakerTag         (pset.get<std::string>("strawHitCollTag"            )),
+    _mcdigisTag               (pset.get<art::InputTag>("strawDigiMCCollTag"  )),
+    fFlagBgrHitsModuleLabel   (pset.get<std::string>("flagBgrHitsCollTag"      )),
     
     fPdgCode                  (pset.get<int>        ("pdgCode"                     )),
     fGeneratorCode            (pset.get<int>        ("generatorCode"               ))
@@ -212,14 +221,24 @@ namespace mu2e {
     fHist.fDwPro        = tfs->make<TH1F>("dw_pro" ,"Hit Dw Protons" , 400,-1000,1000);
     fHist.fDwMuo        = tfs->make<TH1F>("dw_muo" ,"Hit Dw Muons"   , 400,-1000,1000);
     fHist.fDwRest       = tfs->make<TH1F>("dw_rest","Hit Dw Rest"    , 400,-1000,1000);
-    fHist.fEHitCE       = tfs->make<TH1F>("ehce","E(hit) CE"         , 300,0,0.03);
+    fHist.fEHitAll      = tfs->make<TH1F>("ehit","E(hit) All"        , 300,0,0.03);
+    fHist.fEHitEle      = tfs->make<TH1F>("ehele","E(hit) All electrons", 300,0,0.03);
+    fHist.fEHitCE       = tfs->make<TH1F>("ehce","E(hit) mother=e"         , 300,0,0.03);
+    fHist.fEHitEprot    = tfs->make<TH1F>("eheprot","E(hit), electron, mother=proton"         , 300,0,0.03);
     fHist.fEHitMu       = tfs->make<TH1F>("ehmu","E(hit) Muon"       , 300,0,0.03);
     fHist.fEHitProt     = tfs->make<TH1F>("ehpr","E(hit) Proton"     , 300,0,0.03);
     fHist.fEHitDelta    = tfs->make<TH1F>("ehdl","E(hit) Delta"      , 300,0,0.03);
+    fHist.fEHitPos      = tfs->make<TH1F>("ehpos","E(hit) Positron"  , 300,0,0.03);
+    fHist.fEHitDeut     = tfs->make<TH1F>("ehdt","E(hit) Deutron"    , 300,0,0.03);
+    fHist.fEHitOther    = tfs->make<TH1F>("eho" ,"E(hit) other"      , 300,0,0.03);
+    fHist.fMomEle       = tfs->make<TH1F>("pele","Momentum all ele"  , 500,0,250);
     fHist.fMomCE        = tfs->make<TH1F>("pce" ,"Momentum CE"       , 500,0,250);
+    fHist.fMomEprot     = tfs->make<TH1F>("peprot" ,"Momentum ele, mother=prot"  , 20,0,10);
     fHist.fMomMu        = tfs->make<TH1F>("pmu" ,"Momentum Muon"     , 500,0,250);
     fHist.fMomProt      = tfs->make<TH1F>("ppr" ,"Momentum Proton"   , 500,0,500);
     fHist.fMomDelta     = tfs->make<TH1F>("pdl" ,"Momentum Delta"    , 200,0, 10);
+    fHist.fMomPos       = tfs->make<TH1F>("ppos","Momentum Positron" , 200,0, 10);
+    fHist.fMomDeut      = tfs->make<TH1F>("pdt" ,"Momentum Deutron"  , 200,0,500);
     fHist.fDt           = tfs->make<TH1F>("dt"    ,"Delta(T) left-right", 1000,-10,10);
     fHist.fWPos         = tfs->make<TH1F>("wpos"  ,"Hit Position along the Wire", 200,-1000,1000);
     fHist.fDtVsWPos     = tfs->make<TH2F>("dt_vs_wpos" ,"Hit Dt vs WPos", 200,-1000,1000, 200, -10,10);
@@ -260,17 +279,10 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 //  straw hit information
 //-----------------------------------------------------------------------------
-    art::Handle<StrawHitCollection> shH;
-    Evt->getByLabel(fStrawHitMaker,shH);
-    if (shH.isValid()) fStrawHitColl = shH.product();
-    else               fStrawHitColl = NULL;
-    
-    art::Handle<mu2e::StrawHitPositionCollection> shpH;
-    Evt->getByLabel(fStrawHitPosMaker,shpH);
-    if (shpH.isValid()) fStrawHitPosColl = shpH.product();
-    else                fStrawHitPosColl = NULL;
+    auto shH      = Evt->getValidHandle<ComboHitCollection>(fStrawHitMakerTag);
+    fStrawHitColl = shH.product();
 //-----------------------------------------------------------------------------
-// get straw hit flags (half-hack)
+// get straw hit flags
 //-----------------------------------------------------------------------------
     Evt->getByLabel(fFlagBgrHitsModuleLabel.data(),shflagH);
     if (shflagH.isValid()) fStrawHitFlagColl = shflagH.product();
@@ -280,23 +292,12 @@ namespace mu2e {
       fStrawHitFlagColl = NULL;
     }
 
-    // 12 - 11 -2013 giani added some MC info of the straws
-    art::Handle<mu2e::PtrStepPointMCVectorCollection> mcptrHandleStraw;
-    Evt->getByLabel(fStrawHitMaker,"",mcptrHandleStraw);
-
-    if (mcptrHandleStraw.isValid()) fStepPointMCVectorCollection = mcptrHandleStraw.product();
-    else                            fStepPointMCVectorCollection = NULL;
- 
-//     art::Handle<mu2e::StrawHitFlagCollection> shfH;
-//     Evt->getByLabel(fStrawHitFlagMaker,shfH);
-//     fStrawHitFlagColl = shfH.product();
-  }
+    auto mcdH = Evt->getValidHandle<StrawDigiMCCollection>(_mcdigisTag);
+    _mcdigis  = mcdH.product();
+   }
 
 //-----------------------------------------------------------------------------
   void TrackerMCCheck::Init(art::Event* Evt) {
-//    TStnCluster*    cluster;
-//    int             id_word, ntrk;
-
   }
 
 
@@ -310,8 +311,6 @@ namespace mu2e {
 // get event data and initialize data blocks
 //-----------------------------------------------------------------------------
     getData(&Evt);
-
-
 
 //-----------------------------------------------------------------------------
 // particle parameters at virtual detectors
@@ -382,8 +381,8 @@ namespace mu2e {
     int                    nhits, nhits_ce, pdg_id, mother_pdg_id, nsteps_per_hit;
     int                    gen_code; //, sim_id;
 
-    const mu2e::StrawHit           *hit;
-    const mu2e::StrawHitPosition   *shp;
+    const mu2e::ComboHit           *hit;
+    //    const mu2e::StrawHitPosition   *shp;
     const mu2e::StepPointMC        *step; 
 
     static const double MIN_PITCH = 1;
@@ -397,12 +396,20 @@ namespace mu2e {
     nhits_ce = 0;
 
     for (int i=0;  i<nhits;  i++) {
-      mu2e::PtrStepPointMCVector const& mcptr(fStepPointMCVectorCollection->at(i));
-      nsteps_per_hit = mcptr.size();
-      step = mcptr[0].get();
+
+      const mu2e::StrawDigiMC* mcdigi = &_mcdigis->at(i);
+
+      if (mcdigi->wireEndTime(mu2e::StrawEnd::cal) < mcdigi->wireEndTime(mu2e::StrawEnd::hv)) {
+	step = mcdigi->stepPointMC(mu2e::StrawEnd::cal).get();
+      }
+      else {
+	step = mcdigi->stepPointMC(mu2e::StrawEnd::hv ).get();
+      }
+
+      nsteps_per_hit = 1.;
     
       hit   = &fStrawHitColl->at(i);
-      shp   = &fStrawHitPosColl->at(i);
+      //      shp   = &fStrawHitPosColl->at(i);
 
       art::Ptr<mu2e::SimParticle> const& simptr = step->simParticle(); 
       art::Ptr<mu2e::SimParticle> mother = simptr;
@@ -413,7 +420,7 @@ namespace mu2e {
       ehit          = hit->energyDep();
       pdg_id        = simptr->pdgId();
       mother_pdg_id = sim->pdgId();
-      dt            = hit->dt();
+      dt            = -99.; // undefined now // hit->dt();
       //      sim_id        = simptr->id().asInt();
 
       if (simptr->fromGenerator()) gen_code = simptr->genParticle()->generatorId().id();
@@ -423,8 +430,10 @@ namespace mu2e {
 	nhits_ce += 1;
       }
 
-      wpos          = shp->wireDist();
-      errpos        = shp->posRes(StrawHitPosition::wire);   
+      wpos          = hit->wireDist();
+      errpos        = hit->posRes(ComboHit::wire);   
+
+      fHist.fEHitAll->Fill(ehit);
 
       fHist.fDt->Fill(dt);
       fHist.fNStepsPerHit->Fill(nsteps_per_hit);
@@ -434,8 +443,14 @@ namespace mu2e {
       fHist.fErrPos->Fill(errpos);
 
       if (pdg_id == 11) {
-	if (mother_pdg_id == 11) {
-					// electrons, not from photon conversions
+					// electrons
+	fHist.fEHitEle->Fill(ehit);
+	fHist.fMomEle->Fill(p);
+//-----------------------------------------------------------------------------
+// (partial) split by parentage. mother is the "ultimate", generator-level parent
+//-----------------------------------------------------------------------------
+	if (p > 90) { 
+					// "high-momentum" electrons, not from photon conversions
 	  fHist.fEHitCE->Fill(ehit);
 	  //	  fHist.fEHitCEVsPath->Fill(path,ehit);
 	  fHist.fMomCE->Fill(p);
@@ -445,6 +460,17 @@ namespace mu2e {
 	  fHist.fEHitDelta->Fill(ehit);
 	  fHist.fMomDelta->Fill(p);
 	}
+	else if (mother_pdg_id == 2212) {
+					// electrons produced by protons
+	  fHist.fEHitEprot->Fill(ehit);
+	  fHist.fMomEprot->Fill(p);
+	}
+      }
+      else if (pdg_id == -11) {
+					// protons
+	fHist.fEHitPos->Fill(ehit);
+	//	fHist.fEHitMuVsPath->Fill(path,ehit);
+	fHist.fMomPos->Fill(p);
       }
       else if (pdg_id == 2212) {
 					// protons
@@ -456,6 +482,17 @@ namespace mu2e {
 	fHist.fEHitMu->Fill(ehit);
 	//	fHist.fEHitMuVsPath->Fill(path,ehit);
 	fHist.fMomMu->Fill(p);
+      }
+      else if (pdg_id ==1000010020) {
+					// protons
+	fHist.fEHitDeut->Fill(ehit);
+	//	fHist.fEHitMuVsPath->Fill(path,ehit);
+	fHist.fMomDeut->Fill(p);
+      }
+      else {
+					// everything else
+	printf("unknown PDG ID: %i\n",pdg_id);
+	fHist.fEHitOther->Fill(ehit);
       }
     }
 //-----------------------------------------------------------------------------
@@ -496,21 +533,12 @@ namespace mu2e {
     
     int nsteps, nhits, jclosest;
 
-    //    static TH1F*  hist(0);
-
-    //    static TCanvas* c;
-
     const mu2e::StepPointMC        *step;
-    const mu2e::StrawHitPosition   *hitp, *closest_hitp;
 
     double   zstep, zhit, dz, dz_min, /* dx, dy, drho, */ rh, rs, dr;
 
-    //    mu2e::GeomHandle<mu2e::TTracker> ttHandle;
-
-    //    const mu2e::TTracker* tracker = ttHandle.get();
-
     nsteps = fSteps->size();
-    nhits  = fStrawHitPosColl->size();
+    nhits  = fStrawHitColl->size();
     
     for (int i=0; i<nsteps; i++) {
       step =  &fSteps->at(i);
@@ -532,8 +560,7 @@ namespace mu2e {
       dz_min   = 1e10;
 
       for (int j=0; j<nhits; j++) {
-	hitp   = &fStrawHitPosColl->at(j);
-	zhit   = hitp->pos().z();
+	zhit   = fStrawHitColl->at(j).pos().z();
 
 	dz = zstep-zhit;
 	if (fabs(dz) < dz_min) {
@@ -543,15 +570,10 @@ namespace mu2e {
       }
 
       if (jclosest >= 0) {
-	closest_hitp = &fStrawHitPosColl->at(jclosest);
+	const ComboHit* sh = &fStrawHitColl->at(jclosest);
+	const Straw* straw = &_tracker->getStraw(sh->strawId());
 
-	const StrawHit* sh = &fStrawHitColl->at(jclosest);
-	
-	//	mu2e::StrawIndex index = sh->strawIndex();
-
-	const mu2e::Straw* straw = &_tracker->getStraw(sh->strawId());
-
-	const XYZVec* hp = &closest_hitp->pos();
+	const XYZVec* hp = &fStrawHitColl->at(jclosest).pos();
 
 	double dx = sp->x()-hp->x();
 	double dy = sp->y()-hp->y();

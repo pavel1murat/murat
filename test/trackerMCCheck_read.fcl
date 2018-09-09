@@ -13,45 +13,49 @@ BEGIN_PROLOG
   bgHitFiles : @nil
 END_PROLOG
 
-#include "murat/fcl/templates.fcl"
+#include "Stntuple/fcl/templates.fcl"
 
 process_name : trackerMCCheck
 source : {
     module_type :  RootInput
     maxEvents   :  -1
-    fileNames   : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"]
+#    fileNames   : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"]
+# MDC2018
+    fileNames   : [ "/pnfs/mu2e/tape/phy-sim/dig/mu2e/CeEndpoint-mix/MDC2018a/art/a7/01/dig.mu2e.CeEndpoint-mix.MDC2018a.001002_00000000.art" ]
 }
 
-outputs      : { @table::murat.outputs   }
-producers    : { @table::murat.producers }
-filters      : { @table::murat.filters   }
-paths        : { @table::murat.paths     }
+outputs      : { @table::Stntuple.outputs   }
+producers    : { @table::Stntuple.producers }
+filters      : { @table::Stntuple.filters   }
+paths        : { @table::Stntuple.paths     }
 
 #------------------------------------------------------------------------------
 # physics
 #------------------------------------------------------------------------------
 physics : { 
-    producers : { 
-#	@table::TrkHitReco.producers    # defined in TrkHitReco
-	@table::producers 
+    producers : { @table::producers 
+	generate: @local::StoppedParticleReactionGun
     }
-    filters   : { @table::filters }
+
+    filters   : { @table::filters 
+	TrackerMCCheck : { @table::murat.TrackerMCCheck
+	    debugBits                    : { 
+		bit3:0 bit4:1 # bit5:1 
+	    }
+	}
+    }
 
     @table::paths
 #------------------------------------------------------------------------------
 # paths
 #------------------------------------------------------------------------------
-    p1 : [ @sequence::murat.mix_time_map, 
-	   @sequence::Tracking.DigiSim    , 
-	   @sequence::Tracking.PrepareHits, 
-	   TrackerMCCheck                 
-	  ]
+#     p1 : [ @sequence::murat.mix_time_map, 
+# 	   @sequence::Tracking.DigiSim    , 
+# 	   @sequence::TrkHitReco.PrepareHits, 
+# 	   TrackerMCCheck                 
+# 	  ]
     
-    p2 : [ @sequence::EventMixing.TimeMaps, 
-	   @sequence::Tracking.DigiSim    , 
-	   @sequence::Tracking.PrepareHits, 
-	   TrackerMCCheck                 
-	  ]
+    p2 : [ @sequence::TrkHitReco.PrepareHits, TrackerMCCheck  ]
     
 
     e1 : []
@@ -63,6 +67,3 @@ physics : {
 services.TFileService.fileName : "trackerMCCheck_read.hist"
 physics.trigger_paths          : [ p2 ]
 physics.end_paths              : [ e1 ]
-
-# physics.filters.TrackerMCCheck.g4ModuleLabel : "protonMixer"
-physics.filters.TrackerMCCheck.debugBits     : { bit3:1 }

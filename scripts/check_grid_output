@@ -4,7 +4,7 @@ project=$1
   jobid=$2
   order=$3
 
-stage_dir="/pnfs/mu2e/scratch/users/murat/workflow/$project/outstage/"`ls /pnfs/mu2e/scratch/users/murat/workflow/$project/outstage | grep $jobid`;
+stage_dir="/pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage/"`ls /pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage | grep $jobid`;
 
 echo ">>> job output directory:" $stage_dir; 
 

@@ -5,14 +5,16 @@
 #  assume that the stage directory is /mu2e/data/outstage/$USER
 #
 # working example: 
-# . murat/scripts/move_grid_output 15158701 /mu2e/data/users/murat/datasets e0000002 .  
+# . murat/scripts/move_grid_output 15158701 /mu2e/data/users/$USER/datasets e0000002 .  
 # file extentions recognized: .art .log .hist .stn
 #------------------------------------------------------------------------------
- stage_dir=/mu2e/data/outstage/$USER
-     jobid=$1 # 15160119
+   project=$1
+     jobid=$2 # 15160119
 output_dir=/mu2e/data/users/$USER/datasets
-    dsname=$3
-      doit=$4
+    dsname=$4
+      doit=$5
+
+ stage_dir=/pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage/$jobid
 
 echo stage_dir=$stage_dir
 echo     jobid=$jobid
@@ -26,7 +28,7 @@ if [ ".$doit" != "." ] ; then cmd_prefix="" ; fi
 job=`ls $stage_dir | grep $jobid`;
 jobname=`echo $job | awk -F . '{print $1}'`
 
-if [ $2 != "." ] ; then output_dir=$2 ; fi
+if [ $3 != "." ] ; then output_dir=$3 ; fi
 od=$output_dir/$dsname
 
 echo job=$job jobname=$jobname od=$od
@@ -37,7 +39,7 @@ if [ ! -d $od      ] ; then mkdir $od      ; fi
 if [ ! -d $od/log  ] ; then mkdir $od/log  ; fi
 if [ ! -d $od/hist ] ; then mkdir $od/hist ; fi
 
-dir=$stage_dir/$job
+dir=$stage_dir
 echo dir=$dir
 for sd1 in `ls $dir` ; do
 #------------------------------------------------------------------------------
@@ -113,8 +115,8 @@ for sd1 in `ls $dir` ; do
 #------------------------------------------------------------------------------
 # move log files
 #------------------------------------------------------------------------------
-		$cmd_prefix mv $logfile    $od/log/$jobname.$index0.log
-		$cmd_prefix mv $fclfile    $od/log/$jobname.$index0.fcl
+		$cmd_prefix mv $logfile    $od/log/$project.$jobid.$index0.log
+		$cmd_prefix mv $fclfile    $od/log/$project.$jobid.$index0.fcl
 	    else
 		if [ ".$rc" == "." ] ; then
 		    x=`cat $logfile | grep "Art has completed"`;

@@ -703,6 +703,9 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
 void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
 					       TStnTrackID*     TrackID   , 
 					       int              HistSet   ) {
+  // having MC truth is a must for calculating efficiency!
+  if (fSimp == nullptr) return;
+
   if (fSimp->NStrawHits() >= 20) {
     FillEventHistograms(fHist.fEvent[HistSet]);
 

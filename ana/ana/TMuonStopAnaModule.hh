@@ -36,19 +36,20 @@ public:
   struct EventHist_t : public HistBase_t {
     TH1F*    fRunNumber  ;
     TH1F*    fEventNumber;
-    TH1F*    fNVdetHits  ;
-    TH1F*    fNVdetHits_9;
-    TH1F*    fNVdetHits_13;
+    TH1F*    fNVDetHits  ;
+    TH1F*    fNVDetHits_9;
+    TH1F*    fNVDetHits_13;
     TH1F*    fETot_13;
   };
 
-  struct VdetHist_t : public HistBase_t {
+  struct VDetHist_t : public HistBase_t {
     TH1F*    fIndex   ;
     TH1F*    fPDGCode ;		       //
     TH1F*    fGenCode ;		       // generator code
     TH1F*    fMomentum;
     TH1F*    fTime    ;
-    TH2F*    fYVsX    ;
+    TH2F*    fYVsX    ;                // different VD's have different orientation
+    TH2F*    fYVsZ    ;                // fill both hist's
   };
 
   struct SimpData_t {
@@ -56,15 +57,20 @@ public:
     TSimParticle* fParent;              // muon parent
   };
 
+  struct VDetData_t {
+    int fID;
+    int fXOffset;			// for X dist
+  };
+
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets =  100 };
   enum { kNSimpHistSets  = 1000 };
-  enum { kNVdetHistSets  = 1000 };
+  enum { kNVDetHistSets  = 1000 };
 
   struct Hist_t {
     EventHist_t* fEvent[kNEventHistSets];
     SimpHist_t*  fSimp [kNSimpHistSets ];
-    VdetHist_t*  fVdet [kNVdetHistSets ];
+    VDetHist_t*  fVDet [kNVDetHistSets ];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -73,7 +79,7 @@ public:
 					// pointers to the data blocks used
   //  TStepPointMCBlock*    fStepPointMCBlock;
   TSimpBlock*           fSimpBlock;  
-  TStepPointMCBlock*    fVdetBlock;
+  TStepPointMCBlock*    fVDetBlock;
 					// transient data
   SimpData_t            fSimpData[100];
 
@@ -81,12 +87,15 @@ public:
   TSimParticle*         fParent;
   TSimParticle*         fProton;
 
-  int                   fNVdetHits  ;
-  int                   fNVdetHits_9;
-  int                   fNVdetHits_13;
+  int                   fNVDetHits  ;
+  int                   fNVDetHits_9;
+  int                   fNVDetHits_13;
   float                 fETot_13;
 					// histograms filled
   Hist_t                fHist;
+
+  int                   fNVDet;         // max number of the VD used
+  VDetData_t            fVDet[200];     // helper , used in FillVDetHistograms
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -111,12 +120,12 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   void    BookSimpHistograms  (HistBase_t* Hist, const char* Folder);
-  void    BookVdetHistograms  (HistBase_t* Hist, const char* Folder);
+  void    BookVDetHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookEventHistograms (HistBase_t* Hist, const char* Folder);
 
   void    FillEventHistograms (HistBase_t* Hist);
   void    FillSimpHistograms  (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData);
-  void    FillVdetHistograms  (HistBase_t* Hist, TStepPointMC* Step);
+  void    FillVDetHistograms  (HistBase_t* Hist, TStepPointMC* Step);
 
   void    BookHistograms();
   void    FillHistograms();

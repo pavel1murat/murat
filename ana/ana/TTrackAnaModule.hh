@@ -210,10 +210,6 @@ public:
     TH1F*    fEDiskP;			// total energy in the hit disk / P
     TH1F*    fEp;
     TH2F*    fEpVsPath;
-//     TH1F*    fEp_eMinus;
-//     TH1F*    fEp_ePlus;
-//     TH1F*    fEp_muMinus;
-//     TH1F*    fEp_muPlus;
     TH2F*    fNHVsStation;
     TH2F*    fNHVsNSt;
 
@@ -229,7 +225,7 @@ public:
     TH1F*    fLogLHRTrk;
     TH1F*    fLogLHR;
 					// MC truth
-    TH1F*    fPdgCode;	                // PDG code of the particle produced most hits
+    TH1F*    fPdgCode[2];               // PDG code of the particle produced most hits
     TH1F*    fFrGH;			// fraction of hits produced by the particle
 
     TH2F*    fNEPlVsNHPl;

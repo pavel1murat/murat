@@ -648,8 +648,9 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fLogLHRXs->Fill(llhr_xs);
   Hist->fLogLHRTrk->Fill(llhr_trk);
   Hist->fLogLHR->Fill(llhr);
-
-  Hist->fPdgCode->Fill(Track->fPdgCode);
+					// two histograms with different limits and binning
+  Hist->fPdgCode[0]->Fill(Track->fPdgCode);
+  Hist->fPdgCode[1]->Fill(Track->fPdgCode);
   Hist->fFrGH->Fill(Track->fNGoodMcHits/(Track->NActive()+1.e-5));
 
   Hist->fNEPlVsNHPl->Fill(tp->fNEPl,tp->fNHPl);

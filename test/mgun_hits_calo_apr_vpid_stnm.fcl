@@ -62,9 +62,9 @@ physics: { @table::physics
     aaaa : [ @sequence::generatorSeq, @sequence::hitMakerSeq ,
 	     @sequence::CaloCluster.Reco , 
 	     @sequence::allPatRecDemSeq,
-	     @sequence::trkCaloMatchingDemSeq,
+             @sequence::TrackCaloMatching.matching_dem,
 	     @sequence::allPatRecDmmSeq,
-	     @sequence::trkCaloMatchingDmmSeq,
+             @sequence::TrackCaloMatching.matching_dmm,
 	     AvikPID,
 	     @sequence::stnmaker_dem_dmm_seq ]
 

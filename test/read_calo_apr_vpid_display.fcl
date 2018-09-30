@@ -82,10 +82,10 @@ physics: {
 
     @table::paths
 
-    p1 : [ @sequence::calRecoSeq        , 
-	   @sequence::allPatRecSeq      ,
-	   @sequence::trkCaloMatchingSeq,
-	   ParticleID                   , 
+    p1 : [ @sequence::calRecoSeq                , 
+	   @sequence::allPatRecSeq              ,
+           @sequence::TrackCaloMatching.matching,
+	   ParticleID                           , 
 	   MuHitDisplay
 	  ]
 

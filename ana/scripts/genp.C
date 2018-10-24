@@ -22,6 +22,8 @@ def_name genp_012("coll1_dose_ana");
 void  spmc_ana(int Stage = 1, int DebugBit = -1) {
   m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
   if (Stage == 3) m_spmc->SetSpmcBlockName("VdetBlock");
+  if (Stage == 2) m_spmc->SetVDetBlockName("VDetBlock");
+
   if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
 }
 

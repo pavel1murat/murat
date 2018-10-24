@@ -7,6 +7,8 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -20,6 +22,7 @@
 #include "Stntuple/alg/TEmuLogLH.hh"
 
 #include "murat/ana/HistBase_t.h"
+#include "murat/ana/VDetData_t.hh"
 
 #include "murat/ana/AnaDefs.hh"
 
@@ -28,6 +31,25 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
+  struct EventHist_t : public HistBase_t {
+    TH1F*      fRunNumber;
+    TH1F*      fEventNumber;
+  };
+
+  struct SimpHist_t : public HistBase_t {
+    TH1F*    fVolumeID;		       //
+    TH1F*    fGeneratorID;
+    TH1F*    fTime;
+    TH1F*    fParentPDG;
+    TH1F*    fParentMom;
+    TH1F*    fStartMom;
+
+    TH2F*    fYVsX;
+    TH2F*    fXEndVsZEnd;
+    TH2F*    fYVsX_2480;
+    TH2F*    fYVsX_2513;
+  };
+
   struct StepPointMCHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
     TH1F*      fGenIndex;		       //
@@ -44,34 +66,72 @@ public:
     TH1F*      fStepLength;
 
     TH1F*      fMomentum;
+    TH1F*      fEKin;
 
     TH2F*      fYVsZ;
     TH2F*      fYVsX;
   };
 
-  struct EventHist_t : public HistBase_t {
-    TH1F*      fRunNumber;
-    TH1F*      fEventNumber;
+  struct VDetHist_t : public HistBase_t {
+    TH1F*    fIndex   ;
+    TH1F*    fPDGCode ;		       //
+    TH1F*    fGenCode ;		       // generator code
+    TH1F*    fMomentum;
+    TH1F*    fTime    ;
+    TH2F*    fYVsX    ;                // different VD's have different orientation
+    TH2F*    fYVsZ    ;                // fill both hist's
+    TH1F*    fPt      ;                // transverse mom
+    TH1F*    fPp      ;                // momentum component parallel to the solenoid axis
+    TH1F*    fTanTh   ;		       // tan (pitch angle)
+    TH1F*    fEKin    ;
+  };
+
+  struct SimpData_t {
+    int           fIndex;		// so far, not used
+    TSimParticle* fParent;              // muon parent
+  };
+
+  struct SpmcData_t {
+    TParticlePDG*  fParticle;		// so far, not used
   };
 
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets        =   100 };
   enum { kNStepPointMCHistSets  = 10000 };
+  enum { kNSimpHistSets         =  1000 };
+  enum { kNVDetHistSets         =  1000 };
 
   struct Hist_t {
-    EventHist_t*        fEvent       [kNEventHistSets];
-    StepPointMCHist_t*  fStepPointMC [kNStepPointMCHistSets];
+    EventHist_t*        fEvent      [kNEventHistSets      ];
+    SimpHist_t*         fSimp       [kNSimpHistSets       ];
+    VDetHist_t*         fVDet       [kNVDetHistSets       ];
+    StepPointMCHist_t*  fStepPointMC[kNStepPointMCHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
+  TSimpBlock*           fSimpBlock;  
   TStepPointMCBlock*    fStepPointMCBlock;
+  TStepPointMCBlock*    fVDetBlock;
 					// histograms filled
   Hist_t                fHist;
 
   TString               fSpmcBlockName;
+  TString               fVDetBlockName;
+
+  TSimParticle*         fMuon;		// pointer to stopped muon (pend=0)
+  TSimParticle*         fParent;
+  TSimParticle*         fProton;
+
+  TParticlePDG*         fParticleCache[5000];
+
+  TDatabasePDG*         fPdgDb;
+
+  int                   fNVDetHits  ;
+  int                   fNVDet;
+  VDetData_t            fVDet[200];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -86,6 +146,10 @@ public:
 // setters
 //-----------------------------------------------------------------------------
   void SetSpmcBlockName(const char* Name) { fSpmcBlockName = Name; }
+  void SetVDetBlockName(const char* Name) { fVDetBlockName = Name; }
+
+  void          SetParticleCache(int PdgCode, TParticlePDG* P) { fParticleCache[2500+PdgCode] = P; }
+  TParticlePDG* GetParticleCache(int PdgCode) { return fParticleCache[2500+PdgCode]; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
@@ -96,11 +160,15 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
+  void    BookSimpHistograms         (HistBase_t* Hist, const char* Folder);
+  void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
+  void    BookVDetHistograms         (HistBase_t* Hist, const char* Folder);
 
-  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step);
   void    FillEventHistograms        (HistBase_t* Hist);
+  void    FillSimpHistograms         (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData);
+  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData);
+  void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step);
 
   void    BookHistograms();
   void    FillHistograms();

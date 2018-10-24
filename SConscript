@@ -12,7 +12,7 @@ x = subprocess.call('scripts/build_config',shell=True)
 # done
 #------------------------------------------------------------------------------
 env.Append(BUILDERS = {'StntupleCodegen'  : stntuple_codegen})
-env.Append(BUILDERS = {'StntupleRootCint' : stntuple_my_rootcint})
+env.Append(BUILDERS = {'StntupleRootCint' : stntuple_rootcint})
 
 Export('stntuple_helper')
 # 

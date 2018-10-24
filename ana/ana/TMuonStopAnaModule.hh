@@ -12,7 +12,9 @@
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStepPointMCBlock.hh"
 
+#include "murat/ana/VDetData_t.hh"
 #include "murat/ana/HistBase_t.h"
+
 #include "murat/ana/AnaDefs.hh"
 
 class TMuonStopAnaModule: public TStnModule {
@@ -26,11 +28,12 @@ public:
     TH1F*    fTime;
     TH1F*    fParentPDG;
     TH1F*    fParentMom;
+    TH1F*    fStartMom;
 
     TH2F*    fYVsX;
+    TH2F*    fXEndVsZEnd;
     TH2F*    fYVsX_2480;
     TH2F*    fYVsX_2513;
-
   };
 
   struct EventHist_t : public HistBase_t {
@@ -50,18 +53,15 @@ public:
     TH1F*    fTime    ;
     TH2F*    fYVsX    ;                // different VD's have different orientation
     TH2F*    fYVsZ    ;                // fill both hist's
+    TH1F*    fPt      ;                // transverse mom
+    TH1F*    fPp      ;                // momentum component parallel to the solenoid axis
+    TH1F*    fTanTh   ;		       // tan (pitch angle)
   };
 
   struct SimpData_t {
     int           fIndex;		// so far, not used
     TSimParticle* fParent;              // muon parent
   };
-
-  struct VDetData_t {
-    int fID;
-    int fXOffset;			// for X dist
-  };
-
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets =  100 };
   enum { kNSimpHistSets  = 1000 };
@@ -83,7 +83,7 @@ public:
 					// transient data
   SimpData_t            fSimpData[100];
 
-  TSimParticle*         fMuon;
+  TSimParticle*         fMuon;		// pointer to stopped muon (pend=0)
   TSimParticle*         fParent;
   TSimParticle*         fProton;
 

@@ -27,6 +27,8 @@
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
+
+#include "murat/ana/InitVirtualDetectors.hh"
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
@@ -56,7 +58,9 @@ void TMuonStopAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder
   HBook1F(hist->fParentMom  ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
   HBook1F(hist->fParentPDG  ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
 
-  HBook2F(hist->fYVsX       ,"y_vs_x"   ,Form("%s: Y vs X (all)"    ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook1F(hist->fStartMom   ,"mom"        ,Form("%s: start Mom"     ,Folder), 200,     0, 1000,Folder);
+  HBook2F(hist->fYVsX       ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fXEndVsZEnd ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
   HBook2F(hist->fYVsX_2480  ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYVsX_2513  ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
 }
@@ -74,6 +78,9 @@ void TMuonStopAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder
   HBook1F(hist->fTime    ,"time"    ,Form("%s: Hit Time  "    ,Folder), 200, 0,2000,Folder);
   HBook2F(hist->fYVsX    ,"y_vs_x"  ,Form("%s: Y vs X (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYVsZ    ,"y_vs_z"  ,Form("%s: Y vs Z (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
+  HBook1F(hist->fPt      ,"pt"      ,Form("%s: Pt"            ,Folder), 200, 0, 200,Folder);
+  HBook1F(hist->fPp      ,"pp"      ,Form("%s: P(parallel)"   ,Folder), 200, 0, 200,Folder);
+  HBook1F(hist->fTanTh   ,"tan_th"  ,Form("%s: tan(pitch ang)",Folder), 500, -1, 4,Folder);
 }
 
 
@@ -122,7 +129,8 @@ void TMuonStopAnaModule::BookHistograms() {
   int book_simp_histset[kNSimpHistSets];
   for (int i=0; i<kNSimpHistSets; i++) book_simp_histset[i] = 0;
 
-  book_simp_histset[0] = 1;		// all steps
+  book_simp_histset[  0] = 1;		// all stopped muons
+  book_simp_histset[  1] = 1;		// stopped muons p < 50 MeV/c
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -147,15 +155,35 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[109] = 1;		// e-  , VDET=9
   book_vdet_histset[209] = 1;		// e+  , VDET=9
 
-  book_vdet_histset[301] = 1;		// mu- , VDET=1: Coll1_In
-  book_vdet_histset[302] = 1;		// mu- , VDET=2: Coll1_Out
-  book_vdet_histset[303] = 1;		// mu- , VDET=3: Coll31_In
-  book_vdet_histset[304] = 1;		// mu- , VDET=4: Coll31_Out
-  book_vdet_histset[305] = 1;		// mu- , VDET=5: Coll32_In 
-  book_vdet_histset[306] = 1;		// mu- , VDET=6: Coll32_Out
-  book_vdet_histset[307] = 1;		// mu- , VDET=7: Coll5_In
-  book_vdet_histset[308] = 1;		// mu- , VDET=8: Coll5_Out
-  book_vdet_histset[309] = 1;		// mu- , VDET=9: ST_In
+  book_vdet_histset[301] = 1;		// all mu- , VDET=1: Coll1_In
+  book_vdet_histset[302] = 1;		// all mu- , VDET=2: Coll1_Out
+  book_vdet_histset[303] = 1;		// all mu- , VDET=3: Coll31_In
+  book_vdet_histset[304] = 1;		// all mu- , VDET=4: Coll31_Out
+  book_vdet_histset[305] = 1;		// all mu- , VDET=5: Coll32_In 
+  book_vdet_histset[306] = 1;		// all mu- , VDET=6: Coll32_Out
+  book_vdet_histset[307] = 1;		// all mu- , VDET=7: Coll5_In
+  book_vdet_histset[308] = 1;		// all mu- , VDET=8: Coll5_Out
+  book_vdet_histset[309] = 1;		// all mu- , VDET=9: ST_In
+
+  book_vdet_histset[311] = 1;		// p<50 MeV/c mu- , VDET=1: Coll1_In
+  book_vdet_histset[312] = 1;		// p<50 MeV/c mu- , VDET=2: Coll1_Out
+  book_vdet_histset[313] = 1;		// p<50 MeV/c mu- , VDET=3: Coll31_In
+  book_vdet_histset[314] = 1;		// p<50 MeV/c mu- , VDET=4: Coll31_Out
+  book_vdet_histset[315] = 1;		// p<50 MeV/c mu- , VDET=5: Coll32_In 
+  book_vdet_histset[316] = 1;		// p<50 MeV/c mu- , VDET=6: Coll32_Out
+  book_vdet_histset[317] = 1;		// p<50 MeV/c mu- , VDET=7: Coll5_In
+  book_vdet_histset[318] = 1;		// p<50 MeV/c mu- , VDET=8: Coll5_Out
+  book_vdet_histset[319] = 1;		// p<50 MeV/c mu- , VDET=9: ST_In
+
+  book_vdet_histset[321] = 1;		// p>50 MeV/c mu- , VDET=1: Coll1_In
+  book_vdet_histset[322] = 1;		// p>50 MeV/c mu- , VDET=2: Coll1_Out
+  book_vdet_histset[323] = 1;		// p>50 MeV/c mu- , VDET=3: Coll31_In
+  book_vdet_histset[324] = 1;		// p>50 MeV/c mu- , VDET=4: Coll31_Out
+  book_vdet_histset[325] = 1;		// p>50 MeV/c mu- , VDET=5: Coll32_In 
+  book_vdet_histset[326] = 1;		// p>50 MeV/c mu- , VDET=6: Coll32_Out
+  book_vdet_histset[327] = 1;		// p>50 MeV/c mu- , VDET=7: Coll5_In
+  book_vdet_histset[328] = 1;		// p>50 MeV/c mu- , VDET=8: Coll5_Out
+  book_vdet_histset[329] = 1;		// p>50 MeV/c mu- , VDET=9: ST_In
 
   book_vdet_histset[401] = 1;		// mu+ , VDET=1: Coll1_In
   book_vdet_histset[402] = 1;		// mu+ , VDET=2: Coll1_Out
@@ -186,18 +214,21 @@ void TMuonStopAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp
   hist->fVolumeID->Fill(Simp->fEndVolumeIndex);
   hist->fGeneratorID->Fill(Simp->fGeneratorID);
   
-  float x = Simp->EndPos()->X()+3904.;
-  float y = Simp->EndPos()->Y();
-  float t = Simp->EndPos()->T();
+  float xe = Simp->EndPos()->X()+3904.;
+  float ye = Simp->EndPos()->Y();
+  float ze = Simp->EndPos()->Z();
+  float te = Simp->EndPos()->T();
 
-  hist->fTime->Fill(t);
+  hist->fTime->Fill(te);
   hist->fParentMom->Fill(fParent->StartMom()->P());
   hist->fParentPDG->Fill(fParent->PDGCode());
 
-  hist->fYVsX->Fill(x,y);
+  hist->fStartMom->Fill(Simp->StartMom()->P());
+  hist->fYVsX->Fill(xe,ye);
+  hist->fXEndVsZEnd->Fill(ze,xe);
 
-  if (Simp->fEndVolumeIndex == 2480) hist->fYVsX_2480->Fill(x,y);
-  if (Simp->fEndVolumeIndex == 2513) hist->fYVsX_2513->Fill(x,y);
+  if (Simp->fEndVolumeIndex == 2480) hist->fYVsX_2480->Fill(xe,ye);
+  if (Simp->fEndVolumeIndex == 2513) hist->fYVsX_2513->Fill(xe,ye);
 }
 
 //-----------------------------------------------------------------------------
@@ -216,6 +247,24 @@ void TMuonStopAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step
   hist->fTime    ->Fill(Step->Time());
   hist->fYVsX    ->Fill(Step->Pos()->X()-vdd->fXOffset,Step->Pos()->Y());
   hist->fYVsZ    ->Fill(Step->Pos()->Z()              ,Step->Pos()->Y());
+
+  float py = Step->Mom()->Py();
+
+  float px, pp, pt;
+  if (vdd->fIZLocal == 3) {
+    px = Step->Mom()->Px();
+    pp = Step->Mom()->Pz();
+  }
+  else {
+    px = Step->Mom()->Pz();
+    pp = -Step->Mom()->Px();
+  }
+
+  pt = sqrt(px*px+py*py);
+
+  hist->fPt->Fill(pt);
+  hist->fPp->Fill(pp);
+  hist->fTanTh->Fill(pt/pp);
 }
 
 //-----------------------------------------------------------------------------
@@ -251,6 +300,8 @@ void TMuonStopAnaModule::FillHistograms() {
   SimpData_t*   sd =  fSimpData;
 
   FillSimpHistograms(fHist.fSimp[0],fMuon,sd);
+  float pmu = fMuon->StartMom()->P();
+  if (pmu < 50) FillSimpHistograms(fHist.fSimp[1],fMuon,sd);
 //-----------------------------------------------------------------------------
 // VDET histograms
 //-----------------------------------------------------------------------------
@@ -285,6 +336,29 @@ void TMuonStopAnaModule::FillHistograms() {
       if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[307],step);
       if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[308],step);
       if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[309],step);
+
+      if (pmu < 50) {
+	if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[311],step);
+	if (step->VolumeID() == 2) FillVDetHistograms(fHist.fVDet[312],step);
+	if (step->VolumeID() == 3) FillVDetHistograms(fHist.fVDet[313],step);
+	if (step->VolumeID() == 4) FillVDetHistograms(fHist.fVDet[314],step);
+	if (step->VolumeID() == 5) FillVDetHistograms(fHist.fVDet[315],step);
+	if (step->VolumeID() == 6) FillVDetHistograms(fHist.fVDet[316],step);
+	if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[317],step);
+	if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[318],step);
+	if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[319],step);
+      }
+      else {
+	if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[321],step);
+	if (step->VolumeID() == 2) FillVDetHistograms(fHist.fVDet[322],step);
+	if (step->VolumeID() == 3) FillVDetHistograms(fHist.fVDet[323],step);
+	if (step->VolumeID() == 4) FillVDetHistograms(fHist.fVDet[324],step);
+	if (step->VolumeID() == 5) FillVDetHistograms(fHist.fVDet[325],step);
+	if (step->VolumeID() == 6) FillVDetHistograms(fHist.fVDet[326],step);
+	if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[327],step);
+	if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[328],step);
+	if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[329],step);
+      }
     }
     if (step->PDGCode() == -13) {
       if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[401],step);
@@ -299,8 +373,6 @@ void TMuonStopAnaModule::FillHistograms() {
     }
   }
 }
-
-
 
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
@@ -319,34 +391,8 @@ int TMuonStopAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // initialize virtual detector offsets - a convenience for histogram filling
 //-----------------------------------------------------------------------------
-  fNVDet  = 9;
-					// undefined
-  fVDet[0].fID      = 0;
-  fVDet[0].fXOffset = 0;
-					// TS1 : plot Y:X
-  fVDet[1].fID      = 1;
-  fVDet[1].fXOffset = 3904.0;
-  fVDet[2].fID      = 2;
-  fVDet[2].fXOffset = 3904.0;
-					// TS31 : plot Y:Z
-  fVDet[3].fID      = 3;
-  fVDet[3].fXOffset = 0;
-  fVDet[4].fID      = 4;
-  fVDet[4].fXOffset = 0;
-					// TS32 : plot Y:Z
-  fVDet[5].fID      = 5;
-  fVDet[5].fXOffset = 0;
-  fVDet[6].fID      = 6;
-  fVDet[6].fXOffset = 0;
-					// TS5  : plot Y:X
-  fVDet[7].fID      = 7;
-  fVDet[7].fXOffset = -3904.0;
+  InitVirtualDetectors(fVDet,&fNVDet);
 
-  fVDet[8].fID      = 8;
-  fVDet[8].fXOffset = -3904.0;
-					// ST  : plot Y:X
-  fVDet[9].fID      = 9;
-  fVDet[9].fXOffset = -3904.0;
   return 0;
 }
 
@@ -389,10 +435,12 @@ int TMuonStopAnaModule::Event(int ientry) {
       }
     }
   }
-
-  int np = fSimpBlock->NParticles();
+//-----------------------------------------------------------------------------
+// stopped muon - the last simulated particle in the list, proton - the first one
+//-----------------------------------------------------------------------------
+  int np  = fSimpBlock->NParticles();
   fProton = fSimpBlock->Particle(0);
-  fMuon  = fSimpBlock->Particle(np-1);
+  fMuon   = fSimpBlock->Particle(np-1);
 
   TSimParticle* parent = fMuon;
 //-----------------------------------------------------------------------------

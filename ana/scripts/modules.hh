@@ -52,7 +52,7 @@ namespace cdf_stntuple {
   TCesAnaModule*           m_ces   = NULL;
   TClusterAnaModule*       m_clu   = NULL;
   TConversionFilterModule* m_cnv   = NULL;
-  TDebugModule*            m_dbg   = NULL;
+  TStnDebugModule*         m_dbg   = NULL;
   TEmFilterModule*         m_emf   = NULL;
   TFwdDetAnaModule*        m_fwd   = NULL;
   TJetAnaModule*           m_jet   = NULL;

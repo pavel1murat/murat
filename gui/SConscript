@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 import os
 Import('env')
-Import('murat_helper')
+Import('stntuple_helper')
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ if ( not ("Geom"  in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"Ge
 if ( not ("RGL"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"RGL");
 if ( not ("GuiHtml" in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"GuiHtml");
 
-helper = murat_helper();
+helper = stntuple_helper(env);
 
 helper.handle_dictionaries();
 

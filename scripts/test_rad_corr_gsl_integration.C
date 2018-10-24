@@ -55,7 +55,7 @@ double my_f (double E, void * p) {
 void test_rad_corr_gsl_integration(double de = 0.1) {
   
   F.function = &my_f;
-  F.params = &params;
+  F.params   = &params;
 
   size_t limit  = 1000;
   double epsabs = 0.001;

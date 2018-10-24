@@ -57,4 +57,20 @@ void draw_label_abs(const char* Text, double X1, double Y1, double FontSize, int
   label->Draw();
 }
 
+//-----------------------------------------------------------------------------
+void make_empty_plot(const char* figure_name, int Print = 0) {
+
+  TCanvas* c = new TCanvas("c_empty","EmptyPlot",1500,800);
+
+  draw_label_ndc("EMPTY PLOT :  - don't forget to make !",0.25,0.4,0.06,52);
+
+  // TArrow* arr = new TArrow(0.9,40.e3,0.9,10.e3,0.015);
+
+  // arr->SetLineWidth(2);
+  // arr->Draw();
+
+  if (Print == 1) c->Print(figure_name);
+}
+
+
 #endif

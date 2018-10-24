@@ -46,8 +46,9 @@ public:
   double     fR;   // inner radius;
 
   double     fScale;
+  int        fModeXZ;   // 0:X, 1:Z
 
-  TTsMisalignment();
+  TTsMisalignment(int ModeXZ = 0);
   ~TTsMisalignment();
   
   void  Init(double Scale = 1);
@@ -55,6 +56,7 @@ public:
   void  Transform(double X0, double Y0, double Phi, TVector3* X, TVector3* Xr);
   
   virtual void Paint(Option_t* Opt);
+  virtual void Print(Option_t* Opt) const ;
   
 };
 

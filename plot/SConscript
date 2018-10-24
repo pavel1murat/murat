@@ -4,9 +4,9 @@
 #------------------------------------------------------------------------------
 import os
 Import('env')
-Import('murat_helper')
+Import('stntuple_helper')
 
-helper = murat_helper();
+helper = stntuple_helper(env);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ helper.handle_dictionaries();
 
 list_of_fortran_files = Glob('*.f',strings=True);
 list_of_cc_files      = Glob('*.cc',strings=True);
-skip_list             = []
+skip_list             = ["plot_ejected_proton_spectrum.cc"]
 libs                  = ['Stntuple_val', rootlibs, 'gfortran'];
 
 helper.compile_fortran(list_of_fortran_files,skip_list);

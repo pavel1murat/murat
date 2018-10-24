@@ -60,7 +60,9 @@ double smooth::Eval(double* X) {
 
   // printf("%10.3f %10.3f %3i %10.3f %3i %10.3f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f\n",
   // 	 x,f,i0,x0,i1,x1,fP0[i0],fP1[i0],fP2[i0],dx0,f0,w0,dx1,f1,w1);
-  return f;
+
+  double scale = fFunc->GetParameter(0);
+  return f*scale;
 }
 
 
@@ -71,10 +73,10 @@ double smooth::Eval(double* X) {
 double smooth::func(double* X, double* P) {
 
   double f(0);
-					// a hack...
-  smooth* o = (smooth*) ((long int)P[0]);
+					// a hack - P[1] carries the address...
+  smooth* o = (smooth*) ((long int)P[1]);
 
-  if (o) f = o->Eval(X);
+  if (o) f = o->Eval(X)*P[0];
   else   f = 0;
 
   return f;
@@ -156,15 +158,20 @@ smooth::smooth(const TH1* Hist, double XMin, double XMax) {
 //-----------------------------------------------------------------------------
 // parametrization is finished, how to use it? 
 //-----------------------------------------------------------------------------
-    fFunc = new TF1("hist_smooth_func",smooth::func,XMin,XMax,1);
+    fFunc = new TF1("hist_smooth_func",smooth::func,XMin,XMax,2);
 
-    if (fX == 0) {
-      fFunc->SetParameter(0,0);
-    }
+    fFunc->SetParameter(0,1.); // scale factor
+//------------------------------------------------------------------------------
+// hack - passing the address to smooth::Eval()
+//-----------------------------------------------------------------------------
+//    printf(" fX = %p\n",fX);
+    if (fX == 0) fFunc->SetParameter(1,0);
     else {
-      double x = (double) ((long int) this);
-      fFunc->SetParameter(0,x);
+      double hidden_address = (double) ((long int) this);
+      fFunc->FixParameter(1,hidden_address);
     }
+					// fix the second parameter
+    //    fFunc->SetParError(1,0.);
   }
 }
 
@@ -234,15 +241,21 @@ smooth::smooth(const TGraph* Graph, double XMin, double XMax) {
 //-----------------------------------------------------------------------------
 // parametrization is finished, how to use it? 
 //-----------------------------------------------------------------------------
-    fFunc = new TF1("hist_smooth_func",smooth::func,XMin,XMax,1);
+    fFunc = new TF1("hist_smooth_func",smooth::func,XMin,XMax,2);
 
+    fFunc->SetParameter(0,1.); // scale factor
+//------------------------------------------------------------------------------
+// hack - passing the address to smooth::Eval()
+//-----------------------------------------------------------------------------
     if (fX == 0) {
-      fFunc->SetParameter(0,0);
+      fFunc->SetParameter(1,0);
     }
     else {
       double hidden_address = (double) ((long int) this);
-      fFunc->SetParameter(0,hidden_address);
+      fFunc->FixParameter(1,hidden_address);
     }
+    // fix the second parameter
+    //    fFunc->SetParError(1,0.);
   }
 }
 

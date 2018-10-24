@@ -1,13 +1,19 @@
-//
-#include "murat/ana/TTsMisalignment.hh"
-
 //-----------------------------------------------------------------------------
 //  measurements in the local, for each TS piece, coordinate system
 //  TSUL : TS1  collimator
 //  TSUR : TS3u collimator
 //  TSDL : TS5  collimator
 //  TSDR : TS3d collimator
+//  example:
 //-----------------------------------------------------------------------------
+/*
+  tts = new TTsMisalignment();
+  tts->Init(5);
+  c1 = new TCanvas("c1","c1",1000,1000);
+  c->Range(-500,-500,500,500);
+  tts->Draw();
+*/ 
+#include "murat/ana/TTsMisalignment.hh"
 namespace {
 
   struct Data_t {
@@ -44,7 +50,7 @@ namespace {
 };
 
 //-----------------------------------------------------------------------------
-TTsMisalignment::TTsMisalignment() {
+TTsMisalignment::TTsMisalignment(int ModeXZ) {
   fR    = 15;  // cm, this is just an example
 
   fTsuL     = NULL;
@@ -58,6 +64,7 @@ TTsMisalignment::TTsMisalignment() {
   fTsdRMeas = NULL;
 
   fScale = 1.;
+  fModeXZ = ModeXZ;
 }
 
 //-----------------------------------------------------------------------------
@@ -274,4 +281,153 @@ void TTsMisalignment::Paint(Option_t* Opt) {
   fTsdR->Paint();
   fTsdLMeas->Paint();
   fTsdRMeas->Paint();
+}
+
+
+//-----------------------------------------------------------------------------
+void TTsMisalignment::Print(Option_t* Opt) const {
+
+  printf(" TS1: \n");
+
+  double* ts1_x0 = fTsuL->GetX();
+  double* ts1_x1 = fTsuLMeas->GetX();
+  double* ts1_y0 = fTsuL->GetY();
+  double* ts1_y1 = fTsuLMeas->GetY();
+//------------------------------------------------------------------------------
+//  TS1 displacements
+//-----------------------------------------------------------------------------
+  double ts1_dx[4], ts1_dy[4];
+  
+  for (int i=0; i<4; i++) {
+    ts1_dx[i] = ts1_x1[i]-ts1_x0[i];
+    ts1_dy[i] = ts1_y1[i]-ts1_y0[i];
+  }
+    
+  printf("TS1 x0: %12.5f %12.5f %12.5f %12.5f\n",ts1_x0[0],ts1_x0[1],ts1_x0[2],ts1_x0[3]);
+  printf("TS1 y0: %12.5f %12.5f %12.5f %12.5f\n",ts1_y0[0],ts1_y0[1],ts1_y0[2],ts1_y0[3]);
+  printf("TS1 dx: %12.5f %12.5f %12.5f %12.5f\n",ts1_dx[0],ts1_dx[1],ts1_dx[2],ts1_dx[3]);
+  printf("TS1 dy: %12.5f %12.5f %12.5f %12.5f\n",ts1_dy[0],ts1_dy[1],ts1_dy[2],ts1_dy[3]);
+
+  double ts1_dy0_mean = (ts1_dy[0]+ts1_dy[3])/2.;
+  double ts1_dy1_mean = (ts1_dy[1]+ts1_dy[2])/2.;
+  double ts1_l0       = (ts1_x0[1]-ts1_x0[0]);
+
+  printf("TS1   dx0_mean dx1_mean length: %12.5f %12.5f %12.5f\n",ts1_dy0_mean,ts1_dy1_mean,ts1_l0);
+
+  double ts1_dy_mean  = (ts1_dy0_mean+ts1_dy1_mean)/2.;
+
+  // when calculating dy/dx, use nominal length of the collimator
+  double ts1_dydx     = (ts1_dy1_mean-ts1_dy0_mean)/ts1_l0;
+  double dphi_x       =  ts1_dydx*180./M_PI;
+
+  printf("TS1 dy(mean): %12.5f dy/dx(mean): %12.5f dphi_deg(mean): %12.5f\n", ts1_dy_mean, ts1_dydx, dphi_x);
+//------------------------------------------------------------------------------
+//  TS3U displacements
+//-----------------------------------------------------------------------------
+  printf(" TS3U: \n");
+
+  double* ts3u_x0 = fTsuR->GetX();
+  double* ts3u_x1 = fTsuRMeas->GetX();
+  double* ts3u_y0 = fTsuR->GetY();
+  double* ts3u_y1 = fTsuRMeas->GetY();
+
+  double ts3u_dx[4], ts3u_dy[4];
+  
+  for (int i=0; i<4; i++) {
+    ts3u_dx[i] = ts3u_x1[i]-ts3u_x0[i];
+    ts3u_dy[i] = ts3u_y1[i]-ts3u_y0[i];
+  }
+    
+  printf(" TS3u x0: %12.5f %12.5f %12.5f %12.5f\n",ts3u_x0[0],ts3u_x0[1],ts3u_x0[2],ts3u_x0[3]);
+  printf(" TS3u y0: %12.5f %12.5f %12.5f %12.5f\n",ts3u_y0[0],ts3u_y0[1],ts3u_y0[2],ts3u_y0[3]);
+  printf(" TS3u dx: %12.5f %12.5f %12.5f %12.5f\n",ts3u_dx[0],ts3u_dx[1],ts3u_dx[2],ts3u_dx[3]);
+  printf(" TS3u dy: %12.5f %12.5f %12.5f %12.5f\n",ts3u_dy[0],ts3u_dy[1],ts3u_dy[2],ts3u_dy[3]);
+
+  double ts3u_dx0_mean = (ts3u_dx[0]+ts3u_dx[3])/2.;
+  double ts3u_dx1_mean = (ts3u_dx[1]+ts3u_dx[2])/2.;
+  double ts3u_l0       = (ts3u_y0[1]-ts3u_y0[0]);
+
+  printf(" TS3u dx0_mean dx1_mean length: %12.5f %12.5f %12.5f\n",ts3u_dx0_mean,ts3u_dx1_mean,ts3u_l0);
+
+  double ts3u_dx_mean  = (ts3u_dx0_mean+ts3u_dx1_mean)/2.;
+
+  // when calculating dy/dx, use nominal length of the collimator
+
+  double ts3u_dydx     = (ts3u_dx1_mean-ts3u_dx0_mean)/ts3u_l0;
+  double ts3u_dphi_x   =  ts3u_dydx*180./M_PI;
+
+  printf("TS3u dy(mean): %12.5f dy/dx(mean): %12.5f dphi_deg(mean): %12.5f\n", ts3u_dx_mean, ts3u_dydx, ts3u_dphi_x);
+
+//------------------------------------------------------------------------------
+//  TS3d displacements
+//-----------------------------------------------------------------------------
+  printf(" TS3d: \n");
+
+  double* ts3d_x0 = fTsdR->GetX();
+  double* ts3d_x1 = fTsdRMeas->GetX();
+  double* ts3d_y0 = fTsdR->GetY();
+  double* ts3d_y1 = fTsdRMeas->GetY();
+
+  double ts3d_dx[4], ts3d_dy[4];
+  
+  for (int i=0; i<4; i++) {
+    ts3d_dx[i] = ts3d_x1[i]-ts3d_x0[i];
+    ts3d_dy[i] = ts3d_y1[i]-ts3d_y0[i];
+  }
+    
+  printf(" Ts3d x0: %12.5f %12.5f %12.5f %12.5f\n",ts3d_x0[0],ts3d_x0[1],ts3d_x0[2],ts3d_x0[3]);
+  printf(" Ts3d y0: %12.5f %12.5f %12.5f %12.5f\n",ts3d_y0[0],ts3d_y0[1],ts3d_y0[2],ts3d_y0[3]);
+  printf(" Ts3d dx: %12.5f %12.5f %12.5f %12.5f\n",ts3d_dx[0],ts3d_dx[1],ts3d_dx[2],ts3d_dx[3]);
+  printf(" Ts3d dy: %12.5f %12.5f %12.5f %12.5f\n",ts3d_dy[0],ts3d_dy[1],ts3d_dy[2],ts3d_dy[3]);
+
+  double ts3d_dx0_mean = (ts3d_dx[0]+ts3d_dx[3])/2.;
+  double ts3d_dx1_mean = (ts3d_dx[1]+ts3d_dx[2])/2.;
+  double ts3d_l0       = (ts3d_y0[1]-ts3d_y0[0]);
+
+  printf(" TS3d dx0_mean dx1_mean length: %12.5f %12.5f %12.5f\n",ts3d_dx0_mean,ts3d_dx1_mean,ts3d_l0);
+
+  double ts3d_dx_mean  = (ts3d_dx0_mean+ts3d_dx1_mean)/2.;
+
+  // when calculating dy/dx, use nominal length of the collimator
+  double ts3d_dydx     = (ts3d_dx1_mean-ts3d_dx0_mean)/ts3d_l0;
+  double ts3d_dphi_x   =  ts3d_dydx*180./M_PI;
+
+  printf("Ts3d dy(mean): %12.5f dy/dx(mean): %12.5f dphi_deg(mean): %12.5f\n", ts3d_dx_mean, ts3d_dydx, ts3d_dphi_x);
+
+//------------------------------------------------------------------------------
+//  TS5 displacements
+//-----------------------------------------------------------------------------
+  printf(" TS5: \n");
+
+  double* ts5_x0 = fTsdL->GetX();
+  double* ts5_x1 = fTsdLMeas->GetX();
+  double* ts5_y0 = fTsdL->GetY();
+  double* ts5_y1 = fTsdLMeas->GetY();
+
+  double ts5_dx[4], ts5_dy[4];
+  
+  for (int i=0; i<4; i++) {
+    ts5_dx[i] = ts5_x1[i]-ts5_x0[i];
+    ts5_dy[i] = ts5_y1[i]-ts5_y0[i];
+  }
+    
+  printf(" Ts5 x0: %12.5f %12.5f %12.5f %12.5f\n",ts5_x0[0],ts5_x0[1],ts5_x0[2],ts5_x0[3]);
+  printf(" Ts5 y0: %12.5f %12.5f %12.5f %12.5f\n",ts5_y0[0],ts5_y0[1],ts5_y0[2],ts5_y0[3]);
+  printf(" Ts5 dx: %12.5f %12.5f %12.5f %12.5f\n",ts5_dx[0],ts5_dx[1],ts5_dx[2],ts5_dx[3]);
+  printf(" Ts5 dy: %12.5f %12.5f %12.5f %12.5f\n",ts5_dy[0],ts5_dy[1],ts5_dy[2],ts5_dy[3]);
+
+  double ts5_dy0_mean = (ts5_dy[0]+ts5_dy[3])/2.;
+  double ts5_dy1_mean = (ts5_dy[1]+ts5_dy[2])/2.;
+  double ts5_l0       = (ts5_x0[1]-ts5_x0[0]);
+
+  printf(" TS5  dx0_mean dx1_mean length: %12.5f %12.5f %12.5f\n",ts5_dy0_mean,ts5_dy1_mean,ts5_l0);
+
+  double ts5_dy_mean  = (ts5_dy0_mean+ts5_dy1_mean)/2.;
+
+  // when calculating dy/dx, use nominal length of the collimator
+  double ts5_dydx     = (ts5_dy1_mean-ts5_dy0_mean)/ts5_l0;
+  double ts5_dphi_x   =  ts5_dydx*180./M_PI;
+
+  printf("Ts5 dy(mean): %12.5f dy/dx(mean): %12.5f dphi_deg(mean): %12.5f\n", ts5_dy_mean, ts5_dydx, ts5_dphi_x);
+
 }

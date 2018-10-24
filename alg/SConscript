@@ -4,8 +4,8 @@
 #------------------------------------------------------------------------------
 import os
 Import('env')
-Import('murat_helper')
-helper = murat_helper();
+Import('stntuple_helper')
+helper = stntuple_helper(env);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------

@@ -384,8 +384,19 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fGenCode ->Fill(Step->GenIndex());
   hist->fMomentum->Fill(Step->Mom()->Mag());
   hist->fTime    ->Fill(Step->Time());
-  hist->fYVsX    ->Fill(Step->Pos()->X()-vdd->fXOffset,Step->Pos()->Y());
-  hist->fYVsZ    ->Fill(Step->Pos()->Z()              ,Step->Pos()->Y());
+
+  // calculate local X and local Z
+
+  double phi  = vdd->fPhiXZ*M_PI/180;
+
+  double dx   = Step->Pos()->X()-vdd->fX;
+  double dz   = Step->Pos()->Z()-vdd->fZ;
+
+  double xloc =  dx*cos(phi) - dz*sin(phi);
+  double zloc =  dx*sin(phi) + dz*cos(phi);
+
+  hist->fYVsX    ->Fill(xloc,Step->Pos()->Y());
+  hist->fYVsZ    ->Fill(zloc,Step->Pos()->Y());
 
   float py = Step->Mom()->Py();
 

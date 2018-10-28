@@ -6,7 +6,7 @@ import os
 Import('env')
 Import('stntuple_helper')
 
-debug=True;
+debug=False;
 helper = stntuple_helper(env,debug);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library

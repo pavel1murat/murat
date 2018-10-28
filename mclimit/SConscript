@@ -6,23 +6,20 @@ import os
 Import('env')
 Import('stntuple_helper')
 
-helper = stntuple_helper(env);
+debug=True;
+helper = stntuple_helper(env,debug);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
 rootlibs = env['ROOTLIBS']
 
-# if ( not ("EG" in rootlibs)):
-#     rootlibs.insert(rootlibs.index("Physics")+1,"EG");
-
 if ( not ("Minuit" in rootlibs)):
     rootlibs.insert(rootlibs.index("Physics")+1,"Minuit");
 
-helper.handle_dictionaries(".h");
+helper.handle_dictionaries(suffix=".h");
 
 list_of_cc_files = Glob('*.cc',strings=True);
 skip_list        = []
 libs             = rootlibs
 
 helper.build_libs(list_of_cc_files,skip_list,libs);
-# print "tmpdir:"+env['TMP_LIB_DIR']

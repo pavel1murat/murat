@@ -21,5 +21,3 @@ libs             = [ 'murat_obj', 'murat_mclimit', 'Stntuple_val', rootlibs ]
 list_of_cc_files = Glob('*.cc',strings=True);
 
 helper.build_libs(list_of_cc_files,skip_list,libs);
-
-# print "tmpdir:"+env['TMP_LIB_DIR']

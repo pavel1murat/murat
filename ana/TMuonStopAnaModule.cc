@@ -150,50 +150,58 @@ void TMuonStopAnaModule::BookHistograms() {
 
   book_vdet_histset[  9] = 1;		// all particles, VDET= 9 , ST_In
   book_vdet_histset[ 13] = 1;		// all particles, VDET=13 , TT_FrontHollow
-  book_vdet_histset[ 14] = 1;		// all particles, VDET=13 , TT_FrontHollow, r > 40
+  book_vdet_histset[ 14] = 1;		// all particles, VDET=14 , TT_FrontHollow, r > 40
 
   book_vdet_histset[109] = 1;		// e-  , VDET=9
   book_vdet_histset[209] = 1;		// e+  , VDET=9
 
-  book_vdet_histset[301] = 1;		// all mu- , VDET=1: Coll1_In
-  book_vdet_histset[302] = 1;		// all mu- , VDET=2: Coll1_Out
-  book_vdet_histset[303] = 1;		// all mu- , VDET=3: Coll31_In
-  book_vdet_histset[304] = 1;		// all mu- , VDET=4: Coll31_Out
-  book_vdet_histset[305] = 1;		// all mu- , VDET=5: Coll32_In 
-  book_vdet_histset[306] = 1;		// all mu- , VDET=6: Coll32_Out
-  book_vdet_histset[307] = 1;		// all mu- , VDET=7: Coll5_In
-  book_vdet_histset[308] = 1;		// all mu- , VDET=8: Coll5_Out
-  book_vdet_histset[309] = 1;		// all mu- , VDET=9: ST_In
+  book_vdet_histset[301] = 1;		// all mu- , VDET= 1: Coll1_In
+  book_vdet_histset[302] = 1;		// all mu- , VDET= 2: Coll1_Out
+  book_vdet_histset[303] = 1;		// all mu- , VDET= 3: Coll31_In
+  book_vdet_histset[304] = 1;		// all mu- , VDET= 4: Coll31_Out
+  book_vdet_histset[305] = 1;		// all mu- , VDET= 5: Coll32_In 
+  book_vdet_histset[306] = 1;		// all mu- , VDET= 6: Coll32_Out
+  book_vdet_histset[307] = 1;		// all mu- , VDET= 7: Coll5_In
+  book_vdet_histset[308] = 1;		// all mu- , VDET= 8: Coll5_Out
+  book_vdet_histset[309] = 1;		// all mu- , VDET= 9: ST_In
+  book_vdet_histset[398] = 1;		// all mu- , VDET=98: mid-section TSu
+  book_vdet_histset[399] = 1;		// all mu- , VDET=98: mid-section TSd
 
-  book_vdet_histset[311] = 1;		// p<50 MeV/c mu- , VDET=1: Coll1_In
-  book_vdet_histset[312] = 1;		// p<50 MeV/c mu- , VDET=2: Coll1_Out
-  book_vdet_histset[313] = 1;		// p<50 MeV/c mu- , VDET=3: Coll31_In
-  book_vdet_histset[314] = 1;		// p<50 MeV/c mu- , VDET=4: Coll31_Out
-  book_vdet_histset[315] = 1;		// p<50 MeV/c mu- , VDET=5: Coll32_In 
-  book_vdet_histset[316] = 1;		// p<50 MeV/c mu- , VDET=6: Coll32_Out
-  book_vdet_histset[317] = 1;		// p<50 MeV/c mu- , VDET=7: Coll5_In
-  book_vdet_histset[318] = 1;		// p<50 MeV/c mu- , VDET=8: Coll5_Out
-  book_vdet_histset[319] = 1;		// p<50 MeV/c mu- , VDET=9: ST_In
+  book_vdet_histset[401] = 1;		// mu+ , VDET= 1: Coll1_In
+  book_vdet_histset[402] = 1;		// mu+ , VDET= 2: Coll1_Out
+  book_vdet_histset[403] = 1;		// mu+ , VDET= 3: Coll31_In
+  book_vdet_histset[404] = 1;		// mu+ , VDET= 4: Coll31_Out
+  book_vdet_histset[405] = 1;		// mu+ , VDET= 5: Coll32_In 
+  book_vdet_histset[406] = 1;		// mu+ , VDET= 6: Coll32_Out
+  book_vdet_histset[407] = 1;		// mu+ , VDET= 7: Coll5_In
+  book_vdet_histset[408] = 1;		// mu+ , VDET= 8: Coll5_Out
+  book_vdet_histset[409] = 1;		// mu+ , VDET= 9: ST_In
+  book_vdet_histset[498] = 1;		// mu+ , VDET=98: mid-section TSu
+  book_vdet_histset[499] = 1;		// mu+ , VDET=98: mid-section TSd
 
-  book_vdet_histset[321] = 1;		// p>50 MeV/c mu- , VDET=1: Coll1_In
-  book_vdet_histset[322] = 1;		// p>50 MeV/c mu- , VDET=2: Coll1_Out
-  book_vdet_histset[323] = 1;		// p>50 MeV/c mu- , VDET=3: Coll31_In
-  book_vdet_histset[324] = 1;		// p>50 MeV/c mu- , VDET=4: Coll31_Out
-  book_vdet_histset[325] = 1;		// p>50 MeV/c mu- , VDET=5: Coll32_In 
-  book_vdet_histset[326] = 1;		// p>50 MeV/c mu- , VDET=6: Coll32_Out
-  book_vdet_histset[327] = 1;		// p>50 MeV/c mu- , VDET=7: Coll5_In
-  book_vdet_histset[328] = 1;		// p>50 MeV/c mu- , VDET=8: Coll5_Out
-  book_vdet_histset[329] = 1;		// p>50 MeV/c mu- , VDET=9: ST_In
+  book_vdet_histset[501] = 1;		// p<50 MeV/c mu- , VDET= 1: Coll1_In
+  book_vdet_histset[502] = 1;		// p<50 MeV/c mu- , VDET= 2: Coll1_Out
+  book_vdet_histset[503] = 1;		// p<50 MeV/c mu- , VDET= 3: Coll31_In
+  book_vdet_histset[504] = 1;		// p<50 MeV/c mu- , VDET= 4: Coll31_Out
+  book_vdet_histset[505] = 1;		// p<50 MeV/c mu- , VDET= 5: Coll32_In 
+  book_vdet_histset[506] = 1;		// p<50 MeV/c mu- , VDET= 6: Coll32_Out
+  book_vdet_histset[507] = 1;		// p<50 MeV/c mu- , VDET= 7: Coll5_In
+  book_vdet_histset[508] = 1;		// p<50 MeV/c mu- , VDET= 8: Coll5_Out
+  book_vdet_histset[509] = 1;		// p<50 MeV/c mu- , VDET= 9: ST_In
+  book_vdet_histset[598] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
+  book_vdet_histset[599] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSd
 
-  book_vdet_histset[401] = 1;		// mu+ , VDET=1: Coll1_In
-  book_vdet_histset[402] = 1;		// mu+ , VDET=2: Coll1_Out
-  book_vdet_histset[403] = 1;		// mu+ , VDET=3: Coll31_In
-  book_vdet_histset[404] = 1;		// mu+ , VDET=4: Coll31_Out
-  book_vdet_histset[405] = 1;		// mu+ , VDET=5: Coll32_In 
-  book_vdet_histset[406] = 1;		// mu+ , VDET=6: Coll32_Out
-  book_vdet_histset[407] = 1;		// mu+ , VDET=7: Coll5_In
-  book_vdet_histset[408] = 1;		// mu+ , VDET=8: Coll5_Out
-  book_vdet_histset[409] = 1;		// mu+ , VDET=9: ST_In
+  book_vdet_histset[601] = 1;		// p>50 MeV/c mu- , VDET= 1: Coll1_In
+  book_vdet_histset[602] = 1;		// p>50 MeV/c mu- , VDET= 2: Coll1_Out
+  book_vdet_histset[603] = 1;		// p>50 MeV/c mu- , VDET= 3: Coll31_In
+  book_vdet_histset[604] = 1;		// p>50 MeV/c mu- , VDET= 4: Coll31_Out
+  book_vdet_histset[605] = 1;		// p>50 MeV/c mu- , VDET= 5: Coll32_In 
+  book_vdet_histset[606] = 1;		// p>50 MeV/c mu- , VDET= 6: Coll32_Out
+  book_vdet_histset[607] = 1;		// p>50 MeV/c mu- , VDET= 7: Coll5_In
+  book_vdet_histset[608] = 1;		// p>50 MeV/c mu- , VDET= 8: Coll5_Out
+  book_vdet_histset[609] = 1;		// p>50 MeV/c mu- , VDET= 9: ST_In
+  book_vdet_histset[698] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
+  book_vdet_histset[699] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSd
 
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
@@ -232,21 +240,42 @@ void TMuonStopAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp
 }
 
 //-----------------------------------------------------------------------------
+VDetData_t*  TMuonStopAnaModule::GetVDetData(int ID) {
+  VDetData_t* vd (NULL);
+
+  if      (ID < 100) vd = fVDet+ID;
+
+  return vd;
+}
+
+
+//-----------------------------------------------------------------------------
 void TMuonStopAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step) {
 
   VDetHist_t* hist = (VDetHist_t*) Hist;
 
   int id = (Step->VolumeID());
 
-  VDetData_t* vdd = fVDet+id;
+  VDetData_t* vdd = GetVDetData(id) ; // fVDet+id;
   
   hist->fIndex   ->Fill(id);
   hist->fPDGCode ->Fill(Step->PDGCode());
   hist->fGenCode ->Fill(Step->GenIndex());
   hist->fMomentum->Fill(Step->Mom()->Mag());
   hist->fTime    ->Fill(Step->Time());
-  hist->fYVsX    ->Fill(Step->Pos()->X()-vdd->fXOffset,Step->Pos()->Y());
-  hist->fYVsZ    ->Fill(Step->Pos()->Z()              ,Step->Pos()->Y());
+
+  // calculate local X and local Z
+
+  double phi  = vdd->fPhiXZ*M_PI/180;
+
+  double dx   = Step->Pos()->X()-vdd->fX;
+  double dz   = Step->Pos()->Z()-vdd->fZ;
+
+  double xloc =  dx*cos(phi) - dz*sin(phi);
+  double zloc =  dx*sin(phi) + dz*cos(phi);
+
+  hist->fYVsX    ->Fill(xloc,Step->Pos()->Y());
+  hist->fYVsZ    ->Fill(zloc,Step->Pos()->Y());
 
   float py = Step->Mom()->Py();
 
@@ -327,49 +356,57 @@ void TMuonStopAnaModule::FillHistograms() {
       if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[209],step);
     }
     if (step->PDGCode() == 13) {
-      if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[301],step);
-      if (step->VolumeID() == 2) FillVDetHistograms(fHist.fVDet[302],step);
-      if (step->VolumeID() == 3) FillVDetHistograms(fHist.fVDet[303],step);
-      if (step->VolumeID() == 4) FillVDetHistograms(fHist.fVDet[304],step);
-      if (step->VolumeID() == 5) FillVDetHistograms(fHist.fVDet[305],step);
-      if (step->VolumeID() == 6) FillVDetHistograms(fHist.fVDet[306],step);
-      if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[307],step);
-      if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[308],step);
-      if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[309],step);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[301],step);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[302],step);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[303],step);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[304],step);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[305],step);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[306],step);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[307],step);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[308],step);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[309],step);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[398],step);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[399],step);
 
       if (pmu < 50) {
-	if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[311],step);
-	if (step->VolumeID() == 2) FillVDetHistograms(fHist.fVDet[312],step);
-	if (step->VolumeID() == 3) FillVDetHistograms(fHist.fVDet[313],step);
-	if (step->VolumeID() == 4) FillVDetHistograms(fHist.fVDet[314],step);
-	if (step->VolumeID() == 5) FillVDetHistograms(fHist.fVDet[315],step);
-	if (step->VolumeID() == 6) FillVDetHistograms(fHist.fVDet[316],step);
-	if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[317],step);
-	if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[318],step);
-	if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[319],step);
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[501],step);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[502],step);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[503],step);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[504],step);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[505],step);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[506],step);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[507],step);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[508],step);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[509],step);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[598],step);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[599],step);
       }
       else {
-	if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[321],step);
-	if (step->VolumeID() == 2) FillVDetHistograms(fHist.fVDet[322],step);
-	if (step->VolumeID() == 3) FillVDetHistograms(fHist.fVDet[323],step);
-	if (step->VolumeID() == 4) FillVDetHistograms(fHist.fVDet[324],step);
-	if (step->VolumeID() == 5) FillVDetHistograms(fHist.fVDet[325],step);
-	if (step->VolumeID() == 6) FillVDetHistograms(fHist.fVDet[326],step);
-	if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[327],step);
-	if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[328],step);
-	if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[329],step);
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[601],step);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[602],step);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[603],step);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[604],step);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[605],step);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[606],step);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[607],step);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[608],step);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[609],step);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[698],step);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[699],step);
       }
     }
     if (step->PDGCode() == -13) {
-      if (step->VolumeID() == 1) FillVDetHistograms(fHist.fVDet[401],step);
-      if (step->VolumeID() == 2) FillVDetHistograms(fHist.fVDet[402],step);
-      if (step->VolumeID() == 3) FillVDetHistograms(fHist.fVDet[403],step);
-      if (step->VolumeID() == 4) FillVDetHistograms(fHist.fVDet[404],step);
-      if (step->VolumeID() == 5) FillVDetHistograms(fHist.fVDet[405],step);
-      if (step->VolumeID() == 6) FillVDetHistograms(fHist.fVDet[406],step);
-      if (step->VolumeID() == 7) FillVDetHistograms(fHist.fVDet[407],step);
-      if (step->VolumeID() == 8) FillVDetHistograms(fHist.fVDet[408],step);
-      if (step->VolumeID() == 9) FillVDetHistograms(fHist.fVDet[409],step);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[401],step);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[402],step);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[403],step);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[404],step);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[405],step);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[406],step);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[407],step);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[408],step);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[409],step);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step);
     }
   }
 }

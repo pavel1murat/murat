@@ -130,6 +130,8 @@ public:
   void    BookHistograms();
   void    FillHistograms();
 
+  VDetData_t*  GetVDetData(int VDetID);
+
   void    Debug();
 //-----------------------------------------------------------------------------
 // test

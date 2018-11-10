@@ -165,7 +165,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[308] = 1;		// all mu- , VDET= 8: Coll5_Out
   book_vdet_histset[309] = 1;		// all mu- , VDET= 9: ST_In
   book_vdet_histset[398] = 1;		// all mu- , VDET=98: mid-section TSu
-  book_vdet_histset[399] = 1;		// all mu- , VDET=98: mid-section TSd
+  book_vdet_histset[399] = 1;		// all mu- , VDET=99: mid-section TSd
 
   book_vdet_histset[401] = 1;		// mu+ , VDET= 1: Coll1_In
   book_vdet_histset[402] = 1;		// mu+ , VDET= 2: Coll1_Out
@@ -177,7 +177,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[408] = 1;		// mu+ , VDET= 8: Coll5_Out
   book_vdet_histset[409] = 1;		// mu+ , VDET= 9: ST_In
   book_vdet_histset[498] = 1;		// mu+ , VDET=98: mid-section TSu
-  book_vdet_histset[499] = 1;		// mu+ , VDET=98: mid-section TSd
+  book_vdet_histset[499] = 1;		// mu+ , VDET=99: mid-section TSd
 
   book_vdet_histset[501] = 1;		// p<50 MeV/c mu- , VDET= 1: Coll1_In
   book_vdet_histset[502] = 1;		// p<50 MeV/c mu- , VDET= 2: Coll1_Out
@@ -189,7 +189,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[508] = 1;		// p<50 MeV/c mu- , VDET= 8: Coll5_Out
   book_vdet_histset[509] = 1;		// p<50 MeV/c mu- , VDET= 9: ST_In
   book_vdet_histset[598] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
-  book_vdet_histset[599] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSd
+  book_vdet_histset[599] = 1;		// p<50 MeV/c mu- , VDET=99: mid-section TSd
 
   book_vdet_histset[601] = 1;		// p>50 MeV/c mu- , VDET= 1: Coll1_In
   book_vdet_histset[602] = 1;		// p>50 MeV/c mu- , VDET= 2: Coll1_Out
@@ -201,7 +201,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[608] = 1;		// p>50 MeV/c mu- , VDET= 8: Coll5_Out
   book_vdet_histset[609] = 1;		// p>50 MeV/c mu- , VDET= 9: ST_In
   book_vdet_histset[698] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
-  book_vdet_histset[699] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSd
+  book_vdet_histset[699] = 1;		// p<50 MeV/c mu- , VDET=99: mid-section TSd
 
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
@@ -368,6 +368,7 @@ void TMuonStopAnaModule::FillHistograms() {
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[398],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[399],step);
 
+      float pmu = step->Mom()->Mag();
       if (pmu < 50) {
 	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[501],step);
 	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[502],step);

@@ -76,7 +76,7 @@ double smooth::func(double* X, double* P) {
 					// a hack - P[1] carries the address...
   smooth* o = (smooth*) ((long int)P[1]);
 
-  if (o) f = o->Eval(X)*P[0];
+  if (o) f = o->Eval(X);
   else   f = 0;
 
   return f;

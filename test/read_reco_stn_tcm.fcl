@@ -28,7 +28,6 @@
 BEGIN_PROLOG
 #  meanBackground                      : -1        # fixed at 1
   bgHitFiles                          : @nil
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
@@ -86,9 +85,7 @@ physics: {
 # <disable it> physics.filters.CalSeedFit.rescueHits              : 0
 physics.producers.MergePatRec.calPatRecModuleLabel   : CalTrkFit
 physics.producers.MergePatRecCpr.calPatRecModuleLabel: CalTrkFit
-physics.filters.StntupleMakerTcm.trkRecoModuleLabel  : ["MergePatRec", "KFFDeM", "MergePatRecCpr" ]
-# physics.filters.InitStntuple.histFileName            : "read_reco_stn_tcn.stn"
-# services.TFileService.fileName                       : "read_reco_stn_tcn.hist"
+physics.filters.StntupleMakerTcm.trackCollName      : ["MergePatRec", "KFFDeM", "MergePatRecCpr" ]
 services.TFileService.fileName                         : "nts.murat.bbb.ccc.read_reco_stn_tcn.root"
 physics.filters.InitStntuple.histFileName              : "aaa.murat.bbb.ccc.read_reco_stn_tcn.stn"
 

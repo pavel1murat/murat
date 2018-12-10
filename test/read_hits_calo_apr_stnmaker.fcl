@@ -12,9 +12,7 @@
 #------------------------------------------------------------------------------
 BEGIN_PROLOG
   bgHitFiles                          : @nil
-#  g4ModuleLabel                       : "g4run"          # for normal generators
-#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
-  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
+  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
@@ -39,13 +37,8 @@ source       : {
 
 physics: { @table::physics 
     filters : { @table::physics.filters 
-	InitStntuple   : { @table::InitStntuple 
-	    histFileName           : "read_hits_dem_reco_stnmaker.stn" 
-	}
-
- 	StntupleMaker   : { @table::StntupleMaker3 
-	    g4ModuleLabel : @local::G4_MODULE_LABEL
-	}
+	InitStntuple    : { @table::InitStntuple    histFileName : "read_hits_dem_reco_stnmaker.stn" }
+ 	StntupleMaker   : { @table::StntupleMaker3  spmcCollTag  : @local::G4_MODULE_LABEL           }
     }
 
 #    p1 : [ @sequence::physics.allpatrec_dem_dmm_reco_stnmaker, TrackRecoCheck ]

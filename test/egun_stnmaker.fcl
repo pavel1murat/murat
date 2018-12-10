@@ -18,7 +18,6 @@ BEGIN_PROLOG
   pdgId                               : 11
   elow                                : 105.0010
   ehi                                 : 105.0015
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDem
   bgHitFiles                          : @nil
 END_PROLOG
 
@@ -44,10 +43,6 @@ physics: { @table::physics
 	InitStntuple   : { @table::physics.filters.InitStntuple 
 	    histFileName           : "egun_stnmaker.stn" 
 	}
-# 	TrackRecoCheck : { @table::physics.filters.TrackRecoCheck
-# 	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
-# 	    debugBits            : { bit11:1 }
-# 	}
     }
 
     p1 : [ @sequence::gen_allpatrec_dem_dmm_reco_stnmaker_seq ] # , TrackRecoCheck ]

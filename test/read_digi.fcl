@@ -16,11 +16,9 @@
 #include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
-#  meanBackground                      : -1        # fixed at 1
-bgHitFiles                          : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art"]
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
-  G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
-#  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
+#  meanBackground  : -1        # fixed at 1
+bgHitFiles         : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art"]
+  G4_MODULE_LABEL  : "g4run"          # for normal generators and Ralf's cosmics
 END_PROLOG
 
 #include "murat/fcl/templates.fcl"
@@ -31,7 +29,6 @@ source       : {
     module_type : EmptyEvent 
 #    module_type : RootInput 
 #    fileNames: [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/00/90/sim.mu2e.cd3-detmix-cut.v566b.000004_00000341.art" ]
-#    fileNames: [ "/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-beam-g4s4-detconversion/v566/50/b6/sim.mu2e.cd3-beam-g4s4-detconversion.v566.004001_00000000.art" ]
 }
 
 producers    : { @table::murat.producers }

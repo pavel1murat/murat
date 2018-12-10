@@ -14,11 +14,11 @@
 # local changes to global variables
 #------------------------------------------------------------------------------
 BEGIN_PROLOG
-  pdgId                               : 13
-  elow                                : 148.9583         # 105.0010
-  ehi                                 : 148.9585         # 105.0015
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDmm
-  bgHitFiles                          : @nil
+  pdgId                       : 13
+  elow                        : 148.9583         # 105.0010
+  ehi                         : 148.9585         # 105.0015
+  TrackRecoCheck_trackCollTag : MergePatRecDmm
+  bgHitFiles                  : @nil
 END_PROLOG
 
 #include "Stntuple/fcl/templates.fcl"
@@ -41,11 +41,11 @@ physics: { @table::physics
     }
     filters : { @table::physics.filters 
 	InitStntuple   : { @table::InitStntuple 
-	    histFileName           : "mgun_stnmaker.stn" 
+	    histFileName  : "mgun_stnmaker.stn" 
 	}
 	TrackRecoCheck : { @table::TrackRecoCheck
-	    trkPatRecModuleLabel : @local::TrackRecoCheck_trkPatRecModuleLabel
-	    debugBits            : { bit11:1 }
+	    trackCollTag   : @local::TrackRecoCheck_trackCollTag
+	    debugBits      : { bit11:1 }
 	}
     }
 

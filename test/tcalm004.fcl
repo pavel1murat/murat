@@ -76,9 +76,6 @@ physics: {
 	    trkToCaloExtrapolModuleLabel : TrkExtrapolDem
 	    caloClusterModuleLabel       : makeCaloCluster1
 	    diagLevel                    : 0
-	    #	    outPutNtup                   : 1
-	    #	    caloClusterAlgorithm         : closest
-	    #	    caloClusterSeeding           : energy
 	}
 
 	TrkExtrapolUem : {
@@ -101,9 +98,6 @@ physics: {
 	    #tell the module that the particle moves upstream
 	    fitdirection                 : 1 
 	    diagLevel                    : 0
-	    #	    outPutNtup                   : 1
-	    #	    caloClusterAlgorithm         : closest
-	    #	    caloClusterSeeding           : energy
 	}
 
 	PidDem : {
@@ -180,18 +174,14 @@ physics: {
 physics.producers.MakeStereoHits.StrawHitCollectionLabel        : makeSH1
 
 physics.producers.FlagStrawHits.StrawHitCollectionLabel         : makeSH1
-physics.producers.FlagStrawHits.StrawHitPositionCollectionLabel : MakeStereoHits
 
 physics.producers.FlagBkgHits.StrawHitCollectionLabel           : makeSH1
 physics.producers.FlagBkgHits.StrawHitFlagCollectionLabel       : FlagStrawHits
-physics.producers.FlagBkgHits.StrawHitPositionCollectionLabel   : MakeStereoHits
 
 physics.producers.TrkPatRecUem.StrawHitCollectionLabel          : makeSH1
-physics.producers.TrkPatRecUem.StrawHitPositionCollectionLabel  : MakeStereoHits
 physics.producers.TrkPatRecUem.StrawHitFlagCollectionLabel      : FlagBkgHits
 
 physics.producers.TrkPatRecDem.StrawHitCollectionLabel          : makeSH1
-physics.producers.TrkPatRecDem.StrawHitPositionCollectionLabel  : MakeStereoHits
 physics.producers.TrkPatRecDem.StrawHitFlagCollectionLabel      : FlagBkgHits
 
 // Initialze seeding of random engines: do not put these lines in base .fcl files for grid jobs.

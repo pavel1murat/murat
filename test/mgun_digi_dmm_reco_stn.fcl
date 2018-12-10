@@ -44,7 +44,7 @@ physics: {
     filters : { @table::murat.filters 
 	InitStntuple      : { @table::murat.filters.InitStntuple histFileName : "mgun_digi_dmm_reco_stn.stn"  }
  	StntupleMakerDmm  : { @table::murat.filters.StntupleMakerDmm
-	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	    spmcCollTag   : @local::G4_MODULE_LABEL
 	}
     }
 

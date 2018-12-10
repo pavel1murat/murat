@@ -65,12 +65,11 @@ physics.producers.CalPatRecDmm.diagLevel : 1
 physics.producers.AvikPID.debugLevel     : 100
 
 physics.filters.MuHitDisplay : { @table::MuHitDisplay
-    strawHitPosMakerModuleLabel  : CalPatRecMakeStrawHitPositions
-    strawHitFlagMakerModuleLabel : CalPatRecFlagStrawHits
-    trkRecoModuleLabel           : MergePatRecDem
-    trkExtrapol                  : TrkExtrapolDem
-    trkCalMatch                  : CaloMatchingDem
-    pidModuleLabel               : AvikPID
+    strawHitFlagCollTag  : CalPatRecFlagStrawHits
+    trackCollT           : MergePatRecDem
+    trkExtrapo           : TrkExtrapolDem
+    trkCalMatc           : CaloMatchingDem
+    pidCollTag           : AvikPID
 }
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job

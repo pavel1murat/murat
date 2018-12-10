@@ -18,7 +18,6 @@ BEGIN_PROLOG
   pdgId                               : 11
   elow                                : 105.0010
   ehi                                 : 105.0015
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRecDem
   bgHitFiles                          : @nil
   G4_MODULE_LABEL                     : g4run
 END_PROLOG
@@ -51,7 +50,7 @@ physics: {
     
     filters : { @table::murat.filters 
 	InitStntuple         : { @table::murat.filters.InitStntuple        histFileName  : "read_allpatrec_dem_reco_stnmaker.stn" }
- 	StntupleMakerDemDmm  : { @table::murat.filters.StntupleMakerDemDmm g4ModuleLabel : @local::G4_MODULE_LABEL  }
+ 	StntupleMakerDemDmm  : { @table::murat.filters.StntupleMakerDemDmm spmcCollTag   : @local::G4_MODULE_LABEL  }
     }
 
     @table::murat.paths

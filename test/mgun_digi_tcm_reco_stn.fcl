@@ -24,7 +24,6 @@ BEGIN_PROLOG
   pdgId                               : 13
   elow                                : 105.0010
   ehi                                 : 105.0015
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
@@ -48,7 +47,7 @@ physics: {
 
     filters : { @table::murat.filters 
 	InitStntuple     : { @table::murat.filters.InitStntuple      histFileName  : "mgun_digi_tcm_reco_stn.stn"  }
- 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm  g4ModuleLabel : @local::G4_MODULE_LABEL       }
+ 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm  spmcCollTag   : @local::G4_MODULE_LABEL       }
     }
 
     @table::murat.paths

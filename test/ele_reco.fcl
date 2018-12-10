@@ -150,9 +150,5 @@ physics.analyzers.TTrackRecoAna.trkPatRecLabel  :  TrkPatRecDem
 # Andrei's  MC            : detectorFilter
 # Ralf's cosmics          : g4filter
 #------------------------------------------------------------------------------
-# physics.filters.MuHitDisplay.g4ModuleLabel                       : g4run
-# physics.filters.MuHitDisplay.g4ModuleLabel                       : g4filter
-# physics.filters.MuHitDisplay.g4ModuleLabel                       : detectorFilter
-#------------------------------------------------------------------------------
 # the end
 #------------------------------------------------------------------------------

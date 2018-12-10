@@ -31,19 +31,14 @@
 #include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
-  meanBackground : -1        # fixed at 1
-#  g4ModuleLabel                       : "g4run"          # for normal generators
-#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
-  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
+  meanBackground  : -1               # fixed at 1
+  G4_MODULE_LABEL : "detectorFilter" # for Andrei's datasets 
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large
 # mixp3-x050 files are ~ 2.3 GBytes (250 events per file)
 #------------------------------------------------------------------------------
 #  bgHitFiles : @nil
-# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
-# bgHitFiles : [ "/mu2e/users/murat/datasets/mixp3-x050/tdr.beam.mix.bgx050.1716a.16417890/good/00000/data_mixBG.root"]
-# bgHitFiles : [ "/pnfs/mu2e/scratch/tdr/beam/mixp3/tdr.beam.mix.bg.1516a.15409268/good/00000/data_mixBG.root"]
 # CD3
 # bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local/1109a/00/0f/d6/sim.mu2e.cd3-detmix-cut.1109a.000001_00001979.art" ]
 # bgHitFiles : [ "/mu2e/data/users/murat/datasets/cd3-detmix-cut-local-v2/sim.mu2e.cd3-detmix-cut.v566.000003_00000000.art" ]
@@ -66,8 +61,8 @@ physics: {
     }
 
     filters : { @table::murat.filters 
-	InitStntuple     : { @table::murat.filters.InitStntuple     histFileName  : "read_mix_digi_reco_stn_tcm.stn" }
- 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel : @local::G4_MODULE_LABEL }
+	InitStntuple     : { @table::murat.filters.InitStntuple     histFileName : "read_mix_digi_reco_stn_tcm.stn" }
+ 	StntupleMakerTcm : { @table::murat.filters.StntupleMakerTcm spmcCollTag  : @local::G4_MODULE_LABEL          }
     }
 
     @table::murat.paths

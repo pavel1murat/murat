@@ -36,7 +36,7 @@ physics.filters.neutronMixer.detail.mean : -2
 physics.filters.photonMixer.detail.mean  : -2
 physics.filters.protonMixer.detail.mean  : -2
 
-physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+physics.filters.StntupleMaker.genpCollTag          : "generate" 
 
 physics.out : []
 # physics.out : [detectorOutput]

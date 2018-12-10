@@ -12,7 +12,6 @@
 BEGIN_PROLOG
 #  meanBackground                      : -1        # fixed at 1
   bgHitFiles                          : @nil
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
 END_PROLOG
@@ -36,7 +35,7 @@ physics: {
     filters : { @table::filters 
 	CalTimePeakFinder : { @table::filters.CalTimePeakFinder      minClusterEnergy : 20 }
 	InitStntuple      : { @table::murat.filters.InitStntuple     histFileName     : "dio_05T_digi_reco_stn_tcm.stn" }
- 	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm g4ModuleLabel    : @local::G4_MODULE_LABEL  }
+ 	StntupleMakerTcm  : { @table::murat.filters.StntupleMakerTcm spmcCollTag      : @local::G4_MODULE_LABEL  }
     }
 
     @table::paths

@@ -42,8 +42,7 @@ physics: {
 
     filters : { @table::murat.filters }
 
-    analyzers : { # @table::murat.analysers 
-#	ReadGenParticles : { @table::murat.ReadGenParticles }
+    analyzers : {
 	ReadGenParticles : { 
 	    module_type:ReadGenParticles
 	    inputModuleLabel    : generate

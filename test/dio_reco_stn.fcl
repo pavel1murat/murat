@@ -16,7 +16,7 @@ physics.producers.generate : { @table::StoppedParticleReactionGun
     }
 }
 
-physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+physics.filters.StntupleMaker.genpCollTag          : "generate" 
 # physics.out : [ detectorOutput ]
 physics.out : [ ]
 

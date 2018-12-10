@@ -31,10 +31,8 @@
 #include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG
-  meanBackground : -1        # fixed at 1
-#  g4ModuleLabel                       : "g4run"          # for normal generators
-#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
-  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
+  meanBackground  : -1        # fixed at 1
+  G4_MODULE_LABEL : "detectorFilter" # for Andrei's datasets 
 #------------------------------------------------------------------------------
 # note 1: background files below correspond to the TDR geometry 
 # note 2: MixP3 files are about 9.3 GBytes large
@@ -70,9 +68,9 @@ physics: {
 	InitStntuple      : { @table::murat.filters.InitStntuple      histFileName  : "egun_digi_dem_dmm_reco_stn.stn" }
 
  	StntupleMakerTcm       : { @table::murat.filters.StntupleMakerTcm  
-	    g4ModuleLabel      : @local::G4_MODULE_LABEL
+	    spmcCollTag        : @local::G4_MODULE_LABEL
 	    makeTrackStrawHits : 1
-	    makeVirtualHits    : 1
+	    makeVDHits         : 1
 	}
     }
 

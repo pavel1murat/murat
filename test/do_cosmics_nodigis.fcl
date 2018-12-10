@@ -56,7 +56,7 @@ physics: {
     filters : { 
 	@table::murat.filters 
  	InitStntuple     : { @table::murat.filters.InitStntuple      histFileName : "do_cosmics_nodigis.stn" }
- 	StntupleMakerAll : { @table::murat.filters.StntupleMakerAll  g4ModuleLabel: @local::G4_MODULE_LABEL }
+ 	StntupleMakerAll : { @table::murat.filters.StntupleMakerAll  spmcCollTag  : @local::G4_MODULE_LABEL  }
      }
     
      p1 : [ # @sequence::murat.digis, 

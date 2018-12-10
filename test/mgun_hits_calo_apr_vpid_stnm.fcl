@@ -26,7 +26,6 @@ BEGIN_PROLOG
   pdgId                               : 13
   elow                                : 148.9583  # 105.0010
   ehi                                 : 148.9585  # 105.0015
-  TrackRecoCheck_trkPatRecModuleLabel : MergePatRec
   bgHitFiles                          : @nil
   G4_MODULE_LABEL                     : "g4run"          # for normal generators and Ralf's cosmics
 #  G4_MODULE_LABEL                     : "detectorFilter" # for Andrei's datasets 
@@ -55,7 +54,7 @@ physics: { @table::physics
     filters : { @table::physics.filters 
 	InitStntuple  : { @table::InitStntuple histFileName : "mgun_hits_calo_apr_vpid_stnm.stn"  }
  	StntupleMakerDemDmm : { @table::StntupleMakerDemDmm
-	    g4ModuleLabel : @local::G4_MODULE_LABEL
+	    spmcCollTag     : @local::G4_MODULE_LABEL
 	}
     }
 

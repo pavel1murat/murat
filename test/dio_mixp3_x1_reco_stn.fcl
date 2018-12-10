@@ -40,7 +40,7 @@ physics.producers.TrkPatRec.KalFit.ambiguityStrategy : [ 0  , 0  , 4  , 4   , 4 
 physics.producers.TrkPatRec.KalFit.hiterr            : [ 5.0, 1.5, 0.5, 0.25, 0.125, 0.05, 0.0, 0.0, 0.0 ]
 physics.producers.TrkPatRec.KalFit.t0Tolerance       : [ 2.0, 1.0, 1.0, 1.0 , 0.5  , 0.5 , 0.2, 0.2, 0.1 ]
 
-physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
+physics.filters.StntupleMaker.genpCollTag            : "generate" 
 
 physics.out : []
 # physics.out : [detectorOutput]

@@ -52,7 +52,7 @@ source       : {
 physics: { @table::murat.physics 
     filters : { @table::murat.physics.filters 
  	InitStntuple   : { @table::murat.physics.filters.InitStntuple    histFileName : "do_cosmics.stn" }
- 	StntupleMaker4 : { @table::murat.physics.filters.StntupleMaker4  g4ModuleLabel: @local::G4_MODULE_LABEL }
+ 	StntupleMaker4 : { @table::murat.physics.filters.StntupleMaker4  spmcCollTag  : @local::G4_MODULE_LABEL }
      }
     
      p1 : [ @sequence::murat.digis, 

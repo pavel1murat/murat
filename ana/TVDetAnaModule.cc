@@ -28,11 +28,11 @@
 //-----------------------------------------------------------------------------
 // #include "CalorimeterGeom/inc/HexMap.hh"
 
-#include "ana/TVdetAnaModule.hh"
+#include "ana/TVDetAnaModule.hh"
 
-ClassImp(TVdetAnaModule)
+ClassImp(TVDetAnaModule)
 //-----------------------------------------------------------------------------
-TVdetAnaModule::TVdetAnaModule(const char* name, const char* title):
+TVDetAnaModule::TVDetAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
   fPdgCode       = 11;
@@ -40,12 +40,12 @@ TVdetAnaModule::TVdetAnaModule(const char* name, const char* title):
 }
 
 //-----------------------------------------------------------------------------
-TVdetAnaModule::~TVdetAnaModule() {
+TVDetAnaModule::~TVDetAnaModule() {
 }
 
 
 //-----------------------------------------------------------------------------
-void TVdetAnaModule::BookVdetHitHistograms(VdetHitHist_t* Hist, const char* Folder) {
+void TVDetAnaModule::BookVDetHitHistograms(VDetHitHist_t* Hist, const char* Folder) {
   //     char name [200];
   //     char title[200];
   //-----------------------------------------------------------------------------
@@ -61,11 +61,11 @@ void TVdetAnaModule::BookVdetHitHistograms(VdetHitHist_t* Hist, const char* Fold
 
 
 //-----------------------------------------------------------------------------
-void TVdetAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+void TVDetAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fNVdetHits ,"nhvd"   ,Form("%s: N VDET Hits"         ,Folder), 1000, 0,  1000,Folder);
+  HBook1F(Hist->fNVDetHits ,"nhvd"   ,Form("%s: N VDET Hits"         ,Folder), 1000, 0,  1000,Folder);
   HBook1F(Hist->fNHitsTF   ,"nhtf"   ,Form("%s: N Hits Tracker Front",Folder), 100, 0,  100,Folder);
   HBook1F(Hist->fNHitsTB   ,"nhtb"   ,Form("%s: N Hits Tracker Back ",Folder), 100, 0,  100,Folder);
 
@@ -75,7 +75,7 @@ void TVdetAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) 
 }
 
 //_____________________________________________________________________________
-void TVdetAnaModule::BookHistograms() {
+void TVDetAnaModule::BookHistograms() {
 
   //  char name [200];
   //  char title[200];
@@ -107,26 +107,26 @@ void TVdetAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book virtual detector hit histograms
 //-----------------------------------------------------------------------------
-  int book_vdethit_histset[kNVdetHitHistSets];
-  for (int i=0; i<kNVdetHitHistSets; i++) book_vdethit_histset[i] = 0;
+  int book_vdethit_histset[kNVDetHitHistSets];
+  for (int i=0; i<kNVDetHitHistSets; i++) book_vdethit_histset[i] = 0;
 
   book_vdethit_histset[  0] = 1;		// all hits on all virtual detectors
   book_vdethit_histset[ 91] = 1;		// all hits on detector # 91 (before TS1 coll)
   book_vdethit_histset[391] = 1;		// mu- hits on detector # 91 (before TS1 coll)
 
-  for (int i=0; i<kNVdetHitHistSets; i++) {
+  for (int i=0; i<kNVDetHitHistSets; i++) {
     if (book_vdethit_histset[i] != 0) {
       sprintf(folder_name,"vdt_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fVdetHit[i] = new VdetHitHist_t;
-      BookVdetHitHistograms(fHist.fVdetHit[i],Form("Hist/%s",folder_name));
+      fHist.fVDetHit[i] = new VDetHitHist_t;
+      BookVDetHitHistograms(fHist.fVDetHit[i],Form("Hist/%s",folder_name));
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-void TVdetAnaModule::FillVdetHitHistograms(VdetHitHist_t* Hist, TVdetHitData* Hit) {
+void TVDetAnaModule::FillVDetHitHistograms(VDetHitHist_t* Hist, TVDetHitData* Hit) {
 
   Hist->fIndex->Fill(Hit->Index());
   Hist->fPdgCode->Fill(Hit->PdgCode());
@@ -138,13 +138,13 @@ void TVdetAnaModule::FillVdetHitHistograms(VdetHitHist_t* Hist, TVdetHitData* Hi
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-void TVdetAnaModule::FillEventHistograms(EventHist_t* Hist) {
+void TVDetAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //   double            cos_th, xv, yv, rv, zv, p;
 //   TLorentzVector    mom;
 
   float  loss (-1);
 
-  Hist->fNVdetHits->Fill(fNVdetHits);
+  Hist->fNVDetHits->Fill(fNVDetHits);
   Hist->fNHitsTF->Fill(fNHitsTF);
   Hist->fNHitsTB->Fill(fNHitsTB);
   Hist->fMomTF->Fill(fMomTF);
@@ -156,11 +156,11 @@ void TVdetAnaModule::FillEventHistograms(EventHist_t* Hist) {
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
-int TVdetAnaModule::BeginJob() {
+int TVDetAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("VdetBlock" ,"TVdetDataBlock" ,&fVdetDataBlock);
+  RegisterDataBlock("VDetBlock" ,"TVDetDataBlock" ,&fVDetDataBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -171,7 +171,7 @@ int TVdetAnaModule::BeginJob() {
 
 
 //_____________________________________________________________________________
-void TVdetAnaModule::FillHistograms() {
+void TVDetAnaModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
 // event histograms
@@ -183,16 +183,16 @@ void TVdetAnaModule::FillHistograms() {
 // straw hit histograms
 //-----------------------------------------------------------------------------
 //  int            nh;
-  TVdetHitData* hit;
+  TVDetHitData* hit;
 
-  for (int i=0; i<fNVdetHits; i++) {
-    hit = fVdetDataBlock->Hit(i);
-    FillVdetHitHistograms(fHist.fVdetHit[0],hit);
+  for (int i=0; i<fNVDetHits; i++) {
+    hit = fVDetDataBlock->Hit(i);
+    FillVDetHitHistograms(fHist.fVDetHit[0],hit);
 
     if (hit->Index() == 91) {
-      FillVdetHitHistograms(fHist.fVdetHit[91],hit);
+      FillVDetHitHistograms(fHist.fVDetHit[91],hit);
       if (hit->PdgCode() == 13) {
-	FillVdetHitHistograms(fHist.fVdetHit[391],hit);
+	FillVDetHitHistograms(fHist.fVDetHit[391],hit);
       }
     }
   }
@@ -210,7 +210,7 @@ void TVdetAnaModule::FillHistograms() {
 
 
 //_____________________________________________________________________________
-int TVdetAnaModule::BeginRun() {
+int TVDetAnaModule::BeginRun() {
   int rn = GetHeaderBlock()->RunNumber();
   TStntuple::Init(rn);
   return 0;
@@ -218,12 +218,12 @@ int TVdetAnaModule::BeginRun() {
 
 
 //_____________________________________________________________________________
-int TVdetAnaModule::Event(int ientry) {
+int TVDetAnaModule::Event(int ientry) {
 
   //  double                p;
   //  TLorentzVector        mom;
 
-  fVdetDataBlock->GetEntry(ientry);
+  fVDetDataBlock->GetEntry(ientry);
   //  fGenpBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
@@ -231,17 +231,17 @@ int TVdetAnaModule::Event(int ientry) {
 // if there are several hits, use the first one
 //-----------------------------------------------------------------------------
 //  fNGenp      = fGenpBlock->NParticles();
-  TVdetHitData* hit;
+  TVDetHitData* hit;
 
   fNHitsTF   = 0;
   fNHitsTB   = 0;
   fMomTF     = -1.;
   fMomTB     = -1.;
 
-  fNVdetHits = fVdetDataBlock->NHits();
+  fNVDetHits = fVDetDataBlock->NHits();
 
-  for (int i=0; i<fNVdetHits; i++) {
-    hit = fVdetDataBlock->Hit(i);
+  for (int i=0; i<fNVDetHits; i++) {
+    hit = fVDetDataBlock->Hit(i);
     if (hit->Index() == 13) {
 					// tracker FRONT
       fNHitsTF += 1;
@@ -262,7 +262,7 @@ int TVdetAnaModule::Event(int ientry) {
 }
 
 //-----------------------------------------------------------------------------
-void TVdetAnaModule::Debug() {
+void TVDetAnaModule::Debug() {
 
 //-----------------------------------------------------------------------------
 // bit 4: events with NHitsTF > 1
@@ -275,13 +275,13 @@ void TVdetAnaModule::Debug() {
 }
 
 //_____________________________________________________________________________
-int TVdetAnaModule::EndJob() {
+int TVDetAnaModule::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
   return 0;
 }
 
 //_____________________________________________________________________________
-void TVdetAnaModule::Test001() {
+void TVDetAnaModule::Test001() {
 
   // mu2e::HexMap* hmap      = new mu2e::HexMap();
 

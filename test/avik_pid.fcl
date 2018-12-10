@@ -108,10 +108,10 @@ physics.filters: { @table::physics.filters
 # default (in prolog): just one track block "TrackBlock" with output of MergePatRec
 #------------------------------------------------------------------------------
 	    trackBlockName          : [ "TrackBlockDem" , "TrackBlockDmm"  ] 
-	    trkRecoModuleLabel      : [ "MergePatRecDem", "MergePatRecDmm" ]
-	    trkExtrapolModuleLabel  : [            ""   ,               "" ]
-	    trkCaloMatchModuleLabel : [            ""   ,               "" ]
-	    pidModuleLabel          : [          AvikPID,          AvikPID ]
+	    trackCollTag            : [ "MergePatRecDem", "MergePatRecDmm" ]
+	    tciCollTag              : [            ""   ,               "" ]
+	    tcmCollTag              : [            ""   ,               "" ]
+	    pidCollTag              : [          AvikPID,          AvikPID ]
 	    fitParticle             : [               11,               13 ]
 	    fitDirection            : [                0,                0 ]
     }

@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TVdetAnaModule_hh
-#define murat_ana_TVdetAnaModule_hh
+#ifndef murat_ana_TVDetAnaModule_hh
+#define murat_ana_TVDetAnaModule_hh
 
 #include "TH1.h"
 #include "TH2.h"
@@ -12,19 +12,19 @@
 
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
-#include "Stntuple/obj/TVdetDataBlock.hh"
+#include "Stntuple/obj/TVDetDataBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
-class TVdetAnaModule: public TStnModule {
+class TVDetAnaModule: public TStnModule {
 public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct VdetHitHist_t {
+  struct VDetHitHist_t {
     TH1F*    fIndex;
     TH1F*    fPdgCode;		       //
     TH1F*    fGenCode;		       // generator code
@@ -33,7 +33,7 @@ public:
   };
 
   struct EventHist_t {
-    TH1F*    fNVdetHits;		// N virtual detector hits in the event
+    TH1F*    fNVDetHits;		// N virtual detector hits in the event
     TH1F*    fNHitsTF;
     TH1F*    fNHitsTB;
     TH1F*    fMomTF;
@@ -43,22 +43,22 @@ public:
 
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets    =  100 };
-  enum { kNVdetHitHistSets  = 2000 };
+  enum { kNVDetHitHistSets  = 2000 };
 
   struct Hist_t {
     EventHist_t*    fEvent   [kNEventHistSets];
-    VdetHitHist_t*  fVdetHit [kNVdetHitHistSets];
+    VDetHitHist_t*  fVDetHit [kNVDetHitHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TVdetDataBlock*       fVdetDataBlock;
+  TVDetDataBlock*       fVDetDataBlock;
 					// histograms filled
   Hist_t                fHist;
 
-  int                   fNVdetHits;
+  int                   fNVDetHits;
   int                   fNHitsTF;
   int                   fNHitsTB;
 
@@ -71,8 +71,8 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TVdetAnaModule(const char* name="VdetAna", const char* title="VdetAna");
-  ~TVdetAnaModule();
+  TVDetAnaModule(const char* name="VDetAna", const char* title="VDetAna");
+  ~TVDetAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -92,10 +92,10 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookVdetHitHistograms  (VdetHitHist_t*  Hist, const char* Folder);
+  void    BookVDetHitHistograms  (VDetHitHist_t*  Hist, const char* Folder);
   void    BookEventHistograms    (EventHist_t*    Hist, const char* Folder);
 
-  void    FillVdetHitHistograms  (VdetHitHist_t* Hist, TVdetHitData*  Hit);
+  void    FillVDetHitHistograms  (VDetHitHist_t* Hist, TVDetHitData*  Hit);
   void    FillEventHistograms    (EventHist_t*    Hist);
 
   void    BookHistograms();
@@ -108,7 +108,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TVdetAnaModule,0)
+  ClassDef(TVDetAnaModule,0)
 };
 
 #endif

@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "murat/plot/smooth.hh"
+#include "Stntuple/alg/smooth.hh"
 
 namespace {
 

@@ -11,7 +11,7 @@ void  vdet_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
-  m_vdt = (TVdetAnaModule*) g.x->AddModule("TVdetAnaModule",0);  
+  m_vdt = (TVDetAnaModule*) g.x->AddModule("TVDetAnaModule",0);  
   
   if (DebugBit >= 0) m_vdt->SetDebugBit(DebugBit,1);
 }

@@ -20,8 +20,7 @@ physics.trigger_paths                                : [ gen_calpatrec_reco_stnm
 outputs.detectorOutput.SelectEvents : { SelectEvents : [ gen_calpatrec_reco_stnmaker ] }
 
 physics.filters.StntupleMaker: { @table::StntupleMaker
-    generatorModuleLabel : "generate" 
-    trackBlockName       : [ "TrackBlock" ]
+    genpCollTag     : "generate" 
 }
 
 # physics.out : [ detectorOutput ]

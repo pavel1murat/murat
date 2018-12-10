@@ -16,14 +16,14 @@ process_name : CERecoStn
 
 physics.producers.generate : { @table::StoppedMuonConversionGun }
 
-physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
-physics.trigger_paths : [ @local::activePath]
+physics.filters.StntupleMaker.genpCollTag     : "generate" 
+physics.trigger_paths                         : [ @local::activePath]
 # physics.out : [ detectorOutput ]
 physics.out : [ ]
 
-services.TFileService.fileName                     : "ce_reco.hist"
-physics.filters.InitStntuple.histFileName          : "ce_reco.stn" 
-outputs.detectorOutput.fileName                    : "ce_reco.art"
+services.TFileService.fileName                : "ce_reco.hist"
+physics.filters.InitStntuple.histFileName     : "ce_reco.stn" 
+outputs.detectorOutput.fileName               : "ce_reco.art"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------

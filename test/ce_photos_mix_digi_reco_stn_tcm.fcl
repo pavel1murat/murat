@@ -32,8 +32,6 @@
 
 BEGIN_PROLOG
   meanBackground : -1        # fixed at 1
-  g4ModuleLabel                        : "g4run"           # for normal generators
-#  g4ModuleLabel                       : "g4run"          # for Ralf's cosmics
   G4_MODULE_LABEL                      : "g4run"          # for normal generators
 #  G4_MODULE_LABEL                      : "detectorFilter" # for Andrei's datasets 
 #------------------------------------------------------------------------------
@@ -71,9 +69,9 @@ physics: {
 	InitStntuple      : { @table::murat.filters.InitStntuple      histFileName  : "ce_photos_digi_reco_stn_tcm.stn" }
 
  	StntupleMakerTcm       : { @table::murat.filters.StntupleMakerTcm  
-	    g4ModuleLabel      : @local::G4_MODULE_LABEL
+	    spmcCollTag        : @local::G4_MODULE_LABEL
 	    makeTrackStrawHits : 1
-	    makeVirtualHits    : 1
+	    makeVDHits         : 1
 	}
     }
 

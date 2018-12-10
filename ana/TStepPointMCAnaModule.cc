@@ -261,6 +261,18 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[398] = 1;		// all mu- , VDET=98
   book_vdet_histset[399] = 1;		// all mu- , VDET=99
 
+  book_vdet_histset[401] = 1;		// all mu+ , VDET=1: Coll1_In
+  book_vdet_histset[402] = 1;		// all mu+ , VDET=2: Coll1_Out
+  book_vdet_histset[403] = 1;		// all mu+ , VDET=3: Coll31_In
+  book_vdet_histset[404] = 1;		// all mu+ , VDET=4: Coll31_Out
+  book_vdet_histset[405] = 1;		// all mu+ , VDET=5: Coll32_In 
+  book_vdet_histset[406] = 1;		// all mu+ , VDET=6: Coll32_Out
+  book_vdet_histset[407] = 1;		// all mu+ , VDET=7: Coll5_In
+  book_vdet_histset[408] = 1;		// all mu+ , VDET=8: Coll5_Out
+  book_vdet_histset[409] = 1;		// all mu+ , VDET=9: ST_In
+  book_vdet_histset[498] = 1;		// all mu+ , VDET=98
+  book_vdet_histset[499] = 1;		// all mu+ , VDET=99
+
   book_vdet_histset[501] = 1;		// p<50 MeV/c mu- , VDET=1: Coll1_In
   book_vdet_histset[502] = 1;		// p<50 MeV/c mu- , VDET=2: Coll1_Out
   book_vdet_histset[503] = 1;		// p<50 MeV/c mu- , VDET=3: Coll31_In
@@ -283,8 +295,8 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[607] = 1;		// p>50 MeV/c mu- , VDET=7: Coll5_In
   book_vdet_histset[608] = 1;		// p>50 MeV/c mu- , VDET=8: Coll5_Out
   book_vdet_histset[609] = 1;		// p>50 MeV/c mu- , VDET=9: ST_In
-  book_vdet_histset[608] = 1;		// p<50 MeV/c mu- , VDET=98
-  book_vdet_histset[609] = 1;		// p<50 MeV/c mu- , VDET=99
+  book_vdet_histset[698] = 1;		// p>50 MeV/c mu- , VDET=98
+  book_vdet_histset[699] = 1;		// p>50 MeV/c mu- , VDET=99
 
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {

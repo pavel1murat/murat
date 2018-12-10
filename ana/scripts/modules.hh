@@ -10,6 +10,7 @@
 #include "murat/ana/TDioCalibModule.hh"
 #include "murat/ana/TDoseAnaModule.hh"
 #include "murat/ana/TG4ValidationModule.hh"
+#include "murat/ana/THelixAnaModule.hh"
 #include "murat/ana/TMuonStopAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
 #include "murat/ana/TStepPointMCAnaModule.hh"
@@ -22,7 +23,7 @@
 #include "murat/ana/TTrackStrawHitAnaModule.hh"
 #include "murat/ana/TTriggerAnaModule.hh"
 #include "murat/ana/TValCalPatRecModule.hh"
-#include "murat/ana/TVdetAnaModule.hh"
+#include "murat/ana/TVDetAnaModule.hh"
 //-----------------------------------------------------------------------------
 // hide CDF  names inside the namespace to preserve them
 //-----------------------------------------------------------------------------
@@ -82,6 +83,7 @@ TDioCalibModule*           m_dio   = NULL;
 TDoseAnaModule*            m_dose  = NULL;
 TG4ValidationModule*       m_g4val = NULL;
 TGenAnaModule*             m_gen   = NULL;
+THelixAnaModule*           m_hel   = NULL;
 TMuonStopAnaModule*        m_must  = NULL;
 TPidAnaModule*             m_pid   = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
@@ -94,7 +96,7 @@ TTrackPidAnaModule*        m_tpa   = NULL;
 TTrackRecoEffAnaModule*    m_eff   = NULL;
 TTriggerAnaModule*         m_trig  = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
-TVdetAnaModule*            m_vdt   = NULL;
+TVDetAnaModule*            m_vdt   = NULL;
 
 // TStnTrackID*             trk_id  = NULL;
 // TAnalysisDataset*        a_dset  = NULL;

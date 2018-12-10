@@ -104,22 +104,16 @@ physics : {
 	    makeTrackSeeds       : 0
 	    makeClusters         : 0
 	    makePid              : 0
-	    trkRecoModuleLabel   : ["TRFDownstreameMinus"      ]
-	    fitParticle          : [ @local::Particle.proton   ]
-	    fitDirection         : [ @local::FitDir.downstream ]
-	    trackSeedMaker       : "NegHelixFinder"
-	    g4ModuleLabel        : "protonMixer"
-	    generatorModuleLabel : "protonMixer"
+	    trackCollTag         : ["TRFDownstreameMinus"      ]
+	    trackSeedCollTag     : "NegHelixFinder"
+	    genpCollTag          : "protonMixer"
 	}
 
 	MuHitDisplay : { @table::MuHitDisplay
-	    trkRecoModuleLabel           : TRFDownstreameMinus
-	    fitParticle                  : @local::Particle.proton
-	    fitDirection                 : @local::FitDir.downstream
-	    strawHitPosMakerModuleLabel  : MakeStereoHits
-	    strawHitFlagMakerModuleLabel : FlagStrawHits
-	    g4ModuleLabel                : "protonMixer"
-	    generatorModuleLabel         : "protonMixer"
+	    trackCollTag         : TRFDownstreameMinus
+	    strawHitFlagCollTag  : FlagStrawHits
+	    spmcCollTag          : "protonMixer"
+	    genpCollTag          : "protonMixer"
 	}
 
     }
@@ -128,22 +122,21 @@ physics : {
 #
 # physics.trigger_paths : [  gen_allpatrec_dem_dmm_reco_display ]
 #------------------------------------------------------------------------------
-    trkpatrec_reco : [
-		      @sequence::timeMapSeq
-		      , @sequence::hitMakerSeq
-		      , @sequence::CaloCluster.Reco
-		      , @sequence::trkPatRecSeqProt
-		      , MergePatRec
-#		      , @sequence::stnmaker_seq
-		      , MuHitDisplay
+    p1 : [
+	  @sequence::timeMapSeq
+	  , @sequence::hitMakerSeq
+	  , @sequence::CaloCluster.Reco
+	  , @sequence::trkPatRecSeqProt
+	  , MergePatRec
+	  #		      , @sequence::stnmaker_seq
+	  , MuHitDisplay
 		     ]
 
-    trigger_paths : [  trkpatrec_reco ]
-    out           : []
+    trigger_paths : [ p1  ]
+    out           : [     ]
     end_paths     : [ out ]
 }
 
-#physics.filters.MuHitDisplay.trkRecoModuleLabel : MergePatRecTpr
 #services.TFileService.fileName            : "vbertacc/bkg_proton_reco_stn.hist"
 physics.filters.InitStntuple.histFileName : "bkg_proton_reco_stn.stn"
 #------------------------------------------------------------------------------

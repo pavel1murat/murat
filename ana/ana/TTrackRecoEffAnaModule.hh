@@ -16,7 +16,7 @@
 #include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
-#include "Stntuple/obj/TVdetDataBlock.hh"
+#include "Stntuple/obj/TVDetDataBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -107,7 +107,7 @@ public:
   TStnTrackBlock*       fTrackBlock;
   TStrawDataBlock*      fStrawDataBlock;
   TGenpBlock*           fGenpBlock;
-  TVdetDataBlock*       fVdetDataBlock;
+  TVDetDataBlock*       fVDetDataBlock;
 					// histograms filled
   Hist_t                fHist;
 
@@ -115,7 +115,7 @@ public:
   TSimParticle*         fSimp;
 
   int                   fNGenp;		// N(generated particles)
-  int                   fNVdetHits;
+  int                   fNVDetHits;
   int                   fNStrawHits;
   int                   fNHitsSignal;
   int                   fPdgCode;

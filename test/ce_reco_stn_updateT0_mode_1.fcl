@@ -17,8 +17,6 @@ physics.trigger_paths : [reco]
 
 physics.producers.CalPatRec.KalFitHack.T0UpdateMode : 1
 
-physics.filters.StntupleMaker.generatorModuleLabel : "generate" 
-
 # physics.out : [ detectorOutput ]
 
 services.TFileService.fileName                     : "ce_reco_stnmaker.hist"

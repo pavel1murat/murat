@@ -19,7 +19,7 @@
 #include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
-#include "Stntuple/obj/TVdetDataBlock.hh"
+#include "Stntuple/obj/TVDetDataBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -209,11 +209,13 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlock[3];	// [0]: TrkPatRec tracks, [1]:all CalPatRec
+  TStnTrackBlock*   fTrackBlock[2];	// [0]: TrkPatRec fit, [1]:CalPatRec fit
   TStnClusterBlock* fClusterBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
-  TVdetDataBlock*   fVdetBlock;
+  TVDetDataBlock*   fVDetBlock;
+
+  TString           fTrackBlockName[2];
 					
   TrackPar_t        fTrackPar[2][10];	// additional track parameters (assume ntracks < 10)
   SimPar_t          fSimPar;		// additional parameters of the simulated MC particle
@@ -300,6 +302,8 @@ public:
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
+  void    SetTrackBlockName(int I, const char* Name) { fTrackBlockName[I] = Name; }
+
   void    SetPdgCode      (int Code ) { fPdgCode       = Code ; }
   void    SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
 

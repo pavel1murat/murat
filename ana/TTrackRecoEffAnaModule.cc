@@ -466,7 +466,7 @@ int TTrackRecoEffAnaModule::BeginJob() {
 // register data blocks
 //-----------------------------------------------------------------------------
   RegisterDataBlock("StrawDataBlock"  ,"TStrawDataBlock" ,&fStrawDataBlock);
-  RegisterDataBlock("VdetBlock"       ,"TVdetDataBlock"  ,&fVdetDataBlock);
+  RegisterDataBlock("VDetBlock"       ,"TVDetDataBlock"  ,&fVDetDataBlock);
   RegisterDataBlock("GenpBlock"       ,"TGenpBlock"      ,&fGenpBlock);
   RegisterDataBlock("TrackBlock"      ,"TStnTrackBlock"  ,&fTrackBlock);
 //-----------------------------------------------------------------------------
@@ -589,7 +589,7 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
   TStrawHitData*        hit(NULL);
 
   fStrawDataBlock->GetEntry(ientry);
-  fVdetDataBlock->GetEntry(ientry);
+  fVDetDataBlock->GetEntry(ientry);
   fTrackBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
@@ -613,7 +613,7 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
 // use the first TF hit - in principle, teh same particle may have more than 
 // one hit in VD (it can turn back)
 //-----------------------------------------------------------------------------
-  TVdetHitData* vdhit;
+  TVDetHitData* vdhit;
 
   fNHitsTF   = 0;
   fNHitsTB   = 0;
@@ -621,12 +621,12 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
   fMomTB     = -1.;
   fPitchTF   = -1.;
 
-  fNVdetHits = fVdetDataBlock->NHits();
+  fNVDetHits = fVDetDataBlock->NHits();
 
   float  px, py, pz;
 
-  for (int i=0; i<fNVdetHits; i++) {
-    vdhit = fVdetDataBlock->Hit(i);
+  for (int i=0; i<fNVDetHits; i++) {
+    vdhit = fVDetDataBlock->Hit(i);
     if (vdhit->Index() == 13) {
 					// tracker FRONT
       fNHitsTF += 1;

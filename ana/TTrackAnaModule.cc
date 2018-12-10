@@ -137,7 +137,7 @@ int TTrackAnaModule::BeginJob() {
   RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
   RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VdetBlock"           ,"TVdetDataBlock"   ,&fVdetBlock);
+  RegisterDataBlock("VDetBlock"           ,"TVDetDataBlock"   ,&fVDetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -1480,7 +1480,7 @@ int TTrackAnaModule::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
-  fVdetBlock->GetEntry(ientry);
+  fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -1519,9 +1519,9 @@ int TTrackAnaModule::Event(int ientry) {
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  int nvdhits = fVdetBlock->NHits();
+  int nvdhits = fVDetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
-    TVdetHitData* vdhit = fVdetBlock->Hit(i);
+    TVDetHitData* vdhit = fVDetBlock->Hit(i);
     if (vdhit->PdgCode() == fSimp->fPdgCode) {
       if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
 	if (fDirection*vdhit->McMomentumZ() > 0) {

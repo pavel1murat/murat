@@ -6,7 +6,7 @@
 #include "TF1.h"
 #include "TGraph.h"
 
-#include "plot/smooth.hh"
+#include "Stntuple/alg/smooth.hh"
 #include "plot/TMuonDecay.hh"
 
 namespace {

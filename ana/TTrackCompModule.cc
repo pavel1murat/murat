@@ -59,6 +59,10 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fGeneratorCode( 2)                        // 2:ConversionGun 28:StoppedParticleReactionGun
 {
   fFillDioHist = 1;
+
+  fTrackBlockName[0] = "TrackBlockPar";
+  fTrackBlockName[1] = "TrackBlockDar";
+
 //-----------------------------------------------------------------------------
 // TrackID[0] : "SetC"
 // i = 1..6 : cut on DaveTrkQual > 0.1*i instead
@@ -136,13 +140,12 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TrackBlockTpr" ,"TStnTrackBlock"     ,&fTrackBlock[0]);
-  RegisterDataBlock("TrackBlockCpr" ,"TStnTrackBlock"     ,&fTrackBlock[1]);
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"     ,&fTrackBlock[2]);
-  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"   ,&fClusterBlock );
-  RegisterDataBlock("SimpBlock"     ,"TSimpBlock"         ,&fSimpBlock    );
-  RegisterDataBlock("GenpBlock"     ,"TGenpBlock"         ,&fGenpBlock    );
-  RegisterDataBlock("VdetBlock"     ,"TVdetDataBlock"     ,&fVdetBlock    );
+  RegisterDataBlock(fTrackBlockName[0].Data(), "TStnTrackBlock"     ,&fTrackBlock[0]);
+  RegisterDataBlock(fTrackBlockName[1].Data(), "TStnTrackBlock"     ,&fTrackBlock[1]);
+  RegisterDataBlock("ClusterBlock"           , "TStnClusterBlock"   ,&fClusterBlock );
+  RegisterDataBlock("SimpBlock"              , "TSimpBlock"         ,&fSimpBlock    );
+  RegisterDataBlock("GenpBlock"              , "TGenpBlock"         ,&fGenpBlock    );
+  RegisterDataBlock("VDetBlock"              , "TVDetDataBlock"     ,&fVDetBlock    );
 //-----------------------------------------------------------------------------
 // for validation purposes
 //-----------------------------------------------------------------------------
@@ -908,7 +911,6 @@ void TTrackCompModule::FillHistograms() {
 
   int ntpr = fTrackBlock[0]->NTracks();
   int ncpr = fTrackBlock[1]->NTracks();
-  //  int nmpr = fTrackBlock[2]->NTracks();
 
   if ((ntpr > 0) && (fTrackPar[0][0].fIDWord[fBestID[0]] == 0)) {
     tpr  = fTrackBlock[0]->Track(0);
@@ -982,7 +984,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_102, TRK_202: (BestID - FitConsBit - T0ErrBit - MomErrBit) tracks 
 //-----------------------------------------------------------------------------
-      int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kMomErrBit;
+      int mask = (TStnTrackID::kFitConsBit | TStnTrackID::kT0ErrBit | TStnTrackID::kMomErrBit);
       if ((tp->fIDWord[fBestID[i]] & ~mask) == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
       }
@@ -1031,7 +1033,7 @@ void TTrackCompModule::FillHistograms() {
 	//-----------------------------------------------------------------------------
 	// IHIST+2: (SetC - FitConsBit - T0ErrBit - MomErrBit) tracks 
 	//-----------------------------------------------------------------------------
-	int mask = TStnTrackID::kFitConsBit || TStnTrackID::kT0ErrBit || TStnTrackID::kMomErrBit;
+	int mask = (TStnTrackID::kFitConsBit | TStnTrackID::kT0ErrBit | TStnTrackID::kMomErrBit);
 	if ((tp->fIDWord[fBestID[i]] & ~mask) == 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
 	}
@@ -1092,9 +1094,8 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
-  if      (strcmp(block_name,"TrackBlockTpr" ) == 0) track_type = 0;
-  else if (strcmp(block_name,"TrackBlockCpr" ) == 0) track_type = 1;
-  else if (strcmp(block_name,"TrackBlock"    ) == 0) track_type = 2;
+  if      (strcmp(block_name,fTrackBlockName[0].Data()) == 0) track_type = 0;
+  else if (strcmp(block_name,fTrackBlockName[1].Data()) == 0) track_type = 1;
   else {
     Error("TTrackCompModule::InitTrackPar",Form("IN TROUBLE: unknown track block: %s",block_name));
     return -1;
@@ -1333,11 +1334,10 @@ int TTrackCompModule::Event(int ientry) {
 
   fTrackBlock[0]->GetEntry(ientry);
   fTrackBlock[1]->GetEntry(ientry);
-  fTrackBlock[2]->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
-  fVdetBlock->GetEntry(ientry);
+  fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -1388,9 +1388,9 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // virtual detectors - for fSimp need parameters at the tracker front
 //-----------------------------------------------------------------------------
-  int nvdhits = fVdetBlock->NHits();
+  int nvdhits = fVDetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
-    TVdetHitData* vdhit = fVdetBlock->Hit(i);
+    TVDetHitData* vdhit = fVDetBlock->Hit(i);
     if (vdhit->PdgCode() == fSimp->fPdgCode) {
       if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
 	fSimPar.fTFront = vdhit;
@@ -1527,7 +1527,6 @@ void TTrackCompModule::Debug() {
       GetHeaderBlock()->Print(Form("TTrackCompModule :bit011"));
       PrintTrack(fTrackBlock[0]->Track(0),&fTrackPar[0][0],"");
       PrintTrack(fTrackBlock[1]->Track(0),&fTrackPar[1][0],"data");
-      PrintTrack(fTrackBlock[2]->Track(0),&fTrackPar[2][0],"data");
     }
   }
 

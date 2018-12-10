@@ -103,7 +103,7 @@ int TCosmicsAnaModule::BeginJob() {
   RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VdetBlock"     ,"TVdetDataBlock"   ,&fVdetBlock);
+  RegisterDataBlock("VDetBlock"     ,"TVDetDataBlock"   ,&fVDetBlock);
 //-----------------------------------------------------------------------------
 // cache multiple track block pointers for convenience
 //-----------------------------------------------------------------------------
@@ -1403,7 +1403,7 @@ int TCosmicsAnaModule::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
-  fVdetBlock->GetEntry(ientry);
+  fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
@@ -1422,9 +1422,9 @@ int TCosmicsAnaModule::Event(int ientry) {
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
 
-  int nvdhits = fVdetBlock->NHits();
+  int nvdhits = fVDetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
-    TVdetHitData* vdhit = fVdetBlock->Hit(i);
+    TVDetHitData* vdhit = fVDetBlock->Hit(i);
     if (vdhit->PdgCode() == fSimPar.fParticle->fPdgCode) {
       if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
 	fSimPar.fTFront = vdhit;

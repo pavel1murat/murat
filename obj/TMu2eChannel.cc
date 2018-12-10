@@ -9,7 +9,6 @@
 #include <cmath>
 #include <cassert>
 
-#include "murat/plot/smooth.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 
 #include "obj/TMu2eDatasets.hh"

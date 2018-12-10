@@ -18,6 +18,7 @@ def_name track_0081 ("track_ana_umm");
 def_name track_0110 ("track_ana_nocorr");
 
 def_name track_0510 ("track_comp");
+def_name track_0511 ("track_comp_old");
 def_name track_0520 ("track_comp_tmva");
 def_name track_0530 ("track_comp_use_mva");
 
@@ -209,6 +210,24 @@ void  track_comp(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, double
 // configure analysis module
 //-----------------------------------------------------------------------------
   m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
+  m_tcm->SetPdgCode      (PDGCode);
+  m_tcm->SetGeneratorCode(GeneratorCode);
+  if (DebugBit >= 0) {
+    m_tcm->SetDebugBit(DebugBit,1);
+    if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+//-----------------------------------------------------------------------------
+void  track_comp_old(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, double XMin=1,double XMax = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
+  m_tcm->SetTrackBlockName(0,"TrackBlockTpr");
+  m_tcm->SetTrackBlockName(1,"TrackBlockCpr");
   m_tcm->SetPdgCode      (PDGCode);
   m_tcm->SetGeneratorCode(GeneratorCode);
   if (DebugBit >= 0) {

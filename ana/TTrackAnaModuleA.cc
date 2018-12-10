@@ -107,7 +107,7 @@ int TTrackAnaModuleA::BeginJob() {
   RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
   RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VdetBlock"           ,"TVdetDataBlock"   ,&fVdetBlock);
+  RegisterDataBlock("VDetBlock"           ,"TVDetDataBlock"   ,&fVDetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -1198,7 +1198,7 @@ int TTrackAnaModuleA::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
-  fVdetBlock->GetEntry(ientry);
+  fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -1233,9 +1233,9 @@ int TTrackAnaModuleA::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 //-----------------------------------------------------------------------------
-  int nvdhits = fVdetBlock->NHits();
+  int nvdhits = fVDetBlock->NHits();
   for (int i=0; i<nvdhits; i++) {
-    TVdetHitData* vdhit = fVdetBlock->Hit(i);
+    TVDetHitData* vdhit = fVDetBlock->Hit(i);
     if (vdhit->PdgCode() == fSimp->fPdgCode) {
       if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
 	fSimPar.fTFront = vdhit;

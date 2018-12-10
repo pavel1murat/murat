@@ -3,7 +3,7 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class smooth;
+#pragma link C++ class TVDetAnaModule;
 
 #endif
 

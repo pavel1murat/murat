@@ -24,4 +24,4 @@ outputs.detectorOutput.fileName           : "cosmics_stnmaker.root"
 #------------------------------------------------------------------------------
 # everything below is appended by murat/scripts/submit_mu2e_job
 #------------------------------------------------------------------------------
-physics.filters.StntupleMaker.g4ModuleLabel        : "g4filter"     # 
+physics.filters.StntupleMaker.spmcCollTag : "g4filter"     # 

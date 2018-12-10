@@ -6,7 +6,7 @@
 //
 
 #include "TGraphErrors.h"
-#include "murat/plot/smooth.hh"
+#include "Stntuple/alg/smooth.hh"
 
 //-----------------------------------------------------------------------------
 // digitized figure 7b, efficiency folded in, v1

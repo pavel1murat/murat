@@ -23,8 +23,7 @@ physics.trigger_paths : [ all1 ]
 outputs.detectorOutput.SelectEvents : { SelectEvents : [ all1 ] }
 
 physics.filters.StntupleMaker: { @table::StntupleMaker
-    generatorModuleLabel : "generate" 
-    trackBlockName       : [ "TrackBlock" ]
+    genpCollTag    : "generate" 
 }
 
 # physics.out : [ detectorOutput ]

@@ -40,9 +40,9 @@ THelixAnaModule::THelixAnaModule(const char* name, const char* title):
   fPdgCode     = 11;
   fProcessCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
 
-  fHelixBlockName[0]  = "HelixBlockTprDe";
-  fHelixBlockName[1]  = "HelixBlockCprDe";
-  fHelixBlockName[2]  = "HelixBlockDe";
+  fHelixBlockName[0]  = "HelixBlockTpr";
+  fHelixBlockName[1]  = "HelixBlockCpr";
+  fHelixBlockName[2]  = "HelixBlock";
 
   fTrackSeedBlockName = "TrackSeedBlockName";
 }

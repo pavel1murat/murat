@@ -753,7 +753,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
-  Hist->fQ->Fill(-1);
+  Hist->fQ->Fill(Track->fCharge);
   Hist->fFitCons[0]->Fill(Track->fFitCons);
   Hist->fFitCons[1]->Fill(Track->fFitCons);
 

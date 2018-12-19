@@ -21,7 +21,7 @@ def_name genp_012("coll1_dose_ana");
 //-----------------------------------------------------------------------------
 void  spmc_ana(int Stage = 1, int DebugBit = -1) {
   m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
-  if (Stage == 3) m_spmc->SetSpmcBlockName("VdetBlock");
+  if (Stage == 3) m_spmc->SetSpmcBlockName("VDetBlock");
   if (Stage == 2) m_spmc->SetVDetBlockName("VDetBlock");
 
   if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
@@ -38,7 +38,7 @@ void  bflash_ana_spmc(int Stage = 1, int DebugBit = -1) {
 
 void  bflash_ana_vdet(int Stage = 1, int DebugBit = -1) {
   m_bfl = (TBeamFlashAnaModule*) g.x->AddModule("TBeamFlashAnaModule",0);
-  m_bfl->SetSpmcBlockName("VdetBlock");
+  m_bfl->SetSpmcBlockName("VDetBlock");
   if (DebugBit >= 0) m_bfl->SetDebugBit(DebugBit,1);
 }
 

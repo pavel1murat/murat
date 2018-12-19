@@ -541,7 +541,7 @@ void TTrackAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track) {
   Hist->fT0->Fill(Track->fT0);
   Hist->fT0Err->Fill(Track->fT0Err);
   //  printf("TTrackAnaModule::FillTrackHistograms: track charge is not defined yet\n");
-  Hist->fQ->Fill(-1);
+  Hist->fQ->Fill(Track->fCharge);
   Hist->fFitCons[0]->Fill(Track->fFitCons);
   Hist->fFitCons[1]->Fill(Track->fFitCons);
 

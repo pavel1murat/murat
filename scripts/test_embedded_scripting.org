@@ -25,17 +25,18 @@ plot(x1,dchisq(x1*6,6),main="Chi-distribution with NDF=6",type="l",col="blue")
 #+RESULTS:
 [[file:test_001.pdf]]
 
-#+begin_src :file a.png R :session
+#+begin_src R :file a.png :session
   x <- rnorm(10)
   y <- rnorm(10)
   plot(x, y)
 #+end_src
 
 #+RESULTS:
+[[file:a.png]]
 
 Same plot with larger dimension:
 
-#+begin_src R  :session :results output :file b.png :width 800 :height 800
+#+begin_src R :session :results output :file b.png :width 800 :height 800
   x <- rnorm(10)
   y <- rnorm(10)
   plot(x, y)
@@ -54,7 +55,7 @@ require 'date'
 #+end_src
 
 #+RESULTS:
-: This file was last evaluated on 2015-12-17
+: This file was last evaluated on 2018-11-13
 
 * PYTHON examples
 
@@ -67,7 +68,7 @@ return (a, '5+3x = ', 5 + 3*x)
 #+end_src
 
 #+RESULTS: test1
-| Today is Wed Sep  5 16:58:35 2018 | x =      5.00000 | 5+3x = | 20 |
+| Today is Tue Nov 13 15:28:15 2018 | x =      5.00000 | 5+3x = | 20 |
 
 # to execute call : 'C-c C-v C-e'
 #+call: test1(41)
@@ -88,7 +89,7 @@ plt.show()
 #+end_src
 
 #+RESULTS:
-[[file:myfig.pdf]]
+[[file:]]
 
 
 * STNTUPLE Mu2e event mixing job performance vs the background level (use PYTHON)
@@ -117,16 +118,16 @@ fn                                         # return this to org-mode
 
 ** R example 000 : naming of the output file 
 #+attr_latex: width=8cm placement=[htbp]
-#+begin_src R :results output graphics :exports results :file (org-babel-temp-file "./figure-" ".pdf")                                                                                                                                                                                                 
-    require(ggplot2)                                                                                                                           
-    a <- rnorm(100)                                                                                                                            
-    b <- 2*a + rnorm(100)                                                                                                                      
-    d <- data.frame(a,b)                                                                                                                       
-    ggplot(d,aes(a,b)) + geom_point()                                                                                                          
-#+end_src                                     
+#+begin_src R :results output graphics :exports results :file (org-babel-temp-file "./figure-" ".pdf")
+    require(ggplot2) 
+    a <- rnorm(100)  
+    b <- 2*a + rnorm(100)
+    d <- data.frame(a,b) 
+    ggplot(d,aes(a,b)) + geom_point()
+#+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-23439G_8/figure-23439hRs.pdf]]
+[[file:/tmp/babel-5drPGM/figure-wsy5gO.pdf]]
 
 ** R example 000
 #+begin_src R :results output graphics :exports results :file (org-babel-temp-file "./figure-" ".pdf")

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// description of a histogram file
+// a 'dataset' here is a histogram file plus data fields for plotting attributes
 //-----------------------------------------------------------------------------
 #ifndef __murat_scripts_dataset_hh__
 #define __murat_scripts_dataset_hh__
@@ -9,6 +9,7 @@ struct dataset_t {
   TString  fName  ;			// dataset name
   TString  fFn    ;			// full name of the histogram file
   TString  fLabel ;			// label to appear on a plot
+  TString  fHistName;                   // redefines the histogram name
   int      fLineColor;                  // these are utility fields to be used as needed
   int      fLineWidth;
   int      fFillColor;                  // these are utility fields to be used as needed
@@ -32,6 +33,7 @@ struct dataset_t {
     fName        = "";
     fFn          = "";
     fLabel       = "";
+    fHistName    = "";
     fLineColor   = -1;
     fLineWidth   =  1;
     fMarkerSize  = -1;

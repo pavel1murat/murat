@@ -9,7 +9,7 @@
 // 1  : passed events
 // 2  : rejected events
 // 
-// 3  : UNUSED
+// 3  : events with SPMC T<100
 // 4  : events with NHitsTF > 1
 // 5  : UNUSED
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,6 +182,8 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_spmc_histset[7] = 1;		// positive pions
   book_spmc_histset[8] = 1;		// protons+antiprotons
   book_spmc_histset[9] = 1;		// everything else
+
+  book_spmc_histset[10]  = 1;		// SPMC with T < 100 ns
 
   book_spmc_histset[101] = 1;		// electrons with P > 60 MeV/c
   book_spmc_histset[102] = 1;		// electrons with T > 400 ns
@@ -497,7 +499,7 @@ void TStepPointMCAnaModule::FillHistograms() {
     else                     spmc_data.fParticle = NULL;
 
     if (spmc_data.fParticle == NULL) {
-      printf(">>> WARNING: no particle with PDF code=%i in ROOT particle DB\n",pdg_code);
+      if (GetDebugBit(3) == 0) printf(">>> WARNING: no particle with PDF code=%i in ROOT particle DB\n",pdg_code);
     }
 
     FillStepPointMCHistograms(fHist.fStepPointMC[0],spmc,&spmc_data);
@@ -524,12 +526,20 @@ void TStepPointMCAnaModule::FillHistograms() {
       if   (p <  50)            FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,&spmc_data);
       else                      FillStepPointMCHistograms(fHist.fStepPointMC[302],spmc,&spmc_data);
     }
-    else if (pdg_code ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,&spmc_data);
-    else if (pdg_code ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,&spmc_data);
-    else if (pdg_code == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,&spmc_data);
-    else if (pdg_code ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,&spmc_data);
+    else if (pdg_code     ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,&spmc_data);
+    else if (pdg_code     ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,&spmc_data);
+    else if (pdg_code     == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,&spmc_data);
+    else if (pdg_code     ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,&spmc_data);
     else if (abs_pdg_code == 2212) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc,&spmc_data);  // protons+pbars
     else                           FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc,&spmc_data);  // everything else
+
+    if (spmc->Time()      <   100) {
+      FillStepPointMCHistograms(fHist.fStepPointMC[10],spmc,&spmc_data);
+      if (GetDebugBit(3)) {
+	GetHeaderBlock()->Print("");
+	spmc->Print();
+      }
+    }
 
     if (spmc->VolumeID() == 9) {
       FillStepPointMCHistograms(fHist.fStepPointMC[900],spmc,&spmc_data);

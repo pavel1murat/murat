@@ -9,26 +9,31 @@
 # file extentions recognized: .art .log .hist .stn
 #------------------------------------------------------------------------------
    project=$1
-     jobid=$2 # 15160119
-output_dir=/mu2e/data/users/$USER/datasets
-    dsname=$4
-      doit=$5
+   version=$2
+      dsid=$3
+       job=$4
+     jobid=$5 # 15160119
+    dsname=$6
+      doit=$7
 
- stage_dir=/pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage/$jobid
+output_dir=/mu2e/data/users/$USER/datasets
+
+job_name_stub=$project.$version.$dsid.$job
+
+ stage_dir=/pnfs/mu2e/scratch/users/$USER/workflow/$job_name_stub/outstage/$jobid
 
 echo stage_dir=$stage_dir
 echo     jobid=$jobid
 echo    dsname=$dsname
 
-cmd_prefix="echo" ; 
-if [ ".$doit" != "." ] ; then cmd_prefix="" ; fi
+cmd_prefix="echo" ; if [ ".$doit" != "." ] ; then cmd_prefix="" ; fi
 #------------------------------------------------------------------------------
 # find the GRID output directory corresponding to job ID
 #------------------------------------------------------------------------------
-job=`ls $stage_dir | grep $jobid`;
-jobname=`echo $job | awk -F . '{print $1}'`
+# job=`ls $stage_dir | grep $jobid`;
+# jobname=`echo $job | awk -F . '{print $1}'`
 
-if [ $3 != "." ] ; then output_dir=$3 ; fi
+# if [ $3 != "." ] ; then output_dir=$3 ; fi
 od=$output_dir/$dsname
 
 echo job=$job jobname=$jobname od=$od
@@ -37,6 +42,7 @@ echo job=$job jobname=$jobname od=$od
 #------------------------------------------------------------------------------
 if [ ! -d $od      ] ; then mkdir $od      ; fi
 if [ ! -d $od/log  ] ; then mkdir $od/log  ; fi
+if [ ! -d $od/fcl  ] ; then mkdir $od/fcl  ; fi
 if [ ! -d $od/hist ] ; then mkdir $od/hist ; fi
 
 dir=$stage_dir
@@ -58,13 +64,18 @@ for sd1 in `ls $dir` ; do
 
 	nf=`echo $sd2 | awk -F . '{print NF}'` 
 	if [ $nf == 1 ] ; then
+#------------------------------------------------------------------------------
+# completed section, assume there is only one .log and only one .fcl file
+#------------------------------------------------------------------------------
+	    logfile=`ls $sd/log.*.log`
+	    fclfile=`ls $sd/*.fcl`
+
+	    rs_stub=`echo $logfile | awk -F. '{print $(NF-1)}'`
+#	    echo rs_stub:$rs_stub
 
 	    index0=`echo $sd2 | awk '{printf "%04i", $1}'`
 	    index=$sd1.`echo $sd2 | awk '{printf "%04i", $1}'`
 	    echo ------------------------ sd=$sd section=$index: 
-	    
-	    logfile=`ls $sd/log.*.log`
-	    fclfile=`ls $sd/*.fcl`
 	    
 	    x=`cat $logfile | grep "mu2egrid exit status"`; 
 	    rc=`echo $x | awk '{print $4}'`
@@ -72,51 +83,55 @@ for sd1 in `ls $dir` ; do
 	    rc=0
 
 	    if [ ".$rc" == ".0" ] ; then
+#		echo [move_grid_output:$LINENO]: dsname=$dsname
+		new_stn_fn=$dsname.000001$index0
 		if [ ${dsname:3:1} != "s" ] ; then 
 #------------------------------------------------------------------------------
 # PRODUCTION dataset: move stntuple and histogram files
 #------------------------------------------------------------------------------
-		    stn_files=`ls $sd/*.stntuple.root`
+		    stn_files=`ls $sd/* | grep "\.stn"`
 		    for f in $stn_files ; do
-			$cmd_prefix mv $f  $od/$dsname.000001$index0
+			$cmd_prefix cp $f  $od/$dsname.$rs_stub # 000001$index0
 		    done
 
 		    hist_files=`ls $sd/*.root | grep -v stntuple`
 		    for f in $hist_files ; do
-			$cmd_prefix mv $f  $od/hist/`basename $f`
+			$cmd_prefix cp $f  $od/hist/`basename $f`
 		    done
 		else 
 #------------------------------------------------------------------------------
 # SNTUPLE dataset: move stntuple files
 # STNTUPLE dataset may also have DST files woth the extention .art produced 
+# at this point, assume one .stn file per job
 #------------------------------------------------------------------------------
-		    stn_files=`ls $sd/*.stntuple.root`
+		    stn_files=`ls $sd/* | grep "\.stn"`
+		    new_stn_fn=$dsname.$rs_stub ;   # 000001$index0
 		    for f in $stn_files ; do
-			$cmd_prefix mv $f  $od/$dsname.000001$index0
+			$cmd_prefix cp $f  $od/$new_stn_fn
 		    done
 
-		    dst_files=`ls $sd/*.art`
+		    dst_files=`ls $sd/* | grep "\.art"`
 		    dst_dsname=${dsname:0:3}"a"${dsname:4}
 		    
 		    odd=$output_dir/$dst_dsname
 		    if [ ! -d $odd ] ; then mkdir -p $odd ; fi
 		    
 		    for f in $dst_files ; do
-			$cmd_prefix mv $f $odd/$dst_dsname.000001$index0
+			$cmd_prefix cp $f $odd/$dst_dsname.$rs_stub ; # 000001$index0
 		    done
 #------------------------------------------------------------------------------
 # move histogram files
 #------------------------------------------------------------------------------
-		    hist_files=`ls $sd/*.root | grep -v stntuple`
+		    hist_files=`ls $sd/* | grep "\.root" | grep -v stntuple`
 		    for f in $hist_files ; do
-			$cmd_prefix mv $f  $od/hist/`basename $f`
+			$cmd_prefix cp $f  $od/hist/`basename $f`
 		    done
 		fi
 #------------------------------------------------------------------------------
 # move log files
 #------------------------------------------------------------------------------
-		$cmd_prefix mv $logfile    $od/log/$project.$jobid.$index0.log
-		$cmd_prefix mv $fclfile    $od/log/$project.$jobid.$index0.fcl
+		$cmd_prefix cp $logfile    $od/log/$new_stn_fn.log
+		$cmd_prefix cp $fclfile    $od/fcl/$new_stn_fn.fcl
 	    else
 		if [ ".$rc" == "." ] ; then
 		    x=`cat $logfile | grep "Art has completed"`;
@@ -160,9 +175,9 @@ done
 #	-S $concat_list -o $output_file  >| $od/${jobname}_concatenation.log 2>&1 &
 #fi
 #------------------------------------------------------------------------------
-# no concatenate histogram files
+# don't concatenate histogram files
 #------------------------------------------------------------------------------
-hist_file_list=`ls $dir/*/*.hist`
+# hist_file_list=`ls $dir/*/*.hist`
 
 # echo hist_file_list=$hist_file_list
 # echo aaaa

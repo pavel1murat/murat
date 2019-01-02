@@ -1,4 +1,10 @@
 #!/bin/bash
+#------------------------------------------------------------------------------
+# call format:
+#       check_grid_output mdc2018_stntuple.721_0001.flatmugamma.read_reco_stn 14362951 .
+#
+# non-empty order : reverse
+#------------------------------------------------------------------------------
 
 project=$1
   jobid=$2
@@ -48,7 +54,7 @@ for subdir in $list_of_subjobs ; do
 		host=`cat $logfile | grep "Starting on host" | awk '{print $5}'`;
 		   y=`cat $logfile | grep "TrigReport Events total"`
 		
-		printf " %5s : section %-10s was running on %-20s , mu2egrid exit status: %3i $y\n" $nsections $d $host $rc
+		printf " %5s : section %-6s was running on %-36s , mu2egrid exit status: %3i $y\n" $nsections $d $host $rc
 		
 		if [ $rc != 0 ] ; then nfailed=$((nfailed+1)) ; else nsuccess=$((nsuccess+1)) ; fi
 	    fi

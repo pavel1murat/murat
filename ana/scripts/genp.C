@@ -5,6 +5,7 @@
 
 def_name genp_001("genp_ana");
 def_name genp_002("spmc_ana");
+def_name genp_002_01("spmc_ana_old");
 def_name genp_003("mustop_ana");
 def_name genp_004("bflash_ana_spmc");
 def_name genp_005("bflash_ana_vdet");
@@ -23,6 +24,17 @@ void  spmc_ana(int Stage = 1, int DebugBit = -1) {
   m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
   if (Stage == 3) m_spmc->SetSpmcBlockName("VDetBlock");
   if (Stage == 2) m_spmc->SetVDetBlockName("VDetBlock");
+
+  if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+// before Dec'2018, the data blocks were called 'VdetBlock'
+//-----------------------------------------------------------------------------
+void  spmc_ana_old(int Stage = 1, int DebugBit = -1) {
+  m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
+  if (Stage == 3) m_spmc->SetSpmcBlockName("VdetBlock");
+  if (Stage == 2) m_spmc->SetVDetBlockName("VdetBlock");
 
   if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
 }

@@ -1,8 +1,8 @@
 #!/bin/bash
-# call   : move_grid_output  jobid output_dir dsname doit
+# call   : move_grid_output  mdc2018_stntuple 721_0001 flatmugamma-calo read_reco_stn jobid dsname doit
 # ------
 #
-#  assume that the stage directory is /mu2e/data/outstage/$USER
+#  assume that the output directory is /mu2e/data/users/$USER/datasets/$dsid
 #
 # working example: 
 # . murat/scripts/move_grid_output 15158701 /mu2e/data/users/$USER/datasets e0000002 .  

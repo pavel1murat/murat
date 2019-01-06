@@ -17,6 +17,7 @@
 //  9  : all events - print DMVA
 // 10  : events with TRKPATREC DMVA > 0.3 - print DMVA
 // 11  : validate MergePatRec
+// 12  : print events with dtZ0 < -10
 //
 // call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,8 @@
 #include <xercesc/dom/DOM.hpp>
 
 #include "Mu2eUtilities/inc/MVATools.hh"
-#include<string>
+#include <string>
+#include "math.h"
 
 using std::string;
 using std::vector;
@@ -102,6 +104,10 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fWriteTmvaTree     = -1;
   fTmvaAlgorithmTpr  = -1;
   fTmvaAlgorithmCpr  = -1;
+//-----------------------------------------------------------------------------
+// 
+//-----------------------------------------------------------------------------
+  fMbTime            = 1695.;
 }
 
 //-----------------------------------------------------------------------------
@@ -306,6 +312,7 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
   HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
   HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
+  HBook1F(Hist->fXtZ0       ,"xtz0"     ,Form("%s: DT(Z0)/sigT"       ,Folder), 200, -10.0 ,10.0,Folder);
 
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
@@ -424,6 +431,7 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[103] = 1;		// TrkPatRec BestTrackID, dpf>1 tracks 
   book_track_histset[104] = 1;          // TrkPatRec all  tracks events Ecl > 60
   book_track_histset[105] = 1;          // TrkPatRec BestTrackID tracks events Ecl > 60
+  book_track_histset[106] = 1;          // PAR       tracks with dtz0 < -10
 
   book_track_histset[110] = 1;          // TrkPatRec TrackID[0] - SetC
   book_track_histset[111] = 1;          // TrkPatRec TrackID[1]
@@ -452,6 +460,7 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[203] = 1;		// CalPatRec BestTrackID, dpf>1 tracks 
   book_track_histset[204] = 1;          // CalPatRec all  tracks events Ecl > 60
   book_track_histset[205] = 1;          // CalPatRec BestTrackID tracks events Ecl > 60
+  book_track_histset[206] = 1;          // DAR       tracks with dtz0 < -10
 
   book_track_histset[210] = 1;          // CalPatRec TrackID[0] - SetC
   book_track_histset[211] = 1;          // CalPatRec TrackID[1]
@@ -761,6 +770,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fDtZ0->Fill(Tp->fDtZ0);
+  Hist->fXtZ0->Fill(Tp->fDtZ0/Track->fT0Err);
   Hist->fRMax->Fill(Track->RMax());
   
   Hist->fAlgMask->Fill(Track->AlgMask());
@@ -1004,10 +1014,19 @@ void TTrackCompModule::FillHistograms() {
 	  FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp);
 	}
       }
-
+//-----------------------------------------------------------------------------
+// oddly, tracks with seemingly wrong reconstruced T0
+//-----------------------------------------------------------------------------
+      if (tp->fDtZ0 < -10) {
+	FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp);
+      }
+//-----------------------------------------------------------------------------
+// different cuts on track quality variable
+//-----------------------------------------------------------------------------
       for (int idd=0; idd<fNID; idd++) {
 	if (tp->fIDWord[idd] == 0) FillTrackHistograms(fHist.fTrack[ihist+10+idd],trk,tp);
       }
+
     }
 //-----------------------------------------------------------------------------
 // either ID=300 (TrkPatRec not CalPatRec) or 400(CalPatRec not TrkPatRec)
@@ -1148,7 +1167,10 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
 
     tp->fDtZ0 = -1.e6;
-    if (fSimPar.fTMid) tp->fDtZ0 = track->T0()-fSimPar.fTMid->Time();
+    if (fSimPar.fTMid) {
+      double ttrue = fmod(fSimPar.fTMid->Time(),fMbTime);
+      tp->fDtZ0 = track->T0()-ttrue;
+    }
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -1521,7 +1543,6 @@ void TTrackCompModule::Debug() {
     }
   }
 
-
   if (GetDebugBit(11) == 1) {
     if ((fNTracks[0] == 1) && (fNTracks[1] == 1)) {
       GetHeaderBlock()->Print(Form("TTrackCompModule :bit011"));
@@ -1529,7 +1550,18 @@ void TTrackCompModule::Debug() {
       PrintTrack(fTrackBlock[1]->Track(0),&fTrackPar[1][0],"data");
     }
   }
-
+//-----------------------------------------------------------------------------
+// bit 12: DAR tracks with dtZ0 < -10
+//-----------------------------------------------------------------------------
+  if ((GetDebugBit(12) == 1) && (ntrk > 0)) {
+    for (int itrk=0; itrk<ntrk; itrk++) {
+      trk = cprb->Track(itrk);
+      tp  = &fTrackPar[calpatrec][itrk];
+      if ((GetDebugBit(12) == 1) && (tp->fDtZ0 < -10)) {
+	GetHeaderBlock()->Print(Form("TTrackCompModule :bit011: tp->fDtZ0 = %10.3f", tp->fDtZ0));
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------

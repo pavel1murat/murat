@@ -122,6 +122,7 @@ public:
     TH1F*    fTanDip;
     TH1F*    fRMax;
     TH1F*    fDtZ0;			// MC truth: T0-T(MC TMid)
+    TH1F*    fXtZ0;                     // pull(dt) at Z=0
 
     TH1F*    fResid;
     TH1F*    fAlgMask;
@@ -288,6 +289,8 @@ public:
 
   TString                 fTrkQualFile;
   prob_dist*              fTrackProb[2];// 0:TrkPatRec, 1:CalPatRec
+  
+  double                  fMbTime;      // microbunch time
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

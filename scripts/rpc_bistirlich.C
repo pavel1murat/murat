@@ -5,8 +5,15 @@
 // e,n
 //
 
+#include "string.h"
 #include "TGraphErrors.h"
 #include "Stntuple/alg/smooth.hh"
+#include "TF1.h"
+#include "TRandom3.h"
+#include "TLegend.h"
+#include "TCanvas.h"
+
+using std::string;
 
 //-----------------------------------------------------------------------------
 // digitized figure 7b, efficiency folded in, v1
@@ -585,13 +592,6 @@ double f_rpc(double* X, double* P) {
 
   double f(0.);
 
-  // static const double emax  = 138.2;
-  // static const double alpha =   2.691;
-  // static const double gamma =   1.051;
-  // static const double tau   =   8.043;
-  // static const double c0    =   2.741;
-  // static const double c1    =  -0.005;
-
   double emax  = P[0];
   double alpha = P[1];
   double gamma = P[2];
@@ -651,4 +651,41 @@ void fit_h1_fig7a() {
   }
 
   h_fig7a_fit->Fit(f);
+}
+
+
+//-----------------------------------------------------------------------------
+void plot_rpc_spectrum(int NEvents = 100000) {
+
+  double fint  {0.98445};  // integral
+
+  double emax  {  134.530  };
+  double alpha {  1.29931  };
+  double gamma {  0.928705 };
+  double tau   {  9.39676  };
+  double c0    {  4.77611e-02 /fint };
+  double c1    { -3.26349e-04 /fint };
+  
+  TF1* f = new TF1("f1",f_rpc, 0,140,6);
+
+  f->SetParameter(0, emax);
+  f->SetParameter(1,alpha);
+  f->SetParameter(2,gamma);
+  f->SetParameter(3,  tau);
+  f->SetParameter(4,   c0);
+  f->SetParameter(5,   c1);
+
+  TH1F* h = new TH1F("h1","h1",1400,0,140);
+
+  TRandom3 rn3;
+
+  for (int i=0; i<NEvents; i++) {
+    double e = rn3.Rndm(i)*emax;
+    double w = f->Eval(e)*emax;  // this gives correct normalization
+    h->Fill(e,w);
+  }
+
+  h->Draw();
+
+  printf(" integral: %12.5e\n",f->Integral(0,emax));
 }

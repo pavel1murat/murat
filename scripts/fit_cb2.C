@@ -1,4 +1,6 @@
-//
+///////////////////////////////////////////////////////////////////////////////
+// cb2: Crystall Ball function with polynomial tails on both sides
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
   TH1F* _Hist;
@@ -101,12 +103,12 @@ void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double
   printf("anorm = %12.5e\n",anorm);
 
   cb2_create_fit_function(_Func,X0,XMin,XMax);
-  cb2_init_parameters    (_Func,anorm,X0,0.180,1,.4,1.,10);
+  cb2_init_parameters    (_Func,anorm,X0,0.180,1,.4,1.,4);
 
 //   h->Draw();
 //   _Func->Draw("same");
 
-  if (Sigma > 0) {
+  if (Sigma > 0) { // effectively, fix Sigma
     _Func->SetParameter(2,Sigma);
     _Func->SetParLimits(2,Sigma*(1+1.e-5),Sigma*(1+1.e-5));
   }
@@ -114,24 +116,38 @@ void cb2_fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double
   cb2_fit                (h,_Func,XMin,XMax);
 
   TF1* f2 = new TF1("cb2_gauss",cb2_gauss,XMin,XMax,3);
-
   f2->SetParameter(0,_Func->GetParameter(0));
   f2->SetParameter(1,_Func->GetParameter(1));
   f2->SetParameter(2,_Func->GetParameter(2));
 
-  f2->SetLineWidth(1);
-  f2->SetLineColor(kBlue+3);
-  f2->SetFillColor(kBlue+3);
-  f2->SetFillStyle(3003);
-  f2->GetHistogram()->Draw("same");
+  TH1F* h_cb2_gaus = (TH1F*) h->Clone("h_cb2_gaus");
+  h_cb2_gaus->Reset();
 
+  for (int i=1; i<h->GetNbinsX(); i++) {
+    float x = h->GetBinCenter(i);
+    float y = f2->Eval(x);
+    h_cb2_gaus->SetBinContent(i,y);
+    h_cb2_gaus->SetBinError  (i,0);
+  }
+  
+  h_cb2_gaus->SetLineColor(kBlue+3);
+  h_cb2_gaus->SetFillColor(kBlue+3);
+  h_cb2_gaus->SetFillStyle(3003);
+  
+  h_cb2_gaus->Draw("same");
+//-----------------------------------------------------------------------------
+// to calculate the background fraction, use region from alpha2 to XMax
+//-----------------------------------------------------------------------------
   double total = Hist->Integral(1,Hist->GetNbinsX());
 
-  double x0 = _Func->GetParameter(1);
+  double x0     = _Func->GetParameter("mean"  );
+  double sigma  = _Func->GetParameter("sigma" );
+  double alpha2 = _Func->GetParameter("alpha2");
+  double x1     = x0+fabs(sigma*alpha2);
 
-  printf("x0 = %10.4f\n",x0);
-
-  double htail = (_Func->Integral(x0,XMax)-f2->Integral(x0,XMax))/Hist->GetBinWidth(1);
+  printf("x0 = %10.4f, sigma = %10.4f alpha2 = %10.4f\n",x0,sigma, alpha2);
+ 
+  double htail = (_Func->Integral(x1,XMax)-f2->Integral(x1,XMax))/Hist->GetBinWidth(1);
 
   printf("total = %12.5f, HTail = %12.5f, htail/total : %12.5e\n",total,htail,htail/total);
 }

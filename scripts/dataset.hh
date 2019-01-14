@@ -6,9 +6,10 @@
 
 struct dataset_t {
 
-  TString  fName  ;			// dataset name
-  TString  fFn    ;			// full name of the histogram file
-  TString  fLabel ;			// label to appear on a plot
+  TString  fName   ;			// dataset name
+  TString  fJobName;			// job     name
+  TString  fFn     ;			// full name of the histogram file
+  TString  fLabel  ;			// label to appear on a plot
   TString  fHistName;                   // redefines the histogram name
   int      fLineColor;                  // these are utility fields to be used as needed
   int      fLineWidth;
@@ -28,9 +29,17 @@ struct dataset_t {
   TString  fPlotName;
   TString  fPlotLabel;
   TString  fXAxisTitle;
+  float    fLegendXMin;
+  float    fLegendYMin;
+  float    fLegendXMax;
+  float    fLegendYMax;
+  TCanvas* fCanvas;
+  TH1*     fHist;
+  TString  fOutputFn;
 
   dataset_t() {
     fName        = "";
+    fJobName     = "";
     fFn          = "";
     fLabel       = "";
     fHistName    = "";
@@ -52,6 +61,10 @@ struct dataset_t {
     fPlotName    = "";
     fPlotLabel   = "";
     fXAxisTitle  = "";
+    fLegendXMin  = -1;
+    fLegendYMin  = -1;
+    fLegendXMax  = -1;
+    fLegendYMax  = -1;
   }
   
 };

@@ -15,10 +15,10 @@
 
 * R graphics output
 
-#+begin_src R :exports results :results graphics :file test_001.pdf :width 6 :height 4
+#+begin_src R :var ndf=25  :exports results :results graphics :file test_001.pdf :width 6 :height 4
 
-x1=seq(0,5,0.1) 
-plot(x1,dchisq(x1*6,6),main="Chi-distribution with NDF=6",type="l",col="blue") 
+x1=seq(0,3,0.1) 
+plot(x1,dchisq(x1*ndf,ndf),main="Chi-distribution with NDF=ndf",type="l",col="blue") 
 
 #+end_src
 

@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// CalPatRec validation: compare CalPatRec tracks to TrkPatRec ones
-// assume running on stntuple with 3 tracking branches
+// compare track fitting with two different ambiguity resolvers
 //
 // use of tmp:
 //
@@ -18,6 +17,7 @@
 // 10  : events with TRKPATREC DMVA > 0.3 - print DMVA
 // 11  : validate MergePatRec
 // 12  : print events with dtZ0 < -10
+// 13  : events with CalPatRec tracks with DPF > 10
 //
 // call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,10 +61,9 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fGeneratorCode( 2)                        // 2:ConversionGun 28:StoppedParticleReactionGun
 {
   fFillDioHist = 1;
-
+					    // this is the default for MDC2018 stntuples
   fTrackBlockName[0] = "TrackBlockPar";
   fTrackBlockName[1] = "TrackBlockDar";
-
 //-----------------------------------------------------------------------------
 // TrackID[0] : "SetC"
 // i = 1..6 : cut on DaveTrkQual > 0.1*i instead
@@ -152,6 +151,7 @@ int TTrackCompModule::BeginJob() {
   RegisterDataBlock("SimpBlock"              , "TSimpBlock"         ,&fSimpBlock    );
   RegisterDataBlock("GenpBlock"              , "TGenpBlock"         ,&fGenpBlock    );
   RegisterDataBlock("VDetBlock"              , "TVDetDataBlock"     ,&fVDetBlock    );
+  RegisterDataBlock("HelixBlock"             , "TStnHelixBlock"     ,&fHelixBlock   );
 //-----------------------------------------------------------------------------
 // for validation purposes
 //-----------------------------------------------------------------------------
@@ -272,13 +272,13 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
 //-----------------------------------------------------------------------------
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
-  HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder), 200,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder),1000,  -5. ,  5. ,Folder);
   HBook1F(Hist->fXDpF       ,"xdpf"     ,Form("%s: DpF/momErr"        ,Folder),1000, -50. , 50. ,Folder);
-  HBook1F(Hist->fDpFDio     ,"dpfdio"   ,Form("%s: Track DpF(DIO Wt)" ,Folder), 200,  -5. ,  5. ,Folder);
-  HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder), 200,  -5. ,  5. ,Folder);
-  HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder), 200,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fDpFDio     ,"dpfdio"   ,Form("%s: Track DpF(DIO Wt)" ,Folder),1000,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
+  HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
   HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
-  HBook1F(Hist->fDpFSt      ,"dpfst"    ,Form("%s: Track Pf-Psto"     ,Folder), 200,  -5  ,  5. ,Folder);
+  HBook1F(Hist->fDpFSt      ,"dpfst"    ,Form("%s: Track Pf-Psto"     ,Folder),1000,  -5  ,  5. ,Folder);
   HBook2F(Hist->fDpFVsZ1    ,"dpf_vs_z1",Form("%s: Track DPF Vs Z1"   ,Folder), 200, -2000.,0,200,-5.,5,Folder);
 
   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
@@ -286,8 +286,9 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
 
-  HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200, 0,200,Folder);
-  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110, 0.5,1.05,Folder);
+  HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0,200,Folder);
+  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05,Folder);
+  HBook1F(Hist->fDNa        ,"dna"      ,Form("%s: Nhits-Nactive"     ,Folder), 100, -0.5 ,99.5,Folder);
   HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
   HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
   HBook1F(Hist->fNadOverNd  ,"nad_nd"   ,Form("%s: Nad/N(doublets)"   ,Folder), 110, 0,1.1,Folder);
@@ -425,13 +426,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[  3] = 1;          // best track
 
 
-  book_track_histset[100] = 1;		// TrkPatRec all  tracks 
-  book_track_histset[101] = 1;		// TrkPatRec BestTrackID
-  book_track_histset[102] = 1;		// TrkPatRec BestTrackID no fitCons&momErr&t0Err tracks 
-  book_track_histset[103] = 1;		// TrkPatRec BestTrackID, dpf>1 tracks 
-  book_track_histset[104] = 1;          // TrkPatRec all  tracks events Ecl > 60
-  book_track_histset[105] = 1;          // TrkPatRec BestTrackID tracks events Ecl > 60
+  book_track_histset[100] = 1;		// PAR       all  tracks 
+  book_track_histset[101] = 1;		// PAR       BestTrackID
+  book_track_histset[102] = 1;		// PAR       BestTrackID no fitCons&momErr&t0Err tracks 
+  book_track_histset[103] = 1;		// PAR       BestTrackID, dpf>1 tracks 
+  book_track_histset[104] = 1;          // PAR       all  tracks events Ecl > 60
+  book_track_histset[105] = 1;          // PAR       BestTrackID tracks events Ecl > 60
   book_track_histset[106] = 1;          // PAR       tracks with dtz0 < -10
+  book_track_histset[107] = 1;          // PAR       positive tracks
+  book_track_histset[108] = 1;          // PAR       negative tracks
+  book_track_histset[109] = 1;          // PAR       tracks with XDpF > +10 MeV
 
   book_track_histset[110] = 1;          // TrkPatRec TrackID[0] - SetC
   book_track_histset[111] = 1;          // TrkPatRec TrackID[1]
@@ -454,13 +458,22 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[128] = 1;          // TrkPatRec TrackID[18]
   book_track_histset[129] = 1;          // TrkPatRec TrackID[19]
 
-  book_track_histset[200] = 1;		// CalPatRec all  tracks 
-  book_track_histset[201] = 1;		// CalPatRec BestTrackID tracks 
-  book_track_histset[202] = 1;		// CalPatRec BestTrackID no fitCons&momErr&t0Err tracks 
-  book_track_histset[203] = 1;		// CalPatRec BestTrackID, dpf>1 tracks 
-  book_track_histset[204] = 1;          // CalPatRec all  tracks events Ecl > 60
-  book_track_histset[205] = 1;          // CalPatRec BestTrackID tracks events Ecl > 60
+  book_track_histset[141] = 1;          // PAR tracks N(active) > 20 
+  book_track_histset[142] = 1;          // PAR tracks N(active) > 20 and |D0| < 150 
+  book_track_histset[143] = 1;          // PAR tracks N(active) > 20, |D0| < 150, DN(active) < 6 
+  book_track_histset[144] = 1;          // PAR tracks N(active) > 20, |D0| < 150, DN(active) < 6, chi2d < 4
+  book_track_histset[159] = 1;          // PAR tracks : all selections , fDpF > 5. MeV
+
+  book_track_histset[200] = 1;		// DAR       all  tracks 
+  book_track_histset[201] = 1;		// DAR       BestTrackID tracks 
+  book_track_histset[202] = 1;		// DAR       BestTrackID no fitCons&momErr&t0Err tracks 
+  book_track_histset[203] = 1;		// DAR       BestTrackID, dpf>1 tracks 
+  book_track_histset[204] = 1;          // DAR       all  tracks events Ecl > 60
+  book_track_histset[205] = 1;          // DAR       BestTrackID tracks events Ecl > 60
   book_track_histset[206] = 1;          // DAR       tracks with dtz0 < -10
+  book_track_histset[207] = 1;          // DAR       positive tracks
+  book_track_histset[208] = 1;          // DAR       negative tracks
+  book_track_histset[209] = 1;          // DAR       tracks with XdpF > +10
 
   book_track_histset[210] = 1;          // CalPatRec TrackID[0] - SetC
   book_track_histset[211] = 1;          // CalPatRec TrackID[1]
@@ -482,6 +495,12 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[227] = 1;          // CalPatRec TrackID[17]
   book_track_histset[228] = 1;          // CalPatRec TrackID[18]
   book_track_histset[229] = 1;          // CalPatRec TrackID[19]
+
+  book_track_histset[241] = 1;          // DAR tracks N(active) > 20 
+  book_track_histset[242] = 1;          // DAR tracks N(active) > 20, |D0| < 150 
+  book_track_histset[243] = 1;          // DAR tracks N(active) > 20, |D0| < 150, DN(active) < 6 
+  book_track_histset[244] = 1;          // DAR tracks N(active) > 20, |D0| < 150, DN(active) < 6, chi2d < 4
+  book_track_histset[259] = 1;          // DAR tracks : all selections , fDpF > 5. MeV
 
   book_track_histset[300] = 1;		// TrkPatRec not CalPatRec all  tracks 
   book_track_histset[301] = 1;		// TrkPatRec not CalPatRec BestTrackID tracks 
@@ -723,7 +742,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 					// dp: Tracker-only resolution
 
   Hist->fDpFront ->Fill(Tp->fDpF);
-  Hist->fXDpF    ->Fill(Tp->fDpF/Track->fFitMomErr);
+  Hist->fXDpF    ->Fill(Tp->fXDpF);
   Hist->fDpFDio  ->Fill(Tp->fDpF,Tp->fDioWt);
   Hist->fDpFront0->Fill(Tp->fDp0);
   Hist->fDpFront2->Fill(Tp->fDp2);
@@ -738,6 +757,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 
   Hist->fNActive->Fill(na);
   Hist->fNaFract->Fill(na/(Track->NHits()+0.));
+  Hist->fDNa->Fill(Track->NHits()-na);
   Hist->fNWrong->Fill(Track->NWrong());
 
   float nd = Track->NDoublets();
@@ -770,7 +790,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
   Hist->fZ0->Fill(Track->fZ0);
   Hist->fTanDip->Fill(Track->fTanDip);
   Hist->fDtZ0->Fill(Tp->fDtZ0);
-  Hist->fXtZ0->Fill(Tp->fDtZ0/Track->fT0Err);
+  Hist->fXtZ0->Fill(Tp->fXtZ0);
   Hist->fRMax->Fill(Track->RMax());
   
   Hist->fAlgMask->Fill(Track->AlgMask());
@@ -1015,18 +1035,47 @@ void TTrackCompModule::FillHistograms() {
 	}
       }
 //-----------------------------------------------------------------------------
-// oddly, tracks with seemingly wrong reconstruced T0
+// IHIST+6: oddly, tracks with seemingly wrong reconstruced T0
 //-----------------------------------------------------------------------------
       if (tp->fDtZ0 < -10) {
 	FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp);
       }
+//-----------------------------------------------------------------------------
+// IHIST+7 and IHIST+8: positive and negative tracks separately
+//-----------------------------------------------------------------------------
+      if (trk->fCharge > 0) FillTrackHistograms(fHist.fTrack[ihist+7],trk,tp);
+      else                  FillTrackHistograms(fHist.fTrack[ihist+8],trk,tp);
+//-----------------------------------------------------------------------------
+// IHIST+9: tracks with XDpF > 10
+//-----------------------------------------------------------------------------
+      if (tp->fXDpF   > 10) FillTrackHistograms(fHist.fTrack[ihist+9],trk,tp);
 //-----------------------------------------------------------------------------
 // different cuts on track quality variable
 //-----------------------------------------------------------------------------
       for (int idd=0; idd<fNID; idd++) {
 	if (tp->fIDWord[idd] == 0) FillTrackHistograms(fHist.fTrack[ihist+10+idd],trk,tp);
       }
-
+//-----------------------------------------------------------------------------
+// IHIST+41: N(a) > 20
+// IHIST+42: N(a) > 20 |D0| < 150
+// IHIST+43: N(a) > 20, |D0| < 150, DNa < 6
+// IHIST+44: N(a) > 20, |D0| < 150, DNa < 6, chi2d < 4
+// IHIST+59: all above selections plus tp->fDpF > 5
+//-----------------------------------------------------------------------------
+      if (trk->NActive() > 20) { 
+	FillTrackHistograms(fHist.fTrack[ihist+41],trk,tp);
+	if (fabs(trk->D0()) < 150) {
+	  FillTrackHistograms(fHist.fTrack[ihist+42],trk,tp);
+	  int dna = trk->NHits()-trk->NActive();
+	  if (dna < 6) {
+	    FillTrackHistograms(fHist.fTrack[ihist+43],trk,tp);
+	    if (trk->Chi2Dof() < 4.) {
+	      FillTrackHistograms(fHist.fTrack[ihist+44],trk,tp);
+	      if (tp->fDpF > 5.) FillTrackHistograms(fHist.fTrack[ihist+59],trk,tp);
+	    }
+	  }
+	}
+      }
     }
 //-----------------------------------------------------------------------------
 // either ID=300 (TrkPatRec not CalPatRec) or 400(CalPatRec not TrkPatRec)
@@ -1108,8 +1157,8 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //-----------------------------------------------------------------------------
 // momentum corrections for TrkPatRec and CalPatRec
 //-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0.049, 0.020 };
-  const double kDtTcmCorr   [2] = { 0.22 , -0.30 }; // ns, sign: fit peak positions
+  const double kMomentumCorr[2] = { 0. , 0. } ; // CD3: { 0.049, 0.020 };
+  const double kDtTcmCorr   [2] = { 0. , 0. } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
@@ -1153,10 +1202,41 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     if (track_type == 2) track_type = track->BestAlg();
 
     tp->fP     = track->fP0    +kMomentumCorr[track_type];		// correcting
-    tp->fDpF   = tp->fP        -track->fPFront;
-    tp->fDp0   = track->fP0    -track->fPFront;
-    tp->fDp2   = track->fP2    -track->fPFront;
-    tp->fDpFSt = track->fPFront-track->fPStOut;
+//-----------------------------------------------------------------------------
+// hits on virtual detectors
+//-----------------------------------------------------------------------------
+    tp->fPStOut = -999.;
+    tp->fPFront = -999.;
+
+    double t_stout(1.e6), t_front(1.e6);
+
+    int nvdhits = fVDetBlock->NHits();
+    for (int i=0; i<nvdhits; i++) {
+      TVDetHitData* vdh = fVDetBlock->Hit(i);
+      if (vdh->GeneratorCode() == fGeneratorCode) {
+	if ((vdh->Index() == 10) && (vdh->Time() < t_stout)) {
+//-----------------------------------------------------------------------------
+// ST exit 
+//-----------------------------------------------------------------------------
+	  tp->fPStOut = vdh->McMomentum();
+	  t_stout     = vdh->Time();
+	}
+	if ((vdh->Index() == 13) && (vdh->Time() < t_front)) {
+//-----------------------------------------------------------------------------
+// tracker front
+//-----------------------------------------------------------------------------
+	  tp->fPFront = vdh->McMomentum();
+	  t_front     = vdh->Time();
+	}
+      }
+    }
+
+    tp->fDpF   = tp->fP     -tp->fPFront;
+    tp->fDp0   = track->fP0 -tp->fPFront;
+    tp->fDp2   = track->fP2 -tp->fPFront;
+    tp->fDpFSt = tp->fPFront-tp->fPStOut;
+
+    tp->fXDpF  = tp->fDpF/track->fFitMomErr;
 
     if (fFillDioHist == 0) tp->fDioWt = 1.;
     else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
@@ -1170,6 +1250,14 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     if (fSimPar.fTMid) {
       double ttrue = fmod(fSimPar.fTMid->Time(),fMbTime);
       tp->fDtZ0 = track->T0()-ttrue;
+    }
+
+    tp->fXtZ0 = tp->fDtZ0/track->fT0Err;
+
+    tp->fDtBack = -1.e6;
+    if (fSimPar.fTBack) {
+      double ttrue = fmod(fSimPar.fTBack->Time(),fMbTime);
+      tp->fDtBack = track->T0()-ttrue;
     }
 //-----------------------------------------------------------------------------
 // track residuals
@@ -1360,6 +1448,7 @@ int TTrackCompModule::Event(int ientry) {
   fSimpBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fVDetBlock->GetEntry(ientry);
+  fHelixBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -1468,24 +1557,17 @@ void TTrackCompModule::Debug() {
       PrintTrack(fTrackBlock[calpatrec]->Track(i),&fTrackPar[calpatrec][i],"data");
     }
   }
-
-  TStnTrackBlock* cprb = fTrackBlock[calpatrec];
-
-  int ntrk = cprb->NTracks();
-
-  for (int itrk=0; itrk<ntrk; itrk++) {
-    trk = cprb->Track(itrk);
-    tp  = &fTrackPar[calpatrec][itrk];
 //-----------------------------------------------------------------------------
 // bit 3: Set C CALPATREC tracks with large DPF > 5 MeV
 //-----------------------------------------------------------------------------
-    if (GetDebugBit(3) == 1) {
-      if ((trk->fIDWord == 0) && (tp->fDpF > 5.)) {
-	if (tp->fDpF > 5) {
-	  GetHeaderBlock()->Print(Form("TTrackCompModule bit003: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
-				       tp->fDpF, trk->fP,trk->fPFront));
-	}
-      }
+  TStnTrackBlock* cprb = fTrackBlock[calpatrec];
+  int ntrk = cprb->NTracks();
+  for (int itrk=0; itrk<ntrk; itrk++) {
+    trk = cprb->Track(itrk);
+    tp  = &fTrackPar[calpatrec][itrk];
+    if ((GetDebugBit(3) == 1) && (tp->fDpF > 5.)) {
+      GetHeaderBlock()->Print(Form("TTrackCompModule bit003: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f",
+				   tp->fDpF, tp->fP,tp->fPFront));
     }
   }
 //-----------------------------------------------------------------------------
@@ -1558,7 +1640,20 @@ void TTrackCompModule::Debug() {
       trk = cprb->Track(itrk);
       tp  = &fTrackPar[calpatrec][itrk];
       if ((GetDebugBit(12) == 1) && (tp->fDtZ0 < -10)) {
-	GetHeaderBlock()->Print(Form("TTrackCompModule :bit011: tp->fDtZ0 = %10.3f", tp->fDtZ0));
+	GetHeaderBlock()->Print(Form("TTrackCompModule :bit012: tp->fDtZ0 = %10.3f", tp->fDtZ0));
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit 13: DAR tracks with dpf > 10
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(13) == 1) {
+    for (int itrk=0; itrk<ntrk; itrk++) {
+      trk = cprb->Track(itrk);
+      tp  = &fTrackPar[calpatrec][itrk];
+      if ((tp->fDpF > 10) && (trk->fPFront > 90)) {
+	GetHeaderBlock()->Print(Form("TTrackCompModule :bit013: tp->fDpf = %10.3f trk->fPFront = %10.3f", 
+				     tp->fDpF,trk->fPFront));
       }
     }
   }

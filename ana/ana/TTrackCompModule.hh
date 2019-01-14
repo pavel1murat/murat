@@ -20,6 +20,7 @@
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TVDetDataBlock.hh"
+#include "Stntuple/obj/TStnHelixBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -98,6 +99,7 @@ public:
 
     TH1F*    fNActive;
     TH1F*    fNaFract;
+    TH1F*    fDNa;
     TH1F*    fNWrong;			// MC-only histogram: N(hits) with wrong drift signs
     TH1F*    fNDoublets;
     TH1F*    fNadOverNd;		// fraction of doublets with all hits active
@@ -215,6 +217,7 @@ public:
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
   TVDetDataBlock*   fVDetBlock;
+  TStnHelixBlock*   fHelixBlock;
 
   TString           fTrackBlockName[2];
 					

@@ -15,7 +15,10 @@ public:
   double  fProb;
   
   double  fP   ; 			// momentum, corrected to set DPF at 0
-  float   fDpF ;			// tracker-only resolution
+  double  fPStOut;                      // MC true mom on exit from ST
+  double  fPFront;                      // MC true mom at the tracker front
+  float   fDpF ;			// tracker-only resolution (corrected)
+  float   fXDpF;                        // delta(Pfront)/sigmaP
   float   fDp0 ;
   float   fDp2 ;
   float   fDpFSt;
@@ -27,7 +30,8 @@ public:
 
   double  fDtZ0;			// delta(T) at z=0
   double  fDtBack;			// delta(T) at z=Z(TT_Back)
-  
+  double  fXtZ0;
+
   double  fEcl;
   double  fEp;
   double  fEDiskP;

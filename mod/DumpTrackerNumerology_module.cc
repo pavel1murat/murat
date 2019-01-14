@@ -61,7 +61,7 @@ namespace mu2e {
 
       printf("---------------------------------------------------------------------------------");
       printf("--------------------------------------------------------------------\n");
-      printf(" Station Plane Face Panel Layer Straw  StrawInd  R(straw)  X(straw)");
+      printf(" Station Plane Face Panel Layer Straw  StrawID   R(straw)  X(straw)");
       printf("  Y(straw)   Z(straw)   Rho(straw)     L/2       phi    wireNx   wireNy\n"); 
       printf("---------------------------------------------------------------------------------");
       printf("--------------------------------------------------------------------\n");

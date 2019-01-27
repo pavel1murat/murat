@@ -8,8 +8,10 @@ public:
   int     fNHPl;
   int     fNEPl;
   int     fNDPl;
-  int     fDiskID;			// 0: first disk, 1:socond disk
+  int     fDiskID;			// 0: first disk, 1:second disk
   int     fIDWord[20];
+
+  int     fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
 
   double  fMVAOut[20];			// outputs of different MVA classifiers
   double  fProb;
@@ -34,6 +36,7 @@ public:
 
   double  fEcl;
   double  fEp;
+  double  fDtClZ0;
   double  fEDiskP;
   double  fECalP;
   double  fDx;

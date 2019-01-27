@@ -19,8 +19,9 @@
 #include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
-#include "Stntuple/obj/TVDetDataBlock.hh"
+// #include "Stntuple/obj/TVDetDataBlock.hh"
 #include "Stntuple/obj/TStnHelixBlock.hh"
+#include "Stntuple/obj/TStepPointMCBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -72,6 +73,8 @@ public:
     TH1F*    fDp;                       // P(TrkPatRec)-P(CalPatRec)
     TH1F*    fInstLumi;                 // lumi
     TH1F*    fWeight;			// weight, need with statistics
+    TH1F*    fGMom;			// photon momentum
+    TH1F*    fGMomRMC;                  // photon momentum, RMC weighted
   };
 
   struct TrackHist_t : public HistBase_t {
@@ -87,7 +90,6 @@ public:
     TH1F*    fPFront;
     TH1F*    fDpFront;
     TH1F*    fXDpF;                     // DpF/MomErr
-    TH1F*    fDpFDio;
     TH1F*    fDpFront0;
     TH1F*    fDpFront2;
     TH2F*    fDpFVsZ1;
@@ -144,6 +146,9 @@ public:
     TH1F*    fECl;
     TH1F*    fEClEKin;
     TH1F*    fEp;
+    TH1F*    fDtClZ0;                   // T(cluster back at Z0)-T_true(Z0)
+    TH2F*    fDtClZ0VsECl;              // 
+    TH2F*    fDtClZ0VsP;              // 
 
     TH2F*    fFConsVsNActive;
     TH1F*    fDaveTrkQual;
@@ -154,6 +159,8 @@ public:
 //  fTrackHist[  0]: all tracks
 //  fTrackHist[100]: Set C tracks
 //-----------------------------------------------------------------------------
+  enum { kPAR = 0, kDAR = 1 };
+
   enum { kNEventHistSets   =  100 };
   enum { kNTrackHistSets   =  500 };
   enum { kNSimpHistSets    =  100 };
@@ -212,54 +219,65 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlock[2];	// [0]: TrkPatRec fit, [1]:CalPatRec fit
-  TStnClusterBlock* fClusterBlock;
-  TGenpBlock*       fGenpBlock;
-  TSimpBlock*       fSimpBlock;
-  TVDetDataBlock*   fVDetBlock;
-  TStnHelixBlock*   fHelixBlock;
+  TStnTrackBlock*    fTrackBlock[2];	// [0]: TrkPatRec fit, [1]:CalPatRec fit
+  TStnClusterBlock*  fClusterBlock;
+  TGenpBlock*        fGenpBlock;
+  TSimpBlock*        fSimpBlock;
+  //  TVDetDataBlock*    fVDetBlock;
+  TStnHelixBlock*    fHelixBlock;
+  TStepPointMCBlock* fSpmcBlockVDet;
 
-  TString           fTrackBlockName[2];
+  TString            fTrackBlockName[2];
 					
-  TrackPar_t        fTrackPar[2][10];	// additional track parameters (assume ntracks < 10)
-  SimPar_t          fSimPar;		// additional parameters of the simulated MC particle
-  Hist_t            fHist;		// histograms filled
+  TrackPar_t         fTrackPar[2][10];	// additional track parameters (assume ntracks < 10)
+  SimPar_t           fSimPar;		// additional parameters of the simulated MC particle
+  Hist_t             fHist;		// histograms filled
 
 					// cut values
-  double            fPtMin;
+  double             fPtMin;
 
-  Cut_t             fDebugCut[100];
+  Cut_t              fDebugCut[100];
 
-  TGenParticle*     fParticle;		// electron or muon
-  int               fPdgCode;		// determines which one
-  int               fGeneratorCode;      
+  TGenParticle*      fParticle;		// electron or muon
+  int                fPdgCode;		// determines which one
+  int                fGeneratorCode;      
 
-  TSimParticle*     fSimp;
-  double            fEleE;		// electron energy
+  TSimParticle*      fSimp;
+  double             fEleE;		// electron energy
 
-  int               fNTracks    [2];    // 0:TrkPatRec 1:CalPatRec
-  int               fNGoodTracks[2];
-  int               fNGenp;		// N(generated particles)
+  int                fNTracks    [2];    // 0:TrkPatRec 1:CalPatRec
+  int                fNGoodTracks[2];
+  int                fNGenp;		// N(generated particles)
 
-  TStnTrack*        fTrack;
-  int               fFillDioHist;
+  TStnTrack*         fTrack;
+  int                fFillDioHist;
 					// [0]: SetC, [1-6]: TrkQual 0.1 ... 0.6
-  int               fNID;
-  TStnTrackID*      fTrackID[20];
-  TStnTrackID*      fBestTrackID[2];
-  int               fBestID[2];
+  int                fNID;
+  TStnTrackID*       fTrackID[20];
+  TStnTrackID*       fBestTrackID[2];
 
-  TEmuLogLH*        fLogLH;
+  TStnTrackID*       fTrackID_RMC;       // track ID for RMC rejection (mu- --> e+)
 
-  double            fMinETrig;
+  int                fBestID[2];
 
-  double            fMinT0;
-  double            fLumWt;
+  TEmuLogLH*         fLogLH;
 
-  TStnCluster*      fCluster;
-  int               fNClusters;
-  double            fEClMax;
-  double            fTClMax;
+  double             fMinETrig;
+
+  double             fMinT0;
+  double             fLumWt;
+
+  TStnCluster*       fCluster;
+  int                fNClusters;
+  double             fEClMax;
+  double             fTClMax;
+
+  double             fKMaxRMC;             // RMC: closure approximation kMax
+  double             fWtRMC;
+  int                fProcess;
+  double             fPhotonE;
+
+  double             fWtRPC;
 //-----------------------------------------------------------------------------
 // TMVA training ntuples
 //-----------------------------------------------------------------------------
@@ -310,8 +328,9 @@ public:
 //-----------------------------------------------------------------------------
   void    SetTrackBlockName(int I, const char* Name) { fTrackBlockName[I] = Name; }
 
-  void    SetPdgCode      (int Code ) { fPdgCode       = Code ; }
-  void    SetGeneratorCode(int Code ) { fGeneratorCode = Code ; }
+  void    SetPdgCode      (int Code   ) { fPdgCode       = Code ; }
+  void    SetGeneratorCode(int Code   ) { fGeneratorCode = Code ; }
+  void    SetKMaxRMC      (double KMax) { fKMaxRMC       = KMax ; }
 
   void    SetDebugCut(int I, double XMin, double XMax) {
     fDebugCut[I].fXMin = XMin;
@@ -340,7 +359,8 @@ public:
   void    BookTrackHistograms   (HistBase_t*   Hist, const char* Folder);
 
   void    FillEventHistograms    (HistBase_t*  Hist);
-  void    FillTrackHistograms    (HistBase_t*  Hist, TStnTrack*    Trk , TrackPar_t* Tp);
+
+  void    FillTrackHistograms    (HistBase_t*  Hist, TStnTrack* Trk, TrackPar_t* Tp, double Weight = 1.);
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
 				   TStnTrackID*    TrackID   , 

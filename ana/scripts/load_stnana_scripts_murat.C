@@ -15,6 +15,7 @@ int load_stnana_scripts_murat() {
     "hits.C",
     "pid.C",
     "reco_eff_ana.C",
+    "rmc.C",
     "track.C",
     "trigger.C",
     "vdet.C",

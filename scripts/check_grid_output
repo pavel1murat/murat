@@ -12,7 +12,7 @@ project=$1
 
 stage_dir="/pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage/"`ls /pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage | grep $jobid`;
 
-echo ">>> job output directory:" $stage_dir; 
+echo ">>> " `date` "job output directory:" $stage_dir; 
 
 #exit
 
@@ -28,7 +28,7 @@ list_of_subjobs=`ls $stage_dir`
 for subdir in $list_of_subjobs ; do
 
     sdir=$stage_dir/$subdir
-    echo ">>> subdirectory        :" $sdir; 
+    echo ">>>  subdirectory                                     :" $sdir; 
 
     if [ ".$order" == "." ] ; then list_of_sections=`ls     $sdir`
     else                           list_of_sections=`ls -tr $sdir`

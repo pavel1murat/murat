@@ -1,5 +1,5 @@
 #!/bin/bash
-# call   : move_grid_output  mdc2018_stntuple 721_0001 flatmugamma-calo read_reco_stn jobid dsname doit
+# call   : move_grid_output  mdc2018_stntuple.721_0001.flatmugamma-calo.read_reco_stn jobid dsname doit
 # ------
 #
 #  assume that the output directory is /mu2e/data/users/$USER/datasets/$dsid
@@ -8,13 +8,13 @@
 # . murat/scripts/move_grid_output 15158701 /mu2e/data/users/$USER/datasets e0000002 .  
 # file extentions recognized: .art .log .hist .stn
 #------------------------------------------------------------------------------
-   project=$1
-   version=$2
-      dsid=$3
-       job=$4
-     jobid=$5 # 15160119
-    dsname=$6
-      doit=$7
+   project=`echo $1 | awk -F. '{print $1}'`
+   version=`echo $1 | awk -F. '{print $2}'`
+      dsid=`echo $1 | awk -F. '{print $3}'`
+       job=`echo $1 | awk -F. '{print $4}'`
+     jobid=$2 # 15160119
+    dsname=$3
+      doit=$4
 
 output_dir=/mu2e/data/users/$USER/datasets
 

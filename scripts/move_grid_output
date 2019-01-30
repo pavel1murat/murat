@@ -7,18 +7,26 @@
 # working example: 
 # . murat/scripts/move_grid_output 15158701 /mu2e/data/users/$USER/datasets e0000002 .  
 # file extentions recognized: .art .log .hist .stn
+# assume that output of multiple grid jobs corresponding to several input filests 
+# will be copied into the same directory
 #------------------------------------------------------------------------------
+job_name_stub=$1 ; # project.$version.$dsid.$job
+
+        nf=`echo $1 | awk -F. '{print NF}'`
+
    project=`echo $1 | awk -F. '{print $1}'`
    version=`echo $1 | awk -F. '{print $2}'`
       dsid=`echo $1 | awk -F. '{print $3}'`
-       job=`echo $1 | awk -F. '{print $4}'`
+
+      if   [ $nf == 4 ] ; then job=`echo $1 | awk -F. '{print $4}'`
+      elif [ $nf == 5 ] ; then job=`echo $1 | awk -F. '{print $5}'`
+      fi
+
      jobid=$2 # 15160119
     dsname=$3
       doit=$4
 
 output_dir=/mu2e/data/users/$USER/datasets
-
-job_name_stub=$project.$version.$dsid.$job
 
  stage_dir=/pnfs/mu2e/scratch/users/$USER/workflow/$job_name_stub/outstage/$jobid
 
@@ -56,13 +64,15 @@ for sd1 in `ls $dir` ; do
     for sd2 in $list_of_subdirs ; do
 #------------------------------------------------------------------------------
 # check if the job finished with RC=0
-# skip directories corresponding to non-completed sections like '00015.wuue'
+# don't skip directories corresponding to non-completed sections like '00015.wuue'
+# 2019-01-28: now they could contain valid output
 # skip segments with RC != 0
 #------------------------------------------------------------------------------
 #       echo $subdir
 	sd=$dir/$sd1/$sd2
 
-	nf=`echo $sd2 | awk -F . '{print NF}'` 
+	nf=1 ; # `echo $sd2 | awk -F . '{print NF}'` 
+
 	if [ $nf == 1 ] ; then
 #------------------------------------------------------------------------------
 # completed section, assume there is only one .log and only one .fcl file
@@ -134,7 +144,7 @@ for sd1 in `ls $dir` ; do
 		$cmd_prefix cp $fclfile    $od/fcl/$new_stn_fn.fcl
 	    else
 		if [ ".$rc" == "." ] ; then
-		    x=`cat $logfile | grep "Art has completed"`;
+		    x=`cat $logfile | grep "exit code"`;
 		    rc=`echo $x | awk '{print $9}'`
 		fi
 		echo .... ERROR: job finished with RC=$rc, do not move its output

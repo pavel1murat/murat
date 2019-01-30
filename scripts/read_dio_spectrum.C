@@ -1,7 +1,33 @@
 //
 
+///////////////////////////////////////////////////////////////////////////////
+// read DIO data from Mu2e table file and make a histogram
+///////////////////////////////////////////////////////////////////////////////
+void read_dio_spectrum(const char* Filename = "ConditionsService/data/czarnecki_Al.tbl") {
+  TTree* t = new TTree("t_dio","DIO spectrum");
 
+  t->ReadFile(Filename,"e/F:w/F");
 
+  int n = t->GetEntries();
+
+  float e, w;
+
+  t->SetBranchAddress("e",&e);
+  t->SetBranchAddress("w",&w);
+
+  TH1F* hist = new TH1F("h_dio","DIO spectrum",1051,-0.05,105.05);
+
+  for (int i=0; i<n; i++) {
+    t->GetEntry(i);
+    int bin = (e+0.05)/0.1 + 1;
+    hist->SetBinContent(bin,w);
+    hist->SetBinError  (bin,0);
+  }
+
+  hist->Draw();
+}
+
+//-----------------------------------------------------------------------------
 int read_lo_dio_spectrum(const char* Fn, TH1D** Hist) {
   FILE  *f;
   int    done = 0, nbx, loc(0), ix, line(0);

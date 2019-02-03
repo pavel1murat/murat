@@ -17,7 +17,7 @@
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
 #include "Stntuple/obj/TStrawDataBlock.hh"
-#include "Stntuple/obj/TVDetDataBlock.hh"
+#include "Stntuple/obj/TStepPointMCBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 
@@ -279,15 +279,15 @@ public:
 //  data members
 //-----------------------------------------------------------------------------
 public:
-  TString           fTrackBlockName;	// 
+  TString            fTrackBlockName;	// 
 					// pointers to the data blocks used
-  TStnTrackBlock*   fTrackBlock;
-  TStnClusterBlock* fClusterBlock;
-  TCalDataBlock*    fCalDataBlock;
-  TStrawDataBlock*  fStrawDataBlock;
-  TVDetDataBlock*   fVDetBlock;
-  TGenpBlock*       fGenpBlock;
-  TSimpBlock*       fSimpBlock;
+  TStnTrackBlock*    fTrackBlock;
+  TStnClusterBlock*  fClusterBlock;
+  TCalDataBlock*     fCalDataBlock;
+  TStrawDataBlock*   fStrawDataBlock;
+  TStepPointMCBlock* fVDetBlock;
+  TGenpBlock*        fGenpBlock;
+  TSimpBlock*        fSimpBlock;
 					// histograms filled
   Hist_t            fHist;
 

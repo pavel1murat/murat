@@ -19,6 +19,7 @@ def_name track_0110 ("track_ana_nocorr");
 
 def_name track_0510 ("track_comp");
 def_name track_0511 ("track_comp_old");
+def_name track_0512 ("track_comp_debug");
 def_name track_0520 ("track_comp_tmva");
 def_name track_0530 ("track_comp_use_mva");
 
@@ -234,6 +235,21 @@ void  track_comp_old(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, do
     m_tcm->SetDebugBit(DebugBit,1);
     if (XMin < XMax) m_tcm->SetDebugCut(DebugBit,XMin,XMax);
   }
+}
+
+//-----------------------------------------------------------------------------
+// debug: do not fill histograms, force the debug bit to be defined
+//-----------------------------------------------------------------------------
+void  track_comp_debug(int PDGCode=11, int GeneratorCode=28, int DebugBit=14) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  m_tcm = (TTrackCompModule*) g.x->AddModule("TTrackCompModule",0);  
+  m_tcm->SetPdgCode      (PDGCode);
+  m_tcm->SetGeneratorCode(GeneratorCode);
+  m_tcm->SetFillHistograms(0);
+  m_tcm->SetDebugBit(DebugBit,1);
+  m_tcm->GetAna()->SetNEventsToReport(50000);
 }
 
 //-----------------------------------------------------------------------------

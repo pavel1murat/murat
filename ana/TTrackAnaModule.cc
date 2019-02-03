@@ -137,7 +137,7 @@ int TTrackAnaModule::BeginJob() {
   RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
   RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VDetBlock"           ,"TVDetDataBlock"   ,&fVDetBlock);
+  RegisterDataBlock("VDetBlock"           ,"TStepPointMCBlock",&fVDetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -713,16 +713,15 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
     if (fSimp->fMomTrackerFront > 100.) {
       FillEventHistograms(fHist.fEvent[HistSet+1]);
 
-      TLorentzVector vdmom;
+      TVector3 vdmom;
 
       if (fSimPar.fTFront != NULL) {
 //-----------------------------------------------------------------------------
 // regular case
 //-----------------------------------------------------------------------------
-	vdmom.SetXYZM(fSimPar.fTFront->McMomentumX(),
-		      fSimPar.fTFront->McMomentumY(),		      
-		      fSimPar.fTFront->McMomentumZ(),
-		      fSimPar.fTFront->Mass());
+	vdmom.SetXYZ(fSimPar.fTFront->Mom()->X(),
+		     fSimPar.fTFront->Mom()->Y(),		      
+		     fSimPar.fTFront->Mom()->Z());
       }
       else {
 //-----------------------------------------------------------------------------
@@ -730,7 +729,9 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
 // as the downstream one and there is no hit... efficiency doens't make sense
 // just make sure the code doesnt' crash
 //-----------------------------------------------------------------------------
-	vdmom = fSimPar.fParticle->fStartMom;
+	vdmom.SetXYZ(fSimPar.fParticle->fStartMom.X(),
+		     fSimPar.fParticle->fStartMom.Y(),
+		     fSimPar.fParticle->fStartMom.Z());
       }
 
       float ce_pitch  = vdmom.Pt()/vdmom.Pz();
@@ -1519,22 +1520,22 @@ int TTrackAnaModule::Event(int ientry) {
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  int nvdhits = fVDetBlock->NHits();
+  int nvdhits = fVDetBlock->NStepPoints();
   for (int i=0; i<nvdhits; i++) {
-    TVDetHitData* vdhit = fVDetBlock->Hit(i);
-    if (vdhit->PdgCode() == fSimp->fPdgCode) {
-      if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
-	if (fDirection*vdhit->McMomentumZ() > 0) {
+    TStepPointMC* vdhit = fVDetBlock->StepPointMC(i);
+    if (vdhit->PDGCode() == fSimp->fPdgCode) {
+      if ((vdhit->VolumeID() == 13) || (vdhit->VolumeID() == 14)) {
+	if (fDirection*vdhit->Mom()->Z() > 0) {
 	  if (fSimPar.fTFront == 0) fSimPar.fTFront = vdhit;
 	}
       }
-      else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
-	if (fDirection*vdhit->McMomentumZ() > 0) {
+      else if ((vdhit->VolumeID() == 11) || (vdhit->VolumeID() == 12)) {
+	if (fDirection*vdhit->Mom()->Z() > 0) {
 	  if (fSimPar.fTMid == 0) fSimPar.fTMid = vdhit;
 	}
       }
-      else if (vdhit->Index() == mu2e::VirtualDetectorId::TT_Back) {
-	if (fDirection*vdhit->McMomentumZ() > 0) {
+      else if (vdhit->VolumeID() == mu2e::VirtualDetectorId::TT_Back) {
+	if (fDirection*vdhit->Mom()->Z() > 0) {
 	  if (fSimPar.fTBack == NULL) fSimPar.fTBack = vdhit;
 	}
       }

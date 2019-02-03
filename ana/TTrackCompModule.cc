@@ -18,6 +18,7 @@
 // 11  : validate MergePatRec
 // 12  : print events with dtZ0 < -10
 // 13  : events with KDAR tracks with DPF > 10
+// 14  : misreconstructed events in dsid=e11s721z
 //
 // call: "track_comp(28,4)
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,7 +61,6 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fPdgCode      (11),                       // electron
   fGeneratorCode( 2)                        // 2:ConversionGun 28:StoppedParticleReactionGun
 {
-  fFillDioHist = 1;
 					    // this is the default for MDC2018 stntuples
   fTrackBlockName[0] = "TrackBlockPar";
   fTrackBlockName[1] = "TrackBlockDar";
@@ -85,12 +85,16 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
   fTrackID_RMC = new TStnTrackID();
 
   fTrackID_RMC->SetMaxChi2Dof(4. );
-  fTrackID_RMC->SetMaxT0Err  (1.5);
-  fTrackID_RMC->SetMaxMomErr (0.4);
+  // fTrackID_RMC->SetMaxT0Err  (1.5);
+  // fTrackID_RMC->SetMaxMomErr (0.4);
+  fTrackID_RMC->SetMaxT0Err  (1.3);
+  fTrackID_RMC->SetMaxMomErr (0.3);
   fTrackID_RMC->SetMinNActive(20 );
   fTrackID_RMC->SetMaxDNa    ( 5 );
-  fTrackID_RMC->SetMinTanDip (0.5);
-  fTrackID_RMC->SetMaxTanDip (1.3);
+  fTrackID_RMC->SetMinTanDip (1./sqrt(3.));
+  fTrackID_RMC->SetMaxTanDip (1.5);
+  fTrackID_RMC->SetMinD0     (-100.);
+  fTrackID_RMC->SetMaxD0     ( 100.);
 
   int mask = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kT0Bit     | 
              TStnTrackID::kT0ErrBit   | TStnTrackID::kMomErrBit  | TStnTrackID::kTanDipBit | 
@@ -129,6 +133,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
 // 
 //-----------------------------------------------------------------------------
   fMbTime            = 1695.;
+  fFillHistograms    = 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -282,16 +287,6 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
-
-  HBook1D(Hist->fPDio       ,"pdio"     ,Form("%s: Track P(DIO WT)"   ,Folder), 800,  80  ,120. ,Folder);
-  Hist->fPDio->Sumw2(kTRUE);
-//-----------------------------------------------------------------------------
-// luminosity-weighted distributions for signal and background
-//-----------------------------------------------------------------------------
-  HBook1D(Hist->fPlw        ,"plw"     ,Form("%s: Track P(Lumi-WT)"   ,Folder), 800,  80  ,120. ,Folder);
-  Hist->fPlw->Sumw2(kTRUE);
-  HBook1D(Hist->fPDiolw     ,"pdiolw"  ,Form("%s: Trk P WT(Lumi+DIO)" ,Folder), 800,  80  ,120. ,Folder);
-  Hist->fPDiolw->Sumw2(kTRUE);
 //-----------------------------------------------------------------------------
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
@@ -304,12 +299,12 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook2F(Hist->fDpFVsZ1    ,"dpf_vs_z1",Form("%s: Track DPF Vs Z1"   ,Folder), 200, -2000.,0,200,-5.,5,Folder);
 
   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
-  HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1,Folder);
+  HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1  ,Folder);
   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
 
-  HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0,200,Folder);
-  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05,Folder);
+  HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0  , 200 ,Folder);
+  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05 ,Folder);
   HBook1F(Hist->fDNa        ,"dna"      ,Form("%s: Nhits-Nactive"     ,Folder), 100, -0.5 ,99.5,Folder);
   HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
   HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
@@ -417,6 +412,9 @@ void TTrackCompModule::BookHistograms() {
   char     folder_name[200];
 
   DeleteHistograms();
+
+  TH1::SetDefaultSumw2(kTRUE);	
+
   hist_folder = (TFolder*) GetFolder()->FindObject("Hist");
 //-----------------------------------------------------------------------------
 // book event histograms
@@ -514,6 +512,8 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[177] = 1; track_selection[171] = new TString("cosmics+: #171 + 90 < p < 93");
   book_track_histset[178] = 1; track_selection[171] = new TString("cosmics-: #172 + 90 < p < 93");
 
+  book_track_histset[179] = 1; track_selection[179] = new TString("PAR- tracks with final selections and DIO weight");
+
   book_track_histset[180] = 1; track_selection[180] = new TString("PAR+ tracks all");                                       
   book_track_histset[181] = 1; track_selection[181] = new TString("PAR+ tracks N(active) > 20");                                       
   book_track_histset[182] = 1; track_selection[182] = new TString("PAR+ tracks N(active) > 20 and |D0| < 100");			       
@@ -582,6 +582,8 @@ void TTrackCompModule::BookHistograms() {
 
   book_track_histset[277] = 1; track_selection[277] = new TString("cosmics+: #271 + 90 < p < 93");
   book_track_histset[278] = 1; track_selection[278] = new TString("cosmics-: #272 + 90 < p < 93");
+
+  book_track_histset[279] = 1; track_selection[279] = new TString("DAR- tracks with final selections and DIO weight");
 
   book_track_histset[280] = 1; track_selection[280] = new TString("DAR+ tracks all");                                       
   book_track_histset[281] = 1; track_selection[281] = new TString("DAR+ tracks N(active) > 20");                                       
@@ -771,10 +773,10 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
   Hist->fP0->  Fill (Track->fP0,Weight);
   Hist->fP2->  Fill (Track->fP2,Weight);
 
-  Hist->fPDio->Fill(Tp->fP,Tp->fDioWt);
+  //  Hist->fPDio->Fill(Tp->fP,Tp->fDioWt);
 
-  Hist->fPlw->Fill   (Tp->fP, Tp->fLumWt);
-  Hist->fPDiolw->Fill(Tp->fP, Tp->fTotWt);
+  // Hist->fPlw->Fill   (Tp->fP, Tp->fLumWt);
+  // Hist->fPDiolw->Fill(Tp->fP, Tp->fTotWt);
 
   Hist->fFitMomErr->Fill(Track->fFitMomErr,Weight);
 
@@ -1255,7 +1257,9 @@ void TTrackCompModule::FillHistograms() {
 	  if ((fProcess == 41) || (fProcess == 42)) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,fWtRMC); // RMC weighting
 	  if ((fProcess == 11) || (fProcess == 22)) FillTrackHistograms(fHist.fTrack[ihist+76],trk,tp,fWtRPC); // RPC
 	  
-	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp);        // for cosmics
+	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp);            // for cosmics
+
+	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,tp->fDioWt);                                       // DIO
 	}
       }
     }
@@ -1361,20 +1365,15 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
 //       }
 //    }
     
-    tp->fDpF   = tp->fP     -tp->fPFront;
-    tp->fDp0   = track->fP0 -tp->fPFront;
-    tp->fDp2   = track->fP2 -tp->fPFront;
-    tp->fDpFSt = tp->fPFront-tp->fPStOut;
+    tp->fDpF     = tp->fP     -tp->fPFront;
+    tp->fDp0     = track->fP0 -tp->fPFront;
+    tp->fDp2     = track->fP2 -tp->fPFront;
+    tp->fDpFSt   = tp->fPFront-tp->fPStOut;
 
-    tp->fXDpF  = tp->fDpF/track->fFitMomErr;
-
-    if (fFillDioHist == 0) tp->fDioWt = 1.;
-    else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
-
+    tp->fXDpF    = tp->fDpF/track->fFitMomErr;
+    tp->fDioWt   = TStntuple::DioWeightAl   (fEleE)*(105./10);
+    tp->fDioWtRC = TStntuple::DioWeightAl_LL(fEleE)*(105./10);
     tp->fLumWt   = GetHeaderBlock()->LumWeight();
-    tp->fTotWt   = tp->fLumWt*tp->fDioWt;
-    tp->fDioWtRC = tp->fDioWt;
-    tp->fTotWtRC = tp->fLumWt*tp->fDioWtRC;
 
     tp->fDtZ0 = -1.e6;
     if (fSimPar.fTMid) {
@@ -1687,7 +1686,7 @@ int TTrackCompModule::Event(int ientry) {
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i]);
   }
 
-  FillHistograms();
+  if (fFillHistograms) FillHistograms();
 
   Debug();
 
@@ -1821,6 +1820,23 @@ void TTrackCompModule::Debug() {
       if ((tp->fDpF > 10) && (trk->fPFront > 90)) {
 	GetHeaderBlock()->Print(Form("TTrackCompModule :bit013: tp->fDpf = %10.3f trk->fPFront = %10.3f", 
 				     tp->fDpF,trk->fPFront));
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit 14: rare misreconstructed events from e11s721z
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(14) == 1) {
+    for (int itrk=0; itrk<ntrk; itrk++) {
+      trk = cprb->Track(itrk);
+      tp  = &fTrackPar[kDAR][itrk];
+      if ((tp->fIDWord_RMC == 0) && (trk->Charge() < 0)) {
+	if (((tp->fP > 103.5) && (tp->fDioWt > 9.e-11)) || 
+	    ((tp->fP > 104  ) && (tp->fDioWt > 1.e-12)) ||
+	    ((tp->fP > 106  ) && (tp->fDioWt > 1.e-14))    ) {
+	  GetHeaderBlock()->Print(Form("TTrackCompModule :bit014: tp->fP = %10.3f tp->fDioWt = %12.3e", 
+				       tp->fP,tp->fDioWt));
+	}
       }
     }
   }

@@ -107,7 +107,7 @@ int TTrackAnaModuleA::BeginJob() {
   RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
   RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VDetBlock"           ,"TVDetDataBlock"   ,&fVDetBlock);
+  RegisterDataBlock("VDetBlock"           ,"TStepPointMCBlock",&fVDetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -1233,14 +1233,14 @@ int TTrackAnaModuleA::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 //-----------------------------------------------------------------------------
-  int nvdhits = fVDetBlock->NHits();
+  int nvdhits = fVDetBlock->NStepPoints();
   for (int i=0; i<nvdhits; i++) {
-    TVDetHitData* vdhit = fVDetBlock->Hit(i);
-    if (vdhit->PdgCode() == fSimp->fPdgCode) {
-      if ((vdhit->Index() == 13) || (vdhit->Index() == 14)) {
+    TStepPointMC* vdhit = fVDetBlock->StepPointMC(i);
+    if (vdhit->PDGCode() == fSimp->fPdgCode) {
+      if ((vdhit->VolumeID() == 13) || (vdhit->VolumeID() == 14)) {
 	fSimPar.fTFront = vdhit;
       }
-      else if ((vdhit->Index() == 11) || (vdhit->Index() == 12)) {
+      else if ((vdhit->VolumeID() == 11) || (vdhit->VolumeID() == 12)) {
 	fSimPar.fTMid = vdhit;
       }
     }

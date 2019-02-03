@@ -14,10 +14,9 @@
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
 #include "Stntuple/obj/TStrawDataBlock.hh"
+#include "Stntuple/obj/TStepPointMCBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
-#include "Stntuple/obj/TVDetHitData.hh"
-#include "Stntuple/obj/TVDetDataBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -285,7 +284,7 @@ public:
   TStrawDataBlock*  fStrawDataBlock;
   TGenpBlock*       fGenpBlock;
   TSimpBlock*       fSimpBlock;
-  TVDetDataBlock*   fVDetBlock;
+  TStepPointMCBlock*   fVDetBlock;
 					// additional track parameters (assume ntracks < 20)
 
   TrackPar_t        fTrackPar[kNTrackBlocks][20];

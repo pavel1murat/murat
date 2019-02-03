@@ -73,11 +73,10 @@ void TTrackAnaModuleBase::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
     if (fSimPar.fParticle->fMomTrackerFront > 100.) {
       FillEventHistograms(EventHistSet(HistSet+1));
 
-      TLorentzVector vdmom;
-      vdmom.SetXYZM(fSimPar.fTFront->McMomentumX(),
-		    fSimPar.fTFront->McMomentumY(),		      
-		    fSimPar.fTFront->McMomentumZ(),
-		    fSimPar.fTFront->Mass());
+      TVector3 vdmom;
+      vdmom.SetXYZ(fSimPar.fTFront->Mom()->X(),
+		   fSimPar.fTFront->Mom()->Y(),		      
+		   fSimPar.fTFront->Mom()->Z());
 
       float ce_pitch  = vdmom.Pt()/vdmom.Pz();
       float min_pitch = 1./TrackID->MaxTanDip();

@@ -82,9 +82,6 @@ public:
     TH1F*    fP[3];			// total momentum, 3 hists with different binning
     TH1F*    fP0;
     TH1F*    fP2;
-    TH1D*    fPDio;
-    TH1D*    fPlw;			// lumi-weighted momentum
-    TH1D*    fPDiolw;			// lumi- and LO DIO-weighted momentum
     TH1F*    fPt;
     TH1F*    fFitMomErr;
     TH1F*    fPFront;
@@ -250,7 +247,6 @@ public:
   int                fNGenp;		// N(generated particles)
 
   TStnTrack*         fTrack;
-  int                fFillDioHist;
 					// [0]: SetC, [1-6]: TrkQual 0.1 ... 0.6
   int                fNID;
   TStnTrackID*       fTrackID[20];
@@ -278,6 +274,8 @@ public:
   double             fPhotonE;
 
   double             fWtRPC;
+
+  int                fFillHistograms;
 //-----------------------------------------------------------------------------
 // TMVA training ntuples
 //-----------------------------------------------------------------------------
@@ -339,9 +337,9 @@ public:
   
   void    SetMVA          (const char* TrkRecAlgorithm, const char* Dataset, int MvaType);
 
-  void    SetWriteTmvaTree (int Algo) {
-    fWriteTmvaTree = Algo; 
-  }
+  void    SetWriteTmvaTree (int Algo) { fWriteTmvaTree = Algo; }
+
+  void    SetFillHistograms(int Fill) { fFillHistograms = Fill; }
 
 //   void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }
 //   void    SetCprWeightsFile(const char* Fn) { if (Fn[0] != 0) fCprWeightsFile = Fn; }

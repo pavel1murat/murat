@@ -16,7 +16,6 @@
 #include "GeometryService/inc/GeomHandle.hh"
 
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
-#include "TTrackerGeom/inc/TTracker.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
@@ -142,13 +141,6 @@ namespace mu2e {
 // begin run 
 //-----------------------------------------------------------------------------
   bool TCalm005::beginRun(art::Run& R) {
-
-//     GeomHandle<TTracker> tt;
-//     fTracker = (TTracker*) tt.operator -> ();
-
-    //    GeomHandle<VaneCalorimeter> cg;
-    //    fCal = &(*cg);
-    //    fCal = cg.operator -> ();
 
     return true;
   }

@@ -23,7 +23,7 @@
 #include "GeometryService/inc/GeomHandle.hh"
 #include "GeometryService/inc/VirtualDetector.hh"
 
-#include "TTrackerGeom/inc/TTracker.hh"
+// #include "TrackerGeom/inc/Tracker.hh"
 
 #include "RecoDataProducts/inc/StrawHitCollection.hh"
 #include "RecoDataProducts/inc/StrawHitFlagCollection.hh"

@@ -33,15 +33,11 @@
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 
-#include "TTrackerGeom/inc/TTracker.hh"
-//#include "CalorimeterGeom/inc/VaneCalorimeter.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
-//#include "CaloCluster/inc/CaloClusterUtilities.hh"
 #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
 #include "Mu2eUtilities/inc/SortedStepPoints.hh"
 #include "Mu2eUtilities/inc/TrackTool.hh"
-// #include "Mu2eUtilities/inc/TwoLinePCA.hh"
 
 #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
 #include "MCDataProducts/inc/GenParticleCollection.hh"
@@ -50,7 +46,6 @@
 #include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
-// #include "BTrk/TrkBase/TrkHotList.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"

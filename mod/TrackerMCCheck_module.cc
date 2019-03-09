@@ -31,7 +31,7 @@
 #include "GeometryService/inc/GeomHandle.hh"
 #include "GeometryService/inc/VirtualDetector.hh"
 
-#include "TTrackerGeom/inc/TTracker.hh"
+#include "TrackerGeom/inc/Tracker.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
 #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
@@ -82,7 +82,7 @@ namespace mu2e {
     int                fPdgCode;
     int                fGeneratorCode;
 
-    const TTracker*    _tracker;     // straw tracker
+    const Tracker*    _tracker;     // straw tracker
 
 					// hit flag bits which should be ON and OFF
 
@@ -254,7 +254,7 @@ namespace mu2e {
 
 //-----------------------------------------------------------------------------
   bool TrackerMCCheck::beginRun(art::Run& ) {
-    mu2e::GeomHandle<mu2e::TTracker> th;
+    mu2e::GeomHandle<mu2e::Tracker> th;
     _tracker = th.get();
     return true;
   }

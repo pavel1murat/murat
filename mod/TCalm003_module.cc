@@ -11,9 +11,6 @@
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 
-#include "TTrackerGeom/inc/TTracker.hh"
-// #include "CalorimeterGeom/inc/VaneCalorimeter.hh"
-
 #include "RecoDataProducts/inc/CaloCrystalHit.hh"
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
@@ -177,13 +174,6 @@ namespace mu2e {
 // begin job - book histograms etc
 //-----------------------------------------------------------------------------
   void TCalm003::beginJob() {
-
-//     GeomHandle<TTracker> tt;
-//     fTracker = (TTracker*) tt.operator -> ();
-
-    //    GeomHandle<VaneCalorimeter> cg;
-    //    fCal = &(*cg);
-    //    fCal = cg.operator -> ();
 
     fTrackID->SetMinT0(fMinTActive);
 //-----------------------------------------------------------------------------

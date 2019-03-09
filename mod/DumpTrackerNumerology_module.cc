@@ -1,9 +1,9 @@
 //
-// Print the TTracker geometry
+// Print the Tracker geometry
 //
 
 #include "GeometryService/inc/GeomHandle.hh"
-#include "TTrackerGeom/inc/TTracker.hh"
+#include "TrackerGeom/inc/Tracker.hh"
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
@@ -39,9 +39,9 @@ namespace mu2e {
 
   void DumpTrackerNumerology::beginRun(const art::Run& run){
 
-    mu2e::GeomHandle<mu2e::TTracker> handle;
+    GeomHandle<Tracker> handle;
 
-    const TTracker*  tracker = handle.get();
+    const Tracker*  tracker = handle.get();
 
     int             nstations, nplanes, iface, npanels, nlayers;
     //    int             nstraws;
@@ -100,7 +100,7 @@ namespace mu2e {
 	    double ny   = straw->direction().y();
 	    
 	    double z    = straw->getMidPoint().z();  
-	    double hl   = straw->getHalfLength();
+	    double hl   = straw->halfLength();
 	    double r    = straw->getRadius();
 	    
 	    double phi1 = phi/M_PI*180.;

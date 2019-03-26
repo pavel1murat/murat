@@ -44,7 +44,7 @@ public:
   struct EventHist_t : public HistBase_t {
     TH1F* fRunNumber;
     TH1F* fEventNumber;
-    TH1F* fNStrawHits [3];
+    TH1F* fNStrawHits [4];
     TH1F* fNProtonHits[2];
     TH1F* fNStationsWithHits;
     TH1F* fDeltaSt;
@@ -65,6 +65,7 @@ public:
 					// pointers to the data blocks used
   TStrawDataBlock*      fStrawHitDataBlock;
   int                   fNStrawHits;
+  int                   fNsh200;          // n(straw hits) T>200
   int                   fNsh500;          // n(straw hits) T>500
   int                   fNProtonStrawHits;
 

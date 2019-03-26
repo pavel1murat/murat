@@ -1,8 +1,15 @@
 # -*- mode:tcl -*-
 #------------------------------------------------------------------------------
+# the templates file should include all standard ones
+#------------------------------------------------------------------------------
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+#------------------------------------------------------------------------------
 # services section
 #------------------------------------------------------------------------------
-services : {
+services : {  @table::Services.SimAndReco
+
     message               : @local::default_message
     TFileService          : { fileName : "murat_fcl_templates_fcl.hist" }
     RandomNumberGenerator : { }
@@ -13,14 +20,22 @@ services : {
 #------------------------------------------------------------------------------
 #    GeometryService        : { inputFile      : "JobConfig/cd3/geom_baseline.txt"      }
 #    GeometryService        : { inputFile      : "Mu2eG4/geom/geom_common_current.txt"  }
-    GeometryService        : { inputFile      : "Mu2eG4/geom/geom_common.txt"  }
-    ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"        }
-    GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt"   }
-    BTrkHelper             : @local::BTrkHelperDefault
-    G4Helper               : { }
-    SeedService            : { @table::automaticSeeds
+
+    GeometryService        : { @table::Services.SimAndReco.GeometryService 
+	inputFile      : "Mu2eG4/geom/geom_common.txt"
+    }
+
+    ConditionsService      : { @table::Services.SimAndReco.ConditionsService
+	conditionsfile : "Mu2eG4/test/conditions_01.txt"        
+    }
+
+    GlobalConstantsService : { @table::Services.SimAndReco.GlobalConstantsService
+	inputFile      : "Mu2eG4/test/globalConstants_01.txt"   
+    }
+
+    SeedService          : { @table::automaticSeeds
 	baseSeed         :  0
-	maxUniqueEngines :  20
+	maxUniqueEngines :  100
     }
 
     TimeTracker : {

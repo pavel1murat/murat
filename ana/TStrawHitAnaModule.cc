@@ -76,7 +76,8 @@ void TStrawHitAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folde
   HBook1F(hist->fRunNumber        ,"runnum"     ,Form("%s: Run   Number"           ,Folder), 1000, 0,  1.e6,Folder);
   HBook1F(hist->fNStrawHits [0]   ,"nsh_0"      ,Form("%s: N(Straw Hits)[0]"       ,Folder),  200, 0,   200,Folder);
   HBook1F(hist->fNStrawHits [1]   ,"nsh_1"      ,Form("%s: N(Straw Hits)[1]"       ,Folder), 1000, 0, 10000,Folder);
-  HBook1F(hist->fNStrawHits [2]   ,"nsh_2"      ,Form("%s: N(Straw Hits)[2] T>500" ,Folder), 1000, 0, 10000,Folder);
+  HBook1F(hist->fNStrawHits [2]   ,"nsh_2"      ,Form("%s: N(Straw Hits)[2] T>200" ,Folder), 1000, 0, 10000,Folder);
+  HBook1F(hist->fNStrawHits [3]   ,"nsh_3"      ,Form("%s: N(Straw Hits)[2] T>500" ,Folder), 1000, 0, 10000,Folder);
   HBook1F(hist->fNProtonHits[0]   ,"n_prot_sh_0",Form("%s: N(Proton Straw Hits)[0]",Folder),  200, 0,   200,Folder);
   HBook1F(hist->fNProtonHits[1]   ,"n_prot_sh_1",Form("%s: N(Proton Straw Hits)[1]",Folder), 1000, 0, 10000,Folder);
   HBook1F(hist->fNStationsWithHits,"nst_w_hits" ,Form("%s: N(stations w/hits)"     ,Folder),   50, 0,    50,Folder);
@@ -121,7 +122,8 @@ void TStrawHitAnaModule::BookHistograms() {
 
   book_strawhit_histset[0] = 1;		// all hits
   book_strawhit_histset[1] = 1;		// proton hits
-  book_strawhit_histset[2] = 1;		// hits with T > 500 ns
+  book_strawhit_histset[2] = 1;		// all hits with T > 200 ns
+  book_strawhit_histset[3] = 1;		// all hits with T > 500 ns
 
   for (int i=0; i<kNStrawHitHistSets; i++) {
     if (book_strawhit_histset[i] != 0) {
@@ -169,7 +171,8 @@ void TStrawHitAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fRunNumber->Fill(run_number);
   hist->fNStrawHits[0]->Fill(fNStrawHits);
   hist->fNStrawHits[1]->Fill(fNStrawHits);
-  hist->fNStrawHits[2]->Fill(fNsh500);
+  hist->fNStrawHits[2]->Fill(fNsh200);
+  hist->fNStrawHits[3]->Fill(fNsh500);
   hist->fNProtonHits[0]->Fill(fNProtonStrawHits);
   hist->fNProtonHits[1]->Fill(fNProtonStrawHits);
   hist->fNStationsWithHits->Fill(fNStationsWithHits);
@@ -212,7 +215,8 @@ void TStrawHitAnaModule::FillHistograms() {
     hit = fStrawHitDataBlock->Hit(i);
     FillStrawHitHistograms(fHist.fStrawHit[0],hit);
     if (hit->PdgCode() == 2212) FillStrawHitHistograms(fHist.fStrawHit[1],hit);
-    if (hit->Time()    >  500.) FillStrawHitHistograms(fHist.fStrawHit[2],hit);
+    if (hit->Time()    >  200.) FillStrawHitHistograms(fHist.fStrawHit[2],hit);
+    if (hit->Time()    >  500.) FillStrawHitHistograms(fHist.fStrawHit[3],hit);
   }
 }
 
@@ -240,6 +244,7 @@ int TStrawHitAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fNStrawHits       = fStrawHitDataBlock->NHits();
   fNProtonStrawHits = 0;
+  fNsh200           = 0;
   fNsh500           = 0;
 
   fNStationsWithHits = 0;
@@ -252,6 +257,7 @@ int TStrawHitAnaModule::Event(int ientry) {
   for (int i=0; i<fNStrawHits; i++) {
     hit = fStrawHitDataBlock->Hit(i);
     if (hit->PdgCode() == 2212) fNProtonStrawHits += 1;
+    if (hit->Time()    >   200) fNsh200 += 1;
     if (hit->Time()    >   500) fNsh500 += 1;
 
     int ist = hit->Station();

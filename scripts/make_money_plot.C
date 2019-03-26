@@ -3,7 +3,7 @@
 #include "murat/scripts/datasets.hh"
 #include "murat/scripts/plot_utilities.hh"
 
-namespace {
+namespace local {
 
   const char* e41s5721_track_comp = "~/hist/mu2e/v5_7_0/e41s5721.track_comp.hist"; // HEE+BGR , matcorr in CalPatRec
   const char* e42s5721_track_comp = "~/hist/mu2e/v5_7_0/e42s5721.track_comp.hist"; // CE+BGR  , matcorr in CalPatRec
@@ -22,8 +22,8 @@ public:
   
   char fFiguresDir[200];
 
-  const dataset_t* fDatasetDio;
-  const dataset_t* fDatasetCnv;
+  const aa_dataset_t* fDatasetDio;
+  const aa_dataset_t* fDatasetCnv;
 
 public:
   make_money_plot() {
@@ -39,8 +39,8 @@ public:
 		       int         IMax      = 510,
 		       int         Print     =   0);
 
-  void plot           (const dataset_t*  DatasetCnv,
-		       const dataset_t*  DatasetDio,
+  void plot           (const aa_dataset_t*  DatasetCnv,
+		       const aa_dataset_t*  DatasetDio,
 		       const char*       TrkFolder = "trk_3",
 		       int               IMin      = 478,
 		       int               IMax      = 510,
@@ -117,8 +117,8 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
   
   TH1F* h_cnv = (TH1F*) gh1(fDatasetCnv->fn_track_comp,"TrackComp",h_cnv_name)->Clone("h_cnv");
 
-  double emin = h_cnv->GetBinLowEdge(IMin);
-  double emax = h_cnv->GetBinLowEdge(IMax)+h_cnv->GetBinWidth(IMax);
+  double emin1 = h_cnv->GetBinLowEdge(IMin);
+  double emax1 = h_cnv->GetBinLowEdge(IMax)+h_cnv->GetBinWidth(IMax);
 
   h_dio->SetStats(0);
   h_dio->SetTitle("");
@@ -134,10 +134,12 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
 //-----------------------------------------------------------------------------
 // signal window
 //-----------------------------------------------------------------------------
-  TBox* b = new TBox(emin,0.,emax,ymax);
+  TBox* b = new TBox(emin1,0.,emax1,ymax);
   b->Draw();
 					// draw on top...
   h_dio->Draw("same");
+
+  printf("done drawing\n");
 //-----------------------------------------------------------------------------
 // 2. get normalized conversion histogram for R = 1.e-16
 //-----------------------------------------------------------------------------
@@ -169,20 +171,20 @@ void make_money_plot::plot(const char* TrkFolder, int IMin, int IMax, int Print)
   draw_label_ndc(Form("N(stopped #mu) : %8.1e",n_stopped_muons),x1,0.70,20,font);
   draw_label_ndc(Form("R_{#mu #rightarrow e}        : %8.1e",R),x1,0.65,20,font);
 
-  draw_label_ndc(Form("Window       : [%6.2f,%6.2f] MeV/c",emin,emax),x1,0.60,20,font);
+  draw_label_ndc(Form("Window       : [%6.2f,%6.2f] MeV/c",emin1,emax1),x1,0.60,20,font);
 
   draw_label_ndc(Form("N(CE)        : %9.2e",N_sig            ),x1,0.55,20,font);
   draw_label_ndc(Form("N(DIO)       : %9.2e",N_dio            ),x1,0.50,20,font);
   draw_label_ndc(Form("SES          : %9.2e",ses              ),x1,0.45,20,font);
   
-  if (Print == 1) c->Print(Form("%s/money_plot_%s.eps",figures_dir,TrkFolder));
+  if (Print == 1) c->Print(Form("%s/money_plot_%s.eps",local::figures_dir,TrkFolder));
 
 }
 
 
 //-----------------------------------------------------------------------------
-void make_money_plot::plot(const dataset_t*  DatasetCnv,
-			   const dataset_t*  DatasetDio,
+void make_money_plot::plot(const aa_dataset_t*  DatasetCnv,
+			   const aa_dataset_t*  DatasetDio,
 			   const char*       TrkFolder ,
 			   int               IMin      ,
 			   int               IMax      ,

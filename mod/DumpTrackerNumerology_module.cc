@@ -46,18 +46,18 @@ namespace mu2e {
     int             nstations, nplanes, iface, npanels, nlayers;
     //    int             nstraws;
 
-    const Station*  station;
+    //    const Station*  station;
 
     const Straw* straw;
     StrawId      sid;
 
-    nstations = tracker->nStations();
+    nstations = StrawId::_nstations; // tracker->nStations();
 
     printf("Tracker N(stations): %i\n", nstations);
 
     for (int ist=0; ist<nstations; ist++) {
 
-      station = &tracker->getStations().at(ist);
+      //      station = &tracker->getStations().at(ist);
 
       printf("---------------------------------------------------------------------------------");
       printf("--------------------------------------------------------------------\n");
@@ -67,10 +67,12 @@ namespace mu2e {
       printf("--------------------------------------------------------------------\n");
       //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
 
-      nplanes = station->nPlanes();
+      nplanes = 2; // station->nPlanes();
 
       for (int iplane=0; iplane<nplanes; iplane++) {
-	const Plane* plane = &station->getPlane(iplane);
+	int ipl = nplanes*ist+iplane;
+
+	const Plane* plane = &tracker->getPlane(ipl);
 
 	npanels = plane->nPanels();
 

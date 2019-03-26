@@ -41,7 +41,7 @@ int read_lo_dio_spectrum(const char* Fn, TH1D** Hist) {
   
   f = fopen(Fn,"r");
   if (f == 0) {
-    Error("read_LO_dio_histogram",Form("missing file %s\n",Fn));
+    printf("EROOR in read_lo_dio_spectrum: missing file %s\n",Fn);
     return -2;
   }
 
@@ -61,6 +61,8 @@ int read_lo_dio_spectrum(const char* Fn, TH1D** Hist) {
 					// skip the rest of the line
     fgets(c,100,f);
   }
+
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -113,6 +115,5 @@ int dio_main() {
 
   h_dio_wt->Draw("same");
 
-  
-
+  return 0;
 }

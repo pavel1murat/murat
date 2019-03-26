@@ -26,10 +26,12 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Mu2e includes.
+#include "ProditionsService/inc/ProditionsHandle.hh"
 #include "ConditionsService/inc/ConditionsHandle.hh"
 // #include "ConditionsService/inc/TrackerCalibrations.hh"
+#include "TrackerConditions/inc/Mu2eDetector.hh"
 
-#include "BTrkHelper/inc/BTrkHelper.hh"
+// #include "BTrkHelper/inc/BTrkHelper.hh"
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 
@@ -60,7 +62,7 @@
 
 #include "Stntuple/mod/StntupleModule.hh"
 
-#include "Mu2eBTrk/inc/Mu2eDetectorModel.hh"
+// #include "Mu2eBTrk/inc/Mu2eDetectorModel.hh"
 
 #include "TH1F.h"
 
@@ -86,6 +88,8 @@ namespace mu2e {
     } ;
 
     Hist_t fHist;
+
+    ProditionsHandle<Mu2eDetector> _mu2eDetector_h;
 
   public:
     explicit TrackRecoCheck(fhicl::ParameterSet const& pset);
@@ -156,7 +160,9 @@ namespace mu2e {
     const char* oname = "TrackRecoCheck::Debug_11";
 
     //     GeomHandle<Mu2eDetectorModel> detmodel;
-    Mu2eDetectorModel const& detmodel { art::ServiceHandle<BTrkHelper>()->detectorModel() };
+    //    Mu2eDetectorModel const& detmodel { art::ServiceHandle<BTrkHelper>()->detectorModel() };
+
+    auto detmodel = _mu2eDetector_h.getPtr(Evt->id());
 
     art::Handle<mu2e::KalRepPtrCollection> krepsHandle;
 
@@ -213,7 +219,7 @@ namespace mu2e {
 	const CLHEP::Hep3Vector* dir = &straw->direction();
 
 					// gasPath() returns the half-path
-	const DetStrawElem* strawelem = detmodel.strawElem(*straw);
+	const DetStrawElem* strawelem = detmodel->strawElem(*straw);
 
 	path = 2.*strawelem->gasPath(hit->driftRadius(),hit->trkTraj()->direction( hit->fltLen()));
 	ehit = sh->energyDep();

@@ -503,14 +503,14 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[164] = 1; track_selection[164] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
   book_track_histset[171] = 1; track_selection[171] = new TString("PAR+ tracks with final selections");
-  book_track_histset[172] = 1; track_selection[171] = new TString("PAR- tracks with final selections");
+  book_track_histset[172] = 1; track_selection[172] = new TString("PAR- tracks with final selections");
   book_track_histset[173] = 1; track_selection[173] = new TString("PAR+ tracks with final selections and RMC weight");
   book_track_histset[174] = 1; track_selection[174] = new TString("PAR- tracks with final selections and RMC weight");
   book_track_histset[175] = 1; track_selection[175] = new TString("PAR+ tracks with final selections and RPC weight");
   book_track_histset[176] = 1; track_selection[176] = new TString("PAR- tracks with final selections and RPC weight");
 
-  book_track_histset[177] = 1; track_selection[171] = new TString("cosmics+: #171 + 90 < p < 93");
-  book_track_histset[178] = 1; track_selection[171] = new TString("cosmics-: #172 + 90 < p < 93");
+  book_track_histset[177] = 1; track_selection[177] = new TString("cosmics+: #171 + 90 < p < 93");
+  book_track_histset[178] = 1; track_selection[178] = new TString("cosmics-: #172 + 90 < p < 93");
 
   book_track_histset[179] = 1; track_selection[179] = new TString("PAR- tracks with final selections and DIO weight");
 
@@ -574,7 +574,7 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[264] = 1; track_selection[264] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
   book_track_histset[271] = 1; track_selection[271] = new TString("DAR+ tracks with final selections");
-  book_track_histset[272] = 1; track_selection[271] = new TString("DAR- tracks with final selections");
+  book_track_histset[272] = 1; track_selection[272] = new TString("DAR- tracks with final selections");
   book_track_histset[273] = 1; track_selection[273] = new TString("DAR+ tracks with final selections and RMC weight");
   book_track_histset[274] = 1; track_selection[274] = new TString("DAR- tracks with final selections and RMC weight");
   book_track_histset[275] = 1; track_selection[275] = new TString("DAR+ tracks with final selections and RPC weight");

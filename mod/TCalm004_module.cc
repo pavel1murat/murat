@@ -23,7 +23,6 @@
 
 #include "BTrk/KalmanTrack/KalRep.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
-#include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"
 
 namespace mu2e {
 

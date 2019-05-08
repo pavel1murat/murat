@@ -62,6 +62,7 @@ libs      = [ 'murat_alg',
               'xerces-c',
               'boost_filesystem',
               'boost_system',
+              'pthread'
               ];
 
 list_of_cc_files = Glob('*.cc',strings=True);

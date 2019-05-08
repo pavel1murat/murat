@@ -39,7 +39,7 @@
 #include "BTrk/ProbTools/ChisqConsistency.hh"
 #include "BTrkData/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
-#include "TrackCaloMatching/inc/TrkToCaloExtrapol.hh"
+#include "RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
 namespace mu2e {
 

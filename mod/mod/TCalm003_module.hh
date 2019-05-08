@@ -27,6 +27,7 @@
 #include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
 #include "RecoDataProducts/inc/CaloHitCollection.hh"
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
 #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
 #include "MCDataProducts/inc/GenParticleCollection.hh"
@@ -40,9 +41,6 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
-
-// #include "TrackCaloMatching/inc/TrackClusterLink.hh"
-#include "TrackCaloMatching/inc/TrkToCaloExtrapolCollection.hh"
 
 // C++ includes.
 #include <iostream>

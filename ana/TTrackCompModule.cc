@@ -625,7 +625,7 @@ void TTrackCompModule::BookHistograms() {
 //  int       book_dtrack_histset[kNDTrackHistSets];
   TString*  dtrack_selection   [kNDTrackHistSets];
 
-  for (int i=0; i<kNTrackHistSets; i++) { dtrack_selection[i] = NULL; }
+  for (int i=0; i<kNDTrackHistSets; i++) { dtrack_selection[i] = NULL; }
 
   dtrack_selection[  0] = new TString("all PAR-DAR tracks");
 

@@ -152,6 +152,11 @@ public:
     TH1F*    fMVAOut;			// output of our MVA
     TH1F*    fDeltaMVA;			// DaveTrkQual-MVAOut[0]
   };
+
+  struct DTrackHist_t : public HistBase_t {
+    TH1F*    fDp;			// difference between the track momenta
+    TH1F*    fRMomErr10;
+  };
 //-----------------------------------------------------------------------------
 //  fTrackHist[  0]: all tracks
 //  fTrackHist[100]: Set C tracks
@@ -160,12 +165,13 @@ public:
 
   enum { kNEventHistSets   =  100 };
   enum { kNTrackHistSets   =  500 };
+  enum { kNDTrackHistSets  =  100 };
   enum { kNSimpHistSets    =  100 };
 
   struct Hist_t {
     EventHist_t*   fEvent  [kNEventHistSets];
     TrackHist_t*   fTrack  [kNTrackHistSets];
-    //    SimpHist_t*    fSimp   [kNSimpHistSets];
+    DTrackHist_t*  fDTrack [kNDTrackHistSets];
   };
 
 
@@ -220,7 +226,6 @@ public:
   TStnClusterBlock*  fClusterBlock;
   TGenpBlock*        fGenpBlock;
   TSimpBlock*        fSimpBlock;
-  //  TVDetDataBlock*    fVDetBlock;
   TStnHelixBlock*    fHelixBlock;
   TStepPointMCBlock* fSpmcBlockVDet;
 
@@ -355,10 +360,12 @@ public:
 //-----------------------------------------------------------------------------
   void    BookEventHistograms   (HistBase_t*   Hist, const char* Folder);
   void    BookTrackHistograms   (HistBase_t*   Hist, const char* Folder);
+  void    BookDTrackHistograms  (HistBase_t*   Hist, const char* Folder);
 
   void    FillEventHistograms    (HistBase_t*  Hist);
-
   void    FillTrackHistograms    (HistBase_t*  Hist, TStnTrack* Trk, TrackPar_t* Tp, double Weight = 1.);
+  void    FillDTrackHistograms   (HistBase_t*  Hist, TStnTrack* Trk1, TrackPar_t* Tp1, TStnTrack* Trk2, TrackPar_t* Tp2);
+
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
 				   TStnTrackID*    TrackID   , 

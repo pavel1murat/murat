@@ -394,12 +394,12 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms    (CaloHist_t*    Hist, const char* Folder);
-  void    BookClusterHistograms (ClusterHist_t* Hist, const char* Folder);
-  void    BookGenpHistograms    (GenpHist_t*    Hist, const char* Folder);
-  void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
-  void    BookSimpHistograms    (SimpHist_t*    Hist, const char* Folder);
-  void    BookTrackHistograms   (TrackHist_t*   Hist, const char* Folder);
+  void    BookCaloHistograms      (CaloHist_t*    Hist, const char* Folder);
+  void    BookClusterHistograms   (ClusterHist_t* Hist, const char* Folder);
+  void    BookGenpHistograms      (GenpHist_t*    Hist, const char* Folder);
+  void    BookEventHistograms     (EventHist_t*   Hist, const char* Folder);
+  void    BookSimpHistograms      (SimpHist_t*    Hist, const char* Folder);
+  void    BookTrackHistograms     (TrackHist_t*   Hist, const char* Folder);
 
   void    FillEventHistograms    (EventHist_t* Hist);
   void    FillCaloHistograms     (CaloHist_t*    Hist, TStnCrystal*  Crystal);

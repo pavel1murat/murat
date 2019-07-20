@@ -348,7 +348,7 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fPath       ,"path"     ,Form("%s: track sdisk"       ,Folder),  50,   0 ,500,Folder);
 
   HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
-  HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 200, 0   ,2,Folder);
+  HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 500, 0   ,5,Folder);
   HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
   HBook1F(Hist->fDtClZ0     ,"dtclz0"   ,Form("%s: T(cl_z0)-T(Z0)"    ,Folder), 250, -5 , 5,Folder);
   HBook2F(Hist->fDtClZ0VsECl,"dtclz0_vs_ecl",Form("%s: DtClZ0 vs ECl" ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
@@ -358,6 +358,16 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
   HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVAOut[0]"          ,Folder), 200, -0.5, 1.5,Folder);
   HBook1F(Hist->fDeltaMVA   ,"dmva"     ,Form("%s:MVAOut[0]-TrkQual"  ,Folder), 200, -1.0, 1.0,Folder);
+}
+
+//-----------------------------------------------------------------------------
+void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folder) {
+  DTrackHist_t* Hist =  (DTrackHist_t*) HistR;
+
+  HBook1F(Hist->fDp       ,"dp"      ,Form("%s: P(1)-P(2)"               ,Folder),200, -1,1,Folder);
+  HBook1F(Hist->fRMomErr10,"rmomerr" ,Form("%s: MomEff(1)/MomErr(0)"     ,Folder),200,  0,2,Folder);
+
+
 }
 
 //-----------------------------------------------------------------------------
@@ -609,6 +619,29 @@ void TTrackCompModule::BookHistograms() {
       BookTrackHistograms(fHist.fTrack[i],Form("Hist/%s",folder_name));
     }
   }
+//-----------------------------------------------------------------------------
+// book delta track histograms
+//-----------------------------------------------------------------------------
+//  int       book_dtrack_histset[kNDTrackHistSets];
+  TString*  dtrack_selection   [kNDTrackHistSets];
+
+  for (int i=0; i<kNTrackHistSets; i++) { dtrack_selection[i] = NULL; }
+
+  dtrack_selection[  0] = new TString("all PAR-DAR tracks");
+
+  //  const char* folder_title;
+  for (int i=0; i<kNDTrackHistSets; i++) {
+    if (dtrack_selection[i] != 0) {
+      sprintf(folder_name,"dtrk_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      folder_title = folder_name;
+      if (dtrack_selection[i] != NULL) folder_title = dtrack_selection[i]->Data();
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_title);
+      fHist.fDTrack[i] = new DTrackHist_t;
+      BookDTrackHistograms(fHist.fDTrack[i],Form("Hist/%s",folder_name));
+    }
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -932,6 +965,23 @@ int TTrackCompModule::FillTmvaTree() {
   fSigTree->Fill();
 
   return rc;
+}
+
+//-----------------------------------------------------------------------------
+// for DIO : ultimately, one would need to renormalize the distribution
+//-----------------------------------------------------------------------------
+void TTrackCompModule::FillDTrackHistograms(HistBase_t* HistR, TStnTrack* Trk1, TrackPar_t* Tp1, TStnTrack* Trk2, TrackPar_t* Tp2) {
+
+  //  TLorentzVector  mom;
+
+  DTrackHist_t* Hist = (DTrackHist_t*) HistR;
+
+					// Tp->fP - corrected momentum, fP0 and fP2 - not corrected
+  float dp = Tp1->fP-Tp2->fP;
+  Hist->fDp->Fill (dp);
+
+  float rmomerr10 = Trk2->FitMomErr()/Trk1->FitMomErr();
+  Hist->fRMomErr10->Fill (rmomerr10);
 }
 
 //_____________________________________________________________________________
@@ -1262,6 +1312,16 @@ void TTrackCompModule::FillHistograms() {
 	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,tp->fDioWt);                                       // DIO
 	}
       }
+    }
+  }
+
+  if (fNTracks[0] == fNTracks[1]) {
+    for (int itrk=0; itrk<fNTracks[0]; itrk++) {
+      TStnTrack* trk1  = fTrackBlock[0]->Track(itrk);
+      TStnTrack* trk2  = fTrackBlock[1]->Track(itrk);
+      TrackPar_t* tp1  = &fTrackPar[0][0]+itrk;
+      TrackPar_t* tp2  = &fTrackPar[1][0]+itrk;
+      FillDTrackHistograms(fHist.fDTrack[0],trk1,tp1,trk2,tp2);
     }
   }
 //-----------------------------------------------------------------------------

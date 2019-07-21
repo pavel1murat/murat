@@ -329,7 +329,7 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
   HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
-  HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: DT(Z0), MC"        ,Folder), 200, -10.0 ,10.0,Folder);
+  HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: T0_trk-T0_MC(Z=0)" ,Folder), 200, -10.0 ,10.0,Folder);
   HBook1F(Hist->fXtZ0       ,"xtz0"     ,Form("%s: DT(Z0)/sigT"       ,Folder), 200, -10.0 ,10.0,Folder);
 
   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
@@ -339,12 +339,12 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fChi2XY     ,"chi2xy"   ,Form("%s: chi2(t-c match) XY",Folder), 300,-50  ,250 ,Folder);
   HBook1F(Hist->fChi2T      ,"chi2t"    ,Form("%s: chi2(t-c match) T" ,Folder), 250,  0  ,250 ,Folder);
 
-  HBook1F(Hist->fDt         ,"dt"       ,Form("%s: track delta(T)"    ,Folder), 400,-20  ,20 ,Folder);
-  HBook1F(Hist->fDx         ,"dx"       ,Form("%s: track delta(X)"    ,Folder), 200,-500 ,500,Folder);
-  HBook1F(Hist->fDy         ,"dy"       ,Form("%s: track delta(Y)"    ,Folder), 200,-500 ,500,Folder);
-  HBook1F(Hist->fDz         ,"dz"       ,Form("%s: track delta(Z)"    ,Folder), 200,-250 ,250,Folder);
-  HBook1F(Hist->fDu         ,"du"       ,Form("%s: track-cluster DU)" ,Folder), 250,-250 ,250,Folder);
-  HBook1F(Hist->fDv         ,"dv"       ,Form("%s: track-cluster DV)" ,Folder), 200,-100 ,100,Folder);
+  HBook1F(Hist->fDt         ,"dt"       ,Form("%s: T(trk)-T(cl)"      ,Folder), 400,-20  ,20 ,Folder);
+  HBook1F(Hist->fDx         ,"dx"       ,Form("%s: X(trk)-X(cl)"      ,Folder), 200,-500 ,500,Folder);
+  HBook1F(Hist->fDy         ,"dy"       ,Form("%s: Y(trk)-Y(cl)"      ,Folder), 200,-500 ,500,Folder);
+  HBook1F(Hist->fDz         ,"dz"       ,Form("%s: Z(trk)-Z(cl)"      ,Folder), 200,-250 ,250,Folder);
+  HBook1F(Hist->fDu         ,"du"       ,Form("%s: track-cluster DU"  ,Folder), 250,-250 ,250,Folder);
+  HBook1F(Hist->fDv         ,"dv"       ,Form("%s: track-cluster DV"  ,Folder), 200,-100 ,100,Folder);
   HBook1F(Hist->fPath       ,"path"     ,Form("%s: track sdisk"       ,Folder),  50,   0 ,500,Folder);
 
   HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
@@ -390,6 +390,8 @@ void TTrackCompModule::BookEventHistograms(HistBase_t* HistR, const char* Folder
 
   HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
   HBook1F(Hist->fEleMom    ,"ce_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
+
+  HBook1F(Hist->fNHelices  ,"nhel"     ,Form("%s: nhelices"                        ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTracks[0],"ntrk_0"   ,Form("%s: N(Reconstructed Tracks)[0]"      ,Folder),100,0,100,Folder);
   HBook1F(Hist->fNTracks[1],"ntrk_1"   ,Form("%s: N(Reconstructed Tracks)[1]"      ,Folder),100,0,100,Folder);
   HBook1F(Hist->fNshTot [0],"nshtot_0" ,Form("%s: Total Number of Straw Hits [0]"  ,Folder),250,0,250,Folder);
@@ -435,6 +437,7 @@ void TTrackCompModule::BookHistograms() {
   book_event_histset[ 0] = 1;		// all events
   book_event_histset[ 1] = 1;		// events with EclMax > fMinETrig and TClMax > 550
   book_event_histset[ 2] = 1;           // *** fill in
+  book_event_histset[ 3] = 1;           // events with at least one helix
 
 					// KPAR eff: histsets 10:19, KDAR efficiency:20-29
 
@@ -691,6 +694,8 @@ void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
 
   Hist->fEleMom->Fill(p);
   Hist->fEleCosTh->Fill(cos_th);
+
+  Hist->fNHelices->Fill(fNHelices);
 
   Hist->fNTracks[0]->Fill(fNTracks[0]);
   Hist->fNTracks[1]->Fill(fNTracks[1]);
@@ -1007,6 +1012,12 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   if ((fEClMax > fMinETrig) && (fTClMax > 550)) {
     FillEventHistograms(fHist.fEvent[2]);
+  }
+//-----------------------------------------------------------------------------
+// EVT_3: events with at least one helix
+//-----------------------------------------------------------------------------
+  if (fNHelices > 0) {
+    FillEventHistograms(fHist.fEvent[3]);
   }
 //-----------------------------------------------------------------------------
 // EVT_41: events with good DAR positron track 
@@ -1645,7 +1656,6 @@ int TTrackCompModule::Event(int ientry) {
   fClusterBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
-  //  fVDetBlock->GetEntry(ientry);
   fHelixBlock->GetEntry(ientry);
   fSpmcBlockVDet->GetEntry(ientry);
 //-----------------------------------------------------------------------------
@@ -1658,6 +1668,7 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fNGenp     = fGenpBlock->NParticles();
   fNClusters = fClusterBlock->NClusters();
+  fNHelices  = fHelixBlock->NHelices();
 
   fCluster = NULL;
   fEClMax  = -1;

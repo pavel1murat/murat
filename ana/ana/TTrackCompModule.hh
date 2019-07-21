@@ -58,6 +58,7 @@ public:
 
     TH1F*    fEleMom;
     TH1F*    fEleCosTh;
+    TH1F*    fNHelices;
     TH1F*    fNTracks[2];
     TH1F*    fNshTot [2];
     TH1F*    fNGoodSH;
@@ -247,6 +248,7 @@ public:
   TSimParticle*      fSimp;
   double             fEleE;		// electron energy
 
+  int                fNHelices;         // 
   int                fNTracks    [2];    // 0:TrkPatRec 1:CalPatRec
   int                fNGoodTracks[2];
   int                fNGenp;		// N(generated particles)

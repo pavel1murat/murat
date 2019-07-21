@@ -6,9 +6,10 @@
 # non-empty order : reverse
 #------------------------------------------------------------------------------
 
-project=$1
-  jobid=$2
-  order=$3
+  project=$1
+    jobid=$2
+n_submitted_sections=$3
+    order=$3
 
 stage_dir="/pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage/"`ls /pnfs/mu2e/scratch/users/$USER/workflow/$project/outstage | grep $jobid`;
 
@@ -73,6 +74,9 @@ for subdir in $list_of_subjobs ; do
     done
 done
 
-echo output of $ntotal sections checked : total of $nsections sections completed \; $nsuccess sections completed successfully \; \
-    $n_staging_failures sections had staging failures \; \
-    $nfailed sections had the mu2e job failed 
+echo "SUMMARY: submitted       : $n_submitted_sections sections"
+echo "         present         : $ntotal sections"
+echo "         completed       : $nsections sections"
+echo "         success         : $nsuccess sections"
+echo "         staging failures: $n_staging_failures sections"
+echo "         failed          : $nfailed sections"

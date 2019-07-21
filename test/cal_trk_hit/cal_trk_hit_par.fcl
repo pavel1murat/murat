@@ -32,11 +32,9 @@ physics.producers.generate                      : { @table::Stntuple.producers.e
 physics.producers.g4run.physics.physicsListName : "QGSP_BERT"
 #------------------------------------------------------------------------------
 # currently = choose MVA's of the right sign
-# make Par = Dar
+# for this job, run only panel ambig resolver, make Dar = Par w/o TrkCaloHit
 #------------------------------------------------------------------------------
-physics.producers.KFFDeMHPar                 : { @table::CalPatRec.producers.CalTrkFitDem
-    SeedCollection : KSFDeMH  
-}
+physics.producers.KFFDeMHDar                      : { @table::Stntuple.producers.KFFDeMHPar }
 
 physics.producers.KFFDeMHPar.KalFit.useTrkCaloHit : true
 physics.producers.KFFDeMHDar.KalFit.useTrkCaloHit : false

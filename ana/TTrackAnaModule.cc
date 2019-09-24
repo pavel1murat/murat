@@ -725,7 +725,7 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
       }
       else {
 //-----------------------------------------------------------------------------
-// pathologicalcase when an upstream simulated MC particle is reconstructed 
+// pathological case when an upstream simulated MC particle is reconstructed 
 // as the downstream one and there is no hit... efficiency doens't make sense
 // just make sure the code doesnt' crash
 //-----------------------------------------------------------------------------
@@ -1481,7 +1481,12 @@ int TTrackAnaModule::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
-  fVDetBlock->GetEntry(ientry);
+//-----------------------------------------------------------------------------
+// at some point, the TVdetBlock class got obsolete, and now the virtual detector 
+// hits are stored in TStepPointMCBlock 
+// dont' try to read it as that would fail
+//-----------------------------------------------------------------------------
+  //  fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------

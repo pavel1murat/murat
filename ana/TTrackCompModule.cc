@@ -539,6 +539,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[193] = 1; track_selection[193] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
   book_track_histset[194] = 1; track_selection[194] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
+  book_track_histset[195] = 1; track_selection[195] = new TString("PAR- tracks final selections, cluster in the 1st disk");
+  book_track_histset[196] = 1; track_selection[196] = new TString("PAR- tracks final selections, cluster in the 2nd disk");
+
   book_track_histset[200] = 1; track_selection[200] = new TString("DAR all tracks");
   book_track_histset[201] = 1; track_selection[201] = new TString("DAR BestTrackID");
   book_track_histset[202] = 1; track_selection[202] = new TString("DAR BestTrackID no fitCons&momErr&t0Err tracks");
@@ -609,6 +612,9 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[292] = 1; track_selection[292] = new TString("DAR- tracks N(active) > 20 and |D0| < 100");
   book_track_histset[293] = 1; track_selection[293] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
   book_track_histset[294] = 1; track_selection[294] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+
+  book_track_histset[295] = 1; track_selection[295] = new TString("DAR- tracks final selections, cluster in the 1st disk");
+  book_track_histset[296] = 1; track_selection[296] = new TString("DAR- tracks final selections, cluster in the 2nd disk");
 
   const char* folder_title;
   for (int i=0; i<kNTrackHistSets; i++) {
@@ -1309,6 +1315,7 @@ void TTrackCompModule::FillHistograms() {
 	  if ((fProcess == 11) || (fProcess == 22)) FillTrackHistograms(fHist.fTrack[ihist+75],trk,tp,fWtRPC); // RPC
 	  
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+77],trk,tp);            // for cosmics
+
 	}
 	else {
 //-----------------------------------------------------------------------------
@@ -1321,6 +1328,8 @@ void TTrackCompModule::FillHistograms() {
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp);            // for cosmics
 
 	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,tp->fDioWt);                                       // DIO
+
+	  if (tp->fEcl > 0) FillTrackHistograms(fHist.fTrack[ihist+95+tp->fDiskID],trk,tp);
 	}
       }
     }
@@ -1466,6 +1475,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     double    nx, ny;
 
     tp->fEcl       = -1.e6;
+    tp->fDiskID    = -1;
     tp->fEp        = -1.e6;
     tp->fDtClZ0    = -1.e6;
 
@@ -1485,12 +1495,13 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fSInt      = -1.e6;
 
     if (vr) {
-      tp->fEcl = vr->fEnergy;
-      tp->fEp  = tp->fEcl/track->fP2;
+      tp->fDiskID = vr->fID;
+      tp->fEcl    = vr->fEnergy;
+      tp->fEp     = tp->fEcl/track->fP2;
 
-      tp->fDx  = vr->fDx;
-      tp->fDy  = vr->fDy;
-      tp->fDz  = vr->fDz;
+      tp->fDx     = vr->fDx;
+      tp->fDy     = vr->fDy;
+      tp->fDz     = vr->fDz;
 //-----------------------------------------------------------------------------
 // v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
 //-----------------------------------------------------------------------------

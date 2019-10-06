@@ -350,6 +350,7 @@ void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
   HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 500, 0   ,5,Folder);
   HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
+  HBook1F(Hist->fDrDzCal    ,"drdzcal"  ,Form("%s: track dr/dz cal"   ,Folder), 200, -5  ,5  ,Folder);
   HBook1F(Hist->fDtClZ0     ,"dtclz0"   ,Form("%s: T(cl_z0)-T(Z0)"    ,Folder), 250, -5 , 5,Folder);
   HBook2F(Hist->fDtClZ0VsECl,"dtclz0_vs_ecl",Form("%s: DtClZ0 vs ECl" ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
   HBook2F(Hist->fDtClZ0VsP  ,"dtclz0_vs_p"  ,Form("%s: DtClZ0 vs p"   ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
@@ -366,6 +367,7 @@ void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folde
 
   HBook1F(Hist->fDp       ,"dp"      ,Form("%s: P(1)-P(2)"               ,Folder),200, -1,1,Folder);
   HBook1F(Hist->fRMomErr10,"rmomerr" ,Form("%s: MomEff(1)/MomErr(0)"     ,Folder),200,  0,2,Folder);
+  HBook1F(Hist->fDT0      ,"dt0"     ,Form("%s: T0(1)-T0(2)"             ,Folder),200, -5,5,Folder);
 
 
 }
@@ -539,9 +541,6 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[193] = 1; track_selection[193] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
   book_track_histset[194] = 1; track_selection[194] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[195] = 1; track_selection[195] = new TString("PAR- tracks final selections, cluster in the 1st disk");
-  book_track_histset[196] = 1; track_selection[196] = new TString("PAR- tracks final selections, cluster in the 2nd disk");
-
   book_track_histset[200] = 1; track_selection[200] = new TString("DAR all tracks");
   book_track_histset[201] = 1; track_selection[201] = new TString("DAR BestTrackID");
   book_track_histset[202] = 1; track_selection[202] = new TString("DAR BestTrackID no fitCons&momErr&t0Err tracks");
@@ -613,8 +612,19 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[293] = 1; track_selection[293] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
   book_track_histset[294] = 1; track_selection[294] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[295] = 1; track_selection[295] = new TString("DAR- tracks final selections, cluster in the 1st disk");
-  book_track_histset[296] = 1; track_selection[296] = new TString("DAR- tracks final selections, cluster in the 2nd disk");
+  book_track_histset[301] = 1; track_selection[301] = new TString("PAR- tracks final selections, dr/dz(cal) <  0");
+  book_track_histset[302] = 1; track_selection[302] = new TString("PAR- tracks final selections, dr/dz(cal) >= 0");
+  book_track_histset[305] = 1; track_selection[305] = new TString("PAR- tracks final selections, cluster in the 1st disk");
+  book_track_histset[306] = 1; track_selection[306] = new TString("PAR- tracks final selections, cluster in the 2nd disk");
+  book_track_histset[307] = 1; track_selection[307] = new TString("PAR- tracks final selections, dt <  -4 ns");
+  book_track_histset[308] = 1; track_selection[308] = new TString("PAR- tracks final selections, dt >= -4 ns");
+
+  book_track_histset[401] = 1; track_selection[401] = new TString("DAR- tracks final selections, dr/dz(cal) <  0");
+  book_track_histset[402] = 1; track_selection[402] = new TString("DAR- tracks final selections, dr/dz(cal) >= 0");
+  book_track_histset[405] = 1; track_selection[405] = new TString("DAR- tracks final selections, cluster in the 1st disk");
+  book_track_histset[406] = 1; track_selection[406] = new TString("DAR- tracks final selections, cluster in the 2nd disk");
+  book_track_histset[407] = 1; track_selection[407] = new TString("DAR- tracks final selections, dt <  -4 ns");
+  book_track_histset[408] = 1; track_selection[408] = new TString("DAR- tracks final selections, dt >= -4 ns");
 
   const char* folder_title;
   for (int i=0; i<kNTrackHistSets; i++) {
@@ -913,6 +923,7 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 
   Hist->fEClEKin->Fill(Tp->fEcl/ekin, Weight);
   Hist->fEp     ->Fill(Tp->fEp      , Weight);
+  Hist->fDrDzCal->Fill(Tp->fDrDzCal , Weight);
   Hist->fDtClZ0 ->Fill(Tp->fDtClZ0  , Weight);
 
   Hist->fDtClZ0VsECl->Fill(Tp->fEcl,Tp->fDtClZ0, Weight);
@@ -993,6 +1004,9 @@ void TTrackCompModule::FillDTrackHistograms(HistBase_t* HistR, TStnTrack* Trk1, 
 
   float rmomerr10 = Trk2->FitMomErr()/Trk1->FitMomErr();
   Hist->fRMomErr10->Fill (rmomerr10);
+
+  float dt0 = Trk1->T0()-Trk2->T0();
+  Hist->fDT0->Fill (dt0);
 }
 
 //_____________________________________________________________________________
@@ -1315,7 +1329,6 @@ void TTrackCompModule::FillHistograms() {
 	  if ((fProcess == 11) || (fProcess == 22)) FillTrackHistograms(fHist.fTrack[ihist+75],trk,tp,fWtRPC); // RPC
 	  
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+77],trk,tp);            // for cosmics
-
 	}
 	else {
 //-----------------------------------------------------------------------------
@@ -1329,7 +1342,16 @@ void TTrackCompModule::FillHistograms() {
 
 	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,tp->fDioWt);                                       // DIO
 
-	  if (tp->fEcl > 0) FillTrackHistograms(fHist.fTrack[ihist+95+tp->fDiskID],trk,tp);
+//-----------------------------------------------------------------------------
+// debugging mu-
+//-----------------------------------------------------------------------------
+	  if (tp->fDrDzCal < 0 ) FillTrackHistograms(fHist.fTrack[ihist+200+ 1            ],trk,tp);
+	  else                   FillTrackHistograms(fHist.fTrack[ihist+200+ 2            ],trk,tp);
+
+	  if (tp->fEcl     > 0 ) FillTrackHistograms(fHist.fTrack[ihist+200+ 5+tp->fDiskID],trk,tp);
+
+	  if (tp->fDt      < -4) FillTrackHistograms(fHist.fTrack[ihist+200+ 7            ],trk,tp);
+	  else                   FillTrackHistograms(fHist.fTrack[ihist+200+ 8            ],trk,tp);
 	}
       }
     }
@@ -1477,6 +1499,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
     tp->fEcl       = -1.e6;
     tp->fDiskID    = -1;
     tp->fEp        = -1.e6;
+    tp->fDrDzCal   = -1.e6;
     tp->fDtClZ0    = -1.e6;
 
     tp->fDu        = -1.e6;
@@ -1498,6 +1521,7 @@ int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  ,
       tp->fDiskID = vr->fID;
       tp->fEcl    = vr->fEnergy;
       tp->fEp     = tp->fEcl/track->fP2;
+      tp->fDrDzCal = (vr->fXTrk*vr->fNxTrk+vr->fYTrk+vr->fNyTrk)/sqrt(vr->fXTrk*vr->fXTrk+vr->fYTrk*vr->fYTrk)/vr->fNzTrk;
 
       tp->fDx     = vr->fDx;
       tp->fDy     = vr->fDy;

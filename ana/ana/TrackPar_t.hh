@@ -36,6 +36,7 @@ public:
 
   double  fEcl;
   double  fEp;
+  double  fDrDzCal;			// dr/dz at the calorimeter intersection point
   double  fDtClZ0;
   double  fEDiskP;
   double  fECalP;
@@ -43,7 +44,7 @@ public:
   double  fDy;
   double  fDz;
   double  fDt;
-  double  fDu;			// rotated residuals
+  double  fDu;		         	// rotated residuals
   double  fDv;
   double  fChi2Tcm;
   double  fChi2XY;
@@ -57,5 +58,6 @@ public:
   double  fLogLHDedm;			// downstram electron (DE) vs downstream muon (DM)
 
   double  fTMean;			// mean time over the track hits
+
 };
 #endif

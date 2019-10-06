@@ -144,6 +144,7 @@ public:
     TH1F*    fECl;
     TH1F*    fEClEKin;
     TH1F*    fEp;
+    TH1F*    fDrDzCal;
     TH1F*    fDtClZ0;                   // T(cluster back at Z0)-T_true(Z0)
     TH2F*    fDtClZ0VsECl;              // 
     TH2F*    fDtClZ0VsP;              // 
@@ -157,6 +158,7 @@ public:
   struct DTrackHist_t : public HistBase_t {
     TH1F*    fDp;			// difference between the track momenta
     TH1F*    fRMomErr10;
+    TH1F*    fDT0;                      // shift in T0 
   };
 //-----------------------------------------------------------------------------
 //  fTrackHist[  0]: all tracks

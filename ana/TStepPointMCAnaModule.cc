@@ -93,7 +93,8 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
   HBook1F(hist->fEDepNio        ,"edep_nio",Form("%s: EDEP NIO"        ,Folder), 200,   0,   10 ,Folder);
   HBook1F(hist->fTime           ,"time"    ,Form("%s: Time"            ,Folder), 200,   0,  2000,Folder);
   HBook1F(hist->fStepLength     ,"step"    ,Form("%s: Ltep Length"     ,Folder), 200,   0,   100,Folder);
-  HBook1F(hist->fMomentum       ,"mom"     ,Form("%s: Momentum"        ,Folder), 500,   0,   250,Folder);
+  HBook1F(hist->fMomentum[0]    ,"mom"     ,Form("%s: Momentum[0]"     ,Folder), 500,   0,   250,Folder);
+  HBook1F(hist->fMomentum[1]    ,"mom_1"   ,Form("%s: Momentum[1]"     ,Folder), 500,   0,  5000,Folder);
   HBook1F(hist->fEKin           ,"ekin"    ,Form("%s: kinetic energy"  ,Folder), 400,   0,   100,Folder);
 
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
@@ -184,6 +185,11 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_spmc_histset[9] = 1;		// everything else
 
   book_spmc_histset[10]  = 1;		// SPMC with T < 100 ns
+
+  book_spmc_histset[20] = 1;		// protons
+  book_spmc_histset[21] = 1;		// antiprotons
+  book_spmc_histset[22] = 1;		// antiprotons p > 100 MeV/c
+
 
   book_spmc_histset[101] = 1;		// electrons with P > 60 MeV/c
   book_spmc_histset[102] = 1;		// electrons with T > 400 ns
@@ -315,6 +321,42 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[698] = 1;		// p>50 MeV/c mu- , VDET=98
   book_vdet_histset[699] = 1;		// p>50 MeV/c mu- , VDET=99
 
+  book_vdet_histset[1001] = 1;		// pi- , VDET=1: Coll1_In
+  book_vdet_histset[1002] = 1;		// pi- , VDET=2: Coll1_Out
+  book_vdet_histset[1003] = 1;		// pi- , VDET=3: Coll31_In
+  book_vdet_histset[1004] = 1;		// pi- , VDET=4: Coll31_Out
+  book_vdet_histset[1005] = 1;		// pi- , VDET=5: Coll32_In 
+  book_vdet_histset[1006] = 1;		// pi- , VDET=6: Coll32_Out
+  book_vdet_histset[1007] = 1;		// pi- , VDET=7: Coll5_In
+  book_vdet_histset[1008] = 1;		// pi- , VDET=8: Coll5_Out
+  book_vdet_histset[1009] = 1;		// pi- , VDET=9: ST_In
+  book_vdet_histset[1098] = 1;		// pi- , VDET=98
+  book_vdet_histset[1099] = 1;		// pi- , VDET=99
+
+  book_vdet_histset[1101] = 1;		// pi+ , VDET=1: Coll1_In
+  book_vdet_histset[1102] = 1;		// pi+ , VDET=2: Coll1_Out
+  book_vdet_histset[1103] = 1;		// pi+ , VDET=3: Coll31_In
+  book_vdet_histset[1104] = 1;		// pi+ , VDET=4: Coll31_Out
+  book_vdet_histset[1105] = 1;		// pi+ , VDET=5: Coll32_In 
+  book_vdet_histset[1106] = 1;		// pi+ , VDET=6: Coll32_Out
+  book_vdet_histset[1107] = 1;		// pi+ , VDET=7: Coll5_In
+  book_vdet_histset[1108] = 1;		// pi+ , VDET=8: Coll5_Out
+  book_vdet_histset[1109] = 1;		// pi+ , VDET=9: ST_In
+  book_vdet_histset[1198] = 1;		// pi+ , VDET=98
+  book_vdet_histset[1199] = 1;		// pi+ , VDET=99
+
+  book_vdet_histset[2001] = 1;		// pbars , VDET=1: Coll1_In
+  book_vdet_histset[2002] = 1;		// pbars , VDET=2: Coll1_Out
+  book_vdet_histset[2003] = 1;		// pbars , VDET=3: Coll31_In
+  book_vdet_histset[2004] = 1;		// pbars , VDET=4: Coll31_Out
+  book_vdet_histset[2005] = 1;		// pbars , VDET=5: Coll32_In 
+  book_vdet_histset[2006] = 1;		// pbars , VDET=6: Coll32_Out
+  book_vdet_histset[2007] = 1;		// pbars , VDET=7: Coll5_In
+  book_vdet_histset[2008] = 1;		// pbars , VDET=8: Coll5_Out
+  book_vdet_histset[2009] = 1;		// pbars , VDET=9: ST_In
+  book_vdet_histset[2098] = 1;		// pbars , VDET=98
+  book_vdet_histset[2099] = 1;		// pbars , VDET=99
+
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
       sprintf(folder_name,"vdet_%i",i);
@@ -363,8 +405,8 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
   hist->fStepLength->Fill(Step->StepLength());
 
   double p = Step->Mom()->Mag();
-  hist->fMomentum->Fill(p);
-
+  hist->fMomentum[0]->Fill(p);
+  hist->fMomentum[1]->Fill(p);
   
   double m(0);
   if (SpmcData->fParticle) {
@@ -501,10 +543,10 @@ void TStepPointMCAnaModule::FillHistograms() {
 
   int nsteps = fStepPointMCBlock->NStepPoints();
   for (int i=0; i<nsteps; i++) {
-    spmc         = fStepPointMCBlock->StepPointMC(i);
-    float p      = spmc->Mom()->Mag();
-    float t      = spmc->Time();
-    int pdg_code = spmc->PDGCode();
+    spmc             = fStepPointMCBlock->StepPointMC(i);
+    float p          = spmc->Mom()->Mag();
+    float t          = spmc->Time();
+    int pdg_code     = spmc->PDGCode();
     int abs_pdg_code = abs(pdg_code);
 //-----------------------------------------------------------------------------
 // particles of interest are electrons, pions, muons and photons,
@@ -538,15 +580,21 @@ void TStepPointMCAnaModule::FillHistograms() {
 // mu-
 //-----------------------------------------------------------------------------
       FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc,&spmc_data);
-      if   (p <  50)            FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,&spmc_data);
-      else                      FillStepPointMCHistograms(fHist.fStepPointMC[302],spmc,&spmc_data);
+      if   (p <  50)                FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,&spmc_data);
+      else                          FillStepPointMCHistograms(fHist.fStepPointMC[302],spmc,&spmc_data);
     }
-    else if (pdg_code     ==  -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,&spmc_data);
-    else if (pdg_code     ==   22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,&spmc_data);
-    else if (pdg_code     == -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,&spmc_data);
-    else if (pdg_code     ==  211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,&spmc_data);
-    else if (abs_pdg_code == 2212) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc,&spmc_data);  // protons+pbars
-    else                           FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc,&spmc_data);  // everything else
+    else if (pdg_code     ==   -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,&spmc_data);
+    else if (pdg_code     ==    22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,&spmc_data);
+    else if (pdg_code     ==  -211) FillStepPointMCHistograms(fHist.fStepPointMC[6],spmc,&spmc_data);
+    else if (pdg_code     ==   211) FillStepPointMCHistograms(fHist.fStepPointMC[7],spmc,&spmc_data);
+    else if (abs_pdg_code ==  2212) FillStepPointMCHistograms(fHist.fStepPointMC[8],spmc,&spmc_data);  // protons+pbars
+    else                            FillStepPointMCHistograms(fHist.fStepPointMC[9],spmc,&spmc_data);  // everything else
+
+    if (pdg_code          ==  2212) FillStepPointMCHistograms(fHist.fStepPointMC[20],spmc,&spmc_data); // protons
+    if (pdg_code          == -2212) {
+      FillStepPointMCHistograms(fHist.fStepPointMC[21],spmc,&spmc_data);                               // pbars
+      if (p > 100) FillStepPointMCHistograms(fHist.fStepPointMC[22],spmc,&spmc_data);                  // pbars p > 100 MeV/c
+    }
 
     if (spmc->Time()      <   100) {
       FillStepPointMCHistograms(fHist.fStepPointMC[10],spmc,&spmc_data);
@@ -663,6 +711,54 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[409],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step);
+    }
+//-----------------------------------------------------------------------------
+// negative pions
+//-----------------------------------------------------------------------------
+    if (step->PDGCode() == -211) {
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1001],step);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1002],step);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1003],step);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1004],step);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1005],step);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1006],step);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1007],step);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1008],step);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1009],step);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1098],step);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1099],step);
+    }
+//-----------------------------------------------------------------------------
+// positive pions
+//-----------------------------------------------------------------------------
+    if (step->PDGCode() ==  211) {
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1101],step);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1102],step);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1103],step);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1104],step);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1105],step);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1106],step);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1107],step);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1108],step);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1109],step);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1198],step);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1199],step);
+    }
+//-----------------------------------------------------------------------------
+// pbars
+//-----------------------------------------------------------------------------
+    if (step->PDGCode() == -2212) {
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2001],step);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2002],step);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2003],step);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2004],step);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2005],step);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2006],step);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2007],step);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2008],step);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2009],step);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step);
     }
   }
 }

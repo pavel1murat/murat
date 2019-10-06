@@ -2,6 +2,7 @@
 // 2017-05-24: analyse STNTUPLE produced by running on the output of Stage3 simulation
 //             (output stream selected by tgtStopFilter)
 // stopped muon is the last TSimParticle, its momentum in the end should be equal to zero
+// 2019-10-04: old versions had "VDetBlock" named "VdetBlock"
 // 
 // use of tmp:
 //
@@ -16,6 +17,7 @@
 // 3  : events with P(muon gp) > 8000
 // 4  : events with electron or muon gparent=NULL
 // 5  : events with electron or muon grandparent PDG code > 2500
+// 6  : events with fSimp->EndPos()->Time > 900
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -41,6 +43,7 @@ ClassImp(TMuonStopAnaModule)
 TMuonStopAnaModule::TMuonStopAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
+  fVDetBlockName = "VDetBlock";
 }
 
 //-----------------------------------------------------------------------------
@@ -131,6 +134,7 @@ void TMuonStopAnaModule::BookHistograms() {
 
   book_simp_histset[  0] = 1;		// all stopped muons
   book_simp_histset[  1] = 1;		// stopped muons p < 50 MeV/c
+  book_simp_histset[  2] = 1;		// muons stopped in TS5
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -164,6 +168,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[307] = 1;		// all mu- , VDET= 7: Coll5_In
   book_vdet_histset[308] = 1;		// all mu- , VDET= 8: Coll5_Out
   book_vdet_histset[309] = 1;		// all mu- , VDET= 9: ST_In
+  book_vdet_histset[310] = 1;		// all mu- , VDET=10: ST_Out
   book_vdet_histset[398] = 1;		// all mu- , VDET=98: mid-section TSu
   book_vdet_histset[399] = 1;		// all mu- , VDET=99: mid-section TSd
 
@@ -176,6 +181,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[407] = 1;		// mu+ , VDET= 7: Coll5_In
   book_vdet_histset[408] = 1;		// mu+ , VDET= 8: Coll5_Out
   book_vdet_histset[409] = 1;		// mu+ , VDET= 9: ST_In
+  book_vdet_histset[410] = 1;		// mu+ , VDET=10: ST_Out
   book_vdet_histset[498] = 1;		// mu+ , VDET=98: mid-section TSu
   book_vdet_histset[499] = 1;		// mu+ , VDET=99: mid-section TSd
 
@@ -188,6 +194,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[507] = 1;		// p<50 MeV/c mu- , VDET= 7: Coll5_In
   book_vdet_histset[508] = 1;		// p<50 MeV/c mu- , VDET= 8: Coll5_Out
   book_vdet_histset[509] = 1;		// p<50 MeV/c mu- , VDET= 9: ST_In
+  book_vdet_histset[510] = 1;		// p<50 MeV/c mu- , VDET=10: ST_Out
   book_vdet_histset[598] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
   book_vdet_histset[599] = 1;		// p<50 MeV/c mu- , VDET=99: mid-section TSd
 
@@ -200,6 +207,7 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[607] = 1;		// p>50 MeV/c mu- , VDET= 7: Coll5_In
   book_vdet_histset[608] = 1;		// p>50 MeV/c mu- , VDET= 8: Coll5_Out
   book_vdet_histset[609] = 1;		// p>50 MeV/c mu- , VDET= 9: ST_In
+  book_vdet_histset[610] = 1;		// p>50 MeV/c mu- , VDET=10: ST_Out
   book_vdet_histset[698] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
   book_vdet_histset[699] = 1;		// p<50 MeV/c mu- , VDET=99: mid-section TSd
 
@@ -331,6 +339,12 @@ void TMuonStopAnaModule::FillHistograms() {
   FillSimpHistograms(fHist.fSimp[0],fMuon,sd);
   float pmu = fMuon->StartMom()->P();
   if (pmu < 50) FillSimpHistograms(fHist.fSimp[1],fMuon,sd);
+
+//-----------------------------------------------------------------------------
+// SIMP[2]: muons stopped in TS5
+//-----------------------------------------------------------------------------
+  float ze = fMuon->EndPos()->Z();
+  if (ze < 5000.) FillSimpHistograms(fHist.fSimp[2],fMuon,sd);
 //-----------------------------------------------------------------------------
 // VDET histograms
 //-----------------------------------------------------------------------------
@@ -365,6 +379,7 @@ void TMuonStopAnaModule::FillHistograms() {
       if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[307],step);
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[308],step);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[309],step);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[310],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[398],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[399],step);
 
@@ -379,6 +394,7 @@ void TMuonStopAnaModule::FillHistograms() {
 	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[507],step);
 	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[508],step);
 	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[509],step);
+	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[410],step);
 	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[598],step);
 	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[599],step);
       }
@@ -392,6 +408,7 @@ void TMuonStopAnaModule::FillHistograms() {
 	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[607],step);
 	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[608],step);
 	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[609],step);
+	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[610],step);
 	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[698],step);
 	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[699],step);
       }
@@ -406,6 +423,7 @@ void TMuonStopAnaModule::FillHistograms() {
       if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[407],step);
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[408],step);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[409],step);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[410],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step);
     }
@@ -421,7 +439,7 @@ int TMuonStopAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 //  RegisterDataBlock("SpmcBlock","TStepPointMCBlock",&fStepPointMCBlock);
   RegisterDataBlock("SimpBlock","TSimpBlock"   ,&fSimpBlock       );
-  RegisterDataBlock("VdetBlock","TSpmcBlock"   ,&fVDetBlock       );
+  RegisterDataBlock(fVDetBlockName.Data(),"TSpmcBlock"   ,&fVDetBlock       );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -513,6 +531,12 @@ void TMuonStopAnaModule::Debug() {
   // if (GetDebugBit(4) == 1) {
   //   GetHeaderBlock()->Print(Form("NHits(TF) = %5i",fNGenp));
   // }
+
+  if (GetDebugBit(6) == 1) {
+    if (fMuon->EndPos()->T() > 900) {
+      GetHeaderBlock()->Print(Form("muon time = %12.5f",fMuon->EndPos()->T()));
+    }
+  }
 }
 
 //_____________________________________________________________________________

@@ -22,7 +22,7 @@ def_name genp_012("coll1_dose_ana");
 //-----------------------------------------------------------------------------
 void  spmc_ana(int Stage = 1, int DebugBit = -1) {
   m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
-  if (Stage == 3) m_spmc->SetSpmcBlockName("VDetBlock");
+  if (Stage == 3) m_spmc->SetVDetBlockName("VDetBlock");
   if (Stage == 2) m_spmc->SetVDetBlockName("VDetBlock");
 
   if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
@@ -33,7 +33,7 @@ void  spmc_ana(int Stage = 1, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 void  spmc_ana_old(int Stage = 1, int DebugBit = -1) {
   m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
-  if (Stage == 3) m_spmc->SetSpmcBlockName("VdetBlock");
+  if (Stage == 3) m_spmc->SetVDetBlockName("VdetBlock");
   if (Stage == 2) m_spmc->SetVDetBlockName("VdetBlock");
 
   if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
@@ -54,8 +54,9 @@ void  bflash_ana_vdet(int Stage = 1, int DebugBit = -1) {
   if (DebugBit >= 0) m_bfl->SetDebugBit(DebugBit,1);
 }
 
-void  mustop_ana(int DebugBit = -1) {
-  m_must = (TMuonStopAnaModule*) g.x->AddModule("TMuonStopAnaModule",0);  
+void  mustop_ana(const char* VDetBlockName = "VDetBlock", int DebugBit = -1) {
+  m_must = (TMuonStopAnaModule*) g.x->AddModule("TMuonStopAnaModule",0);
+  m_must->SetVDetBlockName(VDetBlockName);
   if (DebugBit >= 0) m_must->SetDebugBit(DebugBit,1);
 }
 

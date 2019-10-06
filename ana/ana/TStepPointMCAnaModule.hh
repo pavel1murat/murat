@@ -65,7 +65,7 @@ public:
     TH1F*      fTime;
     TH1F*      fStepLength;
 
-    TH1F*      fMomentum;
+    TH1F*      fMomentum[2];
     TH1F*      fEKin;
 
     TH2F*      fYVsZ;
@@ -99,7 +99,7 @@ public:
   enum { kNEventHistSets        =   100 };
   enum { kNStepPointMCHistSets  = 10000 };
   enum { kNSimpHistSets         =  1000 };
-  enum { kNVDetHistSets         =  1000 };
+  enum { kNVDetHistSets         = 10000 };
 
   struct Hist_t {
     EventHist_t*        fEvent      [kNEventHistSets      ];

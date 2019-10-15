@@ -10,8 +10,10 @@
 // 2  : rejected events
 // 
 // 3  : events with SPMC T<100
-// 4  : events with NHitsTF > 1
-// 5  : UNUSED
+// 4  : events with pbars ID=300000+I, X> 25cm
+// 5  : events with pbars ID=400000+I
+// 6  : events with pbars reaching the final stage
+// 7  : events with pbars P > 100 MeV/c reaching the final stage
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -40,7 +42,7 @@ TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title
   // fPdgCode       = 11;
   // fGeneratorCode = 28;
   fSpmcBlockName = "SpmcBlock";
-  fVDetBlockName = "VdetBlock";
+  fVDetBlockName = "VDetBlock";
 
   fPdgDb = TDatabasePDG::Instance();
 
@@ -53,8 +55,12 @@ TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title
   SetParticleCache(   22,fPdgDb->GetParticle(   22)); // photon
   SetParticleCache(  211,fPdgDb->GetParticle(  211)); // pi^-
   SetParticleCache( -211,fPdgDb->GetParticle( -211)); // pi^-
+  SetParticleCache( 2112,fPdgDb->GetParticle( 2112)); // neutron
   SetParticleCache( 2212,fPdgDb->GetParticle( 2212)); // proton
   SetParticleCache(-2212,fPdgDb->GetParticle(-2212)); // pbar
+
+  fStageID = 400000;
+
 }
 
 //-----------------------------------------------------------------------------
@@ -70,6 +76,7 @@ void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Fo
 
   HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number",Folder), 1000, 0,  1.e4,Folder);
   HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number",Folder), 1000, 0,  1.e6,Folder);
+  HBook1F(hist->fNSimp      ,"nsimp" ,Form("%s: N(sim particles)",Folder), 200, 0,  200,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -93,8 +100,11 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
   HBook1F(hist->fEDepNio        ,"edep_nio",Form("%s: EDEP NIO"        ,Folder), 200,   0,   10 ,Folder);
   HBook1F(hist->fTime           ,"time"    ,Form("%s: Time"            ,Folder), 200,   0,  2000,Folder);
   HBook1F(hist->fStepLength     ,"step"    ,Form("%s: Ltep Length"     ,Folder), 200,   0,   100,Folder);
-  HBook1F(hist->fMomentum[0]    ,"mom"     ,Form("%s: Momentum[0]"     ,Folder), 500,   0,   250,Folder);
-  HBook1F(hist->fMomentum[1]    ,"mom_1"   ,Form("%s: Momentum[1]"     ,Folder), 500,   0,  5000,Folder);
+  HBook1F(hist->fMom[0]         ,"mom"     ,Form("%s: Momentum[0]"     ,Folder), 500,   0,   500,Folder);
+  HBook1F(hist->fMom[1]         ,"mom_1"   ,Form("%s: Momentum[1]"     ,Folder), 500,   0,  5000,Folder);
+
+  HBook2F(hist->fCosThVsMom     ,"cth_vs_mom",Form("%s: Cos(Th) vs Mom",Folder), 250,   0,  5000,100,-1,1,Folder);
+
   HBook1F(hist->fEKin           ,"ekin"    ,Form("%s: kinetic energy"  ,Folder), 400,   0,   100,Folder);
 
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
@@ -111,11 +121,14 @@ void TStepPointMCAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Fol
   HBook1F(hist->fParentMom  ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
   HBook1F(hist->fParentPDG  ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
 
-  HBook1F(hist->fStartMom   ,"mom"        ,Form("%s: start Mom"     ,Folder), 200,     0, 1000,Folder);
+  HBook1F(hist->fStartMom[0],"mom"        ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
+  HBook1F(hist->fStartMom[1],"mom_1"      ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
   HBook2F(hist->fYVsX       ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fXEndVsZEnd ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
   HBook2F(hist->fYVsX_2480  ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYVsX_2513  ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+
+  HBook2F(hist->fCosThVsMom ,"cth_vs_mom",Form("%s: Cos(Th) vs Mom",Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -126,7 +139,8 @@ void TStepPointMCAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Fol
   HBook1F(hist->fIndex   ,"index"   ,Form("%s: VD index"      ,Folder),1000, 0, 1000,Folder);
   HBook1F(hist->fPDGCode ,"pdg_code",Form("%s: PDG code"      ,Folder),2000,-1000, 1000,Folder);
   HBook1F(hist->fGenCode ,"gen_code",Form("%s: generator code",Folder), 100, -10, 90,Folder);
-  HBook1F(hist->fMomentum,"mom"     ,Form("%s: Momentum"      ,Folder), 200, 0, 200,Folder);
+  HBook1F(hist->fMom[0]  ,"mom"  ,Form("%s: Momentum[0]"   ,Folder), 500, 0, 500,Folder);
+  HBook1F(hist->fMom[1]  ,"mom_1",Form("%s: Momentum[1]"   ,Folder), 500, 0,5000,Folder);
   HBook1F(hist->fTime    ,"time"    ,Form("%s: Hit Time  "    ,Folder), 200, 0,2000,Folder);
   HBook2F(hist->fYVsX    ,"y_vs_x"  ,Form("%s: Y vs X (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYVsZ    ,"y_vs_z"  ,Form("%s: Y vs Z (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
@@ -135,6 +149,7 @@ void TStepPointMCAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Fol
   HBook1F(hist->fTanTh   ,"tan_th"  ,Form("%s: tan(pitch ang)",Folder), 500, -1, 4,Folder);
   HBook1F(hist->fEKin    ,"ekin"    ,Form("%s: kinetic energy",Folder), 400,  0, 100,Folder);
 
+  HBook2F(hist->fCosThVsMom,"cth_vs_mom",Form("%s: Cos(Th) vs Mom",Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -205,10 +220,12 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_spmc_histset[302] = 1;           // mu- p > 50 MeV/c
 
   book_spmc_histset[ 900] = 1;		// all particles , VD=9
-  book_spmc_histset[ 913] = 1;		// mu- in VD=9
+  book_spmc_histset[ 913] = 1;		// mu-   in VD=9
+  book_spmc_histset[ 921] = 1;		// pbars in VD=9
 
   book_spmc_histset[9100] = 1;		// all particles , VD=91
   book_spmc_histset[9113] = 1;		// mu- in VD=91
+  book_spmc_histset[9121] = 1;		// pbars in VD=91
 
   for (int i=0; i<kNStepPointMCHistSets; i++) {
     if (book_spmc_histset[i] != 0) {
@@ -225,8 +242,43 @@ void TStepPointMCAnaModule::BookHistograms() {
   int book_simp_histset[kNSimpHistSets];
   for (int i=0; i<kNSimpHistSets; i++) book_simp_histset[i] = 0;
 
-  book_simp_histset[  0] = 0;		// all stopped muons
-  book_simp_histset[  1] = 0;		// stopped muons p < 50 MeV/c
+  book_simp_histset[  0] = 1;		// all particles 0+ID
+  book_simp_histset[  3] = 1;		// mu-
+  book_simp_histset[  4] = 1;		// mu+
+  book_simp_histset[  5] = 1;		// pi-
+  book_simp_histset[ 21] = 1;		// pbars
+
+  book_simp_histset[100] = 1;		// stage 0
+  book_simp_histset[103] = 1;		// mu-
+  book_simp_histset[104] = 1;		// mu+
+  book_simp_histset[105] = 1;		// pi-
+  book_simp_histset[121] = 1;		// pbars
+
+  book_simp_histset[200] = 1;		// stage 1
+  book_simp_histset[203] = 1;		// mu-
+  book_simp_histset[204] = 1;		// mu+
+  book_simp_histset[205] = 1;		// pi-
+  book_simp_histset[221] = 1;		// pbars
+
+  book_simp_histset[300] = 1;		// stage 2
+  book_simp_histset[303] = 1;		// mu-
+  book_simp_histset[304] = 1;		// mu+
+  book_simp_histset[305] = 1;		// pi-
+  book_simp_histset[321] = 1;		// pbars
+
+  book_simp_histset[400] = 1;		// stage 3
+  book_simp_histset[403] = 1;		// mu-
+  book_simp_histset[404] = 1;		// mu+
+  book_simp_histset[405] = 1;		// pi-
+  book_simp_histset[421] = 1;		// pbars
+
+  book_simp_histset[500] = 1;		// stage 4
+  book_simp_histset[503] = 1;		// mu-
+  book_simp_histset[504] = 1;		// mu+
+  book_simp_histset[505] = 1;		// pi-
+  book_simp_histset[521] = 1;		// pbars
+
+  book_simp_histset[1021] = 1;		// pbar in the production vertex
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -354,8 +406,24 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[2007] = 1;		// pbars , VDET=7: Coll5_In
   book_vdet_histset[2008] = 1;		// pbars , VDET=8: Coll5_Out
   book_vdet_histset[2009] = 1;		// pbars , VDET=9: ST_In
+  book_vdet_histset[2091] = 1;		// pbars , VDET=91: before pbar window
+  book_vdet_histset[2092] = 1;		// pbars , VDET=92: after pbar window
   book_vdet_histset[2098] = 1;		// pbars , VDET=98
   book_vdet_histset[2099] = 1;		// pbars , VDET=99
+
+  book_vdet_histset[3001] = 1;		// pbars reaching the end, VDET=1: Coll1_In
+  book_vdet_histset[3002] = 1;		// pbars reaching the end, VDET=2: Coll1_Out
+  book_vdet_histset[3003] = 1;		// pbars reaching the end, VDET=3: Coll31_In
+  book_vdet_histset[3004] = 1;		// pbars reaching the end, VDET=4: Coll31_Out
+  book_vdet_histset[3005] = 1;		// pbars reaching the end, VDET=5: Coll32_In 
+  book_vdet_histset[3006] = 1;		// pbars reaching the end, VDET=6: Coll32_Out
+  book_vdet_histset[3007] = 1;		// pbars reaching the end, VDET=7: Coll5_In
+  book_vdet_histset[3008] = 1;		// pbars reaching the end, VDET=8: Coll5_Out
+  book_vdet_histset[3009] = 1;		// pbars reaching the end, VDET=9: ST_In
+  book_vdet_histset[3091] = 1;		// pbars reaching the end, VDET=91: before pbar window
+  book_vdet_histset[3092] = 1;		// pbars reaching the end, VDET=92: after pbar window
+  book_vdet_histset[3098] = 1;		// pbars reaching the end, VDET=98
+  book_vdet_histset[3099] = 1;		// pbars reaching the end, VDET=99
 
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
@@ -380,8 +448,9 @@ void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
 
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
-
+  hist->fNSimp->Fill(fNSimp);
 }
+
 //-----------------------------------------------------------------------------
 void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData) {
 
@@ -389,7 +458,11 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
   
   int pdg_code = Step->PDGCode();
 
-  hist->fVolumeID->Fill(Step->VolumeID());
+  int id = (Step->VolumeID());
+
+  VDetData_t* vdd = fVDet+id;
+
+  hist->fVolumeID->Fill(id);
   hist->fGenIndex->Fill(Step->GenIndex());
   hist->fSimID   ->Fill(Step->SimID());
   hist->fPDGCode[0] ->Fill(pdg_code);
@@ -405,8 +478,8 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
   hist->fStepLength->Fill(Step->StepLength());
 
   double p = Step->Mom()->Mag();
-  hist->fMomentum[0]->Fill(p);
-  hist->fMomentum[1]->Fill(p);
+  hist->fMom[0]->Fill(p);
+  hist->fMom[1]->Fill(p);
   
   double m(0);
   if (SpmcData->fParticle) {
@@ -426,6 +499,19 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
 
   hist->fYVsX->Fill(x,y);		// useful for stage 2
   hist->fYVsZ->Fill(z,y);		// useful for stage 1
+
+  //  float py = Step->Mom()->Py();
+
+  float pp;
+  if (vdd->fIZLocal == 3) {
+    pp = Step->Mom()->Pz();
+  }
+  else {
+    pp = -Step->Mom()->Px();
+  }
+
+  float cos_th = pp/p;
+  hist->fCosThVsMom->Fill(p,cos_th);
 }
 
 //-----------------------------------------------------------------------------
@@ -446,12 +532,18 @@ void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* S
   // hist->fParentMom->Fill(fParent->StartMom()->P());
   // hist->fParentPDG->Fill(fParent->PDGCode());
 
-  hist->fStartMom->Fill(Simp->StartMom()->P());
+  float p = Simp->StartMom()->P();
+  hist->fStartMom[0]->Fill(p);
+  hist->fStartMom[1]->Fill(p);
+
   hist->fYVsX->Fill(xe,ye);
   hist->fXEndVsZEnd->Fill(ze,xe);
 
   if (Simp->fEndVolumeIndex == 2480) hist->fYVsX_2480->Fill(xe,ye);
   if (Simp->fEndVolumeIndex == 2513) hist->fYVsX_2513->Fill(xe,ye);
+
+  float cos_th = Simp->StartMom()->Pz()/p;
+  hist->fCosThVsMom->Fill(p,cos_th);
 }
 
 //-----------------------------------------------------------------------------
@@ -466,7 +558,11 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fIndex   ->Fill(id);
   hist->fPDGCode ->Fill(Step->PDGCode());
   hist->fGenCode ->Fill(Step->GenIndex());
-  hist->fMomentum->Fill(Step->Mom()->Mag());
+
+  float p = Step->Mom()->Mag();
+  hist->fMom[0]->Fill(p);
+  hist->fMom[1]->Fill(p);
+
   hist->fTime    ->Fill(Step->Time());
 
   // calculate local X and local Z
@@ -499,6 +595,9 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fPt->Fill(pt);
   hist->fPp->Fill(pp);
   hist->fTanTh->Fill(pt/pp);
+
+  float cos_th = pp/p;
+  hist->fCosThVsMom->Fill(p,cos_th);
 }
 
 //-----------------------------------------------------------------------------
@@ -535,6 +634,59 @@ void TStepPointMCAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
 //-----------------------------------------------------------------------------
+// SIM_PARTICLE histograms
+//-----------------------------------------------------------------------------
+  SimpData_t* sd = nullptr;  // temp
+
+  for (int i=0; i<fNSimp; i++) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code = simp->PDGCode();
+    int simp_id  = simp->GetUniqueID();
+
+    FillSimpHistograms(fHist.fSimp[  0],simp,sd);
+    if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[  3],simp,sd);
+    if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[  4],simp,sd);
+    if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[  5],simp,sd);
+    if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[ 21],simp,sd);
+
+    if      (simp_id < 100000) {
+      FillSimpHistograms(fHist.fSimp[100],simp,sd);
+      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[103],simp,sd);
+      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[104],simp,sd);
+      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[105],simp,sd);
+      if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[121],simp,sd);
+    }
+    else if (simp_id < 200000) {
+      FillSimpHistograms(fHist.fSimp[200],simp,sd);
+      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[203],simp,sd);
+      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[204],simp,sd);
+      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[205],simp,sd);
+      if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[221],simp,sd);
+    }
+    else if (simp_id < 300000) {
+      FillSimpHistograms(fHist.fSimp[300],simp,sd);
+      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[303],simp,sd);
+      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[304],simp,sd);
+      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[305],simp,sd);
+      if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[321],simp,sd);
+    }
+    else if (simp_id < 400000) {
+      FillSimpHistograms(fHist.fSimp[400],simp,sd);
+      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[403],simp,sd);
+      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[404],simp,sd);
+      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[405],simp,sd);
+      if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[421],simp,sd);
+    }
+    else if (simp_id < 500000) {
+      FillSimpHistograms(fHist.fSimp[500],simp,sd);
+      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[503],simp,sd);
+      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[504],simp,sd);
+      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[505],simp,sd);
+      if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[521],simp,sd);
+    }
+  }
+
+//-----------------------------------------------------------------------------
 // StepPointMC histograms
 // for beamline studies, there is only one 
 //-----------------------------------------------------------------------------
@@ -556,7 +708,7 @@ void TStepPointMCAnaModule::FillHistograms() {
     else                     spmc_data.fParticle = NULL;
 
     if (spmc_data.fParticle == NULL) {
-      if (GetDebugBit(3) == 0) printf(">>> WARNING: no particle with PDF code=%i in ROOT particle DB\n",pdg_code);
+      if (GetDebugBit(3) == 0) printf(">>> WARNING: no particle with PDF code=%i cached from ROOT particle DB\n",pdg_code);
     }
 
     FillStepPointMCHistograms(fHist.fStepPointMC[0],spmc,&spmc_data);
@@ -592,10 +744,55 @@ void TStepPointMCAnaModule::FillHistograms() {
 
     if (pdg_code          ==  2212) FillStepPointMCHistograms(fHist.fStepPointMC[20],spmc,&spmc_data); // protons
     if (pdg_code          == -2212) {
+//-----------------------------------------------------------------------------
+// Antiproton
+//-----------------------------------------------------------------------------
+      int simp_id = spmc->SimID();
+      TSimParticle* simp (nullptr);
+      while (simp_id > 0) {
+	 simp = fSimpBlock->FindParticle(simp_id);
+	 simp_id = simp->ParentID();
+      }
+
+      if (simp) FillSimpHistograms(fHist.fSimp[1021],simp,sd);
+      else {
+	printf(" Error in TStepPointMCAnaModule: parentless particle\n");
+      }
+//-----------------------------------------------------------------------------
+// for events with antiproton reached the last plane,  plot antiproton hits in VD91
+//-----------------------------------------------------------------------------
+      int nh = 0;
+      for (int i=0; i<fNVDetHits; i++) {
+	TStepPointMC* step = fVDetBlock->StepPointMC(i);
+	if (step->PDGCode() == -2212) {
+	  if      ((step->SimID() < 100000) && (step->VolumeID() ==  91)) {
+	    FillVDetHistograms(fHist.fVDet[3091],step);
+	    nh++;
+	  }
+	  else if (step->VolumeID() ==  92) FillVDetHistograms(fHist.fVDet[3092],step);
+	  else if (step->VolumeID() ==   1) FillVDetHistograms(fHist.fVDet[3001],step);
+	  else if (step->VolumeID() ==   2) FillVDetHistograms(fHist.fVDet[3002],step);
+	  else if (step->VolumeID() ==   3) FillVDetHistograms(fHist.fVDet[3003],step);
+	  else if (step->VolumeID() ==   4) FillVDetHistograms(fHist.fVDet[3004],step);
+	  else if (step->VolumeID() ==   5) FillVDetHistograms(fHist.fVDet[3005],step);
+	  else if (step->VolumeID() ==   6) FillVDetHistograms(fHist.fVDet[3006],step);
+	  else if (step->VolumeID() ==   7) FillVDetHistograms(fHist.fVDet[3007],step);
+	  else if (step->VolumeID() ==   8) FillVDetHistograms(fHist.fVDet[3008],step);
+	  else if (step->VolumeID() ==   9) FillVDetHistograms(fHist.fVDet[3009],step);
+	  else if (step->VolumeID() ==  98) FillVDetHistograms(fHist.fVDet[3098],step);
+	  else if (step->VolumeID() ==  99) FillVDetHistograms(fHist.fVDet[3099],step);
+	}
+      }
+
+      if (nh == 0) GetHeaderBlock()->Print("<<trouble>> nh = 0");
+
       FillStepPointMCHistograms(fHist.fStepPointMC[21],spmc,&spmc_data);                               // pbars
       if (p > 100) FillStepPointMCHistograms(fHist.fStepPointMC[22],spmc,&spmc_data);                  // pbars p > 100 MeV/c
-    }
 
+    }
+//-----------------------------------------------------------------------------
+// all hits with T < 100 ns
+//-----------------------------------------------------------------------------
     if (spmc->Time()      <   100) {
       FillStepPointMCHistograms(fHist.fStepPointMC[10],spmc,&spmc_data);
       if (GetDebugBit(3)) {
@@ -606,12 +803,14 @@ void TStepPointMCAnaModule::FillHistograms() {
 
     if (spmc->VolumeID() == 9) {
       FillStepPointMCHistograms(fHist.fStepPointMC[900],spmc,&spmc_data);
-      if (pdg_code == 13) FillStepPointMCHistograms(fHist.fStepPointMC[913],spmc,&spmc_data);
+      if (pdg_code ==    13) FillStepPointMCHistograms(fHist.fStepPointMC[913],spmc,&spmc_data);
+      if (pdg_code == -2212) FillStepPointMCHistograms(fHist.fStepPointMC[921],spmc,&spmc_data);
     }
 
     if (spmc->VolumeID() == 91) {
       FillStepPointMCHistograms(fHist.fStepPointMC[9100],spmc,&spmc_data);
-      if (pdg_code == 13) FillStepPointMCHistograms(fHist.fStepPointMC[9113],spmc,&spmc_data);
+      if (pdg_code ==    13) FillStepPointMCHistograms(fHist.fStepPointMC[9113],spmc,&spmc_data);
+      if (pdg_code == -2212) FillStepPointMCHistograms(fHist.fStepPointMC[9121],spmc,&spmc_data);
     }
   }
   
@@ -757,6 +956,8 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2007],step);
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2008],step);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2009],step);
+      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2091],step);
+      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step);
     }
@@ -789,9 +990,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fNVDetHits = fVDetBlock->NStepPoints();
 
-  //  int np     = fSimpBlock->NParticles();
-  fProton    = fSimpBlock->Particle(0);
-//   fMuon      = fSimpBlock->Particle(np-1);
+  fNSimp = fSimpBlock->NParticles();
 
 //   TSimParticle* parent = fMuon;
 // //-----------------------------------------------------------------------------
@@ -820,14 +1019,64 @@ int TStepPointMCAnaModule::Event(int ientry) {
 }
 
 //-----------------------------------------------------------------------------
+// bit 4: pbars with X> 25cm at TS5 in
+// bit 5: pbars ID=400000+I
+// bit 6: pbar in the final state
+// bit 7: pbar P > 100 MeV/c in the final state
+//-----------------------------------------------------------------------------
 void TStepPointMCAnaModule::Debug() {
 
+  for (int i=0; i<fNSimp; i++) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code = simp->PDGCode();
+    int simp_id  = simp->GetUniqueID();
+
+    if (GetDebugBit(4) == 1) {
+      if ((pdg_code == -2212) && (simp_id > 300000) && (simp_id < 400000)) {
+	float xe = simp->EndPos()->X()+3904.;
+	float ye = simp->EndPos()->Y();
+	float ze = simp->EndPos()->Z();
+	float te = simp->EndPos()->T();
+	if (xe > 250) GetHeaderBlock()->Print(Form("bit:4: xe, ye, ze, te = %10.3f %10.3f%10.3f %10.3f",xe,ye,ze,te));
+      }
+    }
+
+    if (GetDebugBit(5) == 1) {
+      if ((pdg_code == -2212) && (simp_id > 400000) && (simp_id < 500000)) {
+	GetHeaderBlock()->Print(Form("bit:5: pbar ID=%10i",simp_id));
+      }
+    }
+  }
 //-----------------------------------------------------------------------------
-// bit 4: events with NHitsTF > 1
+// for all stages except S3, StepPointMC collection represents particles reaching 
+// the "STOP" volume, one hit per particle
 //-----------------------------------------------------------------------------
-  // if (GetDebugBit(4) == 1) {
-  //   GetHeaderBlock()->Print(Form("NHits(TF) = %5i",fNGenp));
-  // }
+  if (GetDebugBit(6) == 1) {
+    int nsteps = fStepPointMCBlock->NStepPoints();
+    for (int i=0; i<nsteps; i++) {
+      TStepPointMC* spmc = fStepPointMCBlock->StepPointMC(i);
+      float p            = spmc->Mom()->Mag();
+      float t            = spmc->Time();
+      int pdg_code       = spmc->PDGCode();
+      
+      if (pdg_code          == -2212) {
+	GetHeaderBlock()->Print(Form("bit:6: pbar in the end, p = %10.3f t= %10.3f",p,t));
+      }
+    }
+  }    
+  if (GetDebugBit(7) == 1) {
+    int nsteps = fStepPointMCBlock->NStepPoints();
+    for (int i=0; i<nsteps; i++) {
+      TStepPointMC* spmc = fStepPointMCBlock->StepPointMC(i);
+      float p            = spmc->Mom()->Mag();
+      float t            = spmc->Time();
+      int pdg_code       = spmc->PDGCode();
+      
+      if ((pdg_code          == -2212) && (p > 100)) {
+	GetHeaderBlock()->Print(Form("bit:7: pbar P > 100 in the end, p = %10.3f t= %10.3f",p,t));
+      }
+    }
+  }    
 }
 
 //_____________________________________________________________________________

@@ -7,7 +7,7 @@
 // NDet is not used so far, make sure dimension of VDet array is >= 10
 ///////////////////////////////////////////////////////////////////////////////
 int InitVirtualDetectors(VDetData_t* VDet, int* NDet) {
-
+//            id ix iz      x         z       bfield    phi
   VDet[ 0] = { 0, 0, 0,     0.00,     0.00,   0.0   ,   0.0 };       // VD0  : unused
   VDet[ 1] = { 1, 1, 3,  3904.00, -4003.99,   2.6654,   0.0 };       // VD1  : upstream   TS1
   VDet[ 2] = { 1, 1, 3,  3904.00, -3004.01,   2.3324,   0.0 };       // VD2  : downstream TS1
@@ -27,6 +27,9 @@ int InitVirtualDetectors(VDetData_t* VDet, int* NDet) {
   for (int i=14; i<98; i++) {
     VDet[i] = {i, 0, 0,     0.0,      0.0,    1.,       0.0 };
   }
+
+  VDet[91] = {91, 1, 3,  3904.00, -4144.28 ,  1.3799,   0.0 };       // VD91 : in front of the first PBAR window
+  VDet[92] = {92, 1, 3,  3904.00, -4144.01 ,  1.3799,   0.0 };       // VD92 : right after the first PBAR window
 
   VDet[98] = {98, 1, 3,  3046.12,  -857.884,  1.3799, -45.0 };       // VD98 : mid-bend TSu
   VDet[99] = {99, 1, 3, -3046.12,   857.884,  1.3799, -45.0 };       // VD10 : mid-bend TSd

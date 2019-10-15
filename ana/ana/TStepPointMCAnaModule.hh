@@ -34,20 +34,22 @@ public:
   struct EventHist_t : public HistBase_t {
     TH1F*      fRunNumber;
     TH1F*      fEventNumber;
+    TH1F*      fNSimp;
   };
 
   struct SimpHist_t : public HistBase_t {
-    TH1F*    fVolumeID;		       //
-    TH1F*    fGeneratorID;
-    TH1F*    fTime;
-    TH1F*    fParentPDG;
-    TH1F*    fParentMom;
-    TH1F*    fStartMom;
+    TH1F*      fVolumeID;		       //
+    TH1F*      fGeneratorID;
+    TH1F*      fTime;
+    TH1F*      fParentPDG;
+    TH1F*      fParentMom;
+    TH1F*      fStartMom[2];
 
-    TH2F*    fYVsX;
-    TH2F*    fXEndVsZEnd;
-    TH2F*    fYVsX_2480;
-    TH2F*    fYVsX_2513;
+    TH2F*      fYVsX;
+    TH2F*      fXEndVsZEnd;
+    TH2F*      fYVsX_2480;
+    TH2F*      fYVsX_2513;
+    TH2F*      fCosThVsMom;
   };
 
   struct StepPointMCHist_t : public HistBase_t {
@@ -65,7 +67,8 @@ public:
     TH1F*      fTime;
     TH1F*      fStepLength;
 
-    TH1F*      fMomentum[2];
+    TH1F*      fMom[2];
+    TH2F*      fCosThVsMom;
     TH1F*      fEKin;
 
     TH2F*      fYVsZ;
@@ -73,17 +76,18 @@ public:
   };
 
   struct VDetHist_t : public HistBase_t {
-    TH1F*    fIndex   ;
-    TH1F*    fPDGCode ;		       //
-    TH1F*    fGenCode ;		       // generator code
-    TH1F*    fMomentum;
-    TH1F*    fTime    ;
-    TH2F*    fYVsX    ;                // different VD's have different orientation
-    TH2F*    fYVsZ    ;                // fill both hist's
-    TH1F*    fPt      ;                // transverse mom
-    TH1F*    fPp      ;                // momentum component parallel to the solenoid axis
-    TH1F*    fTanTh   ;		       // tan (pitch angle)
-    TH1F*    fEKin    ;
+    TH1F*      fIndex   ;
+    TH1F*      fPDGCode ;		       //
+    TH1F*      fGenCode ;		       // generator code
+    TH1F*      fMom[2]  ;
+    TH1F*      fTime    ;
+    TH2F*      fYVsX    ;                // different VD's have different orientation
+    TH2F*      fYVsZ    ;                // fill both hist's
+    TH1F*      fPt      ;                // transverse mom
+    TH1F*      fPp      ;                // momentum component parallel to the solenoid axis
+    TH1F*      fTanTh   ;		       // tan (pitch angle)
+    TH1F*      fEKin    ;
+    TH2F*      fCosThVsMom ;	       // cos (pitch angle) vs Mom
   };
 
   struct SimpData_t {
@@ -98,7 +102,7 @@ public:
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets        =   100 };
   enum { kNStepPointMCHistSets  = 10000 };
-  enum { kNSimpHistSets         =  1000 };
+  enum { kNSimpHistSets         = 10000 };
   enum { kNVDetHistSets         = 10000 };
 
   struct Hist_t {
@@ -132,6 +136,8 @@ public:
   int                   fNVDetHits  ;
   int                   fNVDet;
   VDetData_t            fVDet[200];
+  int                   fStageID;
+  int                   fNSimp;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -147,6 +153,7 @@ public:
 //-----------------------------------------------------------------------------
   void SetSpmcBlockName(const char* Name) { fSpmcBlockName = Name; }
   void SetVDetBlockName(const char* Name) { fVDetBlockName = Name; }
+  void SetStageID      (int ID) { fStageID = ID; }
 
   void          SetParticleCache(int PdgCode, TParticlePDG* P) { fParticleCache[2500+PdgCode] = P; }
   TParticlePDG* GetParticleCache(int PdgCode) { return fParticleCache[2500+PdgCode]; }

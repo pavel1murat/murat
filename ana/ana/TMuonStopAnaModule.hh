@@ -63,9 +63,9 @@ public:
     TSimParticle* fParent;              // muon parent
   };
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets =  100 };
-  enum { kNSimpHistSets  = 1000 };
-  enum { kNVDetHistSets  = 1000 };
+  enum { kNEventHistSets =   100 };
+  enum { kNSimpHistSets  =  1000 };
+  enum { kNVDetHistSets  = 10000 };
 
   struct Hist_t {
     EventHist_t* fEvent[kNEventHistSets];

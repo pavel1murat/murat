@@ -374,22 +374,22 @@ murat.paths : {
 # *FIXME* 					]
 # *FIXME* 
 
-#------------------------------------------------------------------------------
-# run all 8 reconstruction passes
-#------------------------------------------------------------------------------
-    path_gen_digi_all_reco_ump : [ @sequence::murat.gen_g4_time_map,
-				   @sequence::murat.digis          ,
-				   @sequence::murat.trk_hits       ,
-				   @sequence::murat.cal_hits       ,
-				   @sequence::murat.cal_reco       ,
-				   @sequence::murat.dem_reco       ,
-				   @sequence::murat.dmm_reco       ,
-				   @sequence::murat.dep_reco       ,
-				   @sequence::murat.dmp_reco       ,
-				   @sequence::murat.uem_reco       ,
-				   @sequence::murat.umm_reco       ,
-				   @sequence::murat.uep_reco       ,
-				   @sequence::murat.ump_reco       ,
-				   @sequence::Stntuple.stnmaker_all
-				  ]
+# #------------------------------------------------------------------------------
+# # run all 8 reconstruction passes
+# #------------------------------------------------------------------------------
+#     path_gen_digi_all_reco_ump : [ @sequence::murat.gen_g4_time_map,
+# 				   @sequence::murat.digis          ,
+# 				   @sequence::murat.trk_hits       ,
+# 				   @sequence::murat.cal_hits       ,
+# 				   @sequence::murat.cal_reco       ,
+# 				   @sequence::murat.dem_reco       ,
+# 				   @sequence::murat.dmm_reco       ,
+# 				   @sequence::murat.dep_reco       ,
+# 				   @sequence::murat.dmp_reco       ,
+# 				   @sequence::murat.uem_reco       ,
+# 				   @sequence::murat.umm_reco       ,
+# 				   @sequence::murat.uep_reco       ,
+# 				   @sequence::murat.ump_reco       ,
+# 				   @sequence::Stntuple.stnmaker_all
+# 				  ]
 }

@@ -211,6 +211,21 @@ void TMuonStopAnaModule::BookHistograms() {
   book_vdet_histset[698] = 1;		// p<50 MeV/c mu- , VDET=98: mid-section TSu
   book_vdet_histset[699] = 1;		// p<50 MeV/c mu- , VDET=99: mid-section TSd
 
+  book_vdet_histset[2001] = 1;		// pbar , VDET= 1: Coll1_In
+  book_vdet_histset[2002] = 1;		// pbar , VDET= 2: Coll1_Out
+  book_vdet_histset[2003] = 1;		// pbar , VDET= 3: Coll31_In
+  book_vdet_histset[2004] = 1;		// pbar , VDET= 4: Coll31_Out
+  book_vdet_histset[2005] = 1;		// pbar , VDET= 5: Coll32_In 
+  book_vdet_histset[2006] = 1;		// pbar , VDET= 6: Coll32_Out
+  book_vdet_histset[2007] = 1;		// pbar , VDET= 7: Coll5_In
+  book_vdet_histset[2008] = 1;		// pbar , VDET= 8: Coll5_Out
+  book_vdet_histset[2009] = 1;		// pbar , VDET= 9: ST_In
+  book_vdet_histset[2010] = 1;		// pbar , VDET=10: ST_Out
+  book_vdet_histset[2091] = 1;		// pbar , VDET=91: before pbar window
+  book_vdet_histset[2092] = 1;		// pbar , VDET=92: after pbar window
+  book_vdet_histset[2098] = 1;		// pbar , VDET=98: mid-section TSu
+  book_vdet_histset[2099] = 1;		// pbar , VDET=99: mid-section TSd
+
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
       sprintf(folder_name,"vdet_%i",i);
@@ -427,6 +442,22 @@ void TMuonStopAnaModule::FillHistograms() {
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step);
     }
+    if (step->PDGCode() == -2212) {
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2001],step);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2002],step);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2003],step);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2004],step);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2005],step);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2006],step);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2007],step);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2008],step);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2009],step);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2010],step);
+      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2091],step);
+      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step);
+    }
   }
 }
 
@@ -437,9 +468,8 @@ int TMuonStopAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-//  RegisterDataBlock("SpmcBlock","TStepPointMCBlock",&fStepPointMCBlock);
-  RegisterDataBlock("SimpBlock","TSimpBlock"   ,&fSimpBlock       );
-  RegisterDataBlock(fVDetBlockName.Data(),"TSpmcBlock"   ,&fVDetBlock       );
+  RegisterDataBlock("SimpBlock"          ,"TSimpBlock"       ,&fSimpBlock);
+  RegisterDataBlock(fVDetBlockName.Data(),"TStepPointMCBlock",&fVDetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------

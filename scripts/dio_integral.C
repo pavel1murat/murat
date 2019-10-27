@@ -256,8 +256,7 @@ void dio_integral(double& NConv, double& NDio) {
   printf("NDIO            = %12.3e\n",NDio);
   printf("NC)nv           = %12.3e\n",NConv);
 
-
-  TFile* f = TFile::Open("/grid/fermiapp/mu2e/users/murat/hist/mu2e/Czarnecki.root");
+  TFile* f = TFile::Open(Form("%s/Czarnecki.root",gEnv->GetValue("mu2e.HistDir")));
 
   TH1D* h_dio = (TH1D*) f->Get("Spectrum");
 

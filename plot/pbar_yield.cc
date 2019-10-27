@@ -11,7 +11,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 float get_pbar_yield(float P0, float P, float Theta) {
-  printf("emoe\n");
+  //  printf("emoe\n");
   float xsec = pbar_yield_(&P0,&P,&Theta);
   return xsec;
 }

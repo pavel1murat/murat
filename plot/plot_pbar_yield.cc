@@ -46,7 +46,7 @@ void plot_pbar_yield(float P0, float Theta) {
   for (int i=0; i<np; i++) {
     p[i]  = i*0.05+1.e-12; // to avoid zeroes
 
-    // calculate correction factor
+    // calculate correction factor, 1.539e6 is the inelastic cross section on Ta in mubarn
 
     e     = sqrt(p[i]*p[i]+MP*MP);
     cf    = 1.539e6*e/(p[i]*p[i])/(2*TMath::Pi()*TMath::Sin(Theta));

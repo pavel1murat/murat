@@ -14,6 +14,7 @@
 // 5  : events with pbars ID=400000+I
 // 6  : events with pbars reaching the final stage
 // 7  : events with pbars P > 100 MeV/c reaching the final stage
+// 8  : events with pi (-211) in VD9 (before the target)
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -58,9 +59,6 @@ TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title
   SetParticleCache( 2112,fPdgDb->GetParticle( 2112)); // neutron
   SetParticleCache( 2212,fPdgDb->GetParticle( 2212)); // proton
   SetParticleCache(-2212,fPdgDb->GetParticle(-2212)); // pbar
-
-  fStageID = 400000;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -279,6 +277,7 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_simp_histset[521] = 1;		// pbars
 
   book_simp_histset[1021] = 1;		// pbar in the production vertex
+  book_simp_histset[1022] = 1;		// pbar P>100 in the production vertex
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -424,6 +423,20 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[3092] = 1;		// pbars reaching the end, VDET=92: after pbar window
   book_vdet_histset[3098] = 1;		// pbars reaching the end, VDET=98
   book_vdet_histset[3099] = 1;		// pbars reaching the end, VDET=99
+
+  book_vdet_histset[4001] = 1;		// pbars P>100 MeV/c reaching the end, VDET=1: Coll1_In
+  book_vdet_histset[4002] = 1;		// pbars P>100 MeV/c reaching the end, VDET=2: Coll1_Out
+  book_vdet_histset[4003] = 1;		// pbars P>100 MeV/c reaching the end, VDET=3: Coll31_In
+  book_vdet_histset[4004] = 1;		// pbars P>100 MeV/c reaching the end, VDET=4: Coll31_Out
+  book_vdet_histset[4005] = 1;		// pbars P>100 MeV/c reaching the end, VDET=5: Coll32_In 
+  book_vdet_histset[4006] = 1;		// pbars P>100 MeV/c reaching the end, VDET=6: Coll32_Out
+  book_vdet_histset[4007] = 1;		// pbars P>100 MeV/c reaching the end, VDET=7: Coll5_In
+  book_vdet_histset[4008] = 1;		// pbars P>100 MeV/c reaching the end, VDET=8: Coll5_Out
+  book_vdet_histset[4009] = 1;		// pbars P>100 MeV/c reaching the end, VDET=9: ST_In
+  book_vdet_histset[4091] = 1;		// pbars P>100 MeV/c reaching the end, VDET=91: before pbar window
+  book_vdet_histset[4092] = 1;		// pbars P>100 MeV/c reaching the end, VDET=92: after pbar window
+  book_vdet_histset[4098] = 1;		// pbars P>100 MeV/c reaching the end, VDET=98
+  book_vdet_histset[4099] = 1;		// pbars P>100 MeV/c reaching the end, VDET=99
 
   for (int i=0; i<kNVDetHistSets; i++) {
     if (book_vdet_histset[i] != 0) {
@@ -688,7 +701,8 @@ void TStepPointMCAnaModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
 // StepPointMC histograms
-// for beamline studies, there is only one 
+// for beamline studies, fStepPointMCBlock contains hits of particles for which 
+// one of the stopping conditions has been satisfied
 //-----------------------------------------------------------------------------
   TStepPointMC* spmc;
   SpmcData_t    spmc_data;
@@ -759,7 +773,8 @@ void TStepPointMCAnaModule::FillHistograms() {
 	printf(" Error in TStepPointMCAnaModule: parentless particle\n");
       }
 //-----------------------------------------------------------------------------
-// for events with antiproton reached the last plane,  plot antiproton hits in VD91
+// for events with antiproton reached the last plane, antiproton hits 
+// in different detectors
 //-----------------------------------------------------------------------------
       int nh = 0;
       for (int i=0; i<fNVDetHits; i++) {
@@ -787,7 +802,40 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (nh == 0) GetHeaderBlock()->Print("<<trouble>> nh = 0");
 
       FillStepPointMCHistograms(fHist.fStepPointMC[21],spmc,&spmc_data);                               // pbars
-      if (p > 100) FillStepPointMCHistograms(fHist.fStepPointMC[22],spmc,&spmc_data);                  // pbars p > 100 MeV/c
+      if (p > 100) { 
+	FillStepPointMCHistograms(fHist.fStepPointMC[22],spmc,&spmc_data);                  // pbars p > 100 MeV/c
+
+	if (simp) FillSimpHistograms(fHist.fSimp[1022],simp,sd);
+	else {
+	  printf(" Error in TStepPointMCAnaModule: parentless particle\n");
+	}
+//-----------------------------------------------------------------------------
+// for antiprotons P>100 MeV/c reached the last plane, antiproton hits 
+// in different detectors
+//-----------------------------------------------------------------------------
+	int nh = 0;
+	for (int i=0; i<fNVDetHits; i++) {
+	  TStepPointMC* step = fVDetBlock->StepPointMC(i);
+	  if (step->PDGCode() == -2212) {
+	    if      ((step->SimID() < 100000) && (step->VolumeID() ==  91)) {
+	      FillVDetHistograms(fHist.fVDet[4091],step);
+	      nh++;
+	    }
+	    else if (step->VolumeID() ==  92) FillVDetHistograms(fHist.fVDet[4092],step);
+	    else if (step->VolumeID() ==   1) FillVDetHistograms(fHist.fVDet[4001],step);
+	    else if (step->VolumeID() ==   2) FillVDetHistograms(fHist.fVDet[4002],step);
+	    else if (step->VolumeID() ==   3) FillVDetHistograms(fHist.fVDet[4003],step);
+	    else if (step->VolumeID() ==   4) FillVDetHistograms(fHist.fVDet[4004],step);
+	    else if (step->VolumeID() ==   5) FillVDetHistograms(fHist.fVDet[4005],step);
+	    else if (step->VolumeID() ==   6) FillVDetHistograms(fHist.fVDet[4006],step);
+	    else if (step->VolumeID() ==   7) FillVDetHistograms(fHist.fVDet[4007],step);
+	    else if (step->VolumeID() ==   8) FillVDetHistograms(fHist.fVDet[4008],step);
+	    else if (step->VolumeID() ==   9) FillVDetHistograms(fHist.fVDet[4009],step);
+	    else if (step->VolumeID() ==  98) FillVDetHistograms(fHist.fVDet[4098],step);
+	    else if (step->VolumeID() ==  99) FillVDetHistograms(fHist.fVDet[4099],step);
+	  }
+	}
+      }
 
     }
 //-----------------------------------------------------------------------------
@@ -991,23 +1039,15 @@ int TStepPointMCAnaModule::Event(int ientry) {
   fNVDetHits = fVDetBlock->NStepPoints();
 
   fNSimp = fSimpBlock->NParticles();
-
-//   TSimParticle* parent = fMuon;
-// //-----------------------------------------------------------------------------
-// // loop over "steps" in SimpBlock
-// //-----------------------------------------------------------------------------
-//   int loc = np-1;
-//   while (loc >= 0) {
-//     int parent_id = parent->ParentID();
-//     parent = fSimpBlock->FindParticle(parent_id);
-// //-----------------------------------------------------------------------------
-// // sometimes history tree includes a scattered proton, which produces a pion,
-// // decaying into a muon. In this case call pion a 'grandparent'
-// //-----------------------------------------------------------------------------
-//     if (parent && (parent->PDGCode() != 13)) break;
-//   }
-
-//  fParent = parent;
+//-----------------------------------------------------------------------------
+// determine simulation stage
+//-----------------------------------------------------------------------------
+  fStage = -1;
+  if (fNSimp > 0) {
+    TSimParticle* simp = fSimpBlock->Particle(fNSimp-1);
+    int simp_id  = simp->GetUniqueID();
+    fStage = simp_id / 100000;
+  }
 //-----------------------------------------------------------------------------
 // everything is precalculated, fill histograms
 //-----------------------------------------------------------------------------
@@ -1076,7 +1116,20 @@ void TStepPointMCAnaModule::Debug() {
 	GetHeaderBlock()->Print(Form("bit:7: pbar P > 100 in the end, p = %10.3f t= %10.3f",p,t));
       }
     }
-  }    
+  }
+//-----------------------------------------------------------------------------
+// bit:8  events with pi- at VD9
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(8) == 1) {
+    for (int i=0; i<fNVDetHits; i++) {
+      TStepPointMC* step = fVDetBlock->StepPointMC(i);
+      if      ((step->PDGCode() == -211) && (step->VolumeID() ==  9)) {
+	float p            = step->Mom()->Mag();
+	float t            = step->Time();
+	GetHeaderBlock()->Print(Form("bit:8: pi- at VD 09, p = %10.3f t= %10.3f",p,t));
+      }
+    }
+  }
 }
 
 //_____________________________________________________________________________

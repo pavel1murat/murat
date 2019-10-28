@@ -2,7 +2,7 @@
 #include "math.h"
 #include "TMath.h"
 #include "TGraph.h"
-#include "plot/pbar_common.hh"
+#include "Stntuple/alg/pbar_common.hh"
 
 //-----------------------------------------------------------------------------
 // p -in GeV

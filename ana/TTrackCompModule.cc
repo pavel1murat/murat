@@ -172,14 +172,14 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock(fTrackBlockName[0].Data(), "TStnTrackBlock"     ,&fTrackBlock[0]);
-  RegisterDataBlock(fTrackBlockName[1].Data(), "TStnTrackBlock"     ,&fTrackBlock[1]);
-  RegisterDataBlock("ClusterBlock"           , "TStnClusterBlock"   ,&fClusterBlock );
-  RegisterDataBlock("SimpBlock"              , "TSimpBlock"         ,&fSimpBlock    );
-  RegisterDataBlock("GenpBlock"              , "TGenpBlock"         ,&fGenpBlock    );
-  //  RegisterDataBlock("VDetBlock"              , "TVDetDataBlock"     ,&fVDetBlock    );
-  RegisterDataBlock("HelixBlock"             , "TStnHelixBlock"     ,&fHelixBlock   );
-  RegisterDataBlock("SpmcBlockVDet"          , "TStepPointMCBlock"  ,&fSpmcBlockVDet);
+  RegisterDataBlock(fTrackBlockName[0].Data(), "TStnTrackBlock"   , &fTrackBlock[0] );
+  RegisterDataBlock(fTrackBlockName[1].Data(), "TStnTrackBlock"   , &fTrackBlock[1] );
+  RegisterDataBlock("ClusterBlock"           , "TStnClusterBlock" , &fClusterBlock  );
+  RegisterDataBlock("SimpBlock"              , "TSimpBlock"       , &fSimpBlock     );
+  RegisterDataBlock("GenpBlock"              , "TGenpBlock"       , &fGenpBlock     );
+  RegisterDataBlock("TrackSeedBlock"         ,"TStnTrackSeedBlock", &fTrackSeedBlock);
+  RegisterDataBlock("HelixBlock"             , "TStnHelixBlock"   , &fHelixBlock    );
+  RegisterDataBlock("SpmcBlockVDet"          , "TStepPointMCBlock", &fSpmcBlockVDet );
 //-----------------------------------------------------------------------------
 // for validation purposes
 //-----------------------------------------------------------------------------
@@ -273,6 +273,23 @@ int TTrackCompModule::BeginRun() {
   int rn = GetHeaderBlock()->RunNumber();
   TStntuple::Init(rn);
   return 0;
+}
+
+//-----------------------------------------------------------------------------
+void TTrackCompModule::BookTrackSeedHistograms   (HistBase_t*   HistR, const char* Folder){
+  
+  TrackSeedHist_t* Hist =  (TrackSeedHist_t*) HistR;
+
+  HBook1F(Hist->fNHits        ,"nhits" ,Form("%s: # of straw hits"              ,Folder),  150,    0,  150,Folder);
+  HBook1F(Hist->fClusterTime  ,"clt"   ,Form("%s: cluster time; t_{cluster}[ns]",Folder),  800,  400, 1700,Folder);
+  HBook1F(Hist->fClusterEnergy,"cle"   ,Form("%s: cluster energy; E [MeV]      ",Folder),  400,    0,  200,Folder);
+  HBook1F(Hist->fRadius       ,"r"     ,Form("%s: curvature radius; r [mm]"     ,Folder),  500,    0,  500,Folder);
+  HBook1F(Hist->fMom          ,"p"     ,Form("%s: momentum; p [MeV/c]"          ,Folder),  300,    50, 200,Folder);
+  HBook1F(Hist->fPt           ,"pt"    ,Form("%s: pT; pT [MeV/c]"               ,Folder),  600,    0,  150,Folder);
+  HBook1F(Hist->fTanDip       ,"tdip"  ,Form("%s: tanDip; tanDip"               ,Folder),  300,    0,    3,Folder);
+  HBook1F(Hist->fChi2         ,"chi2"  ,Form("%s: #chi^{2}-XY; #chi^{2}/ndof"   ,Folder),  100,    0,   10,Folder);
+  HBook1F(Hist->fFitCons      ,"fcons" ,Form("%s: Fit consistency; Fit-cons"    ,Folder),  100,    0,    1,Folder);
+  HBook1F(Hist->fD0           ,"d0"    ,Form("%s: D0; d0 [mm]"                  ,Folder), 1600, -400,  400,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -386,12 +403,12 @@ void TTrackCompModule::BookEventHistograms(HistBase_t* HistR, const char* Folder
   HBook1F(Hist->fZv        ,"zv"       ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
 
   HBook1F(Hist->fPdgCode         ,"pdg"   ,Form("%s: PDG code"                     ,Folder),200,-100,100,Folder);
-  HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: CE mom after Stopping Target" ,Folder),400,  90,110,Folder);
-  HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: CE mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
+  HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: MC mom after Stopping Target" ,Folder),400,  90,110,Folder);
+  HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: MC mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
   HBook1F(Hist->fNshCE           ,"nsh_ce",Form("%s: CE Number of Straw Hits"      ,Folder),150,0,150,Folder);
 
-  HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
-  HBook1F(Hist->fEleMom    ,"ce_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
+  HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: MC Particle Cos(Theta) Lab"      ,Folder),100,-1,1,Folder);
+  HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: MC Particle Momentum"            ,Folder),1000,  0,200,Folder);
 
   HBook1F(Hist->fNHelices  ,"nhel"     ,Form("%s: nhelices"                        ,Folder), 10,0, 10,Folder);
   HBook1F(Hist->fNTracks[0],"ntrk_0"   ,Form("%s: N(Reconstructed Tracks)[0]"      ,Folder),100,0,100,Folder);
@@ -440,13 +457,21 @@ void TTrackCompModule::BookHistograms() {
   book_event_histset[ 1] = 1;		// events with EclMax > fMinETrig and TClMax > 550
   book_event_histset[ 2] = 1;           // *** fill in
   book_event_histset[ 3] = 1;           // events with at least one helix
+  book_event_histset[ 4] = 1;           // events with at least one reconstructed track seed
+  book_event_histset[ 5] = 1;           // events with at least one reconstructed track seed nhits >= 15 chi2(ZPHI)<4
 
-					// KPAR eff: histsets 10:19, KDAR efficiency:20-29
+					// 10:19: KPAR efficiency, 20:29: KDAR efficiency
 
   for (int i=10; i<20; i++) book_event_histset[i] = 1;
   for (int i=20; i<30; i++) book_event_histset[i] = 1;
 
-  book_event_histset[41] = 1;           // events with at least one positron P > 85 MeV/c
+  book_event_histset[41] = 1;           // 41: events with at least one positron P > 85 MeV/c
+
+  book_event_histset[51] = 1;           // 51: events with at least one reconstructed PAR track
+  book_event_histset[52] = 1;           // 52: events with at least one reconstructed PAR track passing all cuts 
+
+  book_event_histset[61] = 1;           // 61: events with at least one reconstructed DAR track
+  book_event_histset[62] = 1;           // 62: events with at least one reconstructed DAR track passing all cuts 
 
   for (int i=0; i<kNEventHistSets; i++) {
     if (book_event_histset[i] != 0) {
@@ -455,6 +480,29 @@ void TTrackCompModule::BookHistograms() {
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
       fHist.fEvent[i] = new EventHist_t;
       BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
+    }
+  }
+//--------------------------------------------------------------------------------
+// book trackSeed histograms
+//--------------------------------------------------------------------------------
+  int book_trackSeed_histset[kNTrackSeedHistSets];
+  for (int i=0; i<kNTrackSeedHistSets; ++i)  book_trackSeed_histset[i] = 0;
+
+  book_trackSeed_histset[0] = 1;   // events with at least one trackSeed
+  book_trackSeed_histset[1] = 1;   // events with at least one trackSeed with p > 80 MeV/c
+  book_trackSeed_histset[2] = 1;   // events with at least one trackSeed with p > 90 MeV/c
+  book_trackSeed_histset[3] = 1;   // events with at least one trackSeed with p > 100 MeV/c
+  book_trackSeed_histset[4] = 1;   // events with at least one trackSeed with 10 < nhits < 15
+  book_trackSeed_histset[5] = 1;   // events with at least one trackSeed with nhits >= 15
+  book_trackSeed_histset[6] = 1;   // events with at least one trackSeed with nhits >= 15 and chi2(ZPhi)<4
+
+  for (int i=0; i<kNTrackSeedHistSets; i++) {
+    if (book_trackSeed_histset[i] != 0) {
+      sprintf(folder_name,"trkseed_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fTrackSeed[i] = new TrackSeedHist_t;
+      BookTrackSeedHistograms(fHist.fTrackSeed[i],Form("Hist/%s",folder_name));
     }
   }
 //-----------------------------------------------------------------------------
@@ -708,8 +756,8 @@ void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
     Hist->fNshCE->Fill(-1);
   }
 
-  Hist->fEleMom->Fill(p);
-  Hist->fEleCosTh->Fill(cos_th);
+  Hist->fMcMom->Fill(p);
+  Hist->fMcCosTh->Fill(cos_th);
 
   Hist->fNHelices->Fill(fNHelices);
 
@@ -941,6 +989,38 @@ void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, 
 }
 
 
+//--------------------------------------------------------------------------------
+// function to fill TrasckSeedHit block
+//--------------------------------------------------------------------------------
+void TTrackCompModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* TrkSeed) {
+  
+  TrackSeedHist_t* Hist = (TrackSeedHist_t*) HistR;
+  
+  int         nhits    = TrkSeed->NHits      ();
+  double      clusterT = TrkSeed->ClusterTime();
+  double      clusterE = TrkSeed->ClusterEnergy();
+  
+  double      mm2MeV   = 3/10.;
+  double      pT       = TrkSeed->Pt();
+  double      radius   = pT/mm2MeV;
+
+  double      tanDip   = TrkSeed->TanDip();  
+  double      p        = pT/std::cos( std::atan(tanDip));
+  
+  Hist->fNHits      ->Fill(nhits);	 
+  Hist->fClusterTime->Fill(clusterT);
+  Hist->fClusterEnergy->Fill(clusterE);
+  
+  Hist->fRadius     ->Fill(radius);    
+  Hist->fMom        ->Fill(p);	 
+  Hist->fPt         ->Fill(pT);	 
+  Hist->fTanDip     ->Fill(tanDip);    
+  
+  Hist->fChi2       ->Fill(TrkSeed->Chi2()/(nhits-5.));
+  Hist->fFitCons    ->Fill(TrkSeed->FitCons());
+  Hist->fD0         ->Fill(TrkSeed->D0());
+}
+
 //-----------------------------------------------------------------------------
 // TmvaAlgorithm: 100*usez + algorigthm
 //-----------------------------------------------------------------------------
@@ -1036,9 +1116,13 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // EVT_3: events with at least one helix
 //-----------------------------------------------------------------------------
-  if (fNHelices > 0) {
-    FillEventHistograms(fHist.fEvent[3]);
-  }
+  if (fNHelices > 0) FillEventHistograms(fHist.fEvent[3]);
+//-----------------------------------------------------------------------------
+// EVT_4: events with at least one track seed
+// EVT_5: events with at least one GOOD track seed
+//-----------------------------------------------------------------------------
+  if (fNTrackSeeds     > 0) FillEventHistograms(fHist.fEvent[4]);
+  if (fNGoodTrackSeeds > 0) FillEventHistograms(fHist.fEvent[5]);
 //-----------------------------------------------------------------------------
 // EVT_41: events with good DAR positron track 
 //-----------------------------------------------------------------------------
@@ -1049,24 +1133,68 @@ void TTrackCompModule::FillHistograms() {
       FillEventHistograms(fHist.fEvent[41]);
     }
   }
+//-----------------------------------------------------------------------------
+// EVT_51 : events with PAR tracks 
+// EVT_52 : events with good PAR tracks 
+//-----------------------------------------------------------------------------
+  // TLorentzVector    mom (1.,0.,0.,0);
+  // if (fParticle) fParticle->Momentum(mom);
+  // double mc_mom = mom.P();
+
+  if (fNTracks[kPAR] > 0) {
+    FillEventHistograms(fHist.fEvent[51]);
+    TrackPar_t* tp  = &fTrackPar[kPAR][0];
+    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[52]);
+  }
+//-----------------------------------------------------------------------------
+// EVT_61 : events with DAR tracks 
+// EVT_62 : events with good DAR tracks 
+//-----------------------------------------------------------------------------
+  if (fNTracks[kDAR] > 0) {
+    FillEventHistograms(fHist.fEvent[61]);
+    TrackPar_t* tp  = &fTrackPar[kDAR][0];
+    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[62]);
+  }
+
+//--------------------------------------------------------------------------------
+// track seed histograms
+//--------------------------------------------------------------------------------
+  TStnTrackSeed* trkSeed;
+  for (int i=0; i<fNTrackSeeds; ++i) {
+    trkSeed = fTrackSeedBlock->TrackSeed(i);
+    
+    FillTrackSeedHistograms(fHist.fTrackSeed[0], trkSeed);
+    
+    int     nhits    = trkSeed->NHits();
+    double  p        = trkSeed->P();
+    double  chi2     = trkSeed->Chi2();
+   
+    if (p >  80.) FillTrackSeedHistograms(fHist.fTrackSeed[1], trkSeed);
+    if (p >  90.) FillTrackSeedHistograms(fHist.fTrackSeed[2], trkSeed);
+    if (p > 100.) FillTrackSeedHistograms(fHist.fTrackSeed[3], trkSeed);
+
+    if ( (nhits>10) && (nhits <  15)) FillTrackSeedHistograms(fHist.fTrackSeed[4], trkSeed);
+    if ( nhits>=15                  ) FillTrackSeedHistograms(fHist.fTrackSeed[5], trkSeed);
+    if ( (chi2 < 4) && (nhits >= 15)) FillTrackSeedHistograms(fHist.fTrackSeed[6], trkSeed);
+  }
 
 //-----------------------------------------------------------------------------
-// what does KDAR add ?
-// TRK_0 : KPAR tracks, BEST_ID
+// what does kDAR add ?
+// TRK_0 : kPAR tracks, BEST_ID
 //-----------------------------------------------------------------------------
-  if ((fTrackBlock[0]->NTracks() > 0) && (fTrackPar[0][0].fIDWord[fBestID[0]] == 0)) {
-    TStnTrack* trk = fTrackBlock[0]->Track(0);
-    TrackPar_t* tp = &fTrackPar[0][0];
+  if ((fTrackBlock[kPAR]->NTracks() > 0) && (fTrackPar[kPAR][0].fIDWord[fBestID[0]] == 0)) {
+    TStnTrack* trk = fTrackBlock[kPAR]->Track(0);
+    TrackPar_t* tp = &fTrackPar[kPAR][0];
     FillTrackHistograms(fHist.fTrack[0],trk,tp);
   }
   else {
-    if (fTrackBlock[1]->NTracks() > 0) {
-      if (fTrackPar[1][0].fIDWord[3] == 0) {
+    if (fTrackBlock[kDAR]->NTracks() > 0) {
+      if (fTrackPar[kDAR][0].fIDWord[3] == 0) {
 //-----------------------------------------------------------------------------
 // TRK_1: have KDAR track TrkQual > 0.3 and no KPAR TrkQual > 0.4 track
 //-----------------------------------------------------------------------------
-	TStnTrack* trk = fTrackBlock[1]->Track(0);
-	TrackPar_t* tp = &fTrackPar[1][0];
+	TStnTrack* trk = fTrackBlock[kDAR]->Track(0);
+	TrackPar_t* tp = &fTrackPar[kDAR][0];
 	FillTrackHistograms(fHist.fTrack[1],trk,tp);
       }
       if (fTrackPar[1][0].fIDWord[2] == 0) {
@@ -1691,6 +1819,7 @@ int TTrackCompModule::Event(int ientry) {
   fClusterBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
+  fTrackSeedBlock->GetEntry(ientry);
   fHelixBlock->GetEntry(ientry);
   fSpmcBlockVDet->GetEntry(ientry);
 //-----------------------------------------------------------------------------
@@ -1701,9 +1830,10 @@ int TTrackCompModule::Event(int ientry) {
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 //-----------------------------------------------------------------------------
-  fNGenp     = fGenpBlock->NParticles();
-  fNClusters = fClusterBlock->NClusters();
-  fNHelices  = fHelixBlock->NHelices();
+  fNGenp       = fGenpBlock->NParticles();
+  fNClusters   = fClusterBlock->NClusters();
+  fNHelices    = fHelixBlock->NHelices();
+  fNTrackSeeds = fTrackSeedBlock->NTrackSeeds();
 
   fCluster = NULL;
   fEClMax  = -1;
@@ -1781,6 +1911,17 @@ int TTrackCompModule::Event(int ientry) {
       else if ((step->VolumeID() == 11) || (step->VolumeID() == 12)) {
 	fSimPar.fTMid = step;
       }
+    }
+  }
+//-----------------------------------------------------------------------------
+// initialize track seed parameters
+//-----------------------------------------------------------------------------
+  fNGoodTrackSeeds = 0;
+  for (int i=0; i<fNTrackSeeds; i++) {
+    TStnTrackSeed* ts = fTrackSeedBlock->TrackSeed(i);
+    int nhits = ts->NHits();
+    if ((nhits > 15) && (ts->Chi2()/(nhits-4.9999) < 4.)) {
+      fNGoodTrackSeeds += 1;
     }
   }
 //-----------------------------------------------------------------------------

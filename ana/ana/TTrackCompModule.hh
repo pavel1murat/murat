@@ -19,7 +19,7 @@
 #include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
-// #include "Stntuple/obj/TVDetDataBlock.hh"
+#include "Stntuple/obj/TStnTrackSeedBlock.hh"
 #include "Stntuple/obj/TStnHelixBlock.hh"
 #include "Stntuple/obj/TStepPointMCBlock.hh"
 
@@ -56,8 +56,8 @@ public:
     TH1F*    fMomTrackerFront;
     TH1F*    fNshCE;
 
-    TH1F*    fEleMom;
-    TH1F*    fEleCosTh;
+    TH1F*    fMcMom;
+    TH1F*    fMcCosTh;
     TH1F*    fNHelices;
     TH1F*    fNTracks[2];
     TH1F*    fNshTot [2];
@@ -160,21 +160,37 @@ public:
     TH1F*    fRMomErr10;
     TH1F*    fDT0;                      // shift in T0 
   };
+
+  struct TrackSeedHist_t: public HistBase_t {
+    TH1F*    fNHits;	 
+    TH1F*    fClusterTime;
+    TH1F*    fClusterEnergy;
+    TH1F*    fRadius;
+    TH1F*    fMom;
+    TH1F*    fPt;
+    TH1F*    fTanDip;   
+    TH1F*    fChi2;
+    TH1F*    fFitCons;
+    TH1F*    fD0;
+  };
+
 //-----------------------------------------------------------------------------
 //  fTrackHist[  0]: all tracks
 //  fTrackHist[100]: Set C tracks
 //-----------------------------------------------------------------------------
   enum { kPAR = 0, kDAR = 1 };
 
-  enum { kNEventHistSets   =  100 };
-  enum { kNTrackHistSets   =  500 };
-  enum { kNDTrackHistSets  =  100 };
-  enum { kNSimpHistSets    =  100 };
+  enum { kNEventHistSets     =  100 };
+  enum { kNTrackSeedHistSets =  100 };
+  enum { kNTrackHistSets     =  500 };
+  enum { kNDTrackHistSets    =  100 };
+  enum { kNSimpHistSets      =  100 };
 
   struct Hist_t {
-    EventHist_t*   fEvent  [kNEventHistSets];
-    TrackHist_t*   fTrack  [kNTrackHistSets];
-    DTrackHist_t*  fDTrack [kNDTrackHistSets];
+    EventHist_t*     fEvent    [kNEventHistSets];
+    TrackHist_t*     fTrack    [kNTrackHistSets];
+    TrackSeedHist_t* fTrackSeed[kNTrackSeedHistSets];
+    DTrackHist_t*    fDTrack   [kNDTrackHistSets];
   };
 
 
@@ -225,12 +241,13 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStnTrackBlock*    fTrackBlock[2];	// [0]: TrkPatRec fit, [1]:CalPatRec fit
-  TStnClusterBlock*  fClusterBlock;
-  TGenpBlock*        fGenpBlock;
-  TSimpBlock*        fSimpBlock;
-  TStnHelixBlock*    fHelixBlock;
-  TStepPointMCBlock* fSpmcBlockVDet;
+  TStnTrackBlock*      fTrackBlock[2];	// [0]: TrkPatRec fit, [1]:CalPatRec fit
+  TStnClusterBlock*    fClusterBlock;
+  TGenpBlock*          fGenpBlock;
+  TSimpBlock*          fSimpBlock;
+  TStnTrackSeedBlock*  fTrackSeedBlock;
+  TStnHelixBlock*      fHelixBlock;
+  TStepPointMCBlock*   fSpmcBlockVDet;
 
   TString            fTrackBlockName[2];
 					
@@ -251,7 +268,9 @@ public:
   double             fEleE;		// electron energy
 
   int                fNHelices;         // 
-  int                fNTracks    [2];    // 0:TrkPatRec 1:CalPatRec
+  int                fNTrackSeeds;	// N reconstructed track seeds in the event
+  int                fNGoodTrackSeeds;  // N track seeds passing quality cuts
+  int                fNTracks    [2];	// 0:TrkPatRec 1:CalPatRec
   int                fNGoodTracks[2];
   int                fNGenp;		// N(generated particles)
 
@@ -362,20 +381,20 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookEventHistograms   (HistBase_t*   Hist, const char* Folder);
-  void    BookTrackHistograms   (HistBase_t*   Hist, const char* Folder);
-  void    BookDTrackHistograms  (HistBase_t*   Hist, const char* Folder);
+  void    BookEventHistograms    (HistBase_t*   Hist, const char* Folder);
+  void    BookTrackHistograms    (HistBase_t*   Hist, const char* Folder);
+  void    BookTrackSeedHistograms(HistBase_t*   Hist, const char* Folder);
+  void    BookDTrackHistograms   (HistBase_t*   Hist, const char* Folder);
 
   void    FillEventHistograms    (HistBase_t*  Hist);
+  void    FillTrackSeedHistograms(HistBase_t*  Hist, TStnTrackSeed* Seed);
   void    FillTrackHistograms    (HistBase_t*  Hist, TStnTrack* Trk, TrackPar_t* Tp, double Weight = 1.);
   void    FillDTrackHistograms   (HistBase_t*  Hist, TStnTrack* Trk1, TrackPar_t* Tp1, TStnTrack* Trk2, TrackPar_t* Tp2);
-
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
 				   TStnTrackID*    TrackID   , 
 				   TrackPar_t*     TPar      , 
 				   int             HistSet   );
-
   int     FillTmvaTree();
 
   void    BookHistograms();

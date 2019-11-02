@@ -7,6 +7,7 @@
     TStepPointMC*  fTFront;		// VD hit at the tracker front
     TStepPointMC*  fTMid;		// VD hit at the tracker center
     TStepPointMC*  fTBack;		// VD hit at the tracker back (+1610 mm)
+    int            fStage;              // last stage the particle reached
   };
 
 #endif

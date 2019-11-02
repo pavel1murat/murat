@@ -114,6 +114,7 @@ void TStepPointMCAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Fol
   SimpHist_t* hist = (SimpHist_t*) Hist;
 
   HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder), 200,  2400, 2600,Folder);
+  HBook1F(hist->fStage      ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
   HBook1F(hist->fGeneratorID,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
   HBook1F(hist->fTime       ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
   HBook1F(hist->fParentMom  ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
@@ -199,9 +200,13 @@ void TStepPointMCAnaModule::BookHistograms() {
 
   book_spmc_histset[10]  = 1;		// SPMC with T < 100 ns
 
-  book_spmc_histset[20] = 1;		// protons
-  book_spmc_histset[21] = 1;		// antiprotons
-  book_spmc_histset[22] = 1;		// antiprotons p > 100 MeV/c
+  book_spmc_histset[20]  = 1;		// protons
+
+  book_spmc_histset[21]  = 1;		// antiprotons
+  book_spmc_histset[22]  = 1;		// antiprotons p > 100 MeV/c
+
+  book_spmc_histset[23]  = 1;		// antiprotons, with Striganov weights
+  book_spmc_histset[24]  = 1;		// antiprotons p > 100 MeV/c, with Striganov weights
 
 
   book_spmc_histset[101] = 1;		// electrons with P > 60 MeV/c
@@ -531,8 +536,11 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
 void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpData_t* Sd) {
 
   SimpHist_t* hist = (SimpHist_t*) Hist;
+
+  int stage  = Simp->GetUniqueID()/100000;
   
   hist->fVolumeID->Fill(Simp->fEndVolumeIndex);
+  hist->fStage->Fill(stage);
   hist->fGeneratorID->Fill(Simp->fGeneratorID);
   
   float xe = Simp->EndPos()->X()+3904.;
@@ -551,7 +559,9 @@ void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* S
 
   hist->fYVsX->Fill(xe,ye);
   hist->fXEndVsZEnd->Fill(ze,xe);
-
+//-----------------------------------------------------------------------------
+// looks like something to do with the stopping target - but this is still 34 foils..
+//-----------------------------------------------------------------------------
   if (Simp->fEndVolumeIndex == 2480) hist->fYVsX_2480->Fill(xe,ye);
   if (Simp->fEndVolumeIndex == 2513) hist->fYVsX_2513->Fill(xe,ye);
 
@@ -1048,6 +1058,15 @@ int TStepPointMCAnaModule::Event(int ientry) {
     int simp_id  = simp->GetUniqueID();
     fStage = simp_id / 100000;
   }
+
+  for (int i=0; i<fNSimp; i++) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    //    int pdg_code = simp->PDGCode();
+    int simp_id  = simp->GetUniqueID();
+
+    fSimPar[i].fStage = simp_id/100000;
+  }
+    
 //-----------------------------------------------------------------------------
 // everything is precalculated, fill histograms
 //-----------------------------------------------------------------------------

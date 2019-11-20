@@ -14,7 +14,6 @@
 
 #include "murat/ana/VDetData_t.hh"
 #include "murat/ana/HistBase_t.h"
-
 #include "murat/ana/AnaDefs.hh"
 
 class TMuonStopAnaModule: public TStnModule {

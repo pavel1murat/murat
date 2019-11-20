@@ -27,6 +27,7 @@
 
 #include "Stntuple/geom/TDiskCalorimeter.hh"
 
+#include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
@@ -180,11 +181,11 @@ public:
 //-----------------------------------------------------------------------------
   enum { kPAR = 0, kDAR = 1 };
 
-  enum { kNEventHistSets     =  100 };
-  enum { kNTrackSeedHistSets =  100 };
-  enum { kNTrackHistSets     =  500 };
-  enum { kNDTrackHistSets    =  100 };
-  enum { kNSimpHistSets      =  100 };
+  enum { kNEventHistSets     =   100 };
+  enum { kNTrackSeedHistSets =   100 };
+  enum { kNTrackHistSets     = 10000 };
+  enum { kNDTrackHistSets    =   100 };
+  enum { kNSimpHistSets      =   100 };
 
   struct Hist_t {
     EventHist_t*     fEvent    [kNEventHistSets];
@@ -249,7 +250,7 @@ public:
   TStnHelixBlock*      fHelixBlock;
   TStepPointMCBlock*   fSpmcBlockVDet;
 
-  TString            fTrackBlockName[2];
+  TString              fTrackBlockName[2];
 					
   TrackPar_t         fTrackPar[2][10];	// additional track parameters (assume ntracks < 10)
   SimPar_t           fSimPar;		// additional parameters of the simulated MC particle
@@ -273,6 +274,7 @@ public:
   int                fNTracks    [2];	// 0:TrkPatRec 1:CalPatRec
   int                fNGoodTracks[2];
   int                fNGenp;		// N(generated particles)
+  int                fNSimp;		// N(simulated particles)
 
   TStnTrack*         fTrack;
 					// [0]: SetC, [1-6]: TrkQual 0.1 ... 0.6
@@ -297,13 +299,14 @@ public:
   double             fTClMax;
 
   double             fKMaxRMC;             // RMC: closure approximation kMax
-  double             fWtRMC;
+
   int                fProcess;
   double             fPhotonE;
 
-  double             fWtRPC;
+  double             fWeight;
 
   int                fFillHistograms;
+  TStntuple*         fStnt;                // STNTUPLE singleton
 //-----------------------------------------------------------------------------
 // TMVA training ntuples
 //-----------------------------------------------------------------------------

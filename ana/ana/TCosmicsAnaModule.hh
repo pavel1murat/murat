@@ -27,7 +27,6 @@
 #include "Stntuple/alg/TEmuLogLH.hh"
 
 #include "murat/ana/AnaDefs.hh"
-
 #include "murat/ana/HistBase_t.h"
 #include "murat/ana/TrackPar_t.hh"
 #include "murat/ana/SimPar_t.hh"

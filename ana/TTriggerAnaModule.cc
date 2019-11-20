@@ -36,6 +36,9 @@ ClassImp(TTriggerAnaModule)
 TTriggerAnaModule::TTriggerAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
+  fPdgCode     = 11;
+  fProcessCode = -1;
+  fMinTrigMom  = 0.;
 }
 
 //-----------------------------------------------------------------------------
@@ -92,6 +95,15 @@ void TTriggerAnaModule::BookTrackHistograms(HistBase_t* Hist, const char* Folder
 }
 
 //-----------------------------------------------------------------------------
+void TTriggerAnaModule::BookTriggerHistograms(HistBase_t* Hist, const char* Folder) {
+  //  char name [200];
+  //  char title[200];
+  TriggerHist_t* hist = (TriggerHist_t*) Hist;
+
+  HBook1F(hist->fBits     ,"bits"    ,Form("%s: fired trigegr bits" ,Folder), 50,    0,  50,Folder);
+}
+
+//-----------------------------------------------------------------------------
 void TTriggerAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
@@ -106,6 +118,8 @@ void TTriggerAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder
   HBook1F(hist->fNTrackSeeds[1],"nts_1",Form("%s: N(track seeds)[1]",Folder),   10, 0,    10,Folder);
   HBook1F(hist->fNGoodSeeds ,"ngts"  ,Form("%s: N(good seeds)" ,Folder),   10, 0,    10,Folder);
   HBook1F(hist->fNTracks    ,"ntrk"  ,Form("%s: N(tracks)"     ,Folder),   10, 0,    10,Folder);
+  HBook1F(hist->fMcMom     ,"mc_mom"   ,Form("%s: MC Particle Momentum"            ,Folder),1000,  0,200,Folder);
+  HBook1F(hist->fMcCosTh   ,"mc_costh" ,Form("%s: MC Particle Cos(Theta) Lab"      ,Folder),100,-1,1,Folder);
 }
 
 //_____________________________________________________________________________
@@ -127,8 +141,10 @@ void TTriggerAnaModule::BookHistograms() {
   for (int i=0; i<kNEventHistSets; i++) book_event_histset[i] = 0;
 
   book_event_histset[ 0] = 1;		// all events
-  book_event_histset[ 1] = 1;		// events with N(good seeds) > 0
-  book_event_histset[ 2] = 1;		// events with N(tracks) > 0
+  book_event_histset[ 1] = 1;		// events with N(seeds) > 0
+  book_event_histset[ 2] = 1;		// events with N(good seeds) > 0
+
+  book_event_histset[11] = 1;		// events with N(good seeds) > 0, DIO-weighted
 
   for (int i=0; i<kNEventHistSets; i++) {
     if (book_event_histset[i] != 0) {
@@ -163,8 +179,11 @@ void TTriggerAnaModule::BookHistograms() {
   for (int i=0; i<kNTrackSeedHistSets; i++) book_tseed_histset[i] = 0;
 
   book_tseed_histset[ 0] = 1;		// all track seeds
+
   book_tseed_histset[ 1] = 1;		// track seeds   |d0| < 200
   book_tseed_histset[ 2] = 1;		// track seeds   |d0| < 200 , P > 80
+
+  book_tseed_histset[11] = 1;		// all track seeds, DIO-weighted
 
   for (int i=0; i<kNTrackSeedHistSets; i++) {
     if (book_tseed_histset[i] != 0) {
@@ -196,7 +215,54 @@ void TTriggerAnaModule::BookHistograms() {
       BookTrackHistograms(fHist.fTrack[i],Form("Hist/%s",folder_name));
     }
   }
+//-----------------------------------------------------------------------------
+// book trigger histograms
+//-----------------------------------------------------------------------------
+  int book_trigger_histset[kNTriggerHistSets];
+  for (int i=0; i<kNTriggerHistSets; i++) book_trigger_histset[i] = 0;
 
+  book_trigger_histset[  0] = 1;		// all    events
+
+  for (int i=0; i<kNTriggerHistSets; i++) {
+    if (book_trigger_histset[i] != 0) {
+      sprintf(folder_name,"trig_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fTrigger[i] = new TriggerHist_t;
+      BookTriggerHistograms(fHist.fTrigger[i],Form("Hist/%s",folder_name));
+    }
+  }
+
+}
+
+//-----------------------------------------------------------------------------
+// 
+//-----------------------------------------------------------------------------
+void TTriggerAnaModule::FillEventHistograms(HistBase_t* Hist, double Weight) {
+//   double            cos_th, xv, yv, rv, zv, p;
+//   TLorentzVector    mom;
+
+  EventHist_t* hist = (EventHist_t*) Hist;
+
+  int event_number = GetHeaderBlock()->EventNumber();
+  int run_number   = GetHeaderBlock()->RunNumber();
+
+  hist->fEventNumber->Fill(event_number,Weight);
+  hist->fRunNumber->Fill(run_number,Weight);
+  hist->fPassed->Fill(fPassed,Weight);
+  hist->fNTimeClusters->Fill(fNTimeClusters,Weight);
+  hist->fNHelices->Fill(fNHelices,Weight);
+  hist->fNTrackSeeds[0]->Fill(fNTrackSeeds[0],Weight);
+  hist->fNTrackSeeds[1]->Fill(fNTrackSeeds[1],Weight);
+  hist->fNGoodSeeds->Fill(fNGoodSeeds,Weight);
+  hist->fNTracks->Fill(fNTracks,Weight);
+  hist->fMcMom->Fill(fMcMom,Weight);
+  hist->fMcCosTh->Fill(fMcCosTh,Weight);
+}
+
+//-----------------------------------------------------------------------------
+void TTriggerAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* TPeak) {
+  //  HelixHist_t* hist = (HelixHist_t*) Hist;
 }
 
 //-----------------------------------------------------------------------------
@@ -214,17 +280,12 @@ void TTriggerAnaModule::FillTimeClusterHistograms(HistBase_t* Hist, TStnTimeClus
 }
 
 //-----------------------------------------------------------------------------
-void TTriggerAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* TPeak) {
-  //  HelixHist_t* hist = (HelixHist_t*) Hist;
-}
-
-//-----------------------------------------------------------------------------
-void TTriggerAnaModule::FillTrackSeedHistograms(HistBase_t* Hist, TStnTrackSeed* Seed) {
+void TTriggerAnaModule::FillTrackSeedHistograms(HistBase_t* Hist, TStnTrackSeed* Seed, double Weight) {
   TrackSeedHist_t* hist = (TrackSeedHist_t*) Hist;
-  hist->fP->Fill (Seed->fP);		// corrected momentum in the first point
-  hist->fNHits->Fill(Seed->fNHits);
-  hist->fChi2Dof->Fill(Seed->fChi2/(Seed->fNHits-5.));
-  hist->fD0->Fill(Seed->fD0);
+  hist->fP->Fill (Seed->fP,Weight);		// corrected momentum in the first point
+  hist->fNHits->Fill(Seed->fNHits,Weight);
+  hist->fChi2Dof->Fill(Seed->fChi2/(Seed->fNHits-5.),Weight);
+  hist->fD0->Fill(Seed->fD0,Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -254,26 +315,15 @@ void TTriggerAnaModule::FillTrackHistograms(HistBase_t* Hist, TStnTrack* Track) 
 }
 
 //-----------------------------------------------------------------------------
-// 
-//-----------------------------------------------------------------------------
-void TTriggerAnaModule::FillEventHistograms(HistBase_t* Hist) {
-//   double            cos_th, xv, yv, rv, zv, p;
-//   TLorentzVector    mom;
+void TTriggerAnaModule::FillTriggerHistograms(HistBase_t* Hist) {
+  TriggerHist_t* hist = (TriggerHist_t*) Hist;
 
-  EventHist_t* hist = (EventHist_t*) Hist;
+  int nb = fTriggerBlock->Paths()->GetNBits();
 
-  int event_number = GetHeaderBlock()->EventNumber();
-  int run_number   = GetHeaderBlock()->RunNumber();
-
-  hist->fEventNumber->Fill(event_number);
-  hist->fRunNumber->Fill(run_number);
-  hist->fPassed->Fill(fPassed);
-  hist->fNTimeClusters->Fill(fNTimeClusters);
-  hist->fNHelices->Fill(fNHelices);
-  hist->fNTrackSeeds[0]->Fill(fNTrackSeeds[0]);
-  hist->fNTrackSeeds[1]->Fill(fNTrackSeeds[1]);
-  hist->fNGoodSeeds->Fill(fNGoodSeeds);
-  hist->fNTracks->Fill(fNTracks);
+  for (int i=0; i<nb; i++) {
+    int passed = fTriggerBlock->PathPassed(i);
+    if (passed) hist->fBits->Fill(i);
+  }
 }
 
 //_____________________________________________________________________________
@@ -291,17 +341,19 @@ void TTriggerAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // track seed histograms
 //
-// TSEED_0: all track seeds
-// TSEED_1: track seeds  |D0| < 200
+// TSEED_0 : all track seeds
+// TSEED_1 : track seeds  |D0| < 200
+// TSEED_11: track seeds  |D0| < 200, DIO weight
 //-----------------------------------------------------------------------------
   for (int i=0; i<fNTrackSeeds[0]; i++) {
     TStnTrackSeed* tseed = fTrackSeedBlock->TrackSeed(i);
     FillTrackSeedHistograms(fHist.fTrackSeed[0],tseed);
     if (fabs(tseed->fD0) < 200.) {
        FillTrackSeedHistograms(fHist.fTrackSeed[1],tseed);
-       if (tseed->fP > 80.) {
+       if (tseed->fP > fMinTrigMom) {
 	 FillTrackSeedHistograms(fHist.fTrackSeed[2],tseed);
        }
+       FillTrackSeedHistograms(fHist.fTrackSeed[11],tseed,fWeight);
     }
   }
 //-----------------------------------------------------------------------------
@@ -338,8 +390,16 @@ void TTriggerAnaModule::FillHistograms() {
 // EVT_0: all events
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
-  if (fNGoodSeeds  > 0) FillEventHistograms(fHist.fEvent[1]);
-  if (fNGoodTracks > 0) FillEventHistograms(fHist.fEvent[2]);
+  if (fNTrackSeeds[0] > 0) FillEventHistograms(fHist.fEvent[1]);
+  if (fNGoodSeeds     > 0) FillEventHistograms(fHist.fEvent[2]);
+
+  if (fNTrackSeeds[0] > 0) FillEventHistograms(fHist.fEvent[11],fWeight);
+//-----------------------------------------------------------------------------
+// trigger histograms
+//
+// TRIG_0: all events
+//-----------------------------------------------------------------------------
+  FillTriggerHistograms(fHist.fTrigger[0]);
 }
 
 //-----------------------------------------------------------------------------
@@ -349,11 +409,13 @@ int TTriggerAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("TimeClusterBlock" ,"TStnTimeClusterBlock" , &fTimeClusterBlock );
-  RegisterDataBlock("HelixBlock"    ,"TStnHelixBlock"    , &fHelixBlock    );
-  RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"    , &fTrackBlock    );
-  RegisterDataBlock("TrackSeedBlock","TStnTrackSeedBlock", &fTrackSeedBlock);
-  RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock"  , &fClusterBlock  );
+  RegisterDataBlock("GenpBlock"       , "TGenpBlock"          , &fGenpBlock       );
+  RegisterDataBlock("TimeClusterBlock", "TStnTimeClusterBlock", &fTimeClusterBlock);
+  RegisterDataBlock("HelixBlock"      , "TStnHelixBlock"      , &fHelixBlock      );
+  RegisterDataBlock("TrackBlock"      , "TStnTrackBlock"      , &fTrackBlock      );
+  RegisterDataBlock("TrackSeedBlock"  , "TStnTrackSeedBlock"  , &fTrackSeedBlock  );
+  RegisterDataBlock("ClusterBlock"    , "TStnClusterBlock"    , &fClusterBlock    );
+  RegisterDataBlock("TriggerBlock"    , "TStnTriggerBlock"    , &fTriggerBlock    );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -385,19 +447,62 @@ int TTriggerAnaModule::Event(int ientry) {
   //  double                p;
   //  TLorentzVector        mom;
 
+  fGenpBlock->GetEntry(ientry);
   fTimeClusterBlock->GetEntry(ientry);
   fHelixBlock->GetEntry(ientry);
   fTrackBlock->GetEntry(ientry);
   fTrackSeedBlock->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
+  fTriggerBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
-// consider an event passed, if there is a track with loosely defined quality
+// MC generator info
 //-----------------------------------------------------------------------------
-  fPassed     = 0;
+  TGenParticle* genp;
+  int           pdg_code, generator_code;
+
+  fParticle = NULL;
+  fNGenp    = fGenpBlock->NParticles();
+
+  TStntuple* stnt = TStntuple::Instance();
+
+  for (int i=fNGenp-1; i>=0; i--) {
+    genp           = fGenpBlock->Particle(i);
+    pdg_code       = genp->GetPdgCode();
+    generator_code = genp->GetStatusCode();
+    if ((abs(pdg_code) == fPdgCode) && (generator_code == fProcessCode)) {
+      fParticle = genp;
+      break;
+    }
+  }
+
+  fProcessCode = -1;
+  fWeight      =  1;
+
+  TLorentzVector    mom (1.,0.,0.,0);
+
+  if (fParticle) {
+    if ((fParticle->GetStatusCode() == 7) && (fParticle->GetPdgCode() == 11)) {
+//-----------------------------------------------------------------------------
+// flat electrons
+//-----------------------------------------------------------------------------
+      fProcessCode = 7;
+
+      fParticle->Momentum(mom);
+      double e     = mom.E();
+      fWeight      = stnt->DioWeightAl(e);
+    }
+  }
+
+  fMcMom       = mom.P();
+  fMcCosTh     = mom.Pz()/fMcMom;
+//-----------------------------------------------------------------------------
+// consider an event passed, if there is a track seed with loosely defined quality
+//-----------------------------------------------------------------------------
+  fPassed        = 0;
   fNTimeClusters = fTimeClusterBlock->NTimeClusters(); // all
-  fNHelices   = fHelixBlock->NHelices(); // all
-  fNTracks    = fTrackBlock->NTracks();
-  fNGoodSeeds = 0;
+  fNHelices      = fHelixBlock->NHelices(); // all
+  fNTracks       = fTrackBlock->NTracks();
+  fNGoodSeeds    = 0;
 
   fNTrackSeeds[0] = fTrackSeedBlock->NTrackSeeds(); // all
   fNTrackSeeds[1] = 0;
@@ -408,7 +513,7 @@ int TTriggerAnaModule::Event(int ientry) {
     TStnTrackSeed* tseed = fTrackSeedBlock->TrackSeed(i);
     if (fabs(tseed->fD0) < 200.) {
       fNTrackSeeds[1] += 1;
-      if (tseed->fP > 80) {
+      if (tseed->fP > fMinTrigMom) {
 	fNGoodSeeds += 1;
       }
     }

@@ -5,6 +5,8 @@
 
 #pragma link C++ function plot_pbar_kinematics;
 #pragma link C++ function plot_pbar_yield;
+#pragma link C++ function pbar_bgr;
+#pragma link C++ function pbar_xsec_norm;
 
 #endif
 

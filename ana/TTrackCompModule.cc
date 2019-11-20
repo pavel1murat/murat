@@ -80,6 +80,11 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title):
     }
   }
 //-----------------------------------------------------------------------------
+// TStntuple 
+//-----------------------------------------------------------------------------
+  fStnt = TStntuple::Instance();
+
+//-----------------------------------------------------------------------------
 // track ID for RMC background estimates
 //-----------------------------------------------------------------------------
   fTrackID_RMC = new TStnTrackID();
@@ -567,10 +572,8 @@ void TTrackCompModule::BookHistograms() {
 
   book_track_histset[171] = 1; track_selection[171] = new TString("PAR+ tracks with final selections");
   book_track_histset[172] = 1; track_selection[172] = new TString("PAR- tracks with final selections");
-  book_track_histset[173] = 1; track_selection[173] = new TString("PAR+ tracks with final selections and RMC weight");
-  book_track_histset[174] = 1; track_selection[174] = new TString("PAR- tracks with final selections and RMC weight");
-  book_track_histset[175] = 1; track_selection[175] = new TString("PAR+ tracks with final selections and RPC weight");
-  book_track_histset[176] = 1; track_selection[176] = new TString("PAR- tracks with final selections and RPC weight");
+  book_track_histset[173] = 1; track_selection[173] = new TString("PAR+ tracks with final selections and process-defined weight");
+  book_track_histset[174] = 1; track_selection[174] = new TString("PAR- tracks with final selections and process-defined weight");
 
   book_track_histset[177] = 1; track_selection[177] = new TString("cosmics+: #171 + 90 < p < 93");
   book_track_histset[178] = 1; track_selection[178] = new TString("cosmics-: #172 + 90 < p < 93");
@@ -638,10 +641,8 @@ void TTrackCompModule::BookHistograms() {
 
   book_track_histset[271] = 1; track_selection[271] = new TString("DAR+ tracks with final selections");
   book_track_histset[272] = 1; track_selection[272] = new TString("DAR- tracks with final selections");
-  book_track_histset[273] = 1; track_selection[273] = new TString("DAR+ tracks with final selections and RMC weight");
-  book_track_histset[274] = 1; track_selection[274] = new TString("DAR- tracks with final selections and RMC weight");
-  book_track_histset[275] = 1; track_selection[275] = new TString("DAR+ tracks with final selections and RPC weight");
-  book_track_histset[276] = 1; track_selection[276] = new TString("DAR- tracks with final selections and RPC weight");
+  book_track_histset[273] = 1; track_selection[273] = new TString("DAR+ tracks with final selections and process-defined weight");
+  book_track_histset[274] = 1; track_selection[274] = new TString("DAR- tracks with final selections and process-defined weight");
 
   book_track_histset[277] = 1; track_selection[277] = new TString("cosmics+: #271 + 90 < p < 93");
   book_track_histset[278] = 1; track_selection[278] = new TString("cosmics-: #272 + 90 < p < 93");
@@ -789,7 +790,7 @@ void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
 //-----------------------------------------------------------------------------
   if (fProcess == 41) {
     Hist->fGMom->Fill   (fPhotonE, 1.);
-    Hist->fGMomRMC->Fill(fPhotonE, fWtRMC);
+    Hist->fGMomRMC->Fill(fPhotonE, fWeight);
   }
 }
 
@@ -1126,7 +1127,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // EVT_41: events with good DAR positron track 
 //-----------------------------------------------------------------------------
-  if ((fNTracks[kDAR] > 0) && (fWtRMC > 0)) {
+  if ((fNTracks[kDAR] > 0) && (fWeight > 0)) {
     TStnTrack*  trk = fTrackBlock[kDAR]->Track(0);
     TrackPar_t* tp  = &fTrackPar[kDAR][0];
     if ((trk->P0() > 85) && (tp->fIDWord_RMC == 0) && (trk->Charge() > 0)) {
@@ -1452,10 +1453,7 @@ void TTrackCompModule::FillHistograms() {
 // positive tracks
 //-----------------------------------------------------------------------------
 	  FillTrackHistograms  (fHist.fTrack[ihist+71],trk,tp);
-	  
-	  if ((fProcess == 41) || (fProcess == 42)) FillTrackHistograms(fHist.fTrack[ihist+73],trk,tp,fWtRMC); // RMC
-	  if ((fProcess == 11) || (fProcess == 22)) FillTrackHistograms(fHist.fTrack[ihist+75],trk,tp,fWtRPC); // RPC
-	  
+	  if (fProcess != -1) FillTrackHistograms(fHist.fTrack[ihist+73],trk,tp,fWeight); 
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+77],trk,tp);            // for cosmics
 	}
 	else {
@@ -1463,8 +1461,7 @@ void TTrackCompModule::FillHistograms() {
 // negative tracks
 //-----------------------------------------------------------------------------
 	  FillTrackHistograms(fHist.fTrack[ihist+72],trk,tp);
-	  if ((fProcess == 41) || (fProcess == 42)) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,fWtRMC); // RMC weighting
-	  if ((fProcess == 11) || (fProcess == 22)) FillTrackHistograms(fHist.fTrack[ihist+76],trk,tp,fWtRPC); // RPC
+	  if (fProcess > 0) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,fWeight);                       // weighting
 	  
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp);            // for cosmics
 
@@ -1831,6 +1828,7 @@ int TTrackCompModule::Event(int ientry) {
 // be changed
 //-----------------------------------------------------------------------------
   fNGenp       = fGenpBlock->NParticles();
+  fNSimp       = fSimpBlock->NParticles();
   fNClusters   = fClusterBlock->NClusters();
   fNHelices    = fHelixBlock->NHelices();
   fNTrackSeeds = fTrackSeedBlock->NTrackSeeds();
@@ -1861,8 +1859,9 @@ int TTrackCompModule::Event(int ientry) {
   }
 
   fProcess = -1;
-  fWtRMC   =  1.;
-  fWtRPC   =  1.;
+  // fWtRMC   =  1.;
+  // fWtRPC   =  1.;
+  fWeight  =  1.;
   fPhotonE = -1.;
 
   if (fNGenp > 0) {
@@ -1873,23 +1872,20 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
       fProcess = 41;
       fPhotonE = p0->Energy();
-      fWtRMC   = TStntuple::RMC_ClosureAppxWeight(fPhotonE,fKMaxRMC);
+      fWeight  = TStntuple::RMC_ClosureAppxWeight(fPhotonE,fKMaxRMC);
     }
     else if ((p0->GetStatusCode() == 11) && (p0->GetPdgCode() == 22)) {
 //-----------------------------------------------------------------------------
-// RMC
+// RPC
 //-----------------------------------------------------------------------------
       fProcess = 11;
       fPhotonE = p0->Energy();
       double time_wt = fGenpBlock->Weight();
-      fWtRPC   = TStntuple::RPC_PhotonEnergyWeight(fPhotonE)*time_wt;
+      fWeight  = TStntuple::RPC_PhotonEnergyWeight(fPhotonE)*time_wt;
     }
   }
-
-  if (fParticle) fEleE = fParticle->Energy();
-  else           fEleE = -1.;
 //-----------------------------------------------------------------------------
-// may want to revisit the definition of fSimp in the future
+// may want to revisit the definition of fSimp in future
 //-----------------------------------------------------------------------------
   fSimp             = fSimpBlock->Particle(0);
   fSimPar.fParticle = fSimp;
@@ -1897,6 +1893,33 @@ int TTrackCompModule::Event(int ientry) {
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
   fSimPar.fGenp     = NULL;
+//-----------------------------------------------------------------------------
+// sometimes, there is no GENP info - as in Bob's pbar dataset
+//-----------------------------------------------------------------------------
+  if ((fProcess == -1) && (fNSimp > 0)) {
+    if (fSimp->PDGCode() == -2212) {
+//-----------------------------------------------------------------------------
+// pbar production, assume Bob's dataset
+// assuming parent particle exists, determine the production cross-section weight
+// pbeam, nx, ny: the beam momentum and direction
+//-----------------------------------------------------------------------------
+      double pbeam(8.9), nx(-0.24192190), nz(-0.97029573);
+      const TLorentzVector* sm = fSimp->StartMom();
+      double px    = sm->Px();
+      double pz    = sm->Pz();
+      double costh = (px*nx+pz*nz)/sqrt(px*px+pz*pz);
+      double th    = TMath::ACos(costh);
+//-----------------------------------------------------------------------------
+// convert momentum to GeV/c
+//-----------------------------------------------------------------------------
+      double plab  = sm->P()/1000.;  
+
+      fWeight      = fStnt->PBar_Striganov_d2N(pbeam,plab,th);
+    }
+  }
+
+  if (fParticle) fEleE = fParticle->Energy();
+  else           fEleE = -1.;
 //-----------------------------------------------------------------------------
 // virtual detectors - for fSimp need parameters at the tracker front
 //-----------------------------------------------------------------------------

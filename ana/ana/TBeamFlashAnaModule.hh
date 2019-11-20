@@ -16,11 +16,7 @@
 
 #include "Stntuple/base/TStnArrayI.hh"
 
-#include "Stntuple/alg/TStnTrackID.hh"
-#include "Stntuple/alg/TEmuLogLH.hh"
-
 #include "murat/ana/HistBase_t.h"
-
 #include "murat/ana/AnaDefs.hh"
 
 class TBeamFlashAnaModule: public TStnModule {

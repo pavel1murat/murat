@@ -18,8 +18,7 @@
 
 #include "Stntuple/base/TStnArrayI.hh"
 
-#include "Stntuple/alg/TStnTrackID.hh"
-#include "Stntuple/alg/TEmuLogLH.hh"
+#include "Stntuple/alg/TStntuple.hh"
 
 #include "murat/ana/HistBase_t.h"
 #include "murat/ana/SimPar_t.hh"
@@ -95,7 +94,9 @@ public:
 
   struct SimpData_t {
     int           fIndex;		// so far, not used
-    TSimParticle* fParent;              // muon parent
+    TSimParticle* fParent;              // parent (in production vertex)
+    int           fStage;               // for this particle
+    double        fWeight;
   };
 
   struct SpmcData_t {
@@ -143,7 +144,10 @@ public:
   int                   fNSimp;
   int                   fStage;
 
-  SimPar_t              fSimPar[kMaxNSimp];
+  SimpData_t            fSimData[kMaxNSimp];
+
+  TStntuple*            fStnt;
+  double                fWeight; // event weight, determined by the production cross section
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -179,8 +183,8 @@ public:
   void    BookVDetHistograms         (HistBase_t* Hist, const char* Folder);
 
   void    FillEventHistograms        (HistBase_t* Hist);
-  void    FillSimpHistograms         (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData);
-  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData);
+  void    FillSimpHistograms         (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData, double Weight = 1.);
+  void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
   void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step);
 
   void    BookHistograms();

@@ -66,12 +66,12 @@ void pbar_xsec_norm_2(double PBeam, long int NEvents) {
   double mP      = 0.938272;           // [ GeV  ], proton mass
   double twopi   = 2*M_PI;
 
-  float p2max = 2.0;
+  //  float p2max = 2.0;
 
   TH2D* h_pbar_bgr = new TH2D("h_pbar_bgr","h_pbar_bgr: cross sec", 1000,0,5,200,-1,1);
 
-  double binx = h_pbar_bgr->GetXaxis()->GetBinWidth(1);
-  double biny = h_pbar_bgr->GetYaxis()->GetBinWidth(1);
+  // double binx = h_pbar_bgr->GetXaxis()->GetBinWidth(1);
+  // double biny = h_pbar_bgr->GetYaxis()->GetBinWidth(1);
 
   double   rn[2];
   TRandom3 trn3;
@@ -90,7 +90,7 @@ void pbar_xsec_norm_2(double PBeam, long int NEvents) {
 // dp^3 = 2pi*p^2*dp*dcosth (integrated over phi)
 //-----------------------------------------------------------------------------
     double cf = twopi*plab*plab/e;
-    double w  = TStntuple::PBar_Striganov_Ed3SigdP3(pbeam,plab,thlab)*cf; 
+    double w  = stnt->PBar_Striganov_Ed3SigdP3(pbeam,plab,thlab)*cf; 
 
 //    printf("pbeam: %12.5f plab: %12.5f thlab: %12.5f cf: %12.5f w: %12.5e\n",pbeam,plab,thlab,cf,w);
 

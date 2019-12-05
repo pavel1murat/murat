@@ -3,6 +3,8 @@
 
 #include "murat/alg/TFeldmanCousinsA.hh"
 
+#include "TCanvas.h"
+
 ClassImp(TFeldmanCousinsA)
 
 //-----------------------------------------------------------------------------
@@ -62,6 +64,11 @@ void TFeldmanCousinsA::Init(double Bgr, double Sig) {
   
   InitPoissonDist(fMeanBgr         , fBgProb, MaxNx);
   InitPoissonDist(fMeanBgr+fMeanSig, fBsProb, MaxNx);
+
+  fCumBsProb[0] = fBsProb[0];
+  for (int i=1; i<MaxNx;i++) {
+    fCumBsProb[i] = fCumBsProb[i-1]+fBsProb[i];
+  }
 //-----------------------------------------------------------------------------
 // re-initialize 1D histograms
 //-----------------------------------------------------------------------------
@@ -190,13 +197,112 @@ void TFeldmanCousinsA::PrintProbs(int N) {
   printf(" <bgr> = %10.4f <sig> = %10.4f\n",fMeanBgr,fMeanSig);
   printf(" IMin, IMax, Prob = %3i %3i %12.5f\n",fIMin,fIMax,fProb);
 
-  PrintData("BgProb"  ,'d',fBgProb  ,N);
-  PrintData("BestSig" ,'d',fBestSig ,N);
-  PrintData("BsProb"  ,'d',fBsProb  ,N);
-  PrintData("BestProb",'d',fBestProb,N);
-  PrintData("LhRatio" ,'d',fLhRatio ,N);
-  PrintData("Rank   " ,'i',fRank    ,N);
+  PrintData("BgProb"  ,'d',fBgProb   ,N);
+  PrintData("BestSig" ,'d',fBestSig  ,N);
+  PrintData("BsProb"  ,'d',fBsProb   ,N);
+  PrintData("CuBsProb",'d',fCumBsProb,N);
+  PrintData("BestProb",'d',fBestProb ,N);
+  PrintData("LhRatio" ,'d',fLhRatio  ,N);
+  PrintData("Rank   " ,'i',fRank     ,N);
 }
+
+//-----------------------------------------------------------------------------
+int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NSteps) {
+
+  double step = (SMax-SMin)/NSteps;
+
+  for (int i=0; i<NSteps; i++) {
+    double s = SMin+(i+0.5)*step;
+    ConstructInterval(Bgr,s);
+    for (int ix=0; ix<MaxNx; ix++) {
+      if ((ix < fIMin) || (ix > fIMax)) fBelt[i][ix] = 0;
+      else                              fBelt[i][ix] = 1;
+    }
+  }
+  return 0;
+}
+
+
+//-----------------------------------------------------------------------------
+// constructing the FC belt assumes dividing the signal interval into NSteps,
+// make that a parameter
+// calculation of the median for low expected backgrounds doesn't have much sense,
+// so the mean is a preference
+//-----------------------------------------------------------------------------
+double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NSteps) {
+
+  ConstructBelt(Bgr, SMin, SMax, NSteps);
+
+  double step = (SMax-SMin)/NSteps;
+  
+  TH2D* h_belt = new TH2D("h2","FC belt",
+			  TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
+			  NSteps,SMin-step/2,SMax-step/2);
+  
+  for (int iy=0; iy<NSteps; iy++) {
+    for (int ix=0; ix<TFeldmanCousinsA::MaxNx; ix++) {
+      h_belt->SetBinContent(ix+1,iy+1,fBelt[iy][ix]);
+    }
+  }
+
+  TCanvas* c_belt = new TCanvas("c_belt","plot h_belt",1000,800);
+  c_belt->cd();
+
+  h_belt->Draw("box");
+
+  double sbelt[2][TFeldmanCousinsA::MaxNx];
+  
+  for (int ix=0; ix<TFeldmanCousinsA::MaxNx; ix++) {
+    int iymin     = 0;
+    int iymax     = 0;
+    int inside    = 0;
+    for (int iy=0; iy<NSteps; iy++) {
+      if (fBelt[iy][ix] > 0) {
+	if (inside == 0) {
+	  iymin     = iy;
+	  inside    = 1;
+	}
+      }
+      else {
+	if (inside == 1) {
+	  iymax     = iy;
+	  inside    = 0;
+	  break;
+	}
+      }
+    }
+
+    sbelt[0][ix] = (iymin+0.5)*step;
+    sbelt[1][ix] = (iymax+0.5)*step;
+
+    printf("ix, smin, smax : %3i %12.5f %12.5f\n",ix,sbelt[0][ix],sbelt[1][ix]);
+  }
+//-----------------------------------------------------------------------------
+// now generate bgr-only pseudo-experiments and plot the distribution
+// for the excluded signal strength
+//-----------------------------------------------------------------------------
+  TH1D* h1 = new TH1D("h1","excluded",2000,0,20);
+  TRandom3 trn;
+  for (int i=0; i<1000000; i++) {
+    int rn = trn.Poisson(Bgr);
+    if (rn < TFeldmanCousinsA::MaxNx) {
+      h1->Fill(sbelt[1][rn]);
+    }
+    else {
+      printf("trouble, Bill Robertson: rn = %3i\n",rn);
+    }
+  }
+
+  TCanvas* c2 = new TCanvas("c2","plot h1",1000,800);
+  c2->cd();
+  h1->Draw();
+
+  double fc_upper_limit = h1->GetMean();
+  printf(" mean excluded value : %12.5f\n",fc_upper_limit);
+  return fc_upper_limit;
+
+}
+
 
 //-----------------------------------------------------------------------------
 // in general, need to scan a range of signals, call this function multiple times

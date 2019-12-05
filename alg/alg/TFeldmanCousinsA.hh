@@ -12,6 +12,7 @@ class TFeldmanCousinsA : public TNamed {
 public:
   enum {
 	MaxNx = 100,            // max Poisson bin
+	MaxNy = 10000,          // max steps in Mu
   } ;   
   
   double   fCL;
@@ -32,6 +33,8 @@ public:
   double   fBgProb  [MaxNx];
   double   fBsProb  [MaxNx];
 
+  double   fCumBsProb[MaxNx];
+
   double   fFactorial[MaxNx]; // precalculate to speed things up
   
   // X(Bg) - Poisson random number sampled from Bg     distribution
@@ -47,6 +50,8 @@ public:
   int      fIMax;
   int      fNSummed;          // likely, fIMax-fIMin+1
   double   fProb;
+
+  int      fBelt[MaxNy][MaxNx];     // assume 10000 to be large enough for MaxNy
 //-----------------------------------------------------------------------------
 // functions
 //-----------------------------------------------------------------------------
@@ -60,6 +65,8 @@ public:
   void   InitPoissonDist(double Mean, double* Prob, int NMax);
 
   int    ConstructInterval(double Bgr, double Sig);
+  
+  int    ConstructBelt    (double Bgr, double SMin, double SMax, int NSteps);
 
   void   PrintData(const char* Title, char DataType, void* Data, int MaxInd);
   void   PrintProbs(int N);
@@ -68,6 +75,9 @@ public:
   // where discovery is defined as 
   void   DiscoveryProb(double Bgr, double Sig);
 
+  // make sure NSteps < 10000
+  double UpperLimit(double Bgr, double SMin, double SMax, int NSteps);
+  
   ClassDef(TFeldmanCousinsA,0)
 };
 

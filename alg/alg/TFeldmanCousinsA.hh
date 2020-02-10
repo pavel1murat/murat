@@ -36,6 +36,8 @@ public:
   double   fCumBsProb[MaxNx];
 
   double   fFactorial[MaxNx]; // precalculate to speed things up
+
+  double   fSBelt[2][MaxNx];   // belt boundaries
   
   // X(Bg) - Poisson random number sampled from Bg     distribution
   // X(Bs) - Poisson random number sampled from Bg+Sig distribution
@@ -43,7 +45,8 @@ public:
   long int fNPE;	      // N(pseudo experiments) to throw
 
   TH1D*    fProbHist;
-  TH1D*    fBeltHist;
+  TH1D*    fIntervalHist;     // histogram showing current interval
+  TH2D*    fBeltHist;
   
   int      fDebugLevel;
   int      fIMin;

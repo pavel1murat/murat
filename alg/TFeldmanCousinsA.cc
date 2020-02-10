@@ -39,8 +39,9 @@ TFeldmanCousinsA::TFeldmanCousinsA(const char* Name, double CL, int DebugLevel):
   fBgProbHist    = new TH1D(Form("h_bg_prob_%s",GetName()),"h_bg_prob",MaxNx,0,MaxNx);
   fBsProbHist    = new TH1D(Form("h_bs_prob_%s",GetName()),"h_bs_prob",MaxNx,0,MaxNx);
 
-  fProbHist      = new TH1D(Form("h_prob_2D_%s",GetName()),"h prob 2D",MaxNx,-0.5,MaxNx-0.5);
-  fBeltHist      = new TH1D(Form("h_belt_2D_%s",GetName()),"h belt 2D",MaxNx,-0.5,MaxNx-0.5);
+  fProbHist      = new TH1D(Form("h_prob_2D_%s" ,GetName()),"h prob 2D" ,MaxNx,-0.5,MaxNx-0.5);
+  fIntervalHist  = new TH1D(Form("h_interval_%s",GetName()),"h interval",MaxNx,-0.5,MaxNx-0.5);
+  fBeltHist      = nullptr;
 
   fNPE           = 10000000;
 }
@@ -76,6 +77,8 @@ void TFeldmanCousinsA::Init(double Bgr, double Sig) {
     fBgProbHist->SetBinContent(i+1,fBgProb[i]);
     fBsProbHist->SetBinContent(i+1,fBsProb[i]);
   }
+
+  fIntervalHist->Reset();
 }
 
 //-----------------------------------------------------------------------------
@@ -107,7 +110,7 @@ int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
     fRank[i] = i;
   }
 
-  for (int i1=0; i1<MaxNx; i1++) {
+  for (int i1=0; i1<MaxNx-1; i1++) {
     rmax = fLhRatio[fRank[i1]];
     for (int i2=i1+1; i2<MaxNx; i2++) {
       double r2 = fLhRatio[fRank[i2]];
@@ -117,6 +120,10 @@ int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
 	fRank[i1] = fRank[i2];
 	fRank[i2] = i;
       }
+    }
+
+    if (fDebugLevel > 0) {
+      PrintData("Rank   " ,'i',fRank     ,18);
     }
   }
 //-----------------------------------------------------------------------------
@@ -135,7 +142,7 @@ int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
     if (ind < fIMin) fIMin = ind;
     if (ind > fIMax) fIMax = ind;
 
-    if(fDebugLevel > 0) {
+    if (fDebugLevel > 0) {
       printf(" ix ind=fRank[ix] fBsProb[ind] fProb, 1-fProb fIMin fIMax :%3i %3i %10.3e %10.3e %10.3e %3i %3i\n",
 	     ix,ind,fBsProb[ind],fProb,1-fProb,fIMin,fIMax);
     }
@@ -153,7 +160,7 @@ int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
 // suppose, everything is OK, update the belt histogram
 //-----------------------------------------------------------------------------
   for (int i=fIMin; i<=fIMax; i++) {
-    fBeltHist->SetBinContent(i+1,1);
+    fIntervalHist->SetBinContent(i+1,1);
   }
 //-----------------------------------------------------------------------------
 // finally, build the probability histogram
@@ -207,18 +214,56 @@ void TFeldmanCousinsA::PrintProbs(int N) {
 }
 
 //-----------------------------------------------------------------------------
+// construct belt, fill belt histogram
+//-----------------------------------------------------------------------------
 int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NSteps) {
 
   double step = (SMax-SMin)/NSteps;
 
-  for (int i=0; i<NSteps; i++) {
-    double s = SMin+(i+0.5)*step;
+  if (fBeltHist) delete fBeltHist;
+
+  fBeltHist = new TH2D("h_belt","FC belt",TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
+ 	               NSteps,SMin-step/2,SMax-step/2);
+  
+  for (int iy=0; iy<NSteps; iy++) {
+    double s = SMin+(iy+0.5)*step;
     ConstructInterval(Bgr,s);
     for (int ix=0; ix<MaxNx; ix++) {
-      if ((ix < fIMin) || (ix > fIMax)) fBelt[i][ix] = 0;
-      else                              fBelt[i][ix] = 1;
+      if ((ix < fIMin) || (ix > fIMax)) fBelt[iy][ix] = 0;
+      else                              fBelt[iy][ix] = 1;
+
+      fBeltHist->SetBinContent(ix+1,iy+1,fBelt[iy][ix]);
     }
   }
+//-----------------------------------------------------------------------------
+// for convenience, for each N, number of measured events, define the belt boundaries - fSBelt
+//-----------------------------------------------------------------------------
+  for (int ix=0; ix<MaxNx; ix++) {
+    int iymin     = 0;
+    int iymax     = 0;
+    int inside    = 0;
+    for (int iy=0; iy<NSteps; iy++) {
+      if (fBelt[iy][ix] > 0) {
+	if (inside == 0) {
+	  iymin   = iy;
+	  inside  = 1;
+	}
+      }
+      else {
+	if (inside == 1) {
+	  iymax   = iy;
+	  inside  = 0;
+	  break;
+	}
+      }
+    }
+
+    fSBelt[0][ix] = (iymin+0.5)*step;
+    fSBelt[1][ix] = (iymax+0.5)*step;
+
+    printf("ix, smin, smax : %3i %12.5f %12.5f\n",ix,fSBelt[0][ix],fSBelt[1][ix]);
+  }
+
   return 0;
 }
 
@@ -233,60 +278,24 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
 
   ConstructBelt(Bgr, SMin, SMax, NSteps);
 
-  double step = (SMax-SMin)/NSteps;
-  
-  TH2D* h_belt = new TH2D("h2","FC belt",
-			  TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
-			  NSteps,SMin-step/2,SMax-step/2);
-  
-  for (int iy=0; iy<NSteps; iy++) {
-    for (int ix=0; ix<TFeldmanCousinsA::MaxNx; ix++) {
-      h_belt->SetBinContent(ix+1,iy+1,fBelt[iy][ix]);
-    }
-  }
-
-  TCanvas* c_belt = new TCanvas("c_belt","plot h_belt",1000,800);
-  c_belt->cd();
-
-  h_belt->Draw("box");
-
-  double sbelt[2][TFeldmanCousinsA::MaxNx];
-  
-  for (int ix=0; ix<TFeldmanCousinsA::MaxNx; ix++) {
-    int iymin     = 0;
-    int iymax     = 0;
-    int inside    = 0;
-    for (int iy=0; iy<NSteps; iy++) {
-      if (fBelt[iy][ix] > 0) {
-	if (inside == 0) {
-	  iymin     = iy;
-	  inside    = 1;
-	}
-      }
-      else {
-	if (inside == 1) {
-	  iymax     = iy;
-	  inside    = 0;
-	  break;
-	}
-      }
-    }
-
-    sbelt[0][ix] = (iymin+0.5)*step;
-    sbelt[1][ix] = (iymax+0.5)*step;
-
-    printf("ix, smin, smax : %3i %12.5f %12.5f\n",ix,sbelt[0][ix],sbelt[1][ix]);
-  }
 //-----------------------------------------------------------------------------
-// now generate bgr-only pseudo-experiments and plot the distribution
+// now generate background-only pseudo-experiments and plot the distribution
 // for the excluded signal strength
 //-----------------------------------------------------------------------------
+//  double step = (SMax-SMin)/NSteps;
+
   TH1D* h1 = new TH1D("h1","excluded",2000,0,20);
   TRandom3 trn;
   for (int i=0; i<1000000; i++) {
     int rn = trn.Poisson(Bgr);
-    if (rn < TFeldmanCousinsA::MaxNx) {
-      h1->Fill(sbelt[1][rn]);
+
+    if (fDebugLevel > 0) {
+      printf("Bgr, rn, fSBelt[0][rn], fSBelt[1][rn] = %12.5e %5i %12.5e %12.5e\n",
+	Bgr,rn,fSBelt[0][rn], fSBelt[1][rn]);
+    }
+
+    if (rn < MaxNx) {
+      h1->Fill(fSBelt[1][rn]);
     }
     else {
       printf("trouble, Bill Robertson: rn = %3i\n",rn);
@@ -297,10 +306,13 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
   c2->cd();
   h1->Draw();
 
+  TCanvas* c_belt = new TCanvas("c_belt","Belt Histogram",1000,800);
+  c_belt->cd();
+  fBeltHist->Draw("box");
+
   double fc_upper_limit = h1->GetMean();
   printf(" mean excluded value : %12.5f\n",fc_upper_limit);
   return fc_upper_limit;
-
 }
 
 

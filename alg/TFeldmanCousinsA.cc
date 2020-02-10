@@ -222,7 +222,7 @@ int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NS
 
   if (fBeltHist) delete fBeltHist;
 
-  fBeltHist = new TH2D("h_belt","FC belt",TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
+  fBeltHist = new TH2D(Form("h_belt_%s",GetName()),"FC belt",TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
  	               NSteps,SMin-step/2,SMax-step/2);
   
   for (int iy=0; iy<NSteps; iy++) {
@@ -282,9 +282,7 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
 // now generate background-only pseudo-experiments and plot the distribution
 // for the excluded signal strength
 //-----------------------------------------------------------------------------
-//  double step = (SMax-SMin)/NSteps;
-
-  TH1D* h1 = new TH1D("h1","excluded",2000,0,20);
+  TH1D* h1 = new TH1D(Form("h_excluded_%s",GetName()),"excluded",2500,0,50);
   TRandom3 trn;
   for (int i=0; i<1000000; i++) {
     int rn = trn.Poisson(Bgr);
@@ -319,25 +317,44 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
 //-----------------------------------------------------------------------------
 // in general, need to scan a range of signals, call this function multiple times
 //-----------------------------------------------------------------------------
-void TFeldmanCousinsA::DiscoveryProb(double Bgr, double Signal) {
+void TFeldmanCousinsA::DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps) {
 
 //-----------------------------------------------------------------------------
 // construct FC CL confidence interval (covering fCL) assuming no signal
 //-----------------------------------------------------------------------------
   ConstructInterval(Bgr,0);
 
-  double tot = Bgr+Signal;
-  long int ndisc = 0;
-  for (int i=0; i<fNPE; i++) {
-    int rn = fRn.Poisson(tot);
+  double step = (SMax-SMin)/NSteps;
+
+  double x[10000], y[10000];
+
+  int nx = NSteps+1;
+
+  for (int ix=0; ix<nx; ix++) {
+    double sig = SMin+ix*step;
+    double tot = Bgr+sig;
+
+    long int ndisc = 0;
+    for (int i=0; i<fNPE; i++) {
+      int rn = fRn.Poisson(tot);
 //-----------------------------------------------------------------------------
 // definition of discovery: rn > fIMax, i.e  the  probability to observe'rn' is
 // less than 1-fCL
 //-----------------------------------------------------------------------------
-    if (rn > fIMax) ndisc ++;
+      if (rn > fIMax) ndisc ++;
+    }
+    
+    double prob = double(ndisc)/double(fNPE);
+
+    x[ix] = sig;
+    y[ix] = prob;
   }
 
-  double prob = double(ndisc)/double(fNPE);
+  TGraph* gr = new TGraph(nx,x,y);
 
-  printf (">>> ndisc: %10li disc prob = %12.5e\n",ndisc,prob);
+  gr->SetName(Form("gr_bgr_%06i_%s",int(Bgr*1000),GetName()));
+  gr->SetTitle(Form("discovery prob for bgr=%5.3f events",Bgr));
+
+  gr->SetMarkerStyle(20);
+  gr->Draw("alp");
 }

@@ -7,11 +7,12 @@
 #include "TH2.h"
 #include "TMath.h"
 #include "TNamed.h"
+#include  "TGraph.h"
 
 class TFeldmanCousinsA : public TNamed {
 public:
   enum {
-	MaxNx = 100,            // max Poisson bin
+	MaxNx = 200,            // max Poisson bin
 	MaxNy = 10000,          // max steps in Mu
   } ;   
   
@@ -74,9 +75,11 @@ public:
   void   PrintData(const char* Title, char DataType, void* Data, int MaxInd);
   void   PrintProbs(int N);
 
-  // for a given signal and background, calculates probability of a discovery,
-  // where discovery is defined as 
-  void   DiscoveryProb(double Bgr, double Sig);
+  // plot discovery probability for a given background and signal range
+  // calling makes sense only if CL=-1
+  // discovery corresponds to prob=50%
+
+  void   DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps= 10);
 
   // make sure NSteps < 10000
   double UpperLimit(double Bgr, double SMin, double SMax, int NSteps);

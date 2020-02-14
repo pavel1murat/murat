@@ -105,6 +105,10 @@ murat : {
 	debugBits                    : { } # {bit1:1 }
     }
 
+    StrawChargeDeposition : {  module_type:StrawChargeDeposition 
+	spmcCollTag                  : "g4run:tracker"
+    }
+
     TTrackRecoAna : { module_type:TTrackRecoAna
 	diagLevel           : 0
 	trkPatRecLabel      : TrkPatRecDownstreameMinus

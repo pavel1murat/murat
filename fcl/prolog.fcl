@@ -107,6 +107,7 @@ murat : {
 
     StrawChargeDeposition : {  module_type:StrawChargeDeposition 
 	spmcCollTag                  : "g4run:tracker"
+	debugBit                     : -1
     }
 
     TTrackRecoAna : { module_type:TTrackRecoAna

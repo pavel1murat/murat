@@ -60,16 +60,19 @@ namespace mu2e {
 // Module labels 
 //-----------------------------------------------------------------------------
     std::string       _spmcCollTag;
-    const Tracker*    _tracker;     // straw tracker
+    int               _debugBit;
+    const Tracker*    _tracker;         // straw tracker
 
 					// hit flag bits which should be ON and OFF
 
     const mu2e::StepPointMCCollection*  _spmcc;            //
 
     struct Hist_t {
-      TH1F*   _energy;                      // step point energy deposition
-      TH1F*   _energyVsPlane;               // 
+      TH1F*   _stepEnergy;                   // step point energy deposition
+      TH1F*   _totEnergyVsPlane;               // 
+      TH1F*   _stepEnergyPlane[40];        // 
       TH2F*   _strawVsRho[40];
+      TH2F*   _y_vs_x[40];
     } ;
 
     Hist_t _hist;
@@ -94,7 +97,8 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   StrawChargeDeposition::StrawChargeDeposition(fhicl::ParameterSet const& pset): 
     EDFilter            (pset),
-    _spmcCollTag              (pset.get<std::string>("spmcCollTag"            ))
+    _spmcCollTag        (pset.get<std::string>("spmcCollTag")),
+    _debugBit           (pset.get<int>        ("debugBit"   ))
   {
 
   }
@@ -115,12 +119,17 @@ namespace mu2e {
 
     art::ServiceHandle<art::TFileService> tfs;
 
-    _hist._energy        = tfs->make<TH1F>("energy"    ,"Step point energy deposition", 1500,0,  0.15);
-    _hist._energyVsPlane = tfs->make<TH1F>("e_vs_plane","E vs plane", 50,0,  50);
+    _hist._stepEnergy        = tfs->make<TH1F>("eStep"    ,"Step point energy deposition", 1500,0,0.15);
+    _hist._totEnergyVsPlane = tfs->make<TH1F>("e_vs_plane","total E vs plane", 50,0,  50);
 
     for (int i=0; i<36; i++) {
-      _hist._strawVsRho[i]    = tfs->make<TH2F>(Form("straw_vs_rho_%02i",i), Form("straw vs rhoplane %02i",i),
+      _hist._stepEnergyPlane[i] = tfs->make<TH1F>(Form("eStep_%02i",i),Form("E step in plane %02i",i),1500,0,0.15);
+
+      _hist._strawVsRho[i]      = tfs->make<TH2F>(Form("straw_vs_rho_%02i",i), Form("straw vs rho plane %02i",i),
 						100,-1000, 1000,100,0,100);
+
+      _hist._y_vs_x[i]          = tfs->make<TH2F>(Form("y_vs_x_%02i",i), Form("Y vs X plane %02i",i),
+						  100,-1000, 1000,100,-1000,1000);
     }
   }
 //-----------------------------------------------------------------------------
@@ -157,7 +166,7 @@ namespace mu2e {
 
   //-----------------------------------------------------------------------------
   bool StrawChargeDeposition::filter(art::Event& Evt) {
-    // const char* oname = "StrawChargeDeposition::filter";
+    const char* oname = "StrawChargeDeposition::filter";
 
     //    printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
 
@@ -169,6 +178,7 @@ namespace mu2e {
 
     for (int i=0; i<ns; i++) {
       const StepPointMC* step = &_spmcc->at(i);
+      const SimParticle* simp = step->simParticle().get();
       
       const Straw& straw = _tracker->getStraw(step->strawId());
 
@@ -180,17 +190,32 @@ namespace mu2e {
       if (i < 0) printf("%5i %5i %5i %5i \n",plane, panel,layer,ist);
 
       const CLHEP::Hep3Vector& smp = straw.getMidPoint();
+      const CLHEP::Hep3Vector& dir = straw.getDirection();
 
-      double dx = step->position().x()-smp.x();
-      double dy = step->position().y()-smp.y();
+      double x  = step->position().x();
+      double y  = step->position().y();
+      double dx = x-smp.x();
+      double dy = y-smp.y();
 
-      double rho = dx*smp.unit().y()-dy*smp.unit().x();
+      double rho  = dx*smp.unit().y()-dy*smp.unit().x();
+      double rho1 = dx*dir.x()+dy*dir.y();
 
-      //      double rho = sqrt(dx*dx+dy*dy);
 
-      _hist._energy->Fill(step->ionizingEdep());
-      _hist._energyVsPlane->Fill(plane,step->ionizingEdep());
-      _hist._strawVsRho[plane]->Fill(rho,ist,step->ionizingEdep());
+      if ((_debugBit == 1) && (fabs(rho) > 450.)) {
+	printf("[%s] RUN: %10i subrun: %10i EVENT: %10i PDG mom iplane panel ist rho: %10i %12.4f %5i %5i %5i %12.4f %12.4f\n",
+	       oname,Evt.run(),Evt.subRun(),Evt.event(),
+	       simp->pdgId(),simp->startMomentum().vect().mag(),plane,panel,ist,rho,rho1
+	       );
+      }
+
+      _hist._stepEnergy->Fill(step->ionizingEdep());
+
+      _hist._totEnergyVsPlane->Fill(plane,step->ionizingEdep());
+
+      _hist._stepEnergyPlane[plane]->Fill(step->ionizingEdep());
+
+      _hist._strawVsRho[plane]->Fill(rho1,ist,step->ionizingEdep());
+      _hist._y_vs_x    [plane]->Fill(x,y,step->ionizingEdep());
     }
 
     return true;

@@ -18,8 +18,12 @@ helper.handle_dictionaries();
 
 list_of_fortran_files = Glob('*.f',strings=True);
 list_of_cc_files      = Glob('*.cc',strings=True);
-skip_list             = ["plot_ejected_proton_spectrum.cc"]
-libs                  = ['Stntuple_val', 'Stntuple_alg', rootlibs, 'gfortran'];
+skip_list             = [ ] # "plot_ejected_proton_spectrum.cc"]
+libs                  = ['Stntuple_val', 'Stntuple_alg', 
+                         'mu2e_Mu2eUtilities', 
+                         rootlibs, 
+                         'gfortran'
+                         ];
 
 helper.compile_fortran(list_of_fortran_files,skip_list);
 

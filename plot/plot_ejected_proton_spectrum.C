@@ -1,11 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// the code from  Mu2eUtilities/src/EjectedProtonSpectrum.cc
+// the code is cloned from  Mu2eUtilities/src/EjectedProtonSpectrum.cc
 // 'e' is the kinetic energy
 //
 // call:  plot_ejected_proton_spectrum("e") 
 //   or 
 //        plot_ejected_proton_spectrum("p")
 ///////////////////////////////////////////////////////////////////////////////
+#include "Mu2eUtilities/inc/EjectedProtonSpectrum.hh"
 
 double GetEjectedProtontWeight(double* X, double* Par) {
 
@@ -21,25 +22,26 @@ double GetEjectedProtontWeight(double* X, double* Par) {
     //   mu capture in Si.  JEPT 33(1971)11 and PRL 20(1967)569
 
     //these numbers are in MeV!!!!
-    static const double emn = 1.4; // replacing par1 from GMC
+    static const double emn  = 1.4; // replacing par1 from GMC
     static const double par2 = 1.3279;
-    static const double par3=17844.0;
-    static const double par4=.32218;
-    static const double par5=100.;
-    static const double par6=10.014;
-    static const double par7=1050.;
-    static const double par8=5.103;
+    static const double par3 = 17844.0;
+    static const double par4 = .32218;
+    static const double par5 = 100.;
+    static const double par6 = 10.014;
+    static const double par7 = 1050.;
+    static const double par8 = 5.103;
 
     static double MP = 938. ; 
     
     double spectrumWeight;
 
-    double e, p;
+    double e, p, w1(1.);
 
     if (Par[0] == 0) e = X[0];
     else {
-      p = X[0];
-      e = p*p/2/MP;
+      p  = X[0];
+      e  = p*p/(2*MP);
+      w1 = p/MP;
     }
 
     if (e >= 20) {
@@ -58,16 +60,16 @@ double GetEjectedProtontWeight(double* X, double* Par) {
         spectrumWeight = 0.;
     }
 
-    return spectrumWeight;
+    return w1*Par[1]*spectrumWeight;
   }
 
 
 //-----------------------------------------------------------------------------
-// plot energy and momentum distributions
+// plot energy / momentum distributions
 //-----------------------------------------------------------------------------
-void plot_ejected_proton_spectrum(const char* Variable = "e") {
+TF1* ep_fun;
 
-  TF1* ep_fun;
+void plot_ejected_proton_spectrum(const char* Variable = "e") {
 
   TString var = Variable;
 
@@ -75,8 +77,10 @@ void plot_ejected_proton_spectrum(const char* Variable = "e") {
 
   if (var == "e") {
 
-    ep_fun = new TF1("ep_fun",GetEjectedProtontWeight,0,100,1);
+    ep_fun = new TF1("ep_fun",GetEjectedProtontWeight,0,100,2);
     ep_fun->SetParameter(0,0);
+    ep_fun->SetParameter(1,1);
+    ep_fun->SetParameter(1,0.05/ep_fun->Integral(0,100));
     ep_fun->SetNpx(1000);
 
     ep_fun->SetTitle("Ejected proton energy");
@@ -85,8 +89,10 @@ void plot_ejected_proton_spectrum(const char* Variable = "e") {
   }
   else if (var == "p") {
 
-    ep_fun = new TF1("ep_fun",GetEjectedProtontWeight,0,1000,1);
+    ep_fun = new TF1("ep_fun",GetEjectedProtontWeight,0,1000,2);
     ep_fun->SetParameter(0,1);
+    ep_fun->SetParameter(1,1);
+    ep_fun->SetParameter(1,0.05/ep_fun->Integral(0,1000));
     ep_fun->SetNpx(1000);
 
     ep_fun->SetTitle("Ejected proton momentum");

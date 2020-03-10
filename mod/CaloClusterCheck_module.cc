@@ -32,7 +32,7 @@
 
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
-#include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
+// #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
 
 #include "RecoDataProducts/inc/CaloClusterCollection.hh"
 

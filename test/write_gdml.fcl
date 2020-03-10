@@ -8,6 +8,7 @@
 #include "fcl/standardProducers.fcl"
 #include "fcl/standardServices.fcl"
 
+#include "Stntuple/fcl/prolog.fcl"
 #include "murat/fcl/prolog.fcl"
 
 BEGIN_PROLOG

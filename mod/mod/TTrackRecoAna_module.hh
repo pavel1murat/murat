@@ -39,7 +39,6 @@ class KalRep;
 
 namespace mu2e {
   class StrawHit;
-  class StrawHitMCTruth;
   class CaloCluster;
   class TrkToCaloExtrapol;
   class StepPointMC;

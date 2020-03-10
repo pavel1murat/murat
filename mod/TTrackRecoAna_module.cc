@@ -36,8 +36,6 @@
 #include "MCDataProducts/inc/StepPointMC.hh"
 #include "MCDataProducts/inc/StepPointMCCollection.hh"
 #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-#include "MCDataProducts/inc/StrawHitMCTruth.hh"
-#include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 
 #include "BTrk/BbrGeom/BbrVectorErr.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"

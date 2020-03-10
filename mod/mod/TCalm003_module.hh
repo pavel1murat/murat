@@ -33,8 +33,6 @@
 #include "MCDataProducts/inc/GenParticleCollection.hh"
 #include "MCDataProducts/inc/SimParticleCollection.hh"
 #include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
-
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"

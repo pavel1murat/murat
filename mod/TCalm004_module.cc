@@ -611,7 +611,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
       if (trk->LogLHRTrk() <  -2.)                               fElectronIDWord[i] |= kLHRTrkBit;
 
-      if ((fElectronIDWord[i] & kTrackD0Bit) == 1) {
+      if ((fElectronIDWord[i] & kTrackD0Bit) == kTrackD0Bit ) {
 //-----------------------------------------------------------------------------
 // there is a cosmics-like track in the "event"
 //----------------------------------------------------------------------------- 

@@ -34,7 +34,6 @@
 #include "TrackerGeom/inc/Tracker.hh"
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "CalorimeterGeom/inc/Calorimeter.hh"
-#include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
 #include "Mu2eUtilities/inc/SortedStepPoints.hh"
 #include "Mu2eUtilities/inc/TrackTool.hh"
 #include "Mu2eUtilities/inc/TwoLinePCA.hh"
@@ -43,7 +42,6 @@
 #include "MCDataProducts/inc/GenParticleCollection.hh"
 #include "MCDataProducts/inc/SimParticleCollection.hh"
 #include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/StrawHitMCTruthCollection.hh"
 #include "DataProducts/inc/VirtualDetectorId.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
@@ -376,14 +374,13 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   void TrackerMCCheck::Debug_004() {
 
-    float                  dt, p, ehit, wpos, errpos;
+    float                  dt, p, ehit(-1.), wpos, errpos;
 
-    int                    nhits, nhits_ce, pdg_id, mother_pdg_id, nsteps_per_hit;
+    int                    nhits, nhits_ce, pdg_id(-1), mother_pdg_id, nsteps_per_hit;
     int                    gen_code; //, sim_id;
 
-    const mu2e::ComboHit           *hit;
-    //    const mu2e::StrawHitPosition   *shp;
-    const mu2e::StepPointMC        *step; 
+    const mu2e::ComboHit           *hit (nullptr);
+    const mu2e::StepPointMC        *step(nullptr); 
 
     static const double MIN_PITCH = 1;
     static const double MAX_PITCH = sqrt(3);
@@ -400,47 +397,48 @@ namespace mu2e {
       const mu2e::StrawDigiMC* mcdigi = &_mcdigis->at(i);
 
       if (mcdigi->wireEndTime(mu2e::StrawEnd::cal) < mcdigi->wireEndTime(mu2e::StrawEnd::hv)) {
-	step = mcdigi->stepPointMC(mu2e::StrawEnd::cal).get();
+	// thanks Dave ... step = mcdigi->stepPointMC(mu2e::StrawEnd::cal).get();
       }
       else {
-	step = mcdigi->stepPointMC(mu2e::StrawEnd::hv ).get();
+	// thanks Dave ... step = mcdigi->stepPointMC(mu2e::StrawEnd::hv ).get();
       }
 
       nsteps_per_hit = 1.;
     
       hit   = &fStrawHitColl->at(i);
-      //      shp   = &fStrawHitPosColl->at(i);
 
-      art::Ptr<mu2e::SimParticle> const& simptr = step->simParticle(); 
-      art::Ptr<mu2e::SimParticle> mother = simptr;
-      while(mother->hasParent())  mother = mother->parent();
-      const mu2e::SimParticle *   sim    = mother.operator ->();
+      if (step) {
+	art::Ptr<mu2e::SimParticle> const& simptr = step->simParticle(); 
+	art::Ptr<mu2e::SimParticle> mother = simptr;
+	while(mother->hasParent())  mother = mother->parent();
+	const mu2e::SimParticle *   sim    = mother.operator ->();
       
-      p             = step->momentum().mag();
-      ehit          = hit->energyDep();
-      pdg_id        = simptr->pdgId();
-      mother_pdg_id = sim->pdgId();
-      dt            = -99.; // undefined now // hit->dt();
-      //      sim_id        = simptr->id().asInt();
+	p             = step->momentum().mag();
+	ehit          = hit->energyDep();
+	pdg_id        = simptr->pdgId();
+	mother_pdg_id = sim->pdgId();
+	dt            = -99.; // undefined now // hit->dt();
+	//      sim_id        = simptr->id().asInt();
 
-      if (simptr->fromGenerator()) gen_code = simptr->genParticle()->generatorId().id();
-      else                         gen_code = -1;
+	if (simptr->fromGenerator()) gen_code = simptr->genParticle()->generatorId().id();
+	else                         gen_code = -1;
 
-      if ((pdg_id == fPdgCode) && (gen_code == fGeneratorCode)) {
-	nhits_ce += 1;
+	if ((pdg_id == fPdgCode) && (gen_code == fGeneratorCode)) {
+	  nhits_ce += 1;
+	}
+
+	wpos          = hit->wireDist();
+	errpos        = hit->posRes(ComboHit::wire);   
+
+	fHist.fEHitAll->Fill(ehit);
+
+	fHist.fDt->Fill(dt);
+	fHist.fNStepsPerHit->Fill(nsteps_per_hit);
+	fHist.fWPos->Fill(wpos);
+	fHist.fDt->Fill(dt);
+	fHist.fDtVsWPos->Fill(wpos,dt);
+	fHist.fErrPos->Fill(errpos);
       }
-
-      wpos          = hit->wireDist();
-      errpos        = hit->posRes(ComboHit::wire);   
-
-      fHist.fEHitAll->Fill(ehit);
-
-      fHist.fDt->Fill(dt);
-      fHist.fNStepsPerHit->Fill(nsteps_per_hit);
-      fHist.fWPos->Fill(wpos);
-      fHist.fDt->Fill(dt);
-      fHist.fDtVsWPos->Fill(wpos,dt);
-      fHist.fErrPos->Fill(errpos);
 
       if (pdg_id == 11) {
 					// electrons

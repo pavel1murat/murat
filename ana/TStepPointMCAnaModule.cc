@@ -115,7 +115,7 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
 void TStepPointMCAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   SimpHist_t* hist = (SimpHist_t*) Hist;
 
-  HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder), 200,  2400, 2600,Folder);
+  HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
   HBook1F(hist->fStage      ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
   HBook1F(hist->fGeneratorID,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
   HBook1F(hist->fTime       ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
@@ -301,6 +301,9 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_simp_histset[1023] = 1;		// pbar in the production vertex with Striganov's weights
   book_simp_histset[1024] = 1;		// pbar P > 100 in the production vertex with Striganov's weights
 
+  book_simp_histset[1025] = 1;		// parameters of pbar in the production vertex for events with pbars stopped in ST
+  book_simp_histset[1026] = 1;		// parameters of pbar in the production vertex for events with pbars stopped in ST, with Striganov's weights
+
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
       sprintf(folder_name,"simp_%i",i);
@@ -431,6 +434,20 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[2092] = 1;		// pbars , VDET=92: after pbar window
   book_vdet_histset[2098] = 1;		// pbars , VDET=98
   book_vdet_histset[2099] = 1;		// pbars , VDET=99
+
+  book_vdet_histset[2501] = 1;		// pbars , VDET=1: Coll1_In             , w/Striganov's weight
+  book_vdet_histset[2502] = 1;		// pbars , VDET=2: Coll1_Out		, w/Striganov's weight
+  book_vdet_histset[2503] = 1;		// pbars , VDET=3: Coll31_In		, w/Striganov's weight
+  book_vdet_histset[2504] = 1;		// pbars , VDET=4: Coll31_Out		, w/Striganov's weight
+  book_vdet_histset[2505] = 1;		// pbars , VDET=5: Coll32_In 		, w/Striganov's weight
+  book_vdet_histset[2506] = 1;		// pbars , VDET=6: Coll32_Out		, w/Striganov's weight
+  book_vdet_histset[2507] = 1;		// pbars , VDET=7: Coll5_In		, w/Striganov's weight
+  book_vdet_histset[2508] = 1;		// pbars , VDET=8: Coll5_Out		, w/Striganov's weight
+  book_vdet_histset[2509] = 1;		// pbars , VDET=9: ST_In		, w/Striganov's weight
+  book_vdet_histset[2591] = 1;		// pbars , VDET=91: before pbar window	, w/Striganov's weight
+  book_vdet_histset[2592] = 1;		// pbars , VDET=92: after pbar window	, w/Striganov's weight
+  book_vdet_histset[2598] = 1;		// pbars , VDET=98			, w/Striganov's weight
+  book_vdet_histset[2599] = 1;		// pbars , VDET=99                      , w/Striganov's weight
 
   book_vdet_histset[3001] = 1;		// pbars reaching the end, VDET=1: Coll1_In
   book_vdet_histset[3002] = 1;		// pbars reaching the end, VDET=2: Coll1_Out
@@ -581,7 +598,7 @@ void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* S
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step) {
+void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step, double Weight) {
 
   VDetHist_t* hist = (VDetHist_t*) Hist;
 
@@ -589,15 +606,15 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
 
   VDetData_t* vdd = fVDet+id;
   
-  hist->fIndex   ->Fill(id);
-  hist->fPDGCode ->Fill(Step->PDGCode());
-  hist->fGenCode ->Fill(Step->GenIndex());
+  hist->fIndex   ->Fill(id              ,Weight);
+  hist->fPDGCode ->Fill(Step->PDGCode() ,Weight);
+  hist->fGenCode ->Fill(Step->GenIndex(),Weight);
 
   float p = Step->Mom()->Mag();
-  hist->fMom[0]->Fill(p);
-  hist->fMom[1]->Fill(p);
+  hist->fMom[0]->Fill(p,Weight);
+  hist->fMom[1]->Fill(p,Weight);
 
-  hist->fTime    ->Fill(Step->Time());
+  hist->fTime    ->Fill(Step->Time(),Weight);
 
   // calculate local X and local Z
 
@@ -609,8 +626,8 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
   double xloc =  dx*cos(phi) - dz*sin(phi);
   double zloc =  dx*sin(phi) + dz*cos(phi);
 
-  hist->fYVsX    ->Fill(xloc,Step->Pos()->Y());
-  hist->fYVsZ    ->Fill(zloc,Step->Pos()->Y());
+  hist->fYVsX    ->Fill(xloc,Step->Pos()->Y(),Weight);
+  hist->fYVsZ    ->Fill(zloc,Step->Pos()->Y(),Weight);
 
   float py = Step->Mom()->Py();
 
@@ -626,12 +643,12 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
 
   pt = sqrt(px*px+py*py);
 
-  hist->fPt->Fill(pt);
-  hist->fPp->Fill(pp);
-  hist->fTanTh->Fill(pt/pp);
+  hist->fPt   ->Fill(pt   ,Weight);
+  hist->fPp   ->Fill(pp   ,Weight);
+  hist->fTanTh->Fill(pt/pp,Weight);
 
   float cos_th = pp/p;
-  hist->fCosThVsMom->Fill(p,cos_th);
+  hist->fCosThVsMom->Fill(p,cos_th,Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -672,12 +689,15 @@ void TStepPointMCAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   SimpData_t* sd = nullptr;  // temp
 
+  int pbar_stopped_in_st = 0;
+
   for (int i=0; i<fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
     int pdg_code = simp->PDGCode();
     int simp_id  = simp->GetUniqueID();
-    int vid1     = simp->EndVolumeIndex();
+    int    vid1  = simp->EndVolumeIndex();
     double pend  = simp->EndMom()->P();
+    double tend  = simp->EndPos()->T();
 
     FillSimpHistograms(fHist.fSimp[  0],simp,sd);
     if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[  3],simp,sd);
@@ -721,9 +741,11 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[521],simp,sd);
     }
 
-    if ((pend == 0) && (vid1 > 2500) && (vid1 < 2600)) {
+    //    if ((pend == 0) && (vid1 > 2500) && (vid1 < 2600)) {
+    if ((pend == 0) && (vid1 > 2900) && (vid1 < 3000)) {
 //-----------------------------------------------------------------------------
 // particle stopped in the stopping target
+// stopping target foil volume indices change in time...
 //-----------------------------------------------------------------------------
       FillSimpHistograms(fHist.fSimp[600],simp,sd);
       if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[603],simp,sd);
@@ -736,9 +758,20 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[704],simp,sd,fWeight);
       if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[705],simp,sd,fWeight);
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[721],simp,sd,fWeight);
+//-----------------------------------------------------------------------------
+// flag events with pbar stopped in the stopping target
+//-----------------------------------------------------------------------------
+      if ((pdg_code == -2212) && (tend > 600.)) {
+	  pbar_stopped_in_st = 1;
+      }
     }
   }
 
+  if (pbar_stopped_in_st) {
+    TSimParticle* simp = fSimpBlock->Particle(0);
+    FillSimpHistograms(fHist.fSimp[1025],simp,sd);
+    FillSimpHistograms(fHist.fSimp[1026],simp,sd,fWeight);
+  }
 //-----------------------------------------------------------------------------
 // StepPointMC histograms
 // for beamline studies, fStepPointMCBlock contains hits of particles for which 
@@ -806,7 +839,7 @@ void TStepPointMCAnaModule::FillHistograms() {
     if (pdg_code          == -2212) {
 //-----------------------------------------------------------------------------
 // Antiproton
-// SPMC_21: antiprotonparameters in the last recorded trajectory point
+// SPMC_21: antiproton parameters in the last recorded trajectory point
 //-----------------------------------------------------------------------------
 //      if (nh == 0) GetHeaderBlock()->Print("<<trouble>> nh = 0");
 
@@ -827,6 +860,7 @@ void TStepPointMCAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // for events with antiproton reached the last plane, antiproton hits 
 // in different detectors
+// note, that there is not 'last plane' to TGTSTOPS and such - pbars just stop 
 //-----------------------------------------------------------------------------
       int nh = 0;
       for (int i=0; i<fNVDetHits; i++) {
@@ -860,6 +894,7 @@ void TStepPointMCAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // for antiprotons P>100 MeV/c reached the last plane, antiproton hits 
 // in different detectors
+// note, that there is not 'last plane' to TGTSTOPS and such - pbars just stop 
 //-----------------------------------------------------------------------------
 	int nh = 0;
 	for (int i=0; i<fNVDetHits; i++) {
@@ -1056,6 +1091,22 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step);
+
+      if (pbar_stopped_in_st) {
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2501],step,fWeight);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2502],step,fWeight);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2503],step,fWeight);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2504],step,fWeight);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2505],step,fWeight);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2506],step,fWeight);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2507],step,fWeight);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2508],step,fWeight);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2509],step,fWeight);
+	if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2591],step,fWeight);
+	if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2592],step,fWeight);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2598],step,fWeight);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2599],step,fWeight);
+      }
     }
   }
 }
@@ -1097,18 +1148,20 @@ int TStepPointMCAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // pbar production, assume Bob
 // assuming parent particle exists, determine the production cross-section weight
-// pbeam, nx, ny: the beam momentum and direction
+// pbeam, nx, ny: the beam momentum and direction; beam ny = 0
 //-----------------------------------------------------------------------------
       double pbeam(8.9), nx(-0.24192190), nz(-0.97029573);
       const TLorentzVector* sm = sp0->StartMom();
       double px    = sm->Px();
+      //      double py    = sm->Py();
       double pz    = sm->Pz();
-      double costh = (px*nx+pz*nz)/sqrt(px*px+pz*pz);
+      double p     = sm->P();              // momentum in lab frame, MeV/c
+      double costh = (px*nx+pz*nz)/p;
       double th    = TMath::ACos(costh);
 //-----------------------------------------------------------------------------
 // convert momentum to GeV/c
 //-----------------------------------------------------------------------------
-      double plab  = sm->P()/1000.;  
+      double plab  = p/1000.;  
 
       fWeight      = fStnt->PBar_Striganov_d2N(pbeam,plab,th);
     }

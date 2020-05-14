@@ -355,9 +355,9 @@ if [ ".$GRID_CLUSTER" == ".local" ] ; then
 	echo  \#-----------------------------------------------------------------------------------  >> $LOGFILE
 	echo  \# to be executed: $cmd                                                                >> $LOGFILE
 	echo  \#------------------------------------------------------------------------------------ >> $LOGFILE
-	$cmd                                                                                         >> $LOGFILE 2>&1 
-	RC=$? 
-	echo "RC=$RC"                                                                                >> $LOGFILE
+	$cmd                                                                                         >> $LOGFILE 2>&1 ; \
+	RC=$? ; \
+	echo "RC=$RC"                                                                                >> $LOGFILE &
     fi
   
     cd $WORK_DIR

@@ -185,7 +185,7 @@ public:
   void    FillEventHistograms        (HistBase_t* Hist);
   void    FillSimpHistograms         (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData, double Weight = 1.);
   void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
-  void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step);
+  void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step,                       double Weight = 1.);
 
   void    BookHistograms();
   void    FillHistograms();

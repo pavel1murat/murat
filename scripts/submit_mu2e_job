@@ -357,7 +357,7 @@ if [ ".$GRID_CLUSTER" == ".local" ] ; then
 	echo  \#------------------------------------------------------------------------------------ >> $LOGFILE
 	$cmd                                                                                         >> $LOGFILE 2>&1 ; \
 	RC=$? ; \
-	echo "RC=$RC"                                                                                >> $LOGFILE &
+	echo "mu2egrid exit status $RC on `date +\"%b %m %d %H:%M:%S %z %Y\"` (faked by Pasha)"      >> $LOGFILE &
     fi
   
     cd $WORK_DIR

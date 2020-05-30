@@ -421,6 +421,30 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[1198] = 1;		// pi+ , VDET=98
   book_vdet_histset[1199] = 1;		// pi+ , VDET=99
 
+  book_vdet_histset[1201] = 1;		// pi- , VDET=1: Coll1_In   , w/Striganov weight 
+  book_vdet_histset[1202] = 1;		// pi- , VDET=2: Coll1_Out  , w/Striganov weight
+  book_vdet_histset[1203] = 1;		// pi- , VDET=3: Coll31_In  , w/Striganov weight
+  book_vdet_histset[1204] = 1;		// pi- , VDET=4: Coll31_Out , w/Striganov weight
+  book_vdet_histset[1205] = 1;		// pi- , VDET=5: Coll32_In  , w/Striganov weight
+  book_vdet_histset[1206] = 1;		// pi- , VDET=6: Coll32_Out , w/Striganov weight
+  book_vdet_histset[1207] = 1;		// pi- , VDET=7: Coll5_In   , w/Striganov weight
+  book_vdet_histset[1208] = 1;		// pi- , VDET=8: Coll5_Out  , w/Striganov weight
+  book_vdet_histset[1209] = 1;		// pi- , VDET=9: ST_In	    , w/Striganov weight
+  book_vdet_histset[1298] = 1;		// pi- , VDET=98	    , w/Striganov weight
+  book_vdet_histset[1299] = 1;		// pi- , VDET=99            , w/Striganov weight
+
+  book_vdet_histset[1301] = 1;		// pi+ , VDET=1: Coll1_In   , w/Striganov weight
+  book_vdet_histset[1302] = 1;		// pi+ , VDET=2: Coll1_Out  , w/Striganov weight
+  book_vdet_histset[1303] = 1;		// pi+ , VDET=3: Coll31_In  , w/Striganov weight
+  book_vdet_histset[1304] = 1;		// pi+ , VDET=4: Coll31_Out , w/Striganov weight
+  book_vdet_histset[1305] = 1;		// pi+ , VDET=5: Coll32_In  , w/Striganov weight
+  book_vdet_histset[1306] = 1;		// pi+ , VDET=6: Coll32_Out , w/Striganov weight
+  book_vdet_histset[1307] = 1;		// pi+ , VDET=7: Coll5_In   , w/Striganov weight
+  book_vdet_histset[1308] = 1;		// pi+ , VDET=8: Coll5_Out  , w/Striganov weight
+  book_vdet_histset[1309] = 1;		// pi+ , VDET=9: ST_In	    , w/Striganov weight
+  book_vdet_histset[1398] = 1;		// pi+ , VDET=98	    , w/Striganov weight
+  book_vdet_histset[1399] = 1;		// pi+ , VDET=99            , w/Striganov weight
+
   book_vdet_histset[2001] = 1;		// pbars , VDET=1: Coll1_In
   book_vdet_histset[2002] = 1;		// pbars , VDET=2: Coll1_Out
   book_vdet_histset[2003] = 1;		// pbars , VDET=3: Coll31_In
@@ -434,6 +458,20 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_vdet_histset[2092] = 1;		// pbars , VDET=92: after pbar window
   book_vdet_histset[2098] = 1;		// pbars , VDET=98
   book_vdet_histset[2099] = 1;		// pbars , VDET=99
+
+  book_vdet_histset[2201] = 1;		// pbars , VDET=1: Coll1_In             , w/Striganov weight 
+  book_vdet_histset[2202] = 1;		// pbars , VDET=2: Coll1_Out		, w/Striganov weight
+  book_vdet_histset[2203] = 1;		// pbars , VDET=3: Coll31_In		, w/Striganov weight
+  book_vdet_histset[2204] = 1;		// pbars , VDET=4: Coll31_Out		, w/Striganov weight
+  book_vdet_histset[2205] = 1;		// pbars , VDET=5: Coll32_In 		, w/Striganov weight
+  book_vdet_histset[2206] = 1;		// pbars , VDET=6: Coll32_Out		, w/Striganov weight
+  book_vdet_histset[2207] = 1;		// pbars , VDET=7: Coll5_In		, w/Striganov weight
+  book_vdet_histset[2208] = 1;		// pbars , VDET=8: Coll5_Out		, w/Striganov weight
+  book_vdet_histset[2209] = 1;		// pbars , VDET=9: ST_In		, w/Striganov weight
+  book_vdet_histset[2291] = 1;		// pbars , VDET=91: before pbar window	, w/Striganov weight
+  book_vdet_histset[2292] = 1;		// pbars , VDET=92: after pbar window	, w/Striganov weight
+  book_vdet_histset[2298] = 1;		// pbars , VDET=98			, w/Striganov weight
+  book_vdet_histset[2299] = 1;		// pbars , VDET=99                      , w/Striganov weight
 
   book_vdet_histset[2501] = 1;		// pbars , VDET=1: Coll1_In             , w/Striganov's weight
   book_vdet_histset[2502] = 1;		// pbars , VDET=2: Coll1_Out		, w/Striganov's weight
@@ -1057,6 +1095,18 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1009],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1098],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1099],step);
+
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1201],step,fWeight);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1202],step,fWeight);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1203],step,fWeight);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1204],step,fWeight);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1205],step,fWeight);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1206],step,fWeight);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1207],step,fWeight);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1208],step,fWeight);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1209],step,fWeight);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1298],step,fWeight);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1299],step,fWeight);
     }
 //-----------------------------------------------------------------------------
 // positive pions
@@ -1073,6 +1123,18 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1109],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1198],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1199],step);
+
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1301],step,fWeight);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1302],step,fWeight);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1303],step,fWeight);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1304],step,fWeight);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1305],step,fWeight);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1306],step,fWeight);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1307],step,fWeight);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1308],step,fWeight);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1309],step,fWeight);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1398],step,fWeight);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1399],step,fWeight);
     }
 //-----------------------------------------------------------------------------
 // pbars
@@ -1091,6 +1153,20 @@ void TStepPointMCAnaModule::FillHistograms() {
       if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step);
+
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2201],step,fWeight);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2202],step,fWeight);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2203],step,fWeight);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2204],step,fWeight);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2205],step,fWeight);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2206],step,fWeight);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2207],step,fWeight);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2208],step,fWeight);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2209],step,fWeight);
+      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2291],step,fWeight);
+      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2292],step,fWeight);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2298],step,fWeight);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2299],step,fWeight);
 
       if (pbar_stopped_in_st) {
 	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2501],step,fWeight);

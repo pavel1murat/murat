@@ -585,12 +585,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[182] = 1; track_selection[182] = new TString("PAR+ tracks N(active) > 20 and |D0| < 100");			       
   book_track_histset[183] = 1; track_selection[183] = new TString("PAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6");	       
   book_track_histset[184] = 1; track_selection[184] = new TString("PAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  book_track_histset[185] = 1; track_selection[185] = new TString("PAR+ tracks with final selections, E/P < 0.7 (mu+/pi+)");
+  book_track_histset[186] = 1; track_selection[186] = new TString("PAR+ tracks with final selections, E/P > 0.7 (e+)");
 
   book_track_histset[190] = 1; track_selection[190] = new TString("PAR- tracks all");                                       
   book_track_histset[191] = 1; track_selection[191] = new TString("PAR- tracks N(active) > 20");                                       
   book_track_histset[192] = 1; track_selection[192] = new TString("PAR- tracks N(active) > 20 and |D0| < 100");
   book_track_histset[193] = 1; track_selection[193] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
   book_track_histset[194] = 1; track_selection[194] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  book_track_histset[195] = 1; track_selection[195] = new TString("PAR- tracks with final selections, E/P < 0.7 (mu-/pi-)");
+  book_track_histset[196] = 1; track_selection[196] = new TString("PAR- tracks with final selections, E/P > 0.7 (e-)");
 
   book_track_histset[200] = 1; track_selection[200] = new TString("DAR all tracks");
   book_track_histset[201] = 1; track_selection[201] = new TString("DAR BestTrackID");
@@ -654,12 +658,16 @@ void TTrackCompModule::BookHistograms() {
   book_track_histset[282] = 1; track_selection[282] = new TString("DAR+ tracks N(active) > 20 and |D0| < 100");			       
   book_track_histset[283] = 1; track_selection[283] = new TString("DAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6");	       
   book_track_histset[284] = 1; track_selection[284] = new TString("DAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  book_track_histset[285] = 1; track_selection[285] = new TString("DAR+ tracks with final selections, E/P < 0.7 (mu+/pi+)");
+  book_track_histset[286] = 1; track_selection[286] = new TString("DAR+ tracks with final selections, E/P > 0.7 (e+)");
 
   book_track_histset[290] = 1; track_selection[290] = new TString("DAR- tracks all");                                       
   book_track_histset[291] = 1; track_selection[291] = new TString("DAR- tracks N(active) > 20");                                       
   book_track_histset[292] = 1; track_selection[292] = new TString("DAR- tracks N(active) > 20 and |D0| < 100");
   book_track_histset[293] = 1; track_selection[293] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
   book_track_histset[294] = 1; track_selection[294] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  book_track_histset[295] = 1; track_selection[295] = new TString("DAR- tracks with final selections, E/P < 0.7 (mu-/pi-)");
+  book_track_histset[296] = 1; track_selection[296] = new TString("DAR- tracks with final selections, E/P > 0.7 (e-)");
 
   book_track_histset[301] = 1; track_selection[301] = new TString("PAR- tracks final selections, dr/dz(cal) <  0");
   book_track_histset[302] = 1; track_selection[302] = new TString("PAR- tracks final selections, dr/dz(cal) >= 0");
@@ -1455,6 +1463,9 @@ void TTrackCompModule::FillHistograms() {
 	  FillTrackHistograms  (fHist.fTrack[ihist+71],trk,tp);
 	  if (fProcess != -1) FillTrackHistograms(fHist.fTrack[ihist+73],trk,tp,fWeight); 
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+77],trk,tp);            // for cosmics
+
+	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+85],trk,tp);   // "e+"
+	  else                 FillTrackHistograms(fHist.fTrack[ihist+86],trk,tp);   // "mu+/pi+"
 	}
 	else {
 //-----------------------------------------------------------------------------
@@ -1464,6 +1475,9 @@ void TTrackCompModule::FillHistograms() {
 	  if (fProcess > 0) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,fWeight);                       // weighting
 	  
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp);            // for cosmics
+
+	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+95],trk,tp);   // "e-"
+	  else                 FillTrackHistograms(fHist.fTrack[ihist+96],trk,tp);   // "mu-/pi-"
 
 	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,tp->fDioWt);                                       // DIO
 

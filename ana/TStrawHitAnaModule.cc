@@ -187,6 +187,7 @@ int TStrawHitAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
+  RegisterDataBlock("SimpBlock"      ,"TSimpDataBlock"  ,&fSimpBlock);
   RegisterDataBlock("StrawDataBlock" ,"TStrawDataBlock" ,&fStrawHitDataBlock);
 //-----------------------------------------------------------------------------
 // book histograms
@@ -237,6 +238,7 @@ int TStrawHitAnaModule::Event(int ientry) {
   //  TLorentzVector        mom;
 
   fStrawHitDataBlock->GetEntry(ientry);
+  fSimpBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed

@@ -707,11 +707,11 @@ void TTrackCompModule::BookHistograms() {
 
   //  const char* folder_title;
   for (int i=0; i<kNDTrackHistSets; i++) {
-    if (dtrack_selection[i] != 0) {
+    if (dtrack_selection[i] != NULL) {
       sprintf(folder_name,"dtrk_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       folder_title = folder_name;
-      if (dtrack_selection[i] != NULL) folder_title = dtrack_selection[i]->Data();
+      folder_title = dtrack_selection[i]->Data();
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_title);
       fHist.fDTrack[i] = new DTrackHist_t;
       BookDTrackHistograms(fHist.fDTrack[i],Form("Hist/%s",folder_name));

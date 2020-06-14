@@ -33,18 +33,28 @@ public:
     TH1F*    fMomentum;
   };
 
+  struct SimpHist_t : public HistBase_t {
+    TH1F*    fPdgCode;		       //
+    TH1F*    fMomentum;
+    TH1F*    fNStrawHits;
+  };
+
   struct EventHist_t : public HistBase_t {
     TH1F* fRunNumber;
     TH1F* fEventNumber;
+    TH1F* fNGenp;
+    TH1F* fNSimp[2];
   };
 
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets = 100 };
   enum { kNGenpHistSets  = 100 };
+  enum { kNSimpHistSets  = 100 };
 
   struct Hist_t {
     EventHist_t* fEvent[kNEventHistSets];
     GenpHist_t*  fGenp [kNGenpHistSets];
+    SimpHist_t*  fSimp [kNSimpHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -52,10 +62,12 @@ public:
 public:
 					// pointers to the data blocks used
   TGenpBlock*           fGenpBlock;
+  TSimpBlock*           fSimpBlock;
 					// histograms filled
   Hist_t                fHist;
 
   int                   fNGenp;
+  int                   fNSimp[2];
   int                   fPdgCode;
   int                   fGeneratorCode;
 //-----------------------------------------------------------------------------
@@ -84,9 +96,11 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   void    BookGenpHistograms  (HistBase_t* Hist, const char* Folder);
+  void    BookSimpHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookEventHistograms (HistBase_t* Hist, const char* Folder);
 
   void    FillGenpHistograms  (HistBase_t* Hist, TGenParticle* Part);
+  void    FillSimpHistograms  (HistBase_t* Hist, TSimParticle* Part);
   void    FillEventHistograms (HistBase_t* Hist);
 
   void    BookHistograms();

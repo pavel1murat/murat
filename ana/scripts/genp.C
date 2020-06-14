@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/ana/scripts/modules.hh"
 
-def_name genp_001("genp_ana");
+def_name genp_001("gen_ana");
 def_name genp_002("spmc_ana");
 def_name genp_002_01("spmc_ana_old");
 def_name genp_003("mustop_ana");
@@ -19,6 +19,11 @@ def_name genp_012("coll1_dose_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
+void  gen_ana(int DebugBit = -1) {
+  m_gen = (TGenAnaModule*) g.x->AddModule("TGenAnaModule",0);  
+  if (DebugBit >= 0) m_gen->SetDebugBit(DebugBit,1);
+}
+
 //-----------------------------------------------------------------------------
 void  spmc_ana(int DebugBit = -1) {
   m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  

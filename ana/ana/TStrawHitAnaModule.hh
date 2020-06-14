@@ -64,6 +64,8 @@ public:
 public:
 					// pointers to the data blocks used
   TStrawDataBlock*      fStrawHitDataBlock;
+  TSimpBlock*           fSimpBlock;
+
   int                   fNStrawHits;
   int                   fNsh200;          // n(straw hits) T>200
   int                   fNsh500;          // n(straw hits) T>500

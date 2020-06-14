@@ -57,13 +57,28 @@ void TGenAnaModule::BookGenpHistograms(HistBase_t* Hist, const char* Folder) {
 
 
 //-----------------------------------------------------------------------------
+void TGenAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
+  //     char name [200];
+  //     char title[200];
+  SimpHist_t* hist = (SimpHist_t*) Hist;
+
+  HBook1F(hist->fPdgCode   ,"pdg_code",Form("%s: PDG code"     ,Folder), 200,-1000, 1000,Folder);
+  HBook1F(hist->fMomentum  ,"mom"    ,Form("%s: Momentum"      ,Folder), 200, 0, 200,Folder);
+  HBook1F(hist->fNStrawHits,"nsh"    ,Form("%s: N(straw hits"  ,Folder), 200, 0, 200,Folder);
+}
+
+
+//-----------------------------------------------------------------------------
 void TGenAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
   EventHist_t* hist = (EventHist_t*) Hist;
 
-  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number",Folder), 1000, 0,  1.e4,Folder);
-  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number",Folder), 1000, 0,  1.e6,Folder);
+  HBook1F(hist->fEventNumber,"evtnum"  ,Form("%s: Event Number" ,Folder), 1000, 0,  1.e4,Folder);
+  HBook1F(hist->fRunNumber  ,"runnum"  ,Form("%s: Run   Number" ,Folder), 1000, 0,  1.e6,Folder);
+  HBook1F(hist->fNGenp      ,"ngenp"   ,Form("%s: N(genp)"      ,Folder), 100 , 0,  100 ,Folder);
+  HBook1F(hist->fNSimp[0]   ,"nsimp_0" ,Form("%s: N(simp)[all]" ,Folder), 100 , 0,  100 ,Folder);
+  HBook1F(hist->fNSimp[1]   ,"nsimp_1" ,Form("%s: N(simp)[good]",Folder), 100 , 0,  100 ,Folder);
 }
 
 //_____________________________________________________________________________
@@ -81,17 +96,16 @@ void TGenAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book event histograms
 //-----------------------------------------------------------------------------
-  int book_event_histset[kNEventHistSets];
-  for (int i=0; i<kNEventHistSets; i++) book_event_histset[i] = 0;
+  TString*  event_selection   [kNEventHistSets];
+  for (int i=0; i<kNEventHistSets; i++) { event_selection[i] = NULL; }
 
-  book_event_histset[ 0] = 1;		// all events
-  book_event_histset[ 1] = 0;		// just an example - this should be the default
+  event_selection[ 0] = new TString("all events");		// all events
 
   for (int i=0; i<kNEventHistSets; i++) {
-    if (book_event_histset[i] != 0) {
+    if (event_selection[i] != 0) {
       sprintf(folder_name,"evt_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
-      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,event_selection[i]->Data());
       fHist.fEvent[i] = new EventHist_t;
       BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
     }
@@ -99,18 +113,36 @@ void TGenAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book GENP histograms
 //-----------------------------------------------------------------------------
-  int book_genp_histset[kNGenpHistSets];
-  for (int i=0; i<kNGenpHistSets; i++) book_genp_histset[i] = 0;
+  TString*  genp_selection   [kNGenpHistSets];
+  for (int i=0; i<kNGenpHistSets; i++) { genp_selection[i] = NULL; }
 
-  book_genp_histset[0] = 1;		// all clusters
+  genp_selection[0] = new TString("all genparticles");
 
   for (int i=0; i<kNGenpHistSets; i++) {
-    if (book_genp_histset[i] != 0) {
+    if (genp_selection[i] != 0) {
       sprintf(folder_name,"gen_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
-      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,genp_selection[i]->Data());
       fHist.fGenp[i] = new GenpHist_t;
       BookGenpHistograms(fHist.fGenp[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book SIMP histograms
+//-----------------------------------------------------------------------------
+  TString*  simp_selection   [kNSimpHistSets];
+  for (int i=0; i<kNSimpHistSets; i++) { simp_selection[i] = nullptr; }
+
+  simp_selection[0] = new TString("all simparticles");
+  simp_selection[1] = new TString("simparticles nsh>20");
+
+  for (int i=0; i<kNSimpHistSets; i++) {
+    if (simp_selection[i] != 0) {
+      sprintf(folder_name,"sim_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,simp_selection[i]->Data());
+      fHist.fSimp[i] = new SimpHist_t;
+      BookSimpHistograms(fHist.fSimp[i],Form("Hist/%s",folder_name));
     }
   }
 }
@@ -130,6 +162,20 @@ void TGenAnaModule::FillGenpHistograms(HistBase_t* Hist, TGenParticle* Part) {
 }
 
 //-----------------------------------------------------------------------------
+void TGenAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Part) {
+
+  const TLorentzVector* p;
+
+  p = Part->StartMom();
+
+  SimpHist_t* hist = (SimpHist_t*) Hist;
+  
+  hist->fPdgCode->Fill(Part->PDGCode());
+  hist->fMomentum->Fill(p->P());
+  hist->fNStrawHits->Fill(Part->NStrawHits());
+}
+
+//-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
 void TGenAnaModule::FillEventHistograms(HistBase_t* Hist) {
@@ -143,6 +189,9 @@ void TGenAnaModule::FillEventHistograms(HistBase_t* Hist) {
 
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
+  hist->fNGenp->Fill(fNGenp);
+  hist->fNSimp[0]->Fill(fNSimp[0]);
+  hist->fNSimp[1]->Fill(fNSimp[1]);
 
 }
 
@@ -154,6 +203,7 @@ int TGenAnaModule::BeginJob() {
 // register data blocks
 //-----------------------------------------------------------------------------
   RegisterDataBlock("GenpBlock" ,"TGenpBlock" ,&fGenpBlock);
+  RegisterDataBlock("SimpBlock" ,"TSimpBlock" ,&fSimpBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -173,13 +223,23 @@ void TGenAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0]);
 //-----------------------------------------------------------------------------
-// straw hit histograms
+// GENP histograms
 //-----------------------------------------------------------------------------
   TGenParticle* genp;
 
   for (int i=0; i<fNGenp; i++) {
     genp = fGenpBlock->Particle(i);
     FillGenpHistograms(fHist.fGenp[0],genp);
+  }
+//-----------------------------------------------------------------------------
+// SIMP histograms
+//-----------------------------------------------------------------------------
+  TSimParticle* simp;
+
+  for (int i=0; i<fNSimp[0]; i++) {
+    simp = fSimpBlock->Particle(i);
+    FillSimpHistograms(fHist.fSimp[0],simp);
+    if (simp->NStrawHits() > 20) FillSimpHistograms(fHist.fSimp[1],simp);
   }
 }
 
@@ -200,12 +260,24 @@ int TGenAnaModule::Event(int ientry) {
   //  TLorentzVector        mom;
 
   fGenpBlock->GetEntry(ientry);
+  fSimpBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 // if there are several hits, use the first one
 //-----------------------------------------------------------------------------
   fNGenp      = fGenpBlock->NParticles();
+  fNSimp[0]   = fSimpBlock->NParticles();
+
+  fNSimp[1]   = 0;
+  for (int i=0; i<fNSimp[0]; i++) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    const TLorentzVector* p = simp->StartMom();
+    
+    if ((p->P() > 80) && (simp->NStrawHits() > 20)) {
+      fNSimp[1] += 1;
+    }
+  }
 
   FillHistograms();
 

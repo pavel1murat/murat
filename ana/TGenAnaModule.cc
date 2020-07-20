@@ -37,6 +37,8 @@ TGenAnaModule::TGenAnaModule(const char* name, const char* title):
 {
   fPdgCode       = 11;
   fGeneratorCode = 28;
+
+  fPdgDb         = TDatabasePDG::Instance();
 }
 
 //-----------------------------------------------------------------------------
@@ -135,6 +137,8 @@ void TGenAnaModule::BookHistograms() {
 
   simp_selection[0] = new TString("all simparticles");
   simp_selection[1] = new TString("simparticles nsh>20");
+  simp_selection[2] = new TString("simparticles nsh>20 positive");
+  simp_selection[3] = new TString("simparticles nsh>20 negative");
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (simp_selection[i] != 0) {
@@ -239,7 +243,17 @@ void TGenAnaModule::FillHistograms() {
   for (int i=0; i<fNSimp[0]; i++) {
     simp = fSimpBlock->Particle(i);
     FillSimpHistograms(fHist.fSimp[0],simp);
-    if (simp->NStrawHits() > 20) FillSimpHistograms(fHist.fSimp[1],simp);
+    if (simp->NStrawHits() > 20) {
+      FillSimpHistograms(fHist.fSimp[1],simp);
+
+      int pdg_code = simp->PDGCode();
+      TParticlePDG* p = fPdgDb->GetParticle(pdg_code);
+      if      (p->Charge() > 0) FillSimpHistograms(fHist.fSimp[2],simp);
+      else if (p->Charge() < 0) FillSimpHistograms(fHist.fSimp[3],simp);
+      else {
+	printf("in trouble\n");
+      }
+    }
   }
 }
 

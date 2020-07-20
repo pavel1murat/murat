@@ -67,6 +67,7 @@
    ...
    fun:_ZN4mu2e17Mu2eDetectorCache10initializeEv
 }
+
 {
    Suppression_000011
    Memcheck:Param
@@ -76,4 +77,18 @@
    fun:_ZN5TFile11WriteBufferEPKci
    fun:_ZN4TKey19WriteFileKeepBufferEP5TFile
    fun:_ZN7TBasket11WriteBufferEv
+}
+
+{
+   Suppression_000012
+   Memcheck:Cond
+   fun:_ZN8TStorage14UpdateIsOnHeapERVKjRVj
+   fun:_ZN7TObjectC1Ev
+}
+
+{
+   Suppression_000013
+   Memcheck:Cond
+   fun:_ZN8TStorage14UpdateIsOnHeapERVKjRVj
+   fun:_ZN7TObjectC1ERKS_
 }

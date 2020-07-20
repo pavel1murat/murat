@@ -7,6 +7,8 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -70,6 +72,7 @@ public:
   int                   fNSimp[2];
   int                   fPdgCode;
   int                   fGeneratorCode;
+  TDatabasePDG*         fPdgDb;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

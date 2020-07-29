@@ -109,6 +109,8 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
 
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
   HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 500, -250,  250, 500, -250, 250, Folder);
+
+  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -129,7 +131,10 @@ void TStepPointMCAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Fol
   HBook2F(hist->fYVsX_2480  ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYVsX_2513  ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
 
+
   HBook2F(hist->fCosThVsMom ,"cth_vs_mom",Form("%s: Cos(Th) vs Mom",Folder), 250,   0,  5000,100,-1,1,Folder);
+
+  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -151,6 +156,8 @@ void TStepPointMCAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Fol
   HBook1F(hist->fEKin    ,"ekin"    ,Form("%s: kinetic energy",Folder), 400,  0, 100,Folder);
 
   HBook2F(hist->fCosThVsMom,"cth_vs_mom",Form("%s: Cos(Th) vs Mom",Folder), 250,   0,  5000,100,-1,1,Folder);
+
+  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -596,6 +603,8 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
 
   float cos_th = pp/p;
   hist->fCosThVsMom->Fill(p,cos_th,Weight);
+
+  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -633,6 +642,8 @@ void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* S
 
   float cos_th = Simp->StartMom()->Pz()/p;
   hist->fCosThVsMom->Fill(p,cos_th,Weight);
+
+  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -687,6 +698,8 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
 
   float cos_th = pp/p;
   hist->fCosThVsMom->Fill(p,cos_th,Weight);
+
+  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -886,13 +899,20 @@ void TStepPointMCAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // SIMP_1021: antiproton parameters in the production vertex
 //-----------------------------------------------------------------------------
-      int simp_id = spmc->SimID();
-      TSimParticle* simp (nullptr);
-      while (simp_id > 0) {
-	 simp = fSimpBlock->FindParticle(simp_id);
-	 simp_id = simp->ParentID();
-      }
+      int simp_id        = spmc->SimID();
+      TSimParticle* simp = fSimpBlock->FindParticle(simp_id);
 
+      int parent_id      = simp->ParentID();
+
+      TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
+      int gpid  = parent->ParentID();
+      while (gpid > 0) {
+	TSimParticle* gp  = fSimpBlock->FindParticle(gpid);
+	simp      = parent;
+	parent    = gp;
+	gpid      = gp->ParentID();
+      }
+      // 
       FillSimpHistograms(fHist.fSimp[1021],simp,sd);
       FillSimpHistograms(fHist.fSimp[1023],simp,sd,fWeight);
 //-----------------------------------------------------------------------------
@@ -1200,9 +1220,6 @@ int TStepPointMCAnaModule::BeginRun() {
 //_____________________________________________________________________________
 int TStepPointMCAnaModule::Event(int ientry) {
 
-  //  double                p;
-  //  TLorentzVector        mom;
-
   fStepPointMCBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fVDetBlock->GetEntry(ientry);
@@ -1214,32 +1231,39 @@ int TStepPointMCAnaModule::Event(int ientry) {
   fNVDetHits = fVDetBlock->NStepPoints();
 
   fNSimp = fSimpBlock->NParticles();
+
+  fPbarCosThPV = -2.;
+  fPbarMomPV   = -1.;
 //-----------------------------------------------------------------------------
-// determine the cross section weight looking at the first particle
+// determine the cross section weight looking at the first particle with the PDG code of an antiproton
 //-----------------------------------------------------------------------------
   fWeight = 1.;
   if (fNSimp > 0) {
-    TSimParticle* sp0 = fSimpBlock->Particle(0);
-    if (sp0->PDGCode() == -2212) {
+    for (int i=0; i<fNSimp; i++) {
+      TSimParticle* sp0 = fSimpBlock->Particle(i);
+      if (sp0->PDGCode() == -2212) {
 //-----------------------------------------------------------------------------
 // pbar production, assume Bob
 // assuming parent particle exists, determine the production cross-section weight
-// pbeam, nx, ny: the beam momentum and direction; beam ny = 0
+// pbeam, nx, nz: the beam momentum and direction; beam ny = 0
 //-----------------------------------------------------------------------------
-      double pbeam(8.9), nx(-0.24192190), nz(-0.97029573);
-      const TLorentzVector* sm = sp0->StartMom();
-      double px    = sm->Px();
-      //      double py    = sm->Py();
-      double pz    = sm->Pz();
-      double p     = sm->P();              // momentum in lab frame, MeV/c
-      double costh = (px*nx+pz*nz)/p;
-      double th    = TMath::ACos(costh);
+	double pbeam(8.9), nx(-0.24192190), nz(-0.97029573);
+	const TLorentzVector* sm = sp0->StartMom();
+	double px    = sm->Px();
+	double pz    = sm->Pz();
+	double p     = sm->P();              // momentum in lab frame, MeV/c
+	double costh = (px*nx+pz*nz)/p;
+	double th    = TMath::ACos(costh);
 //-----------------------------------------------------------------------------
 // convert momentum to GeV/c
 //-----------------------------------------------------------------------------
-      double plab  = p/1000.;  
+	double plab  = p/1000.;  
 
-      fWeight      = fStnt->PBar_Striganov_d2N(pbeam,plab,th);
+	fWeight      = fStnt->PBar_Striganov_d2N(pbeam,plab,th);
+	fPbarMomPV   = p;
+	fPbarCosThPV = costh;
+	break;
+      }
     }
   }
 //-----------------------------------------------------------------------------

@@ -52,6 +52,7 @@ public:
     TH2F*      fYVsX_2480;
     TH2F*      fYVsX_2513;
     TH2F*      fCosThVsMom;
+    TH2F*      fCosThVsMomPV;		// for antiprotons
   };
 
   struct StepPointMCHist_t : public HistBase_t {
@@ -75,6 +76,7 @@ public:
 
     TH2F*      fYVsZ;
     TH2F*      fYVsX;
+    TH2F*      fCosThVsMomPV;		// for antiprotons
   };
 
   struct VDetHist_t : public HistBase_t {
@@ -90,6 +92,7 @@ public:
     TH1F*      fTanTh   ;		       // tan (pitch angle)
     TH1F*      fEKin    ;
     TH2F*      fCosThVsMom ;	       // cos (pitch angle) vs Mom
+    TH2F*      fCosThVsMomPV;		// for antiprotons
   };
 
   struct SimpData_t {
@@ -148,6 +151,10 @@ public:
 
   TStntuple*            fStnt;
   double                fWeight; // event weight, determined by the production cross section
+
+					// antiproton-specific : in the production vertex
+  double                fPbarCosThPV;
+  double                fPbarMomPV;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

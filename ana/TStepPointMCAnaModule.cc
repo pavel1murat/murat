@@ -898,19 +898,24 @@ void TStepPointMCAnaModule::FillHistograms() {
       FillStepPointMCHistograms(fHist.fStepPointMC[521],spmc,&spmc_data,fWeight);
 //-----------------------------------------------------------------------------
 // SIMP_1021: antiproton parameters in the production vertex
+// for old Bob's dataset, antiproton in the vertex is the first particle 
+// otherwise, assume that the first particle is the incoming proton and try to 
+// find the antiproton correctly
 //-----------------------------------------------------------------------------
-      int simp_id        = spmc->SimID();
-      TSimParticle* simp = fSimpBlock->FindParticle(simp_id);
+      TSimParticle* simp = fSimpBlock->Particle(0);
+      if (simp->PDGCode() != -2212) {
+	int simp_id   = spmc->SimID();
+	simp          = fSimpBlock->FindParticle(simp_id);
+	int parent_id = simp->ParentID();
 
-      int parent_id      = simp->ParentID();
-
-      TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
-      int gpid  = parent->ParentID();
-      while (gpid > 0) {
-	TSimParticle* gp  = fSimpBlock->FindParticle(gpid);
-	simp      = parent;
-	parent    = gp;
-	gpid      = gp->ParentID();
+	TSimParticle* parent = fSimpBlock->FindParticle(parent_id);
+	int gpid  = parent->ParentID();
+	while (gpid > 0) {
+	  TSimParticle* gp  = fSimpBlock->FindParticle(gpid);
+	  simp      = parent;
+	  parent    = gp;
+	  gpid      = gp->ParentID();
+	}
       }
       // 
       FillSimpHistograms(fHist.fSimp[1021],simp,sd);
@@ -1239,6 +1244,10 @@ int TStepPointMCAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fWeight = 1.;
   if (fNSimp > 0) {
+//-----------------------------------------------------------------------------
+// using the first antiproton in the list should work for old Bobs's dataset as well 
+// as for the current ones
+//-----------------------------------------------------------------------------
     for (int i=0; i<fNSimp; i++) {
       TSimParticle* sp0 = fSimpBlock->Particle(i);
       if (sp0->PDGCode() == -2212) {

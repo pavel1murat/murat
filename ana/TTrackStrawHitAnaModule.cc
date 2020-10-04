@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
+// this module is supposed to run in absence of tracks
 // use of tmp:
 //
 // Tmp(0) : nax seg
@@ -192,7 +193,7 @@ void TTrackStrawHitAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-void TTrackStrawHitAnaModule::FillTrackHistograms(HistBase_t* Hist, TrackParBase_t* Tp) {
+void TTrackStrawHitAnaModule::FillTrackHistograms(HistBase_t* Hist, TrackPar_t* Tp) {
 //   double            cos_th, xv, yv, rv, zv, p;
 //   TLorentzVector    mom;
 

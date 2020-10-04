@@ -38,7 +38,6 @@
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
-#include "murat/ana/TTrackCompModule.hh"
 #include "murat/ana/mva_data.hh"
 
 // framework
@@ -51,17 +50,20 @@
 #include <string>
 #include "math.h"
 
+#include "murat/ana/TTrackCompModule.hh"
+
 using std::string;
 using std::vector;
 
-ClassImp(TTrackCompModule)
+ClassImp(murat::TTrackCompModule)
+
+namespace murat {
 //-----------------------------------------------------------------------------
-TTrackCompModule::TTrackCompModule(const char* name, const char* title):
-  TStnModule    (name,title),
-  fPdgCode      (11),                       // electron
-  fGeneratorCode( 2)                        // 2:ConversionGun 28:StoppedParticleReactionGun
-{
-					    // this is the default for MDC2018 stntuples
+TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaModule(name,title) {
+
+  fPdgCode           = 11;		// electron
+  fGeneratorCode     =  2; // 2:ConversionGun 28:StoppedParticleReactionGun
+
   fTrackBlockName[0] = "TrackBlockPar";
   fTrackBlockName[1] = "TrackBlockDar";
 //-----------------------------------------------------------------------------
@@ -280,108 +282,91 @@ int TTrackCompModule::BeginRun() {
   return 0;
 }
 
-//-----------------------------------------------------------------------------
-void TTrackCompModule::BookTrackSeedHistograms   (HistBase_t*   HistR, const char* Folder){
-  
-  TrackSeedHist_t* Hist =  (TrackSeedHist_t*) HistR;
+// //-----------------------------------------------------------------------------
+// void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder) {
+// //   char name [200];
+// //   char title[200];
 
-  HBook1F(Hist->fNHits        ,"nhits" ,Form("%s: # of straw hits"              ,Folder),  150,    0,  150,Folder);
-  HBook1F(Hist->fClusterTime  ,"clt"   ,Form("%s: cluster time; t_{cluster}[ns]",Folder),  800,  400, 1700,Folder);
-  HBook1F(Hist->fClusterEnergy,"cle"   ,Form("%s: cluster energy; E [MeV]      ",Folder),  400,    0,  200,Folder);
-  HBook1F(Hist->fRadius       ,"r"     ,Form("%s: curvature radius; r [mm]"     ,Folder),  500,    0,  500,Folder);
-  HBook1F(Hist->fMom          ,"p"     ,Form("%s: momentum; p [MeV/c]"          ,Folder),  300,    50, 200,Folder);
-  HBook1F(Hist->fPt           ,"pt"    ,Form("%s: pT; pT [MeV/c]"               ,Folder),  600,    0,  150,Folder);
-  HBook1F(Hist->fTanDip       ,"tdip"  ,Form("%s: tanDip; tanDip"               ,Folder),  300,    0,    3,Folder);
-  HBook1F(Hist->fChi2         ,"chi2"  ,Form("%s: #chi^{2}-XY; #chi^{2}/ndof"   ,Folder),  100,    0,   10,Folder);
-  HBook1F(Hist->fFitCons      ,"fcons" ,Form("%s: Fit consistency; Fit-cons"    ,Folder),  100,    0,    1,Folder);
-  HBook1F(Hist->fD0           ,"d0"    ,Form("%s: D0; d0 [mm]"                  ,Folder), 1600, -400,  400,Folder);
-}
+//   TrackHist_t* Hist =  (TrackHist_t*) HistR;
 
-//-----------------------------------------------------------------------------
-void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder) {
-//   char name [200];
-//   char title[200];
+//   HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 800,  80  ,120. ,Folder);
+//   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
+//   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
+//   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
+//   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
+// //-----------------------------------------------------------------------------
+//   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
+//   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
+//   HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder),1000,  -5. ,  5. ,Folder);
+//   HBook1F(Hist->fXDpF       ,"xdpf"     ,Form("%s: DpF/momErr"        ,Folder),1000, -50. , 50. ,Folder);
+//   HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
+//   HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
+//   HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
+//   HBook1F(Hist->fDpFSt      ,"dpfst"    ,Form("%s: Track Pf-Psto"     ,Folder),1000,  -5  ,  5. ,Folder);
+//   HBook2F(Hist->fDpFVsZ1    ,"dpf_vs_z1",Form("%s: Track DPF Vs Z1"   ,Folder), 200, -2000.,0,200,-5.,5,Folder);
 
-  TrackHist_t* Hist =  (TrackHist_t*) HistR;
+//   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
+//   HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1  ,Folder);
+//   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
+//   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
 
-  HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 800,  80  ,120. ,Folder);
-  HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
-  HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
-  HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
-  HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
-//-----------------------------------------------------------------------------
-  HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
-  HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
-  HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder),1000,  -5. ,  5. ,Folder);
-  HBook1F(Hist->fXDpF       ,"xdpf"     ,Form("%s: DpF/momErr"        ,Folder),1000, -50. , 50. ,Folder);
-  HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
-  HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
-  HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
-  HBook1F(Hist->fDpFSt      ,"dpfst"    ,Form("%s: Track Pf-Psto"     ,Folder),1000,  -5  ,  5. ,Folder);
-  HBook2F(Hist->fDpFVsZ1    ,"dpf_vs_z1",Form("%s: Track DPF Vs Z1"   ,Folder), 200, -2000.,0,200,-5.,5,Folder);
+//   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0  , 200 ,Folder);
+//   HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05 ,Folder);
+//   HBook1F(Hist->fDNa        ,"dna"      ,Form("%s: Nhits-Nactive"     ,Folder), 100, -0.5 ,99.5,Folder);
+//   HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
+//   HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
+//   HBook1F(Hist->fNadOverNd  ,"nad_nd"   ,Form("%s: Nad/N(doublets)"   ,Folder), 110, 0,1.1,Folder);
+//   HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
+//   HBook1F(Hist->fNOSD       ,"nosd"     ,Form("%s: N(OS doublets)"    ,Folder),  50, 0, 50,Folder);
+//   HBook1F(Hist->fNdOverNa   ,"nd_na"    ,Form("%s: NDoublets/Nactive" ,Folder), 100, 0,0.5,Folder);
+//   HBook1F(Hist->fNssdOverNa ,"nssd_na"  ,Form("%s: NSSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
+//   HBook1F(Hist->fNosdOverNa ,"nosd_na"  ,Form("%s: NOSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
+//   HBook1F(Hist->fNZeroAmb   ,"nza"      ,Form("%s: N (Iamb = 0) hits" ,Folder), 100, 0,100,Folder);
+//   HBook1F(Hist->fNzaOverNa  ,"nza_na"   ,Form("%s: NZeroAmb/Nactive"  ,Folder), 100, 0,  1,Folder);
+//   HBook1F(Hist->fNMatActive ,"nma"      ,Form("%s: N (Mat Active"     ,Folder), 100, 0,100,Folder);
+//   HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 200, 0,   2,Folder);
+//   HBook1F(Hist->fNBend      ,"nbend"    ,Form("%s: Nbend"             ,Folder), 100, 0,1000,Folder);
 
-  HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
-  HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1  ,Folder);
-  HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
-  HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
+//   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
+//   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
+//   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
+//   HBook1F(Hist->fFitCons[0] ,"fcon"     ,Form("%s: track fit cons [0]",Folder), 200, 0,   1,Folder);
+//   HBook1F(Hist->fFitCons[1] ,"fcon1"    ,Form("%s: track fit cons [1]",Folder), 1000, 0,   0.1,Folder);
+//   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
+//   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
+//   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
+//   HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
+//   HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: T0_trk-T0_MC(Z=0)" ,Folder), 200, -10.0 ,10.0,Folder);
+//   HBook1F(Hist->fXtZ0       ,"xtz0"     ,Form("%s: DT(Z0)/sigT"       ,Folder), 200, -10.0 ,10.0,Folder);
 
-  HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0  , 200 ,Folder);
-  HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05 ,Folder);
-  HBook1F(Hist->fDNa        ,"dna"      ,Form("%s: Nhits-Nactive"     ,Folder), 100, -0.5 ,99.5,Folder);
-  HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
-  HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
-  HBook1F(Hist->fNadOverNd  ,"nad_nd"   ,Form("%s: Nad/N(doublets)"   ,Folder), 110, 0,1.1,Folder);
-  HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
-  HBook1F(Hist->fNOSD       ,"nosd"     ,Form("%s: N(OS doublets)"    ,Folder),  50, 0, 50,Folder);
-  HBook1F(Hist->fNdOverNa   ,"nd_na"    ,Form("%s: NDoublets/Nactive" ,Folder), 100, 0,0.5,Folder);
-  HBook1F(Hist->fNssdOverNa ,"nssd_na"  ,Form("%s: NSSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
-  HBook1F(Hist->fNosdOverNa ,"nosd_na"  ,Form("%s: NOSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
-  HBook1F(Hist->fNZeroAmb   ,"nza"      ,Form("%s: N (Iamb = 0) hits" ,Folder), 100, 0,100,Folder);
-  HBook1F(Hist->fNzaOverNa  ,"nza_na"   ,Form("%s: NZeroAmb/Nactive"  ,Folder), 100, 0,  1,Folder);
-  HBook1F(Hist->fNMatActive ,"nma"      ,Form("%s: N (Mat Active"     ,Folder), 100, 0,100,Folder);
-  HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 200, 0,   2,Folder);
-  HBook1F(Hist->fNBend      ,"nbend"    ,Form("%s: Nbend"             ,Folder), 100, 0,1000,Folder);
+//   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
+//   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
 
-  HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
-  HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
-  HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
-  HBook1F(Hist->fFitCons[0] ,"fcon"     ,Form("%s: track fit cons [0]",Folder), 200, 0,   1,Folder);
-  HBook1F(Hist->fFitCons[1] ,"fcon1"    ,Form("%s: track fit cons [1]",Folder), 1000, 0,   0.1,Folder);
-  HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
-  HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
-  HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
-  HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
-  HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: T0_trk-T0_MC(Z=0)" ,Folder), 200, -10.0 ,10.0,Folder);
-  HBook1F(Hist->fXtZ0       ,"xtz0"     ,Form("%s: DT(Z0)/sigT"       ,Folder), 200, -10.0 ,10.0,Folder);
+//   HBook1F(Hist->fChi2Tcm  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
+//   HBook1F(Hist->fChi2XY     ,"chi2xy"   ,Form("%s: chi2(t-c match) XY",Folder), 300,-50  ,250 ,Folder);
+//   HBook1F(Hist->fChi2T      ,"chi2t"    ,Form("%s: chi2(t-c match) T" ,Folder), 250,  0  ,250 ,Folder);
 
-  HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
-  HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
+//   HBook1F(Hist->fDt         ,"dt"       ,Form("%s: T(trk)-T(cl)"      ,Folder), 400,-20  ,20 ,Folder);
+//   HBook1F(Hist->fDx         ,"dx"       ,Form("%s: X(trk)-X(cl)"      ,Folder), 200,-500 ,500,Folder);
+//   HBook1F(Hist->fDy         ,"dy"       ,Form("%s: Y(trk)-Y(cl)"      ,Folder), 200,-500 ,500,Folder);
+//   HBook1F(Hist->fDz         ,"dz"       ,Form("%s: Z(trk)-Z(cl)"      ,Folder), 200,-250 ,250,Folder);
+//   HBook1F(Hist->fDu         ,"du"       ,Form("%s: track-cluster DU"  ,Folder), 250,-250 ,250,Folder);
+//   HBook1F(Hist->fDv         ,"dv"       ,Form("%s: track-cluster DV"  ,Folder), 200,-100 ,100,Folder);
+//   HBook1F(Hist->fPath       ,"path"     ,Form("%s: track sdisk"       ,Folder),  50,   0 ,500,Folder);
 
-  HBook1F(Hist->fChi2Tcm  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
-  HBook1F(Hist->fChi2XY     ,"chi2xy"   ,Form("%s: chi2(t-c match) XY",Folder), 300,-50  ,250 ,Folder);
-  HBook1F(Hist->fChi2T      ,"chi2t"    ,Form("%s: chi2(t-c match) T" ,Folder), 250,  0  ,250 ,Folder);
+//   HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
+//   HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 500, 0   ,5,Folder);
+//   HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
+//   HBook1F(Hist->fDrDzCal    ,"drdzcal"  ,Form("%s: track dr/dz cal"   ,Folder), 200, -5  ,5  ,Folder);
+//   HBook1F(Hist->fDtClZ0     ,"dtclz0"   ,Form("%s: T(cl_z0)-T(Z0)"    ,Folder), 250, -5 , 5,Folder);
+//   HBook2F(Hist->fDtClZ0VsECl,"dtclz0_vs_ecl",Form("%s: DtClZ0 vs ECl" ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
+//   HBook2F(Hist->fDtClZ0VsP  ,"dtclz0_vs_p"  ,Form("%s: DtClZ0 vs p"   ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
 
-  HBook1F(Hist->fDt         ,"dt"       ,Form("%s: T(trk)-T(cl)"      ,Folder), 400,-20  ,20 ,Folder);
-  HBook1F(Hist->fDx         ,"dx"       ,Form("%s: X(trk)-X(cl)"      ,Folder), 200,-500 ,500,Folder);
-  HBook1F(Hist->fDy         ,"dy"       ,Form("%s: Y(trk)-Y(cl)"      ,Folder), 200,-500 ,500,Folder);
-  HBook1F(Hist->fDz         ,"dz"       ,Form("%s: Z(trk)-Z(cl)"      ,Folder), 200,-250 ,250,Folder);
-  HBook1F(Hist->fDu         ,"du"       ,Form("%s: track-cluster DU"  ,Folder), 250,-250 ,250,Folder);
-  HBook1F(Hist->fDv         ,"dv"       ,Form("%s: track-cluster DV"  ,Folder), 200,-100 ,100,Folder);
-  HBook1F(Hist->fPath       ,"path"     ,Form("%s: track sdisk"       ,Folder),  50,   0 ,500,Folder);
-
-  HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
-  HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 500, 0   ,5,Folder);
-  HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
-  HBook1F(Hist->fDrDzCal    ,"drdzcal"  ,Form("%s: track dr/dz cal"   ,Folder), 200, -5  ,5  ,Folder);
-  HBook1F(Hist->fDtClZ0     ,"dtclz0"   ,Form("%s: T(cl_z0)-T(Z0)"    ,Folder), 250, -5 , 5,Folder);
-  HBook2F(Hist->fDtClZ0VsECl,"dtclz0_vs_ecl",Form("%s: DtClZ0 vs ECl" ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
-  HBook2F(Hist->fDtClZ0VsP  ,"dtclz0_vs_p"  ,Form("%s: DtClZ0 vs p"   ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
-
-  HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
-  HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
-  HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVAOut[0]"          ,Folder), 200, -0.5, 1.5,Folder);
-  HBook1F(Hist->fDeltaMVA   ,"dmva"     ,Form("%s:MVAOut[0]-TrkQual"  ,Folder), 200, -1.0, 1.0,Folder);
-}
+//   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
+//   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
+//   HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVAOut[0]"          ,Folder), 200, -0.5, 1.5,Folder);
+//   HBook1F(Hist->fDeltaMVA   ,"dmva"     ,Form("%s:MVAOut[0]-TrkQual"  ,Folder), 200, -1.0, 1.0,Folder);
+// }
 
 //-----------------------------------------------------------------------------
 void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folder) {
@@ -394,48 +379,48 @@ void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folde
 
 }
 
-//-----------------------------------------------------------------------------
-void TTrackCompModule::BookEventHistograms(HistBase_t* HistR, const char* Folder) {
-  //  char name [200];
-  //  char title[200];
+// //-----------------------------------------------------------------------------
+// void TTrackCompModule::BookEventHistograms(HistBase_t* HistR, const char* Folder) {
+//   //  char name [200];
+//   //  char title[200];
 
-  EventHist_t* Hist =  (EventHist_t*) HistR;
+//   EventHist_t* Hist =  (EventHist_t*) HistR;
 
-  HBook1D(Hist->fLumWt     ,"lumwt"    ,Form("%s: Luminosity Weight"               ,Folder),200, 0,10,Folder);
-  Hist->fLumWt->Sumw2(kTRUE);
+//   HBook1D(Hist->fLumWt     ,"lumwt"    ,Form("%s: Luminosity Weight"               ,Folder),200, 0,10,Folder);
+//   Hist->fLumWt->Sumw2(kTRUE);
 
-  HBook1F(Hist->fRv        ,"rv"       ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
-  HBook1F(Hist->fZv        ,"zv"       ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
+//   HBook1F(Hist->fRv        ,"rv"       ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
+//   HBook1F(Hist->fZv        ,"zv"       ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
 
-  HBook1F(Hist->fPdgCode         ,"pdg"   ,Form("%s: PDG code"                     ,Folder),200,-100,100,Folder);
-  HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: MC mom after Stopping Target" ,Folder),400,  90,110,Folder);
-  HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: MC mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
-  HBook1F(Hist->fNshCE           ,"nsh_ce",Form("%s: CE Number of Straw Hits"      ,Folder),150,0,150,Folder);
+//   HBook1F(Hist->fPdgCode         ,"pdg"   ,Form("%s: PDG code"                     ,Folder),200,-100,100,Folder);
+//   HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: MC mom after Stopping Target" ,Folder),400,  90,110,Folder);
+//   HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: MC mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
+//   HBook1F(Hist->fNshCE           ,"nsh_ce",Form("%s: CE Number of Straw Hits"      ,Folder),150,0,150,Folder);
 
-  HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: MC Particle Cos(Theta) Lab"      ,Folder),100,-1,1,Folder);
-  HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: MC Particle Momentum"            ,Folder),1000,  0,200,Folder);
+//   HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: MC Particle Cos(Theta) Lab"      ,Folder),100,-1,1,Folder);
+//   HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: MC Particle Momentum"            ,Folder),1000,  0,200,Folder);
 
-  HBook1F(Hist->fNHelices  ,"nhel"     ,Form("%s: nhelices"                        ,Folder), 10,0, 10,Folder);
-  HBook1F(Hist->fNTracks[0],"ntrk_0"   ,Form("%s: N(Reconstructed Tracks)[0]"      ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNTracks[1],"ntrk_1"   ,Form("%s: N(Reconstructed Tracks)[1]"      ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNshTot [0],"nshtot_0" ,Form("%s: Total Number of Straw Hits [0]"  ,Folder),250,0,250,Folder);
-  HBook1F(Hist->fNshTot [1],"nshtot_1" ,Form("%s: Total Number of Straw Hits [1]"  ,Folder),250,0,5000,Folder);
-  HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
-  HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
-  HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
-  HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
-  HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
-  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: N(Clusters)"                     ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
-  HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
-  HBook1F(Hist->fDp        ,"dp"       ,Form("%s: P(TPR)-P(CPR)"                   ,Folder),500,-2.5,2.5,Folder);
-  HBook1F(Hist->fInstLumi  ,"inst_lum" ,Form("%s: Inst Luminosity"                 ,Folder),500, 0,1.e8,Folder);
-  HBook1F(Hist->fGMom      ,"gmom"     ,Form("%s: Photon Momentum"                 ,Folder),200, 0,200 ,Folder);
-  HBook1F(Hist->fGMomRMC   ,"gmom_rmc" ,Form("%s: Photon Momentum, RMC weighted"   ,Folder),200, 0,200 ,Folder);
-}
+//   HBook1F(Hist->fNHelices  ,"nhel"     ,Form("%s: nhelices"                        ,Folder), 10,0, 10,Folder);
+//   HBook1F(Hist->fNTracks[0],"ntrk_0"   ,Form("%s: N(Reconstructed Tracks)[0]"      ,Folder),100,0,100,Folder);
+//   HBook1F(Hist->fNTracks[1],"ntrk_1"   ,Form("%s: N(Reconstructed Tracks)[1]"      ,Folder),100,0,100,Folder);
+//   HBook1F(Hist->fNshTot [0],"nshtot_0" ,Form("%s: Total Number of Straw Hits [0]"  ,Folder),250,0,250,Folder);
+//   HBook1F(Hist->fNshTot [1],"nshtot_1" ,Form("%s: Total Number of Straw Hits [1]"  ,Folder),250,0,5000,Folder);
+//   HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
+//   HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
+//   HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
+//   HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
+//   HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
+//   HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
+//   HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
+//   HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
+//   HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: N(Clusters)"                     ,Folder),100,0,100,Folder);
+//   HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
+//   HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
+//   HBook1F(Hist->fDp        ,"dp"       ,Form("%s: P(TPR)-P(CPR)"                   ,Folder),500,-2.5,2.5,Folder);
+//   HBook1F(Hist->fInstLumi  ,"inst_lum" ,Form("%s: Inst Luminosity"                 ,Folder),500, 0,1.e8,Folder);
+//   HBook1F(Hist->fGMom      ,"gmom"     ,Form("%s: Photon Momentum"                 ,Folder),200, 0,200 ,Folder);
+//   HBook1F(Hist->fGMomRMC   ,"gmom_rmc" ,Form("%s: Photon Momentum, RMC weighted"   ,Folder),200, 0,200 ,Folder);
+// }
 
 //_____________________________________________________________________________
 void TTrackCompModule::BookHistograms() {
@@ -513,183 +498,182 @@ void TTrackCompModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book track histograms
 //-----------------------------------------------------------------------------
-  int       book_track_histset[kNTrackHistSets];
   TString*  track_selection   [kNTrackHistSets];
 
-  for (int i=0; i<kNTrackHistSets; i++) { book_track_histset[i] = 0; track_selection[i] = NULL; }
+  for (int i=0; i<kNTrackHistSets; i++) { track_selection[i] = NULL; }
 
-  book_track_histset[  0] = 1; track_selection[  0] = new TString("good PAR tracks");
-  book_track_histset[  1] = 1; track_selection[  1] = new TString("good DAR tracks in events with no good kPAR tracks TrkQual>0.3");
-  book_track_histset[  2] = 1; track_selection[  2] = new TString("good DAR tracks in events with no good kPAR tracks TrkQual>0.2");
-  book_track_histset[  3] = 1; track_selection[  3] = new TString("best track");
+  track_selection[  0] = new TString("good PAR tracks");
+  track_selection[  1] = new TString("good DAR tracks in events with no good kPAR tracks TrkQual>0.3");
+  track_selection[  2] = new TString("good DAR tracks in events with no good kPAR tracks TrkQual>0.2");
+  track_selection[  3] = new TString("best track");
 
-  book_track_histset[100] = 1; track_selection[100] = new TString("PAR all tracks");
-  book_track_histset[101] = 1; track_selection[101] = new TString("PAR BestTrackID");
-  book_track_histset[102] = 1; track_selection[102] = new TString("PAR BestTrackID no fitCons&momErr&t0Err tracks");
-  book_track_histset[103] = 1; track_selection[103] = new TString("PAR BestTrackID, dpf>1 tracks");
-  book_track_histset[104] = 1; track_selection[104] = new TString("PAR all  tracks events Ecl > 60");
-  book_track_histset[105] = 1; track_selection[105] = new TString("PAR BestTrackID tracks events Ecl > 60");
-  book_track_histset[106] = 1; track_selection[106] = new TString("PAR tracks with dtz0 < -10");
-  book_track_histset[109] = 1; track_selection[109] = new TString("PAR tracks with XDpF > +10 MeV");
+  track_selection[100] = new TString("PAR all tracks");
+  track_selection[101] = new TString("PAR BestTrackID");
+  track_selection[102] = new TString("PAR BestTrackID no fitCons&momErr&t0Err tracks");
+  track_selection[103] = new TString("PAR BestTrackID, dpf>1 tracks");
+  track_selection[104] = new TString("PAR all  tracks events Ecl > 60");
+  track_selection[105] = new TString("PAR BestTrackID tracks events Ecl > 60");
+  track_selection[106] = new TString("PAR tracks with dtz0 < -10");
+  track_selection[109] = new TString("PAR tracks with XDpF > +10 MeV");
 
-  book_track_histset[110] = 1; track_selection[110] = new TString("PAR TrackID[0] - SetC");
-  book_track_histset[111] = 1; track_selection[111] = new TString("PAR TrackID[1]");
-  book_track_histset[112] = 1; track_selection[112] = new TString("PAR TrackID[2]");
-  book_track_histset[113] = 1; track_selection[113] = new TString("PAR TrackID[3]");
-  book_track_histset[114] = 1; track_selection[114] = new TString("PAR TrackID[4]");
-  book_track_histset[115] = 1; track_selection[115] = new TString("PAR TrackID[5]");
-  book_track_histset[116] = 1; track_selection[116] = new TString("PAR TrackID[6]");
-  book_track_histset[117] = 1; track_selection[117] = new TString("PAR TrackID[7]");
-  book_track_histset[118] = 1; track_selection[118] = new TString("PAR TrackID[8]");
-  book_track_histset[119] = 1; track_selection[119] = new TString("PAR TrackID[9]");
-  book_track_histset[120] = 1; track_selection[120] = new TString("PAR TrackID[10]");
-  book_track_histset[121] = 1; track_selection[121] = new TString("PAR TrackID[11]");
-  book_track_histset[122] = 1; track_selection[122] = new TString("PAR TrackID[12]");
-  book_track_histset[123] = 1; track_selection[123] = new TString("PAR TrackID[13]");
-  book_track_histset[124] = 1; track_selection[124] = new TString("PAR TrackID[14]");
-  book_track_histset[125] = 1; track_selection[125] = new TString("PAR TrackID[15]");
-  book_track_histset[126] = 1; track_selection[126] = new TString("PAR TrackID[16]");
-  book_track_histset[127] = 1; track_selection[127] = new TString("PAR TrackID[17]");
-  book_track_histset[128] = 1; track_selection[128] = new TString("PAR TrackID[18]");
-  book_track_histset[129] = 1; track_selection[129] = new TString("PAR TrackID[19]");
+  track_selection[110] = new TString("PAR TrackID[0] - SetC");
+  track_selection[111] = new TString("PAR TrackID[1]");
+  track_selection[112] = new TString("PAR TrackID[2]");
+  track_selection[113] = new TString("PAR TrackID[3]");
+  track_selection[114] = new TString("PAR TrackID[4]");
+  track_selection[115] = new TString("PAR TrackID[5]");
+  track_selection[116] = new TString("PAR TrackID[6]");
+  track_selection[117] = new TString("PAR TrackID[7]");
+  track_selection[118] = new TString("PAR TrackID[8]");
+  track_selection[119] = new TString("PAR TrackID[9]");
+  track_selection[120] = new TString("PAR TrackID[10]");
+  track_selection[121] = new TString("PAR TrackID[11]");
+  track_selection[122] = new TString("PAR TrackID[12]");
+  track_selection[123] = new TString("PAR TrackID[13]");
+  track_selection[124] = new TString("PAR TrackID[14]");
+  track_selection[125] = new TString("PAR TrackID[15]");
+  track_selection[126] = new TString("PAR TrackID[16]");
+  track_selection[127] = new TString("PAR TrackID[17]");
+  track_selection[128] = new TString("PAR TrackID[18]");
+  track_selection[129] = new TString("PAR TrackID[19]");
 
-  book_track_histset[141] = 1; track_selection[141] = new TString("PAR tracks N(active) > 20");
-  book_track_histset[142] = 1; track_selection[142] = new TString("PAR tracks N(active) > 20, |D0| < 100");
-  book_track_histset[143] = 1; track_selection[143] = new TString("PAR tracks N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[144] = 1; track_selection[144] = new TString("PAR tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[141] = new TString("PAR tracks N(active) > 20");
+  track_selection[142] = new TString("PAR tracks N(active) > 20, |D0| < 100");
+  track_selection[143] = new TString("PAR tracks N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[144] = new TString("PAR tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[150] = 1; track_selection[150] = new TString("PAR tracks |DpF| < 1");
-  book_track_histset[151] = 1; track_selection[151] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20");
-  book_track_histset[152] = 1; track_selection[152] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100");
-  book_track_histset[153] = 1; track_selection[153] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[154] = 1; track_selection[154] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[150] = new TString("PAR tracks |DpF| < 1");
+  track_selection[151] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20");
+  track_selection[152] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100");
+  track_selection[153] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[154] = new TString("PAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[160] = 1; track_selection[160] = new TString("PAR tracks DpF   > 2");
-  book_track_histset[161] = 1; track_selection[161] = new TString("PAR tracks DpF   > 2 ; N(active) > 20");
-  book_track_histset[162] = 1; track_selection[164] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100");
-  book_track_histset[163] = 1; track_selection[163] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[164] = 1; track_selection[164] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[160] = new TString("PAR tracks DpF   > 2");
+  track_selection[161] = new TString("PAR tracks DpF   > 2 ; N(active) > 20");
+  track_selection[162] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100");
+  track_selection[163] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[164] = new TString("PAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[171] = 1; track_selection[171] = new TString("PAR+ tracks with final selections");
-  book_track_histset[172] = 1; track_selection[172] = new TString("PAR- tracks with final selections");
-  book_track_histset[173] = 1; track_selection[173] = new TString("PAR+ tracks with final selections and process-defined weight");
-  book_track_histset[174] = 1; track_selection[174] = new TString("PAR- tracks with final selections and process-defined weight");
+  track_selection[171] = new TString("PAR+ tracks with final selections");
+  track_selection[172] = new TString("PAR- tracks with final selections");
+  track_selection[173] = new TString("PAR+ tracks with final selections and process-defined weight");
+  track_selection[174] = new TString("PAR- tracks with final selections and process-defined weight");
 
-  book_track_histset[177] = 1; track_selection[177] = new TString("cosmics+: #171 + 90 < p < 93");
-  book_track_histset[178] = 1; track_selection[178] = new TString("cosmics-: #172 + 90 < p < 93");
+  track_selection[177] = new TString("cosmics+: #171 + 90 < p < 93");
+  track_selection[178] = new TString("cosmics-: #172 + 90 < p < 93");
 
-  book_track_histset[179] = 1; track_selection[179] = new TString("PAR- tracks with final selections and DIO weight");
+  track_selection[179] = new TString("PAR- tracks with final selections and DIO weight");
 
-  book_track_histset[180] = 1; track_selection[180] = new TString("PAR+ tracks all");                                       
-  book_track_histset[181] = 1; track_selection[181] = new TString("PAR+ tracks N(active) > 20");                                       
-  book_track_histset[182] = 1; track_selection[182] = new TString("PAR+ tracks N(active) > 20 and |D0| < 100");			       
-  book_track_histset[183] = 1; track_selection[183] = new TString("PAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6");	       
-  book_track_histset[184] = 1; track_selection[184] = new TString("PAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
-  book_track_histset[185] = 1; track_selection[185] = new TString("PAR+ tracks with final selections, E/P < 0.7 (mu+/pi+)");
-  book_track_histset[186] = 1; track_selection[186] = new TString("PAR+ tracks with final selections, E/P > 0.7 (e+)");
+  track_selection[180] = new TString("PAR+ tracks all");                                       
+  track_selection[181] = new TString("PAR+ tracks N(active) > 20");                                       
+  track_selection[182] = new TString("PAR+ tracks N(active) > 20 and |D0| < 100");			       
+  track_selection[183] = new TString("PAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6");	       
+  track_selection[184] = new TString("PAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[185] = new TString("PAR+ tracks with final selections, E/P < 0.7 (mu+/pi+)");
+  track_selection[186] = new TString("PAR+ tracks with final selections, E/P > 0.7 (e+)");
 
-  book_track_histset[190] = 1; track_selection[190] = new TString("PAR- tracks all");                                       
-  book_track_histset[191] = 1; track_selection[191] = new TString("PAR- tracks N(active) > 20");                                       
-  book_track_histset[192] = 1; track_selection[192] = new TString("PAR- tracks N(active) > 20 and |D0| < 100");
-  book_track_histset[193] = 1; track_selection[193] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[194] = 1; track_selection[194] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
-  book_track_histset[195] = 1; track_selection[195] = new TString("PAR- tracks with final selections, E/P < 0.7 (mu-/pi-)");
-  book_track_histset[196] = 1; track_selection[196] = new TString("PAR- tracks with final selections, E/P > 0.7 (e-)");
+  track_selection[190] = new TString("PAR- tracks all");                                       
+  track_selection[191] = new TString("PAR- tracks N(active) > 20");                                       
+  track_selection[192] = new TString("PAR- tracks N(active) > 20 and |D0| < 100");
+  track_selection[193] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[194] = new TString("PAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[195] = new TString("PAR- tracks with final selections, E/P < 0.7 (mu-/pi-)");
+  track_selection[196] = new TString("PAR- tracks with final selections, E/P > 0.7 (e-)");
 
-  book_track_histset[200] = 1; track_selection[200] = new TString("DAR all tracks");
-  book_track_histset[201] = 1; track_selection[201] = new TString("DAR BestTrackID");
-  book_track_histset[202] = 1; track_selection[202] = new TString("DAR BestTrackID no fitCons&momErr&t0Err tracks");
-  book_track_histset[203] = 1; track_selection[203] = new TString("DAR BestTrackID, dpf>1 tracks");
-  book_track_histset[204] = 1; track_selection[204] = new TString("DAR all  tracks events Ecl > 60");
-  book_track_histset[205] = 1; track_selection[205] = new TString("DAR BestTrackID tracks events Ecl > 60");
-  book_track_histset[206] = 1; track_selection[206] = new TString("DAR tracks with dtz0 < -10");
-  book_track_histset[209] = 1; track_selection[209] = new TString("DAR tracks with XDpF > +10 MeV");
+  track_selection[200] = new TString("DAR all tracks");
+  track_selection[201] = new TString("DAR BestTrackID");
+  track_selection[202] = new TString("DAR BestTrackID no fitCons&momErr&t0Err tracks");
+  track_selection[203] = new TString("DAR BestTrackID, dpf>1 tracks");
+  track_selection[204] = new TString("DAR all  tracks events Ecl > 60");
+  track_selection[205] = new TString("DAR BestTrackID tracks events Ecl > 60");
+  track_selection[206] = new TString("DAR tracks with dtz0 < -10");
+  track_selection[209] = new TString("DAR tracks with XDpF > +10 MeV");
 
-  book_track_histset[210] = 1; track_selection[210] = new TString("DAR TrackID[0] - SetC");
-  book_track_histset[211] = 1; track_selection[211] = new TString("DAR TrackID[1]");
-  book_track_histset[212] = 1; track_selection[212] = new TString("DAR TrackID[2]");
-  book_track_histset[213] = 1; track_selection[213] = new TString("DAR TrackID[3]");
-  book_track_histset[214] = 1; track_selection[214] = new TString("DAR TrackID[4]");
-  book_track_histset[215] = 1; track_selection[215] = new TString("DAR TrackID[5]");
-  book_track_histset[216] = 1; track_selection[216] = new TString("DAR TrackID[6]");
-  book_track_histset[217] = 1; track_selection[217] = new TString("DAR TrackID[7]");
-  book_track_histset[218] = 1; track_selection[218] = new TString("DAR TrackID[8]");
-  book_track_histset[219] = 1; track_selection[219] = new TString("DAR TrackID[9]");
-  book_track_histset[220] = 1; track_selection[220] = new TString("DAR TrackID[10]");
-  book_track_histset[221] = 1; track_selection[221] = new TString("DAR TrackID[11]");
-  book_track_histset[222] = 1; track_selection[222] = new TString("DAR TrackID[12]");
-  book_track_histset[223] = 1; track_selection[223] = new TString("DAR TrackID[13]");
-  book_track_histset[224] = 1; track_selection[224] = new TString("DAR TrackID[14]");
-  book_track_histset[225] = 1; track_selection[225] = new TString("DAR TrackID[15]");
-  book_track_histset[226] = 1; track_selection[226] = new TString("DAR TrackID[16]");
-  book_track_histset[227] = 1; track_selection[227] = new TString("DAR TrackID[17]");
-  book_track_histset[228] = 1; track_selection[228] = new TString("DAR TrackID[18]");
-  book_track_histset[229] = 1; track_selection[229] = new TString("DAR TrackID[19");
+  track_selection[210] = new TString("DAR TrackID[0] - SetC");
+  track_selection[211] = new TString("DAR TrackID[1]");
+  track_selection[212] = new TString("DAR TrackID[2]");
+  track_selection[213] = new TString("DAR TrackID[3]");
+  track_selection[214] = new TString("DAR TrackID[4]");
+  track_selection[215] = new TString("DAR TrackID[5]");
+  track_selection[216] = new TString("DAR TrackID[6]");
+  track_selection[217] = new TString("DAR TrackID[7]");
+  track_selection[218] = new TString("DAR TrackID[8]");
+  track_selection[219] = new TString("DAR TrackID[9]");
+  track_selection[220] = new TString("DAR TrackID[10]");
+  track_selection[221] = new TString("DAR TrackID[11]");
+  track_selection[222] = new TString("DAR TrackID[12]");
+  track_selection[223] = new TString("DAR TrackID[13]");
+  track_selection[224] = new TString("DAR TrackID[14]");
+  track_selection[225] = new TString("DAR TrackID[15]");
+  track_selection[226] = new TString("DAR TrackID[16]");
+  track_selection[227] = new TString("DAR TrackID[17]");
+  track_selection[228] = new TString("DAR TrackID[18]");
+  track_selection[229] = new TString("DAR TrackID[19");
 
-  book_track_histset[241] = 1; track_selection[241] = new TString("DAR tracks N(active) > 20");
-  book_track_histset[242] = 1; track_selection[242] = new TString("DAR tracks N(active) > 20, |D0| < 100");
-  book_track_histset[243] = 1; track_selection[243] = new TString("DAR tracks N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[244] = 1; track_selection[244] = new TString("DAR tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[241] = new TString("DAR tracks N(active) > 20");
+  track_selection[242] = new TString("DAR tracks N(active) > 20, |D0| < 100");
+  track_selection[243] = new TString("DAR tracks N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[244] = new TString("DAR tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[250] = 1; track_selection[250] = new TString("DAR tracks |DpF| < 1");
-  book_track_histset[251] = 1; track_selection[251] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20");
-  book_track_histset[252] = 1; track_selection[252] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100");
-  book_track_histset[253] = 1; track_selection[253] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[254] = 1; track_selection[254] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[250] = new TString("DAR tracks |DpF| < 1");
+  track_selection[251] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20");
+  track_selection[252] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100");
+  track_selection[253] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[254] = new TString("DAR tracks |DpF| < 1 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[260] = 1; track_selection[260] = new TString("DAR tracks DpF   > 2");
-  book_track_histset[261] = 1; track_selection[261] = new TString("DAR tracks DpF   > 2 ; N(active) > 20");
-  book_track_histset[262] = 1; track_selection[264] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100");
-  book_track_histset[263] = 1; track_selection[263] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[264] = 1; track_selection[264] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[260] = new TString("DAR tracks DpF   > 2");
+  track_selection[261] = new TString("DAR tracks DpF   > 2 ; N(active) > 20");
+  track_selection[262] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100");
+  track_selection[263] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[264] = new TString("DAR tracks DpF   > 2 ; N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
 
-  book_track_histset[271] = 1; track_selection[271] = new TString("DAR+ tracks with final selections");
-  book_track_histset[272] = 1; track_selection[272] = new TString("DAR- tracks with final selections");
-  book_track_histset[273] = 1; track_selection[273] = new TString("DAR+ tracks with final selections and process-defined weight");
-  book_track_histset[274] = 1; track_selection[274] = new TString("DAR- tracks with final selections and process-defined weight");
+  track_selection[271] = new TString("DAR+ tracks with final selections");
+  track_selection[272] = new TString("DAR- tracks with final selections");
+  track_selection[273] = new TString("DAR+ tracks with final selections and process-defined weight");
+  track_selection[274] = new TString("DAR- tracks with final selections and process-defined weight");
 
-  book_track_histset[277] = 1; track_selection[277] = new TString("cosmics+: #271 + 90 < p < 93");
-  book_track_histset[278] = 1; track_selection[278] = new TString("cosmics-: #272 + 90 < p < 93");
+  track_selection[277] = new TString("cosmics+: #271 + 90 < p < 93");
+  track_selection[278] = new TString("cosmics-: #272 + 90 < p < 93");
 
-  book_track_histset[279] = 1; track_selection[279] = new TString("DAR- tracks with final selections and DIO weight");
+  track_selection[279] = new TString("DAR- tracks with final selections and DIO weight");
 
-  book_track_histset[280] = 1; track_selection[280] = new TString("DAR+ tracks all");                                       
-  book_track_histset[281] = 1; track_selection[281] = new TString("DAR+ tracks N(active) > 20");                                       
-  book_track_histset[282] = 1; track_selection[282] = new TString("DAR+ tracks N(active) > 20 and |D0| < 100");			       
-  book_track_histset[283] = 1; track_selection[283] = new TString("DAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6");	       
-  book_track_histset[284] = 1; track_selection[284] = new TString("DAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
-  book_track_histset[285] = 1; track_selection[285] = new TString("DAR+ tracks with final selections, E/P < 0.7 (mu+/pi+)");
-  book_track_histset[286] = 1; track_selection[286] = new TString("DAR+ tracks with final selections, E/P > 0.7 (e+)");
+  track_selection[280] = new TString("DAR+ tracks all");                                       
+  track_selection[281] = new TString("DAR+ tracks N(active) > 20");                                       
+  track_selection[282] = new TString("DAR+ tracks N(active) > 20 and |D0| < 100");			       
+  track_selection[283] = new TString("DAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6");	       
+  track_selection[284] = new TString("DAR+ tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[285] = new TString("DAR+ tracks with final selections, E/P < 0.7 (mu+/pi+)");
+  track_selection[286] = new TString("DAR+ tracks with final selections, E/P > 0.7 (e+)");
 
-  book_track_histset[290] = 1; track_selection[290] = new TString("DAR- tracks all");                                       
-  book_track_histset[291] = 1; track_selection[291] = new TString("DAR- tracks N(active) > 20");                                       
-  book_track_histset[292] = 1; track_selection[292] = new TString("DAR- tracks N(active) > 20 and |D0| < 100");
-  book_track_histset[293] = 1; track_selection[293] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
-  book_track_histset[294] = 1; track_selection[294] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
-  book_track_histset[295] = 1; track_selection[295] = new TString("DAR- tracks with final selections, E/P < 0.7 (mu-/pi-)");
-  book_track_histset[296] = 1; track_selection[296] = new TString("DAR- tracks with final selections, E/P > 0.7 (e-)");
+  track_selection[290] = new TString("DAR- tracks all");                                       
+  track_selection[291] = new TString("DAR- tracks N(active) > 20");                                       
+  track_selection[292] = new TString("DAR- tracks N(active) > 20 and |D0| < 100");
+  track_selection[293] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6");
+  track_selection[294] = new TString("DAR- tracks N(active) > 20, |D0| < 100, DN(active) < 6, chi2d < 4");
+  track_selection[295] = new TString("DAR- tracks with final selections, E/P < 0.7 (mu-/pi-)");
+  track_selection[296] = new TString("DAR- tracks with final selections, E/P > 0.7 (e-)");
 
-  book_track_histset[301] = 1; track_selection[301] = new TString("PAR- tracks final selections, dr/dz(cal) <  0");
-  book_track_histset[302] = 1; track_selection[302] = new TString("PAR- tracks final selections, dr/dz(cal) >= 0");
-  book_track_histset[305] = 1; track_selection[305] = new TString("PAR- tracks final selections, cluster in the 1st disk");
-  book_track_histset[306] = 1; track_selection[306] = new TString("PAR- tracks final selections, cluster in the 2nd disk");
-  book_track_histset[307] = 1; track_selection[307] = new TString("PAR- tracks final selections, dt <  -4 ns");
-  book_track_histset[308] = 1; track_selection[308] = new TString("PAR- tracks final selections, dt >= -4 ns");
+  track_selection[301] = new TString("PAR- tracks final selections, dr/dz(cal) <  0");
+  track_selection[302] = new TString("PAR- tracks final selections, dr/dz(cal) >= 0");
+  track_selection[305] = new TString("PAR- tracks final selections, cluster in the 1st disk");
+  track_selection[306] = new TString("PAR- tracks final selections, cluster in the 2nd disk");
+  track_selection[307] = new TString("PAR- tracks final selections, dt <  -4 ns");
+  track_selection[308] = new TString("PAR- tracks final selections, dt >= -4 ns");
 
-  book_track_histset[401] = 1; track_selection[401] = new TString("DAR- tracks final selections, dr/dz(cal) <  0");
-  book_track_histset[402] = 1; track_selection[402] = new TString("DAR- tracks final selections, dr/dz(cal) >= 0");
-  book_track_histset[405] = 1; track_selection[405] = new TString("DAR- tracks final selections, cluster in the 1st disk");
-  book_track_histset[406] = 1; track_selection[406] = new TString("DAR- tracks final selections, cluster in the 2nd disk");
-  book_track_histset[407] = 1; track_selection[407] = new TString("DAR- tracks final selections, dt <  -4 ns");
-  book_track_histset[408] = 1; track_selection[408] = new TString("DAR- tracks final selections, dt >= -4 ns");
+  track_selection[401] = new TString("DAR- tracks final selections, dr/dz(cal) <  0");
+  track_selection[402] = new TString("DAR- tracks final selections, dr/dz(cal) >= 0");
+  track_selection[405] = new TString("DAR- tracks final selections, cluster in the 1st disk");
+  track_selection[406] = new TString("DAR- tracks final selections, cluster in the 2nd disk");
+  track_selection[407] = new TString("DAR- tracks final selections, dt <  -4 ns");
+  track_selection[408] = new TString("DAR- tracks final selections, dt >= -4 ns");
 
   const char* folder_title;
   for (int i=0; i<kNTrackHistSets; i++) {
-    if (book_track_histset[i] != 0) {
+    if (track_selection[i] != 0) {
       sprintf(folder_name,"trk_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       folder_title = folder_name;
-      if (track_selection[i] != NULL) folder_title = track_selection[i]->Data();
+      folder_title = track_selection[i]->Data();
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_title);
       fHist.fTrack[i] = new TrackHist_t;
       BookTrackHistograms(fHist.fTrack[i],Form("Hist/%s",folder_name));
@@ -698,7 +682,6 @@ void TTrackCompModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book delta track histograms
 //-----------------------------------------------------------------------------
-//  int       book_dtrack_histset[kNDTrackHistSets];
   TString*  dtrack_selection   [kNDTrackHistSets];
 
   for (int i=0; i<kNDTrackHistSets; i++) { dtrack_selection[i] = NULL; }
@@ -720,315 +703,6 @@ void TTrackCompModule::BookHistograms() {
 
 }
 
-//-----------------------------------------------------------------------------
-// need MC truth branch
-//-----------------------------------------------------------------------------
-void TTrackCompModule::FillEventHistograms(HistBase_t* HistR) {
-
-  double            cos_th, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
-  TLorentzVector    mom (1.,0.,0.,0);
-
-  EventHist_t* Hist = (EventHist_t*) HistR;
-
-  if (fParticle) { 
-    fParticle->Momentum(mom);
-    xv = fParticle->Vx()+3904.;
-    yv = fParticle->Vy();
-    rv = sqrt(xv*xv+yv*yv);
-    zv = fParticle->Vz();
-  }
-
-  p      = mom.P();
-  cos_th = mom.Pz()/p;
-
-  // xv = fParticle->Vx()+3904.;
-  // yv = fParticle->Vy();
-  // rv = sqrt(xv*xv+yv*yv);
-  // zv = fParticle->Vz();
-
-  Hist->fLumWt->Fill(fLumWt);
-  Hist->fRv->Fill(rv);
-  Hist->fZv->Fill(zv);
-
-  TSimParticle* simp = fSimPar.fParticle;
-
-  if (simp) {
-    Hist->fPdgCode->Fill(simp->fPdgCode);
-    Hist->fMomTargetEnd->Fill(simp->fMomTargetEnd);
-    Hist->fMomTrackerFront->Fill(simp->fMomTrackerFront);	// 
-    Hist->fNshCE->Fill(simp->fNStrawHits);
-  }
-  else {
-    Hist->fPdgCode->Fill(-1.e6);
-    Hist->fMomTargetEnd->Fill(-1.);
-    Hist->fMomTrackerFront->Fill(-1.);	// 
-    Hist->fNshCE->Fill(-1);
-  }
-
-  Hist->fMcMom->Fill(p);
-  Hist->fMcCosTh->Fill(cos_th);
-
-  Hist->fNHelices->Fill(fNHelices);
-
-  Hist->fNTracks[0]->Fill(fNTracks[0]);
-  Hist->fNTracks[1]->Fill(fNTracks[1]);
-
-  int nsh_tot = GetHeaderBlock()->fNStrawHits;
-
-  Hist->fNshTot[0]->Fill(nsh_tot);
-  Hist->fNshTot[1]->Fill(nsh_tot);
-
-  Hist->fNClusters->Fill(fNClusters);
-  Hist->fEClMax->Fill(fEClMax);
-  Hist->fTClMax->Fill(fTClMax);
-//-----------------------------------------------------------------------------
-//  difference between the [corrected] PAR and DAR momenta
-//-----------------------------------------------------------------------------
-  double dp {1.e6};
-
-  if ((fNTracks[0] == 1) && (fNTracks[1] == 1)) {
-    TrackPar_t* tp = &fTrackPar[0][0];
-    TrackPar_t* cp = &fTrackPar[1][0];
-
-    dp = tp->fP-cp->fP;
-  }
-  Hist->fDp->Fill(dp);
-//-----------------------------------------------------------------------------
-// photon momentum plots (for RMC )
-//-----------------------------------------------------------------------------
-  if (fProcess == 41) {
-    Hist->fGMom->Fill   (fPhotonE, 1.);
-    Hist->fGMomRMC->Fill(fPhotonE, fWeight);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// fill efficiency histograms : need 10 histogram sets
-// pitch = 1./tan(dip)
-//-----------------------------------------------------------------------------
-void TTrackCompModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
-						TStnTrackID*     TrackID   , 
-						TrackPar_t*      TPar      ,
-						int              HistSet   ) {
-  if (fSimPar.fParticle == NULL) return;
-
-  if (fSimPar.fParticle->NStrawHits() >= 20) {
-    FillEventHistograms(fHist.fEvent[HistSet]);
-
-    if (fSimp->fMomTrackerFront > 100.) {
-      FillEventHistograms(fHist.fEvent[HistSet+1]);
-
-      TVector3 vdmom;
-      vdmom.SetXYZ(fSimPar.fTFront->Mom()->X(),
-		   fSimPar.fTFront->Mom()->Y(),		      
-		   fSimPar.fTFront->Mom()->Z());
-
-      float ce_pitch  = vdmom.Pt()/vdmom.Pz();
-      float min_pitch = 1./TrackID->MaxTanDip();
-      float max_pitch = 1./TrackID->MinTanDip();
-
-      if ((min_pitch < ce_pitch) && (ce_pitch < max_pitch)) {
-	FillEventHistograms(fHist.fEvent[HistSet+2]);
-	  
-	if (TrackBlock->NTracks() > 0) {
-	  TStnTrack* track = TrackBlock->Track(0);
-	  int id_word      = TrackID->IDWord(track);
-
-	  FillEventHistograms(fHist.fEvent[HistSet+3]);
-	  
-	  if ((id_word & TStnTrackID::kTrkQualBit) == 0) {
-	    FillEventHistograms(fHist.fEvent[HistSet+4]);
-	    
-	    if ((id_word & TStnTrackID::kT0Bit) == 0) {
-	      FillEventHistograms(fHist.fEvent[HistSet+5]);
-	      
-	      if ((id_word & TStnTrackID::kTanDipBit) == 0) {
-		FillEventHistograms(fHist.fEvent[HistSet+6]);
-		
-		if (((id_word & TStnTrackID::kD0Bit  ) == 0) && 
-		    ((id_word & TStnTrackID::kRMaxBit) == 0)    ) {
-		  
-		  FillEventHistograms(fHist.fEvent[HistSet+7]);
-		  
-		  if ((id_word & TStnTrackID::kTanDipBit) == 0) {
-		    FillEventHistograms(fHist.fEvent[HistSet+8]);
-
-		    if ((103.5 < TPar->fP) && (TPar->fP < 105)) {
-		      FillEventHistograms(fHist.fEvent[HistSet+9]);
-		    }
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------
-// for DIO : ultimately, one would need to renormalize the distribution
-//-----------------------------------------------------------------------------
-void TTrackCompModule::FillTrackHistograms(HistBase_t* HistR, TStnTrack* Track, TrackPar_t* Tp, double Weight) {
-
-  TLorentzVector  mom;
-
-  TrackHist_t* Hist = (TrackHist_t*) HistR;
-
-					// Tp->fP - corrected momentum, fP0 and fP2 - not corrected
-  Hist->fP[0]->Fill (Tp->fP,Weight);
-  Hist->fP[1]->Fill (Tp->fP,Weight);
-  Hist->fP[2]->Fill (Tp->fP,Weight);
-					// fP0: momentum in the first point,  fP2 - in the last
-  Hist->fP0->  Fill (Track->fP0,Weight);
-  Hist->fP2->  Fill (Track->fP2,Weight);
-
-  //  Hist->fPDio->Fill(Tp->fP,Tp->fDioWt);
-
-  // Hist->fPlw->Fill   (Tp->fP, Tp->fLumWt);
-  // Hist->fPDiolw->Fill(Tp->fP, Tp->fTotWt);
-
-  Hist->fFitMomErr->Fill(Track->fFitMomErr,Weight);
-
-  Hist->fPt    ->Fill(Track->fPt    , Weight);
-  Hist->fPFront->Fill(Track->fPFront, Weight);
-  Hist->fPStOut->Fill(Track->fPStOut, Weight);
-//-----------------------------------------------------------------------------
-// dp: Tracker-only resolution
-//-----------------------------------------------------------------------------
-  Hist->fDpFront ->Fill(Tp->fDpF   , Weight);
-  Hist->fXDpF    ->Fill(Tp->fXDpF  , Weight);
-  Hist->fDpFront0->Fill(Tp->fDp0   , Weight);
-  Hist->fDpFront2->Fill(Tp->fDp2   , Weight);
-  Hist->fDpFSt   ->Fill(Tp->fDpFSt , Weight);
-  Hist->fDpFVsZ1 ->Fill(Track->fZ1 ,Tp->fDpF, Weight);
-
-  Hist->fCosTh->Fill(Track->Momentum()->CosTheta(), Weight);
-  Hist->fChi2->Fill (Track->fChi2, Weight);
-  Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.), Weight);
-
-  float na  = Track->NActive();
-  float dna = Track->NHits()-na;
-
-  Hist->fNActive->Fill(na, Weight);
-  Hist->fNaFract->Fill(na/(Track->NHits()+0.), Weight);
-  Hist->fDNa->Fill(dna, Weight);
-  Hist->fNWrong->Fill(Track->NWrong(), Weight);
-
-  float nd = Track->NDoublets();
-
-  float nad = Track->NDoubletsAct();
-  Hist->fNDoublets->Fill(nd, Weight);
-  Hist->fNadOverNd->Fill(nad/nd, Weight);
-  Hist->fNOSD->Fill(Track->NOSDoublets(), Weight);
-  Hist->fNSSD->Fill(Track->NSSDoublets(), Weight);
-  Hist->fNdOverNa->Fill(nd/na, Weight);
-  Hist->fNosdOverNa->Fill(Track->NOSDoublets()/na , Weight);
-  Hist->fNssdOverNa->Fill(Track->NSSDoublets()/na , Weight);
-  Hist->fNZeroAmb  ->Fill(Track->NHitsAmbZero()   , Weight);
-  Hist->fNzaOverNa ->Fill(Track->NHitsAmbZero()/na, Weight);
-
-  int nma = Track->NMatActive();
-
-  Hist->fNMatActive->Fill(nma   , Weight);
-  Hist->fNmaOverNa ->Fill(nma/na, Weight);
-
-  Hist->fNBend->Fill(Track->NBend(), Weight);
-
-  Hist->fT0->Fill(Track->fT0, Weight);
-  Hist->fT0Err->Fill(Track->fT0Err, Weight);
-  Hist->fQ->Fill(Track->fCharge, Weight);
-//-----------------------------------------------------------------------------
-// the two histograms just have different limits
-//-----------------------------------------------------------------------------
-  Hist->fFitCons[0]->Fill(Track->fFitCons, Weight);
-  Hist->fFitCons[1]->Fill(Track->fFitCons, Weight);
-
-  Hist->fD0->Fill(Track->fD0, Weight);
-  Hist->fZ0->Fill(Track->fZ0, Weight);
-  Hist->fTanDip->Fill(Track->fTanDip, Weight);
-  Hist->fDtZ0->Fill(Tp->fDtZ0, Weight);
-  Hist->fXtZ0->Fill(Tp->fXtZ0, Weight);
-  Hist->fRMax->Fill(Track->RMax(), Weight);
-  
-  Hist->fAlgMask->Fill(Track->AlgMask(), Weight);
-
-  Hist->fChi2Tcm->Fill(Tp->fChi2Tcm, Weight);
-  Hist->fChi2XY ->Fill(Tp->fChi2XY , Weight);
-  Hist->fChi2T  ->Fill(Tp->fChi2T  , Weight);
-
-  Hist->fDt->Fill(Tp->fDt, Weight);
-  Hist->fDx->Fill(Tp->fDx, Weight);
-  Hist->fDy->Fill(Tp->fDy, Weight);
-  Hist->fDz->Fill(Tp->fDz, Weight);
-  Hist->fDu->Fill(Tp->fDu, Weight);
-  Hist->fDv->Fill(Tp->fDv, Weight);
-
-  Hist->fPath->Fill(Tp->fPath, Weight);
-  Hist->fECl ->Fill(Tp->fEcl , Weight);
-//-----------------------------------------------------------------------------
-// assume muon hypothesis
-//-----------------------------------------------------------------------------
-  double    ekin(-1.);
-  if (fSimp) {
-    double p, m;
-    p    = Tp->fP;
-    m    = 105.658; // muon mass, in MeV
-    ekin = sqrt(p*p+m*m)-m;
-  }
-
-  Hist->fEClEKin->Fill(Tp->fEcl/ekin, Weight);
-  Hist->fEp     ->Fill(Tp->fEp      , Weight);
-  Hist->fDrDzCal->Fill(Tp->fDrDzCal , Weight);
-  Hist->fDtClZ0 ->Fill(Tp->fDtClZ0  , Weight);
-
-  Hist->fDtClZ0VsECl->Fill(Tp->fEcl,Tp->fDtClZ0, Weight);
-  Hist->fDtClZ0VsP  ->Fill(Tp->fP  ,Tp->fDtClZ0, Weight);
-
-  Hist->fFConsVsNActive->Fill(Track->NActive(),Track->fFitCons, Weight);
-//-----------------------------------------------------------------------------
-// MVA variables
-//-----------------------------------------------------------------------------
-  Hist->fDaveTrkQual->Fill(Track->DaveTrkQual(), Weight);
-  Hist->fMVAOut     ->Fill(Tp->fMVAOut[0]      , Weight);
-
-  float dmva=Tp->fMVAOut[0]-Track->DaveTrkQual();
-  Hist->fDeltaMVA->Fill(dmva, Weight);
-}
-
-
-//--------------------------------------------------------------------------------
-// function to fill TrasckSeedHit block
-//--------------------------------------------------------------------------------
-void TTrackCompModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* TrkSeed) {
-  
-  TrackSeedHist_t* Hist = (TrackSeedHist_t*) HistR;
-  
-  int         nhits    = TrkSeed->NHits      ();
-  double      clusterT = TrkSeed->ClusterTime();
-  double      clusterE = TrkSeed->ClusterEnergy();
-  
-  double      mm2MeV   = 3/10.;
-  double      pT       = TrkSeed->Pt();
-  double      radius   = pT/mm2MeV;
-
-  double      tanDip   = TrkSeed->TanDip();  
-  double      p        = pT/std::cos( std::atan(tanDip));
-  
-  Hist->fNHits      ->Fill(nhits);	 
-  Hist->fClusterTime->Fill(clusterT);
-  Hist->fClusterEnergy->Fill(clusterE);
-  
-  Hist->fRadius     ->Fill(radius);    
-  Hist->fMom        ->Fill(p);	 
-  Hist->fPt         ->Fill(pT);	 
-  Hist->fTanDip     ->Fill(tanDip);    
-  
-  Hist->fChi2       ->Fill(TrkSeed->Chi2()/(nhits-5.));
-  Hist->fFitCons    ->Fill(TrkSeed->FitCons());
-  Hist->fD0         ->Fill(TrkSeed->D0());
-}
 
 //-----------------------------------------------------------------------------
 // TmvaAlgorithm: 100*usez + algorigthm
@@ -1109,29 +783,29 @@ void TTrackCompModule::FillHistograms() {
 // event histograms
 // EVT_0: all events
 //-----------------------------------------------------------------------------
-  FillEventHistograms(fHist.fEvent[0]);
+  FillEventHistograms(fHist.fEvent[0],&fEvtPar);
 //-----------------------------------------------------------------------------
 // EVT_1: events with 50 MeV+ cluster and T0 > 550
 //-----------------------------------------------------------------------------
   if ((fEClMax > 50.) && (fTClMax > 550)) {
-    FillEventHistograms(fHist.fEvent[1]);
+    FillEventHistograms(fHist.fEvent[1],&fEvtPar);
   }
 //-----------------------------------------------------------------------------
 // EVT_2: events with 50 MeV+ cluster and both tracks T0 > 550
 //-----------------------------------------------------------------------------
   if ((fEClMax > fMinETrig) && (fTClMax > 550)) {
-    FillEventHistograms(fHist.fEvent[2]);
+    FillEventHistograms(fHist.fEvent[2],&fEvtPar);
   }
 //-----------------------------------------------------------------------------
 // EVT_3: events with at least one helix
 //-----------------------------------------------------------------------------
-  if (fNHelices > 0) FillEventHistograms(fHist.fEvent[3]);
+  if (fNHelices > 0) FillEventHistograms(fHist.fEvent[3],&fEvtPar);
 //-----------------------------------------------------------------------------
 // EVT_4: events with at least one track seed
 // EVT_5: events with at least one GOOD track seed
 //-----------------------------------------------------------------------------
-  if (fNTrackSeeds     > 0) FillEventHistograms(fHist.fEvent[4]);
-  if (fNGoodTrackSeeds > 0) FillEventHistograms(fHist.fEvent[5]);
+  if (fNTrackSeeds     > 0) FillEventHistograms(fHist.fEvent[4],&fEvtPar);
+  if (fNGoodTrackSeeds > 0) FillEventHistograms(fHist.fEvent[5],&fEvtPar);
 //-----------------------------------------------------------------------------
 // EVT_41: events with good DAR positron track 
 //-----------------------------------------------------------------------------
@@ -1139,7 +813,7 @@ void TTrackCompModule::FillHistograms() {
     TStnTrack*  trk = fTrackBlock[kDAR]->Track(0);
     TrackPar_t* tp  = &fTrackPar[kDAR][0];
     if ((trk->P0() > 85) && (tp->fIDWord_RMC == 0) && (trk->Charge() > 0)) {
-      FillEventHistograms(fHist.fEvent[41]);
+      FillEventHistograms(fHist.fEvent[41],&fEvtPar);
     }
   }
 //-----------------------------------------------------------------------------
@@ -1151,18 +825,18 @@ void TTrackCompModule::FillHistograms() {
   // double mc_mom = mom.P();
 
   if (fNTracks[kPAR] > 0) {
-    FillEventHistograms(fHist.fEvent[51]);
+    FillEventHistograms(fHist.fEvent[51],&fEvtPar);
     TrackPar_t* tp  = &fTrackPar[kPAR][0];
-    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[52]);
+    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[52],&fEvtPar);
   }
 //-----------------------------------------------------------------------------
 // EVT_61 : events with DAR tracks 
 // EVT_62 : events with good DAR tracks 
 //-----------------------------------------------------------------------------
   if (fNTracks[kDAR] > 0) {
-    FillEventHistograms(fHist.fEvent[61]);
+    FillEventHistograms(fHist.fEvent[61],&fEvtPar);
     TrackPar_t* tp  = &fTrackPar[kDAR][0];
-    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[62]);
+    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[62],&fEvtPar);
   }
 
 //--------------------------------------------------------------------------------
@@ -1194,7 +868,7 @@ void TTrackCompModule::FillHistograms() {
   if ((fTrackBlock[kPAR]->NTracks() > 0) && (fTrackPar[kPAR][0].fIDWord[fBestID[0]] == 0)) {
     TStnTrack* trk = fTrackBlock[kPAR]->Track(0);
     TrackPar_t* tp = &fTrackPar[kPAR][0];
-    FillTrackHistograms(fHist.fTrack[0],trk,tp);
+    FillTrackHistograms(fHist.fTrack[0],trk,tp,&fSimPar);
   }
   else {
     if (fTrackBlock[kDAR]->NTracks() > 0) {
@@ -1204,7 +878,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 	TStnTrack* trk = fTrackBlock[kDAR]->Track(0);
 	TrackPar_t* tp = &fTrackPar[kDAR][0];
-	FillTrackHistograms(fHist.fTrack[1],trk,tp);
+	FillTrackHistograms(fHist.fTrack[1],trk,tp,&fSimPar);
       }
       if (fTrackPar[1][0].fIDWord[2] == 0) {
 //-----------------------------------------------------------------------------
@@ -1212,7 +886,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 	TStnTrack* trk = fTrackBlock[1]->Track(0);
 	TrackPar_t* tp = &fTrackPar[1][0];
-	FillTrackHistograms(fHist.fTrack[2],trk,tp);
+	FillTrackHistograms(fHist.fTrack[2],trk,tp,&fSimPar);
       }
     }
   }
@@ -1270,7 +944,7 @@ void TTrackCompModule::FillHistograms() {
   }
 
   if (best_track != 0) {
-    FillTrackHistograms(fHist.fTrack[3],best_track,best_tp);
+    FillTrackHistograms(fHist.fTrack[3],best_track,best_tp,&fSimPar);
   }
 
 //-----------------------------------------------------------------------------
@@ -1286,7 +960,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_100, TRK_200: all reconstructed tracks
 //-----------------------------------------------------------------------------
-      FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp);
+      FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp,&fSimPar);
 //-----------------------------------------------------------------------------
 // TRK_101, TRK_201: BestID 
 //-----------------------------------------------------------------------------
@@ -1294,7 +968,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // cosmics
 //-----------------------------------------------------------------------------
-	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp,&fSimPar);
 	n_setc_tracks[i] += 1;
       }
 //-----------------------------------------------------------------------------
@@ -1302,39 +976,39 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
       int mask = (TStnTrackID::kFitConsBit | TStnTrackID::kT0ErrBit | TStnTrackID::kMomErrBit);
       if ((tp->fIDWord[fBestID[i]] & ~mask) == 0) {
-	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp,&fSimPar);
       }
 //-----------------------------------------------------------------------------
 // IHIST+3: (SetC + (dpf > 1)tracks 
 //-----------------------------------------------------------------------------
       if ((tp->fIDWord[fBestID[i]] == 0) & (tp->fDpF > 1)) {
-	FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp,&fSimPar);
       }
 //-----------------------------------------------------------------------------
 // IHIST+4: add   Ecl > 60 requirement
 //-----------------------------------------------------------------------------
       if (fEClMax > 60.) {
-	FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp,&fSimPar);
 
 	if (tp->fIDWord[0] == 0) {
-	  FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp);
+	  FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp,&fSimPar);
 	}
       }
 //-----------------------------------------------------------------------------
 // IHIST+6: oddly, tracks with seemingly wrong reconstruced T0
 //-----------------------------------------------------------------------------
       if (tp->fDtZ0 < -10) {
-	FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp,&fSimPar);
       }
 //-----------------------------------------------------------------------------
 // IHIST+9: tracks with XDpF > 10
 //-----------------------------------------------------------------------------
-      if (tp->fXDpF   > 10) FillTrackHistograms(fHist.fTrack[ihist+9],trk,tp);
+      if (tp->fXDpF   > 10) FillTrackHistograms(fHist.fTrack[ihist+9],trk,tp,&fSimPar);
 //-----------------------------------------------------------------------------
 // different cuts on track quality variable
 //-----------------------------------------------------------------------------
       for (int idd=0; idd<fNID; idd++) {
-	if (tp->fIDWord[idd] == 0) FillTrackHistograms(fHist.fTrack[ihist+10+idd],trk,tp);
+	if (tp->fIDWord[idd] == 0) FillTrackHistograms(fHist.fTrack[ihist+10+idd],trk,tp,&fSimPar);
       }
 //-----------------------------------------------------------------------------
 // IHIST+41: N(a) > 20
@@ -1343,14 +1017,14 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+44: N(a) > 20, |D0| < 100, DNa < 6, chi2d < 4
 //-----------------------------------------------------------------------------
       if (trk->NActive() > 20) { 
-	FillTrackHistograms(fHist.fTrack[ihist+41],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+41],trk,tp,&fSimPar);
 	if (fabs(trk->D0()) < 100) {
-	  FillTrackHistograms(fHist.fTrack[ihist+42],trk,tp);
+	  FillTrackHistograms(fHist.fTrack[ihist+42],trk,tp,&fSimPar);
 	  int dna = trk->NHits()-trk->NActive();
 	  if (dna < 6) {
-	    FillTrackHistograms(fHist.fTrack[ihist+43],trk,tp);
+	    FillTrackHistograms(fHist.fTrack[ihist+43],trk,tp,&fSimPar);
 	    if (trk->Chi2Dof() < 4.) {
-	      FillTrackHistograms(fHist.fTrack[ihist+44],trk,tp);
+	      FillTrackHistograms(fHist.fTrack[ihist+44],trk,tp,&fSimPar);
 	    }
 	  }
 	}
@@ -1366,16 +1040,16 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+83: N(a) > 20, |D0| < 100, DNa < 6
 // IHIST+84: N(a) > 20, |D0| < 100, DNa < 6, chi2d < 4
 //-----------------------------------------------------------------------------
-	FillTrackHistograms(fHist.fTrack[ihist+80],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+80],trk,tp,&fSimPar);
 	if (trk->NActive() > 20) { 
-	  FillTrackHistograms(fHist.fTrack[ihist+81],trk,tp);
+	  FillTrackHistograms(fHist.fTrack[ihist+81],trk,tp,&fSimPar);
 	  if (fabs(trk->D0()) < 100) {
-	    FillTrackHistograms(fHist.fTrack[ihist+82],trk,tp);
+	    FillTrackHistograms(fHist.fTrack[ihist+82],trk,tp,&fSimPar);
 	    int dna = trk->NHits()-trk->NActive();
 	    if (dna < 6) {
-	      FillTrackHistograms(fHist.fTrack[ihist+83],trk,tp);
+	      FillTrackHistograms(fHist.fTrack[ihist+83],trk,tp,&fSimPar);
 	      if (trk->Chi2Dof() < 4.) {
-		FillTrackHistograms(fHist.fTrack[ihist+84],trk,tp);
+		FillTrackHistograms(fHist.fTrack[ihist+84],trk,tp,&fSimPar);
 	      }
 	    }
 	  }
@@ -1391,16 +1065,16 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+93: N(a) > 20, |D0| < 100, DNa < 6
 // IHIST+94: N(a) > 20, |D0| < 100, DNa < 6, chi2d < 4
 //-----------------------------------------------------------------------------
-	FillTrackHistograms(fHist.fTrack[ihist+90],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+90],trk,tp,&fSimPar);
 	if (trk->NActive() > 20) { 
-	  FillTrackHistograms(fHist.fTrack[ihist+91],trk,tp);
+	  FillTrackHistograms(fHist.fTrack[ihist+91],trk,tp,&fSimPar);
 	  if (fabs(trk->D0()) < 100) {
-	    FillTrackHistograms(fHist.fTrack[ihist+92],trk,tp);
+	    FillTrackHistograms(fHist.fTrack[ihist+92],trk,tp,&fSimPar);
 	    int dna = trk->NHits()-trk->NActive();
 	    if (dna < 6) {
-	      FillTrackHistograms(fHist.fTrack[ihist+93],trk,tp);
+	      FillTrackHistograms(fHist.fTrack[ihist+93],trk,tp,&fSimPar);
 	      if (trk->Chi2Dof() < 4.) {
-		FillTrackHistograms(fHist.fTrack[ihist+94],trk,tp);
+		FillTrackHistograms(fHist.fTrack[ihist+94],trk,tp,&fSimPar);
 	      }
 	    }
 	  }
@@ -1414,16 +1088,16 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+54: N(a) > 20, |D0| < 100, DNa < 6, chi2d < 4
 //-----------------------------------------------------------------------------
       if (fabs(tp->fDpF) < 1.) {
-	FillTrackHistograms(fHist.fTrack[ihist+50],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+50],trk,tp,&fSimPar);
 	if (trk->NActive() > 20) { 
-	  FillTrackHistograms(fHist.fTrack[ihist+51],trk,tp);
+	  FillTrackHistograms(fHist.fTrack[ihist+51],trk,tp,&fSimPar);
 	  if (fabs(trk->D0()) < 100) {
-	    FillTrackHistograms(fHist.fTrack[ihist+52],trk,tp);
+	    FillTrackHistograms(fHist.fTrack[ihist+52],trk,tp,&fSimPar);
 	    int dna = trk->NHits()-trk->NActive();
 	    if (dna < 6) {
-	      FillTrackHistograms(fHist.fTrack[ihist+53],trk,tp);
+	      FillTrackHistograms(fHist.fTrack[ihist+53],trk,tp,&fSimPar);
 	      if (trk->Chi2Dof() < 4.) {
-		FillTrackHistograms(fHist.fTrack[ihist+54],trk,tp);
+		FillTrackHistograms(fHist.fTrack[ihist+54],trk,tp,&fSimPar);
 	      }
 	    }
 	  }
@@ -1437,16 +1111,16 @@ void TTrackCompModule::FillHistograms() {
 // IHIST+64: N(a) > 20, |D0| < 150, DNa < 6, chi2d < 4
 //-----------------------------------------------------------------------------
       if (tp->fDpF > 2.) {
-	FillTrackHistograms(fHist.fTrack[ihist+60],trk,tp);
+	FillTrackHistograms(fHist.fTrack[ihist+60],trk,tp,&fSimPar);
 	if (trk->NActive() > 20) { 
-	  FillTrackHistograms(fHist.fTrack[ihist+61],trk,tp);
+	  FillTrackHistograms(fHist.fTrack[ihist+61],trk,tp,&fSimPar);
 	  if (fabs(trk->D0()) < 100) {
-	    FillTrackHistograms(fHist.fTrack[ihist+62],trk,tp);
+	    FillTrackHistograms(fHist.fTrack[ihist+62],trk,tp,&fSimPar);
 	    int dna = trk->NHits()-trk->NActive();
 	    if (dna < 6) {
-	      FillTrackHistograms(fHist.fTrack[ihist+63],trk,tp);
+	      FillTrackHistograms(fHist.fTrack[ihist+63],trk,tp,&fSimPar);
 	      if (trk->Chi2Dof() < 4.) {
-		FillTrackHistograms(fHist.fTrack[ihist+64],trk,tp);
+		FillTrackHistograms(fHist.fTrack[ihist+64],trk,tp,&fSimPar);
 	      }
 	    }
 	  }
@@ -1460,37 +1134,37 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // positive tracks
 //-----------------------------------------------------------------------------
-	  FillTrackHistograms  (fHist.fTrack[ihist+71],trk,tp);
-	  if (fProcess != -1) FillTrackHistograms(fHist.fTrack[ihist+73],trk,tp,fWeight); 
-	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+77],trk,tp);            // for cosmics
+	  FillTrackHistograms  (fHist.fTrack[ihist+71],trk,tp,&fSimPar);
+	  if (fProcess != -1) FillTrackHistograms(fHist.fTrack[ihist+73],trk,tp,&fSimPar,fWeight); 
+	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+77],trk,tp,&fSimPar);            // for cosmics
 
-	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+85],trk,tp);   // "e+"
-	  else                 FillTrackHistograms(fHist.fTrack[ihist+86],trk,tp);   // "mu+/pi+"
+	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+85],trk,tp,&fSimPar);   // "e+"
+	  else                 FillTrackHistograms(fHist.fTrack[ihist+86],trk,tp,&fSimPar);   // "mu+/pi+"
 	}
 	else {
 //-----------------------------------------------------------------------------
 // negative tracks
 //-----------------------------------------------------------------------------
-	  FillTrackHistograms(fHist.fTrack[ihist+72],trk,tp);
-	  if (fProcess > 0) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,fWeight);                       // weighting
+	  FillTrackHistograms(fHist.fTrack[ihist+72],trk,tp,&fSimPar);
+	  if (fProcess > 0) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,&fSimPar,fWeight);                       // weighting
 	  
-	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp);            // for cosmics
+	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp,&fSimPar);            // for cosmics
 
-	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+95],trk,tp);   // "e-"
-	  else                 FillTrackHistograms(fHist.fTrack[ihist+96],trk,tp);   // "mu-/pi-"
+	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+95],trk,tp,&fSimPar);   // "e-"
+	  else                 FillTrackHistograms(fHist.fTrack[ihist+96],trk,tp,&fSimPar);   // "mu-/pi-"
 
-	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,tp->fDioWt);                                       // DIO
+	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,&fSimPar,tp->fDioLLWt);                                       // DIO
 
 //-----------------------------------------------------------------------------
 // debugging mu-
 //-----------------------------------------------------------------------------
-	  if (tp->fDrDzCal < 0 ) FillTrackHistograms(fHist.fTrack[ihist+200+ 1            ],trk,tp);
-	  else                   FillTrackHistograms(fHist.fTrack[ihist+200+ 2            ],trk,tp);
+	  if (tp->fDrDzCal < 0 ) FillTrackHistograms(fHist.fTrack[ihist+200+ 1            ],trk,tp,&fSimPar);
+	  else                   FillTrackHistograms(fHist.fTrack[ihist+200+ 2            ],trk,tp,&fSimPar);
 
-	  if (tp->fEcl     > 0 ) FillTrackHistograms(fHist.fTrack[ihist+200+ 5+tp->fDiskID],trk,tp);
+	  if (tp->fEcl     > 0 ) FillTrackHistograms(fHist.fTrack[ihist+200+ 5+tp->fDiskID],trk,tp,&fSimPar);
 
-	  if (tp->fDt      < -4) FillTrackHistograms(fHist.fTrack[ihist+200+ 7            ],trk,tp);
-	  else                   FillTrackHistograms(fHist.fTrack[ihist+200+ 8            ],trk,tp);
+	  if (tp->fDt      < -4) FillTrackHistograms(fHist.fTrack[ihist+200+ 7            ],trk,tp,&fSimPar);
+	  else                   FillTrackHistograms(fHist.fTrack[ihist+200+ 8            ],trk,tp,&fSimPar);
 	}
       }
     }
@@ -1508,315 +1182,14 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // efficiency histograms, use fTrkQual > 0.4 for the cuts
 //-----------------------------------------------------------------------------
-  FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID[0]],&fTrackPar[0][0],10);
-  FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID[1]],&fTrackPar[1][0],20);
+  // FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID[0]],&fTrackPar[0][0],10);
+  // FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID[1]],&fTrackPar[1][0],20);
 
 //-----------------------------------------------------------------------------
 // fill little tree if requested
 //-----------------------------------------------------------------------------
   if (fWriteTmvaTree >= 0) FillTmvaTree();
 
-}
-
-//-----------------------------------------------------------------------------
-// assume less than 20 tracks 
-//-----------------------------------------------------------------------------
-int TTrackCompModule::InitTrackPar(TStnTrackBlock*   TrackBlock  , 
-				   TStnClusterBlock* ClusterBlock, 
-				   TrackPar_t*       TrackPar    ) {
-  TrackPar_t*           tp;
-  TStnTrack*            track;
-  int                   track_type(-999);
-  double                xs;
-  TEmuLogLH::PidData_t  dat;
-//-----------------------------------------------------------------------------
-// momentum corrections for KPAR and KDAR
-//-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0. , 0. } ; // CD3: { 0.049, 0.020 };
-  const double kDtTcmCorr   [2] = { 0. , 0. } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
-
-  const char* block_name = TrackBlock->GetNode()->GetName();
-
-  if      (strcmp(block_name,fTrackBlockName[0].Data()) == 0) track_type = 0;
-  else if (strcmp(block_name,fTrackBlockName[1].Data()) == 0) track_type = 1;
-  else {
-    Error("TTrackCompModule::InitTrackPar",Form("IN TROUBLE: unknown track block: %s",block_name));
-    return -1;
-  }
-//-----------------------------------------------------------------------------
-// loop over tracks
-//-----------------------------------------------------------------------------
-  int ntrk = TrackBlock->NTracks();
-
-  for (int itrk=0; itrk<ntrk; itrk++) {
-    tp             = TrackPar+itrk;
-    track          = TrackBlock->Track(itrk);
-//-----------------------------------------------------------------------------
-// process hit masks
-//-----------------------------------------------------------------------------
-    int i1, i2, n1(0) ,n2(0), ndiff(0);
-    int nbits = track->fHitMask.GetNBits();
-    for (int i=0; i<nbits; i++) {
-      i1 = track->HitMask()->GetBit(i);
-      i2 = track->ExpectedHitMask()->GetBit(i);
-      n1 += i1;
-      n2 += i2;
-      if (i1 != i2) ndiff += 1;
-    }
-//-----------------------------------------------------------------------------
-// define additional parameters
-//-----------------------------------------------------------------------------
-    tp->fNHPl = n1;
-    tp->fNEPl = n2;
-    tp->fNDPl = ndiff;
-//-----------------------------------------------------------------------------
-// in this scheme correction is set right before the call
-// in case of MergePatRec use BestAlg - 
-// hopefully, TTrackComp will never use MergePatRec branch
-//-----------------------------------------------------------------------------
-    if (track_type == 2) track_type = track->BestAlg();
-
-    tp->fP     = track->fP0    +kMomentumCorr[track_type];		// correcting
-//-----------------------------------------------------------------------------
-// hits on virtual detectors
-//-----------------------------------------------------------------------------
-     tp->fPStOut = track->fPStOut;
-     tp->fPFront = track->fPFront;
-
-//     double t_stout(1.e6), t_front(1.e6);
-
-//     int nvdhits = fVDetBlock->NHits();
-//     for (int i=0; i<nvdhits; i++) {
-//       TVDetHitData* vdh = fVDetBlock->Hit(i);
-//       if (vdh->GeneratorCode() == fGeneratorCode) {
-// 	if ((vdh->Index() == 10) && (vdh->Time() < t_stout)) {
-// //-----------------------------------------------------------------------------
-// // ST exit 
-// //-----------------------------------------------------------------------------
-// 	  tp->fPStOut = vdh->McMomentum();
-// 	  t_stout     = vdh->Time();
-// 	}
-// 	if ((vdh->Index() == 13) && (vdh->Time() < t_front)) {
-// //-----------------------------------------------------------------------------
-// // tracker front
-// //-----------------------------------------------------------------------------
-// 	  tp->fPFront = vdh->McMomentum();
-// 	  t_front     = vdh->Time();
-// 	}
-//       }
-//    }
-    
-    tp->fDpF     = tp->fP     -tp->fPFront;
-    tp->fDp0     = track->fP0 -tp->fPFront;
-    tp->fDp2     = track->fP2 -tp->fPFront;
-    tp->fDpFSt   = tp->fPFront-tp->fPStOut;
-
-    tp->fXDpF    = tp->fDpF/track->fFitMomErr;
-    tp->fDioWt   = TStntuple::DioWeightAl   (fEleE)*(105./10);
-    tp->fDioWtRC = TStntuple::DioWeightAl_LL(fEleE)*(105./10);
-    tp->fLumWt   = GetHeaderBlock()->LumWeight();
-
-    tp->fDtZ0 = -1.e6;
-    if (fSimPar.fTMid) {
-      double ttrue = fmod(fSimPar.fTMid->Time(),fMbTime);
-      tp->fDtZ0 = track->T0()-ttrue;
-    }
-
-    tp->fXtZ0 = tp->fDtZ0/track->fT0Err;
-
-    tp->fDtBack = -1.e6;
-    if (fSimPar.fTBack) {
-      double ttrue = fmod(fSimPar.fTBack->Time(),fMbTime);
-      tp->fDtBack = track->T0()-ttrue;
-    }
-//-----------------------------------------------------------------------------
-// track residuals
-//-----------------------------------------------------------------------------
-    TStnTrack::InterData_t*  vr = track->fVMaxEp; 
-    double    nx, ny;
-
-    tp->fEcl       = -1.e6;
-    tp->fDiskID    = -1;
-    tp->fEp        = -1.e6;
-    tp->fDrDzCal   = -1.e6;
-    tp->fDtClZ0    = -1.e6;
-
-    tp->fDu        = -1.e6;
-    tp->fDv        = -1.e6;
-    tp->fDx        = -1.e6;
-    tp->fDy        = -1.e6;
-    tp->fDz        = -1.e6;
-    tp->fDt        = -1.e6;
-
-    tp->fChi2Tcm = -1.e6;
-    tp->fChi2XY    = -1.e6;
-    tp->fChi2T     = -1.e6;
-    tp->fPath      = -1.e6;
-    tp->fSinTC     = -1.e6;
-    tp->fDrTC      = -1.e6;
-    tp->fSInt      = -1.e6;
-
-    if (vr) {
-      tp->fDiskID = vr->fID;
-      tp->fEcl    = vr->fEnergy;
-      tp->fEp     = tp->fEcl/track->fP2;
-      tp->fDrDzCal = (vr->fXTrk*vr->fNxTrk+vr->fYTrk+vr->fNyTrk)/sqrt(vr->fXTrk*vr->fXTrk+vr->fYTrk*vr->fYTrk)/vr->fNzTrk;
-
-      tp->fDx     = vr->fDx;
-      tp->fDy     = vr->fDy;
-      tp->fDz     = vr->fDz;
-//-----------------------------------------------------------------------------
-// v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
-//-----------------------------------------------------------------------------
-      tp->fDt  = vr->fDt ; // v4_2_4: - 0.22; // - 1.;
-      if (track_type >= 0) tp->fDt  -= kDtTcmCorr[track_type];
-
-      nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
-      ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
-
-      tp->fDu        = vr->fDx*nx+vr->fDy*ny;
-      tp->fDv        = vr->fDx*ny-vr->fDy*nx;
-      tp->fChi2Tcm   = vr->fChi2Match;
-					// from now on the matching chi2 has XY part only
-      tp->fChi2XY    = vr->fChi2Match;
-      tp->fChi2T     = vr->fChi2Time;
-      tp->fPath      = vr->fPath;
-//-----------------------------------------------------------------------------
-// angle
-//-----------------------------------------------------------------------------
-      TStnCluster* cl = fClusterBlock->Cluster(vr->fClusterIndex);
-      tp->fSinTC = nx*cl->fNy-ny*cl->fNx;
-      tp->fDrTC  = vr->fDr;
-      tp->fSInt  = vr->fSInt;
-
-      if (fSimPar.fTMid) {
-	tp->fDtClZ0 = tp->fDt-tp->fDtZ0;
-      }
-    }
-
-    if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
-      GetHeaderBlock()->Print(Form(" TTrackAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
-    }
-//-----------------------------------------------------------------------------
-// on-the-fly MVA calculation
-//-----------------------------------------------------------------------------
-    tp->fMVAOut[0] = track->DaveTrkQual();
-
-    if (fUseMVA != 0) {
-      vector<double>  pmva;
-      pmva.resize(10);
-
-      float na = track->NActive();
-
-      pmva[ 0] = na;
-      pmva[ 1] = na/track->NHits();
-      pmva[ 2] = -1.e6; 			// defined below
-      pmva[ 3] = track->FitMomErr();
-      pmva[ 4] = track->T0Err();
-      pmva[ 5] = track->D0();
-      pmva[ 6] = track->RMax();
-      pmva[ 7] = track->NDoubletsAct()/na;
-      pmva[ 8] = track->NHitsAmbZero()/na;
-      pmva[ 9] = track->NMatActive()/na;
-      //      pmva[10] = track->fZ1;
-
-      int alg = track->BestAlg();
-
-      if      (alg == 0) {
-//-----------------------------------------------------------------------------
-// KPAR track - log(fitcons) used for training
-//-----------------------------------------------------------------------------
-	if (fTmvaAlgorithmTpr < 0) {
-	  tp->fMVAOut[0] = track->DaveTrkQual();
-	}
-	else {
-	  int use_chi2d = fTmvaAlgorithmTpr / 100;
-	  if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
-	  else                     pmva[2] = track->Chi2Dof();
-
-	  tp->fMVAOut[0] = fTprQualMva->evalMVA(pmva);
-	}
-	tp->fMVAOut[1] = fTprQualMva->evalMVA(pmva);
-
-	tp->fProb = fTrackProb[0]->prob(tp->fMVAOut[0]);
-      }
-      else if (alg == 1) {
-//-----------------------------------------------------------------------------
-// KDAR track - for fTmvaAlgorithm=101 chi2/N(dof) used (our initial training)
-//-----------------------------------------------------------------------------
-	int use_chi2d = fTmvaAlgorithmCpr / 100;
-	if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
-	else                     pmva[2] = track->Chi2Dof();
-
-	tp->fMVAOut[0] = fCprQualMva->evalMVA(pmva);
-	tp->fMVAOut[1] = tp->fMVAOut[0];
-
-	tp->fProb      = fTrackProb[1]->prob(tp->fMVAOut[0]);
-      }
-
-      if (GetDebugBit(9)) {
-	if (alg == 0) {
-	  GetHeaderBlock()->Print(Form("KPAR TrkQual, MVAOut: %10.5f %10.5f",
-				       track->DaveTrkQual(),tp->fMVAOut[0]));
-	}
-      }
-      if (GetDebugBit(10)) {
-	if ((alg == 0) && (tp->fMVAOut[0] - track->DaveTrkQual() > 0.3)) {
-	  GetHeaderBlock()->Print(Form("KPAR TrkQual, MVAOut: %10.5f %10.5f",
-				       track->DaveTrkQual(),tp->fMVAOut[0]));
-	}
-      }
-    }
-//-----------------------------------------------------------------------------
-// finally, the track ID
-//-----------------------------------------------------------------------------
-    for (int idd=0; idd<fNID; idd++) {
-      int idw = fTrackID[idd]->IDWord(track);
-//-----------------------------------------------------------------------------
-// redefine IDWord to use TQ ANN for KPAR and CQ ANN for KDAR tracks
-//-----------------------------------------------------------------------------
-      idw &= (~TStnTrackID::kTrkQualBit);
-      if (tp->fMVAOut[0] < fTrackID[idd]->MinTrkQual()) idw |= TStnTrackID::kTrkQualBit;
-
-      tp->fIDWord[idd] = idw;
-    }
-//-----------------------------------------------------------------------------
-// RMC ID
-//-----------------------------------------------------------------------------
-    tp->fIDWord_RMC = fTrackID_RMC->IDWord(track);
-//-----------------------------------------------------------------------------
-// PID likelihoods
-//-----------------------------------------------------------------------------
-    dat.fDt   = tp->fDt;
-    dat.fEp   = tp->fEp;
-    dat.fPath = tp->fPath;
-      
-    xs = track->XSlope();
-
-    track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
-    track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
-
-    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
-
-    int id_word = tp->fIDWord[fBestID[track_type]];
-
-    if (GetDebugBit(7)) {
-      if ((id_word == 0) && (llhr_cal > 20)) {
-	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
-      }
-    }
-
-    if (GetDebugBit(8)) {
-      if ((id_word == 0) && (llhr_cal < -20)) {
-	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
-				     track->P(),track->Dt(),tp->fEp));
-      }
-    }
-
-    track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
-  }
-
-  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1873,8 +1246,6 @@ int TTrackCompModule::Event(int ientry) {
   }
 
   fProcess = -1;
-  // fWtRMC   =  1.;
-  // fWtRPC   =  1.;
   fWeight  =  1.;
   fPhotonE = -1.;
 
@@ -1899,10 +1270,9 @@ int TTrackCompModule::Event(int ientry) {
     }
   }
 //-----------------------------------------------------------------------------
-// may want to revisit the definition of fSimp in future
+// may want to revisit the definition of fSimPar in future
 //-----------------------------------------------------------------------------
-  fSimp             = fSimpBlock->Particle(0);
-  fSimPar.fParticle = fSimp;
+  fSimPar.fParticle = fSimpBlock->Particle(0);
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
@@ -1911,14 +1281,14 @@ int TTrackCompModule::Event(int ientry) {
 // sometimes, there is no GENP info - as in Bob's pbar dataset
 //-----------------------------------------------------------------------------
   if ((fProcess == -1) && (fNSimp > 0)) {
-    if (fSimp->PDGCode() == -2212) {
+    if (fSimPar.fParticle->PDGCode() == -2212) {
 //-----------------------------------------------------------------------------
 // pbar production, assume Bob's dataset
 // assuming parent particle exists, determine the production cross-section weight
 // pbeam, nx, ny: the beam momentum and direction
 //-----------------------------------------------------------------------------
       double pbeam(8.9), nx(-0.24192190), nz(-0.97029573);
-      const TLorentzVector* sm = fSimp->StartMom();
+      const TLorentzVector* sm = fSimPar.fParticle->StartMom();
       double px    = sm->Px();
       double pz    = sm->Pz();
       double costh = (px*nx+pz*nz)/sqrt(px*px+pz*pz);
@@ -1931,17 +1301,14 @@ int TTrackCompModule::Event(int ientry) {
       fWeight      = fStnt->PBar_Striganov_d2N(pbeam,plab,th);
     }
   }
-
-  if (fParticle) fEleE = fParticle->Energy();
-  else           fEleE = -1.;
 //-----------------------------------------------------------------------------
-// virtual detectors - for fSimp need parameters at the tracker front
+// virtual detectors - for fSimPar need parameters at the tracker front
 //-----------------------------------------------------------------------------
   int nsteps = fSpmcBlockVDet->NStepPoints();
   
   for (int i=0; i<nsteps; i++) {
     TStepPointMC* step = fSpmcBlockVDet->StepPointMC(i);
-    if (step->PDGCode() == fSimp->fPdgCode) {
+    if (step->PDGCode() == fSimPar.fParticle->PDGCode()) {
       if ((step->VolumeID() == 13) || (step->VolumeID() == 14)) {
 	fSimPar.fTFront = step;
       }
@@ -1967,7 +1334,7 @@ int TTrackCompModule::Event(int ientry) {
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
-    InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i]);
+    InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
 
   if (fFillHistograms) FillHistograms();
@@ -2107,23 +1474,6 @@ void TTrackCompModule::Debug() {
       }
     }
   }
-//-----------------------------------------------------------------------------
-// bit 14: rare misreconstructed events from e11s721z
-//-----------------------------------------------------------------------------
-  if (GetDebugBit(14) == 1) {
-    for (int itrk=0; itrk<ntrk; itrk++) {
-      trk = cprb->Track(itrk);
-      tp  = &fTrackPar[kDAR][itrk];
-      if ((tp->fIDWord_RMC == 0) && (trk->Charge() < 0)) {
-	if (((tp->fP > 103.5) && (tp->fDioWt > 9.e-11)) || 
-	    ((tp->fP > 104  ) && (tp->fDioWt > 1.e-12)) ||
-	    ((tp->fP > 106  ) && (tp->fDioWt > 1.e-14))    ) {
-	  GetHeaderBlock()->Print(Form("TTrackCompModule :bit014: tp->fP = %10.3f tp->fDioWt = %12.3e", 
-				       tp->fP,tp->fDioWt));
-	}
-      }
-    }
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -2147,39 +1497,4 @@ void TTrackCompModule::Test001() {
 }
 
 
-//_____________________________________________________________________________
-void TTrackCompModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const {
-
-  TString opt(Option);
-
-  opt.ToLower();
-					// "non-const *this" for printing purposes
-  TStnTrack* t = (TStnTrack*) Track;
-
-  if ((opt == "") || (opt.Index("banner") >= 0)) {
-//-----------------------------------------------------------------------------
-// print banner
-//-----------------------------------------------------------------------------
-    printf("------------------------------------------------------------------------------------------------");
-    printf("----------------------------------------------------------------------------------\n");
-    printf(" i  nh  na nw nosd nssd na0 ncl  alg_mask    id_word   q     p     p(corr) momerr    T0     T0Err     D0");
-    printf("      Z0    TanDip   TBack   chi2/dof   fcon  TrkQual MvaOut[0]  MVAOut[1]   Prob \n");
-    printf("------------------------------------------------------------------------------------------------");
-    printf("----------------------------------------------------------------------------------\n");
-  }
-
-  if ((opt == "") || (opt.Index("data") >= 0)) {
-    printf("%2i %3i %3i %2i %4i %4i %3i %3i 0x%08x",
-	   t->fNumber,t->NHits(), t->NActive(),t->NWrong(), 
-	   t->NOSDoublets(), t->NSSDoublets(), t->NHitsAmbZero(),
-	   t->NClusters(),
-	   t->AlgorithmID());
-
-    printf(" 0x%08x %1.0f %8.3f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f %9.4f",
-	   t->fIDWord,
-	   t->fCharge, 
-	   t->fP*t->fCharge, Tp->fP*t->fCharge, t->fFitMomErr, t->fT0, t->fT0Err, t->fD0, t->fZ0, t->fTanDip, t->TBack(),
-	   t->Chi2Dof(),t->FitCons(),t->DaveTrkQual(),Tp->fMVAOut[0], Tp->fMVAOut[1], Tp->fProb);
-    printf("\n");
-  }
 }

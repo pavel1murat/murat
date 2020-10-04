@@ -34,7 +34,7 @@ public:
     TH1F*    fMcMomentum;
     TH1F*    fTime;
     TH2F*    fDriftRadiusVsMcDoca;
-    TH1F*    fDr; // drift-mcdoca
+    TH1F*    fDr;                   // drift-mcdoca
   };
 
   struct EventHist_t : public HistBase_t {
@@ -49,7 +49,7 @@ public:
     TH1F* fN500;
   };
 
-  struct TrackPar_t : public TrackParBase_t {
+  struct TrackPar_t {
     int fNHits;
     int fNActive;
     int fN500;
@@ -108,7 +108,7 @@ public:
   void    BookTrackHistograms        (HistBase_t* Hist, const char* Folder);
 
   void    FillEventHistograms        (HistBase_t* Hist);
-  void    FillTrackHistograms        (HistBase_t* Hist, TrackParBase_t*     Trk);
+  void    FillTrackHistograms        (HistBase_t* Hist, TrackPar_t*        Trk);
   void    FillTrackStrawHitHistograms(HistBase_t* Hist, TTrackStrawHitData* Hit);
 
   void    BookHistograms();

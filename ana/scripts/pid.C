@@ -12,9 +12,9 @@ void  pid_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
-  m_pid = (TPidAnaModule*) g.x->AddModule("TPidAnaModule",0);  
+  murat::m_pid = (murat::TPidAnaModule*) g.x->AddModule("murat::TPidAnaModule",0);  
   
-  if (DebugBit >= 0) m_pid->SetDebugBit(DebugBit,1);
+  if (DebugBit >= 0) murat::m_pid->SetDebugBit(DebugBit,1);
 }
 
 

@@ -13,7 +13,7 @@ void  dio_calib(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
   m_dio = (TDioCalibModule*) g.x->AddModule("TDioCalibModule",0);  
   
-  if (DebugBit >= 0) m_cos->SetDebugBit(DebugBit,1);
+  if (DebugBit >= 0) m_dio->SetDebugBit(DebugBit,1);
 }
 
 

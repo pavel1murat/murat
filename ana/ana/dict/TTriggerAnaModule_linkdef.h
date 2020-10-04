@@ -3,9 +3,7 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class TTriggerAnaModule;
-#pragma link C++ class TTriggerAnaModule::Hist_t;
-#pragma link C++ class TTriggerAnaModule::EventHist_t;
+#pragma link C++ class murat::TTriggerAnaModule;
 
 #endif
 

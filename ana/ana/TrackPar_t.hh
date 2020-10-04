@@ -2,13 +2,23 @@
 #define __murat_ana_TrackPar_t__
 
 #include "TrackParBase_t.hh"
+#include "SimPar_t.hh"
 
+class TStnTrackID;
+class TEmuLogLH;
+
+namespace murat {
 class TrackPar_t : public TrackParBase_t {
 public:
   int     fNHPl;
   int     fNEPl;
   int     fNDPl;
-  int     fDiskID;			// 0: first disk, 1:second disk
+  int     fDiskID;                	// 0: first disk, 1:second disk
+		
+  SimPar_t*     fSimPar;               // pointer to simparticle 
+  TStnTrackID*  fTrackID[50];          //
+  TEmuLogLH*    fLogLH;
+
   int     fIDWord[20];
 
   int     fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
@@ -24,11 +34,17 @@ public:
   float   fDp0 ;
   float   fDp2 ;
   float   fDpFSt;
-  double  fDioWt;			// DIO LO weight
-  double  fDioWtRC;			// DIO LO weight with rad corrections
-  double  fLumWt;			// luminosity weight
-  double  fTotWt;			// total weight
-  double  fTotWtRC;			// total weight with rad corrections
+//-----------------------------------------------------------------------------
+// different weights are used by different modules, so in principle could use 
+// the same variable for different weights. Just don't want to do that
+//-----------------------------------------------------------------------------
+  double    fDioLOWt;			// DIO LO weight
+  double    fDioLLWt;			// DIO LL weight (with leading log rad corrections)
+  double    fRPCTimeWt;			// RPC timing weight (don't want to use the same memory for different things)
+  double    fRMCEnergyWt;		// RMC weight (energy spectrum of the generated photons)
+  double    fLumWt;			// luminosity weight
+  double    fTotWt;			// total weight
+  double    fTotWtRC;			// total weight with rad corrections
 
   double  fDtZ0;			// delta(T) at z=0
   double  fDtBack;			// delta(T) at z=Z(TT_Back)
@@ -59,5 +75,9 @@ public:
 
   double  fTMean;			// mean time over the track hits
 
+  double    fDtCRV;			// minimal time residual (CRV)
+  double    fZCRV;                      // Z-coordinate of the closest in time CRV stub candidate
+  double    fDtCRV2;	                // minimal time residual (CRV)
 };
+}
 #endif

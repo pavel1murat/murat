@@ -3,9 +3,7 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class TTrackCompModule;
-#pragma link C++ class TTrackCompModule::Hist_t;
-#pragma link C++ class TTrackCompModule::Cut_t;
+#pragma link C++ class murat::TTrackCompModule;
 
 #endif
 

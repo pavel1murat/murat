@@ -4,12 +4,6 @@
 #ifndef murat_ana_TPidAnaModule_hh
 #define murat_ana_TPidAnaModule_hh
 
-#include "TH1.h"
-#include "TH2.h"
-#include "TProfile.h"
-
-#include "Stntuple/loop/TStnModule.hh"
-
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStnPidBlock.hh"
@@ -20,11 +14,18 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
-#include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/TAnaModule.hh"
 
-class TPidAnaModule: public TStnModule {
+namespace murat {
+class TPidAnaModule: public TAnaModule {
 public:
 
+#include "murat/ana/SimPar_t.hh"
+#include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/TrackHist_t.hh"
+
+#include "murat/ana/TrackSeedHist_t.hh"
+#include "murat/ana/EventHist_t.hh"
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
@@ -32,7 +33,7 @@ public:
     TH1F*    fTrkNumber;
 
     TH1F*    fNMatched;		       //
-    TH1F*    fNMatchedAll;		       // generator code
+    TH1F*    fNMatchedAll;	       // generator code
 
     TH1F*    fNUsedOsH;
     TH1F*    fNUsedSsH;
@@ -56,11 +57,6 @@ public:
     TH1F*    fDrdsSs;
     TH1F*    fXdrdsSs;
   };
-
-  struct EventHist_t {
-    TH1F*    fNTracks;
-  };
-
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets    = 100 };
   enum { kNPidHistSets      = 100 };
@@ -79,8 +75,6 @@ public:
   TStnTrackBlock*       fTrackBlock  [2];
 
 					// additional track parameters (assume ntracks < 20)
-  int                   fNID;
-  TStnTrackID*          fTrackID [20];
   TrackPar_t            fTrackPar[20];
 					// histograms filled
   Hist_t                fHist;
@@ -106,10 +100,10 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   void    BookPidHistograms      (PidHist_t*  Hist, const char* Folder);
-  void    BookEventHistograms    (EventHist_t*    Hist, const char* Folder);
+  //  void    BookEventHistograms    (EventHist_t*    Hist, const char* Folder);
 
   void    FillPidHistograms      (PidHist_t* Hist, TStnPid*  Hit);
-  void    FillEventHistograms    (EventHist_t*    Hist);
+  //  void    FillEventHistograms    (EventHist_t*    Hist);
 
   void    BookHistograms();
   void    FillHistograms();
@@ -121,7 +115,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TPidAnaModule,0)
+  ClassDef(murat::TPidAnaModule,0)
 };
-
+}
 #endif

@@ -3,8 +3,7 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class TCosmicsAnaModule;
-#pragma link C++ class TCosmicsAnaModule::TrackPar_t;
+#pragma link C++ class murat::TCosmicsAnaModule;
 
 #endif
 

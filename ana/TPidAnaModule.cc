@@ -27,10 +27,12 @@
 //------------------------------------------------------------------------------
 #include "ana/TPidAnaModule.hh"
 
-ClassImp(TPidAnaModule)
+ClassImp(murat::TPidAnaModule)
+
+namespace murat {
 //-----------------------------------------------------------------------------
 TPidAnaModule::TPidAnaModule(const char* name, const char* title):
-  TStnModule(name,title)
+  TAnaModule(name,title)
 {
   fNID = 1;
   for (int i=0; i<fNID; i++) fTrackID[i] = new TStnTrackID();
@@ -82,14 +84,6 @@ void TPidAnaModule::BookPidHistograms(PidHist_t* Hist, const char* Folder) {
 
 }
 
-
-//-----------------------------------------------------------------------------
-void TPidAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
-  //  char name [200];
-  //  char title[200];
-
-  HBook1F(Hist->fNTracks ,"ntracks"   ,Form("%s: N (tracks)",Folder), 10, 0,  10,Folder);
-}
 
 //_____________________________________________________________________________
 void TPidAnaModule::BookHistograms() {
@@ -175,16 +169,6 @@ void TPidAnaModule::FillPidHistograms(PidHist_t* Hist, TStnPid* Pid) {
 }
 
 //-----------------------------------------------------------------------------
-// 
-//-----------------------------------------------------------------------------
-void TPidAnaModule::FillEventHistograms(EventHist_t* Hist) {
-//   double            cos_th, xv, yv, rv, zv, p;
-//   TLorentzVector    mom;
-
-  Hist->fNTracks->Fill(fNTracks[0]);
-}
-
-//-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
 int TPidAnaModule::BeginJob() {
@@ -213,7 +197,7 @@ void TPidAnaModule::FillHistograms() {
 //
 // EVT_0: all events
 //-----------------------------------------------------------------------------
-  FillEventHistograms(fHist.fEvent[0]);
+  FillEventHistograms(fHist.fEvent[0],&fEvtPar);
 //-----------------------------------------------------------------------------
 // straw hit histograms
 //-----------------------------------------------------------------------------
@@ -345,3 +329,4 @@ int TPidAnaModule::EndJob() {
 void TPidAnaModule::Test001() {
 }
 
+}

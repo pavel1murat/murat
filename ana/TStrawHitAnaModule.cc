@@ -33,8 +33,7 @@
 
 ClassImp(TStrawHitAnaModule)
 //-----------------------------------------------------------------------------
-TStrawHitAnaModule::TStrawHitAnaModule(const char* name, const char* title):
-  TStnModule(name,title)
+TStrawHitAnaModule::TStrawHitAnaModule(const char* name, const char* title): TStnModule(name,title)
 {
   fNStations = 20;
 }

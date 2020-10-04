@@ -17,7 +17,6 @@
 #include "murat/ana/TStepPointMCAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
 #include "murat/ana/TTrackAnaModule.hh"
-#include "murat/ana/TTrackAnaModuleA.hh"
 #include "murat/ana/TTrackCompModule.hh"
 #include "murat/ana/TTrackPidAnaModule.hh"
 #include "murat/ana/TTrackRecoEffAnaModule.hh"
@@ -79,27 +78,29 @@ TCalAnaModule*             m_cal   = NULL;
 TClusterAnaModule*         m_cls   = NULL;
 TColl1DoseAnaModule*       m_coll1 = NULL;
 TColl3DoseAnaModule*       m_coll3 = NULL;
-TCosmicsAnaModule*         m_cos   = NULL;
 TDioCalibModule*           m_dio   = NULL;
 TDoseAnaModule*            m_dose  = NULL;
 TG4ValidationModule*       m_g4val = NULL;
 TGenAnaModule*             m_gen   = NULL;
 THelixAnaModule*           m_hel   = NULL;
 TMuonStopAnaModule*        m_must  = NULL;
-TPidAnaModule*             m_pid   = NULL;
 // TRMCAnaModule*             m_rmc   = NULL;
 TStepPointMCAnaModule*     m_spmc  = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
-TTrackCompModule*          m_tcm   = NULL;
 TTrackPidAnaModule*        m_tpa   = NULL;
-TTrackAnaModule*           m_trk   = NULL;
-TTrackAnaModuleA*          m_trka  = NULL;
+// TTrackAnaModuleA*          m_trka  = NULL;
 TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackRecoEffAnaModule*    m_eff   = NULL;
-TTriggerAnaModule*         m_trig  = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
 TVDetAnaModule*            m_vdt   = NULL;
 
+namespace murat {
+  TCosmicsAnaModule*       m_cos   = NULL;
+  TPidAnaModule*           m_pid   = NULL;
+  TTrackAnaModule*         m_trk   = NULL;
+  TTrackCompModule*        m_tcm   = NULL;
+  TTriggerAnaModule*       m_trig  = NULL;
+}
 // TStnTrackID*             trk_id  = NULL;
 // TAnalysisDataset*        a_dset  = NULL;
 

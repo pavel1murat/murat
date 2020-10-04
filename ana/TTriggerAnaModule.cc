@@ -37,9 +37,10 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TTriggerAnaModule::TTriggerAnaModule(const char* name, const char* title): TAnaModule(name,title)
 {
-  fPdgCode       = 11;
-  fGeneratorCode = -1;
-  fMinTrigMom    = 0.;
+  fPdgCode        = 11;
+  fGeneratorCode  = -1;
+  fMinTrigMom     = 0.;
+  fTrackBlockName = "TrackBlockPar";
 }
 
 //-----------------------------------------------------------------------------
@@ -412,14 +413,14 @@ int TTriggerAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("GenpBlock"       , "TGenpBlock"          , &fGenpBlock       );
-  RegisterDataBlock("TimeClusterBlock", "TStnTimeClusterBlock", &fTimeClusterBlock);
-  RegisterDataBlock("HelixBlock"      , "TStnHelixBlock"      , &fHelixBlock      );
-  RegisterDataBlock("SimpBlock"       , "TSimpBlock"          , &fSimpBlock       );
-  RegisterDataBlock("TrackBlock"      , "TStnTrackBlock"      , &fTrackBlock      );
-  RegisterDataBlock("TrackSeedBlock"  , "TStnTrackSeedBlock"  , &fTrackSeedBlock  );
-  RegisterDataBlock("ClusterBlock"    , "TStnClusterBlock"    , &fClusterBlock    );
-  RegisterDataBlock("TriggerBlock"    , "TStnTriggerBlock"    , &fTriggerBlock    );
+  RegisterDataBlock("GenpBlock"           , "TGenpBlock"          , &fGenpBlock       );
+  RegisterDataBlock("TimeClusterBlock"    , "TStnTimeClusterBlock", &fTimeClusterBlock);
+  RegisterDataBlock("HelixBlock"          , "TStnHelixBlock"      , &fHelixBlock      );
+  RegisterDataBlock("SimpBlock"           , "TSimpBlock"          , &fSimpBlock       );
+  RegisterDataBlock(fTrackBlockName.Data(), "TStnTrackBlock"      , &fTrackBlock      );
+  RegisterDataBlock("TrackSeedBlock"      , "TStnTrackSeedBlock"  , &fTrackSeedBlock  );
+  RegisterDataBlock("ClusterBlock"        , "TStnClusterBlock"    , &fClusterBlock    );
+  RegisterDataBlock("TriggerBlock"        , "TStnTriggerBlock"    , &fTriggerBlock    );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -455,34 +456,40 @@ int TTriggerAnaModule::Event(int ientry) {
   TGenParticle* genp;
   int           pdg_code, generator_code;
 
-  fParticle = NULL;
-  fNGenp    = fGenpBlock->NParticles();
-
   TStntuple* stnt = TStntuple::Instance();
 
-  for (int i=fNGenp-1; i>=0; i--) {
+//-----------------------------------------------------------------------------
+// event parameters - standardized
+//-----------------------------------------------------------------------------
+  fEvtPar.fNCrvClusters     = -1;
+  fEvtPar.fNCrvPulses       = -1;
+  fEvtPar.fNCrvCoincidences = -1;
+  fEvtPar.fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fParticle         = nullptr;
+
+  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
     genp           = fGenpBlock->Particle(i);
     pdg_code       = genp->GetPdgCode();
     generator_code = genp->GetStatusCode();
     if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
-      fParticle = genp;
+      fEvtPar.fParticle = genp;
       break;
     }
   }
 
   fGeneratorCode = -1;
-  fWeight      =  1;
+  fWeight        =  1;
 
   TLorentzVector    mom (1.,0.,0.,0);
 
-  if (fParticle) {
-    if ((fParticle->GetStatusCode() == 7) && (fParticle->GetPdgCode() == 11)) {
+  if (fEvtPar.fParticle) {
+    if ((fEvtPar.fParticle->GetStatusCode() == 7) && (fEvtPar.fParticle->GetPdgCode() == 11)) {
 //-----------------------------------------------------------------------------
 // flat electrons
 //-----------------------------------------------------------------------------
       fGeneratorCode = 7;
 
-      fParticle->Momentum(mom);
+      fEvtPar.fParticle->Momentum(mom);
       double e     = mom.E();
       fWeight      = stnt->DioWeightAl(e);
     }
@@ -510,8 +517,6 @@ int TTriggerAnaModule::Event(int ientry) {
   fNTrackSeeds[0] = fTrackSeedBlock->NTrackSeeds(); // all
   fNTrackSeeds[1] = 0;
 
-  InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);
-
   for (int i=0; i<fNTrackSeeds[0]; i++) {
     TStnTrackSeed* tseed = fTrackSeedBlock->TrackSeed(i);
     if (fabs(tseed->fD0) < 200.) {
@@ -527,6 +532,12 @@ int TTriggerAnaModule::Event(int ientry) {
   fNGoodTracks = 0;
   for (int i=0; i<fNTracks; i++) {
     TStnTrack* trk = fTrackBlock->Track(i);
+    TrackPar_t* tp = fTrackPar+i;
+
+    tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
+    tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
+    tp->fLogLH      = TAnaModule::fLogLH;
+					// straw man definition of a good track, for trigger efficiency
     if (fabs(trk->fD0) < 200.) {
       if (trk->fP > 100) {
 	if ((trk->Chi2Dof() < 5) && (trk->NActive() >= 20)) {
@@ -535,6 +546,8 @@ int TTriggerAnaModule::Event(int ientry) {
       }
     }
   }
+
+  InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);
 
   FillHistograms();
 

@@ -36,6 +36,9 @@ TPidAnaModule::TPidAnaModule(const char* name, const char* title):
 {
   fNID = 1;
   for (int i=0; i<fNID; i++) fTrackID[i] = new TStnTrackID();
+
+  fTrackBlockName[0] = "TrackBlockPar";
+  fTrackBlockName[1] = "TrackBlockDar";
 }
 
 //-----------------------------------------------------------------------------
@@ -175,11 +178,13 @@ int TPidAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks for downstream electrons and muons
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("PidBlockDem"   ,"TPidDataBlock"    ,&fPidDataBlock[0]);
-  RegisterDataBlock("PidBlockDmm"   ,"TPidDataBlock"    ,&fPidDataBlock[1]);
+  RegisterDataBlock("PidBlockDem"     ,"TStnPidBlock"    , &fPidDataBlock[0]);
+  RegisterDataBlock("PidBlockDmm"     ,"TStnPidBlock"    , &fPidDataBlock[1]);
 
-  RegisterDataBlock("TrackBlockDem" ,"TStnTrackBlock"   ,&fTrackBlock  [0]);
-  RegisterDataBlock("TrackBlockDmm" ,"TStnTrackBlock"   ,&fTrackBlock  [1]);
+  RegisterDataBlock(fTrackBlockName[0], "TStnTrackBlock" , &fTrackBlock  [0]);
+  RegisterDataBlock(fTrackBlockName[1], "TStnTrackBlock" , &fTrackBlock  [1]);
+
+  RegisterDataBlock("ClusterBlock"    ,"TStnClusterBlock", &fClusterBlock   );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -199,29 +204,25 @@ void TPidAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0],&fEvtPar);
 //-----------------------------------------------------------------------------
-// straw hit histograms
+// 2020-10-04: to be implemented properly
 //-----------------------------------------------------------------------------
 //  int            nh;
   TStnPid*     pid;
   TrackPar_t*  tp;
 
   for (int i=0; i<fNTracks[0]; i++) {
-    tp  = fTrackPar+i;
+    tp  = fTrackPar[0]+i;
     pid = fPidDataBlock[0]->Pid(i);
-    FillPidHistograms(fHist.fPid[0],pid);
-    if (tp->fIDWord == 0) {
-      FillPidHistograms(fHist.fPid[1],pid);
+    if (pid) {
+      FillPidHistograms(fHist.fPid[0],pid);
+      if (tp->fIDWord == 0) {
+	FillPidHistograms(fHist.fPid[1],pid);
+      }
+    }
+    else {
+      printf("TPidAnaModule::FillHistograms ERROR: pid[%i] = nullptr\n",i);
     }
   }
-//-----------------------------------------------------------------------------
-// fill GENP histograms
-// GEN_0: all particles
-//-----------------------------------------------------------------------------
-//   TGenParticle* genp;
-//   for (int i=0; i<fNGenp; i++) {
-//     genp = fGenpBlock->Particle(i);
-//     FillGenpHistograms(fHist.fGenp[0],genp);
-//  }
 }
 
 
@@ -245,58 +246,41 @@ int TPidAnaModule::Event(int ientry) {
 
   fTrackBlock  [0]->GetEntry(ientry);
   fTrackBlock  [1]->GetEntry(ientry);
+
+  fClusterBlock->GetEntry(ientry);
+//-----------------------------------------------------------------------------
+// event parameters - standardized
+//-----------------------------------------------------------------------------
+  fEvtPar.fNCrvClusters     = -1;
+  fEvtPar.fNCrvPulses       = -1;
+  fEvtPar.fNCrvCoincidences = -1;
+  fEvtPar.fNGenp            = 0;  // fGenpBlock->NParticles();
+  fEvtPar.fParticle         = nullptr;
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 // if there are several hits, use the first one
 //-----------------------------------------------------------------------------
+  fSimPar.fParticle = nullptr; // fSimpBlock->Particle(0);
+  fSimPar.fTFront   = NULL;
+  fSimPar.fTMid     = NULL;
+  fSimPar.fTBack    = NULL;
+  fSimPar.fGenp     = NULL;
 //  fNGenp      = fGenpBlock->NParticles();
 //  TStnPid* hit;
 
   fNTracks[0] = fTrackBlock[0]->NTracks();
   fNTracks[1] = fTrackBlock[1]->NTracks();
 
-  TrackPar_t*   tp;
-  TStnTrack*    track;
-
-  int ntrk = fTrackBlock[0]->NTracks();
-
-  if (ntrk != fNTracks[0]) {
-    printf(" TPidAnaModule::Event ERROR: ntrk != NTracks[0]. BAIL OUT.\n");
-    return -1;
-  }
-
-  for (int itrk=0; itrk<ntrk; itrk++) {
-					// assume less 20 tracks
-    tp             = fTrackPar+itrk;
-
-    track          = fTrackBlock[0]->Track(itrk);
-    for (int i=0; i<fNID; i++) {
-      tp->fIDWord[i] = fTrackID[i]->IDWord(track);
+  for (int i=0; i<2; i++) {
+    for (int itrk=0; itrk<fNTracks[i]; itrk++) {
+      TrackPar_t* tp  = fTrackPar[i]+itrk;
+      tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
+      tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
+      tp->fLogLH      = TAnaModule::fLogLH;
     }
-//-----------------------------------------------------------------------------
-// track residuals
-//-----------------------------------------------------------------------------
-    tp->fEcl       = -1.e6;
-    tp->fEp        = -1.e6;
 
-    tp->fDu        = -1.e6;
-    tp->fDv        = -1.e6;
-    tp->fDx        = -1.e6;
-    tp->fDy        = -1.e6;
-    tp->fDz        = -1.e6;
-    tp->fDt        = -1.e6;
-
-    tp->fChi2Tcm   = -1.e6;
-    tp->fChi2XY    = -1.e6;
-    tp->fChi2T     = -1.e6;
-    tp->fPath      = -1.e6;
-    tp->fSinTC     = -1.e6;
-    tp->fDrTC      = -1.e6;
-    tp->fSInt      = -1.e6;
-//-----------------------------------------------------------------------------
-// PID likelihoods
-//-----------------------------------------------------------------------------
+    InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
 
   FillHistograms();

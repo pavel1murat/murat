@@ -59,7 +59,9 @@ TCosmicsAnaModule::TCosmicsAnaModule(const char* name, const char* title):
 					// cut on track quality only
   fNID        = 2;
   
-  fBestID      = 0;
+  fBestID     = 0;
+  fTrackID[0] = fTrackID_BOX;
+  fTrackID[1] = fTrackID_MVA;
 
   fLogLH   = new TEmuLogLH();
 //-----------------------------------------------------------------------------

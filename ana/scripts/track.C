@@ -10,8 +10,6 @@ def_name track_0060 ("track_debug_tandip_12");
 def_name track_0070 ("track_ana_dem");
 def_name track_00701("track_ana_dep");
 def_name track_00702("track_ana_dpp");
-def_name track_0071 ("track_ana_tpr");
-def_name track_0072 ("track_ana_cpr");
 def_name track_0073 ("track_ana_dmm");
 def_name track_0080 ("track_ana_ump");
 def_name track_0081 ("track_ana_umm");
@@ -27,41 +25,16 @@ def_name track_100  ("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  track_ana(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
+void  track_ana(const char* TrackBlockName = "TrackBlockPar", int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
-  murat::m_trk->SetPdgCode      (PdgCode);
-  murat::m_trk->SetGeneratorCode(GeneratorCode);
-  if (DebugBit >= 0) {
-    murat::m_trk->SetDebugBit(DebugBit,1);
-  }
-}
 
-//-----------------------------------------------------------------------------
-void  track_ana_tpr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
-//-----------------------------------------------------------------------------
-// configure analysis module
-//-----------------------------------------------------------------------------
-  murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);
+  murat::m_trk->SetTrackBlockName(TrackBlockName);
   murat::m_trk->SetPdgCode      (PdgCode);
   murat::m_trk->SetGeneratorCode(GeneratorCode);
-  murat::m_trk->SetTrackBlockName("TrkPatRec");
-  if (DebugBit >= 0) {
-    murat::m_trk->SetDebugBit(DebugBit,1);
-  }
-}
 
-//-----------------------------------------------------------------------------
-void  track_ana_cpr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
-//-----------------------------------------------------------------------------
-// configure analysis module
-//-----------------------------------------------------------------------------
-  murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);
-  murat::m_trk->SetPdgCode      (PdgCode);
-  murat::m_trk->SetGeneratorCode(GeneratorCode);
-  murat::m_trk->SetTrackBlockName("CalPatRec");
   if (DebugBit >= 0) {
     murat::m_trk->SetDebugBit(DebugBit,1);
   }
@@ -193,31 +166,17 @@ void  track_debug_tandip_12(int Bit, int GeneratorCode = 2) {
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
 //-----------------------------------------------------------------------------
-void  track_comp(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, double XMin=1,double XMax = -1) {
+void  track_comp(const char* TrackBlockName = "TrackBlockPar", int PDGCode=11, int GeneratorCode=28, 
+		 int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPdgCode      (PDGCode);
-  murat::m_tcm->SetGeneratorCode(GeneratorCode);
-  if (DebugBit >= 0) {
-    murat::m_tcm->SetDebugBit(DebugBit,1);
-    if (XMin < XMax) murat::m_tcm->SetDebugCut(DebugBit,XMin,XMax);
-  }
-}
 
-//-----------------------------------------------------------------------------
-// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
-//-----------------------------------------------------------------------------
-void  track_comp_old(int PDGCode=11, int GeneratorCode=28, int DebugBit = -1, double XMin=1,double XMax = -1) {
-//-----------------------------------------------------------------------------
-// configure analysis module
-//-----------------------------------------------------------------------------
-  murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetTrackBlockName(0,"TrackBlockTpr");
-  murat::m_tcm->SetTrackBlockName(1,"TrackBlockCpr");
-  murat::m_tcm->SetPdgCode      (PDGCode);
-  murat::m_tcm->SetGeneratorCode(GeneratorCode);
+  murat::m_tcm->SetTrackBlockName(0,TrackBlockName);
+  murat::m_tcm->SetPdgCode       (PDGCode);
+  murat::m_tcm->SetGeneratorCode (GeneratorCode);
+
   if (DebugBit >= 0) {
     murat::m_tcm->SetDebugBit(DebugBit,1);
     if (XMin < XMax) murat::m_tcm->SetDebugCut(DebugBit,XMin,XMax);

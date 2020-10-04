@@ -1334,6 +1334,15 @@ int TTrackCompModule::Event(int ientry) {
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
+
+    for (int itrk=0; itrk<fNTracks[i]; itrk++) {
+      TrackPar_t* tp  = fTrackPar[i]+itrk;
+
+      tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
+      tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
+      tp->fLogLH      = TAnaModule::fLogLH;
+    }
+
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
 

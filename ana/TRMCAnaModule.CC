@@ -34,112 +34,44 @@
 #include "TSystem.h"
 
 #include "Stntuple/loop/TStnAna.hh"
-#include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
-// 
+// Mu2e offline includes
 //-----------------------------------------------------------------------------
-#include "murat/ana/TAnaModule.hh"
+#include "ana/TRMCAnaModule.hh"
 
-using namespace murat;
-
-namespace murat {
+ClassImp(TRMCAnaModule)
 
 //-----------------------------------------------------------------------------
-TAnaModule::TAnaModule(const char* name, const char* title):
+TRMCAnaModule::TRMCAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
-  fMbTime      = 1695.;
+  fPtMin  = 1.;
+  fTrackNumber.Set(100);
 
-  fMinT0       = 0.; // analysis cuts
-//-----------------------------------------------------------------------------
-// track quality : box cuts
-//-----------------------------------------------------------------------------
-  fTrackID_BOX = new TStnTrackID();
+  fFillDioHist     = 1;
 
-  fTrackID_BOX->SetMaxChi2Dof(3.5 );
-  fTrackID_BOX->SetMaxT0Err  (1.2);
-  fTrackID_BOX->SetMaxMomErr (0.27);
-  fTrackID_BOX->SetMinNActive(18 );
-  fTrackID_BOX->SetMaxDNa    ( 6 );
-  fTrackID_BOX->SetMinFNa    (0.87);
-  fTrackID_BOX->SetMinTanDip (0.5);     // (1./sqrt(3.));
-  fTrackID_BOX->SetMaxTanDip (1.0);
-  fTrackID_BOX->SetMinD0     (-100.);
-  fTrackID_BOX->SetMaxD0     ( 100.);
-//-----------------------------------------------------------------------------
-// track quality
-//-----------------------------------------------------------------------------
-  fTrackID_MVA = new TStnTrackID();
+  fMinT0 = 0; // do not cut on time by default
 
-  fTrackID_MVA->SetMinTrkQual(0.8);
-  fTrackID_MVA->SetMinTanDip (0.5);
-  fTrackID_MVA->SetMaxTanDip (1.0);
-  fTrackID_MVA->SetMinD0     (-100.);
-  fTrackID_MVA->SetMaxD0     ( 100.);
-
-  int mask = TStnTrackID::kTrkQualBit | TStnTrackID::kD0Bit | TStnTrackID::kTanDipBit | TStnTrackID::kRMaxBit | TStnTrackID::kT0Bit ;
-  fTrackID_MVA->SetUseMask(mask);
-
-  fNID     = 2;  			// BOX and MVA
-//-----------------------------------------------------------------------------
-// particle ID
-//-----------------------------------------------------------------------------
+  fTrackID = new TStnTrackID();
   fLogLH   = new TEmuLogLH();
+//-----------------------------------------------------------------------------
+// MC truth: define which MC particle to consider as signal
+//-----------------------------------------------------------------------------
+  fPdgCode       = 11;
+  fGeneratorCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
 }
 
 //-----------------------------------------------------------------------------
-TAnaModule::~TAnaModule() {
+TRMCAnaModule::~TRMCAnaModule() {
 }
 
-//-----------------------------------------------------------------------------
-// common initializations
-//-----------------------------------------------------------------------------
-int TAnaModule::BeginJob() {
-					// make sure T0 is the same - it could've been redefined
-  fTrackID_BOX->SetMinT0(fMinT0);
-  fTrackID_MVA->SetMinT0(fMinT0);
-					// PID initialization: read the likelihood templates
-  fLogLH->Init("v5_7_0");
-
-  return 0;
-}
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookCrvClusterHistograms   (CrvClusterHist_t*   Hist, const char* Folder){
- 
-  HBook1F(Hist->fSectorType    ,"sector"     ,Form("%s: CRV sector type" ,Folder),  15,   0,    15,Folder);
-  HBook1F(Hist->fNPulses       ,"npulses"    ,Form("%s: N(pulses)"       ,Folder), 100,   0,   100,Folder);
-  HBook1F(Hist->fNPe           ,"npe"        ,Form("%s: N(PE)"           ,Folder), 500,   0,  5000,Folder);
-  HBook1F(Hist->fStartTime     ,"tstart"     ,Form("%s: start time, ns"  ,Folder), 400,   0,  2000,Folder);  
-  HBook1F(Hist->fEndTime       ,"tend"       ,Form("%s: end time, ns"    ,Folder), 400,   0,  2000,Folder);  
-  HBook1F(Hist->fWidth         ,"wwidth"     ,Form("%s: width, ns"       ,Folder), 200,   0,  200,Folder);  
-  HBook2F(Hist->fXVsZ          ,"x_vs_z"     ,Form("%s: X vs Z"          ,Folder), 250,   -5000,20000,200,-10000,10000,Folder);  
-  HBook2F(Hist->fYVsZ          ,"y_vs_z"     ,Form("%s: Y vs Z"          ,Folder), 250,   -5000,20000,200,     0,4000,Folder);  
-}
-
-//-----------------------------------------------------------------------------
-void TAnaModule::BookCrvPulseHistograms   (CrvPulseHist_t*   Hist, const char* Folder){
-
-  HBook1F(Hist->fNPe       ,"npe"        ,Form("%s: N(Pe)"     ,Folder), 250,   0,   500,Folder);
-  HBook1F(Hist->fNPeHeight ,"npe_height" ,Form("%s: NPE_HEIGHT",Folder), 250,   0,   500,Folder);
-  HBook1F(Hist->fNDigis    ,"ndigis"     ,Form("%s: N(digis)"  ,Folder),  10,   0,    10,Folder);
-  HBook1F(Hist->fBar       ,"bar"        ,Form("%s: bar"       ,Folder), 600,   0,  6000,Folder);
-  HBook1F(Hist->fSipm      ,"sipm"       ,Form("%s: sipm"      ,Folder),  10,   0,    10,Folder);
-
-  HBook1F(Hist->fTime      ,"time"       ,Form("%s: time"      ,Folder), 500,   0,  2000,Folder);
-  HBook1F(Hist->fHeight    ,"height"     ,Form("%s: height"    ,Folder), 500,   0,  2000,Folder);
-  HBook1F(Hist->fWidth     ,"width"      ,Form("%s: width"     ,Folder), 500,   0,   500,Folder);
-  HBook1F(Hist->fChi2      ,"chi2"       ,Form("%s: chi2"      ,Folder), 500,   0,   500,Folder);
-  HBook1F(Hist->fLeTime    ,"le_time"    ,Form("%s: LE time"   ,Folder), 500,   0,  2000,Folder);
-  HBook1F(Hist->fDt        ,"dt"         ,Form("%s: LEt-t"     ,Folder), 100, -50,    50,Folder);
-}
-
-//-----------------------------------------------------------------------------
-void TAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
+void TRMCAnaModule::BookGenpHistograms(GenpHist_t* HistR, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
@@ -154,30 +86,7 @@ void TAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookTrackIDHistograms(TStnTrackID::Hist_t* Hist, const char* Folder) {
-//   char name [200];
-//   char title[200]
-
-  for (int i=0; i<5; i++) {
-    HBook1F(Hist->fNActive[i],Form("nactive_%i",i) ,Form("%s: Nactive [%i]"        ,Folder,i), 150,   0  , 150. ,Folder);
-    HBook1F(Hist->fFitCons[i],Form("fcons_%i"  ,i) ,Form("%s: FitCons [%i]"        ,Folder,i), 200,   0  ,   1. ,Folder);
-    HBook1F(Hist->fChi2Dof[i],Form("chi2d_%i"  ,i) ,Form("%s: Chi2/Dof[%i]"        ,Folder,i), 200,   0  ,  20. ,Folder);
-    HBook1F(Hist->fT0     [i],Form("t0_%i"     ,i) ,Form("%s: T0      [%i]"        ,Folder,i), 200,   0  ,2000. ,Folder);
-    HBook1F(Hist->fT0Err  [i],Form("t0err_%i"  ,i) ,Form("%s: T0Err   [%i]"        ,Folder,i), 200,   0  ,   2. ,Folder);
-    HBook1F(Hist->fMomErr [i],Form("momerr_%i" ,i) ,Form("%s: MomErr  [%i]"        ,Folder,i), 200,   0  ,   1. ,Folder);
-    HBook1F(Hist->fDNa    [i],Form("dna_%i"    ,i) ,Form("%s: DNa     [%i]"        ,Folder,i), 100,   0  , 100. ,Folder);
-    HBook1F(Hist->fTanDip [i],Form("tandip_%i" ,i) ,Form("%s: TanDip  [%i]"        ,Folder,i), 400,   0  ,   4. ,Folder);
-    HBook1F(Hist->fD0     [i],Form("d0_%i"     ,i) ,Form("%s: D0      [%i]"        ,Folder,i), 400, -200., 200. ,Folder);
-    HBook1F(Hist->fRMax   [i],Form("rmax_%i"   ,i) ,Form("%s: RMax    [%i]"        ,Folder,i), 400,    0., 800. ,Folder);
-    HBook1F(Hist->fTrkQual[i],Form("trkqual_%i",i) ,Form("%s: TrkQual [%i]"        ,Folder,i), 200,  -0.5,   1.5,Folder);
-  }
-
-  HBook1F(Hist->fPassed    ,"passed"     ,Form("%s: Passed     "         ,Folder),  5,  0,   5,Folder);
-  HBook1F(Hist->fFailedBits,"failed_bits",Form("%s: Failed Bits"         ,Folder), 40,  0,  40,Folder);
-}
-
-//-----------------------------------------------------------------------------
-void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
+void TRMCAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
@@ -256,48 +165,42 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 
   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
+  HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVAOut[0]"          ,Folder), 200, -0.5, 1.5,Folder);
+  HBook1F(Hist->fDeltaMVA   ,"dmva"     ,Form("%s:MVAOut[0]-TrkQual"  ,Folder), 200, -1.0, 1.0,Folder);
 
-  HBook2F(Hist->fPVsTime    ,"p_vs_time",Form("%s: P(Z1) vs T(0)"     ,Folder), 800,  80  ,120. , 200, 0, 2000,Folder);
-
-  HBook1F(Hist->fDtCRV      ,"dtcrv"     ,Form("%s:dT(CRV)"            ,Folder), 400,-1000, 1000,Folder);
-  HBook1F(Hist->fDtCRV2     ,"dtcrv2"    ,Form("%s:dT(CRV2)"           ,Folder), 400,-1000, 1000,Folder);
-  HBook2F(Hist->fZVsDtCRV   ,"dtcrv_vs_z",Form("%s: dT(CRV) vs Z(CRV)" ,Folder), 250,-5000,20000,500,-500, 500,Folder);
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+void TRMCAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fMcCosTh    ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
-  HBook1F(Hist->fMcMom      ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
-  //  HBook1D(Hist->fDioMom     ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
+  HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
+  HBook1F(Hist->fEleMom    ,"ce_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
+  HBook1D(Hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
   HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
   HBook1F(Hist->fZv         ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
   //  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
-  HBook1F(Hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNShTot[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
-  HBook1F(Hist->fNShTot[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),250,0,5000,Folder);
+  HBook1F(Hist->fNTracks   ,"ntrk"     ,Form("%s: Number of Reconstructed Tracks"  ,Folder),100,0,100,Folder);
+  HBook1F(Hist->fNStrawHits[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
+  HBook1F(Hist->fNStrawHits[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),250,0,5000,Folder);
   HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
   HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
   HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
   HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
-  HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
+  HBook1F(Hist->fEMax      ,"emax"     ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
   HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
   HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
   HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
   HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
 
-  HBook1F(Hist->fNCrvClusters    ,"ncrvcl"  ,Form("%s: N(CRV Clusters)"                 ,Folder),100,0,  100,Folder);
-  HBook1F(Hist->fNCrvCoincidences[0],"ncrvco_0"  ,Form("%s: N(CRV coincidences)[0]"     ,Folder),200,0, 1000,Folder);
-  HBook1F(Hist->fNCrvCoincidences[1],"ncrvco_1"  ,Form("%s: N(CRV coincidences)[1]"     ,Folder),200,0,  200,Folder);
-  HBook1F(Hist->fNCrvPulses[0]   ,"ncrvp_0" ,Form("%s: N(CRV pulses)[0]"                ,Folder),500,0,10000,Folder);
-  HBook1F(Hist->fNCrvPulses[1]   ,"ncrvp_1" ,Form("%s: N(CRV pulses)[1]"                ,Folder),500,0,  500,Folder);
+  // HBook1F(Hist->fNHitCrystalsTot,"nhcr_tot",Form("%s: NHit Crystals Tot",Folder), 100, 0,100,Folder);
+  // HBook1F(Hist->fECal,"ecal",Form("%s: E(cal), sum over both disks",Folder), 500, 0,250,Folder);
+  // HBook1F(Hist->fECalOverEKin,"ec_over_ek",Form("%s: E(cal)/E(kin)",Folder), 200, 0,2,Folder);
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
+void TRMCAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
@@ -308,116 +211,137 @@ void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
 }
 
 
-//-----------------------------------------------------------------------------
-void TAnaModule::BookTrackSeedHistograms   (HistBase_t*   HistR, const char* Folder){
-  
-  TrackSeedHist_t* Hist =  (TrackSeedHist_t*) HistR;
-
-  HBook1F(Hist->fNHits        ,"nhits" ,Form("%s: # of straw hits"              ,Folder),  150,    0,  150,Folder);
-  HBook1F(Hist->fClusterTime  ,"clt"   ,Form("%s: cluster time; t_{cluster}[ns]",Folder),  800,  400, 1700,Folder);
-  HBook1F(Hist->fClusterEnergy,"cle"   ,Form("%s: cluster energy; E [MeV]      ",Folder),  400,    0,  200,Folder);
-  HBook1F(Hist->fRadius       ,"r"     ,Form("%s: curvature radius; r [mm]"     ,Folder),  500,    0,  500,Folder);
-  HBook1F(Hist->fMom          ,"p"     ,Form("%s: momentum; p [MeV/c]"          ,Folder),  300,    50, 200,Folder);
-  HBook1F(Hist->fPt           ,"pt"    ,Form("%s: pT; pT [MeV/c]"               ,Folder),  600,    0,  150,Folder);
-  HBook1F(Hist->fTanDip       ,"tdip"  ,Form("%s: tanDip; tanDip"               ,Folder),  300,    0,    3,Folder);
-  HBook1F(Hist->fChi2         ,"chi2"  ,Form("%s: #chi^{2}-XY; #chi^{2}/ndof"   ,Folder),  100,    0,   10,Folder);
-  HBook1F(Hist->fFitCons      ,"fcons" ,Form("%s: Fit consistency; Fit-cons"    ,Folder),  100,    0,    1,Folder);
-  HBook1F(Hist->fD0           ,"d0"    ,Form("%s: D0; d0 [mm]"                  ,Folder), 1600, -400,  400,Folder);
-}
-
 //_____________________________________________________________________________
-// void TAnaModule::BookHistograms() {
-// }
+void TRMCAnaModule::BookHistograms() {
 
-
+  //  char name [200];
+  //  char title[200];
+  
+  TFolder* fol;
+  TFolder* hist_folder;
+  char     folder_name[200];
+  
+  DeleteHistograms();
+  hist_folder = (TFolder*) GetFolder()->FindObject("Hist");
+  
 //-----------------------------------------------------------------------------
-void TAnaModule::FillCrvClusterHistograms(CrvClusterHist_t* Hist, TCrvCoincidenceCluster* CrvCluster) {
+// book event histograms
+//-----------------------------------------------------------------------------
+  int book_event_histset[kNEventHistSets];
+  for (int i=0; i<kNEventHistSets; i++) book_event_histset[i] = 0;
 
-  Hist->fSectorType->Fill(CrvCluster->SectorType());
-  Hist->fNPulses->Fill(CrvCluster->NPulses());
-  Hist->fNPe->Fill(CrvCluster->NPe());
-  Hist->fStartTime->Fill(CrvCluster->StartTime());
-  Hist->fEndTime->Fill(CrvCluster->EndTime());
+  book_event_histset[ 0] = 1;		// all events
+  book_event_histset[ 1] = 1;	        // events with a reconstructed track
 
-  float width  = CrvCluster->EndTime()-CrvCluster->StartTime();
-  Hist->fWidth->Fill(width);
+  for (int i=0; i<kNEventHistSets; i++) {
+    if (book_event_histset[i] != 0) {
+      sprintf(folder_name,"evt_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fEvent[i] = new EventHist_t;
+      BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book simp histograms
+//-----------------------------------------------------------------------------
+  int book_simp_histset[kNSimpHistSets];
+  for (int i=0; i<kNSimpHistSets; i++) book_simp_histset[i] = 0;
 
-  float x = CrvCluster->Position()->X();
-  float y = CrvCluster->Position()->Y();
-  float z = CrvCluster->Position()->Z();
+  book_simp_histset[ 0] = 1;		// all events
 
-  Hist->fXVsZ->Fill(z,x);
-  Hist->fYVsZ->Fill(z,y);
+  for (int i=0; i<kNSimpHistSets; i++) {
+    if (book_simp_histset[i] != 0) {
+      sprintf(folder_name,"sim_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fSimp[i] = new SimpHist_t;
+      BookSimpHistograms(fHist.fSimp[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book track histograms
+//-----------------------------------------------------------------------------
+  int book_track_histset[kNTrackHistSets];
+  for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
+
+  book_track_histset[  0] = 1;		// all tracks e-
+  book_track_histset[  1] = 1;		// all tracks e- passing Set C cuts 
+
+  for (int i=0; i<kNTrackHistSets; i++) {
+    if (book_track_histset[i] != 0) {
+      sprintf(folder_name,"trk_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fTrack[i] = new TrackHist_t;
+      BookTrackHistograms(fHist.fTrack[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book Genp histograms
+//-----------------------------------------------------------------------------
+  int book_genp_histset[kNGenpHistSets];
+  for (int i=0; i<kNGenpHistSets; i++) book_genp_histset[i] = 0;
+
+  book_genp_histset[0] = 1;		// all particles
+//   book_genp_histset[1] = 1;		// all crystals, e > 0
+
+  for (int i=0; i<kNGenpHistSets; i++) {
+    if (book_genp_histset[i] != 0) {
+      sprintf(folder_name,"gen_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fGenp[i] = new GenpHist_t;
+      BookGenpHistograms(fHist.fGenp[i],Form("Hist/%s",folder_name));
+    }
+  }
 }
 
-//-----------------------------------------------------------------------------
-void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pulse) {
-
-  Hist->fNPe->Fill(Pulse->NPe());
-  Hist->fNPeHeight->Fill(Pulse->NPeHeight());
-  Hist->fNDigis->Fill(Pulse->NDigis());
-  Hist->fBar->Fill(Pulse->Bar());
-  Hist->fSipm->Fill(Pulse->Sipm());
-  Hist->fTime->Fill(Pulse->Time());
-  Hist->fHeight->Fill(Pulse->Height());
-  Hist->fWidth->Fill(Pulse->Width());
-  Hist->fChi2->Fill(Pulse->Chi2());
-  Hist->fLeTime->Fill(Pulse->LeTime());
-
-  float dt = Pulse->LeTime()-Pulse->Time();
-  Hist->fDt->Fill(dt);
-}
 
 //-----------------------------------------------------------------------------
 // need MC truth branch
 //-----------------------------------------------------------------------------
-  void TAnaModule::FillEventHistograms(EventHist_t* Hist, EventPar_t* Evp) {
-  double            cos_th(-2), xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p(-1.);
+void TRMCAnaModule::FillEventHistograms(EventHist_t* Hist) {
+  double            cos_th(-2), dio_wt(-1.), xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p(-1.);
   //  double            e, m, r;
   TLorentzVector    mom;
 
-  if (Evp->fParticle) {
-    Evp->fParticle->Momentum(mom);
+  if (fParticle) {
+    fParticle->Momentum(mom);
     p      = mom.P();
     cos_th = mom.Pz()/p;
-    xv     = Evp->fParticle->Vx()+3904.;
-    yv     = Evp->fParticle->Vy();
+    xv     = fParticle->Vx()+3904.;
+    yv     = fParticle->Vy();
     rv     = sqrt(xv*xv+yv*yv);
-    zv     = Evp->fParticle->Vz();
-    //    dio_wt = TStntuple::DioWeightAl(p);
+    zv     = fParticle->Vz();
+    dio_wt = TStntuple::DioWeightAl(p);
   }
 
-  Hist->fMcMom->Fill(p);
-  Hist->fMcCosTh->Fill(cos_th);
+  Hist->fEleMom->Fill(p);
+  Hist->fDioMom->Fill(p,dio_wt);
+  Hist->fEleCosTh->Fill(cos_th);
   Hist->fRv->Fill(rv);
   Hist->fZv->Fill(zv);
 
   // Hist->fNClusters->Fill(fNClusters);
-  Hist->fNTracks[0]->Fill  (Evp->fNTracks[0]);
-  Hist->fNTracks[1]->Fill  (Evp->fNTracks[1]);
-  Hist->fNShTot[0]->Fill(Evp->fNStrawHits);
-  Hist->fNShTot[1]->Fill(Evp->fNStrawHits);
+  Hist->fNTracks->Fill  (fNTracks[0]);
+  // Hist->fNStrawHits[0]->Fill(fNStrawHits);
+  // Hist->fNStrawHits[1]->Fill(fNStrawHits);
 
   double emax   = -1;
   double dt     = 9999.;
 
   Hist->fDtClT->Fill(dt);
-  Hist->fEClMax->Fill(emax);
+  Hist->fEMax->Fill(emax);
 
-  // Hist->fNHyp->Fill(fNHyp);
-  // Hist->fBestHyp[0]->Fill(fBestHyp[0]);
-  // Hist->fBestHyp[1]->Fill(fBestHyp[1]);
-  Hist->fNGenp->Fill(Evp->fNGenp);
-
-  Hist->fNCrvClusters->Fill(Evp->fNCrvClusters);
-  Hist->fNCrvCoincidences[0]->Fill(Evp->fNCrvCoincidences);
-  Hist->fNCrvCoincidences[1]->Fill(Evp->fNCrvCoincidences);
-  Hist->fNCrvPulses[0]->Fill(Evp->fNCrvPulses);
-  Hist->fNCrvPulses[1]->Fill(Evp->fNCrvPulses);
+  Hist->fNHyp->Fill(fNHyp);
+  Hist->fBestHyp[0]->Fill(fBestHyp[0]);
+  Hist->fBestHyp[1]->Fill(fBestHyp[1]);
+  Hist->fNGenp->Fill(fNGenp);
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
+void TRMCAnaModule::FillGenpHistograms(GenpHist_t* HistR, TGenParticle* Genp) {
   int    gen_id;
   float  p, cos_th, z0, t0, r0, x0, y0;
 
@@ -448,7 +372,7 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
+void TRMCAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
 
   Hist->fPdgCode->Fill(Simp->fPdgCode);
   Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
@@ -456,14 +380,15 @@ void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
   Hist->fNStrawHits->Fill(Simp->fNStrawHits);
 }
 
-
 //-----------------------------------------------------------------------------
 // for DIO : ultimately, one would need to renormalize the distribution
 //-----------------------------------------------------------------------------
-void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, 
-				     TrackPar_t* Tp, SimPar_t* SimPar, double Weight) {
+void TRMCAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track, TrackPar_t* Tp, double Weight) {
 
   TLorentzVector  mom;
+
+  TrackHist_t* Hist = (TrackHist_t*) HistR;
+
 					// Tp->fP - corrected momentum, fP0 and fP2 - not corrected
   Hist->fP[0]->Fill (Tp->fP,Weight);
   Hist->fP[1]->Fill (Tp->fP,Weight);
@@ -559,7 +484,7 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 // assume muon hypothesis
 //-----------------------------------------------------------------------------
   double    ekin(-1.);
-  if (SimPar->fParticle) {
+  if (fSimp) {
     double p, m;
     p    = Tp->fP;
     m    = 105.658; // muon mass, in MeV
@@ -579,81 +504,185 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 // MVA variables
 //-----------------------------------------------------------------------------
   Hist->fDaveTrkQual->Fill(Track->DaveTrkQual(), Weight);
-//-----------------------------------------------------------------------------
-// 2D momentum() vs time (tracker center) histogram for sensitivity calculation
-//-----------------------------------------------------------------------------
-  Hist->fPVsTime->Fill(Tp->fP, Track->fT0, Weight);
+  Hist->fMVAOut     ->Fill(Tp->fMVAOut[0]      , Weight);
 
-  Hist->fDtCRV   ->Fill(Tp->fDtCRV, Weight);
-  Hist->fZVsDtCRV->Fill(Tp->fZCRV , Tp->fDtCRV, Weight);
-  Hist->fDtCRV2  ->Fill(Tp->fDtCRV2, Weight);
+  float dmva=Tp->fMVAOut[0]-Track->DaveTrkQual();
+  Hist->fDeltaMVA->Fill(dmva, Weight);
 }
 
 
-//--------------------------------------------------------------------------------
-// function to fill TrasckSeedHit block
-//--------------------------------------------------------------------------------
-void TAnaModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* TrkSeed) {
-  
-  TrackSeedHist_t* Hist = (TrackSeedHist_t*) HistR;
-  
-  int         nhits    = TrkSeed->NHits      ();
-  double      clusterT = TrkSeed->ClusterTime();
-  double      clusterE = TrkSeed->ClusterEnergy();
-  
-  double      mm2MeV   = 3/10.;
-  double      pT       = TrkSeed->Pt();
-  double      radius   = pT/mm2MeV;
+//-----------------------------------------------------------------------------
+// register data blocks and book histograms
+//-----------------------------------------------------------------------------
+int TRMCAnaModule::BeginJob() {
+//-----------------------------------------------------------------------------
+// register data blocks
+//-----------------------------------------------------------------------------
+  RegisterDataBlock("TrackBlockDar"       ,"TStnTrackBlock"      ,&fTrackBlock      );
+  RegisterDataBlock("GenpBlock"           ,"TGenpBlock"          ,&fGenpBlock       );
+  RegisterDataBlock("SimpBlock"           ,"TSimpBlock"          ,&fSimpBlock       );
+//-----------------------------------------------------------------------------
+// book histograms
+//-----------------------------------------------------------------------------
+  BookHistograms();
+//-----------------------------------------------------------------------------
+// initialize likelihood histograms
+//-----------------------------------------------------------------------------
+  fTrackID->SetMinT0(fMinT0);
+//-----------------------------------------------------------------------------
+// PID initialization: read the likelihood templates
+//-----------------------------------------------------------------------------
+  fLogLH->Init("v5_7_0");
 
-  double      tanDip   = TrkSeed->TanDip();  
-  double      p        = pT/std::cos( std::atan(tanDip));
-  
-  Hist->fNHits      ->Fill(nhits);	 
-  Hist->fClusterTime->Fill(clusterT);
-  Hist->fClusterEnergy->Fill(clusterE);
-  
-  Hist->fRadius     ->Fill(radius);    
-  Hist->fMom        ->Fill(p);	 
-  Hist->fPt         ->Fill(pT);	 
-  Hist->fTanDip     ->Fill(tanDip);    
-  
-  Hist->fChi2       ->Fill(TrkSeed->Chi2()/(nhits-5.));
-  Hist->fFitCons    ->Fill(TrkSeed->FitCons());
-  Hist->fD0         ->Fill(TrkSeed->D0());
+  return 0;
 }
 
-//-----------------------------------------------------------------------------
-int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  , 
-			     TStnClusterBlock*         ClusterBlock, 
-			     TrackPar_t*       TrackPar    ,
-			     SimPar_t*         SimPar      ) {
-  TrackPar_t*           tp;
-  TStnTrack*            track;
-  int                   track_type(-999);
-  double                xs;
-  TEmuLogLH::PidData_t  dat;
-//-----------------------------------------------------------------------------
-// momentum corrections for KPAR and KDAR
-//-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0. , 0. } ; // CD3: { 0.049, 0.020 };
-  const double kDtTcmCorr   [2] = { 0. , 0. } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
 
-  const char* block_name = TrackBlock->GetNode()->GetName();
+//_____________________________________________________________________________
+int TRMCAnaModule::BeginRun() {
+  int rn = GetHeaderBlock()->RunNumber();
+  TStntuple::Init(rn);
+  return 0;
+}
 
-  if      (strcmp(block_name,"TrackBlockPar") == 0) track_type = 0;
-  else if (strcmp(block_name,"TrackBlockDar") == 0) track_type = 1;
-  else {
-    Error("murat::TAnaModule::InitTrackPar",Form("IN TROUBLE: unknown track block: %s",block_name));
-    return -1;
+
+//_____________________________________________________________________________
+void TRMCAnaModule::FillHistograms() {
+
+  //  double       cos_th (-2.),  cl_e(-1.);
+  // int          disk_id(-1); // , alg_mask, nsh, nactive;
+  //  float        pfront, ce_pitch, reco_pitch, fcons, t0, sigt, sigp, p; 
+  //  TStnCluster  *cl0;
+
+  //  cos_th = fEle->momentum().pz()/fEle->momentum().vect().mag();
+
+  // if (fNClusters > 0) {
+  //   cl0     = fClusterBlock->Cluster(0);
+  //   cl_e    = cl0->Energy();
+  //   disk_id = cl0->DiskID();
+  // }
+  //-----------------------------------------------------------------------------
+  // event histograms
+  //-----------------------------------------------------------------------------
+  FillEventHistograms(fHist.fEvent[0]);
+
+  if (fNTracks[0]> 0) FillEventHistograms(fHist.fEvent[1]);
+//-----------------------------------------------------------------------------
+// Simp histograms
+//-----------------------------------------------------------------------------
+  if (fSimp) {
+    FillSimpHistograms(fHist.fSimp[0],fSimp);
   }
 //-----------------------------------------------------------------------------
-// loop over tracks
+// track histograms, fill them only for the downstream e- hypothesis
 //-----------------------------------------------------------------------------
-  int ntrk = TrackBlock->NTracks();
+  TStnTrack*   trk;
+  //  TrackPar_t*  tp;
+
+  for (int i=0; i<fNTracks[0]; ++i ) {
+    trk = fTrackBlock->Track(i);
+    //    tp  = fTrackPar+i;
+
+    FillTrackHistograms(fHist.fTrack[0],trk);
+
+    if (trk->fIDWord == 0) {
+					// track passes selection "C" 
+
+      FillTrackHistograms(fHist.fTrack[1],trk);
+    }
+  }
+//-----------------------------------------------------------------------------
+// fill GENP histograms
+// GEN_0: all particles
+//-----------------------------------------------------------------------------
+  TGenParticle* genp;
+  for (int i=0; i<fNGenp; i++) {
+    genp = fGenpBlock->Particle(i);
+    FillGenpHistograms(fHist.fGenp[0],genp);
+  }
+  //  first_entry = 0;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// 2014-04-30: it looks that reading the straw hits takes a lot of time - 
+//              turn off by default by commenting it out
+//-----------------------------------------------------------------------------
+int TRMCAnaModule::Event(int ientry) {
+
+  double                xs, p;
+  TEmuLogLH::PidData_t  dat;
+  TStnTrack*            track;
+  int                   id_word;
+  TLorentzVector        mom;
+
+  //  TDiskCalorimeter::GeomData_t disk_geom;
+
+  fTrackBlock  ->GetEntry(ientry);
+  fGenpBlock->GetEntry(ientry);
+  fSimpBlock->GetEntry(ientry);
+//-----------------------------------------------------------------------------
+// assume electron in the first particle, otherwise the logic will need to 
+// be changed
+//-----------------------------------------------------------------------------
+  fNGenp    = fGenpBlock->NParticles();
+
+  TGenParticle* genp;
+  int           pdg_code, generator_code;
+
+  fParticle = NULL;
+  for (int i=fNGenp-1; i>=0; i--) {
+    genp           = fGenpBlock->Particle(i);
+    pdg_code       = genp->GetPdgCode();
+    generator_code = genp->GetStatusCode();
+    if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
+      fParticle = genp;
+      break;
+    }
+  }
+					// may want to revisit the definition of fSimp
+  fSimp     = fSimpBlock->Particle(0);
+
+  if (fParticle) {
+    fParticle->Momentum(mom);
+    p         = mom.P();
+  }
+  else p = 0.;
+
+  fEleE     = sqrt(p*p+0.511*0.511);
+
+
+  fNTracks[0] = fTrackBlock->NTracks();
+
+  fNHyp       = -1;
+  fBestHyp[0] = -1;
+  fBestHyp[1] = -1;
+
+  fNGoodTracks    = 0;
+  fNMatchedTracks = 0;
+
+  fNTracks[0] = fTrackBlock->NTracks();
+  if (fNTracks[0] == 0) fTrack = 0;
+  else                  fTrack = fTrackBlock->Track(0);
+
+  int ntrk = fNTracks[0];
+
+  TrackPar_t*   tp;
 
   for (int itrk=0; itrk<ntrk; itrk++) {
-    tp             = TrackPar+itrk;
-    track          = TrackBlock->Track(itrk);
+					// assume less 20 tracks
+    tp             = fTrackPar+itrk;
+
+    track          = fTrackBlock->Track(itrk);
+    id_word        = fTrackID->IDWord(track);
+    track->fIDWord = id_word;
+    if (id_word == 0) {
+      fNGoodTracks += 1;
+      if ((track->fVMaxEp != NULL) && (fabs(track->fVMaxEp->fDt) < 2.5)) {
+	fNMatchedTracks += 1;
+      }
+    }
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -672,49 +701,14 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
     tp->fNHPl = n1;
     tp->fNEPl = n2;
     tp->fNDPl = ndiff;
-//-----------------------------------------------------------------------------
-// in this scheme correction is set right before the call
-// in case of MergePatRec use BestAlg - 
-//-----------------------------------------------------------------------------
-    if (track_type == 2) track_type = track->BestAlg();
 
-    tp->fP     = track->fP0    +kMomentumCorr[track_type];		// correcting
-//-----------------------------------------------------------------------------
-// hits on virtual detectors
-//-----------------------------------------------------------------------------
-    tp->fPStOut  = track->fPStOut;
-    tp->fPFront  = track->fPFront;
+    tp->fDpF   = track->fP     -track->fPFront;
+    tp->fDp0   = track->fP0    -track->fPFront;
+    tp->fDp2   = track->fP2    -track->fPFront;
+    tp->fDpFSt = track->fPFront-track->fPStOut;
 
-    tp->fDpF     = tp->fP     -tp->fPFront;
-    tp->fDp0     = track->fP0 -tp->fPFront;
-    tp->fDp2     = track->fP2 -tp->fPFront;
-    tp->fDpFSt   = tp->fPFront-tp->fPStOut;
-
-    tp->fXDpF    = tp->fDpF/track->fFitMomErr;
-    if (SimPar->fParticle) {
-      double e     = SimPar->fParticle->StartMom()->E();
-      tp->fDioLOWt = TStntuple::DioWeightAl   (e);
-      tp->fDioLLWt = TStntuple::DioWeightAl_LL(e);
-    }
-    else {
-      tp->fDioLOWt = 1. ; // TStntuple::DioWeightAl   (SimPar->fEleE);
-      tp->fDioLLWt = 1. ; // TStntuple::DioWeightAl_LL(SimPar->fEleE);
-    }
-    tp->fLumWt   = GetHeaderBlock()->LumWeight();
-
-    tp->fDtZ0 = -1.e6;
-    if (SimPar->fTMid) {
-      double ttrue = fmod(SimPar->fTMid->Time(),fMbTime);
-      tp->fDtZ0 = track->T0()-ttrue;
-    }
-
-    tp->fXtZ0 = tp->fDtZ0/track->fT0Err;
-
-    tp->fDtBack = -1.e6;
-    if (SimPar->fTBack) {
-      double ttrue = fmod(SimPar->fTBack->Time(),fMbTime);
-      tp->fDtBack = track->T0()-ttrue;
-    }
+    if (fFillDioHist == 0) tp->fDioWt = 1.;
+    else                   tp->fDioWt = TStntuple::DioWeightAl(fEleE);
 //-----------------------------------------------------------------------------
 // track residuals
 //-----------------------------------------------------------------------------
@@ -722,10 +716,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
     double    nx, ny;
 
     tp->fEcl       = -1.e6;
-    tp->fDiskID    = -1;
     tp->fEp        = -1.e6;
-    tp->fDrDzCal   = -1.e6;
-    tp->fDtClZ0    = -1.e6;
 
     tp->fDu        = -1.e6;
     tp->fDv        = -1.e6;
@@ -734,61 +725,33 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
     tp->fDz        = -1.e6;
     tp->fDt        = -1.e6;
 
-    tp->fChi2Tcm = -1.e6;
-    tp->fChi2XY    = -1.e6;
-    tp->fChi2T     = -1.e6;
+    tp->fChi2Match = -1.e6;
     tp->fPath      = -1.e6;
-    tp->fSinTC     = -1.e6;
-    tp->fDrTC      = -1.e6;
-    tp->fSInt      = -1.e6;
 
     if (vr) {
-      tp->fDiskID = vr->fID;
-      tp->fEcl    = vr->fEnergy;
-      tp->fEp     = tp->fEcl/track->fP2;
-      tp->fDrDzCal = (vr->fXTrk*vr->fNxTrk+vr->fYTrk+vr->fNyTrk)/sqrt(vr->fXTrk*vr->fXTrk+vr->fYTrk*vr->fYTrk)/vr->fNzTrk;
+      tp->fEcl = vr->fEnergy;
+      tp->fEp  = tp->fEcl/track->fP;
 
-      tp->fDx     = vr->fDx;
-      tp->fDy     = vr->fDy;
-      tp->fDz     = vr->fDz;
+      tp->fDx  = vr->fDx;
+      tp->fDy  = vr->fDy;
+      tp->fDz  = vr->fDz;
 //-----------------------------------------------------------------------------
 // v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
 //-----------------------------------------------------------------------------
-      tp->fDt  = vr->fDt ; // v4_2_4: - 0.22; // - 1.;
-      if (track_type >= 0) tp->fDt  -= kDtTcmCorr[track_type];
+      tp->fDt  = vr->fDt - 0.22; // - 1.;
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
 
       tp->fDu        = vr->fDx*nx+vr->fDy*ny;
       tp->fDv        = vr->fDx*ny-vr->fDy*nx;
-      tp->fChi2Tcm   = vr->fChi2Match;
-					// from now on the matching chi2 has XY part only
-      tp->fChi2XY    = vr->fChi2Match;
-      tp->fChi2T     = vr->fChi2Time;
+      tp->fChi2Match = vr->fChi2Match;
       tp->fPath      = vr->fPath;
-//-----------------------------------------------------------------------------
-// angle
-//-----------------------------------------------------------------------------
-      TStnCluster* cl = ClusterBlock->Cluster(vr->fClusterIndex);
-      tp->fSinTC = nx*cl->fNy-ny*cl->fNx;
-      tp->fDrTC  = vr->fDr;
-      tp->fSInt  = vr->fSInt;
-
-      if (SimPar->fTMid) {
-	tp->fDtClZ0 = tp->fDt-tp->fDtZ0;
-      }
     }
 
-    if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
-      GetHeaderBlock()->Print(Form(" TAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
-    }
-//-----------------------------------------------------------------------------
-// track ID 
-//-----------------------------------------------------------------------------
-    for (int k=0; k<fNID; k++) {
-      tp->fIDWord[k]  = tp->fTrackID[k]->IDWord(track);
-    }
+    //    if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
+    //      GetHeaderBlock()->Print(Form(" TRMCAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f",tp->fEp,track->fEp));
+    //    }
 //-----------------------------------------------------------------------------
 // PID likelihoods
 //-----------------------------------------------------------------------------
@@ -798,12 +761,10 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
       
     xs = track->XSlope();
 
-    track->fEleLogLHCal = tp->fLogLH->LogLHCal(&dat,11);
-    track->fMuoLogLHCal = tp->fLogLH->LogLHCal(&dat,13);
+    track->fEleLogLHCal = fLogLH->LogLHCal(&dat,11);
+    track->fMuoLogLHCal = fLogLH->LogLHCal(&dat,13);
 
     double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
-
-    int id_word = tp->fIDWord[0];
 
     if (GetDebugBit(7)) {
       if ((id_word == 0) && (llhr_cal > 20)) {
@@ -818,53 +779,46 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
       }
     }
 
-    track->fLogLHRXs = tp->fLogLH->LogLHRXs(xs); 
+    track->fLogLHRXs    = fLogLH->LogLHRXs(xs);
+  }
 
-    tp->fDtCRV       = -1.e6;
-    tp->fZCRV        = -1.e6;
-    tp->fDtCRV2      = -1.e6;
- }
+  FillHistograms();
 
+  Debug();
 
+  return 0;		       
+}
+
+//-----------------------------------------------------------------------------
+void TRMCAnaModule::Debug() {
+
+  TStnTrack* trk;
+  //  TrackPar_t* tp;
+  int ntrk = fTrackBlock->NTracks();
+
+  for (int itrk=0; itrk<ntrk; itrk++) {
+    trk = fTrackBlock->Track(itrk);
+    //    tp  = &fTrackPar[itrk];
+//-----------------------------------------------------------------------------
+// bit 3: Set C tracks with large DX : 70mm < |DX| < 90mm
+//-----------------------------------------------------------------------------
+    if (GetDebugBit(3) == 1) {
+      if (trk->fIDWord == 0) {
+	TStnTrack::InterData_t*    vr = trk->fVMaxEp; // residuals
+	if ((vr && (fabs(vr->fDx) > 70) && (fabs(vr->fDx) < 90))) {
+	  GetHeaderBlock()->Print(Form("large DX: %f",vr->fDx));
+	}
+      }
+    }
+  }
+}
+
+//_____________________________________________________________________________
+int TRMCAnaModule::EndJob() {
+  printf("----- end job: ---- %s\n",GetName());
   return 0;
 }
 
-
 //_____________________________________________________________________________
-void TAnaModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const {
-
-  TString opt(Option);
-
-  opt.ToLower();
-					// "non-const *this" for printing purposes
-  TStnTrack* t = (TStnTrack*) Track;
-
-  if ((opt == "") || (opt.Index("banner") >= 0)) {
-//-----------------------------------------------------------------------------
-// print banner
-//-----------------------------------------------------------------------------
-    printf("------------------------------------------------------------------------------------------------");
-    printf("----------------------------------------------------------------------------------\n");
-    printf(" i  nh  na nw nosd nssd na0 ncl  alg_mask    id_word   q     p     p(corr) momerr    T0     T0Err     D0");
-    printf("      Z0    TanDip   TBack   chi2/dof   fcon  TrkQual MvaOut[0]  MVAOut[1]   Prob \n");
-    printf("------------------------------------------------------------------------------------------------");
-    printf("----------------------------------------------------------------------------------\n");
-  }
-
-  if ((opt == "") || (opt.Index("data") >= 0)) {
-    printf("%2i %3i %3i %2i %4i %4i %3i %3i 0x%08x",
-	   t->fNumber,t->NHits(), t->NActive(),t->NWrong(), 
-	   t->NOSDoublets(), t->NSSDoublets(), t->NHitsAmbZero(),
-	   t->NClusters(),
-	   t->AlgorithmID());
-
-    printf(" 0x%08x %1.0f %8.3f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f %9.4f",
-	   t->fIDWord,
-	   t->fCharge, 
-	   t->fP*t->fCharge, Tp->fP*t->fCharge, t->fFitMomErr, t->fT0, t->fT0Err, t->fD0, t->fZ0, t->fTanDip, t->TBack(),
-	   t->Chi2Dof(),t->FitCons(),t->DaveTrkQual(),Tp->fMVAOut[0], Tp->fMVAOut[1], Tp->fProb);
-    printf("\n");
-  }
-}
-
+void TRMCAnaModule::Test001() {
 }

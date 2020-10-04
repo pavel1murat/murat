@@ -79,10 +79,10 @@ void TClusterAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folde
   HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 200,Folder);
   HBook1F(Hist->fZv         ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 400, 5000,7000,Folder);
   HBook1F(Hist->fEleCosTh  ,"ce_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder), 100,-1,    1,Folder);
-  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder), 500, 0, 1000,Folder);
-  HBook1F(Hist->fNCl20     ,"ncl20"    ,Form("%s: N(Clusters), E > 20"             ,Folder), 500, 0, 1000,Folder);
-  HBook1F(Hist->fNCl50     ,"ncl50"    ,Form("%s: N(Clusters), E > 50"             ,Folder), 500, 0, 1000,Folder);
-  HBook1F(Hist->fNCl70     ,"ncl70"    ,Form("%s: N(Clusters), E > 70"             ,Folder), 500, 0, 1000,Folder);
+  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),1000, 0, 1000,Folder);
+  HBook1F(Hist->fNCl20     ,"ncl20"    ,Form("%s: N(Clusters), E > 20"             ,Folder), 100, 0,  100,Folder);
+  HBook1F(Hist->fNCl50     ,"ncl50"    ,Form("%s: N(Clusters), E > 50"             ,Folder), 100, 0,  100,Folder);
+  HBook1F(Hist->fNCl70     ,"ncl70"    ,Form("%s: N(Clusters), E > 70"             ,Folder), 100, 0,  100,Folder);
   HBook1F(Hist->fEMax      ,"emax"     ,Form("%s: Max cluster energy"              ,Folder), 250, 0,  500,Folder);
   HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder), 500, 0,10000,Folder);
 

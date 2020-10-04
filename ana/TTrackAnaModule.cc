@@ -58,7 +58,7 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TTrackAnaModule::TTrackAnaModule(const char* name, const char* title): TAnaModule(name,title)
 {
-  fTrackBlockName         = "TrackBlock";
+  fTrackBlockName         = "TrackBlockPar";
   fTrackStrawHitBlockName = "TrackStrawHitBlock";
   fTrackNumber.Set(100);
 
@@ -1871,13 +1871,18 @@ int TTrackAnaModule::Event(int ientry) {
 // determine the number of CalPatRec tracks - this assumes that the list of 
 // tracks has been created by MergePatRec
 //-----------------------------------------------------------------------------
-  TStnTrack*   track;
   int ntrk = fTrackBlock->NTracks();
   fNCalPatRec = 0;
   for (int itrk=0; itrk<ntrk; itrk++) {
-    track        = fTrackBlock->Track(itrk);
-    int alg_mask = track->AlgMask();
+    TStnTrack*   trk = fTrackBlock->Track(itrk);
+    TrackPar_t* tp   = fTrackPar+itrk;
+
+    int alg_mask = trk->AlgMask();
     if (alg_mask & 0x2) fNCalPatRec += 1;
+
+    tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
+    tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
+    tp->fLogLH      = TAnaModule::fLogLH;
   }
 
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);

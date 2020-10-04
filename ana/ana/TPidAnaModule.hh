@@ -8,6 +8,7 @@
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStnPidBlock.hh"
 #include "Stntuple/obj/TStnTrackBlock.hh"
+#include "Stntuple/obj/TStnClusterBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
 
@@ -58,27 +59,30 @@ public:
     TH1F*    fXdrdsSs;
   };
 //-----------------------------------------------------------------------------
+// histograms
+//-----------------------------------------------------------------------------
   enum { kNEventHistSets    = 100 };
   enum { kNPidHistSets      = 100 };
 
   struct Hist_t {
     EventHist_t*    fEvent   [kNEventHistSets];
     PidHist_t*      fPid     [kNPidHistSets  ];
-  };
+  } fHist;
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used 0:DEM, 1:DMM
+  TStnPidBlock*     fPidDataBlock  [2];
+  TStnTrackBlock*   fTrackBlock    [2];
+  TStnClusterBlock* fClusterBlock;
 
-  TStnPidBlock*         fPidDataBlock[2];
-  TStnTrackBlock*       fTrackBlock  [2];
+  TString           fTrackBlockName[2];
 
-					// additional track parameters (assume ntracks < 20)
-  TrackPar_t            fTrackPar[20];
-					// histograms filled
-  Hist_t                fHist;
-  int                   fNTracks[2];
+  SimPar_t          fSimPar;            // additional parameters of the simulated MC particle
+					
+  TrackPar_t        fTrackPar[2][20];   // additional track parameters (assume ntracks < 20)
+  int               fNTracks [2];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -88,7 +92,11 @@ public:
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  Hist_t*            GetHist        () { return &fHist;        }
+  Hist_t*            GetHist          () { return &fHist;        }
+//-----------------------------------------------------------------------------
+// accessors
+//-----------------------------------------------------------------------------
+  void    SetTrackBlockName(int I, const char* Name) { fTrackBlockName[I] = Name;}
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

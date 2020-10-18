@@ -87,6 +87,16 @@ struct TrackHist_t : public HistBase_t {
   TH1F*    fDtCRV;                    // delta(T) from CRV stub candidate
   TH1F*    fDtCRV2;                   // delta(T) from CRV stub candidate
   TH2F*    fZVsDtCRV;                 // delta(T) from CRV stub candidate
+//-----------------------------------------------------------------------------
+// TrkCaloHit histograms
+//-----------------------------------------------------------------------------
+  TH1F*    fTchTime;
+  TH1F*    fTchPath;
+  TH1F*    fTchDx;
+  TH1F*    fTchDy;
+  TH1F*    fTchDr;
+  TH1F*    fTchDz;
+  TH1F*    fTchDt;
 };
 }
 #endif

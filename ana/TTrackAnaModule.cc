@@ -75,28 +75,11 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title): TAnaModul
 // 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
 // what about number of hits ? - 3: no cuts on the number of hits
 //-----------------------------------------------------------------------------
-  fNID             = 4;
-  for (int i=0; i<fNID; i++) {
-    fTrackID[i]    = new TStnTrackID();
-  }
+  fNID             = 2;
+  fTrackID[0]      = TAnaModule::fTrackID_BOX;
+  fTrackID[1]      = TAnaModule::fTrackID_MVA;
 
-  fTrackID[1]->SetMaxMomErr (100);
-  fTrackID[1]->SetMaxT0Err  (100);
-  fTrackID[1]->SetMinFitCons(-1.);
-  fTrackID[1]->SetMinTrkQual(0.1);
-
-  fTrackID[2]->SetMaxMomErr (100);
-  fTrackID[2]->SetMaxT0Err  (100);
-  fTrackID[2]->SetMinFitCons(-1.);
-  fTrackID[2]->SetMinTrkQual(0.4);
-
-  fTrackID[3]->SetMaxMomErr (100);
-  fTrackID[3]->SetMaxT0Err  (100);
-  fTrackID[3]->SetMinFitCons(-1.);
-  fTrackID[3]->SetMinTrkQual(0.4);
-  fTrackID[3]->SetMinNActive(-1 );
-
-  fBestID     = 3;			// best: DaveTrkQual > 0.4, no NActive cut
+  fBestID          = 1;
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 // 2:conversionGun, 28:StoppedParticleReactionGun - see 
@@ -129,7 +112,7 @@ int TTrackAnaModule::BeginJob() {
   RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
   RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("VDetBlock"           ,"TStepPointMCBlock",&fVDetBlock);
+  RegisterDataBlock("SpmcBlockVDet"       ,"TStepPointMCBlock",&fVDetBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -347,7 +330,7 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 62] = 1;		// Set "C" tracks, alg_mask = 3, T > 700
   book_track_histset[ 63] = 1;          // best ID, best = 0 (TrkPatRec)
   book_track_histset[ 64] = 1;          // best ID, best = 1 (CalPatRec)
-  book_track_histset[ 65] = 0;
+  book_track_histset[ 65] = 1;          // tp->fDtClZ0 > -0.6
   book_track_histset[ 66] = 0;
   book_track_histset[ 67] = 0;
   book_track_histset[ 68] = 0;
@@ -1159,23 +1142,19 @@ void TTrackAnaModule::FillHistograms() {
 
     FillTrackHistograms(fHist.fTrack[0],trk,tp,&fSimPar);
 
-    if (trk->fIDWord == 0) {
+    if (tp->fIDWord[fBestID] == 0) {
 					// track passes selection "C" 
 
       FillTrackHistograms(fHist.fTrack[1],trk,tp,&fSimPar);
 
       if (GetDebugBit(32) && (trk->fVMinS != NULL)) {
-	if (trk->fVMinS->fChi2Match > 100) {
-	  GetHeaderBlock()->Print(Form("bit032: chi2(match) = %10.3lf",trk->fVMinS->fChi2Match));
+	if ((tp->fDtClZ0 > -0.6) && (trk->fVMinS->fEnergy > 50.)) { 
+	  GetHeaderBlock()->Print(Form("bit032: odd DT: = %10.3f energy: %10.3f",tp->fDtClZ0, trk->fVMinS->fEnergy));
 	}
       }
 
       if (GetDebugBit(35) && (trk->fP > 106.)) {
 	GetHeaderBlock()->Print(Form("bit035: P = %10.3lf",trk->fP));
-      }
-
-      if (GetDebugBit(39) && (fabs(tp->fSinTC) < 100) && (fabs(tp->fSinTC) > 0.6)) {
-	GetHeaderBlock()->Print(Form("bit039: tp->fSinTC =  %10.3lf",tp->fSinTC));
       }
 
 					// events with at least one  cluster
@@ -1211,7 +1190,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
     if ((trk->Ep() > 0.4) && ( trk->Ep() < 1.2)) {
       FillTrackHistograms(fHist.fTrack[6],trk,tp,&fSimPar);
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	FillTrackHistograms(fHist.fTrack[7],trk,tp,&fSimPar);
       }
     }
@@ -1222,7 +1201,7 @@ void TTrackAnaModule::FillHistograms() {
 //----------------------------------------------------------------------------
     if (cl_e > 60) {
       FillTrackHistograms(fHist.fTrack[9],trk,tp,&fSimPar);
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	FillTrackHistograms(fHist.fTrack[10],trk,tp,&fSimPar);
       }
     }
@@ -1237,7 +1216,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
     if (trk->fFitCons < 1.e-4) FillTrackHistograms(fHist.fTrack[12],trk,tp,&fSimPar);
 
-    if ((trk->fIDWord == 0) && (trk->P() >= 100.) && (trk->P() < 110.)) {
+    if ((tp->fIDWord[fBestID] == 0) && (trk->P() >= 100.) && (trk->P() < 110.)) {
       FillTrackHistograms(fHist.fTrack[13],trk,tp,&fSimPar);
     }
 
@@ -1259,13 +1238,13 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_18: BEST_ID tracks with T0 > 700
 //-----------------------------------------------------------------------------
-    if ((trk->fIDWord == 0) && (trk->T0() > 700)) {
+    if ((tp->fIDWord[fBestID] == 0) && (trk->T0() > 700)) {
       FillTrackHistograms(fHist.fTrack[18],trk,tp,&fSimPar);
     }
 //-----------------------------------------------------------------------------
 // TRK_19: BEST_ID tracks with an associated cluster
 //-----------------------------------------------------------------------------
-    if ((trk->fIDWord == 0) && (trk->Ep() > 0)) {
+    if ((tp->fIDWord[fBestID] == 0) && (trk->Ep() > 0)) {
       FillTrackHistograms(fHist.fTrack[19],trk,tp,&fSimPar);
 
       if (trk->LogLHRCal() < 0) {
@@ -1286,7 +1265,7 @@ void TTrackAnaModule::FillHistograms() {
 // TRK_20: BEST_ID tracks intersecting DISK=0
 // TRK_21: BEST_ID tracks intersecting DISK=1
 //-----------------------------------------------------------------------------
-    if (vt && (trk->fIDWord == 0)) {
+    if (vt && (tp->fIDWord[fBestID] == 0)) {
       if      (vt->fID == 0) FillTrackHistograms(fHist.fTrack[20],trk,tp,&fSimPar);
       else if (vt->fID == 1) FillTrackHistograms(fHist.fTrack[21],trk,tp,&fSimPar);
     }
@@ -1295,7 +1274,7 @@ void TTrackAnaModule::FillHistograms() {
 // TRK 23: BEST_ID tracks with an associated cluster and chi2(match) < 100 and LLHR(cal) > 0
 //         this is interesting to see which muons are getting misidentified
 //-----------------------------------------------------------------------------
-    if ((trk->fIDWord == 0) && (tp->fEp > 0) && (tp->fChi2Tcm < 100.)) {
+    if ((tp->fIDWord[fBestID] == 0) && (tp->fEp > 0) && (tp->fChi2Tcm < 100.)) {
 
       FillTrackHistograms(fHist.fTrack[22],trk,tp,&fSimPar);
       if (trk->LogLHRCal() > 0) {
@@ -1344,7 +1323,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_28 : events with a BEST_ID track and a cluster E/P > 1.1
 //-----------------------------------------------------------------------------
-    if (trk->fIDWord == 0) {
+    if (tp->fIDWord[fBestID] == 0) {
       if (tp->fEp > 1.1) {
 	FillTrackHistograms(fHist.fTrack[28],trk,tp,&fSimPar);
 
@@ -1358,7 +1337,7 @@ void TTrackAnaModule::FillHistograms() {
 // TRK_29: BEST_ID track 100 < P < 110, 0 < E/P < 1.15              : next to TRK_13
 // TRK_32: BEST_ID track 100 < P < 110, 0 < E/P < 1.15, chi2tcm<100 : next to TRK_29
 //-----------------------------------------------------------------------------
-    if (trk->fIDWord == 0) {
+    if (tp->fIDWord[fBestID] == 0) {
       if ((tp->fEp > 0) && (trk->P() > 100.) && (trk->P() < 110.) && (tp->fEp < 1.15)) {
 	FillTrackHistograms(fHist.fTrack[29],trk,tp,&fSimPar);
 
@@ -1399,7 +1378,7 @@ void TTrackAnaModule::FillHistograms() {
 // TrkPatRec-only tracks
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[40],trk,tp,&fSimPar);
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	FillTrackHistograms(fHist.fTrack[41],trk,tp,&fSimPar);
 	// print run/event numbers :
 	if (GetDebugBit(6)) {
@@ -1416,7 +1395,7 @@ void TTrackAnaModule::FillHistograms() {
 // CalPatRec-only tracks
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[50],trk,tp,&fSimPar);
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	FillTrackHistograms(fHist.fTrack[51],trk,tp,&fSimPar);
 	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[52],trk,tp,&fSimPar);
       }
@@ -1426,7 +1405,7 @@ void TTrackAnaModule::FillHistograms() {
 // TrkPatRec+CalPatRec tracks
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[60],trk,tp,&fSimPar);
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	FillTrackHistograms(fHist.fTrack[61],trk,tp,&fSimPar);
 	if (trk->T0() > 700.) FillTrackHistograms(fHist.fTrack[62],trk,tp,&fSimPar);
       }
@@ -1438,11 +1417,15 @@ void TTrackAnaModule::FillHistograms() {
     if (tp->fIDWord[fBestID] == 0) {
       if      (best_alg == 0) FillTrackHistograms(fHist.fTrack[63],trk,tp,&fSimPar);
       else if (best_alg == 1) FillTrackHistograms(fHist.fTrack[64],trk,tp,&fSimPar);
+
+      if (tp->fDtClZ0 > -0.6) FillTrackHistograms(fHist.fTrack[65],trk,tp,&fSimPar);
     }
+
+    
 //-----------------------------------------------------------------------------
 // TRK_71: SetC tracks  103.5 < p < 105 : DIO studies
 //-----------------------------------------------------------------------------
-    if ((trk->fIDWord == 0) && (trk->fP > 103.5) && (trk->fP < 105.)) {
+    if ((tp->fIDWord[fBestID] == 0) && (trk->fP > 103.5) && (trk->fP < 105.)) {
       FillTrackHistograms(fHist.fTrack[71],trk,tp,&fSimPar);
     }
   }
@@ -1763,6 +1746,7 @@ int TTrackAnaModule::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
+  fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // at some point, the TVdetBlock class got obsolete, and now the virtual detector 
 // hits are stored in TStepPointMCBlock 
@@ -1922,7 +1906,7 @@ void TTrackAnaModule::Debug() {
 // bit 1: IDWord =0 0 tracks
 //-----------------------------------------------------------------------------
     if (GetDebugBit(1) == 1) {
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	GetHeaderBlock()->Print(Form("bit_001: IDWord=0 p = %10.3f",
 				     trk->Momentum()->P()));
       }
@@ -1931,7 +1915,7 @@ void TTrackAnaModule::Debug() {
 // bit 3: Set C tracks with large DX : 70mm < |DX| < 90mm
 //-----------------------------------------------------------------------------
     if (GetDebugBit(3) == 1) {
-      if (trk->fIDWord == 0) {
+      if (tp->fIDWord[fBestID] == 0) {
 	TStnTrack::InterData_t*    vr = trk->fVMaxEp; // residuals
 	if ((vr && (fabs(vr->fDx) > 70) && (fabs(vr->fDx) < 90))) {
 	  GetHeaderBlock()->Print(Form("large DX: %f",vr->fDx));
@@ -1952,7 +1936,7 @@ void TTrackAnaModule::Debug() {
 //-----------------------------------------------------------------------------
     if (GetDebugBit(9) == 1) {
       double ep = trk->Ep();
-      if (trk->fIDWord == 0) { 
+      if (tp->fIDWord[fBestID] == 0) { 
 	if (((ep > 0.42) && (ep < 0.46)) || ((ep > 0.35) && (ep < 0.39))) {
 	  GetHeaderBlock()->Print(Form("bit:009 ep = %10.3f e = %10.3f p = %10.3f",
 				       trk->fEp,trk->fEp*trk->fP,trk->fP));
@@ -1964,7 +1948,7 @@ void TTrackAnaModule::Debug() {
 //-----------------------------------------------------------------------------
     if (GetDebugBit(10) == 1) {
       double ecl = trk->ClusterE();
-      if (trk->fIDWord == 0) { 
+      if (tp->fIDWord[fBestID] == 0) { 
 	if (ecl > 60) {
 	  GetHeaderBlock()->Print(Form("bit:010 e = %10.3f p = %10.3f",
 				       ecl,trk->fP));

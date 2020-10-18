@@ -262,6 +262,17 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fDtCRV      ,"dtcrv"     ,Form("%s:dT(CRV)"            ,Folder), 400,-1000, 1000,Folder);
   HBook1F(Hist->fDtCRV2     ,"dtcrv2"    ,Form("%s:dT(CRV2)"           ,Folder), 400,-1000, 1000,Folder);
   HBook2F(Hist->fZVsDtCRV   ,"dtcrv_vs_z",Form("%s: dT(CRV) vs Z(CRV)" ,Folder), 250,-5000,20000,500,-500, 500,Folder);
+//-----------------------------------------------------------------------------
+// TrkCaloHit histograms
+//-----------------------------------------------------------------------------
+  HBook1F(Hist->fTchTime    ,"tch_time"  ,Form("%s:TCH time"           ,Folder), 200,    0, 2000,Folder);
+  HBook1F(Hist->fTchPath    ,"tch_path"  ,Form("%s:TCH path"           ,Folder), 200, -500,  500,Folder);
+  HBook1F(Hist->fTchDx      ,"tch_dx"    ,Form("%s:TCH Dx"             ,Folder), 200, -500,  500,Folder);
+  HBook1F(Hist->fTchDy      ,"tch_dy"    ,Form("%s:TCH Dy"             ,Folder), 200, -500,  500,Folder);
+  HBook1F(Hist->fTchDz      ,"tch_dz"    ,Form("%s:TCH DZ"             ,Folder), 100, -250,  250,Folder);
+  HBook1F(Hist->fTchDr      ,"tch_dr"    ,Form("%s:TCH DR"             ,Folder), 200, -100,  100,Folder);
+  HBook1F(Hist->fTchDt      ,"tch_dt"    ,Form("%s:TCH Dt"             ,Folder), 400,  -10,   10,Folder);
+  
 }
 
 //-----------------------------------------------------------------------------
@@ -587,6 +598,16 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
   Hist->fDtCRV   ->Fill(Tp->fDtCRV, Weight);
   Hist->fZVsDtCRV->Fill(Tp->fZCRV , Tp->fDtCRV, Weight);
   Hist->fDtCRV2  ->Fill(Tp->fDtCRV2, Weight);
+//-----------------------------------------------------------------------------
+// TrkCaloHit histograms
+//-----------------------------------------------------------------------------
+  Hist->fTchTime->Fill(Tp->fTchTime, Weight);
+  Hist->fTchPath->Fill(Tp->fTchPath, Weight);
+  Hist->fTchDx  ->Fill(Tp->fTchDx  , Weight);
+  Hist->fTchDy  ->Fill(Tp->fTchDy  , Weight);
+  Hist->fTchDz  ->Fill(Tp->fTchDz  , Weight);
+  Hist->fTchDr  ->Fill(Tp->fTchDr  , Weight);
+  Hist->fTchDt  ->Fill(Tp->fTchDt  , Weight);
 }
 
 
@@ -632,6 +653,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
   int                   track_type(-999);
   double                xs;
   TEmuLogLH::PidData_t  dat;
+  static int            printed(0);
 //-----------------------------------------------------------------------------
 // momentum corrections for KPAR and KDAR
 //-----------------------------------------------------------------------------
@@ -640,11 +662,14 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
 
   const char* block_name = TrackBlock->GetNode()->GetName();
 
+  track_type = 0;
   if      (strcmp(block_name,"TrackBlockPar") == 0) track_type = 0;
   else if (strcmp(block_name,"TrackBlockDar") == 0) track_type = 1;
   else {
-    Error("murat::TAnaModule::InitTrackPar",Form("IN TROUBLE: unknown track block: %s",block_name));
-    return -1;
+    if (printed <= 10) {
+      Error("murat::TAnaModule::InitTrackPar",Form("COULD BE IN TROUBLE: unknown track block: %s",block_name));
+      printed++;
+    }
   }
 //-----------------------------------------------------------------------------
 // loop over tracks
@@ -819,12 +844,25 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
     }
 
     track->fLogLHRXs = tp->fLogLH->LogLHRXs(xs); 
-
+//-----------------------------------------------------------------------------
+// track-CRV residuals
+//-----------------------------------------------------------------------------
     tp->fDtCRV       = -1.e6;
     tp->fZCRV        = -1.e6;
     tp->fDtCRV2      = -1.e6;
+//-----------------------------------------------------------------------------
+// TrackCaloHit
+//-----------------------------------------------------------------------------
+    TStnTrack::InterData_t*  tch = track->fVTCH;
+  
+    tp->fTchTime   = tch->fTime;
+    tp->fTchPath   = tch->fPath;
+    tp->fTchDr     = tch->fDr;
+    tp->fTchDx     = tch->fDx;
+    tp->fTchDy     = tch->fDy;
+    tp->fTchDz     = tch->fDz;
+    tp->fTchDt     = tch->fDt;
  }
-
 
   return 0;
 }

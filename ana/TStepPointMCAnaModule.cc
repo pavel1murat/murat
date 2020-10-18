@@ -302,6 +302,16 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_simp_histset[705] = 1;		// pi-
   book_simp_histset[721] = 1;		// pbars
 
+  book_simp_histset[800] = 1;		// all particles ParentID=1
+  book_simp_histset[801] = 1;		// mu-
+  book_simp_histset[802] = 1;		// mu+
+  book_simp_histset[803] = 1;		// mu-
+  book_simp_histset[804] = 1;		// mu+
+  book_simp_histset[805] = 1;		// pi-
+  book_simp_histset[806] = 1;		// pi+
+  book_simp_histset[807] = 1;		// pi0
+  book_simp_histset[821] = 1;		// pbars
+
   book_simp_histset[1021] = 1;		// pbar in the production vertex for events reaching the end
   book_simp_histset[1022] = 1;		// pbar P>100 in the production vertex
 
@@ -744,11 +754,12 @@ void TStepPointMCAnaModule::FillHistograms() {
 
   for (int i=0; i<fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
-    int pdg_code = simp->PDGCode();
-    int simp_id  = simp->GetUniqueID();
-    int    vid1  = simp->EndVolumeIndex();
-    double pend  = simp->EndMom()->P();
-    double tend  = simp->EndPos()->T();
+    int pdg_code  = simp->PDGCode();
+    int simp_id   = simp->GetUniqueID();
+    int parent_id = simp->ParentID();
+    int    vid1   = simp->EndVolumeIndex();
+    double pend   = simp->EndMom()->P();
+    double tend   = simp->EndPos()->T();
 
     FillSimpHistograms(fHist.fSimp[  0],simp,sd);
     if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[  3],simp,sd);
@@ -815,6 +826,18 @@ void TStepPointMCAnaModule::FillHistograms() {
       if ((pdg_code == -2212) && (tend > 600.)) {
 	  pbar_stopped_in_st = 1;
       }
+    }
+
+    if (parent_id == 1) {
+      FillSimpHistograms(fHist.fSimp[800],simp,sd,fWeight);
+      if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[801],simp,sd,fWeight);
+      if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[802],simp,sd,fWeight);
+      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[803],simp,sd,fWeight);
+      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[804],simp,sd,fWeight);
+      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[805],simp,sd,fWeight);
+      if (pdg_code ==   211) FillSimpHistograms(fHist.fSimp[806],simp,sd,fWeight);
+      if (pdg_code ==   111) FillSimpHistograms(fHist.fSimp[807],simp,sd,fWeight);
+      if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[821],simp,sd,fWeight);
     }
   }
 

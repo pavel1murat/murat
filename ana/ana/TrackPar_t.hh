@@ -74,10 +74,22 @@ public:
   double  fLogLHDedm;			// downstram electron (DE) vs downstream muon (DM)
 
   double  fTMean;			// mean time over the track hits
-
-  double    fDtCRV;			// minimal time residual (CRV)
-  double    fZCRV;                      // Z-coordinate of the closest in time CRV stub candidate
-  double    fDtCRV2;	                // minimal time residual (CRV)
+//-----------------------------------------------------------------------------
+// Trk-CRV residuals
+//-----------------------------------------------------------------------------
+  double  fDtCRV;			// minimal time residual (CRV)
+  double  fZCRV;                        // Z-coordinate of the closest in time CRV stub candidate
+  double  fDtCRV2;	                // minimal time residual (CRV)
+//-----------------------------------------------------------------------------
+// TrkCaloHit parameters
+//-----------------------------------------------------------------------------
+  double  fTchTime;
+  double  fTchPath;
+  double  fTchDx;
+  double  fTchDy;
+  double  fTchDr;
+  double  fTchDz;
+  double  fTchDt;
 };
 }
 #endif

@@ -116,19 +116,25 @@ void TStrawHitAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 // book GENP histograms
 //-----------------------------------------------------------------------------
-  int book_strawhit_histset[kNStrawHitHistSets];
-  for (int i=0; i<kNStrawHitHistSets; i++) book_strawhit_histset[i] = 0;
+  TString*  hit_selection  [kNStrawHitHistSets];
+  for (int i=0; i<kNStrawHitHistSets; i++) hit_selection[i] = nullptr;
 
-  book_strawhit_histset[0] = 1;		// all hits
-  book_strawhit_histset[1] = 1;		// proton hits
-  book_strawhit_histset[2] = 1;		// all hits with T > 200 ns
-  book_strawhit_histset[3] = 1;		// all hits with T > 500 ns
+  hit_selection[  0] = new TString("all      hits");
+  hit_selection[ 10] = new TString("e+/-     hits");
+  hit_selection[ 11] = new TString("e+/-     hits, P <  20 MeV/c");
+  hit_selection[ 12] = new TString("e+/-     hits, P >= 20 MeV/c");
+  hit_selection[ 20] = new TString("mu+/-    hits");
+  hit_selection[ 30] = new TString("pi+/-    hits");
+  hit_selection[ 40] = new TString("proton   hits");
+  hit_selection[200] = new TString("all hits T>200ns");
+  hit_selection[500] = new TString("all hits T>500ns");
 
   for (int i=0; i<kNStrawHitHistSets; i++) {
-    if (book_strawhit_histset[i] != 0) {
+    if (hit_selection[i] != 0) {
       sprintf(folder_name,"strh_%i",i);
-      fol = (TFolder*) hist_folder->FindObject(folder_name);
-      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fol          = (TFolder*) hist_folder->FindObject(folder_name);
+      const char* title = hit_selection[i]->Data();
+      if (! fol) fol = hist_folder->AddFolder(folder_name,title);
       fHist.fStrawHit[i] = new StrawHitHist_t;
       BookStrawHitHistograms(fHist.fStrawHit[i],Form("Hist/%s",folder_name));
     }
@@ -144,6 +150,7 @@ void TStrawHitAnaModule::FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData*
   hist->fPdgCode->Fill(Hit->PdgCode());
   hist->fMotherPdgCode->Fill(Hit->MotherPdgCode());
   hist->fEnergy->Fill(Hit->Energy());
+  hist->fMcMomentum->Fill(Hit->McMomentum());
   hist->fTime->Fill(Hit->Time());
   hist->fDt->Fill(Hit->Dt());
   hist->fStation->Fill(Hit->Station());
@@ -213,10 +220,20 @@ void TStrawHitAnaModule::FillHistograms() {
 
   for (int i=0; i<fNStrawHits; i++) {
     hit = fStrawHitDataBlock->Hit(i);
+    int pdg_code = hit->PdgCode();
+
     FillStrawHitHistograms(fHist.fStrawHit[0],hit);
-    if (hit->PdgCode() == 2212) FillStrawHitHistograms(fHist.fStrawHit[1],hit);
-    if (hit->Time()    >  200.) FillStrawHitHistograms(fHist.fStrawHit[2],hit);
-    if (hit->Time()    >  500.) FillStrawHitHistograms(fHist.fStrawHit[3],hit);
+    if      (abs(pdg_code) ==    11) { 
+      FillStrawHitHistograms(fHist.fStrawHit[ 10],hit);
+      if (hit->McMomentum() < 20) FillStrawHitHistograms(fHist.fStrawHit[ 11],hit);
+      else                        FillStrawHitHistograms(fHist.fStrawHit[ 12],hit);
+    }
+    else if (abs(pdg_code) ==    13) FillStrawHitHistograms(fHist.fStrawHit[ 20],hit);
+    else if (abs(pdg_code) ==   211) FillStrawHitHistograms(fHist.fStrawHit[ 30],hit);
+    else if (abs(pdg_code) ==  2212) FillStrawHitHistograms(fHist.fStrawHit[ 40],hit);
+
+    if      (hit->Time()    >  200.) FillStrawHitHistograms(fHist.fStrawHit[200],hit);
+    if      (hit->Time()    >  500.) FillStrawHitHistograms(fHist.fStrawHit[500],hit);
   }
 }
 

@@ -54,10 +54,14 @@ THelixAnaModule::~THelixAnaModule() {
 //-----------------------------------------------------------------------------
 void THelixAnaModule::BookTimeClusterHistograms   (TimeClusterHist_t*   Hist, const char* Folder){
  
-  HBook1F(Hist->fNHits         ,"nhits"      ,Form("%s: # of straw hits"              ,Folder), 150,   0,   150,Folder);
-  HBook1F(Hist->fNComboHits    ,"ncombohits" ,Form("%s: # of combo hits"              ,Folder), 150,   0,   150,Folder);
-  HBook1F(Hist->fT0            ,"t0"         ,Form("%s: TimeCluster; t_{0}[ns]"       ,Folder), 800, 400,  1700,Folder);
-  HBook1F(Hist->fClusterEnergy ,"clusterE"   ,Form("%s: cluster energy; E [MeV]      ",Folder), 400,   0,  200,Folder);  
+  HBook1F(Hist->fNHits         ,"nhits"      ,Form("%s: # of straw hits"              ,Folder),  150,   0,   150,Folder);
+  HBook1F(Hist->fNComboHits    ,"ncombohits" ,Form("%s: # of combo hits"              ,Folder),  150,   0,   150,Folder);
+  HBook1F(Hist->fT0            ,"t0"         ,Form("%s: TimeCluster; t_{0}[ns]"       ,Folder),  800, 400,  1700,Folder);
+  HBook1F(Hist->fClusterEnergy ,"clusterE"   ,Form("%s: cluster energy; E [MeV]      ",Folder),  400,   0,  200,Folder);  
+  HBook1F(Hist->fPdgID[0]      ,"pdg_id_0"   ,Form("%s: PDG ID"                       ,Folder),  500,   -250,   250,Folder);  
+  HBook1F(Hist->fPdgID[1]      ,"pdg_id_1"   ,Form("%s: PDG ID"                       ,Folder), 1000, -2500,  2500,Folder);  
+  HBook1F(Hist->fMcMom         ,"mc_mom"     ,Form("%s: MC momentum"                  ,Folder),  200,   0,   200,Folder);  
+  HBook1F(Hist->fNMcHits       ,"nmc_hits"   ,Form("%s: N MC hits"                    ,Folder),  200,   0,   200,Folder);  
 }
 
 //-----------------------------------------------------------------------------
@@ -327,6 +331,11 @@ void THelixAnaModule::FillTimeClusterHistograms(TimeClusterHist_t*   Hist, TStnT
   Hist->fNComboHits    ->Fill(ncombohits);	 
   Hist->fT0            ->Fill(time);
   Hist->fClusterEnergy ->Fill(clusterE);
+  Hist->fPdgID[0]->Fill(TimeCluster->fPdgID);
+  Hist->fPdgID[1]->Fill(TimeCluster->fPdgID);
+  Hist->fMcMom->Fill(TimeCluster->fMcMom);
+  Hist->fNMcHits->Fill(TimeCluster->fNHitsSimID);
+  
 
 }
 

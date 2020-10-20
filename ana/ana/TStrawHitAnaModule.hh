@@ -51,8 +51,8 @@ public:
   };
 
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets     = 10 };
-  enum { kNStrawHitHistSets  = 10 };
+  enum { kNEventHistSets     =   10 };
+  enum { kNStrawHitHistSets  = 1000 };
 
   struct Hist_t {
     EventHist_t*     fEvent   [kNEventHistSets];

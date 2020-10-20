@@ -88,6 +88,9 @@ public:
     TH1F*    fNComboHits;
     TH1F*    fT0;
     TH1F*    fClusterEnergy;
+    TH1F*    fPdgID[2];
+    TH1F*    fMcMom;
+    TH1F*    fNMcHits;
   };
 
   struct HelixHist_t {

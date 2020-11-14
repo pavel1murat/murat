@@ -5,13 +5,15 @@
 // Tmp(1) : nst seg
 // 
 // use of debug bits: bits 0-2 are reserved
-// 0  : all events
-// 1  : passed events
-// 2  : rejected events
+// bit 0 : all events
+// bit 1 : passed events
+// bit 2 : rejected events
 // 
-// 3  : UNUSED
-// 4  : events with NProtonStrawHits >= 20
-// 5  : UNUSED
+// bit 3 : UNUSED
+// bit 4 : events with NProtonStrawHits >= 20
+// bit 5 : hits 1120 < T < 1140: search for repetitions
+// bit 6 : hits 1315 < SppTime < 1360: search for repetitions
+// bit 7 : print hits with SppTime > 1 ms
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -44,28 +46,6 @@ TStrawHitAnaModule::~TStrawHitAnaModule() {
 
 
 //-----------------------------------------------------------------------------
-void TStrawHitAnaModule::BookStrawHitHistograms(HistBase_t* Hist, const char* Folder) {
-  //     char name [200];
-  //     char title[200];
-  StrawHitHist_t* hist = (StrawHitHist_t*) Hist;
-
-  HBook1F(hist->fGeneratorCode,"gen_code"   ,Form("%s: Generator code"  ,Folder),  200, 0   ,  200,Folder);
-  HBook1F(hist->fPdgCode      ,"pdg_code"   ,Form("%s: PDG code"        ,Folder), 1000,-5000, 5000,Folder);
-  HBook1F(hist->fMotherPdgCode,"mother_code",Form("%s: Mother PDG code" ,Folder), 200,-1000, 1000,Folder);
-  HBook1F(hist->fMcMomentum   ,"mc_mom"     ,Form("%s: MC Momentum"     ,Folder), 200, 0, 200,Folder);
-  HBook1F(hist->fEnergy       ,"energy"     ,Form("%s: Hit Charge"      ,Folder), 200, 0, 0.02,Folder);
-  HBook1F(hist->fTime         ,"time"       ,Form("%s: Time"            ,Folder), 200, 0, 2000,Folder);
-  HBook1F(hist->fDt           ,"dt"         ,Form("%s: DeltaT = T1-T2"  ,Folder), 200, -10, 10,Folder);
-  HBook1F(hist->fStation      ,"station"    ,Form("%s: Station"         ,Folder),  40,   0, 40,Folder);
-  HBook1F(hist->fPanel        ,"panel"      ,Form("%s: Panel"           ,Folder),  10,   0, 10,Folder);
-  HBook1F(hist->fLayer        ,"layer"      ,Form("%s: Layer"           ,Folder),   5,   0,  5,Folder);
-  HBook1F(hist->fStraw        ,"straw"      ,Form("%s: Straw"           ,Folder), 100,   0,100,Folder);
-  HBook1F(hist->fPreamp       ,"preamp"     ,Form("%s: Preamp"          ,Folder), 100,   0,100,Folder);
-  HBook1F(hist->fFace         ,"face"       ,Form("%s: Face"            ,Folder),  10,   0, 10,Folder);
-}
-
-
-//-----------------------------------------------------------------------------
 void TStrawHitAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
@@ -73,6 +53,7 @@ void TStrawHitAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folde
 
   HBook1F(hist->fEventNumber      ,"evtnum"     ,Form("%s: Event Number"           ,Folder), 1000, 0,  1.e4,Folder);
   HBook1F(hist->fRunNumber        ,"runnum"     ,Form("%s: Run   Number"           ,Folder), 1000, 0,  1.e6,Folder);
+  HBook1F(hist->fInstLum          ,"inst_lum"   ,Form("%s: Inst Lum"               ,Folder), 1000, 0,  20e7,Folder);
   HBook1F(hist->fNStrawHits [0]   ,"nsh_0"      ,Form("%s: N(Straw Hits)[0]"       ,Folder),  200, 0,   200,Folder);
   HBook1F(hist->fNStrawHits [1]   ,"nsh_1"      ,Form("%s: N(Straw Hits)[1]"       ,Folder), 1000, 0, 10000,Folder);
   HBook1F(hist->fNStrawHits [2]   ,"nsh_2"      ,Form("%s: N(Straw Hits)[2] T>200" ,Folder), 1000, 0, 10000,Folder);
@@ -82,6 +63,31 @@ void TStrawHitAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folde
   HBook1F(hist->fNStationsWithHits,"nst_w_hits" ,Form("%s: N(stations w/hits)"     ,Folder),   50, 0,    50,Folder);
   HBook1F(hist->fDeltaSt          ,"dst"        ,Form("%s: stations: Last-First"   ,Folder),   20, 0,    20,Folder);
 }
+
+//-----------------------------------------------------------------------------
+void TStrawHitAnaModule::BookStrawHitHistograms(HistBase_t* Hist, const char* Folder) {
+  //     char name [200];
+  //     char title[200];
+  StrawHitHist_t* hist = (StrawHitHist_t*) Hist;
+
+  HBook1F(hist->fGeneratorCode,"gen_code"   ,Form("%s: Generator code"   ,Folder),  200,    0,  200,Folder);
+  HBook1F(hist->fPdgCode      ,"pdg_code"   ,Form("%s: PDG code"         ,Folder), 1000,-5000, 5000,Folder);
+  HBook1F(hist->fMotherPdgCode,"mother_code",Form("%s: Mother PDG code"  ,Folder),  200,-1000, 1000,Folder);
+  HBook1F(hist->fMcMomentum   ,"mc_mom"     ,Form("%s: MC Momentum"      ,Folder),  200,    0,  200,Folder);
+  HBook1F(hist->fEnergy       ,"energy"     ,Form("%s: Hit Charge"       ,Folder),  200,    0, 0.02,Folder);
+  HBook1F(hist->fTime         ,"time"       ,Form("%s: Time"             ,Folder),  200,    0, 2000,Folder);
+  HBook1F(hist->fSppTime[0]   ,"spptime_0"  ,Form("%s: Simp prod Time[0], ns",Folder),  200,    0, 2000,Folder);
+  HBook1F(hist->fSppTime[1]   ,"spptime_1"  ,Form("%s: Simp prod Time[1], us",Folder), 5000,    0, 10000,Folder);
+  HBook1F(hist->fSppTime[2]   ,"spptime_2"  ,Form("%s: Simp prod Time[2], ms",Folder),  200,    0,    20,Folder);
+  HBook1F(hist->fDt           ,"dt"         ,Form("%s: DeltaT = T1-T2"   ,Folder),  200,  -10,   10,Folder);
+  HBook1F(hist->fStation      ,"station"    ,Form("%s: Station"          ,Folder),   40,    0,   40,Folder);
+  HBook1F(hist->fPanel        ,"panel"      ,Form("%s: Panel"            ,Folder),   10,    0,   10,Folder);
+  HBook1F(hist->fLayer        ,"layer"      ,Form("%s: Layer"            ,Folder),    5,    0,    5,Folder);
+  HBook1F(hist->fStraw        ,"straw"      ,Form("%s: Straw"            ,Folder),  100,    0,  100,Folder);
+  HBook1F(hist->fPreamp       ,"preamp"     ,Form("%s: Preamp"           ,Folder),  100,    0,  100,Folder);
+  HBook1F(hist->fFace         ,"face"       ,Form("%s: Face"             ,Folder),   10,    0,   10,Folder);
+}
+
 
 //_____________________________________________________________________________
 void TStrawHitAnaModule::BookHistograms() {
@@ -142,7 +148,7 @@ void TStrawHitAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TStrawHitAnaModule::FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData* Hit) {
+void TStrawHitAnaModule::FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData* Hit, StrawHitPar_t* Shp) {
 
   StrawHitHist_t* hist = (StrawHitHist_t*) Hist;
   
@@ -152,6 +158,9 @@ void TStrawHitAnaModule::FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData*
   hist->fEnergy->Fill(Hit->Energy());
   hist->fMcMomentum->Fill(Hit->McMomentum());
   hist->fTime->Fill(Hit->Time());
+  hist->fSppTime[0]->Fill(Shp->fSppTime);               // ns
+  hist->fSppTime[1]->Fill(Shp->fSppTime/1.e3);          // us
+  hist->fSppTime[2]->Fill(Shp->fSppTime/1.e6);          // ms
   hist->fDt->Fill(Hit->Dt());
   hist->fStation->Fill(Hit->Station());
   hist->fPanel->Fill(Hit->Panel());
@@ -170,11 +179,13 @@ void TStrawHitAnaModule::FillEventHistograms(HistBase_t* Hist) {
 
   EventHist_t* hist = (EventHist_t*) Hist;
 
-  int event_number = GetHeaderBlock()->EventNumber();
-  int run_number   = GetHeaderBlock()->RunNumber();
+  int   event_number = GetHeaderBlock()->EventNumber();
+  int   run_number   = GetHeaderBlock()->RunNumber();
+  float inst_lum     = GetHeaderBlock()->InstLum();
 
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
+  hist->fInstLum->Fill(inst_lum);
   hist->fNStrawHits[0]->Fill(fNStrawHits);
   hist->fNStrawHits[1]->Fill(fNStrawHits);
   hist->fNStrawHits[2]->Fill(fNsh200);
@@ -216,24 +227,28 @@ void TStrawHitAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // straw hit histograms
 //-----------------------------------------------------------------------------
-  TStrawHitData* hit;
-
   for (int i=0; i<fNStrawHits; i++) {
-    hit = fStrawHitDataBlock->Hit(i);
+    if (i > kMaxNStrawHits) {
+      GetHeaderBlock()->Print(Form("ERROR: hit number %i greater than kMaxNStrawHits = %i, SKIP.",i,kMaxNStrawHits));
+      break;
+    }
+
+    TStrawHitData* hit = fStrawHitDataBlock->Hit(i);
+    StrawHitPar_t* shp = fStrawHitPar+i;
     int pdg_code = hit->PdgCode();
 
-    FillStrawHitHistograms(fHist.fStrawHit[0],hit);
+    FillStrawHitHistograms(fHist.fStrawHit[0],hit,shp);
     if      (abs(pdg_code) ==    11) { 
-      FillStrawHitHistograms(fHist.fStrawHit[ 10],hit);
-      if (hit->McMomentum() < 20) FillStrawHitHistograms(fHist.fStrawHit[ 11],hit);
-      else                        FillStrawHitHistograms(fHist.fStrawHit[ 12],hit);
+      FillStrawHitHistograms(fHist.fStrawHit[ 10],hit,shp);
+      if (hit->McMomentum() < 20) FillStrawHitHistograms(fHist.fStrawHit[ 11],hit,shp);
+      else                        FillStrawHitHistograms(fHist.fStrawHit[ 12],hit,shp);
     }
-    else if (abs(pdg_code) ==    13) FillStrawHitHistograms(fHist.fStrawHit[ 20],hit);
-    else if (abs(pdg_code) ==   211) FillStrawHitHistograms(fHist.fStrawHit[ 30],hit);
-    else if (abs(pdg_code) ==  2212) FillStrawHitHistograms(fHist.fStrawHit[ 40],hit);
+    else if (abs(pdg_code) ==    13) FillStrawHitHistograms(fHist.fStrawHit[ 20],hit,shp);
+    else if (abs(pdg_code) ==   211) FillStrawHitHistograms(fHist.fStrawHit[ 30],hit,shp);
+    else if (abs(pdg_code) ==  2212) FillStrawHitHistograms(fHist.fStrawHit[ 40],hit,shp);
 
-    if      (hit->Time()    >  200.) FillStrawHitHistograms(fHist.fStrawHit[200],hit);
-    if      (hit->Time()    >  500.) FillStrawHitHistograms(fHist.fStrawHit[500],hit);
+    if      (hit->Time()    >  200.) FillStrawHitHistograms(fHist.fStrawHit[200],hit,shp);
+    if      (hit->Time()    >  500.) FillStrawHitHistograms(fHist.fStrawHit[500],hit,shp);
   }
 }
 
@@ -260,10 +275,10 @@ int TStrawHitAnaModule::Event(int ientry) {
 // be changed
 // if there are several hits, use the first one
 //-----------------------------------------------------------------------------
-  fNStrawHits       = fStrawHitDataBlock->NHits();
-  fNProtonStrawHits = 0;
-  fNsh200           = 0;
-  fNsh500           = 0;
+  fNStrawHits        = fStrawHitDataBlock->NHits();
+  fNProtonStrawHits  = 0;
+  fNsh200            = 0;
+  fNsh500            = 0;
 
   fNStationsWithHits = 0;
   fFirstStation      = -1;
@@ -273,6 +288,13 @@ int TStrawHitAnaModule::Event(int ientry) {
 
   TStrawHitData* hit;
   for (int i=0; i<fNStrawHits; i++) {
+    if (i > kMaxNStrawHits) {
+      GetHeaderBlock()->Print(Form("ERROR: hit number %i greater than kMaxNStrawHits = %i, skip.",i,kMaxNStrawHits));
+      break;
+    }
+
+    StrawHitPar_t* shp = fStrawHitPar+i;
+
     hit = fStrawHitDataBlock->Hit(i);
     if (hit->PdgCode() == 2212) fNProtonStrawHits += 1;
     if (hit->Time()    >   200) fNsh200 += 1;
@@ -280,6 +302,17 @@ int TStrawHitAnaModule::Event(int ientry) {
 
     int ist = hit->Station();
     fNHitsPerStation[ist]++;
+
+    int sim_id = hit->SimID();
+    shp->fSppTime = -1;
+
+    TSimParticle* simp = fSimpBlock->FindParticle(sim_id);
+    if (simp) {
+      shp->fSppTime = simp->StartPos()->T();
+    }
+    else {
+      GetHeaderBlock()->Print(Form(" ERROR in TStrawHitAnaModule::Event: simp=NULL for hit=%i and sim_id=%i",i,sim_id));
+    }
   }
 
   for (int i=0; i<fNStations; i++) {
@@ -309,6 +342,56 @@ void TStrawHitAnaModule::Debug() {
 				   fNStrawHits,fNProtonStrawHits));
     }
   }
+//-----------------------------------------------------------------------------  
+// bit 5 : print hits with 1120 < T < 1140
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(5) == 1) {
+    int banner_printed(0);
+    for (int i=0; i<fNStrawHits; i++) {
+      StrawHitPar_t* shp = fStrawHitPar+i;
+      TStrawHitData* hit = fStrawHitDataBlock->Hit(i);
+      if ((hit->Time() > 1120) && (hit->Time() < 1140)) {
+	if (banner_printed == 0) { 
+	  GetHeaderBlock()->Print("bit 005: Event of interest");
+	  PrintStrawHit(hit,shp,"banner") ; 
+	  banner_printed = 1; 
+	}
+	PrintStrawHit(hit,shp,"data") ;
+      }
+    }
+  }
+//-----------------------------------------------------------------------------  
+// bit 6 : print hits with 1315 < SppTime < 1360
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(6) == 1) {
+    int banner_printed(0);
+    for (int i=0; i<fNStrawHits; i++) {
+      TStrawHitData* hit = fStrawHitDataBlock->Hit(i);
+      StrawHitPar_t* shp = fStrawHitPar+i;
+      if ((shp->fSppTime > 1315) && (shp->fSppTime <= 1360)) {
+	if (banner_printed == 0) { 
+	  GetHeaderBlock()->Print("bit 006: Event of interest");
+	  PrintStrawHit(hit,shp,"banner") ; 
+	  banner_printed = 1; 
+	}
+	PrintStrawHit(hit,shp,"data") ;
+      }
+    }
+  }
+//-----------------------------------------------------------------------------  
+// bit 7 : print hits with SppTime > 1 ms
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(7) == 1) {
+    int nhits = 0;
+    for (int i=0; i<fNStrawHits; i++) {
+      // TStrawHitData* hit = fStrawHitDataBlock->Hit(i);
+      StrawHitPar_t* shp = fStrawHitPar+i;
+      if (shp->fSppTime > 1e6) {
+	nhits += 1;
+      }
+    }
+    if (nhits > 0) GetHeaderBlock()->Print(Form("bit 007: hits with spptime > 1e6"));
+  }
 }
 
 //_____________________________________________________________________________
@@ -328,5 +411,57 @@ void TStrawHitAnaModule::Test001() {
   //   hex_index = hmap->lk(i);
   //   printf(" i,l,k = %5i %5i %5i\n",i,hex_index._l,hex_index._k);
   // }
+}
+
+//_____________________________________________________________________________
+void TStrawHitAnaModule::PrintStrawHit(TStrawHitData* Hit, StrawHitPar_t* Shp, const char* Option) {
+
+  TString opt = Option;
+  opt.ToLower();
+
+  if ((opt == "") || (opt.Index("banner") >= 0)) {
+    printf("----------------------------------------------------------------------------------------------------------------------------------\n");
+    printf("  Index    Time       Dt       Energy    PdgCode    PdgCode(M)  GenCode  SimID    McMom   parentID pGenID    pMom    Shp->fSppTime\n");
+    printf("----------------------------------------------------------------------------------------------------------------------------------\n");
+  }
+
+  if (opt == "banner") return;
+
+  int simID = Hit->SimID();
+  TSimParticle* sim = fSimpBlock->FindParticle(simID);
+
+  int parentID = sim->ParentID();
+
+  float pmom   = -1;
+  int   pgenID = -1;
+
+  
+  TSimParticle* parent = sim;
+
+  while (parent != nullptr) {
+    parent   = fSimpBlock->FindParticle(parentID);
+    if (parent) {
+      pmom     = parent->StartMom()->P();
+      pgenID   = parent->GeneratorID();
+      parentID = parent->ParentID();
+    }
+  }
+
+  printf("%6i %10.3f %8.3f %10.5f %10i %10i %8i %8i %9.3f %10i %5i %9.3f %12.3e\n",
+	 Hit->Index(), 
+	 Hit->Time(),
+	 Hit->Dt(),
+	 Hit->Energy(),
+	 Hit->PdgCode(),
+	 Hit->MotherPdgCode(),
+	 Hit->GeneratorCode(),
+	 Hit->SimID(),
+	 Hit->McMomentum(),
+	 parentID, 
+	 pgenID  , 
+	 pmom    ,
+	 Shp->fSppTime
+	 );
+  
 }
 

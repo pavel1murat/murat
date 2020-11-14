@@ -9,13 +9,15 @@
 // 1  : passed events
 // 2  : rejected events
 // 
-// 3  : events with SPMC T<100
-// 4  : events with pbars ID=300000+I, X> 25cm
-// 5  : events with pbars ID=400000+I
-// 6  : events with pbars reaching the final stage
-// 7  : events with pbars P > 100 MeV/c reaching the final stage
-// 8  : events with pi (-211) in VD9 (before the target)
-// 9  : events with pi (-211) at stage 4 (case of pbar simulation)
+// bit:3  : events with SPMC T<100
+// bit:4  : events with pbars ID=300000+I, X> 25cm
+// bit:5  : events with pbars ID=400000+I
+// bit:6  : events with pbars reaching the final stage
+// bit:7  : events with pbars P > 100 MeV/c reaching the final stage
+// bit:8  : events with pi (-211) in VD9 (before the target)
+// bit:9  : events with pi (-211) at stage 4 (case of pbar simulation)
+// bit:10 : electrons with T > 1000 ns and momentum > 20 MeV/c
+// bit:11 : electrons with T > 1000 ns and momentum <  2 MeV/c
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -26,11 +28,7 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
-//------------------------------------------------------------------------------
-// Mu2e offline includes
 //-----------------------------------------------------------------------------
-// #include "CalorimeterGeom/inc/HexMap.hh"
-
 #include "ana/TStepPointMCAnaModule.hh"
 
 #include "ana/InitVirtualDetectors.hh"
@@ -74,9 +72,10 @@ void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Fo
   //  char title[200];
   EventHist_t* hist = (EventHist_t*) Hist;
 
-  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number",Folder), 1000, 0,  1.e4,Folder);
-  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number",Folder), 1000, 0,  1.e6,Folder);
-  HBook1F(hist->fNSimp      ,"nsimp" ,Form("%s: N(sim particles)",Folder), 200, 0,  200,Folder);
+  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"    ,Folder), 1000, 0,  1e4,Folder);
+  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"    ,Folder), 1000, 0,  1e6,Folder);
+  HBook1F(hist->fNSimp      ,"nsimp" ,Form("%s: N(sim particles)",Folder),  200, 0,  200,Folder);
+  HBook1F(hist->fTMax       ,"tmax"  ,Form("%s: Time(seconds)"   ,Folder), 1000, 0,  1e5,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -219,6 +218,8 @@ void TStepPointMCAnaModule::BookHistograms() {
   book_spmc_histset[103] = 1;		// electrons with p < 2 MeV/c
   book_spmc_histset[104] = 1;		// electrons with 2 < p < 3 MeV/c
   book_spmc_histset[105] = 1;		// electrons with p > 3 MeV/c
+  book_spmc_histset[106] = 1;           // electrons      T > 1000 ns - what are they ?
+
 
   book_spmc_histset[203] = 1;		// positrons with p < 2 MeV/c
   book_spmc_histset[204] = 1;		// positrons with 2 < p < 3 MeV/c
@@ -556,6 +557,7 @@ void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
   hist->fNSimp->Fill(fNSimp);
+  hist->fTMax->Fill(fTMax);
 }
 
 //-----------------------------------------------------------------------------
@@ -879,11 +881,13 @@ void TStepPointMCAnaModule::FillHistograms() {
 
     if      (pdg_code ==   11) {
       FillStepPointMCHistograms(fHist.fStepPointMC[1],spmc,&spmc_data);
-      if (p >  60) FillStepPointMCHistograms(fHist.fStepPointMC[101],spmc,&spmc_data);
-      if (t > 400) FillStepPointMCHistograms(fHist.fStepPointMC[102],spmc,&spmc_data);
+      if (p >  60)              FillStepPointMCHistograms(fHist.fStepPointMC[101],spmc,&spmc_data);
+      if (t > 400)              FillStepPointMCHistograms(fHist.fStepPointMC[102],spmc,&spmc_data);
       if (p  <   2)             FillStepPointMCHistograms(fHist.fStepPointMC[103],spmc,&spmc_data);
       if ((p >=  2) && (p < 3)) FillStepPointMCHistograms(fHist.fStepPointMC[104],spmc,&spmc_data);
       if (p  >   3)             FillStepPointMCHistograms(fHist.fStepPointMC[105],spmc,&spmc_data);
+
+      if (t  > 1000)            FillStepPointMCHistograms(fHist.fStepPointMC[106],spmc,&spmc_data);
     }
     else if (pdg_code ==  -11) {
       FillStepPointMCHistograms(fHist.fStepPointMC[2],spmc,&spmc_data);
@@ -1266,6 +1270,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
 // determine the cross section weight looking at the first particle with the PDG code of an antiproton
 //-----------------------------------------------------------------------------
   fWeight = 1.;
+  fTMax   = -1;
   if (fNSimp > 0) {
 //-----------------------------------------------------------------------------
 // using the first antiproton in the list should work for old Bobs's dataset as well 
@@ -1273,6 +1278,9 @@ int TStepPointMCAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
     for (int i=0; i<fNSimp; i++) {
       TSimParticle* sp0 = fSimpBlock->Particle(i);
+      double t0 = sp0->StartPos()->T();
+      if (t0 > fTMax) fTMax = t0;
+
       if (sp0->PDGCode() == -2212) {
 //-----------------------------------------------------------------------------
 // pbar production, assume Bob
@@ -1298,6 +1306,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
       }
     }
   }
+  fTMax = fTMax/1.e9;			// convert nsec --> seconds
 //-----------------------------------------------------------------------------
 // determine simulation stage by looking at the last particle
 //-----------------------------------------------------------------------------
@@ -1416,6 +1425,59 @@ void TStepPointMCAnaModule::Debug() {
 	if (pdg_code ==  -211) {
 	  GetHeaderBlock()->Print(Form("bit:9: pi- at stage 4"));
 	}
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit:10  electrons with T > 1000 ns and momentum > 20 MeV/c
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(10) == 1) {
+    int nsteps = fStepPointMCBlock->NStepPoints();
+    for (int i=0; i<nsteps; i++) {
+      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      if (step->PDGCode() == 11) {
+	float p            = step->Mom()->Mag();
+	float t            = step->Time();
+	if ((p > 20) && (t > 1000)) {
+	  GetHeaderBlock()->Print(Form("bit:10: e- p = %10.3f t= %10.3f",p,t));
+	}
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit:11  electrons with T > 1000 ns and momentum < 2 MeV/c
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(11) == 1) {
+    int nsteps = fStepPointMCBlock->NStepPoints();
+    for (int i=0; i<nsteps; i++) {
+      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      if (step->PDGCode() == 11) {
+	float p            = step->Mom()->Mag();
+	float t            = step->Time();
+	if ((p < 2) && (t > 1000)) {
+	  GetHeaderBlock()->Print(Form("bit:11: e- p = %10.3f t= %10.3f",p,t));
+	}
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// bit:12  hits with parent mom < 2 MeV and T > 1000 ns 
+//-----------------------------------------------------------------------------
+  if (GetDebugBit(12) == 1) {
+    int nsteps = fStepPointMCBlock->NStepPoints();
+    for (int i=0; i<nsteps; i++) {
+      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      float t            = step->Time();
+      int sim_id        = step->SimID();
+
+      TSimParticle* simp = fSimpBlock->FindParticle(sim_id);
+
+      if (! simp) continue;
+
+      float p_mother = simp->StartMom()->P();
+
+      if ((p_mother < 2) && (t > 1000.)) {
+	GetHeaderBlock()->Print(Form("bit:11: mom_p = %10.3f t= %10.3f",p_mother,t));
       }
     }
   }

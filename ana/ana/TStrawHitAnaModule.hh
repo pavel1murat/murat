@@ -22,6 +22,9 @@
 
 class TStrawHitAnaModule: public TStnModule {
 public:
+  struct  StrawHitPar_t {
+    float    fSppTime;                  // mother sim particle production time
+  };
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
@@ -32,6 +35,7 @@ public:
     TH1F*    fMcMomentum;
     TH1F*    fEnergy;
     TH1F*    fTime;
+    TH1F*    fSppTime[3];
     TH1F*    fDt;
     TH1F*    fStation;
     TH1F*    fFace;
@@ -48,11 +52,14 @@ public:
     TH1F* fNProtonHits[2];
     TH1F* fNStationsWithHits;
     TH1F* fDeltaSt;
+    TH1F* fInstLum;
   };
 
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets     =   10 };
   enum { kNStrawHitHistSets  = 1000 };
+
+  enum { kMaxNStrawHits      = 20000 };
 
   struct Hist_t {
     EventHist_t*     fEvent   [kNEventHistSets];
@@ -73,6 +80,7 @@ public:
 
 					// histograms filled
   Hist_t                fHist;
+  StrawHitPar_t         fStrawHitPar[kMaxNStrawHits];
 
   int                   fNStations;
   int                   fFirstStation;
@@ -106,13 +114,14 @@ public:
   void    BookStrawHitHistograms(HistBase_t* Hist, const char* Folder);
 
   void    FillEventHistograms   (HistBase_t* Hist);
-  void    FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData* Hit);
+  void    FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData* Hit, StrawHitPar_t* Shp);
 
   void    BookHistograms();
   void    FillHistograms();
 
 
   void    Debug();
+  void    PrintStrawHit(TStrawHitData* Hit, StrawHitPar_t* Shp, const char* Option = "");
 //-----------------------------------------------------------------------------
 // test
 //-----------------------------------------------------------------------------

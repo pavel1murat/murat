@@ -36,6 +36,7 @@ public:
     TH1F*      fRunNumber;
     TH1F*      fEventNumber;
     TH1F*      fNSimp;
+    TH1F*      fTMax;
   };
 
   struct SimpHist_t : public HistBase_t {
@@ -67,7 +68,8 @@ public:
 
     TH1F*      fEDepTot;
     TH1F*      fEDepNio;
-    TH1F*      fTime;
+    TH1F*      fTime;			// in ns
+    TH1F*      fTimeSec;		// in seconds, for R/A decays
     TH1F*      fStepLength;
 
     TH1F*      fMom[2];
@@ -150,9 +152,9 @@ public:
   SimpData_t            fSimData[kMaxNSimp];
 
   TStntuple*            fStnt;
-  double                fWeight; // event weight, determined by the production cross section
-
-					// antiproton-specific : in the production vertex
+  double                fWeight;         // event weight, determined by the production cross section
+  double                fTMax;		 // in seconds
+					 // antiproton-specific : in the production vertex
   double                fPbarCosThPV;
   double                fPbarMomPV;
 //-----------------------------------------------------------------------------

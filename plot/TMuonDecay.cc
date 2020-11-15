@@ -1,4 +1,15 @@
+///////////////////////////////////////////////////////////////////////////////
+// Michecl decay, different approximations:
+// LO, NLO (Arbuzov) 
 //
+// NLO(Kuraev) - Bartos, Kuraev, Sečanský : 
+// https://link.springer.com/article/10.1134/S1547477109050033 (Phys. Part. Nuclei Lett. 6, 365 (2009)
+//
+// that should be the same as in Kinoshita-Sirlin Phys. Rev. 113, 1652 
+// http://journals.aps.org/pr/abstract/10.1103/PhysRev.113.1652
+// 
+// and Landau-Lifshits Quantum Electrodynamics vol 2 p 584
+///////////////////////////////////////////////////////////////////////////////
 
 
 #include "TCanvas.h"
@@ -326,10 +337,16 @@ double TMuonDecay::f_muon_spectrum_nlo_kuraev(double* X, double* P) {
 //-----------------------------------------------------------------------------
 void TMuonDecay::plot_muon_spectrum_lo(const char* Opt) {
   
-  TF1* f_lo = new TF1("f_muon_spectrum_lo",f_muon_spectrum_lo_arbuzov,me,55.,1);
-  f_lo->SetParameter(0,1.);
+  //  TF1* f_lo = new TF1("f_muon_spectrum_lo",f_muon_spectrum_lo_arbuzov,me,55.,1);
 
-  f_lo->SetNpx(1000);
+  int    nbins = 5500;
+  double bin   = 55./nbins;
+  double ymin  = -bin/2;
+  double ymax  = 55-bin/2;
+
+  TF1* f_lo = new TF1("f_muon_spectrum_lo",f_muon_spectrum_lo_arbuzov,ymin,ymax,1);
+  f_lo->SetParameter(0,1.);
+  f_lo->SetNpx(nbins);
 
   double qint = f_lo->Integral(0.,55.);
   printf("qint = %12.5f\n",qint);
@@ -352,16 +369,22 @@ void TMuonDecay::plot_muon_spectrum_nlo(const char* Name, const char* Opt) {
 
   sprintf(name,"f_muon_spectrum_nlo_name_%s",Name);
 
+  int    nbins = 5500;
+  double bin   = 55./nbins;
+  double ymin  = -bin/2;
+  double ymax  = 55-bin/2;
+
   if (strcmp(Name,"kuraev") == 0) {
-    f_nlo = new TF1(name,f_muon_spectrum_nlo_kuraev,me,55.,1);
+    //    f_nlo = new TF1(name,f_muon_spectrum_nlo_kuraev,me,55.,1);
+    f_nlo = new TF1(name,f_muon_spectrum_nlo_kuraev,ymin,ymax,1);
   }
   else if (strcmp(Name,"arbuzov") == 0) {
-    f_nlo = new TF1(name,f_muon_spectrum_nlo_arbuzov,me,55.,1);
+    //    f_nlo = new TF1(name,f_muon_spectrum_nlo_arbuzov,me,55.,1);
+    f_nlo = new TF1(name,f_muon_spectrum_nlo_arbuzov,ymin,ymax,1);
   }
 
   f_nlo->SetParameter(0,1.);
-
-  f_nlo->SetNpx(1000);
+  f_nlo->SetNpx(nbins);
 
   double qint = f_nlo->Integral(0.,55.);
   printf("qint = %12.5f\n",qint);

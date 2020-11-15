@@ -16,7 +16,8 @@ if ( not ("EG" in rootlibs)):
 helper.handle_dictionaries();
 
 skip_list        = []
-libs             = rootlibs;
+stntuple_libs    = [ 'Stntuple_alg' ]
+libs             = stntuple_libs + rootlibs;
 list_of_cc_files = Glob('*.cc',strings=True);
 helper.build_libs(list_of_cc_files,skip_list,libs);
 

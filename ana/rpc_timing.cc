@@ -88,11 +88,11 @@ rpc_timing::rpc_timing(TTree *tree) : fChain(0) {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/mu2e/resilient/users/mu2epro/su2020/stops/nts.mu2e.su2020.bpim0s31b0.001000_10000000.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("stops/nts.mu2e.su2020.bpim0s31b0.001000_10000000.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("/pnfs/mu2e/resilient/users/mu2epro/su2020/stops/nts.mu2e.su2020.bpim0s31b0.001000_10000000.root");
+         f = new TFile("stops/nts.mu2e.su2020.bpim0s31b0.001000_10000000.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("/pnfs/mu2e/resilient/users/mu2epro/su2020/stops/nts.mu2e.su2020.bpim0s31b0.001000_10000000.root:/stoppedPionDumper");
+      TDirectory * dir = (TDirectory*)f->Get("stops/nts.mu2e.su2020.bpim0s31b0.001000_10000000.root:/stoppedPionDumper");
       dir->GetObject("stops",tree);
 
    }

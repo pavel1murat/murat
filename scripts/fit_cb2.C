@@ -1,16 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
-// cb2: Crystall Ball function with polynomial tails on both sides
+// cb2: Crystall Ball function : gaussian with power-law tails on both sides
 // make it a C++ class to simplify fitting multiple functions
+//
 // usage:
+// ------
 // .L murat/scripts/fit_cb2.C
 // cbx = new cb2("x");
-// cbx->fit_crystal_ball(file,....) // this defines the fit function
+// cbx->fit(file,....)
 //
-// then scan a range of momenta with
+// or
+//
+// TH1F*hist = ...
+// cbx->fit(...)
+//
+// to find the momentum value corresponding to the half-maximum,
+// scan a range of momenta with 
 // 
 // cbx->GetFunc()->Eval(104.5) 
-//
-// to find the momentum value corresponding to the half-maximum
 ///////////////////////////////////////////////////////////////////////////////
 #include "TMath.h"
 #include "TNamed.h"
@@ -30,23 +36,21 @@ public:
   ~cb2();
 
   static double  gauss(double* X, double* P);
-  static double  f    (double* X, double* P);    // double Crystall Ball itself
+  static double  f_cb2(double* X, double* P);    // double Crystall Ball itself
 
-  void           init_parameters(TF1* F, 
-				 double P0, double P1, double P2, double P3, 
-				 double P4, double P5, double P6);
+  void           init_parameters    (TF1* F, 
+				     double P0, double P1, double P2, double P3, 
+				     double P4, double P5, double P6);
 
-  void           fit(TH1F* Hist, TF1* F, double XMin, double XMax);
-
+  void           fit_histogram      (TH1F* Hist, TF1* F, double XMin, double XMax);
   void           create_fit_function(TF1*& F, double X0, double XMin, double XMax);
-
 //-----------------------------------------------------------------------------
 // two functions doing the same, but with different interfaces
 //-----------------------------------------------------------------------------
-  void           fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1.);
+  void           fit(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1.);
 
-  void           fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
-				  double X0, double XMin, double XMax, double Sigma = -1.);
+  void           fit(const char* File, const char* Module, const char* Hist, 
+		     double X0, double XMin, double XMax, double Sigma = -1.);
 
   TF1* GetFunc() { return fFunc; }
   TH1* GetHist() { return (TH1*) fHist; }
@@ -79,7 +83,7 @@ double cb2::gauss(double* X, double* P) {
 }
 
 //-----------------------------------------------------------------------------
-double cb2::f(double* X, double* P) {
+double cb2::f_cb2(double* X, double* P) {
   double x0, x1, f, sig, alpha1, abs_alpha1, alpha2, abs_alpha2, n1, n2, a, b, dx0, dx1, xdx;
 
   x0         = P[1];
@@ -114,9 +118,9 @@ double cb2::f(double* X, double* P) {
 }
 
 //-----------------------------------------------------------------------------
-  void cb2::init_parameters(TF1* F, 
-			    double P0, double P1, double P2, double P3, 
-			    double P4, double P5, double P6) {
+void cb2::init_parameters(TF1* F, 
+			  double P0, double P1, double P2, double P3, 
+			  double P4, double P5, double P6) {
   F->SetParameter(0,P0);
   F->SetParameter(1,P1);
   F->SetParameter(2,P2);
@@ -124,10 +128,10 @@ double cb2::f(double* X, double* P) {
   F->SetParameter(4,P4);
   F->SetParameter(5,P5);
   F->SetParameter(6,P6);
-  }
+}
 
 //-----------------------------------------------------------------------------
-  void cb2::fit(TH1F* Hist, TF1* F, double XMin, double XMax) {
+void cb2::fit_histogram(TH1F* Hist, TF1* F, double XMin, double XMax) {
   Hist->GetXaxis()->SetRangeUser(XMin,XMax);
   Hist->Fit(F,"L","",XMin,XMax);
 }
@@ -135,7 +139,7 @@ double cb2::f(double* X, double* P) {
 //-----------------------------------------------------------------------------
 void cb2::create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 
-  fFunc = new TF1(Form("%s_f",GetName()),cb2::f,XMin,XMax,7);
+  fFunc = new TF1(Form("%s_f_cb2",GetName()),cb2::f_cb2,XMin,XMax,7);
 
   F->SetParName(0,"anorm");
   F->SetParName(1,"mean");
@@ -153,7 +157,7 @@ void cb2::create_fit_function(TF1*& F, double X0, double XMin, double XMax) {
 }
 
 //-----------------------------------------------------------------------------
-void cb2::fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1.) {
+void cb2::fit(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1.) {
 
   TH1F* h      = (TH1F*) Hist;
   double anorm = h->GetEntries()/10;
@@ -166,13 +170,14 @@ void cb2::fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, doubl
 //   h->Draw();
 //   fFunc->Draw("same");
 
-  if (Sigma > 0) { // effectively, fix Sigma
+  if (Sigma > 0) {			// effectively, fix Sigma
     fFunc->SetParameter(2,Sigma);
     fFunc->SetParLimits(2,Sigma*(1+1.e-5),Sigma*(1+1.e-5));
   }
 
-  fit                (h,fFunc,XMin,XMax);
-
+  fit_histogram(h,fFunc,XMin,XMax);
+					// gaussian component of the fit, to display
+  
   fGaus = new TF1(Form("%s_f_gaus",GetName()),cb2::gauss,XMin,XMax,3);
 
   fGaus->SetParameter(0,fFunc->GetParameter(0));
@@ -196,7 +201,8 @@ void cb2::fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, doubl
   
   fHGaus->Draw("same");
 //-----------------------------------------------------------------------------
-// to calculate the background fraction, use region from alpha2 to XMax
+// calculate the background fraction: high-momentum side , above the gaussian
+// use region from alpha2 to XMax
 //-----------------------------------------------------------------------------
   double total = Hist->Integral(1,Hist->GetNbinsX());
 
@@ -213,11 +219,11 @@ void cb2::fit_crystal_ball(TH1* Hist, double X0, double XMin, double XMax, doubl
 }
 
 //-----------------------------------------------------------------------------
-void cb2::fit_crystal_ball(const char* File, const char* Module, const char* Hist, 
-			   double X0, double XMin, double XMax, double Sigma = -1.) {
+void cb2::fit(const char* File, const char* Module, const char* Hist, 
+	      double X0, double XMin, double XMax, double Sigma = -1.) {
 
   fHist = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit_crystal_ball");
 
-  fit_crystal_ball(fHist,X0,XMin,XMax,Sigma);
+  this->fit(fHist,X0,XMin,XMax,Sigma);
 }
 

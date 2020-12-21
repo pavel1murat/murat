@@ -69,6 +69,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 //-----------------------------------------------------------------------------
 // TrackID[0] : "SetC"
 // i = 1..6 : cut on DaveTrkQual > 0.1*i instead
+// fTrackID[1-19] - check MVA
 //-----------------------------------------------------------------------------
   fNID  = 20;  // this is the limit ....
   for (int i=0; i<fNID; i++) {
@@ -111,16 +112,9 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 
   fKMaxRMC        = 90.;
 //-----------------------------------------------------------------------------
-// 
+// 000 : no Z, use chi2d 
 //-----------------------------------------------------------------------------
   fMinETrig       = 50.;
-  fNMVA           = 0;
-
-  fUseMVA         = 0;
-
-  fTprMVA         = new mva_data("trkpatrec","dave"    ,002);
-  fCprMVA         = new mva_data("calpatrec","e11s5731",002);
-
   fLogLH          = new TEmuLogLH();
 //-----------------------------------------------------------------------------
 // debugging information
@@ -130,12 +124,6 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 
   fDebugCut[6].fXMin = 1.5;
   fDebugCut[6].fXMax = 10.0;
-//-----------------------------------------------------------------------------
-// ntuples for TMVA training
-//-----------------------------------------------------------------------------
-  fWriteTmvaTree     = -1;
-  fTmvaAlgorithmTpr  = -1;
-  fTmvaAlgorithmCpr  = -1;
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
@@ -153,21 +141,32 @@ TTrackCompModule::~TTrackCompModule() {
 }
 
 //-----------------------------------------------------------------------------
+// TrkRecAlgorithm : "cpr" or "tpr"
+// TrainingDataset : just 'fele2s51b1' - goes into a file name
+// MVAType : 
+// ---------
+// 000-004 : log(fcons) with different weights 
+// 100-104 : chi2d      with different weights
+// 202     : chi2       training by Arpan
+//-----------------------------------------------------------------------------
 void TTrackCompModule::SetMVA(const char* TrkRecAlgorithm, const char* TrainingDataset, int MvaType) {
+
+  printf(" [TTrackCompModule::SetMVA] TrkRecAlgorithm:%s  TrainingDataset:%s MvaType:%i\n",
+	 TrkRecAlgorithm,TrainingDataset,MvaType);
 
   fUseMVA         = 1;
 
   TString trk_alg = TrkRecAlgorithm;
   trk_alg.ToUpper();
 
-  if (trk_alg == "CALPATREC") {
+  if (trk_alg == "CPR") {
     if (fCprMVA) delete fCprMVA;
-    fCprMVA           = new mva_data("CALPATREC",TrainingDataset,MvaType);
+    fCprMVA           = new mva_data("CPR",TrainingDataset,MvaType);
     fTmvaAlgorithmCpr = MvaType;
   }
-  else if (trk_alg == "TRKPATREC") {
+  else if (trk_alg == "TPR") {
     if (fTprMVA) delete fTprMVA;
-    fTprMVA           = new mva_data("TRKPATREC",TrainingDataset,MvaType);
+    fTprMVA           = new mva_data("TPR",TrainingDataset,MvaType);
     fTmvaAlgorithmTpr = MvaType;
   }
 }
@@ -259,14 +258,14 @@ int TTrackCompModule::BeginJob() {
     fCprQualMva->initMVA();
   }
 
-  string hist_dir      = gEnv->GetValue("mu2e.TrkQual.HistDir","_none_");
-  string trk_qual_dsid = gEnv->GetValue("mu2e.TrkQual.Dsid"   ,"_none_");
+  // string hist_dir      = gEnv->GetValue("mu2e.TrkQual.HistDir","_none_");
+  // string trk_qual_dsid = gEnv->GetValue("mu2e.TrkQual.Dsid"   ,"_none_");
 
-  fTrkQualFile    = Form("%s/%s.track_comp_use_mva_%03i.hist",
-			 hist_dir.data(),trk_qual_dsid.data(),fUseMVA);
+  // fTrkQualFile    = Form("%s/%s.track_comp_use_mva_%03i.hist",
+  // 			 hist_dir.data(),trk_qual_dsid.data(),fUseMVA);
 
-  fTrackProb[0]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
-  fTrackProb[1]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
+  // fTrackProb[0]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
+  // fTrackProb[1]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
 
   fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
   fBestID[1]      = fCprMVA->BestID();		  // KDAR     : CprQual     > 0.85
@@ -282,91 +281,6 @@ int TTrackCompModule::BeginRun() {
   return 0;
 }
 
-// //-----------------------------------------------------------------------------
-// void TTrackCompModule::BookTrackHistograms(HistBase_t* HistR, const char* Folder) {
-// //   char name [200];
-// //   char title[200];
-
-//   TrackHist_t* Hist =  (TrackHist_t*) HistR;
-
-//   HBook1F(Hist->fP[0]       ,"p"        ,Form("%s: Track P(Z1)"       ,Folder), 800,  80  ,120. ,Folder);
-//   HBook1F(Hist->fP[1]       ,"p_1"      ,Form("%s: Track P(total)[1]" ,Folder), 100, 100  ,105. ,Folder);
-//   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
-//   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
-//   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
-// //-----------------------------------------------------------------------------
-//   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
-//   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
-//   HBook1F(Hist->fDpFront    ,"dpf"      ,Form("%s: Track P-P(front) " ,Folder),1000,  -5. ,  5. ,Folder);
-//   HBook1F(Hist->fXDpF       ,"xdpf"     ,Form("%s: DpF/momErr"        ,Folder),1000, -50. , 50. ,Folder);
-//   HBook1F(Hist->fDpFront0   ,"dp0f"     ,Form("%s: Track P0-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
-//   HBook1F(Hist->fDpFront2   ,"dp2f"     ,Form("%s: Track P2-P(front)" ,Folder),1000,  -5. ,  5. ,Folder);
-//   HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
-//   HBook1F(Hist->fDpFSt      ,"dpfst"    ,Form("%s: Track Pf-Psto"     ,Folder),1000,  -5  ,  5. ,Folder);
-//   HBook2F(Hist->fDpFVsZ1    ,"dpf_vs_z1",Form("%s: Track DPF Vs Z1"   ,Folder), 200, -2000.,0,200,-5.,5,Folder);
-
-//   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
-//   HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1  ,Folder);
-//   HBook1F(Hist->fChi2       ,"chi2"     ,Form("%s: Track chi2 total"  ,Folder), 200, 0,200,Folder);
-//   HBook1F(Hist->fChi2Dof    ,"chi2d"    ,Form("%s: track chi2/N(dof)" ,Folder), 500, 0, 10,Folder);
-
-//   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0  , 200 ,Folder);
-//   HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05 ,Folder);
-//   HBook1F(Hist->fDNa        ,"dna"      ,Form("%s: Nhits-Nactive"     ,Folder), 100, -0.5 ,99.5,Folder);
-//   HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
-//   HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
-//   HBook1F(Hist->fNadOverNd  ,"nad_nd"   ,Form("%s: Nad/N(doublets)"   ,Folder), 110, 0,1.1,Folder);
-//   HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
-//   HBook1F(Hist->fNOSD       ,"nosd"     ,Form("%s: N(OS doublets)"    ,Folder),  50, 0, 50,Folder);
-//   HBook1F(Hist->fNdOverNa   ,"nd_na"    ,Form("%s: NDoublets/Nactive" ,Folder), 100, 0,0.5,Folder);
-//   HBook1F(Hist->fNssdOverNa ,"nssd_na"  ,Form("%s: NSSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
-//   HBook1F(Hist->fNosdOverNa ,"nosd_na"  ,Form("%s: NOSD/Nactive"      ,Folder), 100, 0,0.5,Folder);
-//   HBook1F(Hist->fNZeroAmb   ,"nza"      ,Form("%s: N (Iamb = 0) hits" ,Folder), 100, 0,100,Folder);
-//   HBook1F(Hist->fNzaOverNa  ,"nza_na"   ,Form("%s: NZeroAmb/Nactive"  ,Folder), 100, 0,  1,Folder);
-//   HBook1F(Hist->fNMatActive ,"nma"      ,Form("%s: N (Mat Active"     ,Folder), 100, 0,100,Folder);
-//   HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 200, 0,   2,Folder);
-//   HBook1F(Hist->fNBend      ,"nbend"    ,Form("%s: Nbend"             ,Folder), 100, 0,1000,Folder);
-
-//   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
-//   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
-//   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
-//   HBook1F(Hist->fFitCons[0] ,"fcon"     ,Form("%s: track fit cons [0]",Folder), 200, 0,   1,Folder);
-//   HBook1F(Hist->fFitCons[1] ,"fcon1"    ,Form("%s: track fit cons [1]",Folder), 1000, 0,   0.1,Folder);
-//   HBook1F(Hist->fD0         ,"d0"       ,Form("%s: track D0      "    ,Folder), 200,-200, 200,Folder);
-//   HBook1F(Hist->fZ0         ,"z0"       ,Form("%s: track Z0      "    ,Folder), 200,-2000,2000,Folder);
-//   HBook1F(Hist->fTanDip     ,"tdip"     ,Form("%s: track tan(dip)"    ,Folder), 200, 0.0 ,2.0,Folder);
-//   HBook1F(Hist->fRMax       ,"rmax"     ,Form("%s: track R(max)  "    ,Folder), 200, 0., 1000,Folder);
-//   HBook1F(Hist->fDtZ0       ,"dtz0"     ,Form("%s: T0_trk-T0_MC(Z=0)" ,Folder), 200, -10.0 ,10.0,Folder);
-//   HBook1F(Hist->fXtZ0       ,"xtz0"     ,Form("%s: DT(Z0)/sigT"       ,Folder), 200, -10.0 ,10.0,Folder);
-
-//   HBook1F(Hist->fResid      ,"resid"    ,Form("%s: hit residuals"     ,Folder), 500,-0.5 ,0.5,Folder);
-//   HBook1F(Hist->fAlgMask    ,"alg"      ,Form("%s: algorithm mask"    ,Folder),  10,  0, 10,Folder);
-
-//   HBook1F(Hist->fChi2Tcm  ,"chi2tcm"  ,Form("%s: chi2(t-c match)"   ,Folder), 250,  0  ,250 ,Folder);
-//   HBook1F(Hist->fChi2XY     ,"chi2xy"   ,Form("%s: chi2(t-c match) XY",Folder), 300,-50  ,250 ,Folder);
-//   HBook1F(Hist->fChi2T      ,"chi2t"    ,Form("%s: chi2(t-c match) T" ,Folder), 250,  0  ,250 ,Folder);
-
-//   HBook1F(Hist->fDt         ,"dt"       ,Form("%s: T(trk)-T(cl)"      ,Folder), 400,-20  ,20 ,Folder);
-//   HBook1F(Hist->fDx         ,"dx"       ,Form("%s: X(trk)-X(cl)"      ,Folder), 200,-500 ,500,Folder);
-//   HBook1F(Hist->fDy         ,"dy"       ,Form("%s: Y(trk)-Y(cl)"      ,Folder), 200,-500 ,500,Folder);
-//   HBook1F(Hist->fDz         ,"dz"       ,Form("%s: Z(trk)-Z(cl)"      ,Folder), 200,-250 ,250,Folder);
-//   HBook1F(Hist->fDu         ,"du"       ,Form("%s: track-cluster DU"  ,Folder), 250,-250 ,250,Folder);
-//   HBook1F(Hist->fDv         ,"dv"       ,Form("%s: track-cluster DV"  ,Folder), 200,-100 ,100,Folder);
-//   HBook1F(Hist->fPath       ,"path"     ,Form("%s: track sdisk"       ,Folder),  50,   0 ,500,Folder);
-
-//   HBook1F(Hist->fECl        ,"ecl"      ,Form("%s: cluster E"         ,Folder), 300, 0   ,150,Folder);
-//   HBook1F(Hist->fEClEKin    ,"ecl_ekin" ,Form("%s: cluster E/Ekin(mu)",Folder), 500, 0   ,5,Folder);
-//   HBook1F(Hist->fEp         ,"ep"       ,Form("%s: track E/P"         ,Folder), 300, 0   ,1.5,Folder);
-//   HBook1F(Hist->fDrDzCal    ,"drdzcal"  ,Form("%s: track dr/dz cal"   ,Folder), 200, -5  ,5  ,Folder);
-//   HBook1F(Hist->fDtClZ0     ,"dtclz0"   ,Form("%s: T(cl_z0)-T(Z0)"    ,Folder), 250, -5 , 5,Folder);
-//   HBook2F(Hist->fDtClZ0VsECl,"dtclz0_vs_ecl",Form("%s: DtClZ0 vs ECl" ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
-//   HBook2F(Hist->fDtClZ0VsP  ,"dtclz0_vs_p"  ,Form("%s: DtClZ0 vs p"   ,Folder), 100, 0 , 200, 250, -5 , 5,Folder);
-
-//   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
-//   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
-//   HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVAOut[0]"          ,Folder), 200, -0.5, 1.5,Folder);
-//   HBook1F(Hist->fDeltaMVA   ,"dmva"     ,Form("%s:MVAOut[0]-TrkQual"  ,Folder), 200, -1.0, 1.0,Folder);
-// }
 
 //-----------------------------------------------------------------------------
 void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folder) {
@@ -378,49 +292,6 @@ void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folde
 
 
 }
-
-// //-----------------------------------------------------------------------------
-// void TTrackCompModule::BookEventHistograms(HistBase_t* HistR, const char* Folder) {
-//   //  char name [200];
-//   //  char title[200];
-
-//   EventHist_t* Hist =  (EventHist_t*) HistR;
-
-//   HBook1D(Hist->fLumWt     ,"lumwt"    ,Form("%s: Luminosity Weight"               ,Folder),200, 0,10,Folder);
-//   Hist->fLumWt->Sumw2(kTRUE);
-
-//   HBook1F(Hist->fRv        ,"rv"       ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
-//   HBook1F(Hist->fZv        ,"zv"       ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
-
-//   HBook1F(Hist->fPdgCode         ,"pdg"   ,Form("%s: PDG code"                     ,Folder),200,-100,100,Folder);
-//   HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: MC mom after Stopping Target" ,Folder),400,  90,110,Folder);
-//   HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: MC mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
-//   HBook1F(Hist->fNshCE           ,"nsh_ce",Form("%s: CE Number of Straw Hits"      ,Folder),150,0,150,Folder);
-
-//   HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: MC Particle Cos(Theta) Lab"      ,Folder),100,-1,1,Folder);
-//   HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: MC Particle Momentum"            ,Folder),1000,  0,200,Folder);
-
-//   HBook1F(Hist->fNHelices  ,"nhel"     ,Form("%s: nhelices"                        ,Folder), 10,0, 10,Folder);
-//   HBook1F(Hist->fNTracks[0],"ntrk_0"   ,Form("%s: N(Reconstructed Tracks)[0]"      ,Folder),100,0,100,Folder);
-//   HBook1F(Hist->fNTracks[1],"ntrk_1"   ,Form("%s: N(Reconstructed Tracks)[1]"      ,Folder),100,0,100,Folder);
-//   HBook1F(Hist->fNshTot [0],"nshtot_0" ,Form("%s: Total Number of Straw Hits [0]"  ,Folder),250,0,250,Folder);
-//   HBook1F(Hist->fNshTot [1],"nshtot_1" ,Form("%s: Total Number of Straw Hits [1]"  ,Folder),250,0,5000,Folder);
-//   HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
-//   HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
-//   HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
-//   HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
-//   HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
-//   HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-//   HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-//   HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
-//   HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: N(Clusters)"                     ,Folder),100,0,100,Folder);
-//   HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
-//   HBook1F(Hist->fTClMax    ,"tclmax"   ,Form("%s: highest cluster time"            ,Folder),200,0,2000,Folder);
-//   HBook1F(Hist->fDp        ,"dp"       ,Form("%s: P(TPR)-P(CPR)"                   ,Folder),500,-2.5,2.5,Folder);
-//   HBook1F(Hist->fInstLumi  ,"inst_lum" ,Form("%s: Inst Luminosity"                 ,Folder),500, 0,1.e8,Folder);
-//   HBook1F(Hist->fGMom      ,"gmom"     ,Form("%s: Photon Momentum"                 ,Folder),200, 0,200 ,Folder);
-//   HBook1F(Hist->fGMomRMC   ,"gmom_rmc" ,Form("%s: Photon Momentum, RMC weighted"   ,Folder),200, 0,200 ,Folder);
-// }
 
 //_____________________________________________________________________________
 void TTrackCompModule::BookHistograms() {
@@ -505,7 +376,7 @@ void TTrackCompModule::BookHistograms() {
   track_selection[  0] = new TString("good PAR tracks");
   track_selection[  1] = new TString("good DAR tracks in events with no good kPAR tracks TrkQual>0.3");
   track_selection[  2] = new TString("good DAR tracks in events with no good kPAR tracks TrkQual>0.2");
-  track_selection[  3] = new TString("best track");
+  //  track_selection[  3] = new TString("best track");
 
   track_selection[100] = new TString("PAR all tracks");
   track_selection[101] = new TString("PAR BestTrackID");
@@ -890,63 +761,6 @@ void TTrackCompModule::FillHistograms() {
       }
     }
   }
-//-----------------------------------------------------------------------------
-// TRK_3 : an attempt to define the best track
-//-----------------------------------------------------------------------------
-  TStnTrack  *tpr(0), *cpr(0), *best_track(0);
-  TrackPar_t *best_tp, *tprp, *cprp;
-
-  int ntpr = fTrackBlock[0]->NTracks();
-  int ncpr = fTrackBlock[1]->NTracks();
-
-  if ((ntpr > 0) && (fTrackPar[0][0].fIDWord[fBestID[0]] == 0)) {
-    tpr  = fTrackBlock[0]->Track(0);
-    tprp = &fTrackPar[0][0];
-  }
-
-  if ((ncpr > 0) && (fTrackPar[1][0].fIDWord[fBestID[1]] == 0)) {
-    cpr  = fTrackBlock[1]->Track(0);
-    cprp = &fTrackPar[1][0];
-  }
-
-  if      (tpr != NULL) {
-    if (cpr == NULL) {
-//-----------------------------------------------------------------------------
-// only KPAR track is present
-//-----------------------------------------------------------------------------
-      best_track = tpr;
-      best_tp    = tprp;
-    }
-    else {
-//-----------------------------------------------------------------------------
-// general case: both tracks present and passsed the ID cuts, figure which one 
-// is the best
-//-----------------------------------------------------------------------------
-      double tpr_prob = fTrackProb[0]->prob(tprp->fMVAOut[0]);
-      double cpr_prob = fTrackProb[1]->prob(cprp->fMVAOut[0]);
-
-      if (tpr_prob > cpr_prob) {
-	best_track = tpr;
-	best_tp    = tprp;
-      }
-      else {
-	best_track = cpr;
-	best_tp    = cprp;
-      }
-    }
-  }
-  else if (cpr != NULL) {
-//-----------------------------------------------------------------------------
-// only KDAR track is present
-//-----------------------------------------------------------------------------
-    best_track = cpr;
-    best_tp    = cprp;
-  }
-
-  if (best_track != 0) {
-    FillTrackHistograms(fHist.fTrack[3],best_track,best_tp,&fSimPar);
-  }
-
 //-----------------------------------------------------------------------------
 // KPAR and KDAR histograms, inclusive, ihist defines the offset
 // i=0:KPAR, i=1:KDAR

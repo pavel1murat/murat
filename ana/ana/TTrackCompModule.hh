@@ -4,9 +4,6 @@
 #ifndef murat_ana_TTrackCompModule_hh
 #define murat_ana_TTrackCompModule_hh
 
-#include "TTree.h"
-#include "TBranch.h"
-
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
@@ -25,14 +22,7 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
-#include "murat/ana/prob_dist.hh"
-#include "murat/ana/mva_data.hh"
-
 #include "murat/ana/TAnaModule.hh"
-
-namespace mu2e { 
-  class MVATools;
-};
 
 namespace murat {
 class TTrackCompModule: public murat::TAnaModule {
@@ -66,44 +56,6 @@ public:
   struct Cut_t {
     double fXMin;
     double fXMax;
-  };
-
-  struct TmvaTrainingData_t {
-    float    fP;
-    float    fPMC;
-    float    fTanDip;
-    float    fNActive;
-    float    fNaFract;
-    float    fChi2Dof;
-    float    fFitCons;
-    float    fMomErr;
-    float    fT0Err;
-    float    fD0;
-    float    fRMax;
-    float    fNdaOverNa;
-    float    fNzaOverNa;
-    float    fNmaOverNa;
-    float    fZ1;			// Z-coordinate of the first hit
-    float    fWeight;
-  };
-
-  struct TmvaTrainingBranches_t {
-    TBranch*  fP;
-    TBranch*  fPMC;
-    TBranch*  fTanDip;
-    TBranch*  fNActive;
-    TBranch*  fNaFract;
-    TBranch*  fChi2Dof;
-    TBranch*  fFitCons;
-    TBranch*  fMomErr;
-    TBranch*  fT0Err;
-    TBranch*  fD0;
-    TBranch*  fRMax;
-    TBranch*  fNdaOverNa;
-    TBranch*  fNzaOverNa;
-    TBranch*  fNmaOverNa;
-    TBranch*  fZ1;			// Z-coordinate of the first hit
-    TBranch*  fWeight;			// for background only
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -168,38 +120,6 @@ public:
 
   int                fFillHistograms;
   TStntuple*         fStnt;                // STNTUPLE singleton
-//-----------------------------------------------------------------------------
-// TMVA training ntuples
-//-----------------------------------------------------------------------------
-  int                     fWriteTmvaTree;
-  int                     fTmvaAlgorithmTpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
-  int                     fTmvaAlgorithmCpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
-
-  TFile*                  fTmvaFile;
-
-  TTree*                  fSigTree;
-  //  TTree*                  fBgrTree;
-
-  TmvaTrainingData_t      fTmvaData;
-  TmvaTrainingBranches_t  fSigBranch;
-  //  TmvaTrainingBranches_t  fBgrBranch;
-
-  int                     fUseMVA;
-  int                     fNMVA;	// number of MVA classifiers used for tracks of the same type
-//-----------------------------------------------------------------------------
-// MVA-based classifiers for TrkPatRec and CalPatRec tracks separately
-//-----------------------------------------------------------------------------
-//   TString                 fTprWeightsFile;
-//   TString                 fCprWeightsFile;
-
-  mva_data*               fTprMVA;
-  mva_data*               fCprMVA;
-
-  mu2e::MVATools*         fTprQualMva;
-  mu2e::MVATools*         fCprQualMva;
-
-  TString                 fTrkQualFile;
-  prob_dist*              fTrackProb[2];// 0:TrkPatRec, 1:CalPatRec
   
   double                  fMbTime;      // microbunch time
 //-----------------------------------------------------------------------------

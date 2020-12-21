@@ -40,9 +40,18 @@
 #include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
+// Mu2e offline includes
+//-----------------------------------------------------------------------------
+#include "fhiclcpp/ParameterSet.h"
+#include <xercesc/dom/DOM.hpp>
+#include "Mu2eUtilities/inc/MVATools.hh"
+//------------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
 #include "murat/ana/TAnaModule.hh"
+
+using std::string;
+using std::vector;
 
 using namespace murat;
 
@@ -807,6 +816,77 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
 
     if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
       GetHeaderBlock()->Print(Form(" TAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
+    }
+//-----------------------------------------------------------------------------
+// on-the-fly MVA calculation
+//-----------------------------------------------------------------------------
+    tp->fMVAOut[0] = -1.e6;
+    tp->fMVAOut[1] = -1.e6;
+
+    if (fUseMVA != 0) {
+      vector<double>  pmva;
+//-----------------------------------------------------------------------------
+// alg=0: TrkPatRec track - log(fitcons) used for training
+// tp->fMVAOut[0] : comes from offline
+// tp->fMVAOut[1] : calculated on the fly
+//-----------------------------------------------------------------------------
+      int alg = track->BestAlg();
+      
+      if      (alg == 0) {
+	tp->fMVAOut[0] = track->DaveTrkQual();        // comes from Offline
+
+	pmva.resize(10);
+
+	float na = track->NActive();
+
+	pmva[ 0] = na;
+	pmva[ 1] = na/track->NHits();
+	pmva[ 2] = -1.e6; 			// defined below
+	pmva[ 3] = track->FitMomErr();
+	pmva[ 4] = track->T0Err();
+	pmva[ 5] = track->D0();
+	pmva[ 6] = track->RMax();
+	pmva[ 7] = track->NDoubletsAct()/na;
+	pmva[ 8] = track->NHitsAmbZero()/na;
+	pmva[ 9] = track->NMatActive()/na;
+
+	if (fTmvaAlgorithmTpr >= 0) {
+	  int use_chi2d = fTmvaAlgorithmTpr / 100;
+	  if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
+	  else                     pmva[2] = track->Chi2Dof();
+
+	  tp->fMVAOut[1] = fTprQualMva->evalMVA(pmva);
+	}
+      }
+
+//-----------------------------------------------------------------------------
+// CalPatRec track - for fTmvaAlgorithm=101 chi2/N(dof) used (our initial training)
+//-----------------------------------------------------------------------------
+      else if (alg == 1) {
+
+	pmva.resize(11);
+
+	float na = track->NActive();
+
+	pmva[ 0] = na;
+	pmva[ 1] = na/track->NHits();
+	pmva[ 2] = -1.e6; 			// defined below
+	pmva[ 3] = track->FitMomErr();
+	pmva[ 4] = track->T0Err();
+	pmva[ 5] = track->D0();
+	pmva[ 6] = track->RMax();
+	pmva[ 7] = track->TanDip();
+	pmva[ 8] = track->NDoubletsAct()/na;
+	pmva[ 9] = track->NHitsAmbZero()/na;
+	pmva[10] = track->NMatActive()/na;
+
+
+	int use_chi2d = fTmvaAlgorithmCpr / 100;
+	if      (use_chi2d == 0) pmva[2] = log10(track->FitCons());
+	else                     pmva[2] = track->Chi2Dof();
+
+	tp->fMVAOut[1] = fCprQualMva->evalMVA(pmva);
+      }
     }
 //-----------------------------------------------------------------------------
 // track ID 

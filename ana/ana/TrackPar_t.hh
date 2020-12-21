@@ -23,7 +23,7 @@ public:
 
   int     fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
 
-  double  fMVAOut[20];			// outputs of different MVA classifiers
+  double  fMVAOut[20];			// outputs of different MVA classifiers; 0: Dave/Andy MVA; 1: CPR
   double  fProb;
   
   double  fP   ; 			// momentum, corrected to set DPF at 0

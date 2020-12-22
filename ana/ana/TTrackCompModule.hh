@@ -39,6 +39,8 @@ public:
 //-----------------------------------------------------------------------------
   enum { kPAR = 0, kDAR = 1 };
 
+  enum { kNTrackPar          =    10 };
+
   enum { kNEventHistSets     =   100 };
   enum { kNTrackSeedHistSets =   100 };
   enum { kNTrackHistSets     = 10000 };
@@ -72,23 +74,20 @@ public:
 
   TString             fTrackBlockName[2];
 					
-  TrackPar_t          fTrackPar[2][10];	// additional track parameters (assume ntracks < 10)
-  SimPar_t            fSimPar;		// additional parameters of the simulated MC particle
-  Hist_t              fHist;		// histograms filled
+  TrackPar_t          fTrackPar[2][kNTrackPar];	// additional track parameters (assume ntracks < 10)
+  SimPar_t            fSimPar;		        // additional parameters of the simulated MC particle
+  Hist_t              fHist;		        // histograms filled
 
-					// cut values
+					        // cut values
   double              fPtMin;
 
   Cut_t               fDebugCut[100];
-
-  TGenParticle*       fParticle;		// electron or muon
 
   int                fNHelices;         // 
   int                fNTrackSeeds;	// N reconstructed track seeds in the event
   int                fNGoodTrackSeeds;  // N track seeds passing quality cuts
   int                fNTracks    [2];	// 0:TrkPatRec 1:CalPatRec
   int                fNGoodTracks[2];
-  int                fNGenp;		// N(generated particles)
   int                fNSimp;		// N(simulated particles)
 
   TStnTrack*         fTrack;

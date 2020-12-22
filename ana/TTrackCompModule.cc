@@ -204,10 +204,10 @@ int TTrackCompModule::BeginJob() {
     int algo = fWriteTmvaTree;
 
     if      (algo == 0) {
-      fTmvaFile  = new TFile(Form("%s.tmva_training_trkpatrec.root",dsname),"recreate");
+      fTmvaFile  = new TFile(Form("%s.tmva_training_tpr.root",dsname),"recreate");
     }
     else if (algo == 1) {
-      fTmvaFile  = new TFile(Form("%s.tmva_training_calpatrec.root",dsname),"recreate");
+      fTmvaFile  = new TFile(Form("%s.tmva_training_cpr.root",dsname),"recreate");
     }
 
     fSigTree  = new TTree("tmva_training_tree","TMVA Signal Tree");
@@ -238,37 +238,45 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // init two MVA-based classifiers - KPAR (TPR) and KDAR (CPR) 
 //-----------------------------------------------------------------------------
+  fBestID[0] = -1;
+  fBestID[1] = -1;
+
   if (fUseMVA) {
     fhicl::ParameterSet pset_tpr, pset_cpr;
 
     fNMVA = 1;
 
-    string              s1(fTprMVA->XmlWeightsFile());
-    string              s2(fCprMVA->XmlWeightsFile());
-
-    printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
-    pset_tpr.put<string>("MVAWeights",s1);
-    fTprQualMva = new mu2e::MVATools(pset_tpr);
-    fTprQualMva->initMVA();
+    if (fTprMVA) {
+      string              s1(fTprMVA->XmlWeightsFile());
+      printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
+      pset_tpr.put<string>("MVAWeights",s1);
+      fTprQualMva = new mu2e::MVATools(pset_tpr);
+      fTprQualMva->initMVA();
     //    fTrkQualMva->showMVA();
+      fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
+    }
 
-    printf(">>> [TTrackCompModule::BeginJob] Init CalPatRec MVA from %s\n",s2.data());
-    pset_cpr.put<string>("MVAWeights",s2);
-    fCprQualMva = new mu2e::MVATools(pset_cpr);
-    fCprQualMva->initMVA();
+    if (fCprMVA) { 
+      string              s2(fCprMVA->XmlWeightsFile());
+      printf(">>> [TTrackCompModule::BeginJob] Init CalPatRec MVA from %s\n",s2.data());
+      pset_cpr.put<string>("MVAWeights",s2);
+      fCprQualMva = new mu2e::MVATools(pset_cpr);
+      fCprQualMva->initMVA();
+      fBestID[1]      = fCprMVA->BestID();		  // KDAR     : CprQual     > 0.85
+    }
   }
-
-  // string hist_dir      = gEnv->GetValue("mu2e.TrkQual.HistDir","_none_");
-  // string trk_qual_dsid = gEnv->GetValue("mu2e.TrkQual.Dsid"   ,"_none_");
-
-  // fTrkQualFile    = Form("%s/%s.track_comp_use_mva_%03i.hist",
-  // 			 hist_dir.data(),trk_qual_dsid.data(),fUseMVA);
-
-  // fTrackProb[0]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_100/mvaout");
-  // fTrackProb[1]   = new prob_dist(fTrkQualFile.Data(),"TrackComp","trk_200/mvaout");
-
-  fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
-  fBestID[1]      = fCprMVA->BestID();		  // KDAR     : CprQual     > 0.85
+//-----------------------------------------------------------------------------
+// init track ID pointers in TrackPar - do it just once
+//  .. assume TrkQual to be precalculated, do only beed to cut on
+//-----------------------------------------------------------------------------
+  for (int i=0; i<2; i++) {
+    for (int ip=0; ip<kNTrackPar; ip++) {
+      TrackPar_t* tp = &fTrackPar[i][ip];
+      for (int id=0; id<fNID; id++) {
+	tp->fTrackID[id] = fTrackID[id];
+      }
+    }
+  }
 
   return 0;
 }
@@ -1028,7 +1036,8 @@ int TTrackCompModule::Event(int ientry) {
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 //-----------------------------------------------------------------------------
-  fNGenp       = fGenpBlock->NParticles();
+  fEvtPar.fNGenp  = fGenpBlock->NParticles();
+
   fNSimp       = fSimpBlock->NParticles();
   fNClusters   = fClusterBlock->NClusters();
   fNHelices    = fHelixBlock->NHelices();
@@ -1048,13 +1057,13 @@ int TTrackCompModule::Event(int ientry) {
   TGenParticle* genp;
   int           pdg_code, generator_code;
 
-  fParticle = NULL;
-  for (int i=fNGenp-1; i>=0; i--) {
+  fEvtPar.fParticle = NULL;
+  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
     genp           = fGenpBlock->Particle(i);
     pdg_code       = genp->GetPdgCode();
     generator_code = genp->GetStatusCode();
     if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
-      fParticle = genp;
+      fEvtPar.fParticle = genp;
       break;
     }
   }
@@ -1063,7 +1072,7 @@ int TTrackCompModule::Event(int ientry) {
   fWeight  =  1.;
   fPhotonE = -1.;
 
-  if (fNGenp > 0) {
+  if (fEvtPar.fNGenp > 0) {
     TGenParticle* p0 = fGenpBlock->Particle(0);
     if ((p0->GetStatusCode() == 41) && (p0->GetPdgCode() == 22)) {
 //-----------------------------------------------------------------------------
@@ -1152,6 +1161,7 @@ int TTrackCompModule::Event(int ientry) {
     for (int itrk=0; itrk<fNTracks[i]; itrk++) {
       TrackPar_t* tp  = fTrackPar[i]+itrk;
 
+      tp->fAlg        = i;
       tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
       tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
       tp->fLogLH      = TAnaModule::fLogLH;

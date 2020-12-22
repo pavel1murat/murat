@@ -111,13 +111,31 @@ mva_data::data_t  mva_trkpatrec_e115731_001 = {
   0.40, 8
 };
 
-mva_data::data_t  mva_cpr_fele2s51b1_100 = {
-  "cpr_fele2s51b1_100",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_chi2d_0_uni.xml",                   // localtion of XML weights
+//-----------------------------------------------------------------------------
+// back to training
+//-----------------------------------------------------------------------------
+mva_data::data_t  mva_tpr_fele2s51b1_000 = {
+  "tpr_fele2s51b1_000",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_uni.xml",              // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_100.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
 };
 
+
+mva_data::data_t  mva_cpr_fele2s51b1_000 = {
+  "cpr_fele2s51b1_000",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_uni.xml",              // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_100.hist",        // histograms
+  0.40, 8                                                                   // cut value, ID #
+};
+
+
+mva_data::data_t  mva_cpr_fele2s51b1_100 = {
+  "cpr_fele2s51b1_100",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_cpr_chi2d_uni.xml",                 // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_100.hist",        // histograms
+  0.40, 8                                                                   // cut value, ID #
+};
 
 //-----------------------------------------------------------------------------
 mva_data::~mva_data() {
@@ -161,7 +179,8 @@ mva_data::mva_data(const char* TrkRecAlgorithm, const char* Dataset, int Type) {
       else                  { error = 1; }
     }
     else if (ds = "FELE2S51B1") {
-      if      (Type == 100) fData = mva_cpr_fele2s51b1_100;  // chi2d, uniform weight
+      if      (Type ==   0) fData = mva_cpr_fele2s51b1_000;  // logfcons, uniform weight
+      else if (Type == 100) fData = mva_cpr_fele2s51b1_100;  // chi2d   , uniform weight
       else                  { error = 1; }
     }
     else                    { error = 1; }

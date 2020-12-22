@@ -22,6 +22,7 @@ public:
   int     fIDWord[20];
 
   int     fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
+  int     fAlg;                         // algorithm: 0=tpr, 1=cpr
 
   double  fMVAOut[20];			// outputs of different MVA classifiers; 0: Dave/Andy MVA; 1: CPR
   double  fProb;

@@ -831,14 +831,15 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
 // tp->fMVAOut[1] : calculated on the fly
 //-----------------------------------------------------------------------------
     tp->fMVAOut[0] = track->DaveTrkQual();        // comes from Offline
-    tp->fMVAOut[1] = -1.e6;
+    tp->fMVAOut[1] = track->DaveTrkQual(); 
 
     if (fUseMVA != 0) {
-      vector<float>  pmva(10);
+      vector<float>  pmva(8);
 //-----------------------------------------------------------------------------
 // alg=0: TrkPatRec track - log(fitcons) used for training
 //-----------------------------------------------------------------------------
       float na = track->NActive();
+      float nm = track->NMat();
 
       pmva[ 0] = na;
       pmva[ 1] = na/track->NHits();
@@ -849,11 +850,11 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
 
       pmva[ 3] = track->FitMomErr();
       pmva[ 4] = track->T0Err();
-      pmva[ 5] = track->D0();
-      pmva[ 6] = track->RMax();
-      pmva[ 7] = track->NDoubletsAct()/na;
-      pmva[ 8] = track->NHitsAmbZero()/na;
-      pmva[ 9] = track->NMatActive()/na;
+      // pmva[ 5] = track->D0();
+      // pmva[ 6] = track->RMax();
+      pmva[ 5] = track->NDoubletsAct()/na;
+      pmva[ 6] = track->NHitsAmbZero()/na;
+      pmva[ 7] = track->NMatActive()/nm;
 
       int alg = tp->fAlg;
       

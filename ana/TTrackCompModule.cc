@@ -229,7 +229,7 @@ int TTrackCompModule::BeginJob() {
     fSigBranch.fRMax       = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax      ,"F");
     fSigBranch.fNdaOverNa  = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa ,"F");
     fSigBranch.fNzaOverNa  = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa ,"F");
-    fSigBranch.fNmaOverNa  = fSigTree->Branch("nma_o_na",&fTmvaData.fNmaOverNa ,"F");
+    fSigBranch.fNmaOverNm  = fSigTree->Branch("nma_o_nm",&fTmvaData.fNmaOverNm ,"F");
     fSigBranch.fZ1         = fSigTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
     fSigBranch.fWeight     = fSigTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
 
@@ -252,7 +252,7 @@ int TTrackCompModule::BeginJob() {
       pset_tpr.put<string>("MVAWeights",s1);
       fTprQualMva = new mu2e::MVATools(pset_tpr);
       fTprQualMva->initMVA();
-    //    fTrkQualMva->showMVA();
+      fTprQualMva->showMVA();
       fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
     }
 
@@ -262,6 +262,7 @@ int TTrackCompModule::BeginJob() {
       pset_cpr.put<string>("MVAWeights",s2);
       fCprQualMva = new mu2e::MVATools(pset_cpr);
       fCprQualMva->initMVA();
+      fCprQualMva->showMVA();
       fBestID[1]      = fCprMVA->BestID();		  // KDAR     : CprQual     > 0.85
     }
   }
@@ -599,6 +600,7 @@ int TTrackCompModule::FillTmvaTree() {
   TrackPar_t* tp = &fTrackPar[loc][0];
 
   float na       = trk->NActive();
+  float nm       = trk->NMat();
 
   fTmvaData.fP          = tp->fP;
   fTmvaData.fPMC        = trk->fPFront;
@@ -613,7 +615,7 @@ int TTrackCompModule::FillTmvaTree() {
   fTmvaData.fRMax       = trk->RMax();
   fTmvaData.fNdaOverNa  = trk->NDoubletsAct()/na;
   fTmvaData.fNzaOverNa  = trk->NHitsAmbZero()/na;
-  fTmvaData.fNmaOverNa  = trk->NMatActive()/na;
+  fTmvaData.fNmaOverNm  = trk->NMatActive()/nm;
   fTmvaData.fZ1         = trk->fZ1;
   fTmvaData.fWeight     = 1.;
 
@@ -1168,6 +1170,17 @@ int TTrackCompModule::Event(int ientry) {
     }
 
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
+
+//-----------------------------------------------------------------------------
+// if use on-the-fly MVA, TStnTrackID will use that
+//-----------------------------------------------------------------------------
+    for (int itrk=0; itrk<fNTracks[i]; itrk++) {
+      TrackPar_t* tp  = fTrackPar[i]+itrk;
+      TStnTrack*  trk = fTrackBlock[i]->Track(itrk);
+
+      trk->SetITmp(0,0);
+      trk->SetTmp (0,tp->fMVAOut[1]);
+    }
   }
 
   if (fFillHistograms) FillHistograms();

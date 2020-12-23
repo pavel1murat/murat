@@ -18,7 +18,7 @@ def_name track_0110 ("track_ana_nocorr");
 def_name track_0510 ("track_comp");
 def_name track_0511 ("track_comp_old");
 def_name track_0512 ("track_comp_debug");
-def_name track_0520 ("track_comp_tmva");
+def_name track_0520 ("track_comp_mva");
 def_name track_0530 ("track_comp_use_mva");
 
 def_name track_100  ("track_anaB");
@@ -200,14 +200,14 @@ void  track_comp_debug(int PDGCode=11, int GeneratorCode=28, int DebugBit=14) {
 
 //-----------------------------------------------------------------------------
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
-// TrkRrecoAlg = 0:TrkPatRec    =1:CalPatRec
+// TrkRrecoAlg = 0:TrkPatRec    =1:CalPatRec  =7:dioTail
 //-----------------------------------------------------------------------------
-void  track_comp_tmva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
+void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPdgCode      (11);
+  murat::m_tcm->SetPdgCode      (PDGCode);
   murat::m_tcm->SetGeneratorCode(GeneratorCode);
 
   murat::m_tcm->SetWriteTmvaTree(TrkRecoAlg);
@@ -233,7 +233,7 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = 
   murat::m_tcm->SetPdgCode      (11);
   murat::m_tcm->SetGeneratorCode(GeneratorCode);
 
-  if (TprMvaType >= 0) murat::m_tcm->SetMVA("tpr","e11s5731"  ,TprMvaType);
+  if (TprMvaType >= 0) murat::m_tcm->SetMVA("tpr","fele2s51b1",TprMvaType);
   if (CprMvaType >= 0) murat::m_tcm->SetMVA("cpr","fele2s51b1",CprMvaType);
 
   if (DebugBit >= 0) {

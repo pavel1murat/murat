@@ -116,25 +116,60 @@ mva_data::data_t  mva_trkpatrec_e115731_001 = {
 //-----------------------------------------------------------------------------
 mva_data::data_t  mva_tpr_fele2s51b1_000 = {
   "tpr_fele2s51b1_000",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_uni.xml",              // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_100.hist",        // histograms
+  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_000.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0000.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
 };
 
+
+mva_data::data_t  mva_tpr_fele2s51b1_001 = {
+  "tpr_fele2s51b1_001",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_001.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0001.hist",        // histograms
+  0.80, 16                                                                   // cut value, ID #
+};
+
+mva_data::data_t  mva_tpr_fele2s51b1_002 = {
+  "tpr_fele2s51b1_002",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_002.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0002.hist",        // histograms
+  0.80, 16                                                                   // cut value, ID #
+};
+
+mva_data::data_t  mva_tpr_fele2s51b1_003 = {
+  "tpr_fele2s51b1_001",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_003.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0003.hist",        // histograms
+  0.80, 16                                                                  // cut value, ID #
+};
 
 mva_data::data_t  mva_cpr_fele2s51b1_000 = {
   "cpr_fele2s51b1_000",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_uni.xml",              // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_100.hist",        // histograms
+  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_000.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1000.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
 };
 
 
-mva_data::data_t  mva_cpr_fele2s51b1_100 = {
-  "cpr_fele2s51b1_100",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_cpr_chi2d_uni.xml",                 // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_100.hist",        // histograms
+mva_data::data_t  mva_cpr_fele2s51b1_001 = {
+  "cpr_fele2s51b1_001",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_001.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1001.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
+};
+
+mva_data::data_t  mva_cpr_fele2s51b1_002 = {
+  "cpr_fele2s51b1_002",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_002.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1002.hist",        // histograms
+  0.40, 8                                                                   // cut value, ID #
+};
+
+mva_data::data_t  mva_cpr_fele2s51b1_003 = {
+  "cpr_fele2s51b1_003",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_003.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1003.hist",        // histograms
+  0.80, 16                                                                  // cut value, ID #
 };
 
 //-----------------------------------------------------------------------------
@@ -180,23 +215,34 @@ mva_data::mva_data(const char* TrkRecAlgorithm, const char* Dataset, int Type) {
     }
     else if (ds = "FELE2S51B1") {
       if      (Type ==   0) fData = mva_cpr_fele2s51b1_000;  // logfcons, uniform weight
-      else if (Type == 100) fData = mva_cpr_fele2s51b1_100;  // chi2d   , uniform weight
+      else if (Type ==   1) fData = mva_cpr_fele2s51b1_001;  // logfcons, linear  weight
+      else if (Type ==   2) fData = mva_cpr_fele2s51b1_002;  // logfcons, linear  weight
+      else if (Type ==   3) fData = mva_cpr_fele2s51b1_003;  // logfcons, linear  weight
       else                  { error = 1; }
     }
     else                    { error = 1; }
   }
   else if (algo == "TPR") {
+    printf(" ------ mva_data::mva_data tpr\n");
     if (ds == "DAVE") {
       if       (Type == 2)  fData = mva_trkpatrec_dave_002;
       else                  { error = 1; }
     }
-    else if (ds = "E11S5731") {
-      if       (Type == 1) fData = mva_trkpatrec_e115731_001;
+    else if (ds == "E11S5731") {
+      if       (Type == 1)  fData = mva_trkpatrec_e115731_001;
       else                  { error = 1; }
     }
-    else                    { error = 1; }
+    else if (ds == "FELE2S51B1") {
+      printf(" ------ mva_data::mva_data fele2s51b1\n");
+      if       (Type == 0)   fData = mva_tpr_fele2s51b1_000;  // logfcons, uniform weight
+      else if  (Type == 1)   fData = mva_tpr_fele2s51b1_001;  // logfcons, linear  weight
+      else if  (Type == 2)   fData = mva_tpr_fele2s51b1_002;  // logfcons, linear  weight
+      else if  (Type == 3)   fData = mva_tpr_fele2s51b1_003;  // logfcons, linear  weight
+      else                   { error = 1; }
+    }
+    else                     { error = 1; }
   }
-  else                      { error = 1; }
+  else                       { error = 1; }
 
   if (error != 0) {
     printf(" >>> ERROR in mva_data::mva_data(const char*,const char*,int): algorithm : %s dataset: %s type: %5i. BAIL OUT\n",

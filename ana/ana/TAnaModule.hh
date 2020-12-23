@@ -74,7 +74,7 @@ public:
     float    fRMax;
     float    fNdaOverNa;
     float    fNzaOverNa;
-    float    fNmaOverNa;
+    float    fNmaOverNm;
     float    fZ1;			// Z-coordinate of the first hit
     float    fWeight;
   };
@@ -93,7 +93,7 @@ public:
     TBranch*  fRMax;
     TBranch*  fNdaOverNa;
     TBranch*  fNzaOverNa;
-    TBranch*  fNmaOverNa;
+    TBranch*  fNmaOverNm;
     TBranch*  fZ1;			// Z-coordinate of the first hit
     TBranch*  fWeight;			// for background only
   };

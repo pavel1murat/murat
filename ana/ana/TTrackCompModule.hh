@@ -144,7 +144,15 @@ public:
     fDebugCut[I].fXMax = XMax;
   }
   
-  void    SetMVA          (const char* TrkRecAlgorithm, const char* Dataset, int MvaType);
+//-----------------------------------------------------------------------------
+// MVA Training Codes: 
+//
+// 0060 : PAR dPf > 0.60
+// 0070 : PAR dPf > 0.70
+// 1060 : DAR dPf > 0.60
+// 1070 : DAR dPf > 0.70
+//-----------------------------------------------------------------------------
+  void    SetMVA          (const char* Dataset, int MvaTrainingCode);
 
   void    SetWriteTmvaTree (int Algo) { fWriteTmvaTree = Algo; }
 

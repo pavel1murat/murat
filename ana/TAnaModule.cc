@@ -99,15 +99,17 @@ TAnaModule::TAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
   fLogLH   = new TEmuLogLH();
 //-----------------------------------------------------------------------------
-// multivariate techniques
+// multivariate ways of figuring out the track quality
 //-----------------------------------------------------------------------------
-  fUseMVA = 0;
-  fTprMVA = nullptr;
-  fCprMVA = nullptr;
+  fUseMVA        = 0;
+  fTrkQualMVA[0] = nullptr;
+  fTrkQualMVA[1] = nullptr;
 }
 
 //-----------------------------------------------------------------------------
 TAnaModule::~TAnaModule() {
+  if (fTrkQualMVA[0]) delete fTrkQualMVA[0];
+  if (fTrkQualMVA[1]) delete fTrkQualMVA[1];
 }
 
 //-----------------------------------------------------------------------------
@@ -834,39 +836,29 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
     tp->fMVAOut[1] = track->DaveTrkQual(); 
 
     if (fUseMVA != 0) {
+//-----------------------------------------------------------------------------
+// MVA output calculated on the fly
+//-----------------------------------------------------------------------------
       vector<float>  pmva(8);
-//-----------------------------------------------------------------------------
-// alg=0: TrkPatRec track - log(fitcons) used for training
-//-----------------------------------------------------------------------------
+
       float na = track->NActive();
       float nm = track->NMat();
 
       pmva[ 0] = na;
       pmva[ 1] = na/track->NHits();
-
-      int use_chi2d = fTmvaAlgorithmTpr / 100;
-      if      (use_chi2d == 1) pmva[2] = track->Chi2Dof();
-      else                     pmva[2] = log10(track->FitCons());
-
+      pmva[ 2] = log10(track->FitCons());
       pmva[ 3] = track->FitMomErr();
       pmva[ 4] = track->T0Err();
-      // pmva[ 5] = track->D0();
-      // pmva[ 6] = track->RMax();
+      // pmva[ 5] = track->D0();                          // low-rank, do not use
+      // pmva[ 6] = track->RMax();                        // low-rank, do not use
       pmva[ 5] = track->NDoubletsAct()/na;
       pmva[ 6] = track->NHitsAmbZero()/na;
       pmva[ 7] = track->NMatActive()/nm;
 
-      int alg = tp->fAlg;
-      
-      if      (alg == 0) {
-	if (fTmvaAlgorithmTpr >= 0) {
-	  tp->fMVAOut[1] = fTprQualMva->evalMVA(pmva);
-	}
-      }
-      else if (alg == 1) {
-	if (fTmvaAlgorithmCpr >= 0) {
-	  tp->fMVAOut[1] = fCprQualMva->evalMVA(pmva);
-	}
+      int alg = tp->fAlg;	        // alg=0:PAR  1:DAR
+	
+      if (fTrkQualMVA[alg] != nullptr) {
+	tp->fMVAOut[1] = fTrkQualMVA[alg]->fMva->evalMVA(pmva);
       }
     }
 //-----------------------------------------------------------------------------

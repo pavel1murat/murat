@@ -219,11 +219,8 @@ void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, i
 // GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
 // MVAType : 
 // ---------
-// 000-004 : log(fcons) with different weights 
-// 101-104 : chi2d      with different weights
-// 202     : chi2       training by Arpan
 //-----------------------------------------------------------------------------
-void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = -1, int CprMvaType = 202, 
+void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = -1, int CprMvaType = 1070, 
 			 int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
@@ -233,8 +230,8 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = 
   murat::m_tcm->SetPdgCode      (11);
   murat::m_tcm->SetGeneratorCode(GeneratorCode);
 
-  if (TprMvaType >= 0) murat::m_tcm->SetMVA("tpr","fele2s51b1",TprMvaType);
-  if (CprMvaType >= 0) murat::m_tcm->SetMVA("cpr","fele2s51b1",CprMvaType);
+  if (TprMvaType >= 0) murat::m_tcm->SetMVA("fele2s51b1",TprMvaType);
+  if (CprMvaType >= 0) murat::m_tcm->SetMVA("fele2s51b1",CprMvaType);
 
   if (DebugBit >= 0) {
     murat::m_tcm->SetDebugBit(DebugBit,1);

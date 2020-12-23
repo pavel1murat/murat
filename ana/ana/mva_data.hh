@@ -2,7 +2,9 @@
 #ifndef __murat_ana_mva_data_hh__
 #define __murat_ana_mva_data_hh__
 
-
+namespace mu2e { 
+  class MVATools;
+};
 
 class mva_data {
 public: 
@@ -15,11 +17,15 @@ public:
     int          fBestID;
   };
 
-  data_t  fData;
+  int              fTrainingCode;
+
+  data_t           fData;
+
+  mu2e::MVATools*  fMva;
 
   mva_data();
 
-  mva_data(const char* TrkRecAlgorithm, const char* Dataset, int Type);
+  mva_data(const char* Dataset, int MVATrainingCode);
 
   ~mva_data();
 
@@ -28,6 +34,9 @@ public:
   const char* TrackCompHistFile() { return fData.fTrackCompHistFile; }
   double      MinValue         () { return fData.fMinValue;          }
   int         BestID           () { return fData.fBestID;            }
+  int         TrainingCode     () { return fTrainingCode;            }
+
+  int         Init             ();
 };
 
 #endif

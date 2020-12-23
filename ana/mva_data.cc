@@ -1,10 +1,19 @@
-//
+///////////////////////////////////////////////////////////////////////////////
+// framework
+///////////////////////////////////////////////////////////////////////////////
+#include "fhiclcpp/ParameterSet.h"
 
+// Xerces XML Parser
+#include <xercesc/dom/DOM.hpp>
+
+#include "Mu2eUtilities/inc/MVATools.hh"
 
 #include <stdlib.h>
 #include "murat/ana/mva_data.hh"
 #include "TString.h"
 
+using std::string;
+using std::vector;
 //-----------------------------------------------------------------------------
 // v573  trained MVA's - compared to Dave's TrkQual with 0.4 cut
 // encoding of the last part of the name: (as integer)
@@ -112,65 +121,43 @@ mva_data::data_t  mva_trkpatrec_e115731_001 = {
 };
 
 //-----------------------------------------------------------------------------
-// back to training
+// 2020-12-22 back to training, default settings:
+//
+// TCut signal_cuts("(tdip>0.5)&&(tdip<1.0)&&(t0err<5)&&(fabs(p-pmc)<0.25)");
+// TCut bkg_cuts   ("(tdip>0.5)&&(tdip<1.0)&&(t0err<5)&&(p-pmc)>0.7"     );   or 0.6
+//
+// TString training_opt = "nTrain_Signal=50000:nTrain_Background=20000";
+// training_opt        += ":nTest_Signal=50000:nTest_Background=20000";
 //-----------------------------------------------------------------------------
-mva_data::data_t  mva_tpr_fele2s51b1_000 = {
-  "tpr_fele2s51b1_000",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_000.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0000.hist",        // histograms
+mva_data::data_t  mva_fele2s51b1_0070 = {
+  "fele2s51b1_0070",                                                        // name
+  "su2020/data/trk_qual_mva/MLP_weights_0070.xml",                           // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0070.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
 };
 
 
-mva_data::data_t  mva_tpr_fele2s51b1_001 = {
-  "tpr_fele2s51b1_001",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_001.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0001.hist",        // histograms
+mva_data::data_t  mva_fele2s51b1_0060 = {
+  "fele2s51b1_060",                                                      // name
+  "su2020/data/trk_qual_mva/MLP_weights_0060.xml",                           // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0060.hist",        // histograms
   0.80, 16                                                                   // cut value, ID #
 };
 
-mva_data::data_t  mva_tpr_fele2s51b1_002 = {
-  "tpr_fele2s51b1_002",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_002.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0002.hist",        // histograms
-  0.80, 16                                                                   // cut value, ID #
-};
-
-mva_data::data_t  mva_tpr_fele2s51b1_003 = {
-  "tpr_fele2s51b1_001",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_tpr_logfcons_003.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0003.hist",        // histograms
-  0.80, 16                                                                  // cut value, ID #
-};
-
-mva_data::data_t  mva_cpr_fele2s51b1_000 = {
-  "cpr_fele2s51b1_000",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_000.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1000.hist",        // histograms
+mva_data::data_t  mva_fele2s51b1_1060 = {                                 // 
+  "cpr_fele2s51b1_1060",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_1060.xml",             // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1060.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
 };
 
-
-mva_data::data_t  mva_cpr_fele2s51b1_001 = {
-  "cpr_fele2s51b1_001",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_001.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1001.hist",        // histograms
+mva_data::data_t  mva_fele2s51b1_1070 = {
+  "fele2s51b1_1070",                                                     // name
+  "su2020/data/trk_qual_mva/MLP_weights_1070.xml",                           // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1070.hist",        // histograms
   0.40, 8                                                                   // cut value, ID #
 };
 
-mva_data::data_t  mva_cpr_fele2s51b1_002 = {
-  "cpr_fele2s51b1_002",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_002.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1002.hist",        // histograms
-  0.40, 8                                                                   // cut value, ID #
-};
-
-mva_data::data_t  mva_cpr_fele2s51b1_003 = {
-  "cpr_fele2s51b1_003",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_cpr_logfcons_003.xml",             // location of XML weights
-  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1003.hist",        // histograms
-  0.80, 16                                                                  // cut value, ID #
-};
 
 //-----------------------------------------------------------------------------
 mva_data::~mva_data() {
@@ -183,70 +170,67 @@ mva_data::mva_data() {
 //-----------------------------------------------------------------------------
 // CalPatRec ANN training sets
 // ---------------------------
-// 000-004 : log(fcons) with different weights 
-// 101-104 : chi2d      with different weights
-// 202     : chi2       training by Arpan
+// Training Codes: 
+//
+// 0060 : PAR dPf > 0.60
+// 0070 : PAR dPf > 0.70
+// 1060 : DAR dPf > 0.60
+// 1070 : DAR dPf > 0.70
 //-----------------------------------------------------------------------------
-mva_data::mva_data(const char* TrkRecAlgorithm, const char* Dataset, int Type) {
+mva_data::mva_data(const char* Dataset, int TrainingCode) {
 
   int error(0);
+
+  fTrainingCode = TrainingCode;
   
   TString ds = Dataset;
   ds.ToUpper();
 
-  TString algo = TrkRecAlgorithm;
-  algo.ToUpper();
-
-  if (algo == "CPR") {
-    if (ds == "E11S5731") {
-      if      (Type ==   0) fData = mva_calpatrec_e11s5731_000;
-      else if (Type ==   1) fData = mva_calpatrec_e11s5731_001;
-      else if (Type ==   2) fData = mva_calpatrec_e11s5731_002;
-      else if (Type ==   3) fData = mva_calpatrec_e11s5731_003;
-      else if (Type ==   4) fData = mva_calpatrec_e11s5731_004;
-      else if (Type == 100) fData = mva_calpatrec_e11s5731_100;
-      else if (Type == 101) fData = mva_calpatrec_e11s5731_101;
-      else if (Type == 102) fData = mva_calpatrec_e11s5731_102;
-      else if (Type == 103) fData = mva_calpatrec_e11s5731_103;
-      else if (Type == 104) fData = mva_calpatrec_e11s5731_104;
-      else if (Type == 202) fData = mva_calpatrec_e11s5731_202;
-      else if (Type == 204) fData = mva_calpatrec_e11s5731_204;
-      else                  { error = 1; }
-    }
-    else if (ds = "FELE2S51B1") {
-      if      (Type ==   0) fData = mva_cpr_fele2s51b1_000;  // logfcons, uniform weight
-      else if (Type ==   1) fData = mva_cpr_fele2s51b1_001;  // logfcons, linear  weight
-      else if (Type ==   2) fData = mva_cpr_fele2s51b1_002;  // logfcons, linear  weight
-      else if (Type ==   3) fData = mva_cpr_fele2s51b1_003;  // logfcons, linear  weight
-      else                  { error = 1; }
-    }
-    else                    { error = 1; }
+  if (ds == "E11S5731") {
+    if      (TrainingCode ==   0) fData = mva_calpatrec_e11s5731_000;
+    else if (TrainingCode ==   1) fData = mva_calpatrec_e11s5731_001;
+    else if (TrainingCode ==   2) fData = mva_calpatrec_e11s5731_002;
+    else if (TrainingCode ==   3) fData = mva_calpatrec_e11s5731_003;
+    else if (TrainingCode ==   4) fData = mva_calpatrec_e11s5731_004;
+    else if (TrainingCode == 100) fData = mva_calpatrec_e11s5731_100;
+    else if (TrainingCode == 101) fData = mva_calpatrec_e11s5731_101;
+    else if (TrainingCode == 102) fData = mva_calpatrec_e11s5731_102;
+    else if (TrainingCode == 103) fData = mva_calpatrec_e11s5731_103;
+    else if (TrainingCode == 104) fData = mva_calpatrec_e11s5731_104;
+    else if (TrainingCode == 202) fData = mva_calpatrec_e11s5731_202;
+    else if (TrainingCode == 204) fData = mva_calpatrec_e11s5731_204;
+    else                  { error = 1; }
   }
-  else if (algo == "TPR") {
-    printf(" ------ mva_data::mva_data tpr\n");
-    if (ds == "DAVE") {
-      if       (Type == 2)  fData = mva_trkpatrec_dave_002;
-      else                  { error = 1; }
-    }
-    else if (ds == "E11S5731") {
-      if       (Type == 1)  fData = mva_trkpatrec_e115731_001;
-      else                  { error = 1; }
-    }
-    else if (ds == "FELE2S51B1") {
-      printf(" ------ mva_data::mva_data fele2s51b1\n");
-      if       (Type == 0)   fData = mva_tpr_fele2s51b1_000;  // logfcons, uniform weight
-      else if  (Type == 1)   fData = mva_tpr_fele2s51b1_001;  // logfcons, linear  weight
-      else if  (Type == 2)   fData = mva_tpr_fele2s51b1_002;  // logfcons, linear  weight
-      else if  (Type == 3)   fData = mva_tpr_fele2s51b1_003;  // logfcons, linear  weight
-      else                   { error = 1; }
-    }
-    else                     { error = 1; }
+  else if (ds = "FELE2S51B1") {
+    if      (TrainingCode ==   60) fData = mva_fele2s51b1_0060;  // PAR, logfcons, uniform weight, dPf > 0.6
+    else if (TrainingCode ==   70) fData = mva_fele2s51b1_0070;  // PAR, logfcons, uniform weight, dPf > 0.7
+    else if (TrainingCode == 1060) fData = mva_fele2s51b1_1060;  // DAR, logfcons, uniform weight, dPf > 0.6
+    else if (TrainingCode == 1070) fData = mva_fele2s51b1_1070;  // DAR, logfcons, uniform weight, dPf > 0.7
+    else                  { error = 1; }
   }
-  else                       { error = 1; }
+  else                    { error = 1; }
 
   if (error != 0) {
-    printf(" >>> ERROR in mva_data::mva_data(const char*,const char*,int): algorithm : %s dataset: %s type: %5i. BAIL OUT\n",
-	   TrkRecAlgorithm,Dataset,Type);
+    printf(" >>> ERROR in mva_data::mva_data(const char*,const char*,int): algorithm : %s training code: %5i. BAIL OUT\n",
+	   Dataset,TrainingCode);
   }
 }
 
+
+
+//-----------------------------------------------------------------------------
+int mva_data::Init() {
+  string s1(this->XmlWeightsFile());
+
+  fhicl::ParameterSet pset;
+
+  printf(">>> [mva_data::Init] Init MVA from %s\n",s1.data());
+  pset.put<string>("MVAWeights",s1);
+
+  fMva = new mu2e::MVATools(pset);
+
+  fMva->initMVA();
+  fMva->showMVA();
+
+  return 0;
+}

@@ -60,12 +60,15 @@ public:
 //  data members
 //-----------------------------------------------------------------------------
 public:
-  struct TmvaTrainingData_t {
+
+  struct TmvaTrainData_t {
     float    fP;
     float    fPMC;
     float    fTanDip;
     float    fNActive;
     float    fNaFract;
+    float    fNDoublets;                // total number of doublets
+    float    fNDa;                      // number of doublets with all hits active
     float    fChi2Dof;
     float    fFitCons;
     float    fMomErr;
@@ -75,16 +78,19 @@ public:
     float    fNdaOverNa;
     float    fNzaOverNa;
     float    fNmaOverNm;
+    float    fNdaOverNd;
     float    fZ1;			// Z-coordinate of the first hit
     float    fWeight;
   };
 
-  struct TmvaTrainingBranches_t {
+  struct TmvaTrainBranches_t {
     TBranch*  fP;
     TBranch*  fPMC;
     TBranch*  fTanDip;
     TBranch*  fNActive;
     TBranch*  fNaFract;
+    TBranch*  fNDoublets;
+    TBranch*  fNDa;
     TBranch*  fChi2Dof;
     TBranch*  fFitCons;
     TBranch*  fMomErr;
@@ -94,6 +100,7 @@ public:
     TBranch*  fNdaOverNa;
     TBranch*  fNzaOverNa;
     TBranch*  fNmaOverNm;
+    TBranch*  fNdaOverNd;
     TBranch*  fZ1;			// Z-coordinate of the first hit
     TBranch*  fWeight;			// for background only
   };
@@ -125,21 +132,18 @@ public:
   int                     fTmvaAlgorithmCpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
 
   TFile*                  fTmvaFile;
-  TTree*                  fSigTree;
+  TTree*                  fTmvaTree;
 
-  TmvaTrainingData_t      fTmvaData;
-  TmvaTrainingBranches_t  fSigBranch;
+  TmvaTrainData_t         fTmvaData;
+  TmvaTrainBranches_t     fTmvaBranch;
 
   int                     fUseMVA;
   int                     fNMVA;	// number of MVA classifiers used for tracks of the same type
 //-----------------------------------------------------------------------------
 // MVA-based classifiers for TrkPatRec and CalPatRec tracks separately
 //-----------------------------------------------------------------------------
-  mva_data*               fTprMVA;
-  mva_data*               fCprMVA;
+  mva_data*               fTrkQualMVA[2];   // [0]:PAR(TrkPatRec), [1]:DAR(CalPatRec)
 
-  mu2e::MVATools*         fTprQualMva;
-  mu2e::MVATools*         fCprQualMva;
 ///-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

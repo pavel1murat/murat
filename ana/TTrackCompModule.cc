@@ -40,13 +40,6 @@
 //-----------------------------------------------------------------------------
 #include "murat/ana/mva_data.hh"
 
-// framework
-#include "fhiclcpp/ParameterSet.h"
-
-// Xerces XML Parser
-#include <xercesc/dom/DOM.hpp>
-
-#include "Mu2eUtilities/inc/MVATools.hh"
 #include <string>
 #include "math.h"
 
@@ -135,39 +128,33 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 TTrackCompModule::~TTrackCompModule() {
   delete fLogLH;
   for (int i=0; i<fNID; i++) delete fTrackID[i];
-
-  delete fTprMVA;
-  delete fCprMVA;
 }
 
 //-----------------------------------------------------------------------------
 // TrkRecAlgorithm : "cpr" or "tpr"
 // TrainingDataset : just 'fele2s51b1' - goes into a file name
-// MVAType : 
+// MVATrainingCode : 
 // ---------
-// 000-004 : log(fcons) with different weights 
-// 100-104 : chi2d      with different weights
-// 202     : chi2       training by Arpan
+// 0060 : PAR dPf > 0.60
+// 0070 : PAR dPf > 0.70
+// 1060 : DAR dPf > 0.60
+// 1070 : DAR dPf > 0.70
 //-----------------------------------------------------------------------------
-void TTrackCompModule::SetMVA(const char* TrkRecAlgorithm, const char* TrainingDataset, int MvaType) {
+void TTrackCompModule::SetMVA(const char* TrainingDataset, int MVATrainingCode) {
 
-  printf(" [TTrackCompModule::SetMVA] TrkRecAlgorithm:%s  TrainingDataset:%s MvaType:%i\n",
-	 TrkRecAlgorithm,TrainingDataset,MvaType);
+  printf(" [TTrackCompModule::SetMVA] TrainingDataset:%s MvaType:%i\n", TrainingDataset,MVATrainingCode);
 
   fUseMVA         = 1;
 
-  TString trk_alg = TrkRecAlgorithm;
-  trk_alg.ToUpper();
-
-  if (trk_alg == "CPR") {
-    if (fCprMVA) delete fCprMVA;
-    fCprMVA           = new mva_data("CPR",TrainingDataset,MvaType);
-    fTmvaAlgorithmCpr = MvaType;
+  if (MVATrainingCode >= 1000) {
+    if (fTrkQualMVA[1]) delete fTrkQualMVA[1];
+    fTrkQualMVA[1]           = new mva_data(TrainingDataset,MVATrainingCode);
+    fTmvaAlgorithmCpr        = MVATrainingCode % 1000;
   }
-  else if (trk_alg == "TPR") {
-    if (fTprMVA) delete fTprMVA;
-    fTprMVA           = new mva_data("TPR",TrainingDataset,MvaType);
-    fTmvaAlgorithmTpr = MvaType;
+  else if (MVATrainingCode >= 0) {
+    if (fTrkQualMVA[0]) delete fTrkQualMVA[0];
+    fTrkQualMVA[0]           = new mva_data(TrainingDataset,MVATrainingCode);
+    fTmvaAlgorithmTpr        = MVATrainingCode % 1000;
   }
 }
 
@@ -187,51 +174,41 @@ int TTrackCompModule::BeginJob() {
   RegisterDataBlock("HelixBlock"             , "TStnHelixBlock"   , &fHelixBlock    );
   RegisterDataBlock("SpmcBlockVDet"          , "TStepPointMCBlock", &fSpmcBlockVDet );
 //-----------------------------------------------------------------------------
-// for validation purposes
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
   BookHistograms();
 //-----------------------------------------------------------------------------
-// initialize likelihood histograms
+// fWriteTmvaTree = -1 : do not write
+//                =  0 : write PAR resolver training tree
+//                =  1 : write DAR resolver training tree
 //-----------------------------------------------------------------------------
   if (fWriteTmvaTree >= 0) {
     TDirectory* dir = gDirectory;
 
     const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
 
-    int algo = fWriteTmvaTree;
+    fTmvaFile  = new TFile(Form("%s.tmva_training_%04i.root",dsname,1000*fWriteTmvaTree),"recreate");
+    fTmvaTree  = new TTree("tmva_training_tree","TMVA Training Tree");
 
-    if      (algo == 0) {
-      fTmvaFile  = new TFile(Form("%s.tmva_training_tpr.root",dsname),"recreate");
-    }
-    else if (algo == 1) {
-      fTmvaFile  = new TFile(Form("%s.tmva_training_cpr.root",dsname),"recreate");
-    }
-
-    fSigTree  = new TTree("tmva_training_tree","TMVA Signal Tree");
-
-    //    fBgrTree  = new TTree("background","TMVA Background Tree");
-
-					// signal tree
-
-    fSigBranch.fP          = fSigTree->Branch("p"       ,&fTmvaData.fP         ,"F");
-    fSigBranch.fPMC        = fSigTree->Branch("pmc"     ,&fTmvaData.fPMC       ,"F");
-    fSigBranch.fTanDip     = fSigTree->Branch("tdip"    ,&fTmvaData.fTanDip    ,"F");
-    fSigBranch.fNActive    = fSigTree->Branch("nactive" ,&fTmvaData.fNActive   ,"F");
-    fSigBranch.fNaFract    = fSigTree->Branch("nafract" ,&fTmvaData.fNaFract   ,"F");
-    fSigBranch.fChi2Dof    = fSigTree->Branch("chi2d"   ,&fTmvaData.fChi2Dof   ,"F");
-    fSigBranch.fFitCons    = fSigTree->Branch("fcons"   ,&fTmvaData.fFitCons   ,"F");
-    fSigBranch.fMomErr     = fSigTree->Branch("momerr"  ,&fTmvaData.fMomErr    ,"F");
-    fSigBranch.fT0Err      = fSigTree->Branch("t0err"   ,&fTmvaData.fT0Err     ,"F");
-    fSigBranch.fD0         = fSigTree->Branch("d0"      ,&fTmvaData.fD0        ,"F");
-    fSigBranch.fRMax       = fSigTree->Branch("rmax"    ,&fTmvaData.fRMax      ,"F");
-    fSigBranch.fNdaOverNa  = fSigTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa ,"F");
-    fSigBranch.fNzaOverNa  = fSigTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa ,"F");
-    fSigBranch.fNmaOverNm  = fSigTree->Branch("nma_o_nm",&fTmvaData.fNmaOverNm ,"F");
-    fSigBranch.fZ1         = fSigTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
-    fSigBranch.fWeight     = fSigTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
+    fTmvaBranch.fP          = fTmvaTree->Branch("p"       ,&fTmvaData.fP         ,"F");
+    fTmvaBranch.fPMC        = fTmvaTree->Branch("pmc"     ,&fTmvaData.fPMC       ,"F");
+    fTmvaBranch.fTanDip     = fTmvaTree->Branch("tdip"    ,&fTmvaData.fTanDip    ,"F");
+    fTmvaBranch.fNActive    = fTmvaTree->Branch("nactive" ,&fTmvaData.fNActive   ,"F");
+    fTmvaBranch.fNaFract    = fTmvaTree->Branch("nafract" ,&fTmvaData.fNaFract   ,"F");
+    fTmvaBranch.fNDoublets  = fTmvaTree->Branch("nd"      ,&fTmvaData.fNActive   ,"F");
+    fTmvaBranch.fNDa        = fTmvaTree->Branch("nda"     ,&fTmvaData.fNaFract   ,"F");
+    fTmvaBranch.fChi2Dof    = fTmvaTree->Branch("chi2d"   ,&fTmvaData.fChi2Dof   ,"F");
+    fTmvaBranch.fFitCons    = fTmvaTree->Branch("fcons"   ,&fTmvaData.fFitCons   ,"F");
+    fTmvaBranch.fMomErr     = fTmvaTree->Branch("momerr"  ,&fTmvaData.fMomErr    ,"F");
+    fTmvaBranch.fT0Err      = fTmvaTree->Branch("t0err"   ,&fTmvaData.fT0Err     ,"F");
+    fTmvaBranch.fD0         = fTmvaTree->Branch("d0"      ,&fTmvaData.fD0        ,"F");
+    fTmvaBranch.fRMax       = fTmvaTree->Branch("rmax"    ,&fTmvaData.fRMax      ,"F");
+    fTmvaBranch.fNdaOverNa  = fTmvaTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa ,"F");
+    fTmvaBranch.fNzaOverNa  = fTmvaTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa ,"F");
+    fTmvaBranch.fNmaOverNm  = fTmvaTree->Branch("nma_o_nm",&fTmvaData.fNmaOverNm ,"F");
+    fTmvaBranch.fNdaOverNd  = fTmvaTree->Branch("nda_o_nd",&fTmvaData.fNdaOverNd ,"F");
+    fTmvaBranch.fZ1         = fTmvaTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
+    fTmvaBranch.fWeight     = fTmvaTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
 
     dir->cd();
   }
@@ -242,28 +219,23 @@ int TTrackCompModule::BeginJob() {
   fBestID[1] = -1;
 
   if (fUseMVA) {
-    fhicl::ParameterSet pset_tpr, pset_cpr;
-
     fNMVA = 1;
 
-    if (fTprMVA) {
-      string              s1(fTprMVA->XmlWeightsFile());
-      printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
-      pset_tpr.put<string>("MVAWeights",s1);
-      fTprQualMva = new mu2e::MVATools(pset_tpr);
-      fTprQualMva->initMVA();
-      fTprQualMva->showMVA();
-      fBestID[0]      = fTprMVA->BestID();		  // Dave's default: DaveTrkQual > 0.4
+    if (fTrkQualMVA[0]) {
+      fTrkQualMVA[0]->Init();
+
+      // string              s1(fTrkQualMVA[0]->XmlWeightsFile());
+      // printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
+      // pset_tpr.put<string>("MVAWeights",s1);
+      // fTprQualMva = new mu2e::MVATools(pset_tpr);
+      // fTprQualMva->initMVA();
+      // fTprQualMva->showMVA();
+      fBestID[0] = fTrkQualMVA[0]->BestID();		  // Dave's default: DaveTrkQual > 0.4
     }
 
-    if (fCprMVA) { 
-      string              s2(fCprMVA->XmlWeightsFile());
-      printf(">>> [TTrackCompModule::BeginJob] Init CalPatRec MVA from %s\n",s2.data());
-      pset_cpr.put<string>("MVAWeights",s2);
-      fCprQualMva = new mu2e::MVATools(pset_cpr);
-      fCprQualMva->initMVA();
-      fCprQualMva->showMVA();
-      fBestID[1]      = fCprMVA->BestID();		  // KDAR     : CprQual     > 0.85
+    if (fTrkQualMVA[1]) { 
+      fTrkQualMVA[1]->Init();
+      fBestID[1] = fTrkQualMVA[1]->BestID();		  // KDAR     : CprQual     > 0.85
     }
   }
 //-----------------------------------------------------------------------------
@@ -594,19 +566,22 @@ int TTrackCompModule::FillTmvaTree() {
 
   if (fTrackBlock[loc]->NTracks() != 1) return rc;
 
-					// first KDAR track
-
+//-----------------------------------------------------------------------------
+// use first track
+//-----------------------------------------------------------------------------
   TStnTrack* trk = fTrackBlock[loc]->Track(0);
   TrackPar_t* tp = &fTrackPar[loc][0];
 
-  float na       = trk->NActive();
-  float nm       = trk->NMat();
+  float na              = trk->NActive();
+  float nm              = trk->NMat();
 
   fTmvaData.fP          = tp->fP;
   fTmvaData.fPMC        = trk->fPFront;
   fTmvaData.fTanDip     = trk->TanDip();
   fTmvaData.fNActive    = na;
   fTmvaData.fNaFract    = na/trk->NHits();
+  fTmvaData.fNDoublets  = trk->NDoublets();
+  fTmvaData.fNDa        = trk->NDoubletsAct();
   fTmvaData.fChi2Dof    = trk->Chi2Dof();
   fTmvaData.fFitCons    = trk->FitCons();
   fTmvaData.fMomErr     = trk->FitMomErr();
@@ -619,16 +594,7 @@ int TTrackCompModule::FillTmvaTree() {
   fTmvaData.fZ1         = trk->fZ1;
   fTmvaData.fWeight     = 1.;
 
-// try one! // there should be two trees - signal and background
-// 
-//   if (tp->fDpF > 0.7) {
-//     fBgrTree->Fill();
-//   }
-//   else if (fabs(tp->fDpF) < 0.25) {
-//     fSigTree->Fill();
-//   }
-
-  fSigTree->Fill();
+  fTmvaTree->Fill();
 
   return rc;
 }
@@ -1331,8 +1297,7 @@ int TTrackCompModule::EndJob() {
     fTmvaFile->Write();
     delete fTmvaFile;
     fTmvaFile  = 0;
-    fSigTree   = 0;
-    //    fBgrTree   = 0;
+    fTmvaTree  = 0;
   }
 
   return 0;

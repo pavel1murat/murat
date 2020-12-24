@@ -62,8 +62,8 @@ TAnaModule::TAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
   fMbTime      = 1695.;
-
-  fMinT0       = 0.; // analysis cuts
+  fMinT0       = 0.;                   // analysis cuts
+  fApplyCorr   = 1;                    // by default, corfect momentum and delta(T)     
 //-----------------------------------------------------------------------------
 // track quality : box cuts
 //-----------------------------------------------------------------------------
@@ -90,20 +90,24 @@ TAnaModule::TAnaModule(const char* name, const char* title):
   fTrackID_MVA->SetMinD0     (-100.);
   fTrackID_MVA->SetMaxD0     ( 100.);
 
-  int mask = TStnTrackID::kTrkQualBit | TStnTrackID::kD0Bit | TStnTrackID::kTanDipBit | TStnTrackID::kRMaxBit | TStnTrackID::kT0Bit ;
+  int mask = TStnTrackID::kTrkQualBit | TStnTrackID::kD0Bit | TStnTrackID::kTanDipBit | TStnTrackID::kT0Bit ;
   fTrackID_MVA->SetUseMask(mask);
 
-  fNID     = 2;  			// BOX and MVA
+  fNID           = 2;  			// BOX and MVA
 //-----------------------------------------------------------------------------
 // particle ID
 //-----------------------------------------------------------------------------
-  fLogLH   = new TEmuLogLH();
+  fLogLH         = new TEmuLogLH();
 //-----------------------------------------------------------------------------
 // multivariate ways of figuring out the track quality
 //-----------------------------------------------------------------------------
   fUseMVA        = 0;
   fTrkQualMVA[0] = nullptr;
   fTrkQualMVA[1] = nullptr;
+//-----------------------------------------------------------------------------
+// TStntuple 
+//-----------------------------------------------------------------------------
+  fStnt          = TStntuple::Instance();
 }
 
 //-----------------------------------------------------------------------------
@@ -203,6 +207,7 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fP[2]       ,"p_2"      ,Form("%s: Track P(total)[1]" ,Folder),2000,   0  ,200. ,Folder);
   HBook1F(Hist->fP0         ,"p0"       ,Form("%s: Track P(Z0)"       ,Folder),1000,   0  ,200. ,Folder);
   HBook1F(Hist->fP2         ,"p2"       ,Form("%s: Track P(z=-1540)"  ,Folder),1000,   0  ,200. ,Folder);
+  HBook1F(Hist->fPDio       ,"pdio"     ,Form("%s: Track P Wt=LL(DIO)",Folder), 100, 100  ,105. ,Folder);
 //-----------------------------------------------------------------------------
   HBook1F(Hist->fFitMomErr  ,"momerr"   ,Form("%s: Track FitMomError" ,Folder), 200,   0  ,  1. ,Folder);
   HBook1F(Hist->fPFront     ,"pf"       ,Form("%s: Track P(front)   " ,Folder), 400,  90  ,110. ,Folder);
@@ -497,9 +502,11 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
   Hist->fP[0]->Fill (Tp->fP,Weight);
   Hist->fP[1]->Fill (Tp->fP,Weight);
   Hist->fP[2]->Fill (Tp->fP,Weight);
-					// fP0: momentum in the first point,  fP2 - in the last
+					// fP0: uncorrected momentum in the first point,  fP2 - in the last
   Hist->fP0->  Fill (Track->fP0,Weight);
   Hist->fP2->  Fill (Track->fP2,Weight);
+
+  Hist->fPDio->  Fill (Tp->fP,Tp->fDioLLWt);     // fixed for debugging
 
   //  Hist->fPDio->Fill(Tp->fP,Tp->fDioWt);
 
@@ -663,33 +670,23 @@ void TAnaModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* Trk
 }
 
 //-----------------------------------------------------------------------------
-int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  , 
-			     TStnClusterBlock*         ClusterBlock, 
-			     TrackPar_t*       TrackPar    ,
-			     SimPar_t*         SimPar      ) {
+// on input: TrackPar->fAlg = 0: PAR, =1: DAR
+//-----------------------------------------------------------------------------
+int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  , 
+			     TStnClusterBlock*   ClusterBlock, 
+			     TrackPar_t*         TrackPar    ,
+			     SimPar_t*           SimPar      ) {
   TrackPar_t*           tp;
   TStnTrack*            track;
   int                   track_type(-999);
   double                xs;
   TEmuLogLH::PidData_t  dat;
-  static int            printed(0);
+  //  static int            printed(0);
 //-----------------------------------------------------------------------------
 // momentum corrections for KPAR and KDAR
 //-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0. , 0. } ; // CD3: { 0.049, 0.020 };
-  const double kDtTcmCorr   [2] = { 0. , 0. } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
-
-  const char* block_name = TrackBlock->GetNode()->GetName();
-
-  track_type = 0;
-  if      (strcmp(block_name,"TrackBlockPar") == 0) track_type = 0;
-  else if (strcmp(block_name,"TrackBlockDar") == 0) track_type = 1;
-  else {
-    if (printed <= 10) {
-      Error("murat::TAnaModule::InitTrackPar",Form("COULD BE IN TROUBLE: unknown track block: %s",block_name));
-      printed++;
-    }
-  }
+  const double kMomentumCorr[2] = { 0.038 , 0.033 } ; // SU2020 // CD3: { 0.049, 0.020 };
+  const double kDtTcmCorr   [2] = { 0.    , 0.    } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
 //-----------------------------------------------------------------------------
 // loop over tracks
 //-----------------------------------------------------------------------------
@@ -698,6 +695,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
   for (int itrk=0; itrk<ntrk; itrk++) {
     tp             = TrackPar+itrk;
     track          = TrackBlock->Track(itrk);
+    track_type     = tp->fAlg;
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -718,11 +716,8 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
     tp->fNDPl = ndiff;
 //-----------------------------------------------------------------------------
 // in this scheme correction is set right before the call
-// in case of MergePatRec use BestAlg - 
 //-----------------------------------------------------------------------------
-    if (track_type == 2) track_type = track->BestAlg();
-
-    tp->fP     = track->fP0    +kMomentumCorr[track_type];		// correcting
+    if (fApplyCorr != 0) tp->fP = track->fP0 + kMomentumCorr[track_type]; 
 //-----------------------------------------------------------------------------
 // hits on virtual detectors
 //-----------------------------------------------------------------------------
@@ -798,8 +793,8 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
 //-----------------------------------------------------------------------------
 // v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
 //-----------------------------------------------------------------------------
-      tp->fDt  = vr->fDt ; // v4_2_4: - 0.22; // - 1.;
-      if (track_type >= 0) tp->fDt  -= kDtTcmCorr[track_type];
+      tp->fDt  = vr->fDt ;                                       // v4_2_4: - 0.22; // - 1.;
+      if (fApplyCorr != 0) tp->fDt  -= kDtTcmCorr[track_type];
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
@@ -837,7 +832,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
 
     if (fUseMVA != 0) {
 //-----------------------------------------------------------------------------
-// MVA output calculated on the fly
+// MVA output calculated on the fly - in principle, should be charge-symmetric
 //-----------------------------------------------------------------------------
       vector<float>  pmva(8);
 
@@ -849,16 +844,17 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*           TrackBlock  ,
       pmva[ 2] = log10(track->FitCons());
       pmva[ 3] = track->FitMomErr();
       pmva[ 4] = track->T0Err();
-      // pmva[ 5] = track->D0();                          // low-rank, do not use
-      // pmva[ 6] = track->RMax();                        // low-rank, do not use
       pmva[ 5] = track->NDoubletsAct()/na;
       pmva[ 6] = track->NHitsAmbZero()/na;
       pmva[ 7] = track->NMatActive()/nm;
+      // pmva[ 8] = track->D0();                          // low-rank, do not use
+      // pmva[ 9] = track->RMax();                        // low-rank, do not use
 
       int alg = tp->fAlg;	        // alg=0:PAR  1:DAR
 	
       if (fTrkQualMVA[alg] != nullptr) {
 	tp->fMVAOut[1] = fTrkQualMVA[alg]->fMva->evalMVA(pmva);
+	track->SetTmp(0,tp->fMVAOut[1]);
       }
     }
 //-----------------------------------------------------------------------------

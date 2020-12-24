@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // compare track fitting with two different ambiguity resolvers
+// 2020-12-24: this module will not do track ID properly if run on events with tracks of both signs
 //
 // use of tmp:
 //
@@ -60,55 +61,54 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
   fTrackBlockName[0] = "TrackBlockPar";
   fTrackBlockName[1] = "TrackBlockDar";
 //-----------------------------------------------------------------------------
-// TrackID[0] : "SetC"
-// i = 1..6 : cut on DaveTrkQual > 0.1*i instead
-// fTrackID[1-19] - check MVA
+// TrackID[0]     : Michael's cuts
+// fTrackID[1-19] : cut on MVA-based TrkQual with the step of 0.05
 //-----------------------------------------------------------------------------
-  fNID  = 20;  // this is the limit ....
+  fBestID[0] =  1;                      // default best for PAR tracks
+  fBestID[1] =  0;                      // default best for DAR tracks 
+
+  fNID       = 20;                      // this is the limit ....
   for (int i=0; i<fNID; i++) {
     fTrackID[i] = new TStnTrackID();
-    if (i > 0) {
+    if (i == 0) {
+      fTrackID[0]->SetMaxChi2Dof(4. );
+      // fTrac[0]RMC->SetMaxT0Err  (1.5);
+      // fTrac[0]RMC->SetMaxMomErr (0.4);
+      fTrackID[0]->SetMaxT0Err  (1.3);
+      fTrackID[0]->SetMaxMomErr (0.3);
+      fTrackID[0]->SetMinNActive(20 );
+      fTrackID[0]->SetMaxDNa    ( 5 );
+      fTrackID[0]->SetMinTanDip (0.5);
+      fTrackID[0]->SetMaxTanDip (1. );
+      fTrackID[0]->SetMinD0     (-100.);
+      fTrackID[0]->SetMaxD0     ( 100.);
+
+      int mask = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kT0Bit     | 
+	         TStnTrackID::kT0ErrBit   | TStnTrackID::kMomErrBit  | TStnTrackID::kTanDipBit | 
+	         TStnTrackID::kD0Bit      | TStnTrackID::kRMaxBit    | TStnTrackID::kDNaBit    ;
+
+      fTrackID[0]->SetUseMask(mask);
+    }
+    else {                                  // i > 0: MVA-based ones
       fTrackID[i]->SetMaxMomErr (100);
       fTrackID[i]->SetMaxT0Err  (100);
       fTrackID[i]->SetMinNActive( -1);
-      fTrackID[i]->SetMinFitCons(-1.);
+      fTrackID[i]->SetMinFitCons( -1);
+      fTrackID[i]->SetMinTanDip (0.5);
+      fTrackID[i]->SetMaxTanDip (1.0);
       fTrackID[i]->SetMinTrkQual(0.05*i);
+      fTrackID[i]->SetMinD0     (-100.);
+      fTrackID[i]->SetMaxD0     ( 100.);
     }
   }
 //-----------------------------------------------------------------------------
 // TStntuple 
 //-----------------------------------------------------------------------------
-  fStnt = TStntuple::Instance();
-
-//-----------------------------------------------------------------------------
-// track ID for RMC background estimates
-//-----------------------------------------------------------------------------
-  fTrackID_RMC = new TStnTrackID();
-
-  fTrackID_RMC->SetMaxChi2Dof(4. );
-  // fTrackID_RMC->SetMaxT0Err  (1.5);
-  // fTrackID_RMC->SetMaxMomErr (0.4);
-  fTrackID_RMC->SetMaxT0Err  (1.3);
-  fTrackID_RMC->SetMaxMomErr (0.3);
-  fTrackID_RMC->SetMinNActive(20 );
-  fTrackID_RMC->SetMaxDNa    ( 5 );
-  fTrackID_RMC->SetMinTanDip (1./sqrt(3.));
-  fTrackID_RMC->SetMaxTanDip (1.5);
-  fTrackID_RMC->SetMinD0     (-100.);
-  fTrackID_RMC->SetMaxD0     ( 100.);
-
-  int mask = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kT0Bit     | 
-             TStnTrackID::kT0ErrBit   | TStnTrackID::kMomErrBit  | TStnTrackID::kTanDipBit | 
-             TStnTrackID::kD0Bit      | TStnTrackID::kRMaxBit    | TStnTrackID::kDNaBit    ;
-
-  fTrackID_RMC->SetUseMask(mask);
-
   fKMaxRMC        = 90.;
 //-----------------------------------------------------------------------------
 // 000 : no Z, use chi2d 
 //-----------------------------------------------------------------------------
   fMinETrig       = 50.;
-  fLogLH          = new TEmuLogLH();
 //-----------------------------------------------------------------------------
 // debugging information
 //-----------------------------------------------------------------------------
@@ -126,7 +126,6 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 
 //-----------------------------------------------------------------------------
 TTrackCompModule::~TTrackCompModule() {
-  delete fLogLH;
   for (int i=0; i<fNID; i++) delete fTrackID[i];
 }
 
@@ -215,22 +214,12 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // init two MVA-based classifiers - KPAR (TPR) and KDAR (CPR) 
 //-----------------------------------------------------------------------------
-  fBestID[0] = -1;
-  fBestID[1] = -1;
-
   if (fUseMVA) {
     fNMVA = 1;
 
     if (fTrkQualMVA[0]) {
       fTrkQualMVA[0]->Init();
-
-      // string              s1(fTrkQualMVA[0]->XmlWeightsFile());
-      // printf(">>> [TTrackCompModule::BeginJob] Init TrkPatRec MVA from %s\n",s1.data());
-      // pset_tpr.put<string>("MVAWeights",s1);
-      // fTprQualMva = new mu2e::MVATools(pset_tpr);
-      // fTprQualMva->initMVA();
-      // fTprQualMva->showMVA();
-      fBestID[0] = fTrkQualMVA[0]->BestID();		  // Dave's default: DaveTrkQual > 0.4
+      fBestID[0] = fTrkQualMVA[0]->BestID();		  // Dave's default: DaveTrkQual > 0.8
     }
 
     if (fTrkQualMVA[1]) { 
@@ -411,10 +400,13 @@ void TTrackCompModule::BookHistograms() {
   track_selection[173] = new TString("PAR+ tracks with final selections and process-defined weight");
   track_selection[174] = new TString("PAR- tracks with final selections and process-defined weight");
 
+  track_selection[175] = new TString("PAR- tracks with final selections and DIO weight");
+  track_selection[176] = new TString("PAR- tracks with final selections and DIO weight and 103.5 < P < 105.0");
+
   track_selection[177] = new TString("cosmics+: #171 + 90 < p < 93");
   track_selection[178] = new TString("cosmics-: #172 + 90 < p < 93");
 
-  track_selection[179] = new TString("PAR- tracks with final selections and DIO weight");
+  track_selection[179] = nullptr;
 
   track_selection[180] = new TString("PAR+ tracks all");                                       
   track_selection[181] = new TString("PAR+ tracks N(active) > 20");                                       
@@ -484,10 +476,13 @@ void TTrackCompModule::BookHistograms() {
   track_selection[273] = new TString("DAR+ tracks with final selections and process-defined weight");
   track_selection[274] = new TString("DAR- tracks with final selections and process-defined weight");
 
+  track_selection[275] = new TString("DAR- tracks with final selections and DIO weight");
+  track_selection[276] = new TString("DAR- tracks with final selections and DIO weight and 103.5 < P < 105.0");
+
   track_selection[277] = new TString("cosmics+: #271 + 90 < p < 93");
   track_selection[278] = new TString("cosmics-: #272 + 90 < p < 93");
 
-  track_selection[279] = new TString("DAR- tracks with final selections and DIO weight");
+  track_selection[279] = nullptr;
 
   track_selection[280] = new TString("DAR+ tracks all");                                       
   track_selection[281] = new TString("DAR+ tracks N(active) > 20");                                       
@@ -626,6 +621,9 @@ void TTrackCompModule::FillHistograms() {
   TStnTrack*   trk;
   TrackPar_t*  tp;
   int          ihist, n_setc_tracks[2];
+
+  int bid_par = fBestID[kPAR];
+  int bid_dar = fBestID[kDAR];
 //-----------------------------------------------------------------------------
 // event histograms
 // EVT_0: all events
@@ -659,7 +657,7 @@ void TTrackCompModule::FillHistograms() {
   if ((fNTracks[kDAR] > 0) && (fWeight > 0)) {
     TStnTrack*  trk = fTrackBlock[kDAR]->Track(0);
     TrackPar_t* tp  = &fTrackPar[kDAR][0];
-    if ((trk->P0() > 85) && (tp->fIDWord_RMC == 0) && (trk->Charge() > 0)) {
+    if ((trk->P0() > 85) && (trk->Charge() > 0) && (tp->fIDWord[fBestID[kDAR]] == 0)) {
       FillEventHistograms(fHist.fEvent[41],&fEvtPar);
     }
   }
@@ -674,7 +672,7 @@ void TTrackCompModule::FillHistograms() {
   if (fNTracks[kPAR] > 0) {
     FillEventHistograms(fHist.fEvent[51],&fEvtPar);
     TrackPar_t* tp  = &fTrackPar[kPAR][0];
-    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[52],&fEvtPar);
+    if (tp->fIDWord[fBestID[kPAR]] == 0) FillEventHistograms(fHist.fEvent[52],&fEvtPar);
   }
 //-----------------------------------------------------------------------------
 // EVT_61 : events with DAR tracks 
@@ -683,7 +681,7 @@ void TTrackCompModule::FillHistograms() {
   if (fNTracks[kDAR] > 0) {
     FillEventHistograms(fHist.fEvent[61],&fEvtPar);
     TrackPar_t* tp  = &fTrackPar[kDAR][0];
-    if (tp->fIDWord_RMC == 0) FillEventHistograms(fHist.fEvent[62],&fEvtPar);
+    if (tp->fIDWord[bid_dar] == 0) FillEventHistograms(fHist.fEvent[62],&fEvtPar);
   }
 
 //--------------------------------------------------------------------------------
@@ -712,14 +710,14 @@ void TTrackCompModule::FillHistograms() {
 // what does kDAR add ?
 // TRK_0 : kPAR tracks, BEST_ID
 //-----------------------------------------------------------------------------
-  if ((fTrackBlock[kPAR]->NTracks() > 0) && (fTrackPar[kPAR][0].fIDWord[fBestID[0]] == 0)) {
+  if ((fTrackBlock[kPAR]->NTracks() > 0) && (fTrackPar[kPAR][0].fIDWord[bid_par] == 0)) {
     TStnTrack* trk = fTrackBlock[kPAR]->Track(0);
     TrackPar_t* tp = &fTrackPar[kPAR][0];
     FillTrackHistograms(fHist.fTrack[0],trk,tp,&fSimPar);
   }
   else {
     if (fTrackBlock[kDAR]->NTracks() > 0) {
-      if (fTrackPar[kDAR][0].fIDWord[3] == 0) {
+      if (fTrackPar[kDAR][0].fIDWord[bid_dar] == 0) {
 //-----------------------------------------------------------------------------
 // TRK_1: have KDAR track TrkQual > 0.3 and no KPAR TrkQual > 0.4 track
 //-----------------------------------------------------------------------------
@@ -744,9 +742,11 @@ void TTrackCompModule::FillHistograms() {
   for (int i=0; i<2; i++) {
     n_setc_tracks[i] = 0;
     ihist            = 100*(i+1);
+    int best_id      = fBestID[i];
+
     for (int itrk=0; itrk<fNTracks[i]; itrk++) {
       trk = fTrackBlock[i]->Track(itrk);
-      tp  = fTrackPar[i]+itrk;
+      tp  = fTrackPar  [i]+itrk;
 //-----------------------------------------------------------------------------
 // TRK_100, TRK_200: all reconstructed tracks
 //-----------------------------------------------------------------------------
@@ -754,7 +754,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // TRK_101, TRK_201: BestID 
 //-----------------------------------------------------------------------------
-      if (tp->fIDWord[fBestID[i]] == 0) {
+      if (tp->fIDWord[best_id] == 0) {
 //-----------------------------------------------------------------------------
 // cosmics
 //-----------------------------------------------------------------------------
@@ -765,13 +765,13 @@ void TTrackCompModule::FillHistograms() {
 // TRK_102, TRK_202: (BestID - FitConsBit - T0ErrBit - MomErrBit) tracks 
 //-----------------------------------------------------------------------------
       int mask = (TStnTrackID::kFitConsBit | TStnTrackID::kT0ErrBit | TStnTrackID::kMomErrBit);
-      if ((tp->fIDWord[fBestID[i]] & ~mask) == 0) {
+      if ((tp->fIDWord[best_id] & ~mask) == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp,&fSimPar);
       }
 //-----------------------------------------------------------------------------
 // IHIST+3: (SetC + (dpf > 1)tracks 
 //-----------------------------------------------------------------------------
-      if ((tp->fIDWord[fBestID[i]] == 0) & (tp->fDpF > 1)) {
+      if ((tp->fIDWord[best_id] == 0) & (tp->fDpF > 1)) {
 	FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp,&fSimPar);
       }
 //-----------------------------------------------------------------------------
@@ -919,7 +919,7 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // final selections
 //-----------------------------------------------------------------------------
-      if (tp->fIDWord_RMC == 0) {
+      if (tp->fIDWord[best_id] == 0) {
 	if (trk->Charge() == 1) {
 //-----------------------------------------------------------------------------
 // positive tracks
@@ -938,12 +938,13 @@ void TTrackCompModule::FillHistograms() {
 	  FillTrackHistograms(fHist.fTrack[ihist+72],trk,tp,&fSimPar);
 	  if (fProcess > 0) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,&fSimPar,fWeight);                       // weighting
 	  
+	  FillTrackHistograms(fHist.fTrack[ihist+75],trk,tp,&fSimPar,tp->fDioLLWt);                                       // DIO
+	  if ((tp->fP > 103.5) && (tp->fP < 105.0)) FillTrackHistograms(fHist.fTrack[ihist+76],trk,tp,&fSimPar,tp->fDioLLWt); 
+
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp,&fSimPar);            // for cosmics
 
 	  if   (tp->fEp < 0.7) FillTrackHistograms(fHist.fTrack[ihist+95],trk,tp,&fSimPar);   // "e-"
 	  else                 FillTrackHistograms(fHist.fTrack[ihist+96],trk,tp,&fSimPar);   // "mu-/pi-"
-
-	  FillTrackHistograms(fHist.fTrack[ihist+79],trk,tp,&fSimPar,tp->fDioLLWt);                                       // DIO
 
 //-----------------------------------------------------------------------------
 // debugging mu-
@@ -1128,25 +1129,20 @@ int TTrackCompModule::Event(int ientry) {
 
     for (int itrk=0; itrk<fNTracks[i]; itrk++) {
       TrackPar_t* tp  = fTrackPar[i]+itrk;
+      TStnTrack*  trk = fTrackBlock[i]->Track(itrk);
 
       tp->fAlg        = i;
+      if (fTrkQualMVA[i] != NULL) {
+					// use calculated on the fly MVA estimator
+	trk->SetITmp(0,0);
+      }
+
       tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
       tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
       tp->fLogLH      = TAnaModule::fLogLH;
     }
 
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
-
-//-----------------------------------------------------------------------------
-// if use on-the-fly MVA, TStnTrackID will use that
-//-----------------------------------------------------------------------------
-    for (int itrk=0; itrk<fNTracks[i]; itrk++) {
-      TrackPar_t* tp  = fTrackPar[i]+itrk;
-      TStnTrack*  trk = fTrackBlock[i]->Track(itrk);
-
-      trk->SetITmp(0,0);
-      trk->SetTmp (0,tp->fMVAOut[1]);
-    }
   }
 
   if (fFillHistograms) FillHistograms();
@@ -1194,7 +1190,7 @@ void TTrackCompModule::Debug() {
     trk = cprb->Track(itrk);
     tp  = &fTrackPar[kDAR][itrk];
     //    if ((GetDebugBit(3) == 1) && (tp->fDpF > 5.) && (trk->NActive() > 25) && (trk->Chi2Dof() < 4)) {
-    if ((GetDebugBit(3) == 1) && (tp->fIDWord_RMC == 0) && (tp->fDpF > 1.)) {
+    if ((GetDebugBit(3) == 1) && (tp->fIDWord[fBestID[kDAR]] == 0) && (tp->fDpF > 1.)) {
       GetHeaderBlock()->Print(Form("TTrackCompModule bit003: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f nactv: %4i chi2d: %10.3f",
 				   tp->fDpF, tp->fP,tp->fPFront,trk->NActive(),trk->Chi2Dof()));
     }

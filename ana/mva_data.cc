@@ -130,32 +130,32 @@ mva_data::data_t  mva_trkpatrec_e115731_001 = {
 // training_opt        += ":nTest_Signal=50000:nTest_Background=20000";
 //-----------------------------------------------------------------------------
 mva_data::data_t  mva_fele2s51b1_0070 = {
-  "fele2s51b1_0070",                                                        // name
+  "fele2s51b1_0070",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_0070.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0070.hist",        // histograms
-  0.40, 8                                                                   // cut value, ID #
+  0.40, 8                                                                    // cut value, ID #
 };
 
 
 mva_data::data_t  mva_fele2s51b1_0060 = {
-  "fele2s51b1_060",                                                      // name
+  "fele2s51b1_060",                                                          // name
   "su2020/data/trk_qual_mva/MLP_weights_0060.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0060.hist",        // histograms
   0.80, 16                                                                   // cut value, ID #
 };
 
-mva_data::data_t  mva_fele2s51b1_1060 = {                                 // 
-  "cpr_fele2s51b1_1060",                                                     // name
-  "su2020/data/trk_qual_mva/MLP_weights_1060.xml",             // location of XML weights
+mva_data::data_t  mva_fele2s51b1_1060 = {                                    // 
+  "fele2s51b1_1060",                                                         // name
+  "su2020/data/trk_qual_mva/MLP_weights_1060.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1060.hist",        // histograms
-  0.40, 8                                                                   // cut value, ID #
+  0.20, 4                                                                    // cut value, ID #
 };
 
 mva_data::data_t  mva_fele2s51b1_1070 = {
-  "fele2s51b1_1070",                                                     // name
+  "fele2s51b1_1070",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_1070.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1070.hist",        // histograms
-  0.40, 8                                                                   // cut value, ID #
+  0.20, 4                                                                    // cut value, ID #
 };
 
 

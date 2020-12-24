@@ -31,6 +31,7 @@
 #include "Stntuple/geom/TStnCrystal.hh"
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
+#include "Stntuple/alg/TStntuple.hh"
 
 #include "murat/ana/TrackHist_t.hh"
 
@@ -101,8 +102,8 @@ public:
     TBranch*  fNzaOverNa;
     TBranch*  fNmaOverNm;
     TBranch*  fNdaOverNd;
-    TBranch*  fZ1;			// Z-coordinate of the first hit
-    TBranch*  fWeight;			// for background only
+    TBranch*  fZ1;			       // Z-coordinate of the first hit
+    TBranch*  fWeight;			       // for background only
   };
 
   enum { kMaxNTrackID = 50 };
@@ -110,40 +111,40 @@ public:
   TStnTrackID*        fTrackID_BOX;
   TStnTrackID*        fTrackID_MVA;
 
+  int                 fNID;                    // number of different track ID's used, default=0
   TStnTrackID*        fTrackID[kMaxNTrackID];
 
-  double              fMbTime;      // microbunch time
+  double              fMbTime;                 // microbunch time
   double              fMinT0;
 
-  int                 fPdgCode;		// determines which one
+  int                 fPdgCode;		       // determines which one
   int                 fGeneratorCode;      
-
-  int                 fNID;         // number of different track ID's used, default=0
-  int                 fBestID;      //
 
   TEmuLogLH*          fLogLH;
   EventPar_t          fEvtPar;
 
+  TStntuple*          fStnt;                   // STNTUPLE singleton
 //-----------------------------------------------------------------------------
 // TMVA training ntuples
 //-----------------------------------------------------------------------------
-  int                     fWriteTmvaTree   ;
-  int                     fTmvaAlgorithmTpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
-  int                     fTmvaAlgorithmCpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
+  int                 fWriteTmvaTree   ;
+  int                 fTmvaAlgorithmTpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
+  int                 fTmvaAlgorithmCpr;   // write TMVS training tree for 0:TrkPatRec, 1:CalPatRec 
 
-  TFile*                  fTmvaFile;
-  TTree*                  fTmvaTree;
+  TFile*              fTmvaFile;
+  TTree*              fTmvaTree;
 
-  TmvaTrainData_t         fTmvaData;
-  TmvaTrainBranches_t     fTmvaBranch;
+  TmvaTrainData_t     fTmvaData;
+  TmvaTrainBranches_t fTmvaBranch;
 
-  int                     fUseMVA;
-  int                     fNMVA;	// number of MVA classifiers used for tracks of the same type
+  int                 fUseMVA;
+  int                 fNMVA;	           // number of MVA classifiers used for tracks of the same type
+
+  int                 fApplyCorr;          // default=1
 //-----------------------------------------------------------------------------
-// MVA-based classifiers for TrkPatRec and CalPatRec tracks separately
+// MVA-based classifiers for PAR and DAR tracks separately, [0]:PAR, [1]:DAR
 //-----------------------------------------------------------------------------
-  mva_data*               fTrkQualMVA[2];   // [0]:PAR(TrkPatRec), [1]:DAR(CalPatRec)
-
+  mva_data*           fTrkQualMVA[2];
 ///-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -161,6 +162,7 @@ public:
   void               SetMinT0        (double T0  ) { fMinT0         = T0   ; }
   void               SetPdgCode      (int    Code) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int    Code) { fGeneratorCode = Code ; }
+  void               SetApplyCorr    (int    Flag) { fApplyCorr     = Flag ; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

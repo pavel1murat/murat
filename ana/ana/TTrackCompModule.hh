@@ -4,6 +4,8 @@
 #ifndef murat_ana_TTrackCompModule_hh
 #define murat_ana_TTrackCompModule_hh
 
+#include "murat/ana/TAnaModule.hh"
+
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
@@ -18,11 +20,8 @@
 
 #include "Stntuple/geom/TDiskCalorimeter.hh"
 
-#include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
-
-#include "murat/ana/TAnaModule.hh"
 
 namespace murat {
 class TTrackCompModule: public murat::TAnaModule {
@@ -91,12 +90,7 @@ public:
   int                fNSimp;		// N(simulated particles)
 
   TStnTrack*         fTrack;
-					// [0]: SetC, [1-6]: TrkQual 0.1 ... 0.6
-  TStnTrackID*       fBestTrackID[2];
-
-  TStnTrackID*       fTrackID_RMC;       // track ID for RMC rejection (mu- --> e+)
-
-  int                fBestID[2];
+  int                fBestID[2];        // best track ID for two ambig resolvers
 
   TEmuLogLH*         fLogLH;
 
@@ -118,9 +112,6 @@ public:
   double             fWeight;
 
   int                fFillHistograms;
-  TStntuple*         fStnt;                // STNTUPLE singleton
-  
-  double                  fMbTime;      // microbunch time
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

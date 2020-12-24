@@ -133,6 +133,8 @@ public:
 					// or -1
   TStnArrayI        fTrackNumber;
 
+  int               fBestID;
+
   TStnTrack*        fTrack;
   TStnCluster*      fCluster;
 

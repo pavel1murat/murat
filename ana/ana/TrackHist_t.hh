@@ -12,16 +12,19 @@ struct TrackHist_t : public HistBase_t {
   TH1F*    fP[3];			// total momentum, 3 hists with different binning
   TH1F*    fP0;
   TH1F*    fP2;
-  TH1F*    fPt;
+  TH1F*    fPDio;                      // with the LL DIO weight
+
   TH1F*    fFitMomErr;
   TH1F*    fPFront;
   TH1F*    fDpFront;
   TH1F*    fXDpF;                     // DpF/MomErr
   TH1F*    fDpFront0;
   TH1F*    fDpFront2;
-  TH2F*    fDpFVsZ1;
   TH1F*    fPStOut;
   TH1F*    fDpFSt;			// P(TT_Hollow) - P(ST_Out)
+  TH2F*    fDpFVsZ1;
+
+  TH1F*    fPt;
   TH1F*    fCosTh;
   TH1F*    fChi2;
   TH1F*    fChi2Dof;

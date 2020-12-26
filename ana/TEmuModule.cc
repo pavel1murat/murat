@@ -49,7 +49,7 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
   fBestID[0] = 16;                      // default best for PAR tracks ( > 0.05*15 = 0.8)
   fBestID[1] = 0;                       // default best for DAR tracks 
 
-  fNMVA      = 1; 			// number of MVA's used (if used at all)
+  fNMVA      = 1; 			// MVA per track block 
 
   fNID       = 1;                      // fNID has to be < TAnaModule::kMaxNTrackID
 
@@ -81,8 +81,6 @@ TEmuModule::~TEmuModule() {
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
 int TEmuModule::BeginJob() {
-
-  TAnaModule::BeginJob();
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
@@ -117,6 +115,7 @@ int TEmuModule::BeginJob() {
   for (int i=0; i<2; i++) {
     for (int ip=0; ip<kNTrackPar; ip++) {
       TrackPar_t* tp = &fTrackPar[i][ip];
+      tp->fFitType   = 0;                            // both blocks use the same fits, same track quality MVA
       for (int id=0; id<fNID; id++) {
 	fTrackID[id]->SetLocTrkQual(0);              // use TStnTrack::fTmp[0] to store MVA-calculated TrkQual
 	tp->fTrackID[id] = fTrackID[id];
@@ -130,6 +129,8 @@ int TEmuModule::BeginJob() {
       }
     }
   }
+
+  TAnaModule::BeginJob();
 
   return 0;
 }
@@ -428,18 +429,6 @@ int TEmuModule::Event(int ientry) {
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
-
-    for (int itrk=0; itrk<fNTracks[i]; itrk++) {
-      TrackPar_t* tp  = fTrackPar[i]+itrk;
-      TStnTrack*  trk = fTrackBlock[i]->Track(itrk);
-
-      tp->fAlg        = i;
-      if (fTrkQualMVA[i] != NULL) {
-					// use calculated on the fly MVA estimator
-	trk->SetITmp(0,0);
-      }
-    }
-
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
 

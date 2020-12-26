@@ -760,7 +760,7 @@ void TAnaModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* Trk
 }
 
 //-----------------------------------------------------------------------------
-// on input: TrackPar->fAlg = 0: PAR, =1: DAR
+// on input: TrackPar->fFitType = 0: PAR, =1: DAR
 //-----------------------------------------------------------------------------
 int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  , 
 			     TStnClusterBlock*   ClusterBlock, 
@@ -781,7 +781,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
   for (int itrk=0; itrk<ntrk; itrk++) {
     TrackPar_t*   tp = TrackPar+itrk;
     TStnTrack* track = TrackBlock->Track(itrk);
-    int track_type   = tp->fAlg;
+    int fit_type     = tp->fFitType;
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -803,7 +803,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 //-----------------------------------------------------------------------------
 // in this scheme correction is set right before the call
 //-----------------------------------------------------------------------------
-    if (fApplyCorr != 0) tp->fP = track->fP0 + kMomentumCorr[track_type]; 
+    if (fApplyCorr != 0) tp->fP = track->fP0 + kMomentumCorr[fit_type]; 
 //-----------------------------------------------------------------------------
 // hits on virtual detectors
 //-----------------------------------------------------------------------------
@@ -880,7 +880,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 // v4_2_4: correct by additional 0.22 ns - track propagation by 6 cm
 //-----------------------------------------------------------------------------
       tp->fDt  = vr->fDt ;                                       // v4_2_4: - 0.22; // - 1.;
-      if (fApplyCorr != 0) tp->fDt  -= kDtTcmCorr[track_type];
+      if (fApplyCorr != 0) tp->fDt  -= kDtTcmCorr[fit_type];
 
       nx  = vr->fNxTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
       ny  = vr->fNyTrk/sqrt(vr->fNxTrk*vr->fNxTrk+vr->fNyTrk*vr->fNyTrk);
@@ -936,10 +936,10 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
       // pmva[ 8] = track->D0();                          // low-rank, do not use
       // pmva[ 9] = track->RMax();                        // low-rank, do not use
 
-      int alg = tp->fAlg;	        // alg=0:PAR  1:DAR
+      int fit_type = tp->fFitType;	                          // 
 	
-      if (fTrkQualMVA[alg] != nullptr) {
-	tp->fMVAOut[1] = fTrkQualMVA[alg]->fMva->evalMVA(pmva);
+      if (fTrkQualMVA[fit_type] != nullptr) {
+	tp->fMVAOut[1] = fTrkQualMVA[fit_type]->fMva->evalMVA(pmva);
 	track->SetTmp(0,tp->fMVAOut[1]);
       }
     }
@@ -1006,7 +1006,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 
     TrackPar_t* tp = TrackPar;   
 
-    if (tp->fAlg == fWriteTmvaTree) { 
+    if (tp->fFitType == fWriteTmvaTree) { 
       TStnTrack* trk = TrackBlock->Track(0);
 
       float na              = trk->NActive();

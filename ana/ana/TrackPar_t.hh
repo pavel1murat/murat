@@ -14,6 +14,7 @@ public:
   int     fNEPl;
   int     fNDPl;
   int     fDiskID;                	// 0: first disk, 1:second disk
+  int     fFitType;                     // index of the trk qual MVAL 0=PAR, 1=DAR
 		
   SimPar_t*     fSimPar;               // pointer to simparticle 
   TStnTrackID*  fTrackID[50];          //
@@ -22,7 +23,6 @@ public:
   int     fIDWord[20];
 
   int     fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
-  int     fAlg;                         // algorithm: 0=tpr, 1=cpr
 
   double  fMVAOut[20];			// outputs of different MVA classifiers; 0: Dave/Andy MVA; 1: CPR
   double  fProb;
@@ -39,13 +39,13 @@ public:
 // different weights are used by different modules, so in principle could use 
 // the same variable for different weights. Just don't want to do that
 //-----------------------------------------------------------------------------
-  double    fDioLOWt;			// DIO LO weight
-  double    fDioLLWt;			// DIO LL weight (with leading log rad corrections)
-  double    fRPCTimeWt;			// RPC timing weight (don't want to use the same memory for different things)
-  double    fRMCEnergyWt;		// RMC weight (energy spectrum of the generated photons)
-  double    fLumWt;			// luminosity weight
-  double    fTotWt;			// total weight
-  double    fTotWtRC;			// total weight with rad corrections
+  double  fDioLOWt;		        // DIO LO weight
+  double  fDioLLWt;		        // DIO LL weight (with leading log rad corrections)
+  double  fRPCTimeWt;		        // RPC timing weight (don't want to use the same memory for different things)
+  double  fRMCEnergyWt;	                // RMC weight (energy spectrum of the generated photons)
+  double  fLumWt;			// luminosity weight
+  double  fTotWt;			// total weight
+  double  fTotWtRC;			// total weight with rad corrections
 
   double  fDtZ0;			// delta(T) at z=0
   double  fDtBack;			// delta(T) at z=Z(TT_Back)

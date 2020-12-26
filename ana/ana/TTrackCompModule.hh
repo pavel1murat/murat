@@ -90,7 +90,6 @@ public:
   int                fNSimp;		// N(simulated particles)
 
   TStnTrack*         fTrack;
-  int                fBestID[2];        // best track ID for two ambig resolvers
 
   TEmuLogLH*         fLogLH;
 
@@ -110,8 +109,6 @@ public:
   double             fPhotonE;
 
   double             fWeight;
-
-  int                fFillHistograms;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -122,35 +119,17 @@ public:
 // accessors
 //-----------------------------------------------------------------------------
   Hist_t*            GetHist      () { return &fHist;      }
-  //  TStnTrackID*       GetTrackID   () { return fTrackID; }
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
   void    SetTrackBlockName(int I, const char* Name) { fTrackBlockName[I] = Name; }
 
-  void    SetKMaxRMC      (double KMax) { fKMaxRMC       = KMax ; }
+  void    SetKMaxRMC      (double KMax) { fKMaxRMC = KMax ; }
 
   void    SetDebugCut(int I, double XMin, double XMax) {
     fDebugCut[I].fXMin = XMin;
     fDebugCut[I].fXMax = XMax;
   }
-  
-//-----------------------------------------------------------------------------
-// MVA Training Codes: 
-//
-// 0060 : PAR dPf > 0.60
-// 0070 : PAR dPf > 0.70
-// 1060 : DAR dPf > 0.60
-// 1070 : DAR dPf > 0.70
-//-----------------------------------------------------------------------------
-  void    SetMVA          (const char* Dataset, int MvaTrainingCode);
-
-  void    SetWriteTmvaTree (int Algo) { fWriteTmvaTree = Algo; }
-
-  void    SetFillHistograms(int Fill) { fFillHistograms = Fill; }
-
-//   void    SetTprWeightsFile(const char* Fn) { if (Fn[0] != 0) fTprWeightsFile = Fn; }
-//   void    SetCprWeightsFile(const char* Fn) { if (Fn[0] != 0) fCprWeightsFile = Fn; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
@@ -164,12 +143,6 @@ public:
   void    BookDTrackHistograms   (HistBase_t*   Hist, const char* Folder);
 
   void    FillDTrackHistograms   (HistBase_t*  Hist, TStnTrack* Trk1, TrackPar_t* Tp1, TStnTrack* Trk2, TrackPar_t* Tp2);
-
-  // void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, 
-  // 				   TStnTrackID*    TrackID   , 
-  // 				   TrackPar_t*     TPar      , 
-  // 				   int             HistSet   );
-  int     FillTmvaTree();
 
   void    BookHistograms();
   void    FillHistograms();

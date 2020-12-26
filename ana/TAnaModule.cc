@@ -34,6 +34,8 @@
 #include "TSystem.h"
 
 #include "Stntuple/loop/TStnAna.hh"
+#include "Stntuple/loop/TStnInputModule.hh"
+#include "Stntuple/base/TStnDataset.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
@@ -104,6 +106,7 @@ TAnaModule::TAnaModule(const char* name, const char* title):
   fUseMVA        = 0;
   fTrkQualMVA[0] = nullptr;
   fTrkQualMVA[1] = nullptr;
+  fWriteTmvaTree = -1;
 //-----------------------------------------------------------------------------
 // TStntuple 
 //-----------------------------------------------------------------------------
@@ -117,6 +120,33 @@ TAnaModule::~TAnaModule() {
 }
 
 //-----------------------------------------------------------------------------
+// TrkRecAlgorithm : "cpr" or "tpr"
+// TrainingDataset : just 'fele2s51b1' - goes into a file name
+// MVATrainingCode : 
+// ---------
+// 0060 : PAR dPf > 0.60
+// 0070 : PAR dPf > 0.70
+// 1060 : DAR dPf > 0.60
+// 1070 : DAR dPf > 0.70
+//-----------------------------------------------------------------------------
+void TAnaModule::SetMVA(const char* TrainingDataset, int MVATrainingCode) {
+
+  printf(" [TTrackCompModule::SetMVA] TrainingDataset:%s MvaType:%i\n",TrainingDataset,MVATrainingCode);
+
+  if (MVATrainingCode > 0) { 
+    fUseMVA = 1;
+
+    int loc = MVATrainingCode / 1000 ;
+
+    if (fTrkQualMVA[loc]) delete fTrkQualMVA[loc];
+    fTrkQualMVA[loc] = new mva_data(TrainingDataset,MVATrainingCode);
+  }
+  else { 
+    fUseMVA = 0;
+  }
+}
+
+//-----------------------------------------------------------------------------
 // common initializations
 //-----------------------------------------------------------------------------
 int TAnaModule::BeginJob() {
@@ -125,6 +155,66 @@ int TAnaModule::BeginJob() {
   fTrackID_MVA->SetMinT0(fMinT0);
 					// PID initialization: read the likelihood templates
   fLogLH->Init("v5_7_0");
+//-----------------------------------------------------------------------------
+// if needed, initialize MVA-based classifiers 
+//-----------------------------------------------------------------------------
+  if (fUseMVA) {
+    for (int i=0; i<fNMVA; i++) {
+      if (fTrkQualMVA[i]) {
+	fTrkQualMVA[i]->Init();
+      }
+    }
+  }
+//-----------------------------------------------------------------------------
+// fWriteTmvaTree = -1 : do not write
+//                =  0 : write PAR resolver training tree
+//                =  1 : write DAR resolver training tree
+//-----------------------------------------------------------------------------
+  if (fWriteTmvaTree >= 0) {
+    TDirectory* dir = gDirectory;
+
+    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
+
+    fTmvaFile  = new TFile(Form("%s.tmva_training_%04i.root",dsname,1000*fWriteTmvaTree),"recreate");
+    fTmvaTree  = new TTree("tmva_training_tree","TMVA Training Tree");
+
+    fTmvaBranch.fP          = fTmvaTree->Branch("p"       ,&fTmvaData.fP         ,"F");
+    fTmvaBranch.fPMC        = fTmvaTree->Branch("pmc"     ,&fTmvaData.fPMC       ,"F");
+    fTmvaBranch.fTanDip     = fTmvaTree->Branch("tdip"    ,&fTmvaData.fTanDip    ,"F");
+    fTmvaBranch.fNActive    = fTmvaTree->Branch("nactive" ,&fTmvaData.fNActive   ,"F");
+    fTmvaBranch.fNaFract    = fTmvaTree->Branch("nafract" ,&fTmvaData.fNaFract   ,"F");
+    fTmvaBranch.fNDoublets  = fTmvaTree->Branch("nd"      ,&fTmvaData.fNActive   ,"F");
+    fTmvaBranch.fNDa        = fTmvaTree->Branch("nda"     ,&fTmvaData.fNaFract   ,"F");
+    fTmvaBranch.fChi2Dof    = fTmvaTree->Branch("chi2d"   ,&fTmvaData.fChi2Dof   ,"F");
+    fTmvaBranch.fFitCons    = fTmvaTree->Branch("fcons"   ,&fTmvaData.fFitCons   ,"F");
+    fTmvaBranch.fMomErr     = fTmvaTree->Branch("momerr"  ,&fTmvaData.fMomErr    ,"F");
+    fTmvaBranch.fT0Err      = fTmvaTree->Branch("t0err"   ,&fTmvaData.fT0Err     ,"F");
+    fTmvaBranch.fD0         = fTmvaTree->Branch("d0"      ,&fTmvaData.fD0        ,"F");
+    fTmvaBranch.fRMax       = fTmvaTree->Branch("rmax"    ,&fTmvaData.fRMax      ,"F");
+    fTmvaBranch.fNdaOverNa  = fTmvaTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa ,"F");
+    fTmvaBranch.fNzaOverNa  = fTmvaTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa ,"F");
+    fTmvaBranch.fNmaOverNm  = fTmvaTree->Branch("nma_o_nm",&fTmvaData.fNmaOverNm ,"F");
+    fTmvaBranch.fNdaOverNd  = fTmvaTree->Branch("nda_o_nd",&fTmvaData.fNdaOverNd ,"F");
+    fTmvaBranch.fZ1         = fTmvaTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
+    fTmvaBranch.fWeight     = fTmvaTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
+
+    dir->cd();
+  }
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+int TAnaModule::EndJob() {
+  printf("----- end job: ---- %s\n",GetName());
+
+  if (fWriteTmvaTree >= 0) {
+    printf("[%s::EndJob] Writing output TMVA training file %s\n",GetName(),fTmvaFile->GetName());
+    fTmvaFile->Write();
+
+    delete fTmvaFile;
+    fTmvaFile  = 0;
+    fTmvaTree  = 0;
+  }
 
   return 0;
 }
@@ -676,16 +766,12 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 			     TStnClusterBlock*   ClusterBlock, 
 			     TrackPar_t*         TrackPar    ,
 			     SimPar_t*           SimPar      ) {
-  TrackPar_t*           tp;
-  TStnTrack*            track;
-  int                   track_type(-999);
   double                xs;
   TEmuLogLH::PidData_t  dat;
-  //  static int            printed(0);
 //-----------------------------------------------------------------------------
 // momentum corrections for KPAR and KDAR
 //-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0.038 , 0.033 } ; // SU2020 // CD3: { 0.049, 0.020 };
+  const double kMomentumCorr[2] = { 0.034 , 0.030 } ; // SU2020 // CD3: { 0.049, 0.020 };
   const double kDtTcmCorr   [2] = { 0.    , 0.    } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
 //-----------------------------------------------------------------------------
 // loop over tracks
@@ -693,9 +779,9 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
   int ntrk = TrackBlock->NTracks();
 
   for (int itrk=0; itrk<ntrk; itrk++) {
-    tp             = TrackPar+itrk;
-    track          = TrackBlock->Track(itrk);
-    track_type     = tp->fAlg;
+    TrackPar_t*   tp = TrackPar+itrk;
+    TStnTrack* track = TrackBlock->Track(itrk);
+    int track_type   = tp->fAlg;
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------
@@ -911,7 +997,43 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     tp->fTchDy     = tch->fDy;
     tp->fTchDz     = tch->fDz;
     tp->fTchDt     = tch->fDt;
- }
+  }
+//-----------------------------------------------------------------------------
+// when writing an ntuple for MVA training, use the first track
+// fWriteTmvaTree = algorithm (0 or 1)
+//-----------------------------------------------------------------------------
+  if ((fWriteTmvaTree >= 0) && (ntrk == 1)) {
+
+    TrackPar_t* tp = TrackPar;   
+
+    if (tp->fAlg == fWriteTmvaTree) { 
+      TStnTrack* trk = TrackBlock->Track(0);
+
+      float na              = trk->NActive();
+      float nm              = trk->NMat();
+
+      fTmvaData.fP          = tp->fP;
+      fTmvaData.fPMC        = trk->fPFront;
+      fTmvaData.fTanDip     = trk->TanDip();
+      fTmvaData.fNActive    = na;
+      fTmvaData.fNaFract    = na/trk->NHits();
+      fTmvaData.fNDoublets  = trk->NDoublets();
+      fTmvaData.fNDa        = trk->NDoubletsAct();
+      fTmvaData.fChi2Dof    = trk->Chi2Dof();
+      fTmvaData.fFitCons    = trk->FitCons();
+      fTmvaData.fMomErr     = trk->FitMomErr();
+      fTmvaData.fT0Err      = trk->T0Err();
+      fTmvaData.fD0         = trk->D0();
+      fTmvaData.fRMax       = trk->RMax();
+      fTmvaData.fNdaOverNa  = trk->NDoubletsAct()/na;
+      fTmvaData.fNzaOverNa  = trk->NHitsAmbZero()/na;
+      fTmvaData.fNmaOverNm  = trk->NMatActive()/nm;
+      fTmvaData.fZ1         = trk->fZ1;
+      fTmvaData.fWeight     = 1.;
+    
+      fTmvaTree->Fill();
+    }
+  }
 
   return 0;
 }

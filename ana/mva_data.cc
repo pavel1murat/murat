@@ -144,6 +144,13 @@ mva_data::data_t  mva_fele2s51b1_0060 = {
   0.80, 16                                                                   // cut value, ID #
 };
 
+mva_data::data_t  mva_fele2s51b1_1055 = {                                    // 
+  "fele2s51b1_1055",                                                         // name
+  "su2020/data/trk_qual_mva/MLP_weights_1055.xml",                           // location of XML weights
+  "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1055.hist",        // histograms
+  0.20, 4                                                                    // cut value, ID #
+};
+
 mva_data::data_t  mva_fele2s51b1_1060 = {                                    // 
   "fele2s51b1_1060",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_1060.xml",                           // location of XML weights
@@ -204,6 +211,7 @@ mva_data::mva_data(const char* Dataset, int TrainingCode) {
   else if (ds = "FELE2S51B1") {
     if      (TrainingCode ==   60) fData = mva_fele2s51b1_0060;  // PAR, logfcons, uniform weight, dPf > 0.6
     else if (TrainingCode ==   70) fData = mva_fele2s51b1_0070;  // PAR, logfcons, uniform weight, dPf > 0.7
+    else if (TrainingCode == 1055) fData = mva_fele2s51b1_1055;  // DAR, logfcons, w= 1/dPf      , dPf > 0.5
     else if (TrainingCode == 1060) fData = mva_fele2s51b1_1060;  // DAR, logfcons, uniform weight, dPf > 0.6
     else if (TrainingCode == 1070) fData = mva_fele2s51b1_1070;  // DAR, logfcons, uniform weight, dPf > 0.7
     else                  { error = 1; }

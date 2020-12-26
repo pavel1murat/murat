@@ -193,7 +193,6 @@ void  track_comp_debug(int PDGCode=11, int GeneratorCode=28, int DebugBit=14) {
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
   murat::m_tcm->SetPdgCode      (PDGCode);
   murat::m_tcm->SetGeneratorCode(GeneratorCode);
-  murat::m_tcm->SetFillHistograms(0);
   murat::m_tcm->SetDebugBit(DebugBit,1);
   murat::m_tcm->GetAna()->SetNEventsToReport(50000);
 }

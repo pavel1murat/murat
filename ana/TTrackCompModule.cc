@@ -30,16 +30,10 @@
 #include "TSystem.h"
 
 #include "Stntuple/loop/TStnAna.hh"
-#include "Stntuple/loop/TStnInputModule.hh"
-#include "Stntuple/base/TStnDataset.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
-//------------------------------------------------------------------------------
-// Mu2e offline includes
-//-----------------------------------------------------------------------------
-#include "murat/ana/mva_data.hh"
 
 #include <string>
 #include "math.h"
@@ -56,7 +50,7 @@ namespace murat {
 TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaModule(name,title) {
 
   fPdgCode           = 11;		// electron
-  fGeneratorCode     =  2; // 2:ConversionGun 28:StoppedParticleReactionGun
+  fGeneratorCode     =  2;              // 2:ConversionGun 28:StoppedParticleReactionGun
 
   fTrackBlockName[0] = "TrackBlockPar";
   fTrackBlockName[1] = "TrackBlockDar";
@@ -64,16 +58,16 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 // TrackID[0]     : Michael's cuts
 // fTrackID[1-19] : cut on MVA-based TrkQual with the step of 0.05
 //-----------------------------------------------------------------------------
-  fBestID[0] =  1;                      // default best for PAR tracks
-  fBestID[1] =  0;                      // default best for DAR tracks 
+  fBestID[0] = 16;                      // default best for PAR tracks ( > 0.05*15 = 0.8)
+  fBestID[1] = 0;                       // default best for DAR tracks 
 
-  fNID       = 20;                      // this is the limit ....
+  fNMVA      = 2; 			// number of MVA's used (if used at all)
+
+  fNID       = 20;                      // fNID has to be < TAnaModule::kMaxNTrackID
   for (int i=0; i<fNID; i++) {
     fTrackID[i] = new TStnTrackID();
     if (i == 0) {
       fTrackID[0]->SetMaxChi2Dof(4. );
-      // fTrac[0]RMC->SetMaxT0Err  (1.5);
-      // fTrac[0]RMC->SetMaxMomErr (0.4);
       fTrackID[0]->SetMaxT0Err  (1.3);
       fTrackID[0]->SetMaxMomErr (0.3);
       fTrackID[0]->SetMinNActive(20 );
@@ -99,10 +93,12 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
       fTrackID[i]->SetMinTrkQual(0.05*i);
       fTrackID[i]->SetMinD0     (-100.);
       fTrackID[i]->SetMaxD0     ( 100.);
+
+      int mask = TStnTrackID::kT0Bit | TStnTrackID::kTanDipBit | TStnTrackID::kD0Bit | TStnTrackID::kTrkQualBit  ;
+
+      fTrackID[0]->SetUseMask(mask);
     }
   }
-//-----------------------------------------------------------------------------
-// TStntuple 
 //-----------------------------------------------------------------------------
   fKMaxRMC        = 90.;
 //-----------------------------------------------------------------------------
@@ -117,11 +113,6 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 
   fDebugCut[6].fXMin = 1.5;
   fDebugCut[6].fXMax = 10.0;
-//-----------------------------------------------------------------------------
-// 
-//-----------------------------------------------------------------------------
-  fMbTime            = 1695.;
-  fFillHistograms    = 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -130,37 +121,11 @@ TTrackCompModule::~TTrackCompModule() {
 }
 
 //-----------------------------------------------------------------------------
-// TrkRecAlgorithm : "cpr" or "tpr"
-// TrainingDataset : just 'fele2s51b1' - goes into a file name
-// MVATrainingCode : 
-// ---------
-// 0060 : PAR dPf > 0.60
-// 0070 : PAR dPf > 0.70
-// 1060 : DAR dPf > 0.60
-// 1070 : DAR dPf > 0.70
-//-----------------------------------------------------------------------------
-void TTrackCompModule::SetMVA(const char* TrainingDataset, int MVATrainingCode) {
-
-  printf(" [TTrackCompModule::SetMVA] TrainingDataset:%s MvaType:%i\n", TrainingDataset,MVATrainingCode);
-
-  fUseMVA         = 1;
-
-  if (MVATrainingCode >= 1000) {
-    if (fTrkQualMVA[1]) delete fTrkQualMVA[1];
-    fTrkQualMVA[1]           = new mva_data(TrainingDataset,MVATrainingCode);
-    fTmvaAlgorithmCpr        = MVATrainingCode % 1000;
-  }
-  else if (MVATrainingCode >= 0) {
-    if (fTrkQualMVA[0]) delete fTrkQualMVA[0];
-    fTrkQualMVA[0]           = new mva_data(TrainingDataset,MVATrainingCode);
-    fTmvaAlgorithmTpr        = MVATrainingCode % 1000;
-  }
-}
-
-//-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
 int TTrackCompModule::BeginJob() {
+
+  TAnaModule::BeginJob();
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
@@ -177,57 +142,6 @@ int TTrackCompModule::BeginJob() {
 //-----------------------------------------------------------------------------
   BookHistograms();
 //-----------------------------------------------------------------------------
-// fWriteTmvaTree = -1 : do not write
-//                =  0 : write PAR resolver training tree
-//                =  1 : write DAR resolver training tree
-//-----------------------------------------------------------------------------
-  if (fWriteTmvaTree >= 0) {
-    TDirectory* dir = gDirectory;
-
-    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
-
-    fTmvaFile  = new TFile(Form("%s.tmva_training_%04i.root",dsname,1000*fWriteTmvaTree),"recreate");
-    fTmvaTree  = new TTree("tmva_training_tree","TMVA Training Tree");
-
-    fTmvaBranch.fP          = fTmvaTree->Branch("p"       ,&fTmvaData.fP         ,"F");
-    fTmvaBranch.fPMC        = fTmvaTree->Branch("pmc"     ,&fTmvaData.fPMC       ,"F");
-    fTmvaBranch.fTanDip     = fTmvaTree->Branch("tdip"    ,&fTmvaData.fTanDip    ,"F");
-    fTmvaBranch.fNActive    = fTmvaTree->Branch("nactive" ,&fTmvaData.fNActive   ,"F");
-    fTmvaBranch.fNaFract    = fTmvaTree->Branch("nafract" ,&fTmvaData.fNaFract   ,"F");
-    fTmvaBranch.fNDoublets  = fTmvaTree->Branch("nd"      ,&fTmvaData.fNActive   ,"F");
-    fTmvaBranch.fNDa        = fTmvaTree->Branch("nda"     ,&fTmvaData.fNaFract   ,"F");
-    fTmvaBranch.fChi2Dof    = fTmvaTree->Branch("chi2d"   ,&fTmvaData.fChi2Dof   ,"F");
-    fTmvaBranch.fFitCons    = fTmvaTree->Branch("fcons"   ,&fTmvaData.fFitCons   ,"F");
-    fTmvaBranch.fMomErr     = fTmvaTree->Branch("momerr"  ,&fTmvaData.fMomErr    ,"F");
-    fTmvaBranch.fT0Err      = fTmvaTree->Branch("t0err"   ,&fTmvaData.fT0Err     ,"F");
-    fTmvaBranch.fD0         = fTmvaTree->Branch("d0"      ,&fTmvaData.fD0        ,"F");
-    fTmvaBranch.fRMax       = fTmvaTree->Branch("rmax"    ,&fTmvaData.fRMax      ,"F");
-    fTmvaBranch.fNdaOverNa  = fTmvaTree->Branch("nda_o_na",&fTmvaData.fNdaOverNa ,"F");
-    fTmvaBranch.fNzaOverNa  = fTmvaTree->Branch("nza_o_na",&fTmvaData.fNzaOverNa ,"F");
-    fTmvaBranch.fNmaOverNm  = fTmvaTree->Branch("nma_o_nm",&fTmvaData.fNmaOverNm ,"F");
-    fTmvaBranch.fNdaOverNd  = fTmvaTree->Branch("nda_o_nd",&fTmvaData.fNdaOverNd ,"F");
-    fTmvaBranch.fZ1         = fTmvaTree->Branch("z1"      ,&fTmvaData.fZ1        ,"F");
-    fTmvaBranch.fWeight     = fTmvaTree->Branch("wt"      ,&fTmvaData.fWeight    ,"F");
-
-    dir->cd();
-  }
-//-----------------------------------------------------------------------------
-// init two MVA-based classifiers - KPAR (TPR) and KDAR (CPR) 
-//-----------------------------------------------------------------------------
-  if (fUseMVA) {
-    fNMVA = 1;
-
-    if (fTrkQualMVA[0]) {
-      fTrkQualMVA[0]->Init();
-      fBestID[0] = fTrkQualMVA[0]->BestID();		  // Dave's default: DaveTrkQual > 0.8
-    }
-
-    if (fTrkQualMVA[1]) { 
-      fTrkQualMVA[1]->Init();
-      fBestID[1] = fTrkQualMVA[1]->BestID();		  // KDAR     : CprQual     > 0.85
-    }
-  }
-//-----------------------------------------------------------------------------
 // init track ID pointers in TrackPar - do it just once
 //  .. assume TrkQual to be precalculated, do only beed to cut on
 //-----------------------------------------------------------------------------
@@ -236,6 +150,12 @@ int TTrackCompModule::BeginJob() {
       TrackPar_t* tp = &fTrackPar[i][ip];
       for (int id=0; id<fNID; id++) {
 	tp->fTrackID[id] = fTrackID[id];
+      }
+    }
+
+    if (fUseMVA) {
+      if (fTrkQualMVA[i]) {
+	fBestID[i] = fTrkQualMVA[i]->BestID();		  // Dave's default: DaveTrkQual > 0.8 ; or else
       }
     }
   }
@@ -401,7 +321,7 @@ void TTrackCompModule::BookHistograms() {
   track_selection[174] = new TString("PAR- tracks with final selections and process-defined weight");
 
   track_selection[175] = new TString("PAR- tracks with final selections and DIO weight");
-  track_selection[176] = new TString("PAR- tracks with final selections and DIO weight and 103.5 < P < 105.0");
+  track_selection[176] = new TString("PAR- tracks with final selections and DIO weight and 103.6 < P < 105.0");
 
   track_selection[177] = new TString("cosmics+: #171 + 90 < p < 93");
   track_selection[178] = new TString("cosmics-: #172 + 90 < p < 93");
@@ -477,7 +397,7 @@ void TTrackCompModule::BookHistograms() {
   track_selection[274] = new TString("DAR- tracks with final selections and process-defined weight");
 
   track_selection[275] = new TString("DAR- tracks with final selections and DIO weight");
-  track_selection[276] = new TString("DAR- tracks with final selections and DIO weight and 103.5 < P < 105.0");
+  track_selection[276] = new TString("DAR- tracks with final selections and DIO weight and 103.6 < P < 105.0"); // mu2e-4595
 
   track_selection[277] = new TString("cosmics+: #271 + 90 < p < 93");
   track_selection[278] = new TString("cosmics-: #272 + 90 < p < 93");
@@ -548,50 +468,6 @@ void TTrackCompModule::BookHistograms() {
     }
   }
 
-}
-
-
-//-----------------------------------------------------------------------------
-// TmvaAlgorithm: 100*usez + algorigthm
-//-----------------------------------------------------------------------------
-int TTrackCompModule::FillTmvaTree() {
-  int rc(0), loc(-1);
-
-  loc = fWriteTmvaTree;			// 0:kPAR , 1:kDAR
-
-  if (fTrackBlock[loc]->NTracks() != 1) return rc;
-
-//-----------------------------------------------------------------------------
-// use first track
-//-----------------------------------------------------------------------------
-  TStnTrack* trk = fTrackBlock[loc]->Track(0);
-  TrackPar_t* tp = &fTrackPar[loc][0];
-
-  float na              = trk->NActive();
-  float nm              = trk->NMat();
-
-  fTmvaData.fP          = tp->fP;
-  fTmvaData.fPMC        = trk->fPFront;
-  fTmvaData.fTanDip     = trk->TanDip();
-  fTmvaData.fNActive    = na;
-  fTmvaData.fNaFract    = na/trk->NHits();
-  fTmvaData.fNDoublets  = trk->NDoublets();
-  fTmvaData.fNDa        = trk->NDoubletsAct();
-  fTmvaData.fChi2Dof    = trk->Chi2Dof();
-  fTmvaData.fFitCons    = trk->FitCons();
-  fTmvaData.fMomErr     = trk->FitMomErr();
-  fTmvaData.fT0Err      = trk->T0Err();
-  fTmvaData.fD0         = trk->D0();
-  fTmvaData.fRMax       = trk->RMax();
-  fTmvaData.fNdaOverNa  = trk->NDoubletsAct()/na;
-  fTmvaData.fNzaOverNa  = trk->NHitsAmbZero()/na;
-  fTmvaData.fNmaOverNm  = trk->NMatActive()/nm;
-  fTmvaData.fZ1         = trk->fZ1;
-  fTmvaData.fWeight     = 1.;
-
-  fTmvaTree->Fill();
-
-  return rc;
 }
 
 //-----------------------------------------------------------------------------
@@ -939,7 +815,7 @@ void TTrackCompModule::FillHistograms() {
 	  if (fProcess > 0) FillTrackHistograms(fHist.fTrack[ihist+74],trk,tp,&fSimPar,fWeight);                       // weighting
 	  
 	  FillTrackHistograms(fHist.fTrack[ihist+75],trk,tp,&fSimPar,tp->fDioLLWt);                                       // DIO
-	  if ((tp->fP > 103.5) && (tp->fP < 105.0)) FillTrackHistograms(fHist.fTrack[ihist+76],trk,tp,&fSimPar,tp->fDioLLWt); 
+	  if ((tp->fP > 103.6) && (tp->fP < 105.0)) FillTrackHistograms(fHist.fTrack[ihist+76],trk,tp,&fSimPar,tp->fDioLLWt); // to compare to mu2e-4595
 
 	  if ((tp->fP > 90.) && (tp->fP < 93.)) FillTrackHistograms(fHist.fTrack[ihist+78],trk,tp,&fSimPar);            // for cosmics
 
@@ -975,11 +851,6 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   // FillEfficiencyHistograms(fTrackBlock[0],fTrackID[fBestID[0]],&fTrackPar[0][0],10);
   // FillEfficiencyHistograms(fTrackBlock[1],fTrackID[fBestID[1]],&fTrackPar[1][0],20);
-
-//-----------------------------------------------------------------------------
-// fill little tree if requested
-//-----------------------------------------------------------------------------
-  if (fWriteTmvaTree >= 0) FillTmvaTree();
 
 }
 
@@ -1145,7 +1016,7 @@ int TTrackCompModule::Event(int ientry) {
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
 
-  if (fFillHistograms) FillHistograms();
+  FillHistograms();
 
   Debug();
 
@@ -1286,16 +1157,7 @@ void TTrackCompModule::Debug() {
 
 //-----------------------------------------------------------------------------
 int TTrackCompModule::EndJob() {
-  printf("----- end job: ---- %s\n",GetName());
-
-  if (fWriteTmvaTree >= 0) {
-    printf("[TTrackCompModule::EndJob] Writing output TMVA training file %s\n",fTmvaFile->GetName());
-    fTmvaFile->Write();
-    delete fTmvaFile;
-    fTmvaFile  = 0;
-    fTmvaTree  = 0;
-  }
-
+  TAnaModule::EndJob();
   return 0;
 }
 

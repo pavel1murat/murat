@@ -270,9 +270,9 @@ void TTrackCompModule::BookHistograms() {
 
   track_selection[100] = new TString("PAR all tracks");
   track_selection[101] = new TString("PAR BestTrackID");
-  track_selection[102] = new TString("PAR BestTrackID no fitCons&momErr&t0Err tracks");
-  track_selection[103] = new TString("PAR BestTrackID, dpf>1 tracks");
-  track_selection[104] = new TString("PAR all  tracks events Ecl > 60");
+  track_selection[102] = new TString("PAR BestTrackID, cluster");
+  track_selection[103] = new TString("PAR BestTrackID, cluster, first disk");
+  track_selection[104] = new TString("PAR BestTrackID, cluster, second disk");
   track_selection[105] = new TString("PAR BestTrackID tracks events Ecl > 60");
   track_selection[106] = new TString("PAR tracks with dtz0 < -10");
   track_selection[109] = new TString("PAR tracks with XDpF > +10 MeV");
@@ -346,9 +346,11 @@ void TTrackCompModule::BookHistograms() {
 
   track_selection[200] = new TString("DAR all tracks");
   track_selection[201] = new TString("DAR BestTrackID");
-  track_selection[202] = new TString("DAR BestTrackID no fitCons&momErr&t0Err tracks");
-  track_selection[203] = new TString("DAR BestTrackID, dpf>1 tracks");
-  track_selection[204] = new TString("DAR all  tracks events Ecl > 60");
+
+  track_selection[202] = new TString("DAR BestTrackID, cluster");
+  track_selection[203] = new TString("DAR BestTrackID, cluster, first disk");
+  track_selection[204] = new TString("DAR BestTrackID, cluster, second disk");
+
   track_selection[205] = new TString("DAR BestTrackID tracks events Ecl > 60");
   track_selection[206] = new TString("DAR tracks with dtz0 < -10");
   track_selection[209] = new TString("DAR tracks with XDpF > +10 MeV");
@@ -628,34 +630,25 @@ void TTrackCompModule::FillHistograms() {
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp,&fSimPar);
 //-----------------------------------------------------------------------------
-// TRK_101, TRK_201: BestID 
+// TRK_101: BestID 
+// TRK_102: BestID + cluster
+// TRK_103: BestID + cluster + 1st disk
+// TRK_104: BestID + cluster + 2nd disk
 //-----------------------------------------------------------------------------
       if (tp->fIDWord[best_id] == 0) {
-//-----------------------------------------------------------------------------
-// cosmics
-//-----------------------------------------------------------------------------
 	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp,&fSimPar);
 	n_setc_tracks[i] += 1;
-      }
-//-----------------------------------------------------------------------------
-// TRK_102, TRK_202: (BestID - FitConsBit - T0ErrBit - MomErrBit) tracks 
-//-----------------------------------------------------------------------------
-      int mask = (TStnTrackID::kFitConsBit | TStnTrackID::kT0ErrBit | TStnTrackID::kMomErrBit);
-      if ((tp->fIDWord[best_id] & ~mask) == 0) {
-	FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp,&fSimPar);
-      }
-//-----------------------------------------------------------------------------
-// IHIST+3: (SetC + (dpf > 1)tracks 
-//-----------------------------------------------------------------------------
-      if ((tp->fIDWord[best_id] == 0) & (tp->fDpF > 1)) {
-	FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp,&fSimPar);
+
+	if (tp->fDiskID >= 0) {
+	  FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp,&fSimPar);
+	  if      (tp->fDiskID == 0) FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp,&fSimPar);
+	  else if (tp->fDiskID == 1) FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp,&fSimPar);
+	}
       }
 //-----------------------------------------------------------------------------
 // IHIST+4: add   Ecl > 60 requirement
 //-----------------------------------------------------------------------------
       if (fEClMax > 60.) {
-	FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp,&fSimPar);
-
 	if (tp->fIDWord[0] == 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp,&fSimPar);
 	}

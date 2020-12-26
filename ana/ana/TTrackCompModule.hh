@@ -91,8 +91,6 @@ public:
 
   TStnTrack*         fTrack;
 
-  TEmuLogLH*         fLogLH;
-
   double             fMinETrig;
 
   double             fMinT0;

@@ -80,6 +80,7 @@ struct TrackHist_t : public HistBase_t {
   TH1F*    fDtClZ0;                   // T(cluster back at Z0)-T_true(Z0)
   TH2F*    fDtClZ0VsECl;              // 
   TH2F*    fDtClZ0VsP;              // 
+  TH2F*    fEclVsPath;
 
   TH2F*    fFConsVsNActive;
   TH1F*    fDaveTrkQual;
@@ -100,6 +101,7 @@ struct TrackHist_t : public HistBase_t {
   TH1F*    fTchDr;
   TH1F*    fTchDz;
   TH1F*    fTchDt;
+  TH2F*    fEclVsTchPath;
 };
 }
 #endif

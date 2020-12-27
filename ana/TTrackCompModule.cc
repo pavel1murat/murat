@@ -124,8 +124,6 @@ TTrackCompModule::~TTrackCompModule() {
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
 int TTrackCompModule::BeginJob() {
-
-  TAnaModule::BeginJob();
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
@@ -148,6 +146,10 @@ int TTrackCompModule::BeginJob() {
   for (int i=0; i<2; i++) {
     for (int ip=0; ip<kNTrackPar; ip++) {
       TrackPar_t* tp = &fTrackPar[i][ip];
+
+      tp->fFitType    = i;                                // assume first block - PAR, second - DAR
+      tp->fLogLH      = TAnaModule::fLogLH;
+
       for (int id=0; id<fNID; id++) {
 	tp->fTrackID[id] = fTrackID[id];
       }
@@ -159,6 +161,8 @@ int TTrackCompModule::BeginJob() {
       }
     }
   }
+
+  TAnaModule::BeginJob();
 
   return 0;
 }
@@ -990,21 +994,6 @@ int TTrackCompModule::Event(int ientry) {
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
-
-    for (int itrk=0; itrk<fNTracks[i]; itrk++) {
-      TrackPar_t* tp  = fTrackPar[i]+itrk;
-      TStnTrack*  trk = fTrackBlock[i]->Track(itrk);
-
-      tp->fAlg        = i;
-      if (fTrkQualMVA[i] != NULL) {
-					// use calculated on the fly MVA estimator
-	trk->SetITmp(0,0);
-      }
-
-      tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
-      tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
-      tp->fLogLH      = TAnaModule::fLogLH;
-    }
 
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }

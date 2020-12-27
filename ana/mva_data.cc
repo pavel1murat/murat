@@ -26,98 +26,98 @@ mva_data::data_t  mva_calpatrec_e11s5731_000 = {
   "calpatrec_e11s5731_logfcons_000",
   "CalPatRec/data/v5_7_7/MLP_weights_logfcons_0_uni.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_000.hist",
-  0.60, 12
+  0.60
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_001 = {
   "calpatrec_e11s5731_logfcons_001",
   "CalPatRec/data/v5_7_7/MLP_weights_logfcons_1_lin.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_001.hist",
-  0.65, 13
+  0.65
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_002 = {
   "calpatrec_e11s5731_logfcons_002",
   "CalPatRec/data/v5_7_7/MLP_weights_logfcons_2_exp.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_002.hist",
-  0.85, 17
+  0.85
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_003 = {
   "calpatrec_e11s5731_logfcons_003",
   "CalPatRec/data/v5_7_7/MLP_weights_logfcons_3_pol.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_003.hist",
-  0.85, 17  // not sure
+  0.85  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_004 = {
   "calpatrec_e11s5731_logfcons_004",
   "CalPatRec/data/v5_7_7/MLP_weights_logfcons_4_exp.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_004.hist",
-  0.85, 17  // not sure
+  0.85  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_100 = {
   "calpatrec_e11s5731_chi2d_100",
   "CalPatRec/data/v5_7_7/MLP_weights_chi2d_0_uni.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_100.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_101 = {
   "calpatrec_e11s5731_chi2d_101",
   "CalPatRec/data/v5_7_7/MLP_weights_chi2d_1_lin.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_101.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_102 = {
   "calpatrec_e11s5731_chi2d_102",
   "CalPatRec/data/v5_7_7/MLP_weights_chi2d_2_exp.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_102.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_103 = {
   "calpatrec_e11s5731_chi2d_103",
   "CalPatRec/data/v5_7_7/MLP_weights_chi2d_3_pol.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_103.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_104 = {
   "calpatrec_e11s5731_chi2d_104",
   "CalPatRec/data/v5_7_7/MLP_weights_chi2d_4_exp.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_104.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_202 = {
   "calpatrec_e11s5731_chi2d_202",
   "CalPatRec/data/v5_7_7/MLP_weights_chi2d_2_exp.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_202.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_calpatrec_e11s5731_204 = {
   "calpatrec_e11s5731_chi2d_204",
   "../../alaha/dev/TrkQualPExp4Weights/TMVAClassification_MLP.weights.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_204.hist",
-  0.65, 13  // not sure
+  0.65  // not sure
 };
 
 mva_data::data_t  mva_trkpatrec_dave_002 = {
   "trkpatrec_dave_logfcons_002",
   "AnalysisConditions/weights/TrkQual.weights.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_002.hist",              // not correct
-  0.40, 8
+  0.40
 };
 
 mva_data::data_t  mva_trkpatrec_e115731_001 = {
   "trkpatrec_e11s5731_logfcons_001",
   "CalPatRec/data/v5_7_7/MLP_weights_trkpatrec_logfcons_1_uni.xml",
   "~/hist/mu2e/v5_7_0/e11s5731.track_comp_use_mva_001_000.hist",
-  0.40, 8
+  0.40
 };
 
 //-----------------------------------------------------------------------------
@@ -133,7 +133,7 @@ mva_data::data_t  mva_fele2s51b1_0070 = {
   "fele2s51b1_0070",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_0070.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0070.hist",        // histograms
-  0.40, 8                                                                    // cut value, ID #
+  0.40                                                                       // default cut value
 };
 
 
@@ -141,28 +141,28 @@ mva_data::data_t  mva_fele2s51b1_0060 = {
   "fele2s51b1_060",                                                          // name
   "su2020/data/trk_qual_mva/MLP_weights_0060.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_0060.hist",        // histograms
-  0.80, 16                                                                   // cut value, ID #
+  0.80                                                                       // default cut value
 };
 
 mva_data::data_t  mva_fele2s51b1_1055 = {                                    // 
   "fele2s51b1_1055",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_1055.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1055.hist",        // histograms
-  0.20, 4                                                                    // cut value, ID #
+  0.20                                                                       // default cut value
 };
 
 mva_data::data_t  mva_fele2s51b1_1060 = {                                    // 
   "fele2s51b1_1060",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_1060.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1060.hist",        // histograms
-  0.20, 4                                                                    // cut value, ID #
+  0.20                                                                       // default cut value
 };
 
 mva_data::data_t  mva_fele2s51b1_1070 = {
   "fele2s51b1_1070",                                                         // name
   "su2020/data/trk_qual_mva/MLP_weights_1070.xml",                           // location of XML weights
   "$MU2E_HIST/su2020/su2020.fele2s51b1.track_comp_use_mva_1070.hist",        // histograms
-  0.20, 4                                                                    // cut value, ID #
+  0.20                                                                       // default default cut value
 };
 
 

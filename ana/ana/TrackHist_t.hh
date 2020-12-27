@@ -101,7 +101,10 @@ struct TrackHist_t : public HistBase_t {
   TH1F*    fTchDr;
   TH1F*    fTchDz;
   TH1F*    fTchDt;
-  TH2F*    fEclVsTchPath;
+
+  TH2F*    fEpVsPath;
+  TH2F*    fEpVsTchDz;
+  TH2F*    fTchDtVsDz;
 };
 }
 #endif

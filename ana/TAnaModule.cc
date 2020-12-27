@@ -385,7 +385,10 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fTchDz      ,"tch_dz"    ,Form("%s:TCH DZ"             ,Folder), 100, -250,  250,Folder);
   HBook1F(Hist->fTchDr      ,"tch_dr"    ,Form("%s:TCH DR"             ,Folder), 200, -100,  100,Folder);
   HBook1F(Hist->fTchDt      ,"tch_dt"    ,Form("%s:TCH Dt"             ,Folder), 400,  -10,   10,Folder);
-  
+
+  HBook2F(Hist->fEpVsPath   ,"ep_vs_path",Form("%s: E/P vs Path"       ,Folder), 100, -100,  400, 120,  0,  1.2,Folder);
+  HBook2F(Hist->fEpVsTchDz  ,"ep_vs_tchdz",Form("%s: E/P vs Tch_DZ"    ,Folder), 100, -100,  400, 120,  0,  1.2,Folder);
+  HBook2F(Hist->fTchDtVsDz  ,"tchdt_vs_dz",Form("%s: TCH_DT vs Tch_DZ" ,Folder), 100, -100,  400, 200, -10, 10 ,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -711,9 +714,9 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 //-----------------------------------------------------------------------------
   Hist->fPVsTime->Fill(Tp->fP, Track->fT0, Weight);
 
-  Hist->fDtCRV   ->Fill(Tp->fDtCRV, Weight);
-  Hist->fZVsDtCRV->Fill(Tp->fZCRV , Tp->fDtCRV, Weight);
+  Hist->fDtCRV   ->Fill(Tp->fDtCRV , Weight);
   Hist->fDtCRV2  ->Fill(Tp->fDtCRV2, Weight);
+  Hist->fZVsDtCRV->Fill(Tp->fZCRV  , Tp->fDtCRV, Weight);
 //-----------------------------------------------------------------------------
 // TrkCaloHit histograms
 //-----------------------------------------------------------------------------
@@ -724,6 +727,10 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
   Hist->fTchDz  ->Fill(Tp->fTchDz  , Weight);
   Hist->fTchDr  ->Fill(Tp->fTchDr  , Weight);
   Hist->fTchDt  ->Fill(Tp->fTchDt  , Weight);
+
+  Hist->fEpVsPath ->Fill(Tp->fPath ,Tp->fEp   ,Weight);
+  Hist->fEpVsTchDz->Fill(Tp->fTchDz,Tp->fEp   ,Weight);
+  Hist->fTchDtVsDz->Fill(Tp->fTchDz,Tp->fTchDt,Weight);
 }
 
 
@@ -936,10 +943,10 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
       // pmva[ 8] = track->D0();                          // low-rank, do not use
       // pmva[ 9] = track->RMax();                        // low-rank, do not use
 
-      int fit_type = tp->fFitType;	                          // 
+      int mva_type = tp->fMvaType;	                          // 
 	
-      if (fTrkQualMVA[fit_type] != nullptr) {
-	tp->fMVAOut[1] = fTrkQualMVA[fit_type]->fMva->evalMVA(pmva);
+      if (fTrkQualMVA[mva_type] != nullptr) {
+	tp->fMVAOut[1] = fTrkQualMVA[mva_type]->fMva->evalMVA(pmva);
 	track->SetTmp(0,tp->fMVAOut[1]);
       }
     }

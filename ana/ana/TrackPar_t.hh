@@ -14,7 +14,8 @@ public:
   int     fNEPl;
   int     fNDPl;
   int     fDiskID;                	// 0: first disk, 1:second disk
-  int     fFitType;                     // index of the trk qual MVAL 0=PAR, 1=DAR
+  int     fFitType;                     // index for applying corrections
+  int     fMvaType;                     // index of the trk qual MVAL 0=PAR, 1=DAR
 		
   SimPar_t*     fSimPar;               // pointer to simparticle 
   TStnTrackID*  fTrackID[50];          //

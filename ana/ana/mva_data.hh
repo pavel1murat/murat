@@ -13,8 +13,7 @@ public:
     const  char *fName;
     const  char *fXmlWeightsFile;
     const  char *fTrackCompHistFile;   // hist file name for "track_comp" job
-    double       fMinValue;
-    int          fBestID;
+    double       fCutValue;
   };
 
   int              fTrainingCode;
@@ -32,8 +31,7 @@ public:
   const char* Name             () { return fData.fName;              }
   const char* XmlWeightsFile   () { return fData.fXmlWeightsFile;    }
   const char* TrackCompHistFile() { return fData.fTrackCompHistFile; }
-  double      MinValue         () { return fData.fMinValue;          }
-  int         BestID           () { return fData.fBestID;            }
+  double      CutValue         () { return fData.fCutValue;          }
   int         TrainingCode     () { return fTrainingCode;            }
 
   int         Init             ();

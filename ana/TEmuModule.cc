@@ -46,8 +46,8 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
 // TrackID[0]     : Michael's cuts
 // fTrackID[1-19] : cut on MVA-based TrkQual with the step of 0.05
 //-----------------------------------------------------------------------------
-  fBestID[0] = 16;                      // default best for PAR tracks ( > 0.05*15 = 0.8)
-  fBestID[1] = 0;                       // default best for DAR tracks 
+  fBestID[0] = 0;                       // default best ID word for electrons
+  fBestID[1] = 0;                       // default best ID word for muons
 
   fNMVA      = 1; 			// MVA per track block 
 
@@ -62,7 +62,7 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
     fTrackID[i]->SetMinFitCons( -1);
     fTrackID[i]->SetMinTanDip (0.5);
     fTrackID[i]->SetMaxTanDip (1.0);
-    fTrackID[i]->SetMinTrkQual(0.2);
+    fTrackID[i]->SetMinTrkQual(0.2);   // assuming I know what I'm doind
     fTrackID[i]->SetMinD0     (-100.);
     fTrackID[i]->SetMaxD0     ( 100.);
 
@@ -113,19 +113,23 @@ int TEmuModule::BeginJob() {
 //  .. assume TrkQual to be precalculated, do only beed to cut on
 //-----------------------------------------------------------------------------
   for (int i=0; i<2; i++) {
-    for (int ip=0; ip<kNTrackPar; ip++) {
-      TrackPar_t* tp = &fTrackPar[i][ip];
-      tp->fFitType   = 0;                            // both blocks use the same fits, same track quality MVA
-      for (int id=0; id<fNID; id++) {
-	fTrackID[id]->SetLocTrkQual(0);              // use TStnTrack::fTmp[0] to store MVA-calculated TrkQual
+    for (int id=0; id<fNID; id++) {
+      for (int ip=0; ip<kNTrackPar; ip++) {
+	TrackPar_t* tp = &fTrackPar[i][ip];
+	tp->fLogLH       = TAnaModule::fLogLH;          // do it just once
+	tp->fFitType     = 1;                           // both blocks use DAR fits, kDAR=1
+	tp->fMvaType     = 0;                           // both blocks use the same fits, same track quality MVA
 	tp->fTrackID[id] = fTrackID[id];
-      }
-      tp->fLogLH      = TAnaModule::fLogLH;          // do it just once
-    }
-
-    if (fUseMVA) {
-      if (fTrkQualMVA[i]) {
-	fBestID[i] = fTrkQualMVA[i]->BestID();		  // Dave's default: DaveTrkQual > 0.8 ; or else
+	if (fUseMVA) {
+//-----------------------------------------------------------------------------
+// in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
+// but do not change the cut value on the MVA output
+// in principle, different track blocks could use different track ID definitions
+//-----------------------------------------------------------------------------
+	  if (fTrkQualMVA[i]) {
+	    tp->fTrackID[id]->SetLocTrkQual(0);
+	  }
+	}
       }
     }
   }

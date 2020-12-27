@@ -58,8 +58,8 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 // TrackID[0]     : Michael's cuts
 // fTrackID[1-19] : cut on MVA-based TrkQual with the step of 0.05
 //-----------------------------------------------------------------------------
-  fBestID[0] = 16;                      // default best for PAR tracks ( > 0.05*15 = 0.8)
-  fBestID[1] = 0;                       // default best for DAR tracks 
+  fBestID[0] = 16;                      // default best for PAR tracks ( > 0.05*15 = 0.8) - Dave's track ID
+  fBestID[1] = 0;                       // default best for DAR tracks - BOX cuts
 
   fNMVA      = 2; 			// number of MVA's used (if used at all)
 
@@ -148,16 +148,20 @@ int TTrackCompModule::BeginJob() {
       TrackPar_t* tp = &fTrackPar[i][ip];
 
       tp->fFitType    = i;                                // assume first block - PAR, second - DAR
+      tp->fMvaType    = i;                                // assume that blocks could use different MVAs
       tp->fLogLH      = TAnaModule::fLogLH;
 
       for (int id=0; id<fNID; id++) {
 	tp->fTrackID[id] = fTrackID[id];
-      }
-    }
-
-    if (fUseMVA) {
-      if (fTrkQualMVA[i]) {
-	fBestID[i] = fTrkQualMVA[i]->BestID();		  // Dave's default: DaveTrkQual > 0.8 ; or else
+	if (fUseMVA) {
+//-----------------------------------------------------------------------------
+// in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
+// but do not change the cut value on the MVA output
+//-----------------------------------------------------------------------------
+	  if (fTrkQualMVA[i]) {
+	    tp->fTrackID[id]->SetLocTrkQual(0);
+	  }
+	}
       }
     }
   }

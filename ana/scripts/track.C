@@ -198,8 +198,8 @@ void  track_comp_debug(int PDGCode=11, int GeneratorCode=28, int DebugBit=14) {
 }
 
 //-----------------------------------------------------------------------------
-// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
-// TrkRrecoAlg = 0:TrkPatRec    =1:CalPatRec  =7:dioTail
+// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun 7:dioTail
+// TrkRrecoAlg = 0:PAR    =1:DAR
 //-----------------------------------------------------------------------------
 void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
@@ -209,7 +209,7 @@ void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, i
   murat::m_tcm->SetPdgCode      (PDGCode);
   murat::m_tcm->SetGeneratorCode(GeneratorCode);
 
-  murat::m_tcm->SetWriteTmvaTree(TrkRecoAlg);
+  murat::m_tcm->SetWriteMvaTree(TrkRecoAlg);
 
   if (DebugBit >= 0) murat::m_tcm->SetDebugBit(DebugBit,1);
 }

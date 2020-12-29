@@ -29,6 +29,9 @@
 #include "TEnv.h"
 #include "TSystem.h"
 
+#include "Stntuple/base/TStnDataset.hh"
+#include "Stntuple/loop/TStnInputModule.hh"
+
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/obj/TStnNode.hh"
@@ -61,7 +64,7 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
   fBestID[0] = 16;                      // default best for PAR tracks ( > 0.05*15 = 0.8) - Dave's track ID
   fBestID[1] = 0;                       // default best for DAR tracks - BOX cuts
 
-  fNMVA      = 2; 			// number of MVA's used (if used at all)
+  fNTrkQualMVA = 2; 			// number of track quality MVAs used (if used at all)
 
   fNID       = 20;                      // fNID has to be < TAnaModule::kMaxNTrackID
   for (int i=0; i<fNID; i++) {
@@ -113,6 +116,8 @@ TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaMod
 
   fDebugCut[6].fXMin = 1.5;
   fDebugCut[6].fXMax = 10.0;
+
+  fWriteTrkQualMvaTree = -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -153,7 +158,7 @@ int TTrackCompModule::BeginJob() {
 
       for (int id=0; id<fNID; id++) {
 	tp->fTrackID[id] = fTrackID[id];
-	if (fUseMVA) {
+	if (fUseTrkQualMVA) {
 //-----------------------------------------------------------------------------
 // in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
 // but do not change the cut value on the MVA output
@@ -166,11 +171,67 @@ int TTrackCompModule::BeginJob() {
     }
   }
 
+//-----------------------------------------------------------------------------
+// fWriteTmvaTree = -1 : do not write
+//                =  0 : write PAR resolver training tree
+//                =  1 : write DAR resolver training tree
+//-----------------------------------------------------------------------------
+
+  if (fWriteTrkQualMvaTree >= 0) {
+    TDirectory* dir = gDirectory;
+
+    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
+
+    fTrkQualMvaFile  = new TFile(Form("%s.tmva_training_%04i.root",dsname,1000*fWriteTrkQualMvaTree),"recreate");
+    fTrkQualMvaTree  = new TTree("tmva_training_tree","TMVA Training Tree");
+
+    fTrkQualMvaBranch.fP          = fTrkQualMvaTree->Branch("p"       ,&fTrkQualMvaData.fP         ,"F");
+    fTrkQualMvaBranch.fPMC        = fTrkQualMvaTree->Branch("pmc"     ,&fTrkQualMvaData.fPMC       ,"F");
+    fTrkQualMvaBranch.fTanDip     = fTrkQualMvaTree->Branch("tdip"    ,&fTrkQualMvaData.fTanDip    ,"F");
+    fTrkQualMvaBranch.fNActive    = fTrkQualMvaTree->Branch("nactive" ,&fTrkQualMvaData.fNActive   ,"F");
+    fTrkQualMvaBranch.fNaFract    = fTrkQualMvaTree->Branch("nafract" ,&fTrkQualMvaData.fNaFract   ,"F");
+    fTrkQualMvaBranch.fNDoublets  = fTrkQualMvaTree->Branch("nd"      ,&fTrkQualMvaData.fNActive   ,"F");
+    fTrkQualMvaBranch.fNDa        = fTrkQualMvaTree->Branch("nda"     ,&fTrkQualMvaData.fNaFract   ,"F");
+    fTrkQualMvaBranch.fChi2Dof    = fTrkQualMvaTree->Branch("chi2d"   ,&fTrkQualMvaData.fChi2Dof   ,"F");
+    fTrkQualMvaBranch.fFitCons    = fTrkQualMvaTree->Branch("fcons"   ,&fTrkQualMvaData.fFitCons   ,"F");
+    fTrkQualMvaBranch.fMomErr     = fTrkQualMvaTree->Branch("momerr"  ,&fTrkQualMvaData.fMomErr    ,"F");
+    fTrkQualMvaBranch.fT0Err      = fTrkQualMvaTree->Branch("t0err"   ,&fTrkQualMvaData.fT0Err     ,"F");
+    fTrkQualMvaBranch.fD0         = fTrkQualMvaTree->Branch("d0"      ,&fTrkQualMvaData.fD0        ,"F");
+    fTrkQualMvaBranch.fRMax       = fTrkQualMvaTree->Branch("rmax"    ,&fTrkQualMvaData.fRMax      ,"F");
+    fTrkQualMvaBranch.fNdaOverNa  = fTrkQualMvaTree->Branch("nda_o_na",&fTrkQualMvaData.fNdaOverNa ,"F");
+    fTrkQualMvaBranch.fNzaOverNa  = fTrkQualMvaTree->Branch("nza_o_na",&fTrkQualMvaData.fNzaOverNa ,"F");
+    fTrkQualMvaBranch.fNmaOverNm  = fTrkQualMvaTree->Branch("nma_o_nm",&fTrkQualMvaData.fNmaOverNm ,"F");
+    fTrkQualMvaBranch.fNdaOverNd  = fTrkQualMvaTree->Branch("nda_o_nd",&fTrkQualMvaData.fNdaOverNd ,"F");
+    fTrkQualMvaBranch.fZ1         = fTrkQualMvaTree->Branch("z1"      ,&fTrkQualMvaData.fZ1        ,"F");
+    fTrkQualMvaBranch.fWeight     = fTrkQualMvaTree->Branch("wt"      ,&fTrkQualMvaData.fWeight    ,"F");
+
+    dir->cd();
+  }
+
   TAnaModule::BeginJob();
 
   return 0;
 }
 
+
+//-----------------------------------------------------------------------------
+int TTrackCompModule::EndJob() {
+  printf("----- end job: ---- %s\n",GetName());
+
+  if (fWriteTrkQualMvaTree >= 0) {
+    printf("[%s::EndJob] Writing output TrkQual TMVA training file %s\n",GetName(),fTrkQualMvaFile->GetName());
+
+    fTrkQualMvaFile->Write();
+    delete fTrkQualMvaFile;
+
+    fTrkQualMvaFile  = 0;
+    fTrkQualMvaTree  = 0;
+  }
+
+  TAnaModule::EndJob();
+
+  return 0;
+}
 
 //_____________________________________________________________________________
 int TTrackCompModule::BeginRun() {
@@ -1000,6 +1061,44 @@ int TTrackCompModule::Event(int ientry) {
     fNGoodTracks[i] = 0;
 
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
+
+//-----------------------------------------------------------------------------
+// when writing an ntuple for MVA training, use the first track
+// fWriteTmvaTree = algorithm (0 or 1)
+//-----------------------------------------------------------------------------
+    if ((fWriteTrkQualMvaTree >= 0) && (i == fWriteTrkQualMvaTree)) {
+
+      if (fNTracks[i] == 1) { 
+	TrackPar_t* tp = &fTrackPar[i][0];   
+
+	TStnTrack* trk = fTrackBlock[i]->Track(0);
+
+	float na              = trk->NActive();
+	float nm              = trk->NMat();
+
+	fTrkQualMvaData.fP          = tp->fP;
+	fTrkQualMvaData.fPMC        = trk->fPFront;
+	fTrkQualMvaData.fTanDip     = trk->TanDip();
+	fTrkQualMvaData.fNActive    = na;
+	fTrkQualMvaData.fNaFract    = na/trk->NHits();
+	fTrkQualMvaData.fNDoublets  = trk->NDoublets();
+	fTrkQualMvaData.fNDa        = trk->NDoubletsAct();
+	fTrkQualMvaData.fChi2Dof    = trk->Chi2Dof();
+	fTrkQualMvaData.fFitCons    = trk->FitCons();
+	fTrkQualMvaData.fMomErr     = trk->FitMomErr();
+	fTrkQualMvaData.fT0Err      = trk->T0Err();
+	fTrkQualMvaData.fD0         = trk->D0();
+	fTrkQualMvaData.fRMax       = trk->RMax();
+	fTrkQualMvaData.fNdaOverNa  = trk->NDoubletsAct()/na;
+	fTrkQualMvaData.fNzaOverNa  = trk->NHitsAmbZero()/na;
+	fTrkQualMvaData.fNmaOverNm  = trk->NMatActive()/nm;
+	fTrkQualMvaData.fZ1         = trk->fZ1;
+	fTrkQualMvaData.fWeight     = 1.;
+    
+	fTrkQualMvaTree->Fill();
+      }
+    }
+
   }
 
   FillHistograms();
@@ -1139,12 +1238,6 @@ void TTrackCompModule::Debug() {
       }
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-int TTrackCompModule::EndJob() {
-  TAnaModule::EndJob();
-  return 0;
 }
 
 //_____________________________________________________________________________

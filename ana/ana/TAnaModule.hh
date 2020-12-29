@@ -33,18 +33,20 @@
 #include "Stntuple/alg/TEmuLogLH.hh"
 #include "Stntuple/alg/TStntuple.hh"
 
-#include "murat/ana/TrackHist_t.hh"
-
 #include "murat/ana/EventPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
 #include "murat/ana/TrackPar_t.hh"
 
+#include "murat/ana/ClusterHist_t.hh"
 #include "murat/ana/CrvHist_t.hh"
 #include "murat/ana/EventHist_t.hh"
 #include "murat/ana/GenpHist_t.hh"
 #include "murat/ana/SimpHist_t.hh"
+#include "murat/ana/TrackHist_t.hh"
+
 #include "murat/ana/TrackSeedHist_t.hh"
 
+#include "murat/ana/TTrkQualMva.hh"
 #include "murat/ana/mva_data.hh"
 
 namespace mu2e { 
@@ -61,50 +63,6 @@ public:
 //  data members
 //-----------------------------------------------------------------------------
 public:
-
-  struct TmvaTrainData_t {
-    float    fP;
-    float    fPMC;
-    float    fTanDip;
-    float    fNActive;
-    float    fNaFract;
-    float    fNDoublets;                // total number of doublets
-    float    fNDa;                      // number of doublets with all hits active
-    float    fChi2Dof;
-    float    fFitCons;
-    float    fMomErr;
-    float    fT0Err;
-    float    fD0;
-    float    fRMax;
-    float    fNdaOverNa;
-    float    fNzaOverNa;
-    float    fNmaOverNm;
-    float    fNdaOverNd;
-    float    fZ1;			// Z-coordinate of the first hit
-    float    fWeight;
-  };
-
-  struct TmvaTrainBranches_t {
-    TBranch*  fP;
-    TBranch*  fPMC;
-    TBranch*  fTanDip;
-    TBranch*  fNActive;
-    TBranch*  fNaFract;
-    TBranch*  fNDoublets;
-    TBranch*  fNDa;
-    TBranch*  fChi2Dof;
-    TBranch*  fFitCons;
-    TBranch*  fMomErr;
-    TBranch*  fT0Err;
-    TBranch*  fD0;
-    TBranch*  fRMax;
-    TBranch*  fNdaOverNa;
-    TBranch*  fNzaOverNa;
-    TBranch*  fNmaOverNm;
-    TBranch*  fNdaOverNd;
-    TBranch*  fZ1;			       // Z-coordinate of the first hit
-    TBranch*  fWeight;			       // for background only
-  };
 
   enum { kMaxNTrackID = 50 };
 
@@ -125,19 +83,14 @@ public:
 
   TStntuple*          fStnt;                   // STNTUPLE singleton
 //-----------------------------------------------------------------------------
-// TMVA training ntuples
+// TrackQual MVA
 //-----------------------------------------------------------------------------
-  int                 fWriteTmvaTree   ;       // =0:PAR   1:DAR  (default=-1)
+  int                 fUseTrkQualMVA;
+  int                 fNTrkQualMVA;	   // number of MVA classifiers used for tracks of the same type
 
-  TFile*              fTmvaFile;
-  TTree*              fTmvaTree;
-
-  TmvaTrainData_t     fTmvaData;
-  TmvaTrainBranches_t fTmvaBranch;
-
-  int                 fUseMVA;
-  int                 fNMVA;	           // number of MVA classifiers used for tracks of the same type
-
+  int                 fUsePidMVA;
+  int                 fNPidMVA;	           // number of MVA classifiers used for tracks of the same type
+  
   int                 fApplyCorr;          // default=1
 //-----------------------------------------------------------------------------
 // MVA-based classifiers
@@ -163,7 +116,6 @@ public:
   void               SetPdgCode      (int    Code) { fPdgCode       = Code ; }
   void               SetGeneratorCode(int    Code) { fGeneratorCode = Code ; }
   void               SetApplyCorr    (int    Flag) { fApplyCorr     = Flag ; }
-  void               SetWriteTmvaTree(int    Algo) { fWriteTmvaTree = Algo ; }
 //-----------------------------------------------------------------------------
 // MVA Training Codes: 
 //
@@ -183,18 +135,19 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCrvClusterHistograms(CrvClusterHist_t* Hist, const char* Folder);
-  void    BookCrvPulseHistograms  (CrvPulseHist_t*   Hist, const char* Folder);
-  void    BookGenpHistograms      (GenpHist_t*       Hist, const char* Folder);
-  void    BookEventHistograms     (EventHist_t*      Hist, const char* Folder);
-  void    BookSimpHistograms      (SimpHist_t*       Hist, const char* Folder);
+  void    BookClusterHistograms   (ClusterHist_t*       Hist, const char* Folder);
+  void    BookCrvClusterHistograms(CrvClusterHist_t*    Hist, const char* Folder);
+  void    BookCrvPulseHistograms  (CrvPulseHist_t*      Hist, const char* Folder);
+  void    BookGenpHistograms      (GenpHist_t*          Hist, const char* Folder);
+  void    BookEventHistograms     (EventHist_t*         Hist, const char* Folder);
+  void    BookSimpHistograms      (SimpHist_t*          Hist, const char* Folder);
   void    BookTrackHistograms     (TrackHist_t*         Hist, const char* Folder);
   void    BookTrackIDHistograms   (TStnTrackID::Hist_t* Hist, const char* Folder);
-  void    BookTrackSeedHistograms (HistBase_t*          HistR, const char* Folder);
+  void    BookTrackSeedHistograms (HistBase_t*          Hist, const char* Folder);
 
-
+  void    FillClusterHistograms   (ClusterHist_t*     Hist, TStnCluster*            Cl   );
   void    FillCrvClusterHistograms(CrvClusterHist_t*  Hist, TCrvCoincidenceCluster* CrvCl);
-  void    FillCrvPulseHistograms  (CrvPulseHist_t*    Hist, TCrvRecoPulse* CrvCl);
+  void    FillCrvPulseHistograms  (CrvPulseHist_t*    Hist, TCrvRecoPulse*          Pulse);
 
   void    FillEventHistograms     (EventHist_t*  Hist, EventPar_t*  Evtpar  );
 

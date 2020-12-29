@@ -45,7 +45,7 @@ TClusterAnaModule::~TClusterAnaModule() {
 
 
 //-----------------------------------------------------------------------------
-void TClusterAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
+void TClusterAnaModule::BookClusterHistograms(murat::ClusterHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
@@ -158,14 +158,14 @@ void TClusterAnaModule::BookHistograms() {
       sprintf(folder_name,"cls_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fCluster[i] = new ClusterHist_t;
+      fHist.fCluster[i] = new murat::ClusterHist_t;
       BookClusterHistograms(fHist.fCluster[i],Form("Hist/%s",folder_name));
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-void TClusterAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
+void TClusterAnaModule::FillClusterHistograms(murat::ClusterHist_t* Hist, TStnCluster* Cluster) {
   int   row, col;
   float  x, y, z, r;
 

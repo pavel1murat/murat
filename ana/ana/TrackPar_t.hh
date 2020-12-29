@@ -16,14 +16,16 @@ public:
   int     fDiskID;                	// 0: first disk, 1:second disk
   int     fFitType;                     // index for applying corrections
   int     fMvaType;                     // index of the trk qual MVAL 0=PAR, 1=DAR
+  int     fNCrystals;
 		
+  TStnCluster*  fCluster;              // pointer to the calorimeter cluster
   SimPar_t*     fSimPar;               // pointer to simparticle 
   TStnTrackID*  fTrackID[50];          //
   TEmuLogLH*    fLogLH;
 
-  int     fIDWord[20];
+  int           fIDWord[20];
 
-  int     fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
+  int           fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
 
   double  fMVAOut[20];			// outputs of different MVA classifiers; 0: Dave/Andy MVA; 1: CPR
   double  fProb;
@@ -52,30 +54,32 @@ public:
   double  fDtBack;			// delta(T) at z=Z(TT_Back)
   double  fXtZ0;
 
-  double  fEcl;
-  double  fEp;
-  double  fDrDzCal;			// dr/dz at the calorimeter intersection point
-  double  fDtClZ0;
-  double  fEDiskP;
-  double  fECalP;
-  double  fDx;
-  double  fDy;
-  double  fDz;
-  double  fDt;
-  double  fDu;		         	// rotated residuals
-  double  fDv;
-  double  fChi2Tcm;
-  double  fChi2XY;
-  double  fChi2T;
-  double  fPath;
-  
-  double  fSinTC;			// angle between the cluster and the track
-  double  fDrTC;
-  double  fSInt;
+  double       fEcl;
+  double       fSeedFr;
 
-  double  fLogLHDedm;			// downstram electron (DE) vs downstream muon (DM)
-
-  double  fTMean;			// mean time over the track hits
+  double       fEp;
+  double       fDrDzCal;			// dr/dz at the calorimeter intersection point
+  double       fDtClZ0;
+  double       fEDiskP;
+  double       fECalP;
+  double       fDx;
+  double       fDy;
+  double       fDz;
+  double       fDt;
+  double       fDu;		         	// rotated residuals
+  double       fDv;
+  double       fChi2Tcm;
+  double       fChi2XY;
+  double       fChi2T;
+  double       fPath;
+  	       
+  double       fSinTC;			// angle between the cluster and the track
+  double       fDrTC;
+  double       fSInt;
+	       
+  double       fLogLHDedm;			// downstram electron (DE) vs downstream muon (DM)
+	       
+  double       fTMean;			// mean time over the track hits
 //-----------------------------------------------------------------------------
 // Trk-CRV residuals
 //-----------------------------------------------------------------------------

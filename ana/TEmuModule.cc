@@ -17,6 +17,8 @@
 #include "TEnv.h"
 #include "TSystem.h"
 
+#include "Stntuple/base/TStnDataset.hh"
+#include "Stntuple/loop/TStnInputModule.hh"
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/obj/TStnNode.hh"
@@ -49,7 +51,7 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
   fBestID[0] = 0;                       // default best ID word for electrons
   fBestID[1] = 0;                       // default best ID word for muons
 
-  fNMVA      = 1; 			// MVA per track block 
+  fNPidMva   = 1; 			// PID MVA, just one
 
   fNID       = 1;                      // fNID has to be < TAnaModule::kMaxNTrackID
 
@@ -70,6 +72,10 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
 
     fTrackID[0]->SetUseMask(mask);
   }
+
+  fPidMVA[0]       = nullptr;
+  fPidMVA[1]       = nullptr;
+  fWritePidMvaTree = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -97,16 +103,16 @@ int TEmuModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // force using track quality MVA (DAR-only - code 1070)
 //-----------------------------------------------------------------------------
-  const char* training_dataset = "fele2s51b1";
+  const char* training_dataset = "ele00s62b0";
   int         training_code    = 1070;
 
   printf(" [TEmuModule::BeginJob] TrainingDataset:%s MvaType:%i\n",training_dataset,training_code);
 
-  TAnaModule::fUseMVA = 1;
+  fUsePidMVA = 1;
 
-  for (int i=0; i<2; i++) { 
-    if (fTrkQualMVA[i]) delete fTrkQualMVA[i];
-    fTrkQualMVA[i] = new mva_data(training_dataset,training_code);
+  for (int i=0; i<fNPidMva; i++) { 
+    if (fPidMVA[i]) delete fPidMVA[i];
+    fPidMVA[i] = new mva_data(training_dataset,training_code);
   }
 //-----------------------------------------------------------------------------
 // init track ID pointers in TrackPar - do it just once
@@ -120,7 +126,7 @@ int TEmuModule::BeginJob() {
 	tp->fFitType     = 1;                           // both blocks use DAR fits, kDAR=1
 	tp->fMvaType     = 0;                           // both blocks use the same fits, same track quality MVA
 	tp->fTrackID[id] = fTrackID[id];
-	if (fUseMVA) {
+	if (fUseTrkQualMVA) {
 //-----------------------------------------------------------------------------
 // in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
 // but do not change the cut value on the MVA output
@@ -132,6 +138,35 @@ int TEmuModule::BeginJob() {
 	}
       }
     }
+  }
+//-----------------------------------------------------------------------------
+// fWriteTmvaTree =  -1 : do not write
+//                >=  0 : write PID MVA training tree
+//-----------------------------------------------------------------------------
+  if (fWritePidMvaTree >= 0) {
+    TDirectory* dir = gDirectory;
+
+    const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
+
+    fPidMvaFile  = new TFile(Form("%s.tmva_training_%04i.root",dsname,1000*fWritePidMvaTree),"recreate");
+    fPidMvaTree  = new TTree("tmva_training_tree","TMVA Training Tree");
+
+    fPidMvaBranch.fP          = fPidMvaTree->Branch("p"       ,&fPidMvaData.fP         ,"F");
+    fPidMvaBranch.fEcl        = fPidMvaTree->Branch("ecl"     ,&fPidMvaData.fEcl       ,"F");
+    fPidMvaBranch.fNCrystals  = fPidMvaTree->Branch("ncr"     ,&fPidMvaData.fNCrystals ,"F");
+    fPidMvaBranch.fSeedFr     = fPidMvaTree->Branch("seedfr"  ,&fPidMvaData.fSeedFr    ,"F");
+
+    fPidMvaBranch.fEleTchDt   = fPidMvaTree->Branch("ele_dt"  ,&fPidMvaData.fEleTchDt  ,"F");
+    fPidMvaBranch.fEleTchDz   = fPidMvaTree->Branch("ele_dz"  ,&fPidMvaData.fEleTchDz  ,"F");
+    fPidMvaBranch.fEleTchDr   = fPidMvaTree->Branch("ele_dr"  ,&fPidMvaData.fEleTchDr  ,"F");
+    fPidMvaBranch.fElePath    = fPidMvaTree->Branch("ele_path",&fPidMvaData.fElePath   ,"F");
+
+    fPidMvaBranch.fMuoTchDt   = fPidMvaTree->Branch("muo_dt"  ,&fPidMvaData.fMuoTchDt  ,"F");
+    fPidMvaBranch.fMuoTchDz   = fPidMvaTree->Branch("muo_dz"  ,&fPidMvaData.fMuoTchDz  ,"F");
+    fPidMvaBranch.fMuoTchDr   = fPidMvaTree->Branch("muo_dr"  ,&fPidMvaData.fMuoTchDr  ,"F");
+    fPidMvaBranch.fMuoPath    = fPidMvaTree->Branch("muo_path",&fPidMvaData.fMuoPath   ,"F");
+
+    dir->cd();
   }
 
   TAnaModule::BeginJob();
@@ -180,6 +215,25 @@ void TEmuModule::BookHistograms() {
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
       fHist.fEvent[i] = new EventHist_t;
       BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book cluster histograms
+//-----------------------------------------------------------------------------
+  int book_cluster_histset[kNClusterHistSets];
+  for (int i=0; i<kNClusterHistSets; i++) book_cluster_histset[i] = 0;
+
+  book_cluster_histset[ 0] = 1;		// all clusters
+  book_cluster_histset[ 1] = 1;		// first disk
+  book_cluster_histset[ 2] = 1;         // second disk
+
+  for (int i=0; i<kNClusterHistSets; i++) {
+    if (book_cluster_histset[i] != 0) {
+      sprintf(folder_name,"evt_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fCluster[i] = new ClusterHist_t;
+      BookClusterHistograms(fHist.fCluster[i],Form("Hist/%s",folder_name));
     }
   }
 //-----------------------------------------------------------------------------
@@ -437,6 +491,35 @@ int TEmuModule::Event(int ientry) {
   }
 
   FillHistograms();
+
+//-----------------------------------------------------------------------------
+// when writing an ntuple for PID MVA training, use the first track
+// fWriteTmvaTree = algorithm (0 or 1)
+// require fits with both mass hypotheses to succeed
+//-----------------------------------------------------------------------------
+  if ((fWritePidMvaTree >= 0) && (fNTracks[0] == 1) && (fNTracks[1] == 1)) {
+
+    TrackPar_t* tpe = &fTrackPar[0][0];   // electron reco, first track
+    TrackPar_t* tpm = &fTrackPar[1][0];   // muon reco    , first track
+
+    fPidMvaData.fP          = tpe->fP;
+    fPidMvaData.fEcl        = tpe->fEcl;
+    fPidMvaData.fNCrystals  = tpe->fCluster->NCrystals();
+    fPidMvaData.fSeedFr     = tpe->fCluster->SeedFr();
+    
+    fPidMvaData.fEleTchDt   = tpe->fTchDt;
+    fPidMvaData.fEleTchDz   = tpe->fTchDz;
+    fPidMvaData.fEleTchDr   = tpe->fTchDr;
+    fPidMvaData.fElePath    = tpe->fPath;
+    
+    fPidMvaData.fMuoTchDt   = tpm->fTchDt;
+    fPidMvaData.fMuoTchDz   = tpm->fTchDz;
+    fPidMvaData.fMuoTchDr   = tpm->fTchDr;
+    fPidMvaData.fMuoPath    = tpm->fPath;
+    
+    fPidMvaTree->Fill();
+  }
+
 
   Debug();
 

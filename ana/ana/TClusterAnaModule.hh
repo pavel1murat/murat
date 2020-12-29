@@ -24,35 +24,14 @@
 #include "Stntuple/alg/TStnTrackID.hh"
 #include "Stntuple/alg/TEmuLogLH.hh"
 
+#include "murat/ana/ClusterHist_t.hh"
+
 class TClusterAnaModule: public TStnModule {
 public:
   enum { kNDisks = 2 } ;
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct ClusterHist_t {
-    TH1F*    fDiskID;
-    TH1F*    fEnergy;
-    TH1F*    fT0;
-    TH1F*    fRow;
-    TH1F*    fCol;
-    TH1F*    fX;
-    TH1F*    fY;
-    TH1F*    fZ;
-    TH1F*    fR;
-    TH1F*    fNCr0;			// all clustered
-    TH1F*    fNCr1;			// above 1MeV
-    TH1F*    fYMean;
-    TH1F*    fZMean;
-    TH1F*    fSigY;
-    TH1F*    fSigZ;
-    TH1F*    fSigR;
-    TH1F*    fFrE1;
-    TH1F*    fFrE2;
-    TH1F*    fSigE1;
-    TH1F*    fSigE2;
-  };
-
   struct EventHist_t {
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
@@ -86,7 +65,7 @@ public:
   struct Hist_t {
     TH1F*          fCrystalR[kNDisks];	          // crystal radius
     EventHist_t*   fEvent   [kNEventHistSets];
-    ClusterHist_t* fCluster [kNClusterHistSets];
+    murat::ClusterHist_t* fCluster [kNClusterHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -139,10 +118,10 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookClusterHistograms (ClusterHist_t* Hist, const char* Folder);
+  void    BookClusterHistograms (murat::ClusterHist_t* Hist, const char* Folder);
   void    BookEventHistograms   (EventHist_t*   Hist, const char* Folder);
 
-  void    FillClusterHistograms  (ClusterHist_t* Hist, TStnCluster*  Cluster);
+  void    FillClusterHistograms  (murat::ClusterHist_t* Hist, TStnCluster*  Cluster);
   void    FillEventHistograms    (EventHist_t*   Hist, double        EMin , double TMin);
 
   void    BookHistograms();

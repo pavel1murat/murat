@@ -6,6 +6,9 @@
 
 #include "murat/ana/TAnaModule.hh"
 
+#include "murat/ana/TPidMva.hh"
+#include "murat/ana/mva_data.hh"
+
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
@@ -41,12 +44,14 @@ public:
   enum { kNTrackPar          =    10 };
 
   enum { kNEventHistSets     =   100 };
+  enum { kNClusterHistSets   =   100 };
   enum { kNTrackSeedHistSets =   100 };
   enum { kNTrackHistSets     = 10000 };
   enum { kNDTrackHistSets    =   100 };
   enum { kNSimpHistSets      =   100 };
 
   struct Hist_t {
+    ClusterHist_t*   fCluster  [kNClusterHistSets];
     EventHist_t*     fEvent    [kNEventHistSets];
     TrackHist_t*     fTrack    [kNTrackHistSets];
     TrackSeedHist_t* fTrackSeed[kNTrackSeedHistSets];
@@ -98,7 +103,21 @@ public:
   double              fEClMax;
   double              fTClMax;
 
-  double              fWeight;
+  double                 fWeight;
+//-----------------------------------------------------------------------------
+//  MVA
+//-----------------------------------------------------------------------------
+  int                    fNPidMva;
+  int                    fUsePidMVA;
+  int                    fWritePidMvaTree   ;       // =0:PAR   1:DAR  (default=-1)
+
+  TFile*                 fPidMvaFile;
+  TTree*                 fPidMvaTree;
+
+  TPidMvaTrainData_t     fPidMvaData;
+  TPidMvaTrainBranches_t fPidMvaBranch;
+
+  mva_data*              fPidMVA[2];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -113,6 +132,8 @@ public:
 // modifiers
 //-----------------------------------------------------------------------------
   void    SetTrackBlockName(int I, const char* Name) { fTrackBlockName[I] = Name; }
+
+  void    SetWriteMvaTree (int Flag) { fWritePidMvaTree = Flag; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

@@ -74,18 +74,20 @@ struct TrackHist_t : public HistBase_t {
   TH1F*    fPath;
 
   TH1F*    fECl;
+  TH1F*    fSeedFr;
+  TH1F*    fNCrystals;
   TH1F*    fEClEKin;
   TH1F*    fEp;
   TH1F*    fDrDzCal;
   TH1F*    fDtClZ0;                   // T(cluster back at Z0)-T_true(Z0)
   TH2F*    fDtClZ0VsECl;              // 
-  TH2F*    fDtClZ0VsP;              // 
+  TH2F*    fDtClZ0VsP;                // 
   TH2F*    fEclVsPath;
 
   TH2F*    fFConsVsNActive;
   TH1F*    fDaveTrkQual;
-  TH1F*    fMVAOut;			// output of our MVA
-  TH1F*    fDeltaMVA;			// DaveTrkQual-MVAOut[0]
+  TH1F*    fMVAOut;		      // output of our MVA
+  TH1F*    fDeltaMVA;		      // DaveTrkQual-MVAOut[0]
 
   TH2F*    fPVsTime;                  // 2D histogram momentum vs time at the center of the tracker (T0) (used for sensitivity calculation)
   TH1F*    fDtCRV;                    // delta(T) from CRV stub candidate

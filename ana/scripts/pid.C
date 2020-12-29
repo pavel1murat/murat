@@ -40,6 +40,17 @@ void  pid_emuana(int DebugBit = -1) {
 }
 
 
+//-----------------------------------------------------------------------------
+void  pid_emuana_write_mva(int DebugBit = -1) {
+//-----------------------------------------------------------------------------
+// configure analysis module
+//-----------------------------------------------------------------------------
+  murat::m_emu = (murat::TEmuModule*) g.x->AddModule("murat::TEmuModule",0);  
+  murat::m_emu->SetWriteMvaTree(1);
+  if (DebugBit >= 0) murat::m_emu->SetDebugBit(DebugBit,1);
+}
+
+
 
 
 

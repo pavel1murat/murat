@@ -80,22 +80,6 @@ void TTriggerAnaModule::BookTrackSeedHistograms(HistBase_t* Hist, const char* Fo
   HBook1F(hist->fD0     ,"d0"   ,Form("%s: D0"       ,Folder),  200, -200,  200,Folder);
 }
 
-// //-----------------------------------------------------------------------------
-// void TTriggerAnaModule::BookTrackHistograms(HistBase_t* Hist, const char* Folder) {
-//   //  char name [200];
-//   //  char title[200];
-//   TrackHist_t* hist = (TrackHist_t*) Hist;
-
-//   HBook1F(hist->fP      ,"p"    ,Form("%s: momentum" ,Folder), 1100,    0,  110,Folder);
-//   HBook1F(hist->fNActive,"nactv",Form("%s: N(Active)",Folder),  200,    0,  200,Folder);
-//   HBook1F(hist->fChi2Dof,"chi2d",Form("%s: Chi2/DOF" ,Folder),  200,    0,   40,Folder);
-//   HBook1F(hist->fT0     ,"t0"   ,Form("%s: T0"       ,Folder), 2000,    0, 2000,Folder);
-//   HBook1F(hist->fD0     ,"d0"   ,Form("%s: D0"       ,Folder),  200, -200,  200,Folder);
-//   HBook1F(hist->fZ0     ,"z0"   ,Form("%s: z0"       ,Folder),  200,-2000, 2000,Folder);
-//   HBook1F(hist->fTanDip ,"tdip" ,Form("%s: TanDip"   ,Folder),  250, -2.5,  2.5,Folder);
-//   HBook1F(hist->fAlgMask,"amask",Form("%s: AlgMask"  ,Folder),   10,    0,   10,Folder);
-// }
-
 //-----------------------------------------------------------------------------
 void TTriggerAnaModule::BookTriggerHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
@@ -104,25 +88,6 @@ void TTriggerAnaModule::BookTriggerHistograms(HistBase_t* Hist, const char* Fold
 
   HBook1F(hist->fBits     ,"bits"    ,Form("%s: fired trigegr bits" ,Folder), 50,    0,  50,Folder);
 }
-
-// //-----------------------------------------------------------------------------
-// void TTriggerAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
-//   //  char name [200];
-//   //  char title[200];
-//   EventHist_t* hist = (EventHist_t*) Hist;
-
-//   HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"  ,Folder), 1000, 0,  1.e4,Folder);
-//   HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"  ,Folder), 1000, 0,  1.e6,Folder);
-//   HBook1F(hist->fPassed     ,"passed",Form("%s: event passed"  ,Folder),   10, 0,    10,Folder);
-//   HBook1F(hist->fNTimeClusters ,"ntcl",Form("%s: N(time clusters)",Folder),   20, 0,    20,Folder);
-//   HBook1F(hist->fNHelices ,"nhel",Form("%s: N(helices)",Folder),   10, 0,    10,Folder);
-//   HBook1F(hist->fNTrackSeeds[0],"nts_0",Form("%s: N(track seeds)[0]",Folder),   10, 0,    10,Folder);
-//   HBook1F(hist->fNTrackSeeds[1],"nts_1",Form("%s: N(track seeds)[1]",Folder),   10, 0,    10,Folder);
-//   HBook1F(hist->fNGoodSeeds ,"ngts"  ,Form("%s: N(good seeds)" ,Folder),   10, 0,    10,Folder);
-//   HBook1F(hist->fNTracks    ,"ntrk"  ,Form("%s: N(tracks)"     ,Folder),   10, 0,    10,Folder);
-//   HBook1F(hist->fMcMom     ,"mc_mom"   ,Form("%s: MC Particle Momentum"            ,Folder),1000,  0,200,Folder);
-//   HBook1F(hist->fMcCosTh   ,"mc_costh" ,Form("%s: MC Particle Cos(Theta) Lab"      ,Folder),100,-1,1,Folder);
-// }
 
 //_____________________________________________________________________________
 void TTriggerAnaModule::BookHistograms() {
@@ -238,31 +203,6 @@ void TTriggerAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-// 
-//-----------------------------------------------------------------------------
-// void TTriggerAnaModule::FillEventHistograms(HistBase_t* Hist, double Weight) {
-// //   double            cos_th, xv, yv, rv, zv, p;
-// //   TLorentzVector    mom;
-
-//   EventHist_t* hist = (EventHist_t*) Hist;
-
-//   int event_number = GetHeaderBlock()->EventNumber();
-//   int run_number   = GetHeaderBlock()->RunNumber();
-
-//   hist->fEventNumber->Fill(event_number,Weight);
-//   hist->fRunNumber->Fill(run_number,Weight);
-//   hist->fPassed->Fill(fPassed,Weight);
-//   hist->fNTimeClusters->Fill(fNTimeClusters,Weight);
-//   hist->fNHelices->Fill(fNHelices,Weight);
-//   hist->fNTrackSeeds[0]->Fill(fNTrackSeeds[0],Weight);
-//   hist->fNTrackSeeds[1]->Fill(fNTrackSeeds[1],Weight);
-//   hist->fNGoodSeeds->Fill(fNGoodSeeds,Weight);
-//   hist->fNTracks->Fill(fNTracks,Weight);
-//   hist->fMcMom->Fill(fMcMom,Weight);
-//   hist->fMcCosTh->Fill(fMcCosTh,Weight);
-// }
-
-//-----------------------------------------------------------------------------
 void TTriggerAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* TPeak) {
   //  HelixHist_t* hist = (HelixHist_t*) Hist;
 }
@@ -289,32 +229,6 @@ void TTriggerAnaModule::FillTrackSeedHistograms(HistBase_t* Hist, TStnTrackSeed*
   hist->fChi2Dof->Fill(Seed->fChi2/(Seed->fNHits-5.),Weight);
   hist->fD0->Fill(Seed->fD0,Weight);
 }
-
-//-----------------------------------------------------------------------------
-// for DIO : ultimately, one would need to renormalize the distribution
-//-----------------------------------------------------------------------------
-// void TTriggerAnaModule::FillTrackHistograms(HistBase_t* Hist, TStnTrack* Track) {
-
-//   TLorentzVector  mom;
-//   int             itrk;
-//   TrackPar_t*     tp;
-
-//   TrackHist_t* hist = (TrackHist_t*) Hist;
-// 					// pointer to local track parameters
-//   itrk = Track->Number();
-//   tp   = fTrackPar+itrk;
-
-//   float na = Track->NActive();
-
-//   hist->fP->Fill (tp->fP);		// corrected momentum in the first point
-//   hist->fNActive->Fill(na);
-//   hist->fChi2Dof->Fill(Track->fChi2/(na-5.));
-//   hist->fT0->Fill(Track->fT0);
-//   hist->fD0->Fill(Track->fD0);
-//   hist->fZ0->Fill(Track->fZ0);
-//   hist->fTanDip->Fill(Track->fTanDip);
-//   hist->fAlgMask->Fill(Track->AlgMask());
-// }
 
 //-----------------------------------------------------------------------------
 void TTriggerAnaModule::FillTriggerHistograms(HistBase_t* Hist) {
@@ -536,7 +450,7 @@ int TTriggerAnaModule::Event(int ientry) {
 
     tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
     tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
-    tp->fLogLH      = TAnaModule::fLogLH;
+    //    tp->fLogLH      = TAnaModule::fLogLH;
 					// straw man definition of a good track, for trigger efficiency
     if (fabs(trk->fD0) < 200.) {
       if (trk->fP > 100) {

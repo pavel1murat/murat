@@ -9,7 +9,8 @@ Import('stntuple_helper')
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
 rootlibs = env['ROOTLIBS']
-if ( not ("EG"   in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+if ( not ("EG"    in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+if ( not ("TMVA"  in rootlibs)): rootlibs.append("TMVA");
 
 helper = stntuple_helper(env);
 

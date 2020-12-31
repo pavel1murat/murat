@@ -6,7 +6,7 @@
 namespace murat {
 
  struct SimpHist_t  : public HistBase_t {
-   TH1F*    fPdgCode;
+   TH1F*    fPdgCode[2];
    TH1F*    fMomTargetEnd;
    TH1F*    fMomTrackerFront;
    TH1F*    fNStrawHits;

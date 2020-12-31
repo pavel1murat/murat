@@ -9,7 +9,7 @@
 #include "TProfile.h"
 #include "TTree.h"
 #include "TBranch.h"
-
+#include "TMVA/Reader.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -74,9 +74,13 @@ public:
 
   double              fMbTime;                 // microbunch time
   double              fMinT0;
+  int                 fApplyCorr;              // default=1
 
   int                 fPdgCode;		       // determines which one
   int                 fGeneratorCode;      
+  double              fEleE;                // relevant event generated energy
+  double              fEventWeight = 1.;    // weight applied when filling histograms
+  int                 fBatchMode   = 1;
 
   TEmuLogLH*          fLogLH;
   EventPar_t          fEvtPar;
@@ -85,18 +89,21 @@ public:
 //-----------------------------------------------------------------------------
 // TrackQual MVA
 //-----------------------------------------------------------------------------
-  int                 fUseTrkQualMVA;
-  int                 fNTrkQualMVA;	   // number of MVA classifiers used for tracks of the same type
+  int                 fUseTrqMVA;
+  int                 fNTrqMVA;	               // number of MVA classifiers used for tracks of the same type
+  float               fTrqData[20];            // with a few spare words
 
   int                 fUsePidMVA;
-  int                 fNPidMVA;	           // number of MVA classifiers used for tracks of the same type
-  
-  int                 fApplyCorr;          // default=1
+  int                 fNPidMVA;	               // number of MVA classifiers used for tracks of the same type
+  mva_data*           fPidMVA[20];
+
+  mva_data*           fPidReader;              // ROOT-based implementation
+  float               fPidData[20];            // with a few spare words
 //-----------------------------------------------------------------------------
 // MVA-based classifiers
 // so far, use up to 2. for PAR and DAR tracks separately, [0]:PAR, [1]:DAR
 //-----------------------------------------------------------------------------
-  mva_data*           fTrkQualMVA[20];
+  mva_data*           fTrqMVA[20];
   int                 fBestID[2];          // best track ID for two ambig resolvers
 //-----------------------------------------------------------------------------
 //  functions
@@ -117,19 +124,23 @@ public:
   void               SetGeneratorCode(int    Code) { fGeneratorCode = Code ; }
   void               SetApplyCorr    (int    Flag) { fApplyCorr     = Flag ; }
 //-----------------------------------------------------------------------------
-// MVA Training Codes: 
+// TRQ MVA Training Codes: 
 //
 // 0060 : PAR dPf > 0.60
 // 0070 : PAR dPf > 0.70
 // 1060 : DAR dPf > 0.60
 // 1070 : DAR dPf > 0.70
 //-----------------------------------------------------------------------------
-  void                SetMVA         (const char* Dataset, int MvaTrainingCode);
+  void                SetTrqMVA      (int Block, const char* Dataset, int MvaTrainingCode);
+//-----------------------------------------------------------------------------
+// PID MVA
+//-----------------------------------------------------------------------------
+  void                SetPidMVA      (const char* Dataset, int MvaTrainingCode);
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
   virtual int     BeginJob();
-  // virtual int     BeginRun();
+  virtual int     BeginRun();
   // virtual int     Event   (int ientry);
   virtual int     EndJob  ();
 //-----------------------------------------------------------------------------
@@ -145,7 +156,7 @@ public:
   void    BookTrackIDHistograms   (TStnTrackID::Hist_t* Hist, const char* Folder);
   void    BookTrackSeedHistograms (HistBase_t*          Hist, const char* Folder);
 
-  void    FillClusterHistograms   (ClusterHist_t*     Hist, TStnCluster*            Cl   );
+  void    FillClusterHistograms   (ClusterHist_t*     Hist, TStnCluster*            Cl   , double Weight = 1.);
   void    FillCrvClusterHistograms(CrvClusterHist_t*  Hist, TCrvCoincidenceCluster* CrvCl);
   void    FillCrvPulseHistograms  (CrvPulseHist_t*    Hist, TCrvRecoPulse*          Pulse);
 
@@ -168,6 +179,8 @@ public:
 		       SimPar_t*          SimPar      );
   
   void    PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const ;
+
+  double  BatchModeWeight(float lumi, int mode);
 
   //  ClassDef(TAnaModule,0)
 };

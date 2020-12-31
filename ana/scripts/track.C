@@ -219,7 +219,9 @@ void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, i
 // MVAType : 
 // ---------
 //-----------------------------------------------------------------------------
-void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = -1, int CprMvaType = 1070, 
+void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, 
+			 int PARTrainingCode =   -1, 
+			 int DARTrainingCode = 1070, 
 			 int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
@@ -229,8 +231,8 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, int TprMvaType = 
   murat::m_tcm->SetPdgCode      (11);
   murat::m_tcm->SetGeneratorCode(GeneratorCode);
 
-  if (TprMvaType >= 0) murat::m_tcm->SetMVA("fele2s51b1",TprMvaType);
-  if (CprMvaType >= 0) murat::m_tcm->SetMVA("fele2s51b1",CprMvaType);
+  if (PARTrainingCode >= 0) murat::m_tcm->SetTrqMVA(0,"fele2s51b1",PARTrainingCode);
+  if (DARTrainingCode >= 0) murat::m_tcm->SetTrqMVA(1,"fele2s51b1",DARTrainingCode);
 
   if (DebugBit >= 0) {
     murat::m_tcm->SetDebugBit(DebugBit,1);

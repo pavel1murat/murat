@@ -277,7 +277,7 @@ int TPidAnaModule::Event(int ientry) {
       TrackPar_t* tp  = fTrackPar[i]+itrk;
       tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
       tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
-      tp->fLogLH      = TAnaModule::fLogLH;
+      //      tp->fLogLH      = TAnaModule::fLogLH;
     }
 
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);

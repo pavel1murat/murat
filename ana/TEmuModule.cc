@@ -8,8 +8,10 @@
 //  0  : all events
 //  1  : passed events
 //  2  : rejected events
+//  3  : events with E/P > 0.7 - learn how to reject mu-->e decays
+//  4  : events with MVA PID > 0.5 - learn about the PID filures
 //
-// call: "temu_ana(28,4)
+// call: "temu_ana(3)
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -27,7 +29,12 @@
 
 #include <string>
 #include "math.h"
-
+//------------------------------------------------------------------------------
+// Mu2e offline includes
+//-----------------------------------------------------------------------------
+#include "fhiclcpp/ParameterSet.h"
+#include <xercesc/dom/DOM.hpp>
+#include "Mu2eUtilities/inc/MVATools.hh"
 #include "murat/ana/TEmuModule.hh"
 
 using std::string;
@@ -51,30 +58,31 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
   fBestID[0] = 0;                       // default best ID word for electrons
   fBestID[1] = 0;                       // default best ID word for muons
 
-  fNPidMva   = 1; 			// PID MVA, just one
+  fNPidMVA   = 1; 			// PID MVA, just one
 
   fNID       = 1;                      // fNID has to be < TAnaModule::kMaxNTrackID
 
   for (int i=0; i<fNID; i++) {
     fTrackID[i] = new TStnTrackID();
 
-    fTrackID[i]->SetMaxMomErr (100);
-    fTrackID[i]->SetMaxT0Err  (100);
-    fTrackID[i]->SetMinNActive( -1);
-    fTrackID[i]->SetMinFitCons( -1);
-    fTrackID[i]->SetMinTanDip (0.5);
-    fTrackID[i]->SetMaxTanDip (1.0);
-    fTrackID[i]->SetMinTrkQual(0.2);   // assuming I know what I'm doind
+    // fTrackID[i]->SetMaxMomErr (100);
+    // fTrackID[i]->SetMaxT0Err  (100);
+    // fTrackID[i]->SetMinNActive( -1);
+    // fTrackID[i]->SetMinFitCons( -1);
+
+    fTrackID[i]->SetMinTanDip (  0.5);
+    fTrackID[i]->SetMaxTanDip (  1.0);
     fTrackID[i]->SetMinD0     (-100.);
     fTrackID[i]->SetMaxD0     ( 100.);
+    fTrackID[i]->SetMinTrkQual(  0.8);   // assuming I know what I'm doind
 
     int mask = TStnTrackID::kT0Bit | TStnTrackID::kTanDipBit | TStnTrackID::kD0Bit | TStnTrackID::kTrkQualBit  ;
 
     fTrackID[0]->SetUseMask(mask);
   }
 
-  fPidMVA[0]       = nullptr;
-  fPidMVA[1]       = nullptr;
+  SetPidMVA(  "ele00s61b0",1000);
+
   fWritePidMvaTree = 0;
 }
 
@@ -101,20 +109,6 @@ int TEmuModule::BeginJob() {
 //-----------------------------------------------------------------------------
   BookHistograms();
 //-----------------------------------------------------------------------------
-// force using track quality MVA (DAR-only - code 1070)
-//-----------------------------------------------------------------------------
-  const char* training_dataset = "ele00s62b0";
-  int         training_code    = 1070;
-
-  printf(" [TEmuModule::BeginJob] TrainingDataset:%s MvaType:%i\n",training_dataset,training_code);
-
-  fUsePidMVA = 1;
-
-  for (int i=0; i<fNPidMva; i++) { 
-    if (fPidMVA[i]) delete fPidMVA[i];
-    fPidMVA[i] = new mva_data(training_dataset,training_code);
-  }
-//-----------------------------------------------------------------------------
 // init track ID pointers in TrackPar - do it just once
 //  .. assume TrkQual to be precalculated, do only beed to cut on
 //-----------------------------------------------------------------------------
@@ -122,17 +116,17 @@ int TEmuModule::BeginJob() {
     for (int id=0; id<fNID; id++) {
       for (int ip=0; ip<kNTrackPar; ip++) {
 	TrackPar_t* tp = &fTrackPar[i][ip];
-	tp->fLogLH       = TAnaModule::fLogLH;          // do it just once
+	// tp->fLogLH       = TAnaModule::fLogLH;       // do it just once
 	tp->fFitType     = 1;                           // both blocks use DAR fits, kDAR=1
 	tp->fMvaType     = 0;                           // both blocks use the same fits, same track quality MVA
 	tp->fTrackID[id] = fTrackID[id];
-	if (fUseTrkQualMVA) {
+	if (fUseTrqMVA) {
 //-----------------------------------------------------------------------------
 // in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
 // but do not change the cut value on the MVA output
 // in principle, different track blocks could use different track ID definitions
 //-----------------------------------------------------------------------------
-	  if (fTrkQualMVA[i]) {
+	  if (fTrqMVA[i]) {
 	    tp->fTrackID[id]->SetLocTrkQual(0);
 	  }
 	}
@@ -143,7 +137,7 @@ int TEmuModule::BeginJob() {
 // fWriteTmvaTree =  -1 : do not write
 //                >=  0 : write PID MVA training tree
 //-----------------------------------------------------------------------------
-  if (fWritePidMvaTree >= 0) {
+  if (fWritePidMvaTree != 0) {
     TDirectory* dir = gDirectory;
 
     const char* dsname = GetAna()->GetInputModule()->GetDataset(0)->GetName();
@@ -450,13 +444,7 @@ int TEmuModule::Event(int ientry) {
     }
   }
 
-  //  fProcess = -1;
   fWeight  =  1.;
-  //  fPhotonE = -1.;
-
-  // if (fEvtPar.fNGenp > 0) {
-  //   TGenParticle* p0 = fGenpBlock->Particle(0);
-  // }
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimPar in future
 //-----------------------------------------------------------------------------
@@ -489,37 +477,43 @@ int TEmuModule::Event(int ientry) {
     fNGoodTracks[i] = 0;
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
-
+//-----------------------------------------------------------------------------
+// fill histograms
+//-----------------------------------------------------------------------------
   FillHistograms();
-
 //-----------------------------------------------------------------------------
 // when writing an ntuple for PID MVA training, use the first track
 // fWriteTmvaTree = algorithm (0 or 1)
-// require fits with both mass hypotheses to succeed
+// require fits with both mass hypotheses to succeed and both tracks to have clusters
+// also reject muon decays in flight : zmax > 10000 should do that
 //-----------------------------------------------------------------------------
-  if ((fWritePidMvaTree >= 0) && (fNTracks[0] == 1) && (fNTracks[1] == 1)) {
+  if ((fWritePidMvaTree != 0) && (fNTracks[0] == 1) && (fNTracks[1] == 1)) {
 
     TrackPar_t* tpe = &fTrackPar[0][0];   // electron reco, first track
     TrackPar_t* tpm = &fTrackPar[1][0];   // muon reco    , first track
 
-    fPidMvaData.fP          = tpe->fP;
-    fPidMvaData.fEcl        = tpe->fEcl;
-    fPidMvaData.fNCrystals  = tpe->fCluster->NCrystals();
-    fPidMvaData.fSeedFr     = tpe->fCluster->SeedFr();
-    
-    fPidMvaData.fEleTchDt   = tpe->fTchDt;
-    fPidMvaData.fEleTchDz   = tpe->fTchDz;
-    fPidMvaData.fEleTchDr   = tpe->fTchDr;
-    fPidMvaData.fElePath    = tpe->fPath;
-    
-    fPidMvaData.fMuoTchDt   = tpm->fTchDt;
-    fPidMvaData.fMuoTchDz   = tpm->fTchDz;
-    fPidMvaData.fMuoTchDr   = tpm->fTchDr;
-    fPidMvaData.fMuoPath    = tpm->fPath;
-    
-    fPidMvaTree->Fill();
-  }
+    float zmax = fSimPar.fParticle->EndPos()->Z();
 
+    if ((zmax > 10000) &&(tpe->fIDWord[fBestID[0]] == 0) && (tpe->fEcl > 0) && (tpm->fEcl > 0)) {
+
+      fPidMvaData.fP          = tpe->fP;
+      fPidMvaData.fEcl        = tpe->fEcl;
+      fPidMvaData.fNCrystals  = tpe->fCluster->NCrystals();
+      fPidMvaData.fSeedFr     = tpe->fCluster->SeedFr();
+    
+      fPidMvaData.fEleTchDt   = tpe->fTchDt;
+      fPidMvaData.fEleTchDz   = tpe->fTchDz;
+      fPidMvaData.fEleTchDr   = tpe->fTchDr;
+      fPidMvaData.fElePath    = tpe->fPath;
+    
+      fPidMvaData.fMuoTchDt   = tpm->fTchDt;
+      fPidMvaData.fMuoTchDz   = tpm->fTchDz;
+      fPidMvaData.fMuoTchDr   = tpm->fTchDr;
+      fPidMvaData.fMuoPath    = tpm->fPath;
+    
+      fPidMvaTree->Fill();
+    }
+  }
 
   Debug();
 
@@ -555,24 +549,48 @@ void TEmuModule::Debug() {
       PrintTrack(fTrackBlock[kMUO]->Track(i),&fTrackPar[kMUO][i],"data");
     }
   }
+
+  if (GetDebugBit(3) == 1) {
 //-----------------------------------------------------------------------------
-// bit 3: KMUO tracks with large DPF > 5 MeV
+// bit 3: E/P > 0.7
 //-----------------------------------------------------------------------------
-  // TStnTrackBlock* cprb = fTrackBlock[kMUO];
-  // int ntrk = cprb->NTracks();
-  // for (int itrk=0; itrk<ntrk; itrk++) {
-  //   trk = cprb->Track(itrk);
-  //   tp  = &fTrackPar[kMUO][itrk];
-  //   //    if ((GetDebugBit(3) == 1) && (tp->fDpF > 5.) && (trk->NActive() > 25) && (trk->Chi2Dof() < 4)) {
-  //   if ((GetDebugBit(3) == 1) && (tp->fIDWord[fBestID[kMUO]] == 0) && (tp->fDpF > 1.)) {
-  //     GetHeaderBlock()->Print(Form("TEmuModule bit003: tp->DpF = %10.3f trk->fP = %10.3f trk->fPFront = %10.3f nactv: %4i chi2d: %10.3f",
-  // 				   tp->fDpF, tp->fP,tp->fPFront,trk->NActive(),trk->Chi2Dof()));
-  //   }
-  //  }
+    TStnTrackBlock* tb = fTrackBlock[kELE];
+    int ntrk = tb->NTracks();
+    for (int itrk=0; itrk<ntrk; itrk++) {
+      TrackPar_t* tp = &fTrackPar[kELE][itrk];
+      if ((tp->fIDWord[fBestID[kELE]] == 0) && (tp->fEp > 0.7)) {
+	GetHeaderBlock()->Print(Form("TEmuModule bit:003: tp->fEP = %10.3f",tp->fEp));
+      }
+    }
+  }
+  if (GetDebugBit(4) == 1) {
+//-----------------------------------------------------------------------------
+// bit 3: E/P > 0.7
+//-----------------------------------------------------------------------------
+    TStnTrackBlock* tb = fTrackBlock[kELE];
+    int ntrk = tb->NTracks();
+    for (int itrk=0; itrk<ntrk; itrk++) {
+      TrackPar_t* tp = &fTrackPar[kELE][itrk];
+      if ((tp->fIDWord[fBestID[kELE]] == 0) && (tp->fPidMvaOut[0] > 0.5)) {
+	GetHeaderBlock()->Print(Form("TEmuModule bit:004: tp->fPidMvaOut[0] = %10.3f",tp->fPidMvaOut[0]));
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
 int TEmuModule::EndJob() {
+
+  if (fWritePidMvaTree != 0) {
+    printf("[%s::EndJob] Writing output MVA training file %s\n",GetName(),fPidMvaFile->GetName());
+
+    fPidMvaFile->Write();
+
+    delete fPidMvaFile;
+    fPidMvaFile  = 0;
+    fPidMvaTree  = 0;
+  }
+  
   TAnaModule::EndJob();
   return 0;
 }

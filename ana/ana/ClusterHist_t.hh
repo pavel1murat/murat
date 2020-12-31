@@ -11,6 +11,7 @@ namespace murat {
   struct ClusterHist_t {
     TH1F*    fDiskID;
     TH1F*    fEnergy;
+    TH1F*    fEnergyDiff;
     TH1F*    fT0;
     TH1F*    fRow;
     TH1F*    fCol;
@@ -30,6 +31,5 @@ namespace murat {
     TH1F*    fSigE1;
     TH1F*    fSigE2;
   };
-
 }
 #endif

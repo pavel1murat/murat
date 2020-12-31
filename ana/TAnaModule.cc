@@ -33,6 +33,9 @@
 #include "TEnv.h"
 #include "TSystem.h"
 
+#include "Math/PdfFuncMathCore.h"
+#include "Math/ProbFuncMathCore.h"
+
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
@@ -50,7 +53,6 @@
 //-----------------------------------------------------------------------------
 #include "murat/ana/TAnaModule.hh"
 
-using std::string;
 using std::vector;
 
 using namespace murat;
@@ -97,28 +99,36 @@ TAnaModule::TAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // particle ID
 //-----------------------------------------------------------------------------
-  fLogLH         = new TEmuLogLH();
+  fLogLH   = new TEmuLogLH();
+//-----------------------------------------------------------------------------
+// e/mu PID MVA
+//-----------------------------------------------------------------------------
+  fUsePidMVA = 0;
+  fPidMVA[0] = nullptr;
+  fPidMVA[1] = nullptr;
+
+  fPidReader = nullptr;
 //-----------------------------------------------------------------------------
 // multivariate ways of figuring out the track quality
 //-----------------------------------------------------------------------------
-  fUseTrkQualMVA = 0;
-  fTrkQualMVA[0] = nullptr;
-  fTrkQualMVA[1] = nullptr;
+  fUseTrqMVA = 0;
+  fTrqMVA[0] = nullptr;
+  fTrqMVA[1] = nullptr;
 //-----------------------------------------------------------------------------
 // TStntuple 
 //-----------------------------------------------------------------------------
-  fStnt          = TStntuple::Instance();
+  fStnt      = TStntuple::Instance();
 }
 
 //-----------------------------------------------------------------------------
 TAnaModule::~TAnaModule() {
-  if (fTrkQualMVA[0]) delete fTrkQualMVA[0];
-  if (fTrkQualMVA[1]) delete fTrkQualMVA[1];
+  if (fTrqMVA[0]) delete fTrqMVA[0];
+  if (fTrqMVA[1]) delete fTrqMVA[1];
 }
 
 //-----------------------------------------------------------------------------
-// TrkRecAlgorithm : "cpr" or "tpr"
-// TrainingDataset : just 'fele2s51b1' - goes into a file name
+// TrkRecAlgorithm : "PAR" or "DAR"
+// TrainingDataset : just 'fele2s51b1' - goes into the file name
 // MVATrainingCode : 
 // ---------
 // 0060 : PAR dPf > 0.60
@@ -126,21 +136,44 @@ TAnaModule::~TAnaModule() {
 // 1060 : DAR dPf > 0.60
 // 1070 : DAR dPf > 0.70
 //-----------------------------------------------------------------------------
-void TAnaModule::SetMVA(const char* TrainingDataset, int MVATrainingCode) {
+void TAnaModule::SetTrqMVA(int Block, const char* TrainingDataset, int MVATrainingCode) {
 
-  printf(" [TTrackCompModule::SetMVA] TrainingDataset:%s MvaType:%i\n",TrainingDataset,MVATrainingCode);
+  printf(" [TTrackCompModule::SetTrqMVA] TrainingDataset:%s MvaType:%i\n",TrainingDataset,MVATrainingCode);
 
   if (MVATrainingCode > 0) { 
-    fUseTrkQualMVA = 1;
+    fUseTrqMVA = 1;
 
-    int loc = MVATrainingCode / 1000 ;
-
-    if (fTrkQualMVA[loc]) delete fTrkQualMVA[loc];
-    fTrkQualMVA[loc] = new mva_data(TrainingDataset,MVATrainingCode);
+    if (fTrqMVA[Block]) delete fTrqMVA[Block];
+    fTrqMVA[Block] = new mva_data(TrainingDataset,MVATrainingCode);
   }
   else { 
-    fUseTrkQualMVA = 0;
+    fUseTrqMVA = 0;
   }
+}
+
+
+//-----------------------------------------------------------------------------
+void TAnaModule::SetPidMVA(const char* TrainingDataset, int MVATrainingCode) {
+
+  printf(" [%s::SetPidMVA] TrainingDataset:%s TrainingCode:%i\n",GetName(),TrainingDataset,MVATrainingCode);
+
+  if (MVATrainingCode > 0) { 
+    fUsePidMVA = 1;
+
+    if (fPidMVA[0]) delete fPidMVA[0];
+
+    fPidMVA[0] = new mva_data(TrainingDataset,MVATrainingCode);  // TMVA::Reader
+  }
+  else { 
+    fUsePidMVA = 0;
+  }
+}
+
+//-----------------------------------------------------------------------------
+// common initializations
+//-----------------------------------------------------------------------------
+int TAnaModule::BeginRun() {
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -151,33 +184,44 @@ int TAnaModule::BeginJob() {
   fTrackID_BOX->SetMinT0(fMinT0);
   fTrackID_MVA->SetMinT0(fMinT0);
 					// PID initialization: read the likelihood templates
-  fLogLH->Init("v5_7_0");
-//-----------------------------------------------------------------------------
-// if needed, initialize MVA-based classifiers 
-//-----------------------------------------------------------------------------
-  if (fUseTrkQualMVA) {
-    for (int i=0; i<fNTrkQualMVA; i++) {
-      if (fTrkQualMVA[i]) {
-	fTrkQualMVA[i]->Init();
-      }
-    }
-  }
+  //  fLogLH->Init("v5_7_0");
   return 0;
 }
 
 //-----------------------------------------------------------------------------
 int TAnaModule::EndJob() {
-  //  printf("----- end job: ---- %s\n",GetName());
   return 0;
+}
+
+
+//-----------------------------------------------------------------------------
+double TAnaModule::BatchModeWeight(float lumi, int mode) {
+  if(mode <= 0) return 1.;
+  if(mode > 2 ) return 1.;
+//-----------------------------------------------------------------------------
+// Batch mode 1/2 log normal initialization
+//-----------------------------------------------------------------------------
+  const static double mean_b1 = 1.6e7;
+  const static double mean_b2 = 3.9e7;
+  const static double sigma = 0.7147;
+  const static double mub1 = log(mean_b1) - 0.5*sigma*sigma;
+  const static double mub2 = log(mean_b2) - 0.5*sigma*sigma;
+  const static double cut_off_norm_b1 = ROOT::Math::lognormal_cdf(1.2e8, mub1, sigma); //Due to max cutoff in generation 
+  const static double cut_off_norm_b2 = ROOT::Math::lognormal_cdf(1.2e8, mub2, sigma); //Due to max cutoff in generation
+  if(mode == 1) {
+    const double p1 = ROOT::Math::lognormal_pdf(lumi, mub1, sigma)/cut_off_norm_b1;
+    return p1;
+  }
+  const double p2 = ROOT::Math::lognormal_pdf(lumi, mub2, sigma)/cut_off_norm_b2;
+  return p2;
 }
 
 //-----------------------------------------------------------------------------
 void TAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
-//   char name [200];
-//   char title[200];
 
   HBook1F(Hist->fDiskID ,"disk_id",Form("%s: Disk ID"       ,Folder), 10, 0,  10,Folder);
   HBook1F(Hist->fEnergy ,"energy" ,Form("%s: Cluster Energy",Folder),500, 0, 250,Folder);
+  HBook1F(Hist->fEnergyDiff ,"energydiff" ,Form("%s: Cluster Energy - Gen Energy",Folder),500, -50, 50,Folder);
   HBook1F(Hist->fT0     ,"t0"     ,Form("%s: cluster T0"    ,Folder),200, 0,2000,Folder);
   HBook1F(Hist->fRow    ,"row"    ,Form("%s: cluster Row"   ,Folder),200, 0, 200,Folder);
   HBook1F(Hist->fCol    ,"col"    ,Form("%s: cluster column",Folder),200, 0, 200,Folder);
@@ -287,6 +331,7 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fPStOut     ,"pstout"   ,Form("%s: Track P(ST_Out)  " ,Folder), 400,  90. ,110. ,Folder);
   HBook1F(Hist->fDpFSt      ,"dpfst"    ,Form("%s: Track Pf-Psto"     ,Folder),1000,  -5  ,  5. ,Folder);
   HBook2F(Hist->fDpFVsZ1    ,"dpf_vs_z1",Form("%s: Track DPF Vs Z1"   ,Folder), 200, -2000.,0,200,-5.,5,Folder);
+  HBook2F(Hist->fPVsGenE    ,"p_vs_gene",Form("%s: Track P vs Gen E"  ,Folder), 300, 0., 150., 300, 0., 150., Folder);
 
   HBook1F(Hist->fPt         ,"pt"       ,Form("%s: Track Pt"          ,Folder), 600, 75,95,Folder);
   HBook1F(Hist->fCosTh      ,"costh"    ,Form("%s: Track cos(theta)"  ,Folder), 100,-1,1  ,Folder);
@@ -349,7 +394,7 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 
   HBook2F(Hist->fFConsVsNActive,"fc_vs_na" ,Form("%s: FitCons vs NActive",Folder),  150, 0, 150, 200,0,1,Folder);
   HBook1F(Hist->fDaveTrkQual,"dtqual"   ,Form("%s:DaveTrkQual"        ,Folder), 200, -0.5, 1.5,Folder);
-  HBook1F(Hist->fMVAOut     ,"mvaout"   ,Form("%s:MVA output"         ,Folder), 200, -0.5, 1.5,Folder);
+  HBook1F(Hist->fTrqMvaOut  ,"trqmvaout",Form("%s:TRQ MVA output"     ,Folder), 200, -0.5, 1.5,Folder);
 
   HBook2F(Hist->fPVsTime    ,"p_vs_time",Form("%s: P(Z1) vs T(0)"     ,Folder), 800,  80  ,120. , 200, 0, 2000,Folder);
 
@@ -370,6 +415,10 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook2F(Hist->fEpVsPath   ,"ep_vs_path",Form("%s: E/P vs Path"       ,Folder), 100, -100,  400, 120,  0,  1.2,Folder);
   HBook2F(Hist->fEpVsTchDz  ,"ep_vs_tchdz",Form("%s: E/P vs Tch_DZ"    ,Folder), 100, -100,  400, 120,  0,  1.2,Folder);
   HBook2F(Hist->fTchDtVsDz  ,"tchdt_vs_dz",Form("%s: TCH_DT vs Tch_DZ" ,Folder), 100, -100,  400, 200, -10, 10 ,Folder);
+//-----------------------------------------------------------------------------
+// PID histograms
+//-----------------------------------------------------------------------------
+  HBook1F(Hist->fPidMvaOut  ,"pidmvaout",Form("%s:PID MVA output"     ,Folder), 200, -0.5, 1.5,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -377,11 +426,20 @@ void TAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fMcCosTh    ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
-  HBook1F(Hist->fMcMom      ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
-  //  HBook1D(Hist->fDioMom     ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
-  HBook1F(Hist->fRv         ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
-  HBook1F(Hist->fZv         ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
+  HBook1F(Hist->fEventWeight[0],"eventweight_0" ,Form("%s: Event Weight"            ,Folder), 100, -1.,   2.,Folder);
+  HBook1F(Hist->fEventWeight[1],"eventweight_1" ,Form("%s: Log10(Event Weight)"     ,Folder), 100,-15.,   5.,Folder);
+  HBook1F(Hist->fEventE        ,"event_energy"  ,Form("%s: Relevant Event Energy"   ,Folder), 400,  0., 200.,Folder);
+  HBook1F(Hist->fInstLumi[0]   ,"inst_lumi_0"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(Hist->fInstLumi[1]   ,"inst_lumi_1"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(Hist->fInstLumi[2]   ,"inst_lumi_2"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(Hist->fBatchWeight[0],"batchweight_0" ,Form("%s: Log10(One Batch Weight)" ,Folder), 100, -20., 2.,Folder);
+  HBook1F(Hist->fBatchWeight[1],"batchweight_1" ,Form("%s: Log10(Two Batch Weight)" ,Folder), 100, -20., 2.,Folder);
+
+  HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
+  HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
+  HBook1D(Hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
+  HBook1F(Hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
+  HBook1F(Hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
   //  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
   HBook1F(Hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
   HBook1F(Hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
@@ -409,7 +467,8 @@ void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fPdgCode   ,"pdg"         ,Form("%s: PDG code"                     ,Folder),200,-100,100,Folder);
+  HBook1F(Hist->fPdgCode[0],"pdg_0"       ,Form("%s: PDG code[0]"                  ,Folder),200,-100,100,Folder);
+  HBook1F(Hist->fPdgCode[1],"pdg_1"       ,Form("%s: PDG code[1]"                  ,Folder),200,-100,100,Folder);
   HBook1F(Hist->fNStrawHits,"nsth"        ,Form("%s: n straw hits"                 ,Folder),200,   0,200,Folder);
   HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: CE mom after Stopping Target" ,Folder),400,  90,110,Folder);
   HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: CE mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
@@ -433,20 +492,16 @@ void TAnaModule::BookTrackSeedHistograms   (HistBase_t*   HistR, const char* Fol
   HBook1F(Hist->fD0           ,"d0"    ,Form("%s: D0; d0 [mm]"                  ,Folder), 1600, -400,  400,Folder);
 }
 
-//_____________________________________________________________________________
-// void TAnaModule::BookHistograms() {
-// }
-
-
 //-----------------------------------------------------------------------------
-void TAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
+void TAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster, double Weight) {
+  // if(Weight == 0.) return; //ignore 0 weight events
   int   row, col;
   float  x, y, z, r;
 
   row = Cluster->Ix1();
   col = Cluster->Ix2();
 
-  x   = Cluster->fX; // +3904.;
+  x   = Cluster->fX;
   y   = Cluster->fY;
   z   = Cluster->fZ;
   r   = sqrt(x*x+y*y);
@@ -454,27 +509,28 @@ void TAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster
   if ((row < 0) || (row > 9999)) row = -9999;
   if ((col < 0) || (col > 9999)) col = -9999;
 
-  Hist->fDiskID->Fill(Cluster->DiskID());
-  Hist->fEnergy->Fill(Cluster->Energy());
-  Hist->fT0->Fill(Cluster->Time());
-  Hist->fRow->Fill(row);
-  Hist->fCol->Fill(col);
-  Hist->fX->Fill(x);
-  Hist->fY->Fill(y);
-  Hist->fZ->Fill(z);
-  Hist->fR->Fill(r);
+  Hist->fDiskID->Fill(Cluster->DiskID(), Weight);
+  Hist->fEnergy->Fill(Cluster->Energy(), Weight);
+  Hist->fEnergyDiff->Fill((Cluster->Energy() - fEleE), Weight); //assuming generated energy is ideal cluster energy
+  Hist->fT0->Fill(Cluster->Time(), Weight);
+  Hist->fRow->Fill(row, Weight);
+  Hist->fCol->Fill(col, Weight);
+  Hist->fX->Fill(x, Weight);
+  Hist->fY->Fill(y, Weight);
+  Hist->fZ->Fill(z, Weight);
+  Hist->fR->Fill(r, Weight);
 
-  Hist->fYMean->Fill(Cluster->fYMean);
-  Hist->fZMean->Fill(Cluster->fZMean);
-  Hist->fSigY ->Fill(Cluster->fSigY);
-  Hist->fSigZ ->Fill(Cluster->fSigZ);
-  Hist->fSigR ->Fill(Cluster->fSigR);
-  Hist->fNCr0 ->Fill(Cluster->fNCrystals);
-  Hist->fNCr1 ->Fill(Cluster->fNCr1);
-  Hist->fFrE1 ->Fill(Cluster->fFrE1);
-  Hist->fFrE2 ->Fill(Cluster->fFrE2);
-  Hist->fSigE1->Fill(Cluster->fSigE1);
-  Hist->fSigE2->Fill(Cluster->fSigE2);
+  Hist->fYMean->Fill(Cluster->fYMean, Weight);
+  Hist->fZMean->Fill(Cluster->fZMean, Weight);
+  Hist->fSigY->Fill(Cluster->fSigY, Weight);
+  Hist->fSigZ->Fill(Cluster->fSigZ, Weight);
+  Hist->fSigR->Fill(Cluster->fSigR, Weight);
+  Hist->fNCr0->Fill(Cluster->fNCrystals, Weight);
+  Hist->fNCr1->Fill(Cluster->fNCr1, Weight);
+  Hist->fFrE1->Fill(Cluster->fFrE1, Weight);
+  Hist->fFrE2->Fill(Cluster->fFrE2, Weight);
+  Hist->fSigE1->Fill(Cluster->fSigE1, Weight);
+  Hist->fSigE2->Fill(Cluster->fSigE2, Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -519,7 +575,7 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
 // need MC truth branch
 //-----------------------------------------------------------------------------
   void TAnaModule::FillEventHistograms(EventHist_t* Hist, EventPar_t* Evp) {
-  double            cos_th(-2), xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p(-1.);
+    double            cos_th(-2), xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p(-1.), dio_wt(-1.);
   //  double            e, m, r;
   TLorentzVector    mom;
 
@@ -531,10 +587,27 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
     yv     = Evp->fParticle->Vy();
     rv     = sqrt(xv*xv+yv*yv);
     zv     = Evp->fParticle->Vz();
-    //    dio_wt = TStntuple::DioWeightAl(p);
+    dio_wt = TStntuple::DioWeightAl(p);
   }
 
+  Hist->fEventWeight[0]->Fill(fEventWeight);
+  Hist->fEventWeight[1]->Fill(log10(fEventWeight));
+  Hist->fEventE        ->Fill(Evp->fPartE  , fEventWeight);
+  Hist->fInstLumi[0]   ->Fill(Evp->fInstLum, fEventWeight);
+
+  if (fBatchMode == 1) {
+    Hist->fInstLumi[1]->Fill(Evp->fInstLum, fEventWeight/Evp->fOneBatchWeight);
+    Hist->fInstLumi[2]->Fill(Evp->fInstLum, fEventWeight/Evp->fOneBatchWeight*Evp->fTwoBatchWeight);
+  } else if(fBatchMode == 2) {
+    Hist->fInstLumi[1]->Fill(Evp->fInstLum, fEventWeight/Evp->fTwoBatchWeight);
+    Hist->fInstLumi[2]->Fill(Evp->fInstLum, fEventWeight/Evp->fTwoBatchWeight*Evp->fOneBatchWeight);
+  }
+
+  Hist->fBatchWeight[0]->Fill(log10(Evp->fOneBatchWeight));
+  Hist->fBatchWeight[1]->Fill(log10(Evp->fTwoBatchWeight));
+
   Hist->fMcMom->Fill(p);
+  Hist->fDioMom->Fill(p,dio_wt);
   Hist->fMcCosTh->Fill(cos_th);
   Hist->fRv->Fill(rv);
   Hist->fZv->Fill(zv);
@@ -597,7 +670,8 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
 //-----------------------------------------------------------------------------
 void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
 
-  Hist->fPdgCode->Fill(Simp->fPdgCode);
+  Hist->fPdgCode[0]->Fill(Simp->fPdgCode);
+  Hist->fPdgCode[1]->Fill(Simp->fPdgCode);
   Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
   Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront);
   Hist->fNStrawHits->Fill(Simp->fNStrawHits);
@@ -631,6 +705,7 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
   Hist->fPt    ->Fill(Track->fPt    , Weight);
   Hist->fPFront->Fill(Track->fPFront, Weight);
   Hist->fPStOut->Fill(Track->fPStOut, Weight);
+  Hist->fPVsGenE->Fill(fEleE, Track->fP, Weight);
 //-----------------------------------------------------------------------------
 // dp: Tracker-only resolution
 //-----------------------------------------------------------------------------
@@ -730,7 +805,7 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 // MVA variables
 //-----------------------------------------------------------------------------
   Hist->fDaveTrkQual->Fill(Track->DaveTrkQual(), Weight);
-  Hist->fMVAOut->Fill(Tp->fMVAOut[1], Weight);
+  Hist->fTrqMvaOut->Fill(Tp->fTrqMvaOut[1], Weight);
 //-----------------------------------------------------------------------------
 // 2D momentum() vs time (tracker center) histogram for sensitivity calculation
 //-----------------------------------------------------------------------------
@@ -753,6 +828,10 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
   Hist->fEpVsPath ->Fill(Tp->fPath ,Tp->fEp   ,Weight);
   Hist->fEpVsTchDz->Fill(Tp->fTchDz,Tp->fEp   ,Weight);
   Hist->fTchDtVsDz->Fill(Tp->fTchDz,Tp->fTchDt,Weight);
+//-----------------------------------------------------------------------------
+// MVA-based PID
+//-----------------------------------------------------------------------------
+  Hist->fPidMvaOut->Fill(Tp->fPidMvaOut[0], Weight);
 }
 
 
@@ -795,8 +874,8 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 			     TStnClusterBlock*   ClusterBlock, 
 			     TrackPar_t*         TrackPar    ,
 			     SimPar_t*           SimPar      ) {
-  double                xs;
-  TEmuLogLH::PidData_t  dat;
+  // double                xs;
+  //  TEmuLogLH::PidData_t  dat;
 //-----------------------------------------------------------------------------
 // momentum corrections for KPAR and KDAR
 //-----------------------------------------------------------------------------
@@ -949,34 +1028,38 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 // tp->fMVAOut[0] : comes from offline
 // tp->fMVAOut[1] : calculated on the fly
 //-----------------------------------------------------------------------------
-    tp->fMVAOut[0] = track->DaveTrkQual();        // comes from Offline
-    tp->fMVAOut[1] = track->DaveTrkQual(); 
+    tp->fTrqMvaOut[0] = track->DaveTrkQual();        // comes from Offline
+    tp->fTrqMvaOut[1] = track->DaveTrkQual(); 
 
-    if (fUseTrkQualMVA != 0) {
+    if (fUseTrqMVA != 0) {
 //-----------------------------------------------------------------------------
 // MVA output calculated on the fly - in principle, should be charge-symmetric
 //-----------------------------------------------------------------------------
-      vector<float>  pmva(8);
-
       float na = track->NActive();
       float nm = track->NMat();
 
-      pmva[ 0] = na;
-      pmva[ 1] = na/track->NHits();
-      pmva[ 2] = log10(track->FitCons());
-      pmva[ 3] = track->FitMomErr();
-      pmva[ 4] = track->T0Err();
-      pmva[ 5] = track->NDoubletsAct()/na;
-      pmva[ 6] = track->NHitsAmbZero()/na;
-      pmva[ 7] = track->NMatActive()/nm;
+      int mva_type = tp->fMvaType;	                          // 
+	
+      if (fTrqMVA[mva_type] != nullptr) {
+	fTrqMVA[mva_type]->fVar[0] = na;
+	fTrqMVA[mva_type]->fVar[1] = na/track->NHits();
+	fTrqMVA[mva_type]->fVar[2] = log10(track->FitCons());
+	fTrqMVA[mva_type]->fVar[3] = track->FitMomErr();
+	fTrqMVA[mva_type]->fVar[4] = track->T0Err();
+	fTrqMVA[mva_type]->fVar[5] = track->NDoubletsAct()/na;
+	fTrqMVA[mva_type]->fVar[6] = track->NHitsAmbZero()/na;
+	fTrqMVA[mva_type]->fVar[7] = track->NMatActive()/nm;
       // pmva[ 8] = track->D0();                          // low-rank, do not use
       // pmva[ 9] = track->RMax();                        // low-rank, do not use
 
-      int mva_type = tp->fMvaType;	                          // 
-	
-      if (fTrkQualMVA[mva_type] != nullptr) {
-	tp->fMVAOut[1] = fTrkQualMVA[mva_type]->fMva->evalMVA(pmva);
-	track->SetTmp(0,tp->fMVAOut[1]);
+	tp->fTrqMvaOut[1] = fTrqMVA[mva_type]->Eval();
+
+	if (tp->fTrqMvaOut[1] < -990) {
+	  GetHeaderBlock()->Print(Form("BAD TRQ: ntrk, itrk= %2i %2i",ntrk,itrk));
+	  PrintTrack(track,tp,"");
+	}
+
+	track->SetTmp(0,tp->fTrqMvaOut[1]);
       }
     }
 //-----------------------------------------------------------------------------
@@ -985,36 +1068,6 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     for (int k=0; k<fNID; k++) {
       tp->fIDWord[k]  = tp->fTrackID[k]->IDWord(track);
     }
-//-----------------------------------------------------------------------------
-// PID likelihoods
-//-----------------------------------------------------------------------------
-    dat.fDt   = tp->fDt;
-    dat.fEp   = tp->fEp;
-    dat.fPath = tp->fPath;
-      
-    xs = track->XSlope();
-
-    track->fEleLogLHCal = tp->fLogLH->LogLHCal(&dat,11);
-    track->fMuoLogLHCal = tp->fLogLH->LogLHCal(&dat,13);
-
-    double llhr_cal = track->fEleLogLHCal-track->fMuoLogLHCal;
-
-    int id_word = tp->fIDWord[0];
-
-    if (GetDebugBit(7)) {
-      if ((id_word == 0) && (llhr_cal > 20)) {
-	GetHeaderBlock()->Print(Form("bit:007: dt = %10.3f ep = %10.3f",track->Dt(),tp->fEp));
-      }
-    }
-
-    if (GetDebugBit(8)) {
-      if ((id_word == 0) && (llhr_cal < -20)) {
-	GetHeaderBlock()->Print(Form("bit:008: p = %10.3f dt = %10.3f ep = %10.3f",
-				     track->P(),track->Dt(),tp->fEp));
-      }
-    }
-
-    track->fLogLHRXs = tp->fLogLH->LogLHRXs(xs); 
 //-----------------------------------------------------------------------------
 // track-CRV residuals
 //-----------------------------------------------------------------------------
@@ -1033,7 +1086,29 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     tp->fTchDy     = tch->fDy;
     tp->fTchDz     = tch->fDz;
     tp->fTchDt     = tch->fDt;
+//-----------------------------------------------------------------------------
+// MVA-based PID - can't calculate here, as need two reco outputs
+//-----------------------------------------------------------------------------
+    tp->fPidMvaOut[0] = -1.e6;
+//-----------------------------------------------------------------------------
+// both electron and muon tracks are there, need to apply preselections
+//-----------------------------------------------------------------------------
+    if (fUsePidMVA != 0) {
+      if ((tp->fTchDt > -100) && (tp->fTchDz > -50) && (tp->fTchDz < 250)) {
+
+	fPidMVA[0]->fVar[0] = tp->fEp;
+	fPidMVA[0]->fVar[1] = tp->fNCrystals;
+	fPidMVA[0]->fVar[2] = tp->fSeedFr;
+	fPidMVA[0]->fVar[3] = tp->fTchDt;
+	fPidMVA[0]->fVar[4] = tp->fTchDz;
+	fPidMVA[0]->fVar[5] = tp->fTchDr;
+	fPidMVA[0]->fVar[6] = tp->fPath;
+
+	tp->fPidMvaOut[0] = fPidMVA[0]->Eval();
+      }
+    }
   }
+
   return 0;
 }
 
@@ -1054,7 +1129,7 @@ void TAnaModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) 
     printf("------------------------------------------------------------------------------------------------");
     printf("----------------------------------------------------------------------------------\n");
     printf(" i  nh  na nw nosd nssd na0 ncl  alg_mask    id_word   q     p     p(corr) momerr    T0     T0Err     D0");
-    printf("      Z0    TanDip   TBack   chi2/dof   fcon  TrkQual MvaOut[0]  MVAOut[1]   Prob \n");
+    printf("      Z0    TanDip   TBack   chi2/dof   fcon  TrkQ    MvaOut[0]  MVAOut[1] \n");
     printf("------------------------------------------------------------------------------------------------");
     printf("----------------------------------------------------------------------------------\n");
   }
@@ -1066,11 +1141,11 @@ void TAnaModule::PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) 
 	   t->NClusters(),
 	   t->AlgorithmID());
 
-    printf(" 0x%08x %1.0f %8.3f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f %9.4f",
+    printf(" 0x%08x %1.0f %8.3f %8.3f %7.3f %8.3f %6.3f %7.3f %8.3f %7.4f %8.3f %8.2f %8.2e %7.3f %9.4f %9.4f",
 	   t->fIDWord,
 	   t->fCharge, 
 	   t->fP*t->fCharge, Tp->fP*t->fCharge, t->fFitMomErr, t->fT0, t->fT0Err, t->fD0, t->fZ0, t->fTanDip, t->TBack(),
-	   t->Chi2Dof(),t->FitCons(),t->DaveTrkQual(),Tp->fMVAOut[0], Tp->fMVAOut[1], Tp->fProb);
+	   t->Chi2Dof(),t->FitCons(),t->DaveTrkQual(),Tp->fTrqMvaOut[0], Tp->fTrqMvaOut[1]);
     printf("\n");
   }
 }

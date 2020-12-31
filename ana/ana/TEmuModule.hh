@@ -107,8 +107,6 @@ public:
 //-----------------------------------------------------------------------------
 //  MVA
 //-----------------------------------------------------------------------------
-  int                    fNPidMva;
-  int                    fUsePidMVA;
   int                    fWritePidMvaTree   ;       // =0:PAR   1:DAR  (default=-1)
 
   TFile*                 fPidMvaFile;
@@ -116,8 +114,6 @@ public:
 
   TPidMvaTrainData_t     fPidMvaData;
   TPidMvaTrainBranches_t fPidMvaBranch;
-
-  mva_data*              fPidMVA[2];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

@@ -110,13 +110,13 @@ public:
 //-----------------------------------------------------------------------------
 // Track quality (TQ) MVA training ntuples
 //-----------------------------------------------------------------------------
-  int                 fWriteTrkQualMvaTree   ;       // =0:PAR   1:DAR  (default=-1)
+  int                 fWriteTrqMvaTree   ;       // =0:PAR   1:DAR  (default=-1)
 
-  TFile*              fTrkQualMvaFile;
-  TTree*              fTrkQualMvaTree;
+  TFile*              fTrqMvaFile;
+  TTree*              fTrqMvaTree;
 
-  TmvaTrainData_t     fTrkQualMvaData;
-  TmvaTrainBranches_t fTrkQualMvaBranch;
+  TmvaTrainData_t     fTrqMvaData;
+  TmvaTrainBranches_t fTrqMvaBranch;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -139,7 +139,7 @@ public:
     fDebugCut[I].fXMax = XMax;
   }
 
-  void    SetWriteMvaTree(int Alg) { fWriteTrkQualMvaTree = Alg; }
+  void    SetWriteMvaTree(int Alg) { fWriteTrqMvaTree = Alg; }
 //-----------------------------------------------------------------------------
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------

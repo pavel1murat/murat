@@ -5,8 +5,11 @@
 
 namespace murat {
   struct EventHist_t : public HistBase_t {
-
-    TH1D*    fLumWt;		        // luminosity related MC weight
+    TH1F*    fEventWeight[2];           // MC truth
+    TH1F*    fEventE;                   // MC truth relevant event energy
+    TH1F*    fInstLumi[3];              // MC truth lumi info: 0: nominal 1: undo batch weight 2: opposite batch weight
+    TH1F*    fBatchWeight[2];           // MC truth
+    TH1F*    fLumWeight;                // luminosity-related event weight (PM)
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
 
@@ -16,6 +19,7 @@ namespace murat {
     TH1F*    fNshCE;
 
     TH1F*    fMcMom;
+    TH1D*    fDioMom;
     TH1F*    fMcCosTh;
     TH1F*    fNHelices;
     TH1F*    fNTracks[2];
@@ -32,7 +36,6 @@ namespace murat {
     TH1F*    fEClMax;			// energy of the first (highest) reconstructed cluster
     TH1F*    fTClMax;			// time   of the first (highest) reconstructed cluster
     TH1F*    fDp;                       // P(TrkPatRec)-P(CalPatRec)
-    TH1F*    fInstLumi;                 // lumi
     TH1F*    fWeight;			// weight, need with statistics
     TH1F*    fGMom;			// photon momentum
     TH1F*    fGMomRMC;                  // photon momentum, RMC weighted

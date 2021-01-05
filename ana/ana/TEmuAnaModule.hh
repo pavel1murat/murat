@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TEmuModule_hh
-#define murat_ana_TEmuModule_hh
+#ifndef murat_ana_TEmuAnaModule_hh
+#define murat_ana_TEmuAnaModule_hh
 
 #include "murat/ana/TAnaModule.hh"
 
@@ -27,7 +27,7 @@
 #include "Stntuple/alg/TEmuLogLH.hh"
 
 namespace murat {
-class TEmuModule: public murat::TAnaModule {
+class TEmuAnaModule: public murat::TAnaModule {
 public:
 					//  parameters
   struct DTrackHist_t : public HistBase_t {
@@ -118,8 +118,8 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TEmuModule(const char* name="Emu", const char* title="Emu");
-  ~TEmuModule();
+  TEmuAnaModule(const char* name="EmuAna", const char* title="EmuAna");
+  ~TEmuAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ public:
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
   int     BeginJob();
-  int     BeginRun();
+  //  int     BeginRun();
   int     Event   (int ientry);
   int     EndJob  ();
 //-----------------------------------------------------------------------------
@@ -149,7 +149,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(murat::TEmuModule,0)
+  ClassDef(murat::TEmuAnaModule,0)
 };
 }
 #endif

@@ -9,7 +9,7 @@
 #include "murat/ana/TCosmicsAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
 #include "murat/ana/TDoseAnaModule.hh"
-#include "murat/ana/TEmuModule.hh"
+#include "murat/ana/TEmuAnaModule.hh"
 #include "murat/ana/TG4ValidationModule.hh"
 #include "murat/ana/THelixAnaModule.hh"
 #include "murat/ana/TMuonStopAnaModule.hh"
@@ -89,7 +89,6 @@ TMuonStopAnaModule*        m_must  = NULL;
 TStepPointMCAnaModule*     m_spmc  = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
 TTrackPidAnaModule*        m_tpa   = NULL;
-// TTrackAnaModuleA*          m_trka  = NULL;
 TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackRecoEffAnaModule*    m_eff   = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
@@ -97,7 +96,7 @@ TVDetAnaModule*            m_vdt   = NULL;
 
 namespace murat {
   TCosmicsAnaModule*       m_cos   = NULL;
-TEmuModule*                m_emu   = NULL;
+  TEmuAnaModule*           m_emu   = NULL;
   TPidAnaModule*           m_pid   = NULL;
   TTrackAnaModule*         m_trk   = NULL;
   TTrackCompModule*        m_tcm   = NULL;

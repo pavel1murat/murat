@@ -144,7 +144,7 @@ public:
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
   int     BeginJob();
-  int     BeginRun();
+  // int     BeginRun();
   int     Event   (int ientry);
   int     EndJob  ();
 //-----------------------------------------------------------------------------

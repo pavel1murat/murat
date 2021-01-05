@@ -25,15 +25,15 @@ def_name track_100  ("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  track_ana(const char* TrackBlockName = "TrackBlockPar", int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
+void  track_ana(const char* TrackBlockName = "TrackBlockPar", int PdgCode = 11, int MCProcessCode = 2, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
 
   murat::m_trk->SetTrackBlockName(TrackBlockName);
-  murat::m_trk->SetPdgCode      (PdgCode);
-  murat::m_trk->SetGeneratorCode(GeneratorCode);
+  murat::m_trk->SetPDGCode      (PdgCode);
+  murat::m_trk->SetMCProcessCode(MCProcessCode);
 
   if (DebugBit >= 0) {
     murat::m_trk->SetDebugBit(DebugBit,1);
@@ -41,13 +41,13 @@ void  track_ana(const char* TrackBlockName = "TrackBlockPar", int PdgCode = 11, 
 }
 
 //-----------------------------------------------------------------------------
-void  track_ana_nocorr(int PdgCode = 11, int GeneratorCode = 2, int DebugBit = -1) {
+void  track_ana_nocorr(int PdgCode = 11, int MCProcessCode = 2, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
-  murat::m_trk->SetPdgCode      (PdgCode);
-  murat::m_trk->SetGeneratorCode(GeneratorCode);
+  murat::m_trk->SetPDGCode      (PdgCode);
+  murat::m_trk->SetMCProcessCode(MCProcessCode);
   murat::m_trk->SetApplyCorrections(0);
   if (DebugBit >= 0) {
     murat::m_trk->SetDebugBit(DebugBit,1);
@@ -62,9 +62,9 @@ void  track_ana_dmm(int PdgCode = 13) {
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->SetTrackBlockName("TrackBlockDmm");
-  murat::m_trk->SetPdgCode(PdgCode);
+  murat::m_trk->SetPDGCode(PdgCode);
   murat::m_trk->SetDirection(1);
-  murat::m_trk->SetGeneratorCode(28);
+  murat::m_trk->SetMCProcessCode(28);
 }
 
 //-----------------------------------------------------------------------------
@@ -76,9 +76,9 @@ void  track_ana_dem(int PdgCode = 11) {
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->SetTrackBlockName("TrackBlockDem");
   murat::m_trk->SetTrackStrawHitBlockName("TrackHitBlockDem");
-  murat::m_trk->SetPdgCode(PdgCode);
+  murat::m_trk->SetPDGCode(PdgCode);
   murat::m_trk->SetDirection(1);
-  murat::m_trk->SetGeneratorCode(28);
+  murat::m_trk->SetMCProcessCode(28);
 }
 
 //-----------------------------------------------------------------------------
@@ -90,9 +90,9 @@ void  track_ana_dep(int PdgCode = 12) {
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->SetTrackBlockName("TrackBlockDep");
   murat::m_trk->SetTrackStrawHitBlockName("TrackHitBlockDep");
-  murat::m_trk->SetPdgCode(PdgCode);
+  murat::m_trk->SetPDGCode(PdgCode);
   murat::m_trk->SetDirection(1);
-  murat::m_trk->SetGeneratorCode(28);
+  murat::m_trk->SetMCProcessCode(28);
 }
 
 //-----------------------------------------------------------------------------
@@ -104,9 +104,9 @@ void  track_ana_dpp() {
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->SetTrackBlockName("TrackBlockDpp");
   murat::m_trk->SetTrackStrawHitBlockName("TrackHitBlockDpp");
-  murat::m_trk->SetPdgCode(2212);
+  murat::m_trk->SetPDGCode(2212);
   murat::m_trk->SetDirection(1);
-  murat::m_trk->SetGeneratorCode(28);
+  murat::m_trk->SetMCProcessCode(28);
 }
 
 //-----------------------------------------------------------------------------
@@ -117,9 +117,9 @@ void  track_ana_ump() {
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->SetTrackBlockName("TrackBlockUmp");
-  murat::m_trk->SetPdgCode(-13);
+  murat::m_trk->SetPDGCode(-13);
   murat::m_trk->SetDirection(-1);
-  murat::m_trk->SetGeneratorCode(28);
+  murat::m_trk->SetMCProcessCode(28);
 }
 
 //-----------------------------------------------------------------------------
@@ -130,13 +130,13 @@ void  track_ana_umm() {
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->SetTrackBlockName("TrackBlockUmm");
-  murat::m_trk->SetPdgCode(13);
+  murat::m_trk->SetPDGCode(13);
   murat::m_trk->SetDirection(-1);
-  murat::m_trk->SetGeneratorCode(28);
+  murat::m_trk->SetMCProcessCode(28);
 }
 
 //-----------------------------------------------------------------------------
-void  track_ana_tandip_12(int GeneratorCode = 2) {
+void  track_ana_tandip_12(int MCProcessCode = 2) {
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->GetTrackID(0)->SetMinTanDip(1.);
   murat::m_trk->GetTrackID(0)->SetMaxTanDip(2.);
@@ -156,7 +156,7 @@ void  val_cpr(int Bit = -1) {
 
 
 //-----------------------------------------------------------------------------
-void  track_debug_tandip_12(int Bit, int GeneratorCode = 2) {
+void  track_debug_tandip_12(int Bit, int MCProcessCode = 2) {
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
   murat::m_trk->GetTrackID(0)->SetMinTanDip(1.);
   murat::m_trk->GetTrackID(0)->SetMaxTanDip(2.);
@@ -164,9 +164,9 @@ void  track_debug_tandip_12(int Bit, int GeneratorCode = 2) {
 }
 
 //-----------------------------------------------------------------------------
-// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+// MCProcessCode= 2:ConversionElectronGun 28:ParticleGun
 //-----------------------------------------------------------------------------
-void  track_comp(const char* TrackBlockName = "TrackBlockPar", int PDGCode=11, int GeneratorCode=28, 
+void  track_comp(const char* TrackBlockName = "TrackBlockPar", int PDGCode=11, int MCProcessCode=28, 
 		 int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
@@ -174,8 +174,8 @@ void  track_comp(const char* TrackBlockName = "TrackBlockPar", int PDGCode=11, i
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
 
   murat::m_tcm->SetTrackBlockName(0,TrackBlockName);
-  murat::m_tcm->SetPdgCode       (PDGCode);
-  murat::m_tcm->SetGeneratorCode (GeneratorCode);
+  murat::m_tcm->SetPDGCode       (PDGCode);
+  murat::m_tcm->SetMCProcessCode (MCProcessCode);
 
   if (DebugBit >= 0) {
     murat::m_tcm->SetDebugBit(DebugBit,1);
@@ -186,28 +186,28 @@ void  track_comp(const char* TrackBlockName = "TrackBlockPar", int PDGCode=11, i
 //-----------------------------------------------------------------------------
 // debug: do not fill histograms, force the debug bit to be defined
 //-----------------------------------------------------------------------------
-void  track_comp_debug(int PDGCode=11, int GeneratorCode=28, int DebugBit=14) {
+void  track_comp_debug(int PDGCode=11, int MCProcessCode=28, int DebugBit=14) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPdgCode      (PDGCode);
-  murat::m_tcm->SetGeneratorCode(GeneratorCode);
+  murat::m_tcm->SetPDGCode      (PDGCode);
+  murat::m_tcm->SetMCProcessCode(MCProcessCode);
   murat::m_tcm->SetDebugBit(DebugBit,1);
   murat::m_tcm->GetAna()->SetNEventsToReport(50000);
 }
 
 //-----------------------------------------------------------------------------
-// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun 7:dioTail
+// MCProcessCode= 2:ConversionElectronGun 28:ParticleGun 7:dioTail
 // TrkRrecoAlg = 0:PAR    =1:DAR
 //-----------------------------------------------------------------------------
-void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
+void  track_comp_mva(int PDGCode=11, int MCProcessCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPdgCode      (PDGCode);
-  murat::m_tcm->SetGeneratorCode(GeneratorCode);
+  murat::m_tcm->SetPDGCode      (PDGCode);
+  murat::m_tcm->SetMCProcessCode(MCProcessCode);
 
   murat::m_tcm->SetWriteMvaTree(TrkRecoAlg);
 
@@ -215,11 +215,11 @@ void  track_comp_mva(int PDGCode=11, int GeneratorCode=28, int TrkRecoAlg = 0, i
 }
 
 //-----------------------------------------------------------------------------
-// GeneratorCode= 2:ConversionElectronGun 28:ParticleGun
+// MCProcessCode= 2:ConversionElectronGun 28:ParticleGun
 // MVAType : 
 // ---------
 //-----------------------------------------------------------------------------
-void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28, 
+void  track_comp_use_mva(int PDGCode=11, int MCProcessCode=28, 
 			 int PARTrainingCode =   -1, 
 			 int DARTrainingCode = 1070, 
 			 int DebugBit = -1, double XMin=1,double XMax = -1) {
@@ -228,8 +228,8 @@ void  track_comp_use_mva(int PDGCode=11, int GeneratorCode=28,
 // MVA type: 
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPdgCode      (11);
-  murat::m_tcm->SetGeneratorCode(GeneratorCode);
+  murat::m_tcm->SetPDGCode      (11);
+  murat::m_tcm->SetMCProcessCode(MCProcessCode);
 
   if (PARTrainingCode >= 0) murat::m_tcm->SetTrqMVA(0,"fele2s51b1",PARTrainingCode);
   if (DARTrainingCode >= 0) murat::m_tcm->SetTrqMVA(1,"fele2s51b1",DARTrainingCode);
@@ -249,8 +249,8 @@ void  rmc_ana(double KMax = 90, int DebugBit = -1) {
 // configure analysis module to write TMVA training trees
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPdgCode      (-11);
-  murat::m_tcm->SetGeneratorCode(41);
+  murat::m_tcm->SetPDGCode      (-11);
+  murat::m_tcm->SetMCProcessCode(41);
 
   murat::m_tcm->SetKMaxRMC(KMax);
 

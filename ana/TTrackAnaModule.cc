@@ -84,8 +84,6 @@ TTrackAnaModule::TTrackAnaModule(const char* name, const char* title): TAnaModul
 // MC truth: define which MC particle to consider as signal
 // 2:conversionGun, 28:StoppedParticleReactionGun - see 
 //-----------------------------------------------------------------------------
-  fPdgCode       = 11;
-  fGeneratorCode =  2;
   fDirection     =  1;
 
   fApplyCorrections = 0;
@@ -118,14 +116,6 @@ int TTrackAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
   BookHistograms();
 
-  return 0;
-}
-
-
-//_____________________________________________________________________________
-int TTrackAnaModule::BeginRun() {
-  int rn = GetHeaderBlock()->RunNumber();
-  TStntuple::Init(rn);
   return 0;
 }
 
@@ -417,194 +407,7 @@ void TTrackAnaModule::BookHistograms() {
       BookGenpHistograms(fHist.fGenp[i],Form("Hist/%s",folder_name));
     }
   }
-
 }
-
-//-----------------------------------------------------------------------------
-// need MC truth branch
-//-----------------------------------------------------------------------------
-// void TTrackAnaModule::FillEventHistograms(EventHist_t* Hist) {
-//   double            cos_th, dio_wt, xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p;
-//   double            e, m, r;
-//   TLorentzVector    mom(1.,0.,0.,0);
-
-//   if (fParticle) { 
-//     fParticle->Momentum(mom);
-//     xv = fParticle->Vx()+3904.;
-//     yv = fParticle->Vy();
-//     rv = sqrt(xv*xv+yv*yv);
-//     zv = fParticle->Vz();
-//   }
-
-//   p      = mom.P();
-//   cos_th = mom.Pz()/p;
-//   dio_wt = TStntuple::DioWeightAl(p);
-
-//   Hist->fLumWt->Fill(fLumWt);
-//   Hist->fRv->Fill(rv);
-//   Hist->fZv->Fill(zv);
-//   Hist->fEleMom->Fill(p);
-//   Hist->fDioMom->Fill(p,dio_wt);
-//   Hist->fEleCosTh->Fill(cos_th);
-
-//   Hist->fNClusters->Fill(fNClusters);
-//   Hist->fNTracks->Fill  (fNTracks[0]);
-
-//   int nsh = GetHeaderBlock()->fNStrawHits;
-//   Hist->fNStrawHits[0]->Fill(nsh);
-//   Hist->fNStrawHits[1]->Fill(nsh);
-
-//   double emax   = -1;
-//   double t0_cls = -1;
-//   double dt     = 9999.;
-
-//   TStnCluster* cluster(0);
-//   if (fNClusters > 0) cluster = fClusterBlock->Cluster(0);
-
-//   TStnTrack* track(0);
-//   if (fNTracks > 0) track = fTrackBlock->Track(0);
-
-//   if (cluster) {
-//     emax   = cluster->Energy();
-//     t0_cls = cluster->Time();
-//   }
-
-//   double t0_trk = -1;
-//   int    alg_mask(-1);
-//   if (track) {
-//     t0_trk   = track->fT0;
-//     alg_mask = track->AlgMask();
-//   }
-
-//   if (track && cluster) {
-//     dt = t0_cls-t0_trk;
-//   }
-
-//   Hist->fAlgMask->Fill(alg_mask);
-//   Hist->fDtClT->Fill(dt);
-//   Hist->fEMax->Fill(emax);
-
-//   TStrawHitData*  sh;
-//   int n_good_hits = 0;
-//   int nstraw_hits = fStrawDataBlock->NHits();
-//   for (int i=0; i<nstraw_hits; i++ ) {
-//     sh = fStrawDataBlock->Hit(i);
-//     dt = t0_cls-sh->Time() + 15;
-//     Hist->fDtClS->Fill(dt);
-//     Hist->fSHTime->Fill(sh->Time());
-
-//     if (fabs(dt+15.)< 50) n_good_hits += 1;
-//   }
-
-//   Hist->fNGoodSH->Fill(n_good_hits);
-
-//   Hist->fNHyp->Fill(fNHyp);
-//   Hist->fBestHyp[0]->Fill(fBestHyp[0]);
-//   Hist->fBestHyp[1]->Fill(fBestHyp[1]);
-//   Hist->fNGenp->Fill(fNGenp);
-// //-----------------------------------------------------------------------------
-// // crystals - count crystals with E > 1MeV
-// //-----------------------------------------------------------------------------
-//   int          ndisks, n_hit_crystals[kNDisks], n_hit_crystals_tot;
-//   double       etot[kNDisks];
-//   //  TCalHitData* cch;
-
-//   //  int n_cch_1mev = 0;
-
-//   //  int   nhits_vane[2][kNDisks], nhits_row [2][20], nhits_col[2][50];
-//   //  int   crystal_id, vane_id, local_id, vane_row, vane_col;
-//   int   bin, hit_id, idisk, nhits;
-//   int   nhits_r[kNDisks][100], n_hit_crystals_r[kNDisks][100];
-
-//   if (fCalorimeterType == 2) {
-// //-----------------------------------------------------------------------------
-// // disk calorimeter
-// //-----------------------------------------------------------------------------
-
-//     TCalHitData* hit;
-
-//     ndisks = fDiskCalorimeter->NDisks();
-
-//     if (ndisks > 0) {
-
-//       for (int id=0; id<kNDisks; id++) {
-// 	n_hit_crystals[id] = 0;
-// 	etot[id]           = 0;
-	
-// 	for (int ib=0; ib<100; ib++) {
-// 	  nhits_r         [id][ib] = 0;
-// 	  n_hit_crystals_r[id][ib] = 0;
-// 	}
-//       }
-
-//       nhits = fCalDataBlock->NHits();
-
-//       for (int i=0; i< nhits; i++) {
-// 	hit    = fCalDataBlock->CalHitData(i);
-	
-// 	hit_id = hit->ID();
-// 	idisk  = fDiskCalorimeter->DiskNumber(hit_id);
-// 	r      = fDiskCalorimeter->CrystalRadius(hit_id);
-// 	e      = hit->Energy(); 
-      
-// 	etot          [idisk] += e;
-// 	n_hit_crystals[idisk] += 1;
-	
-// 	Hist->fECrVsR[idisk]->Fill(r,e);
-// 	Hist->fNCrVsR[idisk]->Fill(r,1);
-	
-// 	bin  = (int) (r/10.);
-	
-// 	nhits_r         [idisk][bin] += 1;
-// //-----------------------------------------------------------------------------
-// // this is not correct, one needs to check whether this crystal has been hit,
-// // for the moment, to get going, ignore that
-// //-----------------------------------------------------------------------------
-// 	n_hit_crystals_r[idisk][bin] += 1;
-//       }
-//     }
-
-//     n_hit_crystals_tot = 0;
-
-//     double ecal = 0;
-//     for (int id=0; id<ndisks; id++) {
-//       n_hit_crystals_tot += n_hit_crystals[id];
-//       ecal += etot[id];
-// //-----------------------------------------------------------------------------
-// // fill 'per-disk' histograms
-// //-----------------------------------------------------------------------------
-//       Hist->fETot[id]->Fill(etot[id]);
-
-// //-----------------------------------------------------------------------------
-// // 100 is fixed by the number of bins in the radial distributions
-// //-----------------------------------------------------------------------------
-//       for (int ib=0; ib<100; ib++) {
-// 	r = (ib+0.5)*10.;
-// 	Hist->fNCrystalHitsVsR[id]->Fill(r,nhits_r         [id][ib]);
-// 	Hist->fNHitCrystalsVsR[id]->Fill(r,n_hit_crystals_r[id][ib]);
-//       }
-//     }
-
-//     Hist->fNHitCrystalsTot->Fill(n_hit_crystals_tot);
-//     Hist->fECal->Fill(ecal);
-
-//     double ekin(-1.);
-// //-----------------------------------------------------------------------------
-// // there is an inconsistency in the SIMP block filling - in Mu2e offline 
-// // the particle momentumis is kept in MeV/c, while the PDG mass  -in GeV/c^2..
-// // thus the energy is screwed up... kludge around
-// // assign muon mass
-// //-----------------------------------------------------------------------------
-//     if (fSimp) {
-//       p    = fSimp->fStartMom.P();
-//       m    = 105.658; // in MeV
-//       ekin = sqrt(p*p+m*m)-m;
-//     }
-//     Hist->fECalOverEKin->Fill(ecal/ekin);
-//   }
-
-//   Hist->fInstLumi->Fill(GetHeaderBlock()->InstLum());
-// }
 
 //-----------------------------------------------------------------------------
 void TTrackAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
@@ -1268,11 +1071,14 @@ int TTrackAnaModule::Event(int ientry) {
 // hits are stored in TStepPointMCBlock 
 // dont' try to read it as that would fail
 //-----------------------------------------------------------------------------
-  //  fVDetBlock->GetEntry(ientry);
+  fEvtPar.fDioLOWt          = 1.;
+  fEvtPar.fDioLLWt          = 1.;
   fEvtPar.fNCrvClusters     = -1;
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fParticle         = NULL;
+  fEvtPar.fPartE            = -1.;
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -1280,18 +1086,25 @@ int TTrackAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // look for signal particle defined by the PDG code and the generator code
 //-----------------------------------------------------------------------------
-  TGenParticle* genp;
-  int           pdg_code, generator_code;
+  TLorentzVector mom;
   
-  fEvtPar.fParticle = NULL;
   for (int i=fNGenp-1; i>=0; i--) {
-    genp           = fGenpBlock->Particle(i);
-    pdg_code       = genp->GetPdgCode();
-    generator_code = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
+    TGenParticle* genp = fGenpBlock->Particle(i);
+    int pdg_code       = genp->GetPdgCode();
+    int process_code   = genp->GetStatusCode();
+    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
       fEvtPar.fParticle = genp;
+      genp->Momentum(mom);
+      fEvtPar.fPartE    = mom.Energy();
       break;
     }
+  }
+//-----------------------------------------------------------------------------
+// calculate DIO weights once per event
+//-----------------------------------------------------------------------------
+  if (fEvtPar.fPartE > 0) {
+    fEvtPar.fDioLOWt = TStntuple::DioWeightAl   (fEvtPar.fPartE);
+    fEvtPar.fDioLLWt = TStntuple::DioWeightAl_LL(fEvtPar.fPartE);
   }
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimp in the future
@@ -1377,12 +1190,14 @@ int TTrackAnaModule::Event(int ientry) {
     TStnTrack*   trk = fTrackBlock->Track(itrk);
     TrackPar_t* tp   = fTrackPar+itrk;
 
+    tp->fDioLOWt     = fEvtPar.fDioLOWt;
+    tp->fDioLLWt     = fEvtPar.fDioLLWt;
+
     int alg_mask = trk->AlgMask();
     if (alg_mask & 0x2) fNCalPatRec += 1;
 
     tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
     tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
-    //    tp->fLogLH      = TAnaModule::fLogLH;
   }
 
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);

@@ -15,19 +15,17 @@ public:
   int           fNDPl;
   int           fDiskID;               // 0: first disk, 1:second disk
   int           fFitType;              // index for applying corrections
-  int           fMvaType;              // index of the trk qual MVAL 0=PAR, 1=DAR
+  int           fTrqMvaIndex;          // index of the TRQ MVA: 0=PAR, 1=DAR
 		
   TStnCluster*  fCluster;              // pointer to the calorimeter cluster
   SimPar_t*     fSimPar;               // pointer to simparticle 
   TStnTrackID*  fTrackID[50];          //
-  //  TEmuLogLH*    fLogLH;
 
   int           fIDWord[20];
 
   int           fIDWord_RMC;                  // ID word for mu- --> E+ analysis (RMC rejection)
 
   double        fTrqMvaOut[20];			// outputs of different MVA classifiers; 0: Dave/Andy MVA; 1: CPR
-  //  double        fProb;
 
   double        fLogLHDedm;	        // downstram electron (DE) vs downstream muon (DM)
   double        fPidMvaOut[20];			// 

@@ -52,9 +52,6 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TTrackCompModule::TTrackCompModule(const char* name, const char* title): TAnaModule(name,title) {
 
-  fPdgCode           = 11;		// electron
-  fGeneratorCode     =  2;              // 2:ConversionGun 28:StoppedParticleReactionGun
-
   fTrackBlockName[0] = "TrackBlockPar";
   fTrackBlockName[1] = "TrackBlockDar";
 //-----------------------------------------------------------------------------
@@ -152,9 +149,8 @@ int TTrackCompModule::BeginJob() {
     for (int ip=0; ip<kNTrackPar; ip++) {
       TrackPar_t* tp = &fTrackPar[i][ip];
 
-      tp->fFitType    = i;                                // assume first block - PAR, second - DAR
-      tp->fMvaType    = i;                                // assume that blocks could use different MVAs
-      //      tp->fLogLH      = TAnaModule::fLogLH;
+      tp->fFitType     = i;                                // assume first block - PAR, second - DAR
+      tp->fTrqMvaIndex = i;                                // assume that different blocks could use different TRQ MVAs
 
       for (int id=0; id<fNID; id++) {
 	tp->fTrackID[id] = fTrackID[id];
@@ -232,14 +228,6 @@ int TTrackCompModule::EndJob() {
 
   return 0;
 }
-
-//_____________________________________________________________________________
-int TTrackCompModule::BeginRun() {
-  int rn = GetHeaderBlock()->RunNumber();
-  TStntuple::Init(rn);
-  return 0;
-}
-
 
 //-----------------------------------------------------------------------------
 void TTrackCompModule::BookDTrackHistograms(HistBase_t* HistR, const char* Folder) {
@@ -935,10 +923,16 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
-// assume electron in the first particle, otherwise the logic will need to 
-// be changed
+// assume electron in the first particle, otherwise the logic needs to be changed
 //-----------------------------------------------------------------------------
-  fEvtPar.fNGenp  = fGenpBlock->NParticles();
+  fEvtPar.fDioLOWt          = 1.;
+  fEvtPar.fDioLLWt          = 1.;
+  fEvtPar.fNCrvClusters     = -1;
+  fEvtPar.fNCrvPulses       = -1;
+  fEvtPar.fNCrvCoincidences = -1;
+  fEvtPar.fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fParticle         = NULL;
+  fEvtPar.fPartE            = -1;
 
   fNSimp       = fSimpBlock->NParticles();
   fNClusters   = fClusterBlock->NClusters();
@@ -956,22 +950,25 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // MC generator info
 //-----------------------------------------------------------------------------
-  TGenParticle*     genp;
   TLorentzVector    mom;
-  int               pdg_code, generator_code;
 
-  fEvtPar.fParticle  = NULL;
-  fEvtPar.fPartE     = -1;
   for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-    genp           = fGenpBlock->Particle(i);
-    pdg_code       = genp->GetPdgCode();
-    generator_code = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
+    TGenParticle* genp = fGenpBlock->Particle(i);
+    int pdg_code       = genp->GetPdgCode();
+    int process_code   = genp->GetStatusCode();
+    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
       fEvtPar.fParticle = genp;
       genp->Momentum(mom);
       fEvtPar.fPartE    = mom.Energy();
       break;
     }
+  }
+//-----------------------------------------------------------------------------
+// calculate DIO weights once per event
+//-----------------------------------------------------------------------------
+  if (fEvtPar.fPartE > 0) {
+    fEvtPar.fDioLOWt = TStntuple::DioWeightAl   (fEvtPar.fPartE);
+    fEvtPar.fDioLLWt = TStntuple::DioWeightAl_LL(fEvtPar.fPartE);
   }
 
   fProcess = -1;
@@ -1026,7 +1023,6 @@ int TTrackCompModule::Event(int ientry) {
 // convert momentum to GeV/c
 //-----------------------------------------------------------------------------
       double plab  = sm->P()/1000.;  
-
       fWeight      = fStnt->PBar_Striganov_d2N(pbeam,plab,th);
     }
   }
@@ -1064,8 +1060,13 @@ int TTrackCompModule::Event(int ientry) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
 
-    InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
+    for (int it=0; it<fNTracks[i]; it++) {
+      TrackPar_t* tp = &fTrackPar[i][it];
+      tp->fDioLOWt   = fEvtPar.fDioLOWt;
+      tp->fDioLLWt   = fEvtPar.fDioLLWt;
+    }
 
+    InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
 //-----------------------------------------------------------------------------
 // when writing an ntuple for MVA training, use the first track
 // fWriteTmvaTree = algorithm (0 or 1)

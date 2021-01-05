@@ -176,7 +176,7 @@ public:
 // overloaded methods of TStnModule
 //-----------------------------------------------------------------------------
   virtual int     BeginJob();
-  virtual int     BeginRun();
+  // virtual int     BeginRun();   // use TAnaModule::BeginRun()
   virtual int     Event   (int ientry);
   virtual int     EndJob  ();
 //-----------------------------------------------------------------------------

@@ -2,41 +2,39 @@
 #
 # Script to build the files found in this directory.
 #------------------------------------------------------------------------------
-import os
+import os, copy
 Import('env')
 Import('stntuple_helper')
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
-rootlibs = env['ROOTLIBS']
-if ( not ("EG"    in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
-if ( not ("TMVA"  in rootlibs)): rootlibs.append("TMVA");
+def local_build():
+    local_env = env.Clone();
+    rootlibs  = local_env['ROOTLIBS']
 
-helper = stntuple_helper(env);
+    if ( not ("EG"    in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+    if ( not ("TMVA"  in rootlibs)): rootlibs.append("TMVA");
 
-helper.handle_dictionaries();
+    helper = stntuple_helper(local_env);
 
-skip_list = []
+    helper.handle_dictionaries();
 
-stntuple_libs = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
-                  'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base'
+    skip_list = []
+
+    stntuple_libs = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
+                      'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base'
                   ];
 
-mc_libs = []
+    mc_libs = []
 
-if (os.getenv("STNTUPLE_MC_GEN") != None): mc_libs = ["mc_photos", "mc_base"];
+    if (os.getenv("STNTUPLE_MC_GEN") != None): mc_libs = ["mc_photos", "mc_base"];
 
-libs          = stntuple_libs + mc_libs + [
-                'mu2e_Mu2eUtilities',
-                'fhiclcpp',
-                'cetlib',
-                'cetlib_except',
-                'xerces-c',
-                rootlibs,
-                'boost_filesystem',
-                'boost_system'
-                ];
+    libs          = stntuple_libs + mc_libs + [
+        rootlibs
+    ];
 
-list_of_cc_files = Glob('*.cc',strings=True);
-helper.build_libs(list_of_cc_files,skip_list,libs);
+    list_of_cc_files = Glob('*.cc',strings=True);
+    helper.build_libs(list_of_cc_files,skip_list,libs);
+
+local_build()
 # print "tmpdir:"+env['TMP_LIB_DIR']

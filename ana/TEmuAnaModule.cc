@@ -29,25 +29,13 @@
 
 #include <string>
 #include "math.h"
-//------------------------------------------------------------------------------
-// Mu2e offline includes
-//-----------------------------------------------------------------------------
-#include "fhiclcpp/ParameterSet.h"
-#include <xercesc/dom/DOM.hpp>
-#include "Mu2eUtilities/inc/MVATools.hh"
-#include "murat/ana/TEmuModule.hh"
 
-using std::string;
-using std::vector;
-
-ClassImp(murat::TEmuModule)
+#include "murat/ana/TEmuAnaModule.hh"
+ClassImp(murat::TEmuAnaModule)
 
 namespace murat {
 //-----------------------------------------------------------------------------
-TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,title) {
-
-  fPdgCode           = 11;		// electron
-  fGeneratorCode     =  2;              // 2:ConversionGun 28:StoppedParticleReactionGun
+TEmuAnaModule::TEmuAnaModule(const char* name, const char* title): TAnaModule(name,title) {
 
   fTrackBlockName[0] = "TrackBlockDarDe";
   fTrackBlockName[1] = "TrackBlockDarDmu";
@@ -64,11 +52,6 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
 
   for (int i=0; i<fNID; i++) {
     fTrackID[i] = new TStnTrackID();
-
-    // fTrackID[i]->SetMaxMomErr (100);
-    // fTrackID[i]->SetMaxT0Err  (100);
-    // fTrackID[i]->SetMinNActive( -1);
-    // fTrackID[i]->SetMinFitCons( -1);
 
     fTrackID[i]->SetMinTanDip (  0.5);
     fTrackID[i]->SetMaxTanDip (  1.0);
@@ -87,14 +70,14 @@ TEmuModule::TEmuModule(const char* name, const char* title): TAnaModule(name,tit
 }
 
 //-----------------------------------------------------------------------------
-TEmuModule::~TEmuModule() {
+TEmuAnaModule::~TEmuAnaModule() {
   for (int i=0; i<fNID; i++) delete fTrackID[i];
 }
 
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
-int TEmuModule::BeginJob() {
+int TEmuAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
@@ -116,9 +99,8 @@ int TEmuModule::BeginJob() {
     for (int id=0; id<fNID; id++) {
       for (int ip=0; ip<kNTrackPar; ip++) {
 	TrackPar_t* tp = &fTrackPar[i][ip];
-	// tp->fLogLH       = TAnaModule::fLogLH;       // do it just once
 	tp->fFitType     = 1;                           // both blocks use DAR fits, kDAR=1
-	tp->fMvaType     = 0;                           // both blocks use the same fits, same track quality MVA
+	tp->fTrqMvaIndex = 0;                           // both blocks use the same fits, same track quality MVA
 	tp->fTrackID[id] = fTrackID[id];
 	if (fUseTrqMVA) {
 //-----------------------------------------------------------------------------
@@ -170,15 +152,7 @@ int TEmuModule::BeginJob() {
 
 
 //_____________________________________________________________________________
-int TEmuModule::BeginRun() {
-  int rn = GetHeaderBlock()->RunNumber();
-  TStntuple::Init(rn);
-  return 0;
-}
-
-
-//_____________________________________________________________________________
-void TEmuModule::BookHistograms() {
+void TEmuAnaModule::BookHistograms() {
 
   //  char name [200];
   //  char title[200];
@@ -243,14 +217,16 @@ void TEmuModule::BookHistograms() {
 
   track_selection[100] = new TString("[0] all tracks");
   track_selection[101] = new TString("[0] BestTrackID");
-  track_selection[102] = new TString("[0] BestTrackID, cluster");
-  track_selection[103] = new TString("[0] BestTrackID, cluster, first disk");
-  track_selection[104] = new TString("[0] BestTrackID, cluster, second disk");
-  track_selection[105] = new TString("[0] BestTrackID tracks events Ecl > 60");
-  track_selection[106] = new TString("[0] tracks with dtz0 < -10");
-  track_selection[109] = new TString("[0] tracks with XDpF > +10 MeV");
-
-  track_selection[110] = new TString("[0] TrackID[0]");
+  track_selection[102] = new TString("[0] BestTrackID+cluster");
+  track_selection[103] = new TString("[0] BestTrackID+cluster, first disk");
+  track_selection[104] = new TString("[0] BestTrackID+cluster, second disk");
+  track_selection[105] = new TString("[0] BestTrackID+cluster+(|dr|<100)");
+  track_selection[106] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)");
+  track_selection[107] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250" );
+  track_selection[108] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)");
+  track_selection[109] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)");
+  track_selection[110] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
+  track_selection[111] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
 
   track_selection[200] = new TString("[1] all tracks");
   track_selection[201] = new TString("[1] BestTrackID");
@@ -258,10 +234,14 @@ void TEmuModule::BookHistograms() {
   track_selection[202] = new TString("[1] BestTrackID, cluster");
   track_selection[203] = new TString("[1] BestTrackID, cluster, first disk");
   track_selection[204] = new TString("[1] BestTrackID, cluster, second disk");
+  track_selection[205] = new TString("[1] BestTrackID + cluster + (|dr|<100)");
+  track_selection[206] = new TString("[1] BestTrackID + cluster + (|dr|<100) + (|dt|<10)");
+  track_selection[207] = new TString("[1] BestTrackID + cluster + (|dr|<100) + (|dt|<10) + (-50<dz<250" );
+  track_selection[208] = new TString("[1] BestTrackID + cluster + (|dr|<100) + (|dt|<10) + (-50<dz<250)+(E/P<1.2)");
+  track_selection[209] = new TString("[1] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)");
+  track_selection[210] = new TString("[1] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
+  track_selection[211] = new TString("[1] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
 
-  track_selection[205] = new TString("[1] BestTrackID tracks events Ecl > 60");
-  track_selection[206] = new TString("[1] tracks with dtz0 < -10");
-  track_selection[209] = new TString("[1] tracks with XDpF > +10 MeV");
 
   track_selection[210] = new TString("[1] TrackID[0]");
 
@@ -282,11 +262,11 @@ void TEmuModule::BookHistograms() {
 
 //_____________________________________________________________________________
 
-void TEmuModule::FillHistograms() {
+void TEmuAnaModule::FillHistograms() {
 
   TStnTrack*   trk;
   TrackPar_t*  tp;
-  int          ihist, n_setc_tracks[2];
+  int          ihist;
 
   int bid_par = fBestID[kELE];
   int bid_dar = fBestID[kMUO];
@@ -341,7 +321,7 @@ void TEmuModule::FillHistograms() {
 // i=0:KPAR, i=1:KDAR
 //-----------------------------------------------------------------------------
   for (int i=0; i<2; i++) {
-    n_setc_tracks[i] = 0;
+    //n_setc_tracks[i] = 0;
     ihist            = 100*(i+1);
     int best_id      = fBestID[i];
 
@@ -353,44 +333,44 @@ void TEmuModule::FillHistograms() {
 //-----------------------------------------------------------------------------
       FillTrackHistograms(fHist.fTrack[ihist+0],trk,tp,&fSimPar);
 //-----------------------------------------------------------------------------
-// TRK_101: BestID 
-// TRK_102: BestID + cluster
-// TRK_103: BestID + cluster + 1st disk
-// TRK_104: BestID + cluster + 2nd disk
+// IHIST+ 1: BestID 
+// IHIST+ 2: BestID+cluster
+// IHIST+ 3: BestID+cluster+(1st disk)
+// IHIST+ 4: BestID+cluster+(2nd disk)
+// IHIST+ 5: BestID+(P>100)
+// IHIST+ 6: BestID+(P>100)+(|dr|<100)
+// IHIST+ 7: BestID+(P>100)+(|dr|<100)+(|dt|<10)
+// IHIST+ 8: BestID+(P>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)
+// IHIST+ 9: BestID+(P>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)
+// IHIST+10: BestID+(P>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(PID>0.5)
+// IHIST+11: BestID+(P>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(PID<0.5)
 //-----------------------------------------------------------------------------
       if (tp->fIDWord[best_id] == 0) {
 	FillTrackHistograms(fHist.fTrack[ihist+1],trk,tp,&fSimPar);
-	n_setc_tracks[i] += 1;
 
 	if (tp->fDiskID >= 0) {
 	  FillTrackHistograms(fHist.fTrack[ihist+2],trk,tp,&fSimPar);
 	  if      (tp->fDiskID == 0) FillTrackHistograms(fHist.fTrack[ihist+3],trk,tp,&fSimPar);
 	  else if (tp->fDiskID == 1) FillTrackHistograms(fHist.fTrack[ihist+4],trk,tp,&fSimPar);
 	}
-      }
-//-----------------------------------------------------------------------------
-// IHIST+4: add   Ecl > 60 requirement
-//-----------------------------------------------------------------------------
-      if (fEClMax > 60.) {
-	if (tp->fIDWord[0] == 0) {
+	
+	if (tp->fP > 100) {
 	  FillTrackHistograms(fHist.fTrack[ihist+5],trk,tp,&fSimPar);
+	  if (fabs(tp->fTchDr) < 100) {
+	    FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp,&fSimPar);
+	    if (fabs(tp->fTchDt) < 10) {
+	      FillTrackHistograms(fHist.fTrack[ihist+7],trk,tp,&fSimPar);
+	      if ((tp->fTchDz > -50) && (tp->fTchDz < 250)) {
+		FillTrackHistograms(fHist.fTrack[ihist+8],trk,tp,&fSimPar);
+		if (tp->fEp < 1.2) {
+		  FillTrackHistograms(fHist.fTrack[ihist+9],trk,tp,&fSimPar);
+		  if (tp->fPidMvaOut[0] > 0.5) FillTrackHistograms(fHist.fTrack[ihist+10],trk,tp,&fSimPar);
+		  else                         FillTrackHistograms(fHist.fTrack[ihist+11],trk,tp,&fSimPar);
+		}
+	      }
+	    }
+	  }
 	}
-      }
-//-----------------------------------------------------------------------------
-// IHIST+6: oddly, tracks with seemingly wrong reconstruced T0
-//-----------------------------------------------------------------------------
-      if (tp->fDtZ0 < -10) {
-	FillTrackHistograms(fHist.fTrack[ihist+6],trk,tp,&fSimPar);
-      }
-//-----------------------------------------------------------------------------
-// IHIST+9: tracks with XDpF > 10
-//-----------------------------------------------------------------------------
-      if (tp->fXDpF   > 10) FillTrackHistograms(fHist.fTrack[ihist+9],trk,tp,&fSimPar);
-//-----------------------------------------------------------------------------
-// different cuts on track quality variable
-//-----------------------------------------------------------------------------
-      for (int idd=0; idd<fNID; idd++) {
-	if (tp->fIDWord[idd] == 0) FillTrackHistograms(fHist.fTrack[ihist+10+idd],trk,tp,&fSimPar);
       }
     }
   }
@@ -400,7 +380,7 @@ void TEmuModule::FillHistograms() {
 // 2014-04-30: it looks that reading the straw hits takes a lot of time - 
 //              turn off by default by commenting it out
 //-----------------------------------------------------------------------------
-int TEmuModule::Event(int ientry) {
+int TEmuAnaModule::Event(int ientry) {
 
   fTrackBlock[0]->GetEntry(ientry);
   fTrackBlock[1]->GetEntry(ientry);
@@ -412,12 +392,16 @@ int TEmuModule::Event(int ientry) {
 // assume electron in the first particle, otherwise the logic will need to
 // be changed
 //-----------------------------------------------------------------------------
-  fEvtPar.fNGenp  = fGenpBlock->NParticles();
+  fEvtPar.fDioLOWt          = 1.;
+  fEvtPar.fDioLLWt          = 1.;
+  fEvtPar.fNCrvClusters     = -1;
+  fEvtPar.fNCrvPulses       = -1;
+  fEvtPar.fNCrvCoincidences = -1;
+  fEvtPar.fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fParticle         = NULL;
 
   fNSimp       = fSimpBlock->NParticles();
   fNClusters   = fClusterBlock->NClusters();
-  // fNHelices    = fHelixBlock->NHelices();
-  // fNTrackSeeds = fTrackSeedBlock->NTrackSeeds();
 
   fCluster = NULL;
   fEClMax  = -1;
@@ -430,15 +414,11 @@ int TEmuModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // MC generator info
 //-----------------------------------------------------------------------------
-  TGenParticle* genp;
-  int           pdg_code, generator_code;
-
-  fEvtPar.fParticle = NULL;
   for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-    genp           = fGenpBlock->Particle(i);
-    pdg_code       = genp->GetPdgCode();
-    generator_code = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
+    TGenParticle* genp = fGenpBlock->Particle(i);
+    int pdg_code       = genp->GetPdgCode();
+    int process_code   = genp->GetStatusCode();
+    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
       fEvtPar.fParticle = genp;
       break;
     }
@@ -475,6 +455,13 @@ int TEmuModule::Event(int ientry) {
   for (int i=0; i<2; i++) {
     fNTracks    [i] = fTrackBlock[i]->NTracks();
     fNGoodTracks[i] = 0;
+
+    for (int it=0; it<fNTracks[i]; it++) {
+      TrackPar_t* tp = &fTrackPar[i][it];
+      tp->fDioLOWt   = fEvtPar.fDioLOWt;
+      tp->fDioLLWt   = fEvtPar.fDioLLWt;
+    }
+
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);
   }
 //-----------------------------------------------------------------------------
@@ -525,7 +512,7 @@ int TEmuModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // diagnostics is related to KDAR
 //-----------------------------------------------------------------------------
-void TEmuModule::Debug() {
+void TEmuAnaModule::Debug() {
 
   // TStnTrack* trk;
   // TrackPar_t* tp(NULL);
@@ -534,7 +521,7 @@ void TEmuModule::Debug() {
 // bit 0: All Events
 //-----------------------------------------------------------------------------
   if (GetDebugBit(0) == 1) {
-    GetHeaderBlock()->Print(Form("TEmuModule :bit000:"));
+    GetHeaderBlock()->Print(Form("TEmuAnaModule :bit000:"));
     printf("KPAR:\n");
     fTrackBlock[kELE]->Print();
 
@@ -559,7 +546,7 @@ void TEmuModule::Debug() {
     for (int itrk=0; itrk<ntrk; itrk++) {
       TrackPar_t* tp = &fTrackPar[kELE][itrk];
       if ((tp->fIDWord[fBestID[kELE]] == 0) && (tp->fEp > 0.7)) {
-	GetHeaderBlock()->Print(Form("TEmuModule bit:003: tp->fEP = %10.3f",tp->fEp));
+	GetHeaderBlock()->Print(Form("TEmuAnaModule bit:003: tp->fEP = %10.3f",tp->fEp));
       }
     }
   }
@@ -572,14 +559,14 @@ void TEmuModule::Debug() {
     for (int itrk=0; itrk<ntrk; itrk++) {
       TrackPar_t* tp = &fTrackPar[kELE][itrk];
       if ((tp->fIDWord[fBestID[kELE]] == 0) && (tp->fPidMvaOut[0] > 0.5)) {
-	GetHeaderBlock()->Print(Form("TEmuModule bit:004: tp->fPidMvaOut[0] = %10.3f",tp->fPidMvaOut[0]));
+	GetHeaderBlock()->Print(Form("TEmuAnaModule bit:004: tp->fPidMvaOut[0] = %10.3f",tp->fPidMvaOut[0]));
       }
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-int TEmuModule::EndJob() {
+int TEmuAnaModule::EndJob() {
 
   if (fWritePidMvaTree != 0) {
     printf("[%s::EndJob] Writing output MVA training file %s\n",GetName(),fPidMvaFile->GetName());
@@ -596,7 +583,7 @@ int TEmuModule::EndJob() {
 }
 
 //_____________________________________________________________________________
-void TEmuModule::Test001() {
+void TEmuAnaModule::Test001() {
 }
 
 

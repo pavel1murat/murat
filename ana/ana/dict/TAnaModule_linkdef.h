@@ -3,7 +3,7 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class TAnaModule;
+#pragma link C++ class murat::TAnaModule;
 
 #endif
 

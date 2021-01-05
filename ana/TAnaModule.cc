@@ -36,26 +36,21 @@
 #include "Math/PdfFuncMathCore.h"
 #include "Math/ProbFuncMathCore.h"
 
+#include "Stntuple/base/TStnDataset.hh"
+#include "Stntuple/loop/TStnInputModule.hh"
 #include "Stntuple/loop/TStnAna.hh"
+
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
 #include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
-// Mu2e offline includes
-//-----------------------------------------------------------------------------
-#include "fhiclcpp/ParameterSet.h"
-#include <xercesc/dom/DOM.hpp>
-#include "Mu2eUtilities/inc/MVATools.hh"
-//------------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
 #include "murat/ana/TAnaModule.hh"
 
-using std::vector;
-
-using namespace murat;
+ClassImp(murat::TAnaModule)
 
 namespace murat {
 
@@ -66,6 +61,8 @@ TAnaModule::TAnaModule(const char* name, const char* title):
   fMbTime      = 1695.;
   fMinT0       = 0.;                   // analysis cuts
   fApplyCorr   = 1;                    // by default, corfect momentum and delta(T)     
+  fEventWeight = 1.;
+  fBatchMode   = 1;
 //-----------------------------------------------------------------------------
 // track quality : box cuts
 //-----------------------------------------------------------------------------
@@ -99,7 +96,7 @@ TAnaModule::TAnaModule(const char* name, const char* title):
 //-----------------------------------------------------------------------------
 // particle ID
 //-----------------------------------------------------------------------------
-  fLogLH   = new TEmuLogLH();
+//  fLogLH   = new TEmuLogLH();
 //-----------------------------------------------------------------------------
 // e/mu PID MVA
 //-----------------------------------------------------------------------------
@@ -129,22 +126,22 @@ TAnaModule::~TAnaModule() {
 //-----------------------------------------------------------------------------
 // TrkRecAlgorithm : "PAR" or "DAR"
 // TrainingDataset : just 'fele2s51b1' - goes into the file name
-// MVATrainingCode : 
-// ---------
+// MVA TrainingCode : 
+// ---------------------
 // 0060 : PAR dPf > 0.60
 // 0070 : PAR dPf > 0.70
 // 1060 : DAR dPf > 0.60
 // 1070 : DAR dPf > 0.70
 //-----------------------------------------------------------------------------
-void TAnaModule::SetTrqMVA(int Block, const char* TrainingDataset, int MVATrainingCode) {
+void TAnaModule::SetTrqMVA(int Block, const char* TrainingDataset, int TrainingCode) {
 
-  printf(" [TTrackCompModule::SetTrqMVA] TrainingDataset:%s MvaType:%i\n",TrainingDataset,MVATrainingCode);
+  printf(" [%s::SetTrqMVA] TrainingDataset:%s TrainingCode:%i\n",GetName(),TrainingDataset,TrainingCode);
 
-  if (MVATrainingCode > 0) { 
+  if (TrainingCode > 0) { 
     fUseTrqMVA = 1;
 
     if (fTrqMVA[Block]) delete fTrqMVA[Block];
-    fTrqMVA[Block] = new mva_data(TrainingDataset,MVATrainingCode);
+    fTrqMVA[Block] = new mva_data(TrainingDataset,TrainingCode);
   }
   else { 
     fUseTrqMVA = 0;
@@ -173,6 +170,22 @@ void TAnaModule::SetPidMVA(const char* TrainingDataset, int MVATrainingCode) {
 // common initializations
 //-----------------------------------------------------------------------------
 int TAnaModule::BeginRun() {
+
+  TStnDataset* ds = GetAna()->GetInputModule()->GetDataset(0);
+
+  if (ds->GetMcFlag() != 0) {
+    int pdg_code     = ds->GetPDGCode();
+    int process_code = ds->GetMCProcessCode();
+
+    if (pdg_code     != 0) fPDGCode       = pdg_code;
+    if (process_code >= 0) fMCProcessCode = process_code;
+  }
+
+  int rn = GetHeaderBlock()->RunNumber();
+  TStntuple::Init(rn);
+
+  printf("%s::BeginRun: run: %6i, MCProcessCode: %5i PDGCode: %5i\n",GetName(),rn,fMCProcessCode,fPDGCode);
+  
   return 0;
 }
 
@@ -408,7 +421,7 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fTchPath    ,"tch_path"  ,Form("%s:TCH path"           ,Folder), 200, -500,  500,Folder);
   HBook1F(Hist->fTchDx      ,"tch_dx"    ,Form("%s:TCH Dx"             ,Folder), 200, -500,  500,Folder);
   HBook1F(Hist->fTchDy      ,"tch_dy"    ,Form("%s:TCH Dy"             ,Folder), 200, -500,  500,Folder);
-  HBook1F(Hist->fTchDz      ,"tch_dz"    ,Form("%s:TCH DZ"             ,Folder), 100, -250,  250,Folder);
+  HBook1F(Hist->fTchDz      ,"tch_dz"    ,Form("%s:TCH DZ"             ,Folder), 200, -500,  500,Folder);
   HBook1F(Hist->fTchDr      ,"tch_dr"    ,Form("%s:TCH DR"             ,Folder), 200, -100,  100,Folder);
   HBook1F(Hist->fTchDt      ,"tch_dt"    ,Form("%s:TCH Dt"             ,Folder), 400,  -10,   10,Folder);
 
@@ -924,15 +937,17 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     tp->fDpFSt   = tp->fPFront-tp->fPStOut;
 
     tp->fXDpF    = tp->fDpF/track->fFitMomErr;
-    if (SimPar->fParticle) {
-      double e     = SimPar->fParticle->StartMom()->E();
-      tp->fDioLOWt = TStntuple::DioWeightAl   (e);
-      tp->fDioLLWt = TStntuple::DioWeightAl_LL(e);
-    }
-    else {
-      tp->fDioLOWt = 1. ; // TStntuple::DioWeightAl   (SimPar->fEleE);
-      tp->fDioLLWt = 1. ; // TStntuple::DioWeightAl_LL(SimPar->fEleE);
-    }
+
+    // if (SimPar->fParticle) {
+    //   double e     = SimPar->fParticle->StartMom()->E();
+    //   tp->fDioLOWt = TStntuple::DioWeightAl   (e);
+    //   tp->fDioLLWt = TStntuple::DioWeightAl_LL(e);
+    // }
+    // else {
+    //   tp->fDioLOWt = 1. ; // TStntuple::DioWeightAl   (SimPar->fEleE);
+    //   tp->fDioLLWt = 1. ; // TStntuple::DioWeightAl_LL(SimPar->fEleE);
+    // }
+
     tp->fLumWt   = GetHeaderBlock()->LumWeight();
 
     tp->fDtZ0 = -1.e6;
@@ -1034,25 +1049,27 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     if (fUseTrqMVA != 0) {
 //-----------------------------------------------------------------------------
 // MVA output calculated on the fly - in principle, should be charge-symmetric
+// can have several TRQ MVA's defined, each track block uses only one of them,
+// indexed with tp->fTrqMvaIndex
 //-----------------------------------------------------------------------------
       float na = track->NActive();
       float nm = track->NMat();
 
-      int mva_type = tp->fMvaType;	                          // 
+      int imva = tp->fTrqMvaIndex;	                          // 
 	
-      if (fTrqMVA[mva_type] != nullptr) {
-	fTrqMVA[mva_type]->fVar[0] = na;
-	fTrqMVA[mva_type]->fVar[1] = na/track->NHits();
-	fTrqMVA[mva_type]->fVar[2] = log10(track->FitCons());
-	fTrqMVA[mva_type]->fVar[3] = track->FitMomErr();
-	fTrqMVA[mva_type]->fVar[4] = track->T0Err();
-	fTrqMVA[mva_type]->fVar[5] = track->NDoubletsAct()/na;
-	fTrqMVA[mva_type]->fVar[6] = track->NHitsAmbZero()/na;
-	fTrqMVA[mva_type]->fVar[7] = track->NMatActive()/nm;
+      if (fTrqMVA[imva] != nullptr) {
+	fTrqMVA[imva]->fVar[0] = na;
+	fTrqMVA[imva]->fVar[1] = na/track->NHits();
+	fTrqMVA[imva]->fVar[2] = log10(track->FitCons());
+	fTrqMVA[imva]->fVar[3] = track->FitMomErr();
+	fTrqMVA[imva]->fVar[4] = track->T0Err();
+	fTrqMVA[imva]->fVar[5] = track->NDoubletsAct()/na;
+	fTrqMVA[imva]->fVar[6] = track->NHitsAmbZero()/na;
+	fTrqMVA[imva]->fVar[7] = track->NMatActive()/nm;
       // pmva[ 8] = track->D0();                          // low-rank, do not use
       // pmva[ 9] = track->RMax();                        // low-rank, do not use
 
-	tp->fTrqMvaOut[1] = fTrqMVA[mva_type]->Eval();
+	tp->fTrqMvaOut[1] = fTrqMVA[imva]->Eval();
 
 	if (tp->fTrqMvaOut[1] < -990) {
 	  GetHeaderBlock()->Print(Form("BAD TRQ: ntrk, itrk= %2i %2i",ntrk,itrk));

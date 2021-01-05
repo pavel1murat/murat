@@ -68,7 +68,7 @@ mva_data::data_t  pid_mva_ele00s61b0_1000 = {
   "pid_ele00s61b0_1000",                                                     // name
   "ecl/p:ncr:seedfr:ele_dt:ele_dz:ele_dr:ele_path",                          // assume all floats
   "su2020/data/pid_mva/pid_MLP_weights_1000.xml",                            // location of XML weights
-  0.80                                                                       // default cut value
+  0.50                                                                       // default cut value
 };
 
 //-----------------------------------------------------------------------------

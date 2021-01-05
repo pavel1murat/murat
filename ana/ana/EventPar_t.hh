@@ -23,8 +23,12 @@ namespace murat {
     int           fCandidate_MVA;           // if 1, passes analysis cuts = event candidate
 
     float         fInstLum;
+
     double        fOneBatchWeight;
     double        fTwoBatchWeight;
+
+    double        fDioLOWt;
+    double        fDioLLWt;
   };
 }
 #endif

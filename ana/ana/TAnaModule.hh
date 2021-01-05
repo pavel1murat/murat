@@ -76,13 +76,13 @@ public:
   double              fMinT0;
   int                 fApplyCorr;              // default=1
 
-  int                 fPdgCode;		       // determines which one
-  int                 fGeneratorCode;      
-  double              fEleE;                // relevant event generated energy
-  double              fEventWeight = 1.;    // weight applied when filling histograms
-  int                 fBatchMode   = 1;
+  int                 fPDGCode;		       // determines which one
+  int                 fMCProcessCode;      
+  double              fEleE;                   // relevant event generated energy
+  double              fEventWeight;            // weight applied when filling histograms
+  int                 fBatchMode;
 
-  TEmuLogLH*          fLogLH;
+  //  TEmuLogLH*          fLogLH;
   EventPar_t          fEvtPar;
 
   TStntuple*          fStnt;                   // STNTUPLE singleton
@@ -114,14 +114,13 @@ public:
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  TEmuLogLH*         GetLogLH       () { return fLogLH; }
   TStnTrackID*       GetTrackID(int I) { return fTrackID[I]; }
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
   void               SetMinT0        (double T0  ) { fMinT0         = T0   ; }
-  void               SetPdgCode      (int    Code) { fPdgCode       = Code ; }
-  void               SetGeneratorCode(int    Code) { fGeneratorCode = Code ; }
+  void               SetPDGCode      (int    Code) { fPDGCode       = Code ; }
+  void               SetMCProcessCode(int    Code) { fMCProcessCode = Code ; }
   void               SetApplyCorr    (int    Flag) { fApplyCorr     = Flag ; }
 //-----------------------------------------------------------------------------
 // TRQ MVA Training Codes: 
@@ -182,7 +181,7 @@ public:
 
   double  BatchModeWeight(float lumi, int mode);
 
-  //  ClassDef(TAnaModule,0)
+  ClassDef(murat::TAnaModule,0)
 };
 }
 #endif

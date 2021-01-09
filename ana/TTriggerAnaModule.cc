@@ -37,8 +37,8 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TTriggerAnaModule::TTriggerAnaModule(const char* name, const char* title): TAnaModule(name,title)
 {
-  fPdgCode        = 11;
-  fGeneratorCode  = -1;
+  // fPdgCode        = 11;
+  // fGeneratorCode  = -1;
   fMinTrigMom     = 0.;
   fTrackBlockName = "TrackBlockPar";
 }
@@ -368,10 +368,9 @@ int TTriggerAnaModule::Event(int ientry) {
 // MC generator info
 //-----------------------------------------------------------------------------
   TGenParticle* genp;
-  int           pdg_code, generator_code;
+  int           pdg_code, process_code;
 
   TStntuple* stnt = TStntuple::Instance();
-
 //-----------------------------------------------------------------------------
 // event parameters - standardized
 //-----------------------------------------------------------------------------
@@ -384,33 +383,28 @@ int TTriggerAnaModule::Event(int ientry) {
   for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
     genp           = fGenpBlock->Particle(i);
     pdg_code       = genp->GetPdgCode();
-    generator_code = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPdgCode) && (generator_code == fGeneratorCode)) {
+    process_code   = genp->GetStatusCode();
+    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
       fEvtPar.fParticle = genp;
       break;
     }
   }
 
-  fGeneratorCode = -1;
   fWeight        =  1;
 
   TLorentzVector    mom (1.,0.,0.,0);
 
   if (fEvtPar.fParticle) {
-    if ((fEvtPar.fParticle->GetStatusCode() == 7) && (fEvtPar.fParticle->GetPdgCode() == 11)) {
 //-----------------------------------------------------------------------------
 // flat electrons
 //-----------------------------------------------------------------------------
-      fGeneratorCode = 7;
-
-      fEvtPar.fParticle->Momentum(mom);
-      double e     = mom.E();
-      fWeight      = stnt->DioWeightAl(e);
-    }
+    fEvtPar.fParticle->Momentum(mom);
+    double e     = mom.E();
+    fWeight      = stnt->DioWeightAl(e);
   }
 
-  fMcMom       = mom.P();
-  fMcCosTh     = mom.Pz()/fMcMom;
+  // fMcMom       = mom.P();
+  // fMcCosTh     = mom.Pz()/fMcMom;
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimPar in future
 //-----------------------------------------------------------------------------

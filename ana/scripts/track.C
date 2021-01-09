@@ -198,16 +198,16 @@ void  track_comp_debug(int PDGCode=11, int MCProcessCode=28, int DebugBit=14) {
 }
 
 //-----------------------------------------------------------------------------
-// MCProcessCode= 2:ConversionElectronGun 28:ParticleGun 7:dioTail
-// TrkRrecoAlg = 0:PAR    =1:DAR
-//-----------------------------------------------------------------------------
-void  track_comp_mva(int PDGCode=11, int MCProcessCode=28, int TrkRecoAlg = 0, int DebugBit = -1) {
-//-----------------------------------------------------------------------------
 // configure analysis module to write TMVA training trees
+// MCProcessCode= 2:ConversionElectronGun 28:ParticleGun 7:dioTail
+// TrkRrecoAlg = 0:PAR , 1:DAR
+// by default, the PDGCode and the MCProcessCode are read from the catalog
 //-----------------------------------------------------------------------------
+void  track_comp_mva(int TrkRecoAlg = 0, int PDGCode=0, int MCProcessCode=-1, int DebugBit = -1) {
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPDGCode      (PDGCode);
-  murat::m_tcm->SetMCProcessCode(MCProcessCode);
+
+  if (PDGCode       != 0) murat::m_tcm->SetPDGCode      (PDGCode);
+  if (MCProcessCode >  0) murat::m_tcm->SetMCProcessCode(MCProcessCode);
 
   murat::m_tcm->SetWriteMvaTree(TrkRecoAlg);
 
@@ -218,21 +218,29 @@ void  track_comp_mva(int PDGCode=11, int MCProcessCode=28, int TrkRecoAlg = 0, i
 // MCProcessCode= 2:ConversionElectronGun 28:ParticleGun
 // MVAType : 
 // ---------
+// by default, PDGCode and MCProcessID are picked from the catalog
 //-----------------------------------------------------------------------------
-void  track_comp_use_mva(int PDGCode=11, int MCProcessCode=28, 
-			 int PARTrainingCode =   -1, 
+void  track_comp_use_mva(int PARTrainingCode =   -1, 
 			 int DARTrainingCode = 1070, 
+			 int PDGCode=11, int MCProcessCode=28, 
 			 int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
-// configure analysis module to write TMVA training trees
-// MVA type: 
+// configure analysis module to use TMVA training trees
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
   murat::m_tcm->SetPDGCode      (11);
   murat::m_tcm->SetMCProcessCode(MCProcessCode);
 
-  if (PARTrainingCode >= 0) murat::m_tcm->SetTrqMVA(0,"fele2s51b1",PARTrainingCode);
-  if (DARTrainingCode >= 0) murat::m_tcm->SetTrqMVA(1,"fele2s51b1",DARTrainingCode);
+  if (PARTrainingCode >= 0) {
+    int charge_mode = PARTrainingCode/100;
+    if   (charge_mode == 0) murat::m_tcm->SetTrqMVA(0,"fele2s51b1",PARTrainingCode);  // negative
+    else                    murat::m_tcm->SetTrqMVA(0,"fpos2s51b1",PARTrainingCode);  // positive
+  }
+  if (DARTrainingCode >= 0) {
+    int charge_mode = DARTrainingCode/100;
+    if   (charge_mode == 0) murat::m_tcm->SetTrqMVA(1,"fele2s51b1",DARTrainingCode);  // negative
+    else                    murat::m_tcm->SetTrqMVA(1,"fpos2s51b1",DARTrainingCode);  // positive
+  }
 
   if (DebugBit >= 0) {
     murat::m_tcm->SetDebugBit(DebugBit,1);

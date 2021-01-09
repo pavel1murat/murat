@@ -61,6 +61,34 @@ mva_data::data_t  trq_mva_fele2s51b1_1070 = {
   0.20                                                                       // default default cut value
 };
 
+mva_data::data_t  trq_mva_fpos2s51b1_0150 = {
+  "fpos2s51b1_0150",                                                         // positrons, PAR dpF>0.5 MeV/c
+  "nactive:nafract:log10(fcons):momerr:t0err:nda_o_na:nza_o_na:nma_o_nm",    // assume all floats
+  "su2020/data/trq_mva/MLP_weights_0150.xml",                                // location of XML weights
+  0.20                                                                       // default default cut value
+};
+
+mva_data::data_t  trq_mva_fpos2s51b1_0170 = {
+  "fpos2s51b1_0170",                                                         // positrons, PAR dpF>0.7 MeV/c
+  "nactive:nafract:log10(fcons):momerr:t0err:nda_o_na:nza_o_na:nma_o_nm",    // assume all floats
+  "su2020/data/trq_mva/MLP_weights_0170.xml",                                // location of XML weights
+  0.20                                                                       // default default cut value
+};
+
+mva_data::data_t  trq_mva_fpos2s51b1_1150 = {
+  "fpos2s51b1_1150",                                                         // positrons, DAR dpF>0.5 MeV/c
+  "nactive:nafract:log10(fcons):momerr:t0err:nda_o_na:nza_o_na:nma_o_nm",    // assume all floats
+  "su2020/data/trq_mva/MLP_weights_1150.xml",                                // location of XML weights
+  0.20                                                                       // default default cut value
+};
+
+mva_data::data_t  trq_mva_fpos2s51b1_1170 = {
+  "fpos2s51b1_1170",                                                         // positrons, DAR dpF>0.7 MeV/c
+  "nactive:nafract:log10(fcons):momerr:t0err:nda_o_na:nza_o_na:nma_o_nm",    // assume all floats
+  "su2020/data/trq_mva/MLP_weights_1170.xml",                                // location of XML weights
+  0.20                                                                       // default default cut value
+};
+
 //------------------------------------------------------------------------------
 // PID MVA's
 //-----------------------------------------------------------------------------
@@ -72,7 +100,7 @@ mva_data::data_t  pid_mva_ele00s61b0_1000 = {
 };
 
 //-----------------------------------------------------------------------------
-// CalPatRec ANN training sets
+// PAR ANN training sets
 // ---------------------------
 // Training Codes: 
 //
@@ -96,6 +124,13 @@ mva_data::mva_data(const char* Dataset, int TrainingCode) {
     else if (TrainingCode == 1055) fData = trq_mva_fele2s51b1_1055;  // DAR, logfcons, w= 1/dPf      , dPf > 0.5
     else if (TrainingCode == 1060) fData = trq_mva_fele2s51b1_1060;  // DAR, logfcons, uniform weight, dPf > 0.6
     else if (TrainingCode == 1070) fData = trq_mva_fele2s51b1_1070;  // DAR, logfcons, uniform weight, dPf > 0.7
+    else                           { error = 1; }
+  }
+  if      (ds == "FPOS2S51B1") {
+    if      (TrainingCode ==  150) fData = trq_mva_fpos2s51b1_0150;  // PAR, logfcons, uniform weight, dPf > 0.5
+    else if (TrainingCode ==  170) fData = trq_mva_fpos2s51b1_0170;  // PAR, logfcons, uniform weight, dPf > 0.7
+    else if (TrainingCode == 1150) fData = trq_mva_fpos2s51b1_1150;  // DAR, logfcons, uniform weight, dPf > 0.5
+    else if (TrainingCode == 1170) fData = trq_mva_fpos2s51b1_1170;  // DAR, logfcons, uniform weight, dPf > 0.7
     else                           { error = 1; }
   }
   else if (ds == "ELE00S61B0") {

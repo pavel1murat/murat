@@ -154,15 +154,6 @@ int TTrackCompModule::BeginJob() {
 
       for (int id=0; id<fNID; id++) {
 	tp->fTrackID[id] = fTrackID[id];
-	if (TAnaModule::fUseTrqMVA) {
-//-----------------------------------------------------------------------------
-// in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
-// but do not change the cut value on the MVA output
-//-----------------------------------------------------------------------------
-	  if (TAnaModule::fTrqMVA[i]) {
-	    tp->fTrackID[id]->SetLocTrkQual(0);
-	  }
-	}
       }
     }
   }
@@ -1064,6 +1055,19 @@ int TTrackCompModule::Event(int ientry) {
       TrackPar_t* tp = &fTrackPar[i][it];
       tp->fDioLOWt   = fEvtPar.fDioLOWt;
       tp->fDioLLWt   = fEvtPar.fDioLLWt;
+
+      for (int id=0; id<fNID; id++) {
+	if (TAnaModule::fUseTrqMVA && TAnaModule::fTrqMVA[i]) {
+//-----------------------------------------------------------------------------
+// in case of on-the-fly calculation store result in TStnTrack::fTmp[0] 
+// but do not change the cut value on the MVA output
+//-----------------------------------------------------------------------------
+	  tp->fTrackID[id]->SetLocTrkQual(0);
+	}
+	else {
+	  tp->fTrackID[id]->SetLocTrkQual(-1);
+	}
+      }
     }
 
     InitTrackPar(fTrackBlock[i],fClusterBlock,fTrackPar[i],&fSimPar);

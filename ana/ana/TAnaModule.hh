@@ -82,7 +82,6 @@ public:
   double              fEventWeight;            // weight applied when filling histograms
   int                 fBatchMode;
 
-  //  TEmuLogLH*          fLogLH;
   EventPar_t          fEvtPar;
 
   TStntuple*          fStnt;                   // STNTUPLE singleton

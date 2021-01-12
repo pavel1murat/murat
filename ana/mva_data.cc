@@ -126,7 +126,7 @@ mva_data::mva_data(const char* Dataset, int TrainingCode) {
     else if (TrainingCode == 1070) fData = trq_mva_fele2s51b1_1070;  // DAR, logfcons, uniform weight, dPf > 0.7
     else                           { error = 1; }
   }
-  if      (ds == "FPOS2S51B1") {
+  else if (ds == "FPOS2S51B1") {
     if      (TrainingCode ==  170) fData = trq_mva_fpos2s51b1_0170;  // PAR, logfcons, uniform weight, dPf > 0.7
     else if (TrainingCode == 1150) fData = trq_mva_fpos2s51b1_1150;  // DAR, logfcons, uniform weight, dPf > 0.5
     else if (TrainingCode == 1152) fData = trq_mva_fpos2s51b1_1152;  // DAR, logfcons, exp     weight, dPf > 0.5

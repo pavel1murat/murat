@@ -222,14 +222,16 @@ void  track_comp_mva(int TrkRecoAlg = 0, int PDGCode=0, int MCProcessCode=-1, in
 //-----------------------------------------------------------------------------
 void  track_comp_use_mva(int PARTrainingCode =   -1, 
 			 int DARTrainingCode = 1070, 
-			 int PDGCode=11, int MCProcessCode=28, 
+			 int PDGCode         =   -1, 
+			 int MCProcessCode   =   -1, 
 			 int DebugBit = -1, double XMin=1,double XMax = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module to use TMVA training trees
 //-----------------------------------------------------------------------------
   murat::m_tcm = (murat::TTrackCompModule*) g.x->AddModule("murat::TTrackCompModule",0);  
-  murat::m_tcm->SetPDGCode      (11);
-  murat::m_tcm->SetMCProcessCode(MCProcessCode);
+
+  if (PDGCode       != 0) murat::m_tcm->SetPDGCode      (11);
+  if (MCProcessCode >= 0) murat::m_tcm->SetMCProcessCode(MCProcessCode);
 
   if (PARTrainingCode >= 0) {
     int charge_mode = PARTrainingCode/100;

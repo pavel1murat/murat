@@ -234,12 +234,16 @@ void  track_comp_use_mva(int PARTrainingCode =   -1,
   if (MCProcessCode >= 0) murat::m_tcm->SetMCProcessCode(MCProcessCode);
 
   if (PARTrainingCode >= 0) {
-    int charge_mode = PARTrainingCode/100;
+    int training_code = PARTrainingCode % 1000;
+    int charge_mode   = training_code/100;
+
     if   (charge_mode == 0) murat::m_tcm->SetTrqMVA(0,"fele2s51b1",PARTrainingCode);  // negative
     else                    murat::m_tcm->SetTrqMVA(0,"fpos2s51b1",PARTrainingCode);  // positive
   }
   if (DARTrainingCode >= 0) {
-    int charge_mode = DARTrainingCode/100;
+    int training_code = DARTrainingCode % 1000;
+    int charge_mode   = training_code/100;
+
     if   (charge_mode == 0) murat::m_tcm->SetTrqMVA(1,"fele2s51b1",DARTrainingCode);  // negative
     else                    murat::m_tcm->SetTrqMVA(1,"fpos2s51b1",DARTrainingCode);  // positive
   }

@@ -99,6 +99,13 @@ mva_data::data_t  pid_mva_ele00s61b0_1000 = {
   0.50                                                                       // default cut value
 };
 
+mva_data::data_t  pid_mva_ele01s51b0_1100 = {
+  "pid_ele00s51b0_1100",                                                     // name
+  "ecl/p:ncr:seedfr:ele_dt:ele_dz:ele_dr:ele_path",                          // assume all floats
+  "su2020/data/pid_mva/pid_MLP_weights_1100.xml",                            // location of XML weights
+  0.50                                                                       // default cut value
+};
+
 //-----------------------------------------------------------------------------
 // PAR ANN training sets
 // ---------------------------
@@ -135,6 +142,10 @@ mva_data::mva_data(const char* Dataset, int TrainingCode) {
   }
   else if (ds == "ELE00S61B0") {
     if      (TrainingCode == 1000) fData = pid_mva_ele00s61b0_1000;  // DAR PID MVA 
+    else                           { error = 1; }
+  }
+  else if (ds == "ELE01S51B0") {
+    if      (TrainingCode == 1100) fData = pid_mva_ele01s51b0_1100;  // DAR PID MVA trained at 92 MeV/c
     else                           { error = 1; }
   }
   else if (ds == "ANDY") {

@@ -217,34 +217,50 @@ void TEmuAnaModule::BookHistograms() {
 
   track_selection[100] = new TString("[0] all tracks");
   track_selection[101] = new TString("[0] BestTrackID");
+
   track_selection[102] = new TString("[0] BestTrackID+cluster");
   track_selection[103] = new TString("[0] BestTrackID+cluster, first disk");
   track_selection[104] = new TString("[0] BestTrackID+cluster, second disk");
-  track_selection[105] = new TString("[0] BestTrackID+cluster+(|dr|<100)");
-  track_selection[106] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)");
-  track_selection[107] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250" );
-  track_selection[108] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)");
-  track_selection[109] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)");
-  track_selection[110] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
-  track_selection[111] = new TString("[0] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
 
+  track_selection[105] = new TString("[0] BestTrackID+cluster+(p>100)");
+  track_selection[106] = new TString("[0] BestTrackID+cluster+(p>100)+(|dr|<100)");
+  track_selection[107] = new TString("[0] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)" );
+  track_selection[108] = new TString("[0] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)");
+  track_selection[109] = new TString("[0] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)");
+  track_selection[110] = new TString("[0] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+  track_selection[111] = new TString("[0] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+
+  track_selection[115] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)");
+  track_selection[116] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)");
+  track_selection[117] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)" );
+  track_selection[118] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)");
+  track_selection[119] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)");
+  track_selection[120] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+  track_selection[121] = new TString("[0] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+							    
   track_selection[200] = new TString("[1] all tracks");
   track_selection[201] = new TString("[1] BestTrackID");
 
   track_selection[202] = new TString("[1] BestTrackID, cluster");
   track_selection[203] = new TString("[1] BestTrackID, cluster, first disk");
   track_selection[204] = new TString("[1] BestTrackID, cluster, second disk");
-  track_selection[205] = new TString("[1] BestTrackID + cluster + (|dr|<100)");
-  track_selection[206] = new TString("[1] BestTrackID + cluster + (|dr|<100) + (|dt|<10)");
-  track_selection[207] = new TString("[1] BestTrackID + cluster + (|dr|<100) + (|dt|<10) + (-50<dz<250" );
-  track_selection[208] = new TString("[1] BestTrackID + cluster + (|dr|<100) + (|dt|<10) + (-50<dz<250)+(E/P<1.2)");
-  track_selection[209] = new TString("[1] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)");
-  track_selection[210] = new TString("[1] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
-  track_selection[211] = new TString("[1] BestTrackID+cluster+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(p>100)+(pid<0.5)");
 
+  track_selection[205] = new TString("[1] BestTrackID+cluster+(p>100)");
+  track_selection[206] = new TString("[1] BestTrackID+cluster+(p>100)+(|dr|<100)");
+  track_selection[207] = new TString("[1] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)" );
+  track_selection[208] = new TString("[1] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)");
+  track_selection[209] = new TString("[1] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)");
+  track_selection[210] = new TString("[1] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+  track_selection[211] = new TString("[1] BestTrackID+cluster+(p>100)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
 
-  track_selection[210] = new TString("[1] TrackID[0]");
-
+  track_selection[215] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)");
+  track_selection[216] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)");
+  track_selection[217] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)" );
+  track_selection[218] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)");
+  track_selection[219] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)");
+  track_selection[220] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+  track_selection[221] = new TString("[1] BestTrackID+cluster+(87.5<p<92.5)+(|dr|<100)+(|dt|<10)+(-50<dz<250)+(E/P<1.2)+(pid<0.5)");
+							    
   const char* folder_title;
   for (int i=0; i<kNTrackHistSets; i++) {
     if (track_selection[i] != 0) {
@@ -371,6 +387,24 @@ void TEmuAnaModule::FillHistograms() {
 	    }
 	  }
 	}
+
+	if ((tp->fP > 87.5) && ( tp->fP < 92.5)) {
+	  FillTrackHistograms(fHist.fTrack[ihist+15],trk,tp,&fSimPar);
+	  if (fabs(tp->fTchDr) < 100) {
+	    FillTrackHistograms(fHist.fTrack[ihist+16],trk,tp,&fSimPar);
+	    if (fabs(tp->fTchDt) < 10) {
+	      FillTrackHistograms(fHist.fTrack[ihist+17],trk,tp,&fSimPar);
+	      if ((tp->fTchDz > -50) && (tp->fTchDz < 250)) {
+		FillTrackHistograms(fHist.fTrack[ihist+18],trk,tp,&fSimPar);
+		if (tp->fEp < 1.2) {
+		  FillTrackHistograms(fHist.fTrack[ihist+19],trk,tp,&fSimPar);
+		  if (tp->fPidMvaOut[0] > 0.5) FillTrackHistograms(fHist.fTrack[ihist+20],trk,tp,&fSimPar);
+		  else                         FillTrackHistograms(fHist.fTrack[ihist+21],trk,tp,&fSimPar);
+		}
+	      }
+	    }
+	  }
+	}
       }
     }
   }
@@ -474,14 +508,14 @@ int TEmuAnaModule::Event(int ientry) {
 // require fits with both mass hypotheses to succeed and both tracks to have clusters
 // also reject muon decays in flight : zmax > 10000 should do that
 //-----------------------------------------------------------------------------
-  if ((fWritePidMvaTree != 0) && (fNTracks[0] == 1) && (fNTracks[1] == 1)) {
+  if ((fWritePidMvaTree != 0) && (fNTracks[0] == 1)) {
 
     TrackPar_t* tpe = &fTrackPar[0][0];   // electron reco, first track
     TrackPar_t* tpm = &fTrackPar[1][0];   // muon reco    , first track
 
     float zmax = fSimPar.fParticle->EndPos()->Z();
 
-    if ((zmax > 10000) &&(tpe->fIDWord[fBestID[0]] == 0) && (tpe->fEcl > 0) && (tpm->fEcl > 0)) {
+    if ((zmax > 10000) && (tpe->fIDWord[fBestID[0]] == 0) && (tpe->fEcl > 0)) {
 
       fPidMvaData.fP          = tpe->fP;
       fPidMvaData.fEcl        = tpe->fEcl;
@@ -493,10 +527,18 @@ int TEmuAnaModule::Event(int ientry) {
       fPidMvaData.fEleTchDr   = tpe->fTchDr;
       fPidMvaData.fElePath    = tpe->fPath;
     
-      fPidMvaData.fMuoTchDt   = tpm->fTchDt;
-      fPidMvaData.fMuoTchDz   = tpm->fTchDz;
-      fPidMvaData.fMuoTchDr   = tpm->fTchDr;
-      fPidMvaData.fMuoPath    = tpm->fPath;
+      if (fNTracks[1] > 0) {
+	fPidMvaData.fMuoTchDt   = tpm->fTchDt;
+	fPidMvaData.fMuoTchDz   = tpm->fTchDz;
+	fPidMvaData.fMuoTchDr   = tpm->fTchDr;
+	fPidMvaData.fMuoPath    = tpm->fPath;
+      }
+      else {
+	fPidMvaData.fMuoTchDt   = -999.; // tpm->fTchDt;
+	fPidMvaData.fMuoTchDz   = -999.; // tpm->fTchDz;
+	fPidMvaData.fMuoTchDr   = -999.; // tpm->fTchDr;
+	fPidMvaData.fMuoPath    = -999.; // tpm->fPath;
+      }
     
       fPidMvaTree->Fill();
     }

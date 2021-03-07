@@ -24,7 +24,7 @@
 #include "Stntuple/base/TObjHandle.hh"
 
 #include "Stntuple/val/stntuple_val_functions.hh"
-#include "Stntuple/mod/TAnaDump.hh"
+#include "Stntuple/print/TAnaDump.hh"
 
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"

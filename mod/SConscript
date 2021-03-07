@@ -20,12 +20,14 @@ helper.handle_dictionaries();
 
 libs      = [ 'murat_alg',
               'murat_obj',
-              'Stntuple_val',
               'Stntuple_mod',
+              'Stntuple_print',
               'Stntuple_alg',
               'Stntuple_obj',
               'Stntuple_geom',
               'Stntuple_base',
+
+              'Stntuple_val',
 #
               'mu2e_TrkReco',
               'mu2e_TrkHitReco',

@@ -44,7 +44,7 @@
 #include "BTrkData/inc/TrkStrawHit.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 
-#include "Stntuple/mod/TAnaDump.hh"
+#include "Stntuple/print/TAnaDump.hh"
 
 // C++ includes.
 #include <iostream>

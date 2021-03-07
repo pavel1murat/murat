@@ -10,7 +10,7 @@
 #include "art/Framework/Principal/Selector.h"
 
 #include "murat/mod/TCalm006_module.hh"
-#include "Stntuple/mod/TAnaDump.hh"
+#include "Stntuple/print/TAnaDump.hh"
 
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"

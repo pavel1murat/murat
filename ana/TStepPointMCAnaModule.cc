@@ -67,15 +67,41 @@ TStepPointMCAnaModule::~TStepPointMCAnaModule() {
 
 
 //-----------------------------------------------------------------------------
+// register data blocks and book histograms
+//-----------------------------------------------------------------------------
+int TStepPointMCAnaModule::BeginJob() {
+//-----------------------------------------------------------------------------
+// register data blocks 'SpmcBlock' or 'StepPointMCBlock' (old)
+//-----------------------------------------------------------------------------
+  RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock",&fStepPointMCBlock);
+  RegisterDataBlock("SimpBlock"          ,"TSimpBlock"       ,&fSimpBlock       );
+  RegisterDataBlock(fVDetBlockName.Data(),"TStepPointMCBlock",&fVDetBlock       );
+//-----------------------------------------------------------------------------
+// book histograms
+//-----------------------------------------------------------------------------
+  BookHistograms();
+
+//-----------------------------------------------------------------------------
+// initialize virtual detector offsets - a convenience for histogram filling
+//-----------------------------------------------------------------------------
+  InitVirtualDetectors(fVDet,&fNVDet);
+
+  return 0;
+}
+
+
+//-----------------------------------------------------------------------------
 void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
   EventHist_t* hist = (EventHist_t*) Hist;
 
-  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"    ,Folder), 1000, 0,  1e4,Folder);
-  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"    ,Folder), 1000, 0,  1e6,Folder);
-  HBook1F(hist->fNSimp      ,"nsimp" ,Form("%s: N(sim particles)",Folder),  200, 0,  200,Folder);
-  HBook1F(hist->fTMax       ,"tmax"  ,Form("%s: Time(seconds)"   ,Folder), 1000, 0,  1e5,Folder);
+  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"     ,Folder), 1000, 0,  1e4,Folder);
+  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"     ,Folder), 1000, 0,  1e6,Folder);
+  HBook1F(hist->fNSimp      ,"nsimp" ,Form("%s: N(sim particles)" ,Folder),  200, 0,  200,Folder);
+  HBook1F(hist->fTMaxSimp[0],"tsim_0",Form("%s: TMaxSimp(ns )[0]" ,Folder), 1000, 0, 2000,Folder);
+  HBook1F(hist->fTMaxSimp[1],"tsim_1",Form("%s: TMaxSimp(sec)[1]" ,Folder), 1000, 0,  1e5,Folder);
+  HBook1F(hist->fTMaxSpmc   ,"tspmc" ,Form("%s: TMaxStep(ns )   " ,Folder), 1000, 0, 2000,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -557,7 +583,9 @@ void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fEventNumber->Fill(event_number);
   hist->fRunNumber->Fill(run_number);
   hist->fNSimp->Fill(fNSimp);
-  hist->fTMax->Fill(fTMax);
+  hist->fTMaxSimp[0]->Fill(fTMaxSimp);
+  hist->fTMaxSimp[1]->Fill(fTMaxSimp);
+  hist->fTMaxSpmc->Fill(fTMaxSpmc);
 }
 
 //-----------------------------------------------------------------------------
@@ -713,30 +741,6 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
 
   hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
-
-//-----------------------------------------------------------------------------
-// register data blocks and book histograms
-//-----------------------------------------------------------------------------
-int TStepPointMCAnaModule::BeginJob() {
-//-----------------------------------------------------------------------------
-// register data blocks 'SpmcBlock' or 'StepPointMCBlock' (old)
-//-----------------------------------------------------------------------------
-  RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock",&fStepPointMCBlock);
-  RegisterDataBlock("SimpBlock"          ,"TSimpBlock"       ,&fSimpBlock       );
-  RegisterDataBlock(fVDetBlockName.Data(),"TStepPointMCBlock",&fVDetBlock       );
-//-----------------------------------------------------------------------------
-// book histograms
-//-----------------------------------------------------------------------------
-  BookHistograms();
-
-//-----------------------------------------------------------------------------
-// initialize virtual detector offsets - a convenience for histogram filling
-//-----------------------------------------------------------------------------
-  InitVirtualDetectors(fVDet,&fNVDet);
-
-  return 0;
-}
-
 
 //-----------------------------------------------------------------------------
 void TStepPointMCAnaModule::FillHistograms() {
@@ -1270,7 +1274,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
 // determine the cross section weight looking at the first particle with the PDG code of an antiproton
 //-----------------------------------------------------------------------------
   fWeight = 1.;
-  fTMax   = -1;
+  fTMaxSimp   = -1;
   if (fNSimp > 0) {
 //-----------------------------------------------------------------------------
 // using the first antiproton in the list should work for old Bobs's dataset as well 
@@ -1279,7 +1283,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
     for (int i=0; i<fNSimp; i++) {
       TSimParticle* sp0 = fSimpBlock->Particle(i);
       double t0 = sp0->StartPos()->T();
-      if (t0 > fTMax) fTMax = t0;
+      if (t0 > fTMaxSimp) fTMaxSimp = t0;
 
       if (sp0->PDGCode() == -2212) {
 //-----------------------------------------------------------------------------
@@ -1306,7 +1310,18 @@ int TStepPointMCAnaModule::Event(int ientry) {
       }
     }
   }
-  fTMax = fTMax/1.e9;			// convert nsec --> seconds
+  fTMaxSimp = fTMaxSimp/1.e9;			// convert nsec --> seconds
+//-----------------------------------------------------------------------------
+// determine t(max) for steps
+//-----------------------------------------------------------------------------
+  fTMaxSpmc = -1;
+  int nsteps = fStepPointMCBlock->NStepPoints();
+  for (int i=0; i<nsteps; i++) {
+    TStepPointMC* spmc = fStepPointMCBlock->StepPointMC(i);
+    //float p          = spmc->Mom()->Mag();
+    float t            = spmc->Time();
+    if (t > fTMaxSpmc) fTMaxSpmc = t;
+  }
 //-----------------------------------------------------------------------------
 // determine simulation stage by looking at the last particle
 //-----------------------------------------------------------------------------

@@ -1,0 +1,24 @@
+# -*- mode: tcl -*-
+#
+# Print some information about the TTracker.
+#
+###############################################################################
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+
+#include "Stntuple/fcl/stnmaker.fcl"
+
+process_name : dump
+
+source  : { module_type : EmptyEvent }
+
+physics : {
+  analyzers :  {
+    DumpTrackerNumerology : { module_type : DumpTrackerNumerology }
+  }
+
+  e1         : [DumpTrackerNumerology]
+  end_paths  : [e1]
+}
+

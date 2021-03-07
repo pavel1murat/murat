@@ -36,7 +36,8 @@ public:
     TH1F*      fRunNumber;
     TH1F*      fEventNumber;
     TH1F*      fNSimp;
-    TH1F*      fTMax;
+    TH1F*      fTMaxSimp[2];
+    TH1F*      fTMaxSpmc;
   };
 
   struct SimpHist_t : public HistBase_t {
@@ -153,7 +154,8 @@ public:
 
   TStntuple*            fStnt;
   double                fWeight;         // event weight, determined by the production cross section
-  double                fTMax;		 // in seconds
+  double                fTMaxSimp;	 // in seconds
+  double                fTMaxSpmc;	 // in ns
 					 // antiproton-specific : in the production vertex
   double                fPbarCosThPV;
   double                fPbarMomPV;

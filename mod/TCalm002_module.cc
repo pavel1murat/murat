@@ -1351,7 +1351,7 @@ namespace mu2e {
 // bit 003: print downstream - tracks
 //-----------------------------------------------------------------------------
     if (TModule::fDebugBit[3] != 0) {
-      TModule::fDump->printKalRepCollection(fTrkPatRecDem.data(),"","",1);
+      TModule::fDump->printKalRepCollection(fTrkPatRecDem.data(),1);
     }
 //-----------------------------------------------------------------------------
 // bit 004: events with a track with the fit consistency < 1e-5

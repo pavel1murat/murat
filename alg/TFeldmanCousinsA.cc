@@ -1,31 +1,22 @@
-// my implementation of Feldman-Cousins algorithm
+// my implementation of the Feldman-Cousins algorithm
 // 
-
 #include "murat/alg/TFeldmanCousinsA.hh"
-
 #include "TCanvas.h"
 
 ClassImp(TFeldmanCousinsA)
-
 //-----------------------------------------------------------------------------
 // CL > 0: CL has the meaning of a probability - 0.9, 0.95 .. .0.99 etc
 //    < 0: CL is the "discovery probability", probability corresponding
-//         to the 5 gaussian sigma level
+//         to 5 gaussian sigma level, 
 //-----------------------------------------------------------------------------
 TFeldmanCousinsA::TFeldmanCousinsA(const char* Name, double CL, int DebugLevel):
   TNamed(Name,Name),
   fRn()
 {
   if (CL > 0) fCL = CL;
-  else        fCL = 1-5.733e-7;
+  else        fCL = 1-5.733e-7/2.; // always one-sided
 
   fDebugLevel = DebugLevel;
-//-----------------------------------------------------------------------------
-// zero probabilities
-//-----------------------------------------------------------------------------
-  // for (int i=0; i<MaxNx; i++) {
-  //   fProb[i] = 0.;
-  // }
 //-----------------------------------------------------------------------------
 // calculate factorials - just once
 //-----------------------------------------------------------------------------
@@ -36,24 +27,31 @@ TFeldmanCousinsA::TFeldmanCousinsA(const char* Name, double CL, int DebugLevel):
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
-  fBgProbHist    = new TH1D(Form("h_bg_prob_%s",GetName()),"h_bg_prob",MaxNx,0,MaxNx);
-  fBsProbHist    = new TH1D(Form("h_bs_prob_%s",GetName()),"h_bs_prob",MaxNx,0,MaxNx);
+  fHist.fBgProb    = new TH1D(Form("h_bg_prob_%s"   ,GetName()),"h_bg_prob",MaxNx,0,MaxNx);
+  fHist.fBsProb    = new TH1D(Form("h_bs_prob_%s"   ,GetName()),"h_bs_prob",MaxNx,0,MaxNx);
+  fHist.fCumBgProb = new TH1D(Form("h_cumbg_prob_%s",GetName()),"h_cumbg_prob",MaxNx,0,MaxNx);
+  fHist.fCumBsProb = new TH1D(Form("h_cumbs_prob_%s",GetName()),"h_cumbs_prob",MaxNx,0,MaxNx);
 
-  fProbHist      = new TH1D(Form("h_prob_2D_%s" ,GetName()),"h prob 2D" ,MaxNx,-0.5,MaxNx-0.5);
-  fIntervalHist  = new TH1D(Form("h_interval_%s",GetName()),"h interval",MaxNx,-0.5,MaxNx-0.5);
-  fBeltHist      = nullptr;
+  fHist.fProb      = new TH1D(Form("h_prob_2D_%s"    ,GetName()),"h prob 2D" ,MaxNx,-0.5,MaxNx-0.5);
+  fHist.fBelt      = nullptr;
 
-  fNPE           = 10000000;
+  fNExp            = 10000000;
 }
 
 //-----------------------------------------------------------------------------
 // the length of 'Prob' should be at least N
 //-----------------------------------------------------------------------------
-void TFeldmanCousinsA::InitPoissonDist(double Mean, double* Prob, int N) {
+void TFeldmanCousinsA::InitPoissonDist(double Mean, double* Prob, double* CumProb, int N) {
 
   for (int i=0; i<N; i++) {
     Prob[i] = TMath::Power(Mean,i)*TMath::Exp(-Mean)/fFactorial[i];
   }
+					// integral
+  CumProb[0] = Prob[0];
+  for (int i=1; i<MaxNx;i++) {
+    CumProb[i] = CumProb[i-1]+Prob[i];
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -63,22 +61,20 @@ void TFeldmanCousinsA::Init(double Bgr, double Sig) {
   fMeanBgr = Bgr;
   fMeanSig = Sig;
   
-  InitPoissonDist(fMeanBgr         , fBgProb, MaxNx);
-  InitPoissonDist(fMeanBgr+fMeanSig, fBsProb, MaxNx);
-
-  fCumBsProb[0] = fBsProb[0];
-  for (int i=1; i<MaxNx;i++) {
-    fCumBsProb[i] = fCumBsProb[i-1]+fBsProb[i];
-  }
+  InitPoissonDist(fMeanBgr         , fBgProb, fCumBgProb, MaxNx);
+  InitPoissonDist(fMeanBgr+fMeanSig, fBsProb, fCumBsProb, MaxNx);
 //-----------------------------------------------------------------------------
-// re-initialize 1D histograms
+// [re]-initialize 1D histograms with the probabilities and integral probabilities
 //-----------------------------------------------------------------------------
   for (int i=0; i<MaxNx; i++) {
-    fBgProbHist->SetBinContent(i+1,fBgProb[i]);
-    fBsProbHist->SetBinContent(i+1,fBsProb[i]);
-  }
+    fHist.fBgProb->SetBinContent(i+1,fBgProb[i]);
 
-  fIntervalHist->Reset();
+    fHist.fBsProb->SetBinContent(i+1,fBsProb[i]);
+    fHist.fProb  ->SetBinContent(i+1,fBsProb[i]);
+    
+    fHist.fCumBgProb->SetBinContent(i+1,fCumBgProb[i]);
+    fHist.fCumBsProb->SetBinContent(i+1,fCumBsProb[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -129,16 +125,15 @@ int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
 //-----------------------------------------------------------------------------
 // build confidence interval corresponding to the probability fCL - 0.9 , 0.95, etc
 //-----------------------------------------------------------------------------
-  fIMin = MaxNx;
-  fIMax = -1;
+  fIMin       = MaxNx;
+  fIMax       = -1;
 
   int covered = 0;
-  
-  fProb = 0;
+  fProb       = 0;
   
   for (int ix=0; ix<MaxNx; ix++) {
     int ind = fRank[ix];
-    fProb    += fBsProb[ind];
+    fProb  += fBsProb[ind];
     if (ind < fIMin) fIMin = ind;
     if (ind > fIMax) fIMax = ind;
 
@@ -155,18 +150,6 @@ int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
 
   if (covered == 0) {
     printf("trouble ! interval not covered : prob = %12.5e , 1-CL = %12.5e\n",fProb,1-fCL);
-  }
-//-----------------------------------------------------------------------------
-// suppose, everything is OK, update the belt histogram
-//-----------------------------------------------------------------------------
-  for (int i=fIMin; i<=fIMax; i++) {
-    fIntervalHist->SetBinContent(i+1,1);
-  }
-//-----------------------------------------------------------------------------
-// finally, build the probability histogram
-//-----------------------------------------------------------------------------
-  for (int i=0; i<MaxNx; i++) {
-    fProbHist->SetBinContent(i+1,fBsProb[i]);
   }
 
   return rc;
@@ -212,17 +195,17 @@ void TFeldmanCousinsA::PrintProbs(int N) {
   PrintData("LhRatio" ,'d',fLhRatio  ,N);
   PrintData("Rank   " ,'i',fRank     ,N);
 }
-
 //-----------------------------------------------------------------------------
-// construct belt, fill belt histogram
+// vary signal from SMin to SMax in NSteps, construct FC belt, fill belt histogram
+// fBelt is the FC belt histogram
 //-----------------------------------------------------------------------------
 int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NSteps) {
 
   double step = (SMax-SMin)/NSteps;
 
-  if (fBeltHist) delete fBeltHist;
+  if (fHist.fBelt) delete fHist.fBelt;
 
-  fBeltHist = new TH2D(Form("h_belt_%s",GetName()),"FC belt",TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
+  fHist.fBelt = new TH2D(Form("h_belt_%s",GetName()),"FC belt",TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
  	               NSteps,SMin-step/2,SMax-step/2);
   
   for (int iy=0; iy<NSteps; iy++) {
@@ -232,7 +215,7 @@ int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NS
       if ((ix < fIMin) || (ix > fIMax)) fBelt[iy][ix] = 0;
       else                              fBelt[iy][ix] = 1;
 
-      fBeltHist->SetBinContent(ix+1,iy+1,fBelt[iy][ix]);
+      fHist.fBelt->SetBinContent(ix+1,iy+1,fBelt[iy][ix]);
     }
   }
 //-----------------------------------------------------------------------------
@@ -277,9 +260,8 @@ int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NS
 double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NSteps) {
 
   ConstructBelt(Bgr, SMin, SMax, NSteps);
-
 //-----------------------------------------------------------------------------
-// now generate background-only pseudo-experiments and plot the distribution
+// generate background-only pseudo-experiments and plot the distribution
 // for the excluded signal strength
 //-----------------------------------------------------------------------------
   TH1D* h1 = new TH1D(Form("h_excluded_%s",GetName()),"excluded",2500,0,50);
@@ -306,21 +288,19 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
 
   TCanvas* c_belt = new TCanvas("c_belt","Belt Histogram",1000,800);
   c_belt->cd();
-  fBeltHist->Draw("box");
+  fHist.fBelt->Draw("box");
 
   double fc_upper_limit = h1->GetMean();
   printf(" mean excluded value : %12.5f\n",fc_upper_limit);
   return fc_upper_limit;
 }
 
-
 //-----------------------------------------------------------------------------
 // in general, need to scan a range of signals, call this function multiple times
 //-----------------------------------------------------------------------------
 void TFeldmanCousinsA::DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps) {
-
 //-----------------------------------------------------------------------------
-// construct FC CL confidence interval (covering fCL) assuming no signal
+// construct FC CL confidence interval (covering fCL) assuming Signal=0
 //-----------------------------------------------------------------------------
   ConstructInterval(Bgr,0);
 
@@ -333,18 +313,21 @@ void TFeldmanCousinsA::DiscoveryProb(double Bgr, double SMin, double SMax, int N
   for (int ix=0; ix<nx; ix++) {
     double sig = SMin+ix*step;
     double tot = Bgr+sig;
-
-    long int ndisc = 0;
-    for (int i=0; i<fNPE; i++) {
+//-----------------------------------------------------------------------------
+// ndisc: number of "discovery experiments", pseudoexperiments in which NULL
+// hypothesis is excluded at (1-fCL) level
+//-----------------------------------------------------------------------------
+    long int ndisc = 0;			
+    for (int i=0; i<fNExp; i++) {
       int rn = fRn.Poisson(tot);
 //-----------------------------------------------------------------------------
-// definition of discovery: rn > fIMax, i.e  the  probability to observe'rn' is
-// less than 1-fCL
+// definition of the discovery:
+// rn > fIMax, i.e  the  probability to observe'rn' is less than 1-fCL
 //-----------------------------------------------------------------------------
       if (rn > fIMax) ndisc ++;
     }
     
-    double prob = double(ndisc)/double(fNPE);
+    double prob = double(ndisc)/double(fNExp);
 
     x[ix] = sig;
     y[ix] = prob;

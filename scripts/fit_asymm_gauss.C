@@ -1,5 +1,7 @@
-//
-
+///////////////////////////////////////////////////////////////////////////////
+// fit distribution with a pseudo-gaussian function which has different values of
+// gaussian sigma to the lft and to the right of maximum
+///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 double asymm_gauss(double* X, double* P) {
@@ -31,11 +33,11 @@ int fit_asymm_gauss(TH1* Hist, double A, double X0, double SigN, double SigP, do
 
 //-----------------------------------------------------------------------------
 int fit_asymm_gauss(const char* Fn, const char* Module, const char* Hist, 
-		   double A, double X0, double SigN, double SigP, double XMin, double XMax) {
+		   double A, double X0, double SigLeft, double SigRight, double XMin, double XMax) {
 
   TH1F* h = (TH1F*) gh1(Fn,Module,Hist)->Clone("h_fit_asymm_gauss");
 
-  fit_asymm_gauss(h,A,X0,SigN,SigP,XMin,XMax);
+  fit_asymm_gauss(h,A,X0,SigLeft,SigRight,XMin,XMax);
 
   return 0;
 }

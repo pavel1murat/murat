@@ -12,9 +12,18 @@
 class TFeldmanCousinsA : public TNamed {
 public:
   enum {
-	MaxNx = 200,            // max Poisson bin
-	MaxNy = 10000,          // max steps in Mu
-  } ;   
+	MaxNx = 200,                    // max Poisson bin
+	MaxNy = 10000,			// max steps in Mu
+  };   
+
+  struct Hist_t {
+    TH1D*    fBgProb;
+    TH1D*    fBsProb;
+    TH1D*    fCumBgProb;
+    TH1D*    fCumBsProb;
+    TH1D*    fProb;                     // the same as fBsProb, but shifted by half-bin
+    TH2D*    fBelt;
+  } fHist;
   
   double   fCL;
   double   fMeanBgr;
@@ -22,33 +31,26 @@ public:
   
   TRandom3 fRn;
 
-  TH1D*    fBgProbHist;
-  TH1D*    fBsProbHist;
+  double   fBestSig  [MaxNx];
+  double   fBestProb [MaxNx];
 
-  double   fBestSig [MaxNx];
-  double   fBestProb[MaxNx];
+  double   fLhRatio  [MaxNx];
+  int      fRank     [MaxNx];
 
-  double   fLhRatio [MaxNx];
-  int      fRank    [MaxNx];
+  double   fBgProb   [MaxNx];		//
+  double   fBsProb   [MaxNx];
 
-  double   fBgProb  [MaxNx];
-  double   fBsProb  [MaxNx];
-
+  double   fCumBgProb[MaxNx];           // fCumBgProb[i]: P(X<=i) for BGR-only hyp
   double   fCumBsProb[MaxNx];
 
-  double   fFactorial[MaxNx]; // precalculate to speed things up
-
-  double   fSBelt[2][MaxNx];   // belt boundaries
+  double   fFactorial[MaxNx];	        // precalculate to speed things up
+  double   fSBelt [2][MaxNx];		// belt boundaries
   
   // X(Bg) - Poisson random number sampled from Bg     distribution
   // X(Bs) - Poisson random number sampled from Bg+Sig distribution
   
-  long int fNPE;	      // N(pseudo experiments) to throw
+  long int fNExp;	      // N(pseudo experiments) to throw
 
-  TH1D*    fProbHist;
-  TH1D*    fIntervalHist;     // histogram showing current interval
-  TH2D*    fBeltHist;
-  
   int      fDebugLevel;
   int      fIMin;
   int      fIMax;
@@ -66,7 +68,7 @@ public:
   ~TFeldmanCousinsA() {};
 
   void   Init           (double Bgr, double Sig);
-  void   InitPoissonDist(double Mean, double* Prob, int NMax);
+  void   InitPoissonDist(double Mean, double* Prob, double* CumProb, int NMax);
 
   int    ConstructInterval(double Bgr, double Sig);
   

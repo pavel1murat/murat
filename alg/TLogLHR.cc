@@ -20,14 +20,15 @@ TLogLHR::TLogLHR(const char* Name, double CL, int DebugLevel):
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
-  fHist.fLHb    = new TH1D(Form("h_bg_prob_%s"   ,GetName()),"h_bg_prob",MaxNx,-0.5,MaxNx-0.5);
-  fHist.fLHs    = new TH1D(Form("h_bs_prob_%s"   ,GetName()),"h_bs_prob",MaxNx,-0.5,MaxNx-0.5);
+  fHist.fLHb    = new TH1D(Form("h_bg_prob_%s"   ,GetName()),"LHb"    ,MaxNx,-0.5,MaxNx-0.5);
+  fHist.fLHs    = new TH1D(Form("h_bs_prob_%s"   ,GetName()),"LHs"    ,MaxNx,-0.5,MaxNx-0.5);
 
-  fHist.fLogLHb = new TH1D(Form("h_log_lb_%s"    ,GetName()),"h_log_lb" ,NxLogLH,-180,20);
-  fHist.fLogLHs = new TH1D(Form("h_log_ls_%s"    ,GetName()),"h_log_ls" ,NxLogLH,-180,20);
-  fHist.fLogLHr = new TH1D(Form("h_log_lr_%s"    ,GetName()),"h_log_lr" ,NxLogLH,-180,20);
+  fHist.fLogLHb = new TH1D(Form("h_log_lhb_%s"   ,GetName()),"LogLHb" ,NxLogLH,-180,120);
+  fHist.fLogLHs = new TH1D(Form("h_log_lhs_%s"   ,GetName()),"LogLHs" ,NxLogLH,-180,120);
+  fHist.fLogLHr = new TH1D(Form("h_log_lhr_%s"   ,GetName()),"LogLHr" ,NxLogLH,-180,120);
+  fHist.fLogLHw = new TH1D(Form("h_log_lhw_%s"   ,GetName()),"LogLHw" ,NxLogLH,-180,120);
 
-  fHist.fPTail  = new TH1D(Form("h_ptail_%s"     ,GetName()),"Tail Prob",NxLogLH,-180,20);
+  fHist.fPTail  = new TH1D(Form("h_ptail_%s"     ,GetName()),"PTail"  ,NxLogLH,-180,120);
   
   for (int i=0; i<MaxNx; i++) {
     fHist.fLHPoi[i] = new TH1D(Form("h_lh_poi_%03i_%s",i,GetName()),Form("poisson prob for <m> = %i",i),
@@ -51,11 +52,22 @@ void TLogLHR::InitLogLHr(double* Num, double* Denom) {
   // weight is given by the numerator histogram
 
   fHist.fLogLHr->Reset();
+  fHist.fLogLHw->Reset();
+
+  for (int i=0; i<NxLogLH; i++)  fHist.fLogLHw->SetBinContent(i+1,1.e12);
+
+  double x0 = fHist.fLogLHr->GetXaxis()->GetXmin();
+  double bx = fHist.fLogLHr->GetBinWidth(1);
+  
   for (int i=0; i<MaxNx; i++) {
     double llh_num = Num[i];
     double llh_den = Denom[i];
     double llhr = log(llh_num/llh_den);
+   
     fHist.fLogLHr->Fill(llhr,llh_num);
+
+    int bin = floor((llhr-x0)/bx)+1;
+    fHist.fLogLHw->SetBinContent(bin,llhr);
   }
 //-----------------------------------------------------------------------------
 // integrate the tail
@@ -147,13 +159,16 @@ double TLogLHR::PTail(double LogLHr) {
   double prob(0);
   
   for (int i=0; i<NxLogLH; i++) {
-    double log_lhr = fHist.fPTail->GetBinCenter(i+1);
-    if (log_lhr < LogLHr) {
-      //      prob += fHist.fPTail->GetBinContent(i+1);
-      prob += fHist.fLogLHr->GetBinContent(i+1);
-    }
-    else {
-      break;
+    double log_lhr  = fHist.fLogLHw->GetBinContent(i+1);
+					// skip uninitialized bins
+    if (log_lhr < 1.e12) {
+      if (log_lhr < LogLHr+1.e-6) {
+	//      prob += fHist.fPTail->GetBinContent(i+1);
+	prob += fHist.fLogLHr->GetBinContent(i+1);
+      }
+      else {
+	break;
+      }
     }
   }
   return prob;
@@ -165,12 +180,10 @@ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSte
   // 'N'   : number of measured events
   // assume that the "measured" signal s = N-Bgr;
 
-  double lhpoi[MaxNx];
-  
   double step(0);
   int    ns(1);
 
-  printf(">>> TLogLHR::ConfInterval\n");
+  printf(">>> TLogLHR::ConfInterval : Bgr = %12.5e N = %5i, SMin=%12.5e\n",Bgr,N,SMin);
     
   if (NSteps > 1) {
     step = (SMax-SMin)/NSteps;
@@ -190,10 +203,15 @@ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSte
 //-----------------------------------------------------------------------------
 // likelihood corresponding to the measurement of N events
 //-----------------------------------------------------------------------------
-    InitPoissonDist(tot,lhpoi,MaxNx);
-    InitLogLHr     (fLHs,lhpoi);
+    InitPoissonDist(tot,fLHb,MaxNx);
+					// for debugging, dont' need otherwise
+    for (int ib=0; ib<MaxNx; ib++) {
+      fHist.fLHb->SetBinContent(ib+1,fLHb[ib]);
+    }
     
-    double lh      = lhpoi[N];
+    InitLogLHr     (fLHb,fLHs);
+    
+    double lh      = fLHb[N];
     double lh_best = fHist.fLHPoi[N]->GetBinContent(N);
     double log_lhr = log(lh) - log(lh_best);
     
@@ -202,51 +220,4 @@ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSte
     printf("is, lh, lh_best, log_lhr, prob: %3i %12.5e %12.5e %12.5e %12.5e\n",
 	   is, lh, lh_best, log_lhr, Prob[is]);
   }
-}
-
-//-----------------------------------------------------------------------------
-// in general, need to scan a range of signals, call this function multiple times
-//-----------------------------------------------------------------------------
-void TLogLHR::DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps) {
-
-  double step = (SMax-SMin)/NSteps;
-
-  double x[10000], y[10000];
-
-  int nx = NSteps+1;
-
-  for (int ix=0; ix<nx; ix++) {
-    double sig = SMin+ix*step;
-    double tot = Bgr+sig;           // expected mean for given signal assumption
-    Init(Bgr,sig);  
-//-----------------------------------------------------------------------------
-// ndisc: number of "discovery experiments", pseudoexperiments in which NULL
-// hypothesis is excluded at (1-fCL) level
-//-----------------------------------------------------------------------------
-    long int ndisc = 0;			
-    for (int i=0; i<fNExp; i++) {
-      int rn = fRn.Poisson(tot);
-//-----------------------------------------------------------------------------
-// definition of the discovery: probability to observe a lower number of events
-// is less than P("5 sigma")
-//-----------------------------------------------------------------------------
-      double lhr   = fHist.fLogLHs->GetBinContent(rn)/fHist.fLogLHb->GetBinContent(rn);
-      double ptail = PTail(lhr);
-
-      if (ptail < (1-fCL)) ndisc ++;
-    }
-    
-    double prob = double(ndisc)/double(fNExp);
-
-    x[ix] = sig;
-    y[ix] = prob;
-  }
-
-  TGraph* gr = new TGraph(nx,x,y);
-
-  gr->SetName(Form("gr_bgr_%06i_%s",int(Bgr*1000),GetName()));
-  gr->SetTitle(Form("discovery prob for bgr=%5.3f events",Bgr));
-
-  gr->SetMarkerStyle(20);
-  gr->Draw("alp");
 }

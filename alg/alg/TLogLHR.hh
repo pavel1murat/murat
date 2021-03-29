@@ -14,7 +14,7 @@ public:
   enum {
 	MaxNx   = 200,			// max Poisson bin
 	MaxNy   = 10000,		// max steps in Mu
-	NxLogLH = 1000,			// N(bins) in the LogLHr 
+	NxLogLH = 3000,			// N(bins) in the LogLHr 
   };   
 
   struct Hist_t {
@@ -27,6 +27,7 @@ public:
     TH1D*    fLogLHb;
     TH1D*    fLogLHs;
     TH1D*    fLogLHr;
+    TH1D*    fLogLHw;
 
     TH1D*    fPTail;                     // tail probability
   } fHist;
@@ -73,12 +74,6 @@ public:
   void   PrintProbs(int N);
 
   double PTail(double LogLHr);
-
-  // plot discovery probability for a given background and signal range
-  // calling makes sense only if CL=-1
-  // discovery corresponds to prob=50%
-
-  void   DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps= 10);
 
   // it is up to you to make sure NSteps < 10000
   void ConfInterval(double Bgr, int N, double SMin, double SMax, int NSteps, double* Prob);

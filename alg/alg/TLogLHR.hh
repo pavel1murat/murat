@@ -12,39 +12,54 @@
 class TLogLHR : public TNamed {
 public:
   enum {
-	MaxNx   = 200,			// max Poisson bin
+	MaxNx   = 20,			// max Poisson bin
 	MaxNy   = 10000,		// max steps in Mu
 	NxLogLH = 3000,			// N(bins) in the LogLHr 
-  };   
+  };
+
+  struct MData_t {
+    int    N;                           // measured number of N
+    double mub;                         // poisson mean of the distributon from which N has been sampled
+    double lhb;                         // likelihood : exp(-mu)*mu^N/N!
+    double log_lhb;                     // log likelihood;
+    double mus;
+    double lhs;
+    double log_lhs;                     // log likelihood;
+
+    double log_lhr() {
+      if (lhb > 1.e-12) return log_lhb - log_lhs ;
+      else              return -30;
+    }
+  };
 
   struct Hist_t {
 
-    TH1D*    fLHPoi[MaxNx];  // i-th hist is a poisson distribuion for <mu> = i
-    
-    TH1D*    fLHb;
-    TH1D*    fLHs;
+    TH1D*    fLHb;                      // Poisson dist for the 'best' hyp
+    TH1D*    fLHs;			// Poisson dist for the hyp with signal
+    TH1D*    fLHt;			// for future
 
     TH1D*    fLogLHb;
     TH1D*    fLogLHs;
     TH1D*    fLogLHr;
     TH1D*    fLogLHw;
+    TH1D*    fLogLHn;			// poisson N for a given log(lhr)
 
     TH1D*    fPTail;                     // tail probability
   } fHist;
   
   double   fCL;				// confidence level
-  double   fMeanBgr;
-  double   fMeanSig;
+  double   fMuB;
+  double   fMuS;
   
   TRandom3 fRn;
 
-  double   fBestSig  [MaxNx];
-  double   fBestProb [MaxNx];
-
-  double   fLhRatio  [MaxNx];
-
   double   fLHb   [MaxNx];		//
   double   fLHs   [MaxNx];
+  double   fLHt   [MaxNx];
+
+  MData_t* fData  [MaxNx];              // use instead of histograms
+
+  double   fFactorial[MaxNx];
 
   // X(Bg) - Poisson random number sampled from Bg     distribution
   // X(Bs) - Poisson random number sampled from Bg+Sig distribution
@@ -52,9 +67,6 @@ public:
   long int fNExp;	      // N(pseudo experiments) to throw
 
   int      fDebugLevel;
-  int      fIMin;
-  int      fIMax;
-  int      fNSummed;          // likely, fIMax-fIMin+1
   double   fProb;
 //-----------------------------------------------------------------------------
 // functions
@@ -65,15 +77,13 @@ public:
   
   ~TLogLHR() {};
 
-  void   Init           (double Bgr , double Sig);
-  void   InitPoissonDist(double Mean, double* Prob, int NMax);
+  void   Init           (double Bgr , double Sig, int N, MData_t** Data);
+  
+  void   InitPoissonDist(double Bgr, double Sig, int N, double* Prob, MData_t** Data, int NMax);
 
-  void   InitLogLHr(double* Num, double* Denom);
+  void   PrintData(MData_t** Data, int MaxInd = -1);
 
-  void   PrintData(const char* Title, char DataType, void* Data, int MaxInd);
-  void   PrintProbs(int N);
-
-  double PTail(double LogLHr);
+  double PTail(MData_t** Data, double LogLHr);
 
   // it is up to you to make sure NSteps < 10000
   void ConfInterval(double Bgr, int N, double SMin, double SMax, int NSteps, double* Prob);

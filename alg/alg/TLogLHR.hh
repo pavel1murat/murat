@@ -33,7 +33,7 @@ public:
   };
 
   struct Hist_t {
-
+    
     TH1D*    fLHb;                      // Poisson dist for the 'best' hyp
     TH1D*    fLHs;			// Poisson dist for the hyp with signal
     TH1D*    fLHt;			// for future
@@ -72,21 +72,23 @@ public:
 // functions
 //-----------------------------------------------------------------------------
   TLogLHR(const char* Name,
-		   double      CL,
-		   int         DebugLevel = 0);
+	  double      CL,
+	  int         DebugLevel = 0);
   
   ~TLogLHR() {};
 
-  void   Init           (double Bgr , double Sig, int N, MData_t** Data);
+  void   Init           (double Bgr , double Sig, int N, double MuBest, MData_t** Data);
   
   void   InitPoissonDist(double Bgr, double Sig, int N, double* Prob, MData_t** Data, int NMax);
 
   void   PrintData(MData_t** Data, int MaxInd = -1);
 
   double PTail(MData_t** Data, double LogLHr);
-
+  
   // it is up to you to make sure NSteps < 10000
-  void ConfInterval(double Bgr, int N, double SMin, double SMax, int NSteps, double* Prob);
+  void ConfInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob);
+
+  void MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob);
   
   ClassDef(TLogLHR,0)
 };

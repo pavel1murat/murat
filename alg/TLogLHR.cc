@@ -53,15 +53,16 @@ TLogLHR::TLogLHR(const char* Name, double CL, int DebugLevel):
   fNExp         = 10000000;
 }
 
-void TLogLHR::InitPoissonDist(double Bgr, double Sig, int N, double* Prob, MData_t** Data, int NMax) {
+void TLogLHR::InitPoissonDist(double MuB, double MuS, int N, double* Prob, MData_t** Data, int NMax) {
   // N<0 means no prior knowledge 
   // array 'Prob' should have at least NMax elements
   // 'N' is the number of measured events - it constrains the background fluctuations
   // and truncates the distribution
+  // MuB+Mus - sampled distribution
 
-  printf(">>> InitPoissonDist: Bgr=%12.5e Sig=%12.5e N=%3i,NMax=%5i\n",Bgr,Sig,N,NMax);
+  printf(">>> InitPoissonDist: MuB=%12.5e MuS=%12.5e N=%3i,NMax=%5i\n",MuB,MuS,N,NMax);
 
-  double mean = Bgr+Sig;
+  double mean = MuB+MuS;
   Prob[0] = TMath::Exp(-mean);
   if (N < 0) {
     for (int i=1; i<NMax; i++) {
@@ -70,25 +71,36 @@ void TLogLHR::InitPoissonDist(double Bgr, double Sig, int N, double* Prob, MData
     }
   }
   else {
-    // if N >= 0, we know that in the performed measurement, background is not higher than N
-    // so the measurement constrains the probability calculation
+//-----------------------------------------------------------------------------
+// if N >= 0, we know that in the performed measurement, background is not higher
+// than N so the measurement constrains the probability calculation
+// if N<i, the measurement tells that the expected Poisson distribution is different
+// from the default one
+//-----------------------------------------------------------------------------
     for (int i=1; i<NMax; i++) {
-      Prob[i] = 0;
-      if (i <= N) Prob[i] = Prob[0]*pow(mean,i)/fFactorial[i];
+					// 'i' - bin in the expected Poisson distribution
+      double sum = 0;
+      // for the moment, ignore the bias
+      int kmax   = i; // (N >= i) ? i : N;
+      
+      for (int k=0; k<=kmax; k++) {
+	sum += pow(MuB,k)*pow(MuS,i-k)/(fFactorial[k]*fFactorial[i-k]);
+      }
+      Prob[i] = TMath::Exp(-mean)*sum;
     }
   }
 }
 
 
-void TLogLHR::Init(double MuB, double MuS, int N, MData_t** Data) {
+void TLogLHR::Init(double MuB, double MuS, int N, double MuBest, MData_t** Data) {
   // 'N' is the 'measured number of events'
 
   fMuB = MuB;
   fMuS = MuS;
   printf("INit: MuB=%12.5e MuS: %12.5e N:%3i\n",MuB,MuS,N);
   
-  InitPoissonDist(MuB,  0, N, fLHb, fData, MaxNx);
-  InitPoissonDist(MuB,MuS, N, fLHs, fData, MaxNx);
+  InitPoissonDist(MuB,MuBest, N, fLHb, fData, MaxNx);  // mubest normally 0
+  InitPoissonDist(MuB,MuS   , N, fLHs, fData, MaxNx);
 //-----------------------------------------------------------------------------
 // [re]-initialize 1D histograms with the probabilities and integral probabilities
 //-----------------------------------------------------------------------------
@@ -111,7 +123,6 @@ void TLogLHR::Init(double MuB, double MuS, int N, MData_t** Data) {
     fData[i]->lhs     = fLHs[i];
     fData[i]->log_lhs = log_lhs;
   }
-
 //-----------------------------------------------------------------------------
 // order in log_lhs
 //-----------------------------------------------------------------------------
@@ -150,6 +161,8 @@ void TLogLHR::PrintData(MData_t** Data, int MaxInd) {
 
 double TLogLHR::PTail(MData_t** Data, double LogLHr) {
   // Data are ordered in increasing log_lhs
+  // MuS - sampled distribution - it defines Data[i]->lhs;
+  
   double prob(0);
   
   for (int i=0; i<MaxNx; i++) {
@@ -187,17 +200,55 @@ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSte
 //-----------------------------------------------------------------------------
     printf("is = %3i, sig=%12.5e Bgr = %12.5e N = %3i\n",is,sig,Bgr,N);
     
-    Init(Bgr,sig,-1,fData);
+    Init(Bgr,sig,N,0,fData);
 
-    //    double log_lhs = fData[N]->log_lhs;          // - log(lh_best);
     double log_lhr = log(1-fCL);
 //-----------------------------------------------------------------------------
 // ptail - ratio of probabilites integrated over the region x < log_lhr
 //-----------------------------------------------------------------------------
     Prob[is]       = PTail(fData,log_lhr);
     
-    printf("is, log_lhr, prob: %3i %12.5e %12.5e\n",
-	   is, log_lhr, Prob[is]);
+    printf("is, log_lhr, prob: %3i %12.5e %12.5e\n",is,log_lhr,Prob[is]);
+  }
+
+  printf(" >>> TLogLHR::ConfInterval : END\n");
+}
+
+
+
+void TLogLHR::MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob) {
+  // 'Bgr' : background expectation
+  // 'N'   : number of measured events
+  // assume that the "measured" signal s = N-Bgr;
+
+  double step(0);
+
+  double best_sig = NMeas - Bgr;
+  if (best_sig < 0) best_sig = 0;
+
+  if (NSteps > 1) step = (SMax-SMin)/(NSteps-1);
+//-----------------------------------------------------------------------------
+// measurement result, computation-wise, this place can be optimized 
+//-----------------------------------------------------------------------------
+  printf(">>> MeasInterval   : Bgr=%12.5e NMeas = %5i SMin=%12.5e\n",Bgr,NMeas,SMin);
+ 
+  for (int is=0; is<NSteps; is++) {
+    double sig = SMin+is*step;
+//-----------------------------------------------------------------------------
+// likelihood corresponding to the measurement of N events 
+// we have an estimate of B, and know that background didn't fluctuate above N
+//-----------------------------------------------------------------------------
+    printf("is = %3i, sig=%12.5e Bgr = %12.5e NMeas = %3i\n",is,sig,Bgr,NMeas);
+    
+    Init(Bgr,best_sig,NMeas,sig,fData);
+
+    double log_lhr = log(1-fCL);
+//-----------------------------------------------------------------------------
+// ptail - ratio of probabilites integrated over the region x < log_lhr
+//-----------------------------------------------------------------------------
+    Prob[is]       = PTail(fData,log_lhr);
+    
+    printf("is, log_lhr, prob: %3i %12.5e %12.5e\n",is,log_lhr,Prob[is]);
   }
 
   printf(" >>> TLogLHR::ConfInterval : END\n");

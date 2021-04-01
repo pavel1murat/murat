@@ -59,6 +59,8 @@ public:
 
   MData_t* fData  [MaxNx];              // use instead of histograms
 
+  double   fMeanLLHR;
+
   double   fFactorial[MaxNx];
 
   // X(Bg) - Poisson random number sampled from Bg     distribution
@@ -86,9 +88,14 @@ public:
   double PTail(MData_t** Data, double LogLHr);
   
   // it is up to you to make sure NSteps < 10000
-  void ConfInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob);
+  void ConfInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps,
+		    double* Prob, double* MeanLLHR);
 
-  void MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob);
+  void MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps,
+		    double* Prob, double* MeanLLHR);
+
+  void DiscoveryProbCLb(double Bgr, double SMin, double SMax, int NSteps);
+  void DiscoveryProbCLs(double Bgr, double SMin, double SMax, int NSteps);
   
   ClassDef(TLogLHR,0)
 };

@@ -81,7 +81,8 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, int N, double* Prob, MData
 					// 'i' - bin in the expected Poisson distribution
       double sum = 0;
       // for the moment, ignore the bias
-      int kmax   = i; // (N >= i) ? i : N;
+      // int kmax   = i; // (N >= i) ? i : N;
+      int kmax   = (N >= i) ? i : N;
       
       for (int k=0; k<=kmax; k++) {
 	sum += pow(MuB,k)*pow(MuS,i-k)/(fFactorial[k]*fFactorial[i-k]);
@@ -104,6 +105,13 @@ void TLogLHR::Init(double MuB, double MuS, int N, double MuBest, MData_t** Data)
 //-----------------------------------------------------------------------------
 // [re]-initialize 1D histograms with the probabilities and integral probabilities
 //-----------------------------------------------------------------------------
+  fHist.fLHb->Reset();
+  fHist.fLHs->Reset();
+  fHist.fLogLHr->Reset();
+  
+  double s  = 0;
+  double sw = 0;
+  
   for (int i=0; i<MaxNx; i++) {
     fHist.fLHb->SetBinContent(i+1,fLHb[i]);
     fHist.fLHs->SetBinContent(i+1,fLHs[i]);
@@ -122,7 +130,14 @@ void TLogLHR::Init(double MuB, double MuS, int N, double MuBest, MData_t** Data)
     fData[i]->mus     = MuS;
     fData[i]->lhs     = fLHs[i];
     fData[i]->log_lhs = log_lhs;
+
+    fHist.fLogLHr->Fill(fData[i]->log_lhr(),fLHs[i]);
+
+    s   += fLHs[i]*fData[i]->log_lhr();
+    sw  += fLHs[i];
   }
+
+  fMeanLLHR           = s/sw;
 //-----------------------------------------------------------------------------
 // order in log_lhs
 //-----------------------------------------------------------------------------
@@ -179,7 +194,7 @@ double TLogLHR::PTail(MData_t** Data, double LogLHr) {
 }
 
 
-void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSteps, double* Prob) {
+ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSteps, double* Prob, double* MeanLLHR) {
   // 'Bgr' : background expectation
   // 'N'   : number of measured events
   // assume that the "measured" signal s = N-Bgr;
@@ -207,8 +222,9 @@ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSte
 // ptail - ratio of probabilites integrated over the region x < log_lhr
 //-----------------------------------------------------------------------------
     Prob[is]       = PTail(fData,log_lhr);
+    MeanLLHR[is]   = fMeanLLHR;
     
-    printf("is, log_lhr, prob: %3i %12.5e %12.5e\n",is,log_lhr,Prob[is]);
+    printf("is, log_lhr, prob, <logLHr>: %3i %12.5e %12.5e %12.5e\n",is,log_lhr,Prob[is],MeanLLHR[is]);
   }
 
   printf(" >>> TLogLHR::ConfInterval : END\n");
@@ -216,7 +232,7 @@ void TLogLHR::ConfInterval(double Bgr, int N, double SMin, double SMax, int NSte
 
 
 
-void TLogLHR::MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob) {
+ void TLogLHR::MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps, double* Prob, double* MeanLLHR) {
   // 'Bgr' : background expectation
   // 'N'   : number of measured events
   // assume that the "measured" signal s = N-Bgr;
@@ -232,6 +248,8 @@ void TLogLHR::MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int 
 //-----------------------------------------------------------------------------
   printf(">>> MeasInterval   : Bgr=%12.5e NMeas = %5i SMin=%12.5e\n",Bgr,NMeas,SMin);
  
+  double log_lhr = log(1-fCL);   // threshold
+  
   for (int is=0; is<NSteps; is++) {
     double sig = SMin+is*step;
 //-----------------------------------------------------------------------------
@@ -241,15 +259,132 @@ void TLogLHR::MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int 
     printf("is = %3i, sig=%12.5e Bgr = %12.5e NMeas = %3i\n",is,sig,Bgr,NMeas);
     
     Init(Bgr,best_sig,NMeas,sig,fData);
-
-    double log_lhr = log(1-fCL);
 //-----------------------------------------------------------------------------
 // ptail - ratio of probabilites integrated over the region x < log_lhr
 //-----------------------------------------------------------------------------
     Prob[is]       = PTail(fData,log_lhr);
+    MeanLLHR[is]   = fMeanLLHR;
     
-    printf("is, log_lhr, prob: %3i %12.5e %12.5e\n",is,log_lhr,Prob[is]);
+    printf("is, log_lhr, prob, <llhr>: %3i %12.5e %12.5e %12.5e\n",is,log_lhr,Prob[is],fMeanLLHR);
   }
 
   printf(" >>> TLogLHR::ConfInterval : END\n");
+}
+
+
+void TLogLHR::DiscoveryProbCLb(double Bgr, double SMin, double SMax, int NSteps) {
+//-----------------------------------------------------------------------------
+// in general, need to scan a range of signals, call this function multiple times
+// just calculate the probability for background to be not conssitent with the measurement
+//-----------------------------------------------------------------------------
+  double step = (SMax-SMin)/NSteps;
+
+  double x[10000], y[10000];
+
+  TH1D* hist = new TH1D("hist","hist",1000,-90,10);
+
+  int nx = NSteps+1;
+  double p0 = TMath::Exp(-Bgr);
+  for (int ix=0; ix<nx; ix++) {
+    double sig = SMin+ix*step;
+    double tot = Bgr+sig;
+//-----------------------------------------------------------------------------
+// ndisc: number of "discovery experiments", pseudoexperiments in which NULL
+// hypothesis is excluded at (1-fCL) level
+//-----------------------------------------------------------------------------
+    long int ndisc = 0;			
+    hist->Reset();
+    
+    for (int i=0; i<fNExp; i++) {
+      int nmeas = fRn.Poisson(tot);
+//-----------------------------------------------------------------------------
+// calculate likelihood of the background-only hypothesis, compare it to 
+//-----------------------------------------------------------------------------
+      double p     = p0*pow(Bgr,nmeas)/fFactorial[nmeas];
+      double log_p = log(p);
+      hist->Fill(log_p);
+
+      if (p < 1-fCL) ndisc += 1;
+    }
+    
+    double prob = double(ndisc)/double(fNExp);
+
+    x[ix] = sig;
+    y[ix] = prob;
+  }
+
+  TGraph* gr = new TGraph(nx,x,y);
+
+  gr->SetName(Form("gr_bgr_%06i_%s",int(Bgr*1000),GetName()));
+  gr->SetTitle(Form("CLb discovery prob for bgr=%5.3f events",Bgr));
+
+  gr->SetMarkerStyle(20);
+  gr->Draw("alp");
+
+  gPad->SetGridy(1);
+  gPad->SetGridx(1);
+
+  gPad->Modified();
+  gPad->Update();
+}
+
+void TLogLHR::DiscoveryProbCLs(double Bgr, double SMin, double SMax, int NSteps) {
+//-----------------------------------------------------------------------------
+// in general, need to scan a range of signals, call this function multiple times
+// just calculate the probability for background to be not conssitent with the measurement
+//-----------------------------------------------------------------------------
+  double step = (SMax-SMin)/NSteps;
+
+  double x[10000], y[10000];
+
+  TH1D* hist = new TH1D("h_cls","log LHR cls",1000,-90,10);
+
+  int nx = NSteps+1;
+  double p0 = TMath::Exp(-Bgr);
+  for (int ix=0; ix<nx; ix++) {
+    double sig = SMin+ix*step;
+    double tot = Bgr+sig;
+    double p1  = TMath::Exp(-tot);
+//-----------------------------------------------------------------------------
+// ndisc: number of "discovery experiments", pseudoexperiments in which NULL
+// hypothesis is excluded at (1-fCL) level
+//-----------------------------------------------------------------------------
+    long int ndisc = 0;			
+    hist->Reset();
+    
+    for (int i=0; i<fNExp; i++) {
+      int nmeas = fRn.Poisson(Bgr);
+//-----------------------------------------------------------------------------
+// calculate likelihood of the background-only hypothesis, compare it to 
+//-----------------------------------------------------------------------------
+      double p_b     = p0*pow(Bgr,nmeas)/fFactorial[nmeas];
+      double p_bs    = p1*pow(tot,nmeas)/fFactorial[nmeas];
+
+      double lhr     = p_bs/p_b;
+      
+      double log_lhr = log(lhr);
+      hist->Fill(log_lhr);
+
+      if (lhr < 1-fCL) ndisc += 1;
+    }
+    
+    double prob = double(ndisc)/double(fNExp);
+
+    x[ix] = sig;
+    y[ix] = prob;
+  }
+
+  TGraph* gr = new TGraph(nx,x,y);
+
+  gr->SetName(Form("gr_bgr_%06i_%s",int(Bgr*1000),GetName()));
+  gr->SetTitle(Form("LogLHR CLs discovery prob for bgr=%5.3f events",Bgr));
+
+  gr->SetMarkerStyle(20);
+  gr->Draw("alp");
+
+  gPad->SetGridy(1);
+  gPad->SetGridx(1);
+
+  gPad->Modified();
+  gPad->Update();
 }

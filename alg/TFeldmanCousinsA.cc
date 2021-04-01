@@ -336,7 +336,7 @@ void TFeldmanCousinsA::DiscoveryProb(double Bgr, double SMin, double SMax, int N
   TGraph* gr = new TGraph(nx,x,y);
 
   gr->SetName(Form("gr_bgr_%06i_%s",int(Bgr*1000),GetName()));
-  gr->SetTitle(Form("discovery prob for bgr=%5.3f events",Bgr));
+  gr->SetTitle(Form("FC discovery prob for bgr=%5.3f events",Bgr));
 
   gr->SetMarkerStyle(20);
   gr->Draw("alp");

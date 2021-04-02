@@ -14,7 +14,7 @@ TLogLHR*          llhr;
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-void fc_004(double B=0.1, int N = 5.0, double  SMin = 0, double SMax = 20, double NSteps = 100) {
+void fc_004(double B=0.1, double N = 5.0, double  SMin = 0, double SMax = 20, double NSteps = 100) {
 
   if (!gInterpreter->IsLoaded("lib/libmurat_alg.so")) gInterpreter->Load("lib/libmurat_alg.so");
   
@@ -43,6 +43,7 @@ void fc_004(double B=0.1, int N = 5.0, double  SMin = 0, double SMax = 20, doubl
   TCanvas* c = new TCanvas("c_fc_004","FC 004",1600,900);
   c->Divide(2,1);
 
+  if (! c->GetShowEventStatus()) c->ToggleEventStatus();
   c->cd(1); 
   h_prob->Draw();
 
@@ -54,7 +55,7 @@ void fc_004(double B=0.1, int N = 5.0, double  SMin = 0, double SMax = 20, doubl
 //-----------------------------------------------------------------------------
 // try upper limit - set nsteps = 1, SMin = 0;
 //-----------------------------------------------------------------------------
-void fc_005(double CL, double B=0.1, int N = 5, double  SMin = 0, double SMax = 0, double NSteps = 1) {
+void fc_005(double CL, double B=0.1, double N = -1, double  SMin = 0, double SMax = 0, double NSteps = 1) {
 
   if (!gInterpreter->IsLoaded("lib/libmurat_alg.so")) gInterpreter->Load("lib/libmurat_alg.so");
   
@@ -85,9 +86,10 @@ void fc_005(double CL, double B=0.1, int N = 5, double  SMin = 0, double SMax = 
 
   TCanvas* c = new TCanvas("c_fc_005","FC 005",1400,700);
   c->Divide(2,1);
+  if (! c->GetShowEventStatus()) c->ToggleEventStatus();
 
   c->cd(1);
-  gPad->SetLogy(1);
+  // gPad->SetLogy(1);
   gPad->SetGridy(1);
   gPad->SetCrosshair(1);
 
@@ -102,7 +104,7 @@ void fc_005(double CL, double B=0.1, int N = 5, double  SMin = 0, double SMax = 
 //-----------------------------------------------------------------------------
 // try measurement
 //-----------------------------------------------------------------------------
-void fc_006(double CL, double B=0.1, int N = 5, double  SMin = 0, double SMax = 0, double NSteps = 1) {
+void fc_006(double CL, double B=0.1, double N = 5, double  SMin = 0, double SMax = 0, double NSteps = 1) {
 
   if (!gInterpreter->IsLoaded("lib/libmurat_alg.so")) gInterpreter->Load("lib/libmurat_alg.so");
   
@@ -134,6 +136,8 @@ void fc_006(double CL, double B=0.1, int N = 5, double  SMin = 0, double SMax = 
   TCanvas* c = new TCanvas("c_fc_006","FC 006",1400,600);
   //  gPad->SetLogy(1);
   c->Divide(2,1);
+  if (! c->GetShowEventStatus()) c->ToggleEventStatus();
+
   c->cd(1);
   gPad->SetGridx(1);
   gPad->SetGridy(1);

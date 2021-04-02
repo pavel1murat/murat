@@ -12,9 +12,9 @@
 class TLogLHR : public TNamed {
 public:
   enum {
-	MaxNx   = 20,			// max Poisson bin
+	MaxNx   =   100,		// max Poisson bin
 	MaxNy   = 10000,		// max steps in Mu
-	NxLogLH = 3000,			// N(bins) in the LogLHr 
+	NxLogLH =  5000,		// N(bins) in the LogLHr 
   };
 
   struct MData_t {
@@ -27,8 +27,8 @@ public:
     double log_lhs;                     // log likelihood;
 
     double log_lhr() {
-      if (lhb > 1.e-12) return log_lhb - log_lhs ;
-      else              return -30;
+      if (lhb > 0) return log_lhb - log_lhs ;
+      else         return -100;
     }
   };
 
@@ -79,19 +79,20 @@ public:
   
   ~TLogLHR() {};
 
-  void   Init           (double Bgr , double Sig, int N, double MuBest, MData_t** Data);
+  void   Init           (double Bgr , double Sig, double NMeas, double MuBest, MData_t** Data);
   
-  void   InitPoissonDist(double Bgr, double Sig, int N, double* Prob, MData_t** Data, int NMax);
+  void   InitPoissonDist(double Bgr, double Sig, double NMeas, double* Prob, MData_t** Data, int NMax);
 
   void   PrintData(MData_t** Data, int MaxInd = -1);
 
   double PTail(MData_t** Data, double LogLHr);
   
   // it is up to you to make sure NSteps < 10000
-  void ConfInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps,
+  
+  void ConfInterval(double Bgr, double NMeas, double SMin, double SMax, int NSteps,
 		    double* Prob, double* MeanLLHR);
 
-  void MeasInterval(double Bgr, int NMeas, double SMin, double SMax, int NSteps,
+  void MeasInterval(double Bgr, double NMeas, double SMin, double SMax, int NSteps,
 		    double* Prob, double* MeanLLHR);
 
   void DiscoveryProbCLb(double Bgr, double SMin, double SMax, int NSteps);

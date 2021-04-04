@@ -41,13 +41,13 @@ public:
     TH1D*    fLogLHb;
     TH1D*    fLogLHs;
     TH1D*    fLogLHr;
-    TH1D*    fLogLHw;
-    TH1D*    fLogLHn;			// poisson N for a given log(lhr)
 
     TH1D*    fPTail;                     // tail probability
   } fHist;
   
   double   fCL;				// confidence level
+  double   fLog1mCL;			// log(1-fCL)
+  
   double   fMuB;
   double   fMuS;
   
@@ -69,7 +69,6 @@ public:
   long int fNExp;	      // N(pseudo experiments) to throw
 
   int      fDebugLevel;
-  double   fProb;
 //-----------------------------------------------------------------------------
 // functions
 //-----------------------------------------------------------------------------
@@ -79,24 +78,27 @@ public:
   
   ~TLogLHR() {};
 
-  void   Init           (double Bgr , double Sig, double NMeas, double MuBest, MData_t** Data);
+  void   SetCL          (double CL);
+
+  void   Init           (double Bgr , double Sig, double NMeas, double MuBest);
   
-  void   InitPoissonDist(double Bgr, double Sig, double NMeas, double* Prob, MData_t** Data, int NMax);
+  void   InitPoissonDist(double Bgr, double Sig, double NMeas, double* Prob, int NMax);
 
   void   PrintData(MData_t** Data, int MaxInd = -1);
 
   double PTail(MData_t** Data, double LogLHr);
   
   // it is up to you to make sure NSteps < 10000
-  
-  void ConfInterval(double Bgr, double NMeas, double SMin, double SMax, int NSteps,
-		    double* Prob, double* MeanLLHR);
 
-  void MeasInterval(double Bgr, double NMeas, double SMin, double SMax, int NSteps,
-		    double* Prob, double* MeanLLHR);
+  // determine point where S and (S+B) become 5-sigma different, assuming no prior knowledge
+  void ConfInterval(double MuB, double SMin, double SMax, int NSteps, double* Prob, double* MeanLLHR);
 
-  void DiscoveryProbCLb(double Bgr, double SMin, double SMax, int NSteps);
-  void DiscoveryProbCLs(double Bgr, double SMin, double SMax, int NSteps);
+  // determing 2-sided confidence interval, given the expected background and the measurement
+  void MeasInterval(double MuB, double NMeas, double SMin, double SMax, int NSteps, double* Prob, double* MeanLLHR);
+
+  // simplified routines, throw random numbers. I think, that is CLs
+  void DiscoveryProbCLb(double Bgr, double SMin, double SMax, int NPoints, double* MuS, double* Prob);
+  void DiscoveryProbCLs(double Bgr, double SMin, double SMax, int NPoints, double* MuS, double* Prob);
   
   ClassDef(TLogLHR,0)
 };

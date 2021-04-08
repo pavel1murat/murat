@@ -26,6 +26,7 @@ public:
   } fHist;
   
   double   fCL;
+  double   fLog1mCL;			// log(1-fCL)
   double   fMeanBgr;
   double   fMeanSig;
   
@@ -44,7 +45,7 @@ public:
   double   fCumBsProb[MaxNx];
 
   double   fFactorial[MaxNx];	        // precalculate to speed things up
-  double   fSBelt [2][MaxNx];		// belt boundaries
+  double   fSBelt    [MaxNx][2];	// belt boundaries
   
   // X(Bg) - Poisson random number sampled from Bg     distribution
   // X(Bs) - Poisson random number sampled from Bg+Sig distribution
@@ -67,12 +68,14 @@ public:
   
   ~TFeldmanCousinsA() {};
 
+  void   SetCL          (double CL);
+  
   void   Init           (double Bgr, double Sig);
   void   InitPoissonDist(double Mean, double* Prob, double* CumProb, int NMax);
 
   int    ConstructInterval(double Bgr, double Sig);
   
-  int    ConstructBelt    (double Bgr, double SMin, double SMax, int NSteps);
+  int    ConstructBelt    (double Bgr, double SMin, double SMax, int NPoints, double S[], double Belt[][2]);
 
   void   PrintData(const char* Title, char DataType, void* Data, int MaxInd);
   void   PrintProbs(int N);
@@ -81,10 +84,10 @@ public:
   // calling makes sense only if CL=-1
   // discovery corresponds to prob=50%
 
-  void   DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps= 10);
+  void   DiscoveryProb(double MuBB, double SMin, double SMax, int NPoints, double* MuS, double* Prob);
 
-  // make sure NSteps < 10000
-  double UpperLimit(double Bgr, double SMin, double SMax, int NSteps);
+  // make sure NPoints < 10000
+  double UpperLimit(double MuB, double SMin, double SMax, int NPoints);
   
   ClassDef(TFeldmanCousinsA,0)
 };

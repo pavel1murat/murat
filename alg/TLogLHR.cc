@@ -91,24 +91,22 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, double N, double* Prob, in
 //-----------------------------------------------------------------------------
 // background probability constrained by the measurement of N events (Zech'1989)
 //-----------------------------------------------------------------------------
-    double pbn = 0; for (int k=0; k<=N; k++) { pbn += pow(MuB,k)/fFactorial[k]; }
+    double pbn = 0; for (int k=0; k<=N; k++) { pbn += TMath::Exp(-MuB)*pow(MuB,k)/fFactorial[k]; }
     
     double pb[NMax];
     for (int i=0; i<NMax; i++) {
-      if (i <= N) pb[i] = pow(MuB,i)/fFactorial[i]/pbn;
+      if (i <= N) pb[i] = TMath::Exp(-MuB)*pow(MuB,i)/fFactorial[i]/pbn;
       else        pb[i] = 0;
     }
-					// 'i' - bin in the coonstrained Poisson distribution
+					// 'i' - bin in the constrained Poisson distribution
     for (int i=0; i<NMax; i++) {
       double pi = 0;
-					// an experiment observed N events, can only discuss i <= N
-      if (i <= N) {
-	int kmax = i;
-	for (int k=0; k<=kmax; k++) {
-	  pi = pi + pb[k]*pow(MuS,kmax-k)/fFactorial[kmax-k];
-	}
+					// an experiment observed N events, use pb[k]
+      for (int k=0; k<=i; k++) {
+	double ps = TMath::Exp(-MuS)*pow(MuS,i-k)/fFactorial[i-k];
+	pi        = pi + pb[k]*ps;
       }
-      Prob[i] = TMath::Exp(-MuS)*pi;
+      Prob[i] = pi;
     }
   }
 }
@@ -122,7 +120,7 @@ void TLogLHR::Init(double MuB, double MuS, double NMeas, double MuBest) {
   if (fDebugLevel > 0) printf("Init: MuB=%12.5e MuS: %12.5e NMeas:%12.5e\n",MuB,MuS,NMeas);
 
   if (fDebugLevel > 0) printf("Init: init fLHb\n");
-  InitPoissonDist(MuB,MuBest,NMeas,fLHb,MaxNx);  // mubest normally 0
+  InitPoissonDist(MuB,MuBest,NMeas,fLHb,MaxNx);           // mubest normally 0, not zero for a scan
 
   if (fDebugLevel > 0) printf("Init: init fLHs - best idea of the signal\n");
   InitPoissonDist(MuB,MuS   ,NMeas,fLHs,MaxNx);
@@ -391,3 +389,41 @@ void TLogLHR::DiscoveryProbCLs(double MuB, double SMin, double SMax, int NPoints
     Prob[ix] = double(ndisc)/double(fNExp);
   }
 }
+
+// void TLogLHR::DiscoveryProbCLs2(double MuB, double SMin, double SMax, int NPoints, double* MuS, double* Prob) {
+// //-----------------------------------------------------------------------------
+// // in general, need to scan a range of signals, call this function multiple times
+// // just calculate the probability for background to be not conssitent with the measurement
+// //-----------------------------------------------------------------------------
+//   double step = (NPoints > 1) ? (SMax-SMin)/(NPoints-1) : 0;
+  
+//   TH1D* hist = new TH1D("h_cls","log LHR cls",1000,-90,10);
+
+//   for (int ix=0; ix<NPoints; ix++) {
+//     MuS[ix] = SMin+ix*step;
+//     double tot = MuB+MuS[ix];
+// //-----------------------------------------------------------------------------
+// // ndisc: number of "discovery experiments", pseudoexperiments in which NULL
+// // hypothesis is excluded at (1-fCL) level
+// //-----------------------------------------------------------------------------
+//     long int ndisc = 0;			
+//     hist->Reset();
+
+//     for (int i=0; i<fNExp; i++) {
+//       int nmeas = fRn.Poisson(tot);
+// //-----------------------------------------------------------------------------
+// // calculate likelihood of the background-only hypothesis, compare it to 
+// //-----------------------------------------------------------------------------
+//       Init(MuB,MuS[ix],nmeas,0);
+// //-----------------------------------------------------------------------------
+// // calculate likelihood of the background-only hypothesis, compare it to 
+// //-----------------------------------------------------------------------------
+//       double ps     = fLHs[nmeas];
+//       if (ps > 0) {
+// 	double p   = fLHb[nmeas]/ps;
+//       	if (p < 1-fCL) ndisc += 1;
+//       }
+//     }
+//     Prob[ix] = double(ndisc)/double(fNExp);
+//   }
+// }

@@ -13,8 +13,7 @@ TFeldmanCousinsA::TFeldmanCousinsA(const char* Name, double CL, int DebugLevel):
   TNamed(Name,Name),
   fRn()
 {
-  if (CL > 0) fCL = CL;
-  else        fCL = 1-5.733e-7/2.; // always one-sided
+  SetCL(CL);
 
   fDebugLevel = DebugLevel;
 //-----------------------------------------------------------------------------
@@ -38,10 +37,19 @@ TFeldmanCousinsA::TFeldmanCousinsA(const char* Name, double CL, int DebugLevel):
   fNExp            = 10000000;
 }
 
+void  TFeldmanCousinsA::SetCL(double CL) {
+  double alpha = 1-TMath::Erf(5./sqrt(2));
+  
+  if (CL > 0) fCL = CL;
+  else        fCL = 1-alpha/2; // always two-sided: 1-5.7330314e-07
+
+  fLog1mCL        = log(1-fCL);
+}
+
+void TFeldmanCousinsA::InitPoissonDist(double Mean, double* Prob, double* CumProb, int N) {
 //-----------------------------------------------------------------------------
 // the length of 'Prob' should be at least N
 //-----------------------------------------------------------------------------
-void TFeldmanCousinsA::InitPoissonDist(double Mean, double* Prob, double* CumProb, int N) {
 
   for (int i=0; i<N; i++) {
     Prob[i] = TMath::Power(Mean,i)*TMath::Exp(-Mean)/fFactorial[i];
@@ -80,22 +88,21 @@ void TFeldmanCousinsA::Init(double Bgr, double Sig) {
 //-----------------------------------------------------------------------------
 // construct Feldman-Cousins belt
 //-----------------------------------------------------------------------------
-int TFeldmanCousinsA::ConstructInterval(double Bgr, double Sig) {
+int TFeldmanCousinsA::ConstructInterval(double MuB, double MuS) {
   int rc(0);				// return code
 
-  Init(Bgr,Sig);
+  Init(MuB,MuS);
   
   for (int ix=0; ix<MaxNx; ix++) {
-    double sbest = ix-fMeanBgr;
+    double sbest = ix-MuB;
 
     if (sbest <= 0) sbest = 0;
 
-    double sb = sbest+fMeanBgr;
+    double sb = sbest+MuB;
 
     fBestProb[ix] = TMath::Power(sb,ix)*TMath::Exp(-sb)/fFactorial[ix];
-
-    fBestSig[ix]  = sbest;
-    fLhRatio[ix]  = fBsProb[ix]/fBestProb[ix];
+    fBestSig [ix] = sbest;
+    fLhRatio [ix] = fBsProb[ix]/fBestProb[ix];
   }
 //-----------------------------------------------------------------------------
 // sort ranks
@@ -196,21 +203,22 @@ void TFeldmanCousinsA::PrintProbs(int N) {
   PrintData("Rank   " ,'i',fRank     ,N);
 }
 //-----------------------------------------------------------------------------
-// vary signal from SMin to SMax in NSteps, construct FC belt, fill belt histogram
+// vary signal from SMin to SMax in NPoints, construct FC belt, fill belt histogram
 // fBelt is the FC belt histogram
 //-----------------------------------------------------------------------------
-int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NSteps) {
+int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NPoints, double S[], double Belt[][2]) {
 
-  double step = (SMax-SMin)/NSteps;
+
+  double step = (NPoints > 1) ? (SMax-SMin)/(NPoints-1) : 1;
 
   if (fHist.fBelt) delete fHist.fBelt;
 
   fHist.fBelt = new TH2D(Form("h_belt_%s",GetName()),"FC belt",TFeldmanCousinsA::MaxNx,0,TFeldmanCousinsA::MaxNx,
- 	               NSteps,SMin-step/2,SMax-step/2);
+			 NPoints,SMin-step/2,SMax-step/2);
   
-  for (int iy=0; iy<NSteps; iy++) {
-    double s = SMin+(iy+0.5)*step;
-    ConstructInterval(Bgr,s);
+  for (int iy=0; iy<NPoints; iy++) {
+    S[iy] = SMin+(iy+0.5)*step;
+    ConstructInterval(Bgr,S[iy]);
     for (int ix=0; ix<MaxNx; ix++) {
       if ((ix < fIMin) || (ix > fIMax)) fBelt[iy][ix] = 0;
       else                              fBelt[iy][ix] = 1;
@@ -225,7 +233,7 @@ int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NS
     int iymin     = 0;
     int iymax     = 0;
     int inside    = 0;
-    for (int iy=0; iy<NSteps; iy++) {
+    for (int iy=0; iy<NPoints; iy++) {
       if (fBelt[iy][ix] > 0) {
 	if (inside == 0) {
 	  iymin   = iy;
@@ -241,10 +249,10 @@ int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NS
       }
     }
 
-    fSBelt[0][ix] = (iymin+0.5)*step;
-    fSBelt[1][ix] = (iymax+0.5)*step;
+    Belt[0][ix] = (iymin+0.5)*step;
+    Belt[1][ix] = (iymax+0.5)*step;
 
-    printf("ix, smin, smax : %3i %12.5f %12.5f\n",ix,fSBelt[0][ix],fSBelt[1][ix]);
+    printf("ix, smin, smax : %3i %12.5f %12.5f\n",ix,Belt[0][ix],Belt[1][ix]);
   }
 
   return 0;
@@ -252,14 +260,15 @@ int TFeldmanCousinsA::ConstructBelt(double Bgr, double SMin, double SMax, int NS
 
 
 //-----------------------------------------------------------------------------
-// constructing the FC belt assumes dividing the signal interval into NSteps,
+// constructing the FC belt assumes dividing the signal interval into NPoints,
 // make that a parameter
 // calculation of the median for low expected backgrounds doesn't have much sense,
 // so the mean is a preference
 //-----------------------------------------------------------------------------
-double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NSteps) {
+double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NPoints) {
 
-  ConstructBelt(Bgr, SMin, SMax, NSteps);
+  double s[NPoints];
+  ConstructBelt(Bgr, SMin, SMax, NPoints,s,fSBelt);
 //-----------------------------------------------------------------------------
 // generate background-only pseudo-experiments and plot the distribution
 // for the excluded signal strength
@@ -270,12 +279,12 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
     int rn = trn.Poisson(Bgr);
 
     if (fDebugLevel > 0) {
-      printf("Bgr, rn, fSBelt[0][rn], fSBelt[1][rn] = %12.5e %5i %12.5e %12.5e\n",
-	Bgr,rn,fSBelt[0][rn], fSBelt[1][rn]);
+      printf("Bgr, rn, fSBelt[rn][0], fSBelt[rn][1] = %12.5e %5i %12.5e %12.5e\n",
+	Bgr,rn,fSBelt[rn][0], fSBelt[rn][1]);
     }
 
     if (rn < MaxNx) {
-      h1->Fill(fSBelt[1][rn]);
+      h1->Fill(fSBelt[rn][1]);
     }
     else {
       printf("trouble, Bill Robertson: rn = %3i\n",rn);
@@ -298,21 +307,17 @@ double TFeldmanCousinsA::UpperLimit(double Bgr, double SMin, double SMax, int NS
 //-----------------------------------------------------------------------------
 // in general, need to scan a range of signals, call this function multiple times
 //-----------------------------------------------------------------------------
-void TFeldmanCousinsA::DiscoveryProb(double Bgr, double SMin, double SMax, int NSteps) {
+void TFeldmanCousinsA::DiscoveryProb(double MuB, double SMin, double SMax, int NPoints, double* MuS, double* Prob) {
 //-----------------------------------------------------------------------------
 // construct FC CL confidence interval (covering fCL) assuming Signal=0
 //-----------------------------------------------------------------------------
-  ConstructInterval(Bgr,0);
+  ConstructInterval(MuB,0);
 
-  double step = (SMax-SMin)/NSteps;
+  double step = (NPoints > 1) ? (SMax-SMin)/(NPoints-1) : 0;
 
-  double x[10000], y[10000];
-
-  int nx = NSteps+1;
-
-  for (int ix=0; ix<nx; ix++) {
-    double sig = SMin+ix*step;
-    double tot = Bgr+sig;
+  for (int ix=0; ix<NPoints; ix++) {
+    MuS[ix]   = SMin+ix*step;
+    double tot = MuB+MuS[ix];
 //-----------------------------------------------------------------------------
 // ndisc: number of "discovery experiments", pseudoexperiments in which NULL
 // hypothesis is excluded at (1-fCL) level
@@ -326,18 +331,6 @@ void TFeldmanCousinsA::DiscoveryProb(double Bgr, double SMin, double SMax, int N
 //-----------------------------------------------------------------------------
       if (rn > fIMax) ndisc ++;
     }
-    
-    double prob = double(ndisc)/double(fNExp);
-
-    x[ix] = sig;
-    y[ix] = prob;
+    Prob[ix] = double(ndisc)/double(fNExp);
   }
-
-  TGraph* gr = new TGraph(nx,x,y);
-
-  gr->SetName(Form("gr_bgr_%06i_%s",int(Bgr*1000),GetName()));
-  gr->SetTitle(Form("FC discovery prob for bgr=%5.3f events",Bgr));
-
-  gr->SetMarkerStyle(20);
-  gr->Draw("alp");
 }

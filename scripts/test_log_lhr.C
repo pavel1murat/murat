@@ -188,3 +188,89 @@ void fc_008(double CL, double MuB=0.1, double  SMin = 0, double SMax = 0, int NP
 }
 
 
+//-----------------------------------------------------------------------------
+// experiment with the expected background  N
+// scan a range of signal hypotheses [SMin,SMax] with a step 'Step'
+// determine FC propability of a CL-level observation of a signal
+//-----------------------------------------------------------------------------
+void fc_009(double CL, double MuB=0.1, double  SMin = 0, double SMax = 0, int NPoints = 1) {
+
+  if (!gInterpreter->IsLoaded("lib/libmurat_alg.so")) gInterpreter->Load("lib/libmurat_alg.so");
+  
+  if (fc == nullptr) fc = new TFeldmanCousinsA("fc_009",CL);
+  else               fc->SetCL(CL);
+
+  double  x[NPoints], prob[NPoints];
+  
+  fc->DiscoveryProb(MuB,SMin,SMax,NPoints,x,prob);
+
+  TCanvas* c = new TCanvas("c_fc_009","FC 009",1100,800);
+  if (! c->GetShowEventStatus()) c->ToggleEventStatus();
+  gPad->SetCrosshair(1);
+
+  TGraph* gr = new TGraph(NPoints,x,prob);
+
+  gr->SetName(Form("gr_bgr_%06i_fc_009",int(MuB*1000)));
+  gr->SetTitle(Form("FC discovery prob for bgr=%5.3f events",MuB));
+
+  gr->SetMarkerStyle(20);
+  gr->Draw("alp");
+
+  gPad->SetGridy(1);
+  gPad->SetGridx(1);
+
+  gPad->Modified();
+  gPad->Update();
+}
+
+//-----------------------------------------------------------------------------
+// construct and plot FC belt for a given MuB
+//-----------------------------------------------------------------------------
+void fc_010(double CL, double MuB=0.1, double  SMin = 0, double SMax = 0, int NPoints = 1) {
+
+  if (!gInterpreter->IsLoaded("lib/libmurat_alg.so")) gInterpreter->Load("lib/libmurat_alg.so");
+  
+  if (fc == nullptr) fc = new TFeldmanCousinsA("fc_009",CL);
+  else               fc->SetCL(CL);
+
+  double  fcb[NPoints][2], mu[NPoints],s[NPoints];
+  
+  fc->ConstructBelt(MuB,SMin,SMax,NPoints,mu,fcb);
+
+  TCanvas* c = new TCanvas("c_fc_010","FC 010",1000,800);
+  if (! c->GetShowEventStatus()) c->ToggleEventStatus();
+  gPad->SetCrosshair(1);
+
+  fc->fHist.fBelt->SetFillColor(kBlue+2);
+  fc->fHist.fBelt->SetFillStyle(3001);
+
+  fc->fHist.fBelt->SetTitle(Form("FC belt, #mu_{B} = %6.2f",MuB));
+  fc->fHist.fBelt->Draw("box");
+
+  TGraph *grshade = new TGraph(2*NPoints);
+
+  for (int i=0;i<NPoints;i++) {
+    printf("mu, smin, smax: %12.5e %12.5e %12.5e\n",mu[i],fcb[i][0],fcb[i][1]);
+  //   grshade->SetPoint(i  ,x[i            ],fcb[i][1]);
+  //   grshade->SetPoint(n+i,x[2*NPoints-i-1],fcb[i][0]);
+  }
+  
+  // grshade->SetFillStyle(3013);
+  // grshade->SetFillColor(16);
+  // grshade->Draw("f");
+
+   // TGraph* gr = new TGraph(NPoints,x,prob);
+
+  // gr->SetName(Form("gr_bgr_%06i_fc_009",int(MuB*1000)));
+  // gr->SetTitle(Form("FC discovery prob for bgr=%5.3f events",MuB));
+
+  // gr->SetMarkerStyle(20);
+  // gr->Draw("alp");
+
+  // gPad->SetGridy(1);
+  // gPad->SetGridx(1);
+
+  // gPad->Modified();
+  // gPad->Update();
+}
+

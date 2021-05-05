@@ -12,7 +12,7 @@
 class TLogLHR : public TNamed {
 public:
   enum {
-	MaxNx   =   100,		// max Poisson bin
+	MaxNx   =    50,		// max Poisson bin  (was 100)
 	MaxNy   = 10000,		// max steps in Mu
 	NxLogLH =  5000,		// N(bins) in the LogLHr 
   };

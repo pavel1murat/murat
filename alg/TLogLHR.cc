@@ -109,6 +109,7 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, double N, double* Prob, in
       Prob[i] = pi;
     }
   }
+  if (fDebugLevel > 0) printf(">>> InitPoissonDist: EXIT\n");
 }
 
 
@@ -276,21 +277,21 @@ void TLogLHR::ConfInterval(double Bgr, double SMin, double SMax, int NPoints, do
 
 
 
- void TLogLHR::MeasInterval(double Bgr, double NMeas, double SMin, double SMax, int NPoints, double* Prob, double* MeanLLHR) {
-  // 'Bgr' : background expectation
+ void TLogLHR::MeasInterval(double MuB, double NObs, double SMin, double SMax, int NPoints, double* Prob, double* MeanLLHR) {
+  // 'MuB' : background expectation
   // 'N'   : number of measured events
-  // assume that a measurement has been performed, so the "best measured signal" s = N-Bgr;
+  // assume that a measurement has been performed, so the "best measured signal" s = N-MuB;
 
   double step(0);
 
-  double best_sig = NMeas - Bgr;
+  double best_sig = NObs - MuB;
   if (best_sig < 0) best_sig = 0;
 
   if (NPoints > 1) step = (SMax-SMin)/(NPoints-1);
 //-----------------------------------------------------------------------------
 // measurement result, computation-wise, this place can be optimized 
 //-----------------------------------------------------------------------------
-  if (fDebugLevel > 0) printf(">>> MeasInterval   : Bgr=%12.5e NMeas = %12.5e SMin=%12.5e\n",Bgr,NMeas,SMin);
+  if (fDebugLevel > 0) printf(">>> MeasInterval   : MuB=%12.5e NObs = %12.5e SMin=%12.5e\n",MuB,NObs,SMin);
  
   for (int is=0; is<NPoints; is++) {
     double sig = SMin+is*step;
@@ -298,16 +299,15 @@ void TLogLHR::ConfInterval(double Bgr, double SMin, double SMax, int NPoints, do
 // likelihood corresponding to the measurement of N events 
 // we have an estimate of B, and know that background didn't fluctuate above N
 //-----------------------------------------------------------------------------
-    if (fDebugLevel > 10) printf("is = %3i, sig=%12.5e Bgr = %12.5e NMeas = %12.5e\n",is,sig,Bgr,NMeas);
-    
-    Init(Bgr,best_sig,NMeas,sig);
+    Init(MuB,best_sig,NObs,sig);
 //-----------------------------------------------------------------------------
 // ptail - ratio of probabilites integrated over the region x < log(1-fCL)
 //-----------------------------------------------------------------------------
     Prob[is]       = PTail(fData,fLog1mCL);
     MeanLLHR[is]   = fMeanLLHR;
     
-    if (fDebugLevel > 10) printf("is, fLog1mCL, prob, <llhr>: %3i %12.5e %12.5e %12.5e\n",is,fLog1mCL,Prob[is],fMeanLLHR);
+    if (fDebugLevel > 10) printf("is, MuB, sig, fLog1mCL, prob, <llhr> NObs llhr[NObs]: %3i %12.5e %12.5e %12.5e %12.5e %12.5e %5f %12.5e\n",
+				 is,MuB,sig,fLog1mCL,Prob[is],fMeanLLHR,NObs,fData[(int)NObs]->log_lhr());
   }
 
   if (fDebugLevel > 0) printf(" >>> TLogLHR::ConfInterval : END\n");

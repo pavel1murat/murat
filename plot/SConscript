@@ -3,29 +3,33 @@
 # Script to build the files found in this directory.
 #------------------------------------------------------------------------------
 import os
-Import('env')
+Import('murat_env')
 Import('stntuple_helper')
-
-helper = stntuple_helper(env);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
-rootlibs = env['ROOTLIBS']
-if ( not ("EG" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+def local_build():
+    local_env = murat_env.Clone()
 
-helper.handle_dictionaries();
+    rootlibs = local_env['ROOTLIBS']
+    if ( not ("EG" in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
 
-list_of_fortran_files = Glob('*.f',strings=True);
-list_of_cc_files      = Glob('*.cc',strings=True);
-skip_list             = [ ] # "plot_ejected_proton_spectrum.cc"]
-libs                  = ['Stntuple_val', 'Stntuple_alg', 
-                         'mu2e_Mu2eUtilities', 
-                         rootlibs, 
-                         'gfortran'
+    helper = stntuple_helper(local_env);
+    helper.handle_dictionaries();
+
+    list_of_fortran_files = Glob('*.f',strings=True);
+    list_of_cc_files      = Glob('*.cc',strings=True);
+    skip_list             = [ ] # "plot_ejected_proton_spectrum.cc"]
+    libs                  = ['Stntuple_val', 'Stntuple_alg', 
+                             'mu2e_Mu2eUtilities', 
+                             rootlibs, 
+                             'gfortran'
                          ];
 
-helper.compile_fortran(list_of_fortran_files,skip_list);
+    helper.compile_fortran(list_of_fortran_files,skip_list);
 
-helper.build_libs(list_of_cc_files,skip_list,libs);
+    helper.build_libs(list_of_cc_files,skip_list,libs);
+#------------------------------------------------------------------------------
+local_build();
+
 # print "tmpdir:"+env['TMP_LIB_DIR']

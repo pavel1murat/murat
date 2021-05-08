@@ -1,25 +1,30 @@
 #!/usr/bin/env python
 #
-# Script to build the files found in this directory.
+# handle build in this directory.
 #------------------------------------------------------------------------------
 import os
-Import('env')
+Import('murat_env')
 Import('stntuple_helper')
-
-debug=False;
-helper = stntuple_helper(env,debug);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
-rootlibs = env['ROOTLIBS']
+def local_build():
+    local_env = murat_env.Clone()
 
-if ( not ("Minuit" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Physics")+1,"Minuit");
+    rootlibs = local_env['ROOTLIBS']
+    if ( not ("Minuit" in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"Minuit");
 
-helper.handle_dictionaries(suffix=".h");
+    debug=False;
+    helper = stntuple_helper(local_env,debug);
 
-list_of_cc_files = Glob('*.cc',strings=True);
-skip_list        = []
-libs             = rootlibs
 
-helper.build_libs(list_of_cc_files,skip_list,libs);
+    helper.handle_dictionaries(suffix=".h");
+
+    list_of_cc_files = Glob('*.cc',strings=True);
+    skip_list        = []
+    libs             = rootlibs
+
+    helper.build_libs(list_of_cc_files,skip_list,libs);
+# ------------------------------------------------------------------------------
+local_build();
+

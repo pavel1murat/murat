@@ -8,16 +8,16 @@ from stntuple_helper import *
 #                                      "AND_THIS" is usually "src"
 #------------------------------------------------------------------------------
 x = subprocess.call('scripts/build_config',shell=True)
-if (os.environ.get("MU2E_SATELLITE_RELEASE")) :
-    env['CPPPATH' ].append('-I'+os.environ['MU2E_SATELLITE_RELEASE']+'/include');
-    env['CXXFLAGS'].append('-I'+os.environ['MU2E_SATELLITE_RELEASE']+'/include');
-else :
-    env['CPPPATH' ].append('-I'+os.environ['MU2E_BASE_RELEASE']+'/include');
-    env['CXXFLAGS'].append('-I'+os.environ['MU2E_BASE_RELEASE']+'/include');
+
+murat_env = env.Clone()
+
+murat_env['CPPPATH' ].append('-I'+os.environ['BUILD_BASE']+'/include');
+murat_env['CXXFLAGS'].append('-I'+os.environ['BUILD_BASE']+'/include');
 #------------------------------------------------------------------------------
 # done
 #------------------------------------------------------------------------------
-env.Append(BUILDERS = {'StntupleCodegen'  : stntuple_codegen})
-env.Append(BUILDERS = {'StntupleRootCint' : stntuple_rootcint})
+murat_env.Append(BUILDERS = {'StntupleCodegen'  : stntuple_codegen})
+murat_env.Append(BUILDERS = {'StntupleRootCint' : stntuple_rootcint})
 
+Export('murat_env')
 Export('stntuple_helper')

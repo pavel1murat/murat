@@ -3,13 +3,13 @@
 # Script to build the files found in this directory.
 #------------------------------------------------------------------------------
 import os, copy
-Import('env')
+Import('murat_env')
 Import('stntuple_helper')
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
 def local_build():
-    local_env = env.Clone();
+    local_env = murat_env.Clone();
     rootlibs  = local_env['ROOTLIBS']
 
     if ( not ("EG"    in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");

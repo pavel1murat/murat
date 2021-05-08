@@ -3,22 +3,27 @@
 # Script to build the files found in this directory.
 #------------------------------------------------------------------------------
 import os
-Import('env')
+Import('murat_env')
 Import('stntuple_helper')
-helper = stntuple_helper(env);
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
-rootlibs = env['ROOTLIBS']
-if ( not ("EG" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+def local_build():
 
-helper.handle_dictionaries();
+    local_env = murat_env.Clone();
 
-skip_list        = []
-stntuple_libs    = [ 'Stntuple_alg' ]
-libs             = stntuple_libs + rootlibs;
-list_of_cc_files = Glob('*.cc',strings=True);
-helper.build_libs(list_of_cc_files,skip_list,libs);
+    rootlibs  = local_env['ROOTLIBS']
+    if ( not ("EG" in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+
+    helper = stntuple_helper(local_env);
+    helper.handle_dictionaries();
+
+    skip_list        = []
+    stntuple_libs    = [ 'Stntuple_alg' ]
+    libs             = stntuple_libs + rootlibs;
+    list_of_cc_files = Glob('*.cc',strings=True);
+    helper.build_libs(list_of_cc_files,skip_list,libs);
+# ------------------------------------------------------------------------------
+local_build();
 
 # print "tmpdir:"+env['TMP_LIB_DIR']

@@ -26,7 +26,8 @@
 
 #include "murat/ana/ClusterHist_t.hh"
 
-class TClusterAnaModule: public TStnModule {
+namespace murat {
+  class TClusterAnaModule: public TStnModule {
 public:
   enum { kNDisks = 2 } ;
 //-----------------------------------------------------------------------------
@@ -134,7 +135,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TClusterAnaModule,0)
+    ClassDef(murat::TClusterAnaModule,0)
 };
-
+}
 #endif

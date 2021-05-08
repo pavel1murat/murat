@@ -31,7 +31,9 @@
 
 #include "ana/TCalAnaModule.hh"
 
-ClassImp(TCalAnaModule)
+ClassImp(murat::TCalAnaModule)
+
+namespace murat {
 //-----------------------------------------------------------------------------
 TCalAnaModule::TCalAnaModule(const char* name, const char* title):
   TStnModule(name,title)
@@ -836,3 +838,4 @@ void TCalAnaModule::Test001() {
   // }
 }
 
+}

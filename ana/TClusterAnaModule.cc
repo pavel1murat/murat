@@ -28,9 +28,11 @@
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
-#include "ana/TClusterAnaModule.hh"
+#include "murat/ana/TClusterAnaModule.hh"
 
-ClassImp(TClusterAnaModule)
+ClassImp(murat::TClusterAnaModule)
+
+namespace murat {
 //-----------------------------------------------------------------------------
 TClusterAnaModule::TClusterAnaModule(const char* name, const char* title):
   TStnModule(name,title)
@@ -506,3 +508,4 @@ void TClusterAnaModule::Test001() {
   // }
 }
 
+}

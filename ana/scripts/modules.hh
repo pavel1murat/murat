@@ -75,8 +75,6 @@ namespace cdf_stntuple {
 // modules defined in 'murat' package (libmurat_ana.so)
 //-----------------------------------------------------------------------------
 TBeamFlashAnaModule*       m_bfl   = NULL;
-TCalAnaModule*             m_cal   = NULL;
-TClusterAnaModule*         m_cls   = NULL;
 TColl1DoseAnaModule*       m_coll1 = NULL;
 TColl3DoseAnaModule*       m_coll3 = NULL;
 TDioCalibModule*           m_dio   = NULL;
@@ -93,9 +91,13 @@ TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackRecoEffAnaModule*    m_eff   = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
 TVDetAnaModule*            m_vdt   = NULL;
-
+//-----------------------------------------------------------------------------
+// modules known to clash with Stntuple and su2020
+//-----------------------------------------------------------------------------
 namespace murat {
+  TCalAnaModule*           m_cal   = NULL;
   TCosmicsAnaModule*       m_cos   = NULL;
+  TClusterAnaModule*       m_cls   = NULL;
   TEmuAnaModule*           m_emu   = NULL;
   TPidAnaModule*           m_pid   = NULL;
   TTrackAnaModule*         m_trk   = NULL;

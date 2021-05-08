@@ -25,6 +25,7 @@
 #include "Stntuple/alg/TEmuLogLH.hh"
 #include "Stntuple/geom/TStnCrystal.hh"
 
+namespace murat {
 class TCalAnaModule: public TStnModule {
 public:
   enum { kNDisks = 2 } ;
@@ -213,7 +214,7 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TCalAnaModule,0)
+  ClassDef(murat::TCalAnaModule,0)
 };
-
+}
 #endif

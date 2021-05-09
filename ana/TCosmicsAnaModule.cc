@@ -608,7 +608,7 @@ void TCosmicsAnaModule::FillHistograms() {
 
     FillTrackHistograms(fHist.fTrack[0],trk,tp,&fSimPar);
 
-    fTrackID[fBestID]->FillHistograms(fHist.fTrackID[0],trk,1);
+    fTrackID[fBestID]->FillHistograms(fHist.fTrackID[0],trk);
 
     if (tp->fIDWord[fBestID] == 0) {
 					// GOOD track: IDWORD=0

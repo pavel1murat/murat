@@ -23,7 +23,7 @@ def local_build():
 
     skip_list = []
 
-    stntuple_libs = [ 'Stntuple_val', 'Stntuple_alg', 'Stntuple_loop',
+    stntuple_libs = [ 'Stntuple_val', 'Stntuple_gui' , 'Stntuple_alg', 'Stntuple_loop',
                       'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base'
                   ];
 

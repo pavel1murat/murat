@@ -20,9 +20,9 @@
 
 #include "Stntuple/gui/TEvdMainFrame.hh"
 
-#include "Stntuple/gui/TTrkXYView.hh"
+// #include "Stntuple/gui/TTrkXYView.hh"
 
-#include "murat/gui/TTrkTZView.hh"
+// #include "murat/gui/TTrkTZView.hh"
 
 // #include "Stntuple/gui/TCalView.hh"
 // #include "Stntuple/gui/TCrvView.hh"
@@ -61,7 +61,7 @@ TEvdManager::~TEvdManager() {
 
     // delete tracking views
     //    delete fTrkXYView;
-    delete fTrkTZView;
+    // delete fTrkTZView;
 
     delete fMenuBarHelpLayout;
     delete fMenuBarItemLayout;

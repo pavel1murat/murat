@@ -57,7 +57,7 @@ void combo_hits::BookHistograms() {
   TEvdManager* vm = TEvdManager::Instance();
 
   // define views
-  TStnView* view  = new TStnView(TStnView::kTZ,"TZView","TZView") ;
+  TStnView* view  = new TStnView(TStnView::kTZ,-1,"TZView","TZView") ;
   view->AddNode(fNode);
 
   vm->AddView(view);

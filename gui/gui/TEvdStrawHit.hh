@@ -4,6 +4,7 @@
 
 #include "TEveGeoShape.h"
 
+namespace murat {
 class TEvdStrawHit : public TEveGeoShape {
 public:
   int        fIndex;			// in the data collection
@@ -42,7 +43,7 @@ public:
 
   void     Print(Option_t* Opt) const; // *MENU*
 
-  ClassDef(TEvdStrawHit,0);
+  ClassDef(murat::TEvdStrawHit,0);
 };
-
+}
 #endif

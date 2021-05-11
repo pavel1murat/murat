@@ -5,6 +5,9 @@
 #include "TMarker.h"
 #include "TObject.h"
 
+#include "TObjArray.h"
+
+//-----------------------------------------------------------------------------
 class TComboHitData: public TObject {
 public:
   float   fX;
@@ -16,8 +19,8 @@ public:
   int     fPnl;
   int     fLay;
   int     fStr;
-  int     fEDep;
-  int     fP;     // partcle momentum
+  float   fEDep;
+  float   fP;     // partcle momentum
 
   TMarker fXYMarker;
   TMarker fTZMarker;
@@ -33,6 +36,13 @@ public:
     else if (fPdg == 2212) return 6;
     else                   return 7;
   }
+
+  float  T()    { return fT; }
+  float  Time() { return fT; }
+
+  float  X()    { return fX; }
+  float  Y()    { return fY; }
+  float  Z()    { return fZ; }
   
 public:
   TComboHitData() {}
@@ -44,6 +54,28 @@ public:
   virtual void  Paint      (Option_t* option = "");
   virtual void  PaintXY    (Option_t* option = "");
   virtual void  PaintTZ    (Option_t* option = "");
+
+  virtual void  Print      (Option_t* option = "") const ;   // *MENU* 
+
+  ClassDef(TComboHitData,0)
+};
+
+//-----------------------------------------------------------------------------
+struct StationData_t {
+public:
+  TObjArray fHits;
+
+  StationData_t() { fHits.SetOwner(1); }
+  
+  TComboHitData* GetHit  (int I) { return (TComboHitData*) fHits.UncheckedAt(I); }
+  int            GetNHits()      { return fHits.GetEntriesFast(); }
+};
+
+//-----------------------------------------------------------------------------
+struct HitData_t {
+   StationData_t   fStation[18];
+
+  HitData_t() { }
 
 };
 

@@ -1,14 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
-
+//
+///////////////////////////////////////////////////////////////////////////////
 
 #include "murat/gui/TEvdManager.hh"
 #include "murat/gui/TComboHitData.hh"
+#include "murat/gui/TComboHitVisNode.hh"
 #include "murat/gui/combo_hits.hh"
 #include "TH2.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TFolder.h"
 
+//-----------------------------------------------------------------------------
 combo_hits::combo_hits(const char* Name, const char* Fn) : TNamed(Name,Name), fChain(0) {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -28,23 +31,40 @@ combo_hits::combo_hits(const char* Name, const char* Fn) : TNamed(Name,Name), fC
     tree->ReadFile(Fn,format.Data(),' ');
   }
 
+  printf(" input tree: Nhits: %lli\n",tree->GetEntries());
+
+  fHitData = new HitData_t();
+  fNode    = new TComboHitVisNode("emoe_TComboHitVisNode",fHitData);
+
+  printf("in the combo_hits constructor\n");
+  fNode->Print();
+
   Init(tree);
 
   BookHistograms();
 }
 
+//-----------------------------------------------------------------------------
 combo_hits::~combo_hits() {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
+   
+   delete fHitData;
 }
 
 //-----------------------------------------------------------------------------
 void combo_hits::BookHistograms() {
-  TEvdManager::Instance();
-  // vm->InitGui();
+  TEvdManager* vm = TEvdManager::Instance();
+
+  // define views
+  TStnView* view  = new TStnView(TStnView::kTZ,"TZView","TZView") ;
+  view->AddNode(fNode);
+
+  vm->AddView(view);
 }
 
-void combo_hits::Loop(int Flag, float MinE, float TMin, float TMax) {
+//-----------------------------------------------------------------------------
+void combo_hits::Loop(int Flag, float EMin, float TMin, float TMax) {
 //-----------------------------------------------------------------------------
 //   In a ROOT session, you can do:
 //      root> .L combo_hits.C
@@ -72,21 +92,25 @@ void combo_hits::Loop(int Flag, float MinE, float TMin, float TMax) {
 //-----------------------------------------------------------------------------
   if (fChain == 0) return;
 
-  for (int i=0; i<18; i++) fStationData[i].fHits.Delete();
+  for (int i=0; i<18; i++) {
+    fHitData->fStation[i].fHits.Delete();
+  }
 
   Long64_t nentries = fChain->GetEntriesFast();
 
+  printf(" ---- nentries = %lli EMin = %5.1f TMin = %10.3f TMax=%10.3f\n",nentries,EMin,TMin,TMax);
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
-    //  nb = fChain->GetEntry(jentry);   // nbytes += nb;
-    
-    if ((edep < MinE) or (time < TMin) or (time > TMax)) continue; 
+    fChain->GetEntry(jentry);   // nbytes += nb;
+    printf("ientry, edep,time: %5lli %10.3f %10.3f\n",ientry,edep,time);
+
+    if ((edep < EMin) or (time < TMin) or (time > TMax)) continue; 
 //-----------------------------------------------------------------------------
 // prepare data to plot Y:X by station
 //-----------------------------------------------------------------------------
     int station       = pln/2;
-    StationData_t* sd = fStationData+station;
+    StationData_t* sd = &fHitData->fStation[station];
 
     float t = time-drtime-prtime;
     
@@ -97,15 +121,20 @@ void combo_hits::Loop(int Flag, float MinE, float TMin, float TMax) {
     hit->fLay  = lay;
     hit->fStr  = str;
     
+    printf("adding hit to station %i\n",station);
     sd->fHits.Add(hit);
   }
 //-----------------------------------------------------------------------------
 // plot TZ 
 //-----------------------------------------------------------------------------
-  PlotTZ(Flag);
+  fNode->InitEvent();
+  printf("--- right after InitEvent()\n");
+  fNode->Print();
+  // PlotTZ(Flag);
 }
 
 
+//-----------------------------------------------------------------------------
 Long64_t combo_hits::LoadTree(Long64_t entry) {
 //-----------------------------------------------------------------------------
 // Set the environment to read one entry
@@ -119,6 +148,7 @@ Long64_t combo_hits::LoadTree(Long64_t entry) {
    return centry;
 }
 
+//-----------------------------------------------------------------------------
 void combo_hits::Init(TTree *tree) {
 //-----------------------------------------------------------------------------
 // The Init() function is called when the selector needs to initialize
@@ -174,6 +204,7 @@ Bool_t combo_hits::Notify() {
    return kTRUE;
 }
 
+//-----------------------------------------------------------------------------
 void combo_hits::Show(Long64_t entry) {
 // Print contents of entry.
 // If entry is not specified, print current entry
@@ -181,6 +212,8 @@ void combo_hits::Show(Long64_t entry) {
    fChain->Show(entry);
 }
 
+
+//-----------------------------------------------------------------------------
 Int_t combo_hits::GetEntry(Long64_t entry) {
 // Read contents of entry.
    if (!fChain) return 0;
@@ -188,6 +221,7 @@ Int_t combo_hits::GetEntry(Long64_t entry) {
 }
 
 
+//-----------------------------------------------------------------------------
 void combo_hits::PlotXY(int Station, float TMin, float TMax) {
 
   TH2F* h2 = new TH2F("h2_xy",Form("h2 xy station %2i",Station),400,-800,800,800,-800,800);
@@ -196,7 +230,7 @@ void combo_hits::PlotXY(int Station, float TMin, float TMax) {
 
   for (int ist=0; ist<18; ist++) {
     if ((Station < 0) or (ist == Station)) {
-      StationData_t* sd = fStationData+ist;
+      StationData_t* sd = &fHitData->fStation[ist];
       int n = sd->GetNHits();
       for (int i=0; i<n; i++) {
 	TComboHitData* hit = sd->GetHit(i);
@@ -209,13 +243,14 @@ void combo_hits::PlotXY(int Station, float TMin, float TMax) {
   }
 }
 
+//-----------------------------------------------------------------------------
 void combo_hits::PlotTime(int Station) {
   TH1F* h1 = new TH1F("h1_time",Form("h1 time station %2i",Station),300,300,1800);
   h1->SetStats(0);
 
   for (int ist=0; ist<18; ist++) {
     if ((Station < 0) or (ist == Station)) {
-      StationData_t* sd = fStationData+ist;
+      StationData_t* sd = &fHitData->fStation[ist];
       int n = sd->GetNHits();
       for (int i=0; i<n; i++) {
 	TComboHitData* hit = sd->GetHit(i);
@@ -229,6 +264,7 @@ void combo_hits::PlotTime(int Station) {
 }
 
 
+//-----------------------------------------------------------------------------
 void combo_hits::PlotTZ(float TMin, float TMax) {
 
   TH2F* h2 = new TH2F("h2","combo hit time vs Z",1600,-1600,1600,300,300,1800);
@@ -238,7 +274,7 @@ void combo_hits::PlotTZ(float TMin, float TMax) {
   h2->Draw();
    
   for (int ist = 0; ist<18; ist++) {
-    StationData_t* sd = fStationData + ist;
+    StationData_t* sd = &fHitData->fStation[ist];
     int nh = sd->GetNHits();
     for (int i=0; i<nh; i++) {
       TComboHitData* hit = sd->GetHit(i);

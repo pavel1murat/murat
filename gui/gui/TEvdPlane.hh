@@ -7,6 +7,7 @@
 #include "murat/gui/TEvdNumerology.hh"
 #include "murat/gui/TEvdPanel.hh"
 
+namespace murat {
 //-----------------------------------------------------------------------------
 class TEvdPlane : public TEveElementList {
 public:
@@ -21,5 +22,5 @@ public:
 
   ClassDef(TEvdPlane,0);
 };
-
+}
 #endif

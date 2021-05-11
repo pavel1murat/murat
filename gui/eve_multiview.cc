@@ -14,6 +14,7 @@
 // Constructor --- creates required scenes, projection managers
 // and GL viewers.
 //-----------------------------------------------------------------------------
+namespace murat {
 Mu2eMultiView::Mu2eMultiView() {
   
   // Scenes
@@ -133,4 +134,6 @@ void Mu2eMultiView::DestroyEventRPhi() {
 
 void Mu2eMultiView::DestroyEventRhoZ() {
   fRhoZEventScene->DestroyElements();
+}
+
 }

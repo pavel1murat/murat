@@ -3,7 +3,6 @@
 
 #include "TObjArray.h"
 #include "Stntuple/base/TVisManager.hh"
-#include "Stntuple/gui/TStnView.hh"
 
 #include "TGDoubleSlider.h"
 #include "TGButton.h"
@@ -22,16 +21,9 @@ class TExtrapolator;
 
 class TEvdManager : public TVisManager {
 public:
-
-  enum {
-    kXYView  = 1,
-    kTZView  = 2,
-    kCalView = 3,
-    kCrvView = 4
-  };
-  //-----------------------------------------------------------------------------
-  // command codes
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// command codes
+//-----------------------------------------------------------------------------
   enum CommandIdentifiers {
     M_TRACKER_XY,
     M_TRACKER_RZ,
@@ -149,8 +141,10 @@ public:
 //-----------------------------------------------------------------------------
 // different views
 //-----------------------------------------------------------------------------
+  virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2);
+
   // Int_t   OpenTrkXYView();
-  // Int_t   OpenTrkXYView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);
+  Int_t   OpenTrkXYView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);
   
   Int_t   OpenTrkTZView();
   Int_t   OpenTrkTZView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);

@@ -47,11 +47,11 @@ namespace {
 
   //  TEveTrackList *gTrackList = 0;
   
-  TEvdTracker*        _tracker(NULL);
-  TEvdStrawHitHolder* _strawHitHolder(NULL);
-  TEveElementList*    _trackHolder(NULL);
+  murat::TEvdTracker*        _tracker(NULL);
+  murat::TEvdStrawHitHolder* _strawHitHolder(NULL);
+  TEveElementList*           _trackHolder(NULL);
  
-  Mu2eMultiView* gMultiView = 0;
+  murat::Mu2eMultiView* gMultiView = 0;
 
   extern HtmlSummary* fgHtmlSummary;
   //  TGHtml      *fgHtml        = 0;
@@ -72,19 +72,18 @@ void run_eve_mu2e(int IEvent) {
    // 5. Load first event.
 
   TEveManager::Create();
-
 //-----------------------------------------------------------------------------
 // load geometry and let gEve know about it
 //-----------------------------------------------------------------------------
   {
-    _tracker = new TEvdTracker();
+    _tracker = new murat::TEvdTracker();
     _tracker->InitGeometry("trackerNumerology.txt");
     
     //    gEve->AddGlobalElement(_tracker);
     gEve->AddElement(_tracker);
 
     if (_strawHitHolder == NULL) {
-      _strawHitHolder = new TEvdStrawHitHolder();
+      _strawHitHolder = new murat::TEvdStrawHitHolder();
       _strawHitHolder->IncDenyDestroy();              // protect against destruction
       //-----------------------------------------------------------------------------
       // define transformations such that hits could be placed into the local reference
@@ -94,12 +93,12 @@ void run_eve_mu2e(int IEvent) {
       for (int is=0; is<20; is++) {
 	for (int iplane=0; iplane<2; iplane++) {
 	  for (int ip=0; ip<6; ip+=1) {
-	    TEvdPanel* panel = _tracker->Panel(is,iplane,ip);
+	    murat::TEvdPanel* panel = _tracker->Panel(is,iplane,ip);
 	    double phi = panel->fPhi;
 	    
 	    double zpanel = panel->Z();
 	    
-	    TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(is,iplane,ip);
+	    murat::TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(is,iplane,ip);
 	    phh->RefMainTrans().SetPos(0,0,zpanel);
 	    phh->RefMainTrans().RotatePF(1,2,phi);
 	  }
@@ -112,7 +111,7 @@ void run_eve_mu2e(int IEvent) {
 //-----------------------------------------------------------------------------
 // Standard multi-view 
 //-----------------------------------------------------------------------------
-  gMultiView = new Mu2eMultiView;
+  gMultiView = new murat::Mu2eMultiView;
 
   // gMultiView->ImportGeomRPhi(gGeomGentle);
   // gMultiView->ImportGeomRhoZ(gGeomGentle);
@@ -202,9 +201,9 @@ int eve_mu2e_read_tracks(const char* TracksFile) {
       for (int ist=0; ist<kNStations; ist++) {
 	for (int ipln=0; ipln<2; ipln++) {
 	  for (int ip=0; ip<2; ip++) {
-	    TEvdPanel* panel = _tracker->Panel(ist,ipln,ip);
+	    murat::TEvdPanel* panel = _tracker->Panel(ist,ipln,ip);
 	    for (int iw=0; iw<2; iw++) {
-	      TEvdStraw* straw = panel->Straw(iw);
+	      murat::TEvdStraw* straw = panel->Straw(iw);
 	      double z = straw->Z();
 	      helix->GetPointAtZ(z,&v);
 	      printf("helix point : ist: %2i %12.5f %12.5f %12.5f\n",ist, v.x(),v.y(),v.z());

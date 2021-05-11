@@ -2,8 +2,9 @@
 
 #include "murat/gui/TEvdPlane.hh"
 
-ClassImp(TEvdPlane)
+ClassImp(murat::TEvdPlane)
 
+namespace murat {
 //-----------------------------------------------------------------------------
 TEvdPlane::TEvdPlane(int I): TEveElementList(Form("plane_%02i",I),Form("plane_%02i",I)) {
   fNumber = I;
@@ -14,3 +15,5 @@ TEvdPlane::TEvdPlane(int I): TEveElementList(Form("plane_%02i",I),Form("plane_%0
   }
   SetRnrSelfChildren(false,true);
 }  
+
+}

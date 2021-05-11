@@ -7,13 +7,16 @@
 
 #include "murat/gui/TEvdStraw.hh"
 
+
+namespace murat {
+
 class TEvdPlane;
 
 class TEvdPanel : public TEveGeoShape {
 public:
   int         fNumber;
-  TEvdPlane*  fPlane; // backward pointer to the mother plane
-  TEvdStraw*  fStraw[kNStraws];
+  murat::TEvdPlane*  fPlane; // backward pointer to the mother plane
+  murat::TEvdStraw*  fStraw[kNStraws];
   double      fNx;    // as fas as the event display is concerned, all wires are parallel
   double      fNy;
   double      fPhi;
@@ -35,7 +38,7 @@ public:
 
   void        Print(Option_t* Opt) const;   // *MENU* 
 
-  ClassDef(TEvdPanel,0)
+  ClassDef(murat::TEvdPanel,0)
 };
-
+}
 #endif

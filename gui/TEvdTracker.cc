@@ -3,8 +3,9 @@
 #include "TGeoTube.h"
 #include "murat/gui/TEvdTracker.hh"
 
-ClassImp(TEvdTracker)
+ClassImp(murat::TEvdTracker)
 
+namespace murat {
 //-----------------------------------------------------------------------------
 TEvdTracker::TEvdTracker(): TEveElementList ("tracker") {
   for (int i=0; i<kNStations; i++) {
@@ -96,4 +97,5 @@ int TEvdTracker::InitGeometry(const char* FileName) {
     }
   }
   return 0;
+}
 }

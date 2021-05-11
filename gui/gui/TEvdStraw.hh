@@ -6,6 +6,7 @@
 
 #include "murat/gui/TEvdNumerology.hh"
 
+namespace murat {
 class TEvdPanel;
 
 class TEvdStraw : public TEveGeoShape {
@@ -31,7 +32,7 @@ public:
   int      ID   () { return fID   ; }  // *MENU*
   void     Print(Option_t* Opt) const; // *MENU*
 
-  ClassDef(TEvdStraw,0);
+  ClassDef(murat::TEvdStraw,0);
 };
-
+}
 #endif

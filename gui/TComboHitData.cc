@@ -4,6 +4,8 @@
 #include "murat/gui/TComboHitData.hh"
 #include "Stntuple/base/TVisManager.hh"
 
+ClassImp(TComboHitData)
+
 //-----------------------------------------------------------------------------
 TComboHitData::TComboHitData(float X, float Y, float Z, float T, float EDep, int Pdg, float P) { 
   fX    = X;
@@ -46,13 +48,12 @@ void TComboHitData::Paint(Option_t* Option) {
 
   //  int   iv;
 
-  const char* view = TVisManager::Instance()->GetCurrentView();
+  int view = TVisManager::Instance()->GetCurrentView()->Type();
 
-
-  if      (strstr(view,"xy" ) != 0) PaintXY(Option);
-  else if (strstr(view,"tz" ) != 0) PaintTZ(Option);
+  if      (view == TStnView::kXY) PaintXY (Option);
+  else if (view == TStnView::kTZ) PaintTZ (Option);
   else {
-    printf("[%s] >>> ERROR: unknown view: %s, DO NOTHING\n",oname,view);
+    printf("[%s] >>> ERROR: unknown view: %i, DO NOTHING\n",oname,view);
   }
 
   gPad->Modified();
@@ -67,3 +68,13 @@ void TComboHitData::PaintXY(Option_t* Option) {
 void TComboHitData::PaintTZ(Option_t* Option) {
   fTZMarker.Paint(Option);
 }
+
+
+//-----------------------------------------------------------------------------
+void TComboHitData::Print(Option_t* Option) const {
+  //const char oname[] = "TComboHitData::Paint";
+
+  printf("TComboHitData::Print: time = %10.3f Z=%10.3f edep=%10.6f pdg=%10i P=%10.3f\n",
+	 fT,fZ,fEDep,fPdg,fP);
+}
+

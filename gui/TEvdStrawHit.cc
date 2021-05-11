@@ -8,8 +8,9 @@
 #include "TEveTrans.h"
 #include "TGeoMatrix.h"
 
-ClassImp(TEvdStrawHit)
+ClassImp(murat::TEvdStrawHit)
 
+namespace murat {
 //-----------------------------------------------------------------------------
 TEvdStrawHit::TEvdStrawHit(): TEveGeoShape("") {
   //  fNumber = I;
@@ -70,4 +71,5 @@ void TEvdStrawHit::Print(Option_t* Opt) const {
 	 fIndex,fStrawIndex,fPlane,fPanel,fLayer,fStraw);
   printf(" time: %8.2f dt: %8.2f edep: %8.3f x: %8.3f y: %8.3f z: %9.3f wdist: %8.3f wres: %8.3f\n",
 	 fTime,fDt,fEDep,fX,fY,fZ,fWDist,fWRes);
+}
 }

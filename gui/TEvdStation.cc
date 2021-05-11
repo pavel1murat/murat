@@ -2,8 +2,9 @@
 
 #include "murat/gui/TEvdStation.hh"
 
-ClassImp(TEvdStation)
+ClassImp(murat::TEvdStation)
 
+namespace murat {
 //-----------------------------------------------------------------------------
 TEvdStation::TEvdStation(int I): TEveElementList(Form("station_%02i",I),Form("station_%02i",I)) {
   fNumber = I;
@@ -14,3 +15,4 @@ TEvdStation::TEvdStation(int I): TEveElementList(Form("station_%02i",I),Form("st
   SetRnrSelfChildren(false,true);
 }
 
+}

@@ -3,5 +3,5 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class    TEvdStation;
+#pragma link C++ class    murat::TEvdStation;
 #endif

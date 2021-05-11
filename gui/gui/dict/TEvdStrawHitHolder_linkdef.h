@@ -3,8 +3,8 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class    TEvdPanelStrawHitHolder;
-#pragma link C++ class    TEvdPlaneStrawHitHolder;
-#pragma link C++ class    TEvdStationStrawHitHolder;
-#pragma link C++ class    TEvdStrawHitHolder;
+#pragma link C++ class    murat::TEvdPanelStrawHitHolder;
+#pragma link C++ class    murat::TEvdPlaneStrawHitHolder;
+#pragma link C++ class    murat::TEvdStationStrawHitHolder;
+#pragma link C++ class    murat::TEvdStrawHitHolder;
 #endif

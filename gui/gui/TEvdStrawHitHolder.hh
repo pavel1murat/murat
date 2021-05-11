@@ -8,6 +8,8 @@
 
 #include "TNamed.h"
 
+namespace murat {
+
 class TEvdTracker;
 
 class TEvdPanelStrawHitHolder: public TEveElement, public TNamed {
@@ -67,7 +69,7 @@ public:
   
   int ReadHits(const char* Filename, TEvdTracker* Tracker);
   
-  ClassDef(TEvdStrawHitHolder,0)    // Tracker Straw Hits, structured
+  ClassDef(murat::TEvdStrawHitHolder,0)    // Tracker Straw Hits, structured
 };
-
+}
 #endif

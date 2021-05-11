@@ -5,11 +5,12 @@
 #include "murat/gui/TEvdStrawHit.hh"
 #include "murat/gui/TEvdTracker.hh"
 
-ClassImp(TEvdPanelStrawHitHolder)
-ClassImp(TEvdPlaneStrawHitHolder)
-ClassImp(TEvdStationStrawHitHolder)
-ClassImp(TEvdStrawHitHolder)
+ClassImp(murat::TEvdPanelStrawHitHolder)
+ClassImp(murat::TEvdPlaneStrawHitHolder)
+ClassImp(murat::TEvdStationStrawHitHolder)
+ClassImp(murat::TEvdStrawHitHolder)
 
+namespace murat {
 //-----------------------------------------------------------------------------
 TEvdPanelStrawHitHolder::TEvdPanelStrawHitHolder(int Number) {
   fNumber = Number;
@@ -178,9 +179,9 @@ int TEvdStrawHitHolder::ReadHits(const char* Filename, TEvdTracker* Tracker) {
       int ipln    = plane % 2;
       TEvdPanelStrawHitHolder* phh = this->Panel(station,ipln,panel);
 
-      TEvdPanel* evd_panel = Tracker->Panel(station,ipln,panel);
+      murat::TEvdPanel* evd_panel = Tracker->Panel(station,ipln,panel);
       
-      TEvdStrawHit* hit = new TEvdStrawHit();
+      murat::TEvdStrawHit* hit = new murat::TEvdStrawHit();
       hit->Init(index,straw_index,plane,panel,layer,straw_number,delta_id,
 		time,dt,edep,wdist,wres,x,y,z);
 					// thiese are not always defined
@@ -200,7 +201,7 @@ int TEvdStrawHitHolder::ReadHits(const char* Filename, TEvdTracker* Tracker) {
       }
 
       // 'straw_number' - number within the panel (0:95)
-      TEvdStraw* s  = evd_panel->Straw(straw_number);
+      murat::TEvdStraw* s  = evd_panel->Straw(straw_number);
       double zpanel = evd_panel->Z();
       double dz     = s->Z()-zpanel;
       
@@ -222,4 +223,5 @@ int TEvdStrawHitHolder::ReadHits(const char* Filename, TEvdTracker* Tracker) {
   fclose(f);
   
   return 0;
+}
 }

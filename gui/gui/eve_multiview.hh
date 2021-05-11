@@ -10,6 +10,7 @@
 #include <TEveBrowser.h>
 #include <TEveWindow.h>
 
+namespace murat {
 class Mu2eMultiView {
 public:
   
@@ -40,4 +41,5 @@ public:
   void DestroyEventRhoZ();
   
 };
+}
 #endif

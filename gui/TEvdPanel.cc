@@ -7,8 +7,9 @@
 #include "TGeoXtru.h"
 #include "TEveTrans.h"
 
-ClassImp(TEvdPanel)
+ClassImp(murat::TEvdPanel)
 
+namespace murat {
 //-----------------------------------------------------------------------------
 TEvdPanel::TEvdPanel(int I): TEveGeoShape() {
   fNumber = I;
@@ -103,4 +104,6 @@ TEvdPanel::~TEvdPanel() {
 void TEvdPanel::Print(Option_t* Opt) const {
   printf("panel: plane: %02i index: %1i nx: %8.5f ny: %8.5f phi: %8.5f z: %9.3f\n",
 	 fPlane->Number(),fNumber,fNx,fNy,fPhi,Z());
+}
+
 }

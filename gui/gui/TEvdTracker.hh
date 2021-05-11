@@ -8,6 +8,7 @@
 #include "murat/gui/TEvdPlane.hh"
 #include "murat/gui/TEvdStation.hh"
 
+namespace murat {
 //-----------------------------------------------------------------------------  
 class TEvdTracker: public TEveElementList {
 public:
@@ -21,7 +22,7 @@ public:
 
   int InitGeometry(const char* Fn);
 
-  ClassDef(TEvdTracker,0)
+  ClassDef(murat::TEvdTracker,0)
 };
-
+}
 #endif

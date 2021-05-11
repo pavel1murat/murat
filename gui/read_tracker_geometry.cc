@@ -20,10 +20,11 @@
 
 namespace {
   TEveScene*          _scene;
-  TEvdTracker*        _tracker;
-  TEvdStrawHitHolder* _strawHitHolder(NULL);
+  murat::TEvdTracker*        _tracker;
+  murat::TEvdStrawHitHolder* _strawHitHolder(NULL);
   TEveElementList*    _trackHolder(NULL);
 }
+
 
 //-----------------------------------------------------------------------------
 int read_tracks(const char* TracksFile) {
@@ -81,9 +82,9 @@ int read_tracks(const char* TracksFile) {
       for (int ist=0; ist<kNStations; ist++) {
 	for (int ipln=0; ipln<2; ipln++) {
 	  for (int ip=0; ip<2; ip++) {
-	    TEvdPanel* panel = _tracker->Panel(ist,ipln,ip);
+	    murat::TEvdPanel* panel = _tracker->Panel(ist,ipln,ip);
 	    for (int iw=0; iw<2; iw++) {
-	      TEvdStraw* straw = panel->Straw(iw);
+	      murat::TEvdStraw* straw = panel->Straw(iw);
 	      double z = straw->Z();
 	      helix->GetPointAtZ(z,&v);
 	      printf("helix point : ist: %2i %12.5f %12.5f %12.5f\n",ist, v.x(),v.y(),v.z());
@@ -160,11 +161,11 @@ int read_hits(const char* HitsFile) {
       //-----------------------------------------------------------------------------
       int station = plane / 2;
       int ipln    = plane % 2;
-      TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(station,ipln,panel);
+      murat::TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(station,ipln,panel);
 
-      TEvdPanel* evd_panel = _tracker->Panel(station,ipln,panel);
+      murat::TEvdPanel* evd_panel = _tracker->Panel(station,ipln,panel);
       
-      TEvdStrawHit* hit = new TEvdStrawHit();
+      murat::TEvdStrawHit* hit = new murat::TEvdStrawHit();
       hit->Init(index,straw_index,plane,panel,layer,straw_number,delta_id,
 		time,dt,edep,wdist,wres,x,y,z);
 					// thiese are not always defined
@@ -184,7 +185,7 @@ int read_hits(const char* HitsFile) {
       }
 
       // 'straw_number' - number within the panel (0:95)
-      TEvdStraw* s  = evd_panel->Straw(straw_number);
+      murat::TEvdStraw* s  = evd_panel->Straw(straw_number);
       double zpanel = evd_panel->Z();
       double dz     = s->Z()-zpanel;
       
@@ -223,7 +224,7 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
 
   TEveManager::Create();
 
-  _tracker = new TEvdTracker();
+  _tracker = new murat::TEvdTracker();
   _tracker->InitGeometry(fn);
 //-----------------------------------------------------------------------------
 // create scene
@@ -239,7 +240,7 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
 // read hits
 //-----------------------------------------------------------------------------
   if (_strawHitHolder == NULL) {
-    _strawHitHolder = new TEvdStrawHitHolder();
+    _strawHitHolder = new murat::TEvdStrawHitHolder();
     _strawHitHolder->IncDenyDestroy();              // protect against destruction
     //-----------------------------------------------------------------------------
     // define transformations such that hits could be placed into the local reference
@@ -248,12 +249,12 @@ int read_tracker_geometry(const char* HitsFile, const char* TracksFile) {
     for (int is=0; is<20; is++) {
       for (int iplane=0; iplane<2; iplane++) {
   	for (int ip=0; ip<6; ip+=1) {
-  	  TEvdPanel* panel = _tracker->Panel(is,iplane,ip);
+	  murat::TEvdPanel* panel = _tracker->Panel(is,iplane,ip);
   	  double phi = panel->fPhi;
 
   	  double zpanel = panel->Z();
 
-  	  TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(is,iplane,ip);
+	  murat::TEvdPanelStrawHitHolder* phh = _strawHitHolder->Panel(is,iplane,ip);
   	  phh->RefMainTrans().SetPos(0,0,zpanel);
   	  phh->RefMainTrans().RotatePF(1,2,phi);
   	}

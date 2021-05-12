@@ -66,7 +66,6 @@ TComboHitVisNode::~TComboHitVisNode() {
   delete fListOfHits;
 }
 
-
 //-----------------------------------------------------------------------------
 int TComboHitVisNode::InitEvent() {
 
@@ -95,16 +94,28 @@ int TComboHitVisNode::InitEvent() {
   // stntuple::TEvdStation*   station;
   // stntuple::TEvdPlane*     plane;
   // stntuple::TEvdPanel*     panel;
-  //  TEvdFace*      face;
 
   fListOfHits->Clear();
 
-  for (int is=0; is<18; is++) {
-    int n = fHitData->fStation[is].GetNHits();
-    for (int i=0; i<n; i++) {
-      TComboHitData* hit = fHitData->fStation[is].GetHit(i);
-      fListOfHits->Add(hit);
+  int nhits = (*fComboHitColl)->size();
+  for (int i=0; i<nhits; i++) {
+    hit         = &(*fComboHitColl)->at(ihit);
+
+    int   style(0), color(0);
+    float size(0.);
+  
+    if      (Pdg == 11) {
+      if    (P    > 20  ) { style = 20; size = 0.8; color = kRed; }
+      else                { style = 20; size = 0.4; color = kRed+2; }
     }
+    else if (Pdg ==  -11) { style = 24; size = 0.8; color = kBlue;   } 
+    else if (Pdg ==   13) { style = 20; size = 0.8; color = kGreen+2;} 
+    else if (Pdg ==  -13) { style = 20; size = 0.8; color = kGreen-2;} 
+    else if (Pdg == 2212) { style = 20; size = 1.0; color = kBlue+2; } 
+    else                  { style = 20; size = 1.0; color = kMagenta;} 
+    
+    TComboHitData* hit = fHitData->fStation[is].GetHit(i);
+    fListOfHits->Add(hit);
   }
 
   return 0;

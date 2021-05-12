@@ -11,6 +11,8 @@
 #include "TCanvas.h"
 #include "TFolder.h"
 
+using murat::TComboHitVisNode;
+
 //-----------------------------------------------------------------------------
 combo_hits::combo_hits(const char* Name, const char* Fn) : TNamed(Name,Name), fChain(0) {
 // if parameter tree is not specified (or zero), connect the file
@@ -39,9 +41,12 @@ combo_hits::combo_hits(const char* Name, const char* Fn) : TNamed(Name,Name), fC
   printf("in the combo_hits constructor\n");
   fNode->Print();
 
-  Init(tree);
+  TStnView* view  = new TStnView(TStnView::kTZ,-1,"TZView","TZView") ;
+  view->AddNode(fNode);
 
-  BookHistograms();
+  TEvdManager::Instance()->AddView(view);
+
+  Init(tree);
 }
 
 //-----------------------------------------------------------------------------
@@ -54,13 +59,6 @@ combo_hits::~combo_hits() {
 
 //-----------------------------------------------------------------------------
 void combo_hits::BookHistograms() {
-  TEvdManager* vm = TEvdManager::Instance();
-
-  // define views
-  TStnView* view  = new TStnView(TStnView::kTZ,-1,"TZView","TZView") ;
-  view->AddNode(fNode);
-
-  vm->AddView(view);
 }
 
 //-----------------------------------------------------------------------------
@@ -130,6 +128,8 @@ void combo_hits::Loop(int Flag, float EMin, float TMin, float TMax) {
   fNode->InitEvent();
   printf("--- right after InitEvent()\n");
   fNode->Print();
+
+  TEvdManager::Instance()->OpenTrkTZView();
   // PlotTZ(Flag);
 }
 

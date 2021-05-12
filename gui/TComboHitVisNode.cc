@@ -39,8 +39,9 @@
 
 #include "murat/gui/TComboHitVisNode.hh"
 
-ClassImp(TComboHitVisNode)
+ClassImp(murat::TComboHitVisNode)
 
+namespace murat {
 //_____________________________________________________________________________
 TComboHitVisNode::TComboHitVisNode() : TStnVisNode("unnamed_TComboHitVisNode") {
 }
@@ -69,53 +70,16 @@ TComboHitVisNode::~TComboHitVisNode() {
 //-----------------------------------------------------------------------------
 int TComboHitVisNode::InitEvent() {
 
-  //  const char* oname = "TComboHitVisNode::InitEvent";
+  fListOfHits->Clear();			// hits are owned by 
 
-  // mu2e::GeomHandle<mu2e::Tracker> ttHandle;
-  // const mu2e::Tracker* tracker = ttHandle.get();
-
-  // Tracker calibration object.
-  //  mu2e::ConditionsHandle<mu2e::StrawResponse> srep = mu2e::ConditionsHandle<mu2e::StrawResponse>("ignored");
-
-  // const mu2e::ComboHit              *hit;
-  // const mu2e::StrawDigiMC           *hit_digi_mc;
-
-  // stntuple::TEvdStrawHit                      *evd_straw_hit; 
-  // const CLHEP::Hep3Vector           /**mid,*/ *w; 
-  // const mu2e::Straw                 *straw; 
-
-  // int                               n_straw_hits, display_hit, color, nl, ns; // , ipeak, ihit;
-  // bool                              isFromConversion, intime;
-  // double                            sigw, /*vnorm, v,*/ sigr; 
-  // CLHEP::Hep3Vector                 vx0, vx1, vx2;
-//-----------------------------------------------------------------------------
-// first, clear the cached hit information from the previous event
-//-----------------------------------------------------------------------------
-  // stntuple::TEvdStation*   station;
-  // stntuple::TEvdPlane*     plane;
-  // stntuple::TEvdPanel*     panel;
-
-  fListOfHits->Clear();
-
-  int nhits = (*fComboHitColl)->size();
-  for (int i=0; i<nhits; i++) {
-    hit         = &(*fComboHitColl)->at(ihit);
-
-    int   style(0), color(0);
-    float size(0.);
-  
-    if      (Pdg == 11) {
-      if    (P    > 20  ) { style = 20; size = 0.8; color = kRed; }
-      else                { style = 20; size = 0.4; color = kRed+2; }
+  for (int is=0; is<18; is++) {
+    //    int nhits = (*fComboHitColl)->size();
+    int nhits = fHitData->fStation[is].GetNHits();
+    for (int i=0; i<nhits; i++) {
+      //      hit         = &(*fComboHitColl)->at(ihit);
+      TComboHitData* hit = fHitData->fStation[is].GetHit(i);
+      fListOfHits->Add(hit);
     }
-    else if (Pdg ==  -11) { style = 24; size = 0.8; color = kBlue;   } 
-    else if (Pdg ==   13) { style = 20; size = 0.8; color = kGreen+2;} 
-    else if (Pdg ==  -13) { style = 20; size = 0.8; color = kGreen-2;} 
-    else if (Pdg == 2212) { style = 20; size = 1.0; color = kBlue+2; } 
-    else                  { style = 20; size = 1.0; color = kMagenta;} 
-    
-    TComboHitData* hit = fHitData->fStation[is].GetHit(i);
-    fListOfHits->Add(hit);
   }
 
   return 0;
@@ -186,4 +150,5 @@ void TComboHitVisNode::Print(Option_t* Option) const {
     printf(" %3i",fHitData->fStation[i].fHits.GetEntries());
   }
   printf("\n");
+}
 }

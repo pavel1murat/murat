@@ -16,8 +16,8 @@
 //-----------------------------------------------------------------------------
 class combo_hits : public TNamed {
 public :
-  HitData_t*        fHitData;
-  TComboHitVisNode* fNode;
+  HitData_t*               fHitData;
+  murat::TComboHitVisNode* fNode;
 //-----------------------------------------------------------------------------
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain

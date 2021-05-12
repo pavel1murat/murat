@@ -18,14 +18,7 @@
 #include "TGTextBuffer.h"
 #include "TGLabel.h"
 
-#include "Stntuple/gui/TEvdMainFrame.hh"
-
-// #include "Stntuple/gui/TTrkXYView.hh"
-
-// #include "murat/gui/TTrkTZView.hh"
-
-// #include "Stntuple/gui/TCalView.hh"
-// #include "Stntuple/gui/TCrvView.hh"
+// #include "Stntuple/gui/TEvdMainFrame.hh"
 
 #include "Stntuple/gui/TStnFrame.hh"
 
@@ -41,7 +34,7 @@ TEvdManager::TEvdManager(const char* Name, const char* Title): TVisManager(Name,
 //-----------------------------------------------------------------------------
 // views
 //-----------------------------------------------------------------------------
-  InitViews();
+//  InitViews();
   fListOfDetectors = new TObjArray(10);
   fMinStation =  0;
   fMaxStation = 50;
@@ -122,104 +115,104 @@ void TEvdManager::HandleButtons() {
 void TEvdManager::HandleSlider() {
   // Handle slider widget
 
-  Int_t id;
-  TGFrame *frm = (TGFrame *) gTQSender;
-  TGDoubleSlider *sd = (TGDoubleSlider *) frm;
-  id = sd->WidgetId();
+  // Int_t id;
+  // TGFrame *frm = (TGFrame *) gTQSender;
+  // TGDoubleSlider *sd = (TGDoubleSlider *) frm;
+  // id = sd->WidgetId();
   
-  switch (id) {
-    //case TEvdManager::TIMESLIDER_ID:
-    // Update text boxes with max and min values
+  // switch (id) {
+  //   //case TEvdManager::TIMESLIDER_ID:
+  //   // Update text boxes with max and min values
     
-  case TIMESLIDER_ID:
-    timeWindowLowDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMinPosition()).c_str());
-    gClient->NeedRedraw(timeWindowLowDisp);
+  // case TIMESLIDER_ID:
+  //   timeWindowLowDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMinPosition()).c_str());
+  //   gClient->NeedRedraw(timeWindowLowDisp);
     
-    timeWindowHighDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMaxPosition()).c_str());
-    gClient->NeedRedraw(timeWindowHighDisp);
-    break;
-  default:
-    break;
-  }
+  //   timeWindowHighDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMaxPosition()).c_str());
+  //   gClient->NeedRedraw(timeWindowHighDisp);
+  //   break;
+  // default:
+  //   break;
+  // }
 }
 
 //_____________________________________________________________________________
 void TEvdManager::HandleText() {
   // Handle text entry widgets
 
-  TGTextEntry *te = (TGTextEntry *) gTQSender;
-  Int_t id = te->WidgetId();
+  // TGTextEntry *te = (TGTextEntry *) gTQSender;
+  // Int_t id = te->WidgetId();
 
-  float textBoxNum;
+  // float textBoxNum;
 
-  switch (id) {
-  case TIMELOW_DISP:
-    try{
-      textBoxNum = boost::lexical_cast<float>(timeWindowLowDisp->GetText());
-      if (textBoxNum < 0 || textBoxNum > timeWindowSlider->GetMaxPosition())
-	timeWindowLowDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMinPosition()).c_str());
-      else {
-	timeWindowSlider->SetPosition(textBoxNum, timeWindowSlider->GetMaxPosition());
-	timeWindowLowDisp->SetText(boost::lexical_cast<std::string>(textBoxNum).c_str());
-      }
-    }
-    catch (boost::bad_lexical_cast &){
-      timeWindowLowDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMinPosition()).c_str());
-    }		
-    break;
-  case TIMEHIGH_DISP:
-    try {
-      textBoxNum = boost::lexical_cast<float>(timeWindowHighDisp->GetText());
-      if (textBoxNum > 1695 || textBoxNum < timeWindowSlider->GetMinPosition())
-	timeWindowHighDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMaxPosition()).c_str());
-      else {
-	timeWindowSlider->SetPosition(timeWindowSlider->GetMinPosition(), textBoxNum);
-	timeWindowHighDisp->SetText(boost::lexical_cast<std::string>(textBoxNum).c_str());
-      }
-    }
-    catch (boost::bad_lexical_cast &){
-      timeWindowHighDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMaxPosition()).c_str());
-    }
-    break;
-  default:
-    break;
-  }
+  // switch (id) {
+  // case TIMELOW_DISP:
+  //   try{
+  //     textBoxNum = boost::lexical_cast<float>(timeWindowLowDisp->GetText());
+  //     if (textBoxNum < 0 || textBoxNum > timeWindowSlider->GetMaxPosition())
+  // 	timeWindowLowDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMinPosition()).c_str());
+  //     else {
+  // 	timeWindowSlider->SetPosition(textBoxNum, timeWindowSlider->GetMaxPosition());
+  // 	timeWindowLowDisp->SetText(boost::lexical_cast<std::string>(textBoxNum).c_str());
+  //     }
+  //   }
+  //   catch (boost::bad_lexical_cast &){
+  //     timeWindowLowDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMinPosition()).c_str());
+  //   }		
+  //   break;
+  // case TIMEHIGH_DISP:
+  //   try {
+  //     textBoxNum = boost::lexical_cast<float>(timeWindowHighDisp->GetText());
+  //     if (textBoxNum > 1695 || textBoxNum < timeWindowSlider->GetMinPosition())
+  // 	timeWindowHighDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMaxPosition()).c_str());
+  //     else {
+  // 	timeWindowSlider->SetPosition(timeWindowSlider->GetMinPosition(), textBoxNum);
+  // 	timeWindowHighDisp->SetText(boost::lexical_cast<std::string>(textBoxNum).c_str());
+  //     }
+  //   }
+  //   catch (boost::bad_lexical_cast &){
+  //     timeWindowHighDisp->SetText(boost::lexical_cast<std::string>((int) timeWindowSlider->GetMaxPosition()).c_str());
+  //   }
+  //   break;
+  // default:
+  //   break;
+  // }
 }
 
 
 //-----------------------------------------------------------------------------
 int TEvdManager::InitGui(const char* Title) {
-  fMain = new  TEvdMainFrame(gClient->GetRoot(),200,100,kMainFrame | kVerticalFrame);
-//-----------------------------------------------------------------------------
-//  create menu bar
-//-----------------------------------------------------------------------------
-  fMenuBarLayout     = new TGLayoutHints(kLHintsTop | kLHintsLeft | kLHintsExpandX, 0, 0, 1, 1);
-  fMenuBarItemLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft, 0, 4, 0, 0);
-  fMenuBarHelpLayout = new TGLayoutHints(kLHintsTop | kLHintsRight);
+//   fMain = new  TEvdMainFrame(gClient->GetRoot(),200,100,kMainFrame | kVerticalFrame);
+// //-----------------------------------------------------------------------------
+// //  create menu bar
+// //-----------------------------------------------------------------------------
+//   fMenuBarLayout     = new TGLayoutHints(kLHintsTop | kLHintsLeft | kLHintsExpandX, 0, 0, 1, 1);
+//   fMenuBarItemLayout = new TGLayoutHints(kLHintsTop | kLHintsLeft, 0, 4, 0, 0);
+//   fMenuBarHelpLayout = new TGLayoutHints(kLHintsTop | kLHintsRight);
 
-  fMenu = new TGPopupMenu(gClient->GetRoot());
-  fMenu->AddEntry("&Exit", M_EXIT);
-  fMenu->Associate(fMain);
+//   fMenu = new TGPopupMenu(gClient->GetRoot());
+//   fMenu->AddEntry("&Exit", M_EXIT);
+//   fMenu->Associate(fMain);
 
-  fMenuHelp = new TGPopupMenu(gClient->GetRoot());
-  fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
-  fMenuHelp->AddEntry("&Search...", M_HELP_SEARCH);
-  fMenuHelp->AddSeparator();
-  fMenuHelp->AddEntry("&About", M_HELP_ABOUT);
-  fMenuHelp->Associate(fMain);
+//   fMenuHelp = new TGPopupMenu(gClient->GetRoot());
+//   fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
+//   fMenuHelp->AddEntry("&Search...", M_HELP_SEARCH);
+//   fMenuHelp->AddSeparator();
+//   fMenuHelp->AddEntry("&About", M_HELP_ABOUT);
+//   fMenuHelp->Associate(fMain);
 
-  fMenuBar = new TGMenuBar(fMain, 1, 1, kHorizontalFrame);
-  fMenuBar->AddPopup("&Menu", fMenu, fMenuBarItemLayout);
-  fMenuBar->AddPopup("&Help", fMenuHelp, fMenuBarHelpLayout);
+//   fMenuBar = new TGMenuBar(fMain, 1, 1, kHorizontalFrame);
+//   fMenuBar->AddPopup("&Menu", fMenu, fMenuBarItemLayout);
+//   fMenuBar->AddPopup("&Help", fMenuHelp, fMenuBarHelpLayout);
 
-  fMain->AddFrame(fMenuBar, fMenuBarLayout);
+//   fMain->AddFrame(fMenuBar, fMenuBarLayout);
 
-  trkrBtnTZ = new TGTextButton(fMain, "Tracker TZ", TStnView::kTZ);
-  trkrBtnTZ->Connect("Clicked()", "TEvdManager", this, "HandleButtons()");
-  trkrBtnTZ->SetTextJustify(36);
-  trkrBtnTZ->SetMargins(0, 0, 0, 0);
-  trkrBtnTZ->SetWrapLength(-1);
-  trkrBtnTZ->MoveResize(16, 26, 98, 24);
+//   trkrBtnTZ = new TGTextButton(fMain, "Tracker TZ", TStnView::kTZ);
+//   trkrBtnTZ->Connect("Clicked()", "TEvdManager", this, "HandleButtons()");
+//   trkrBtnTZ->SetTextJustify(36);
+//   trkrBtnTZ->SetMargins(0, 0, 0, 0);
+//   trkrBtnTZ->SetWrapLength(-1);
+//   trkrBtnTZ->MoveResize(16, 26, 98, 24);
 
   // trkrBtnRZ = new TGTextButton(fMain, "Tracker RZ", kRZView);
   // trkrBtnRZ->Connect("Clicked()", "TEvdManager", this, "HandleButtons()");
@@ -242,59 +235,59 @@ int TEvdManager::InitGui(const char* Title) {
   // crvBtn->SetWrapLength(-1);
   // crvBtn->MoveResize(16, 122, 98, 24);
 
-  timeWindowSlider = new TGDoubleHSlider(fMain, 100, kDoubleScaleBoth, TIMESLIDER_ID);
-  timeWindowSlider->SetRange(0, 1695);
-  timeWindowSlider->SetPosition(400, 1695);
-  timeWindowSlider->MoveResize(150, 45, 200, 20);
-  timeWindowSlider->Connect("PositionChanged()", "TEvdManager", this, "HandleSlider()");
+//   timeWindowSlider = new TGDoubleHSlider(fMain, 100, kDoubleScaleBoth, TIMESLIDER_ID);
+//   timeWindowSlider->SetRange(0, 1695);
+//   timeWindowSlider->SetPosition(400, 1695);
+//   timeWindowSlider->MoveResize(150, 45, 200, 20);
+//   timeWindowSlider->Connect("PositionChanged()", "TEvdManager", this, "HandleSlider()");
 	
-  timeWindowLowDisp = new TGTextEntry(fMain, timeWindowLowBuff = new TGTextBuffer(10), TIMELOW_DISP);
-  timeWindowLowBuff->AddText(0, "400");
-  timeWindowLowDisp->MoveResize(150, 70, 40, 20);
-  timeWindowLowDisp->Connect("ReturnPressed()", "TEvdManager", this, "HandleText()");
+//   timeWindowLowDisp = new TGTextEntry(fMain, timeWindowLowBuff = new TGTextBuffer(10), TIMELOW_DISP);
+//   timeWindowLowBuff->AddText(0, "400");
+//   timeWindowLowDisp->MoveResize(150, 70, 40, 20);
+//   timeWindowLowDisp->Connect("ReturnPressed()", "TEvdManager", this, "HandleText()");
 
-  timeWindowHighDisp = new TGTextEntry(fMain, timeWindowHighBuff = new TGTextBuffer(10), TIMEHIGH_DISP);
-  timeWindowHighBuff->AddText(0, "1695");
-  timeWindowHighDisp->MoveResize(310, 70, 40, 20);
-  timeWindowHighDisp->Connect("ReturnPressed()", "TEvdManager", this, "HandleText()");
+//   timeWindowHighDisp = new TGTextEntry(fMain, timeWindowHighBuff = new TGTextBuffer(10), TIMEHIGH_DISP);
+//   timeWindowHighBuff->AddText(0, "1695");
+//   timeWindowHighDisp->MoveResize(310, 70, 40, 20);
+//   timeWindowHighDisp->Connect("ReturnPressed()", "TEvdManager", this, "HandleText()");
 
-  TGLabel *sliderLabelLow = new TGLabel(fMain, "0");
-  sliderLabelLow->SetTextJustify(36);
-  sliderLabelLow->SetMargins(0, 0, 0, 0);
-  sliderLabelLow->SetWrapLength(-1);
-  sliderLabelLow->MoveResize(140, 25, 30, 20);
+//   TGLabel *sliderLabelLow = new TGLabel(fMain, "0");
+//   sliderLabelLow->SetTextJustify(36);
+//   sliderLabelLow->SetMargins(0, 0, 0, 0);
+//   sliderLabelLow->SetWrapLength(-1);
+//   sliderLabelLow->MoveResize(140, 25, 30, 20);
 
-  TGLabel *sliderLabelHigh = new TGLabel(fMain, "1695");
-  sliderLabelHigh->SetTextJustify(36);
-  sliderLabelHigh->SetMargins(0, 0, 0, 0);
-  sliderLabelHigh->SetWrapLength(-1);
-  sliderLabelHigh->MoveResize(330, 25, 30, 20);
+//   TGLabel *sliderLabelHigh = new TGLabel(fMain, "1695");
+//   sliderLabelHigh->SetTextJustify(36);
+//   sliderLabelHigh->SetMargins(0, 0, 0, 0);
+//   sliderLabelHigh->SetWrapLength(-1);
+//   sliderLabelHigh->MoveResize(330, 25, 30, 20);
 
-  updaterBtn = new TGTextButton(fMain, "Update", UPDATER_BTN);
-  updaterBtn->Connect("Clicked()", "TEvdManager", this, "HandleButtons()");
-  updaterBtn->SetTextJustify(36);
-  updaterBtn->SetMargins(0, 0, 0, 0);
-  updaterBtn->SetWrapLength(-1);
-  updaterBtn->MoveResize(220, 120, 60, 20);
-//-----------------------------------------------------------------------------
-// final actions
-//-----------------------------------------------------------------------------
-  fMain->MapSubwindows();
-  fMain->Resize(fMain->GetDefaultSize());
-  fMain->Resize(400, 150);
+//   updaterBtn = new TGTextButton(fMain, "Update", UPDATER_BTN);
+//   updaterBtn->Connect("Clicked()", "TEvdManager", this, "HandleButtons()");
+//   updaterBtn->SetTextJustify(36);
+//   updaterBtn->SetMargins(0, 0, 0, 0);
+//   updaterBtn->SetWrapLength(-1);
+//   updaterBtn->MoveResize(220, 120, 60, 20);
+// //-----------------------------------------------------------------------------
+// // final actions
+// //-----------------------------------------------------------------------------
+//   fMain->MapSubwindows();
+//   fMain->Resize(fMain->GetDefaultSize());
+//   fMain->Resize(400, 150);
 
-  fMain->SetWindowName(Title);
-  fMain->MapWindow();
+//   fMain->SetWindowName(Title);
+//   fMain->MapWindow();
 
   return 0;
 }
 
-//-----------------------------------------------------------------------------
-int TEvdManager::InitViews() {
-  //  fTrkXYView       = new TTrkXYView();
-  // fTrkTZView       = new TTrkTZView();
-  return 0;
-}
+// //-----------------------------------------------------------------------------
+// int TEvdManager::InitViews() {
+//   //  fTrkXYView       = new TTrkXYView();
+//   // fTrkTZView       = new TTrkTZView();
+//   return 0;
+// }
 
 
 //-----------------------------------------------------------------------------
@@ -389,7 +382,7 @@ Int_t TEvdManager::OpenTrkTZView() {
   sprintf(name,  "zt_view_%i", n);
   sprintf(title, "ZT view number %i", n);
 
-  TStnFrame* win = new TStnFrame(name, title, TStnView::kXY, 740, 760);
+  TStnFrame* win = new TStnFrame(name, title, TStnView::kXY, 1240, 760);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 

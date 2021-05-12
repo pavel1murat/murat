@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vis node displays one wedge
+// TZ view prototyping
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef murat_gui_TComboHitVisNode_hh
 #define murat_gui_TComboHitVisNode_hh
@@ -32,6 +32,8 @@ namespace mu2e {
   class Tracker;
 }
 
+namespace murat {
+  
 class TComboHitVisNode: public TStnVisNode {
 public:
   enum {
@@ -124,20 +126,20 @@ public:
 
   //  virtual void  Draw    (Option_t* option = "");
 
-  int InitEvent();
+  virtual int InitEvent();
 
-  virtual void  PaintXY (Option_t* option = "");
-  virtual void  PaintTZ (Option_t* option = "");
+  virtual void  PaintXY (Option_t* option = "") ;
+  virtual void  PaintTZ (Option_t* option = "") ;
 
   //  virtual void  ExecuteEvent(Int_t event, Int_t px, Int_t py);
 
   // virtual Int_t DistancetoPrimitiveXY(Int_t px, Int_t py);
-  virtual Int_t DistancetoPrimitiveTZ(Int_t px, Int_t py);
+  virtual Int_t DistancetoPrimitiveTZ(Int_t px, Int_t py) ;
 
   virtual void   Print(const char* Opt = "") const ; // **MENU**
 
   ClassDef(TComboHitVisNode,0)
 };
-
+}
 
 #endif

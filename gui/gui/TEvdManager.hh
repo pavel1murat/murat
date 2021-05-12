@@ -98,7 +98,7 @@ public:
   //Interface Handlers
 
   virtual int InitGui(const char* Title);
-  virtual int InitViews();
+  //  virtual int InitViews();
 
   void HandleButtons();
   void HandleSlider();

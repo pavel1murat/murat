@@ -8,71 +8,76 @@ Import('stntuple_helper')
 #------------------------------------------------------------------------------
 # 2016-10-10: STNTUPLE link: add ROOT 'EG' library after 'Physics' library
 #------------------------------------------------------------------------------
-babarlibs = env['BABARLIBS']
-rootlibs  = env['ROOTLIBS']
+def local_build():
+    local_env = env.Clone()
 
-if ( not ("EG" in rootlibs)):
-    rootlibs.insert(rootlibs.index("Physics")+1,"EG");
+    babarlibs = env['BABARLIBS']
+    rootlibs  = env['ROOTLIBS']
 
-helper = stntuple_helper(env);
+    if ( not ("EG" in rootlibs)): rootlibs.insert(rootlibs.index("Physics")+1,"EG");
 
-helper.handle_dictionaries();
+    helper = stntuple_helper(env);
 
-libs      = [ 'murat_alg',
-              'murat_obj',
-              'Stntuple_mod',
-              'Stntuple_print',
-              'Stntuple_alg',
-              'Stntuple_obj',
-              'Stntuple_geom',
-              'Stntuple_base',
+    helper.handle_dictionaries();
 
-              'Stntuple_val',
+    libs      = [ 'murat_alg',
+                  'murat_obj',
+                  'Stntuple_mod',
+                  'Stntuple_print',
+                  'Stntuple_alg',
+                  'Stntuple_obj',
+                  'Stntuple_geom',
+                  'Stntuple_base',
+
+                  'Stntuple_val',
 #
-              'mu2e_TrkReco',
-              'mu2e_TrkHitReco',
-              'mu2e_TrackerConditions',
-              'mu2e_Mu2eBTrk',
-              'mu2e_GeometryService',
-              'mu2e_ConditionsService',
-              'mu2e_Mu2eUtilities',
-              'mu2e_GeneralUtilities',
-              'mu2e_CaloCluster',
-              'mu2e_CalorimeterGeom',
-              'mu2e_CRVResponse',
-              'mu2e_MCDataProducts',
-              'mu2e_RecoDataProducts',
-              'mu2e_BTrkData',
-              'mu2e_DataProducts',
-              'mu2e_Mu2eInterfaces',
-              babarlibs,
-              'CLHEP',
-              'art_Framework_Core',
-              'art_Framework_Principal',
-              'art_Framework_Services_Registry',
-              'art_root_io_tfile_support',
-              'art_root_io_TFileService_service',
-              'art_Framework_Services_Optional_RandomNumberGenerator_service',
-              'art_Persistency_Common',
-              'art_Persistency_Provenance',
-              'art_Utilities',
-              'MF_MessageLogger',
-              rootlibs,
-              'fhiclcpp',
-              'canvas',
-              'cetlib',
-              'cetlib_except',
-              'xerces-c',
-              'boost_filesystem',
-              'boost_system',
-              'pthread'
+                  'mu2e_TrkReco',
+                  'mu2e_TrkHitReco',
+                  'mu2e_TrackerConditions',
+                  'mu2e_Mu2eBTrk',
+                  'mu2e_GeometryService',
+                  'mu2e_ConditionsService',
+                  'mu2e_Mu2eUtilities',
+                  'mu2e_GeneralUtilities',
+                  'mu2e_CaloCluster',
+                  'mu2e_CalorimeterGeom',
+                  'mu2e_CRVResponse',
+                  'mu2e_MCDataProducts',
+                  'mu2e_RecoDataProducts',
+                  'mu2e_BTrkData',
+                  'mu2e_DataProducts',
+                  'mu2e_Mu2eInterfaces',
+                  babarlibs,
+                  'CLHEP',
+                  'art_Framework_Core',
+                  'art_Framework_Principal',
+                  'art_Framework_Services_Registry',
+                  'art_root_io_tfile_support',
+                  'art_root_io_TFileService_service',
+                  'art_Framework_Services_Optional_RandomNumberGenerator_service',
+                  'art_Persistency_Common',
+                  'art_Persistency_Provenance',
+                  'art_Utilities',
+                  'MF_MessageLogger',
+                  rootlibs,
+                  'fhiclcpp',
+                  'canvas',
+                  'cetlib',
+                  'cetlib_except',
+                  'xerces-c',
+                  'boost_filesystem',
+                  'boost_system',
+                  'pthread'
               ];
 
-list_of_cc_files = Glob('*.cc',strings=True);
-list_of_modules  = Glob('*_module.cc', strings=True)
-skip_list        = list_of_modules
+    list_of_cc_files = Glob('*.cc',strings=True);
+    list_of_modules  = Glob('*_module.cc', strings=True)
+    list_of_plugins  = Glob('*_tool.cc'  , strings=True)
+    skip_list        = list_of_modules+list_of_plugins
 
-helper.build_libs(list_of_cc_files,skip_list,libs);
-helper.build_modules(list_of_modules,[],libs)
+    helper.build_libs(list_of_cc_files,skip_list,libs);
+    helper.build_modules(list_of_modules+list_of_plugins,[],libs)
+#------------------------------------------------------------------------------
+local_build()
 
 # print "tmpdir:"+env['TMP_LIB_DIR']

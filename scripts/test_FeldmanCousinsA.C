@@ -4,7 +4,7 @@
 // --------------
 // .L murat/scripts/test_FeldmanCousinsA.C
 // fc = new test_fc();
-// fc->fc_011(-1)
+// fc->test_012(-1)   // plot median dis
 //-----------------------------------------------------------------------------
 
 #include "TCanvas.h"
@@ -14,7 +14,7 @@
 #include "TMath.h"
 #include "TMatrixD.h"
 
-#include "murat/alg/TFeldmanCousinsA.hh"
+#include "Stntuple/alg/TFeldmanCousinsA.hh"
 
 class test_fc {
 public:

@@ -47,16 +47,16 @@ double analysis::GetBgrIntegral(float PMin, float PMax, float TMin, float TMax) 
 //-----------------------------------------------------------------------------
 double analysis::FluctuateBackground(float PMin, float PMax, float TMin, float TMax) {
 
-  double bgr  = 0;
+  double sum  = 0;
 
   int nbgr = fListOfBgrChannels->GetEntriesFast();
   
   for (int ibgr=0; ibgr<nbgr; ibgr++) {
     channel* bgr = GetBgrChannel(ibgr);
-    sw += bgr->FluctuateBackground(PMin,PMax,TMin,TMax);
+    sum += bgr->FluctuateBackground(PMin,PMax,TMin,TMax);
   }
 
-  return bgr;
+  return sum;
 }
 
 

@@ -466,7 +466,8 @@ double channel::FluctuateBackground(float PMin, float PMax, float TMin, float TM
   // in a simplest form, dont fluctuate, just return the mean
   // to fluctuate, need uncertainties...
   
-  double bgr = GetIntegral(float PMin, float PMax, float TMin, float TMax);
+  double bgr = GetIntegral(PMin, PMax, TMin, TMax);
+  // not finished
 
   return bgr;
 }

@@ -1,0 +1,26 @@
+# -*- mode: tcl -*-
+#
+# Print some information about the TTracker.
+#
+###############################################################################
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+
+#include "murat/fcl/prolog.fcl"
+
+process_name : dump
+
+source  : { module_type : RootInput }
+
+physics : {
+  analyzers :  { @table::murat.analyzers }
+
+  e1         : [DumpMCTrajectories]
+  end_paths  : [e1]
+}
+
+
+physics.analyzers.DumpMCTrajectories.mcTrajCollTag : "compressDigiMCs"
+
+

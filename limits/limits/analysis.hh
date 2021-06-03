@@ -42,7 +42,10 @@ public:
   channel* GetSignal() { return fSignal; }
   
 					// returns a random number - sampled fluctuated background
-  double   FluctuateBackground(); 
+
+  double   FluctuateBackground() { printf("not implemented yet!\n");  return -1 ; }
+
+  double   FluctuateBackground(float PMin, float PMax, float TMin, float TMax); 
 
   double   GetSES   (float PMin, float PMax, float TMin, float TMax) {
     double ses = 1./fSignal->GetIntegral(PMin,PMax,TMin,TMax);

@@ -118,6 +118,11 @@ murat : {
     DumpEventNumber : { module_type:DumpEventNumber
     }
 
+    DumpMCTrajectories : { module_type:DumpMCTrajectories
+	simpCollTag  : "compressDigiMCs"
+	mctrCollTag  : "compressDigiMCs"
+    }
+
     ReadGenParticles : { module_type:ReadGenParticles
 	inputModuleLabel    : StoppedParticleReactionGun
 	inputInstanceName   : ""
@@ -136,8 +141,9 @@ murat : { @table::murat
 	CaloClusterCheck : { @table::murat.CaloClusterCheck }
     }
 
-    analysers : { 
-	DumpEventNumber : { @table::murat.DumpEventNumber }
+    analyzers : { 
+	DumpEventNumber    : { @table::murat.DumpEventNumber    }
+	DumpMCTrajectories : { @table::murat.DumpMCTrajectories }
     }
 }
 END_PROLOG

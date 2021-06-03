@@ -1,6 +1,6 @@
 // my implementation of the Feldman-Cousins algorithm
 // 
-#include "murat/alg/TLogLHR.hh"
+#include "murat/limits/TLogLHR.hh"
 #include "TCanvas.h"
 
 ClassImp(TLogLHR)

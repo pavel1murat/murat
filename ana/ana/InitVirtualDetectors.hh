@@ -4,6 +4,9 @@
 
 #include "murat/ana/VDetData_t.hh"
 
-int InitVirtualDetectors(VDetData_t* VDet, int* NDet);
+namespace murat {
 
+  int InitVirtualDetectors(murat::VDetData_t* VDet, int* NDet);
+
+}
 #endif

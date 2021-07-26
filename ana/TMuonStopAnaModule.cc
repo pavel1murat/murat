@@ -263,8 +263,8 @@ void TMuonStopAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp
 }
 
 //-----------------------------------------------------------------------------
-VDetData_t*  TMuonStopAnaModule::GetVDetData(int ID) {
-  VDetData_t* vd (NULL);
+murat::VDetData_t*  TMuonStopAnaModule::GetVDetData(int ID) {
+  murat::VDetData_t* vd (NULL);
 
   if      (ID < 100) vd = fVDet+ID;
 
@@ -279,7 +279,7 @@ void TMuonStopAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step
 
   int id = (Step->VolumeID());
 
-  VDetData_t* vdd = GetVDetData(id) ; // fVDet+id;
+  murat::VDetData_t* vdd = GetVDetData(id) ; // fVDet+id;
   
   hist->fIndex   ->Fill(id);
   hist->fPDGCode ->Fill(Step->PDGCode());

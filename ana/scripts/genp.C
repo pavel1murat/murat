@@ -26,19 +26,19 @@ void  genp_ana(int DebugBit = -1) {
 
 //-----------------------------------------------------------------------------
 void  spmc_ana(int DebugBit = -1) {
-  m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
-  if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
+  murat::m_spmc = (murat::TSpmcAnaModule*) g.x->AddModule("murat::TSpmcAnaModule",0);  
+  if (DebugBit >= 0) murat::m_spmc->SetDebugBit(DebugBit,1);
 }
 
 //-----------------------------------------------------------------------------
 // before Dec'2018, the data blocks were called 'VdetBlock'
 //-----------------------------------------------------------------------------
 void  spmc_ana_old(int Stage = 1, int DebugBit = -1) {
-  m_spmc = (TStepPointMCAnaModule*) g.x->AddModule("TStepPointMCAnaModule",0);  
-  if (Stage == 3) m_spmc->SetVDetBlockName("VdetBlock");
-  if (Stage == 2) m_spmc->SetVDetBlockName("VdetBlock");
+  murat::m_spmc = (murat::TSpmcAnaModule*) g.x->AddModule("murat::TSpmcAnaModule",0);  
+  if (Stage == 3) murat::m_spmc->SetVDetBlockName("VdetBlock");
+  if (Stage == 2) murat::m_spmc->SetVDetBlockName("VdetBlock");
 
-  if (DebugBit >= 0) m_spmc->SetDebugBit(DebugBit,1);
+  if (DebugBit >= 0) murat::m_spmc->SetDebugBit(DebugBit,1);
 }
 
 //-----------------------------------------------------------------------------

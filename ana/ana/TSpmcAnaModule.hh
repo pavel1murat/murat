@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef murat_ana_TStepPointMCAnaModule_hh
-#define murat_ana_TStepPointMCAnaModule_hh
+#ifndef murat_ana_TSpmcAnaModule_hh
+#define murat_ana_TSpmcAnaModule_hh
 
 #include "TH1.h"
 #include "TH2.h"
@@ -26,7 +26,9 @@
 
 #include "murat/ana/AnaDefs.hh"
 
-class TStepPointMCAnaModule: public TStnModule {
+namespace murat {
+
+class TSpmcAnaModule: public TStnModule {
 public:
   enum { kMaxNSimp = 1000 };
 //-----------------------------------------------------------------------------
@@ -38,6 +40,7 @@ public:
     TH1F*      fNSimp;
     TH1F*      fTMaxSimp[2];
     TH1F*      fTMaxSpmc;
+    TH1F*      fLogWeight;
   };
 
   struct SimpHist_t : public HistBase_t {
@@ -88,6 +91,7 @@ public:
     TH1F*      fGenCode ;		       // generator code
     TH1F*      fMom[2]  ;
     TH1F*      fTime    ;
+    TH1F*      fPTime   ;                // proper time
     TH2F*      fYVsX    ;                // different VD's have different orientation
     TH2F*      fYVsZ    ;                // fill both hist's
     TH1F*      fPt      ;                // transverse mom
@@ -96,6 +100,9 @@ public:
     TH1F*      fEKin    ;
     TH2F*      fCosThVsMom ;	       // cos (pitch angle) vs Mom
     TH2F*      fCosThVsMomPV;		// for antiprotons
+    TH2F*      fTimeVsMom;
+    TH2F*      fTimeVsMomW;
+    TH2F*      fPTimeVsMom;
   };
 
   struct SimpData_t {
@@ -126,6 +133,7 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
+  TGenpBlock*           fGenpBlock;  
   TSimpBlock*           fSimpBlock;  
   TStepPointMCBlock*    fStepPointMCBlock;
   TStepPointMCBlock*    fVDetBlock;
@@ -163,8 +171,8 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TStepPointMCAnaModule(const char* name="StepPointMCAna", const char* title="StepPointMCAna");
-  ~TStepPointMCAnaModule();
+  TSpmcAnaModule(const char* name="murat_SpmcAna", const char* title="murat SpmcAna");
+  ~TSpmcAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -208,7 +216,8 @@ public:
 //-----------------------------------------------------------------------------
   void    Test001();
 
-  ClassDef(TStepPointMCAnaModule,0)
+  ClassDef(TSpmcAnaModule,0)
 };
 
+}
 #endif

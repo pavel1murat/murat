@@ -480,11 +480,12 @@ void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fPdgCode[0],"pdg_0"       ,Form("%s: PDG code[0]"                  ,Folder),200,-100,100,Folder);
-  HBook1F(Hist->fPdgCode[1],"pdg_1"       ,Form("%s: PDG code[1]"                  ,Folder),200,-100,100,Folder);
-  HBook1F(Hist->fNStrawHits,"nsth"        ,Form("%s: n straw hits"                 ,Folder),200,   0,200,Folder);
-  HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: CE mom after Stopping Target" ,Folder),400,  90,110,Folder);
-  HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: CE mom at the Tracker Front"  ,Folder),400,  90,110,Folder);
+  HBook1F(Hist->fPdgCode[0],"pdg_0"       ,Form("%s: PDG code[0]"                  ,Folder), 200,-100, 100,Folder);
+  HBook1F(Hist->fPdgCode[1],"pdg_1"       ,Form("%s: PDG code[1]"                  ,Folder),1000,-500, 500,Folder);
+  HBook1F(Hist->fNStrawHits,"nsth"        ,Form("%s: n straw hits"                 ,Folder), 200,   0, 200,Folder);
+  HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: mom after Stopping Target"    ,Folder), 400,   0, 200,Folder);
+  HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: mom at the Tracker Front"     ,Folder), 400,   0, 200,Folder);
+  HBook1F(Hist->fTime            ,"time"  ,Form("%s: production time"              ,Folder), 200,   0,2000,Folder);
 }
 
 
@@ -688,6 +689,7 @@ void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
   Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
   Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront);
   Hist->fNStrawHits->Fill(Simp->fNStrawHits);
+  Hist->fTime->Fill(Simp->StartPos()->T());
 }
 
 

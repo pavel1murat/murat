@@ -29,13 +29,15 @@
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //-----------------------------------------------------------------------------
-#include "ana/TStepPointMCAnaModule.hh"
+#include "murat/ana/TSpmcAnaModule.hh"
 
 #include "ana/InitVirtualDetectors.hh"
 
-ClassImp(TStepPointMCAnaModule)
+ClassImp(murat::TSpmcAnaModule)
+
+namespace murat { 
 //-----------------------------------------------------------------------------
-TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title):
+TSpmcAnaModule::TSpmcAnaModule(const char* name, const char* title):
   TStnModule(name,title)
 {
   // fPdgCode       = 11;
@@ -62,17 +64,18 @@ TStepPointMCAnaModule::TStepPointMCAnaModule(const char* name, const char* title
 }
 
 //-----------------------------------------------------------------------------
-TStepPointMCAnaModule::~TStepPointMCAnaModule() {
+TSpmcAnaModule::~TSpmcAnaModule() {
 }
 
 
 //-----------------------------------------------------------------------------
 // register data blocks and book histograms
 //-----------------------------------------------------------------------------
-int TStepPointMCAnaModule::BeginJob() {
+int TSpmcAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks 'SpmcBlock' or 'StepPointMCBlock' (old)
 //-----------------------------------------------------------------------------
+  RegisterDataBlock("GenpBlock"          ,"TGenpBlock"       ,&fGenpBlock       );
   RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock",&fStepPointMCBlock);
   RegisterDataBlock("SimpBlock"          ,"TSimpBlock"       ,&fSimpBlock       );
   RegisterDataBlock(fVDetBlockName.Data(),"TStepPointMCBlock",&fVDetBlock       );
@@ -91,7 +94,7 @@ int TStepPointMCAnaModule::BeginJob() {
 
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
+void TSpmcAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
   EventHist_t* hist = (EventHist_t*) Hist;
@@ -105,7 +108,7 @@ void TStepPointMCAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Fo
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const char* Folder) {
+void TSpmcAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const char* Folder) {
   //     char name [200];
   //     char title[200];
   StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
@@ -139,7 +142,7 @@ void TStepPointMCAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const ch
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
+void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   SimpHist_t* hist = (SimpHist_t*) Hist;
 
   HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
@@ -163,7 +166,7 @@ void TStepPointMCAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Fol
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder) {
+void TSpmcAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder) {
 
   VDetHist_t* hist = (VDetHist_t*) Hist;
 
@@ -173,6 +176,7 @@ void TStepPointMCAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Fol
   HBook1F(hist->fMom[0]  ,"mom"  ,Form("%s: Momentum[0]"   ,Folder), 500, 0, 500,Folder);
   HBook1F(hist->fMom[1]  ,"mom_1",Form("%s: Momentum[1]"   ,Folder), 500, 0,5000,Folder);
   HBook1F(hist->fTime    ,"time"    ,Form("%s: Hit Time  "    ,Folder), 200, 0,2000,Folder);
+  HBook1F(hist->fPTime   ,"ptime"   ,Form("%s: Hit properTime",Folder), 500, 0,500,Folder);
   HBook2F(hist->fYVsX    ,"y_vs_x"  ,Form("%s: Y vs X (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYVsZ    ,"y_vs_z"  ,Form("%s: Y vs Z (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook1F(hist->fPt      ,"pt"      ,Form("%s: Pt"            ,Folder), 200, 0, 200,Folder);
@@ -183,10 +187,14 @@ void TStepPointMCAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Fol
   HBook2F(hist->fCosThVsMom,"cth_vs_mom",Form("%s: Cos(Th) vs Mom",Folder), 250,   0,  5000,100,-1,1,Folder);
 
   HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
+
+  HBook2F(hist->fTimeVsMom   ,"time_vs_mom" ,Form("%s: Time:Mom"  ,Folder), 250,   0, 1250 ,200,0,2000,Folder);
+  HBook2F(hist->fTimeVsMomW  ,"time_vs_momw",Form("%s: Time:Mom W",Folder), 250,   0, 1250 ,200,0,2000,Folder);
+  HBook2F(hist->fPTimeVsMom  ,"ptime_vs_mom",Form("%s: PTime:Mom" ,Folder), 250,   0, 1250 ,200,0,400 ,Folder);
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::BookHistograms() {
+void TSpmcAnaModule::BookHistograms() {
 
   //  char name [200];
   //  char title[200];
@@ -571,7 +579,7 @@ void TStepPointMCAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
+void TSpmcAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //   double            cos_th, xv, yv, rv, zv, p;
 //   TLorentzVector    mom;
 
@@ -589,7 +597,7 @@ void TStepPointMCAnaModule::FillEventHistograms(HistBase_t* Hist) {
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
+void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
 
   StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
   
@@ -648,7 +656,7 @@ void TStepPointMCAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPoi
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpData_t* Sd, double Weight) {
+void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpData_t* Sd, double Weight) {
 
   SimpHist_t* hist = (SimpHist_t*) Hist;
 
@@ -687,7 +695,7 @@ void TStepPointMCAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* S
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step, double Weight) {
+void TSpmcAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step, double Weight) {
 
   VDetHist_t* hist = (VDetHist_t*) Hist;
 
@@ -703,7 +711,8 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fMom[0]->Fill(p,Weight);
   hist->fMom[1]->Fill(p,Weight);
 
-  hist->fTime    ->Fill(Step->Time(),Weight);
+  hist->fTime    ->Fill(Step->Time (),Weight);
+  hist->fPTime   ->Fill(Step->ProperTime(),Weight);
 
   // calculate local X and local Z
 
@@ -740,10 +749,15 @@ void TStepPointMCAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fCosThVsMom->Fill(p,cos_th,Weight);
 
   hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
+
+  hist->fTimeVsMom->Fill(p,Step->Time(),Weight);
+  hist->fPTimeVsMom->Fill(p,Step->ProperTime(),Weight);
+
+  //  surv_prob = 1;
 }
 
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::FillHistograms() {
+void TSpmcAnaModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
 // event histograms
@@ -981,7 +995,7 @@ void TStepPointMCAnaModule::FillHistograms() {
 
       if (p > 100) { 
 	FillStepPointMCHistograms(fHist.fStepPointMC[ 22],spmc,&spmc_data);                  // pbars p > 100 MeV/c
-	FillStepPointMCHistograms(fHist.fStepPointMC[522],spmc,&spmc_data,fWeight);                  // pbars p > 100 MeV/c
+	FillStepPointMCHistograms(fHist.fStepPointMC[522],spmc,&spmc_data,fWeight);          // pbars p > 100 MeV/c
 
 	FillSimpHistograms(fHist.fSimp[1022],simp,sd);
 	FillSimpHistograms(fHist.fSimp[1024],simp,sd,fWeight);
@@ -1246,7 +1260,7 @@ void TStepPointMCAnaModule::FillHistograms() {
 
 
 //_____________________________________________________________________________
-int TStepPointMCAnaModule::BeginRun() {
+int TSpmcAnaModule::BeginRun() {
   int rn = GetHeaderBlock()->RunNumber();
   TStntuple::Init(rn);
   return 0;
@@ -1254,9 +1268,10 @@ int TStepPointMCAnaModule::BeginRun() {
 
 
 //_____________________________________________________________________________
-int TStepPointMCAnaModule::Event(int ientry) {
+int TSpmcAnaModule::Event(int ientry) {
 
   fStepPointMCBlock->GetEntry(ientry);
+  fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
@@ -1273,7 +1288,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // determine the cross section weight looking at the first particle with the PDG code of an antiproton
 //-----------------------------------------------------------------------------
-  fWeight = 1.;
+  fWeight     = fGenpBlock->Weight();
   fTMaxSimp   = -1;
   if (fNSimp > 0) {
 //-----------------------------------------------------------------------------
@@ -1341,7 +1356,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
       fSimData[i].fStage = simp_id/100000;
     }
     else {
-      printf(" TStepPointMCAnaModule::Event ERROR: too many SimParticles\n");
+      printf(" TSpmcAnaModule::Event ERROR: too many SimParticles\n");
     }
   }
     
@@ -1361,7 +1376,7 @@ int TStepPointMCAnaModule::Event(int ientry) {
 // bit 6: pbar in the final state
 // bit 7: pbar P > 100 MeV/c in the final state
 //-----------------------------------------------------------------------------
-void TStepPointMCAnaModule::Debug() {
+void TSpmcAnaModule::Debug() {
 
   for (int i=0; i<fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
@@ -1499,12 +1514,13 @@ void TStepPointMCAnaModule::Debug() {
 }
 
 //_____________________________________________________________________________
-int TStepPointMCAnaModule::EndJob() {
+int TSpmcAnaModule::EndJob() {
   printf("----- end job: ---- %s\n",GetName());
   return 0;
 }
 
 //_____________________________________________________________________________
-void TStepPointMCAnaModule::Test001() {
+void TSpmcAnaModule::Test001() {
 }
 
+}

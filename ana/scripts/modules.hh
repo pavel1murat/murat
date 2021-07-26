@@ -15,7 +15,7 @@
 #include "murat/ana/TMuonStopAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
 // #include "murat/ana/TRMCAnaModule.hh"
-#include "murat/ana/TStepPointMCAnaModule.hh"
+#include "murat/ana/TSpmcAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
 #include "murat/ana/TTrackAnaModule.hh"
 #include "murat/ana/TTrackCompModule.hh"
@@ -84,7 +84,6 @@ TGenAnaModule*             m_gen   = NULL;
 THelixAnaModule*           m_hel   = NULL;
 TMuonStopAnaModule*        m_must  = NULL;
 // TRMCAnaModule*             m_rmc   = NULL;
-TStepPointMCAnaModule*     m_spmc  = NULL;
 TStrawHitAnaModule*        m_strh  = NULL;
 TTrackPidAnaModule*        m_tpa   = NULL;
 TTrackStrawHitAnaModule*   m_tsh   = NULL;
@@ -100,6 +99,8 @@ namespace murat {
   TClusterAnaModule*       m_cls   = NULL;
   TEmuAnaModule*           m_emu   = NULL;
   TPidAnaModule*           m_pid   = NULL;
+  TSimpAnaModule*          m_sim   = NULL;
+  TSpmcAnaModule*          m_spmc  = NULL;
   TTrackAnaModule*         m_trk   = NULL;
   TTrackCompModule*        m_tcm   = NULL;
   TTriggerAnaModule*       m_trig  = NULL;

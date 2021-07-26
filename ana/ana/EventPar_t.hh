@@ -9,6 +9,9 @@ namespace murat {
     TGenParticle* fParticle;                // generator "signal" particle
     float         fPartE;
 
+    int           fNSimp;
+    TSimParticle* fSimp;                    // "signal" particle (?)
+
     int           fNTracks    [2];          // might need two for different reasons: DAR<->PAR, ELE<->MUO
     int           fNGoodTracks[2];
     int           fNStrawHits;

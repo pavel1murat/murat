@@ -1,0 +1,114 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////////////////
+#ifndef murat_ana_TVDetAnaModule_hh
+#define murat_ana_TVDetAnaModule_hh
+
+#include "TH1.h"
+#include "TH2.h"
+#include "TProfile.h"
+
+#include "Stntuple/loop/TStnModule.hh"
+
+#include "Stntuple/obj/TGenpBlock.hh"
+#include "Stntuple/obj/TSimpBlock.hh"
+#include "Stntuple/obj/TVDetDataBlock.hh"
+
+#include "Stntuple/base/TStnArrayI.hh"
+
+#include "Stntuple/alg/TStnTrackID.hh"
+#include "Stntuple/alg/TEmuLogLH.hh"
+
+class TVDetAnaModule: public TStnModule {
+public:
+//-----------------------------------------------------------------------------
+//  histograms
+//-----------------------------------------------------------------------------
+  struct VDetHitHist_t {
+    TH1F*    fIndex;
+    TH1F*    fPdgCode;		       //
+    TH1F*    fGenCode;		       // generator code
+    TH1F*    fEnergy;
+    TH1F*    fTime;
+  };
+
+  struct EventHist_t {
+    TH1F*    fNVDetHits;		// N virtual detector hits in the event
+    TH1F*    fNHitsTF;
+    TH1F*    fNHitsTB;
+    TH1F*    fMomTF;
+    TH1F*    fMomTB;
+    TH1F*    fMomLoss;
+  };
+
+//-----------------------------------------------------------------------------
+  enum { kNEventHistSets    =  100 };
+  enum { kNVDetHitHistSets  = 2000 };
+
+  struct Hist_t {
+    EventHist_t*    fEvent   [kNEventHistSets];
+    VDetHitHist_t*  fVDetHit [kNVDetHitHistSets];
+  };
+//-----------------------------------------------------------------------------
+//  data members
+//-----------------------------------------------------------------------------
+public:
+					// pointers to the data blocks used
+  TVDetDataBlock*       fVDetDataBlock;
+					// histograms filled
+  Hist_t                fHist;
+
+  int                   fNVDetHits;
+  int                   fNHitsTF;
+  int                   fNHitsTB;
+
+  float                 fMomTF;
+  float                 fMomTB;
+
+  int                   fPdgCode;
+  int                   fGeneratorCode;
+//-----------------------------------------------------------------------------
+//  functions
+//-----------------------------------------------------------------------------
+public:
+  TVDetAnaModule(const char* name="VDetAna", const char* title="VDetAna");
+  ~TVDetAnaModule();x
+//-----------------------------------------------------------------------------
+// accessors
+//-----------------------------------------------------------------------------
+  Hist_t*            GetHist        () { return &fHist;        }
+//-----------------------------------------------------------------------------
+// setters
+//-----------------------------------------------------------------------------
+  void    SetPdgCode      (int Code) { fPdgCode       = Code; }
+  void    SetGeneratorCode(int Code) { fGeneratorCode = Code; }
+//-----------------------------------------------------------------------------
+// overloaded methods of TStnModule
+//-----------------------------------------------------------------------------
+  int     BeginJob();
+  int     BeginRun();
+  int     Event   (int ientry);
+  int     EndJob  ();
+//-----------------------------------------------------------------------------
+// other methods
+//-----------------------------------------------------------------------------
+  void    BookVDetHitHistograms  (VDetHitHist_t*  Hist, const char* Folder);
+  void    BookEventHistograms    (EventHist_t*    Hist, const char* Folder);
+
+  void    FillVDetHitHistograms  (VDetHitHist_t* Hist, TVDetHitData*  Hit);
+  void    FillEventHistograms    (EventHist_t*    Hist);
+
+  void    BookHistograms();
+  void    FillHistograms();
+
+
+  void    Debug();
+//-----------------------------------------------------------------------------
+// test
+//-----------------------------------------------------------------------------
+  void    Test001();
+
+  ClassDef(TVDetAnaModule,0)
+};
+
+#endif

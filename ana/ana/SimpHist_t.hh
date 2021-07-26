@@ -10,6 +10,7 @@ namespace murat {
    TH1F*    fMomTargetEnd;
    TH1F*    fMomTrackerFront;
    TH1F*    fNStrawHits;
+   TH1F*    fTime;
  };
 
 }

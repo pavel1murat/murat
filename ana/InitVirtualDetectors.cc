@@ -6,7 +6,9 @@
 // define X-offsets to histogram hits on virtual detectors conveniently
 // NDet is not used so far, make sure dimension of VDet array is >= 10
 ///////////////////////////////////////////////////////////////////////////////
-int InitVirtualDetectors(VDetData_t* VDet, int* NDet) {
+namespace murat {
+
+int InitVirtualDetectors(murat::VDetData_t* VDet, int* NDet) {
 //            id ix iz      x         z       bfield    phi
   VDet[ 0] = { 0, 0, 0,     0.00,     0.00,   0.0   ,   0.0 };       // VD0  : unused
   VDet[ 1] = { 1, 1, 3,  3904.00, -4003.99,   2.6654,   0.0 };       // VD1  : upstream   TS1
@@ -37,4 +39,5 @@ int InitVirtualDetectors(VDetData_t* VDet, int* NDet) {
   *NDet            = 100;
 
   return 0;
+}
 }

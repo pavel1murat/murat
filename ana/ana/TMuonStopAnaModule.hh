@@ -94,7 +94,7 @@ public:
   Hist_t                fHist;
 
   int                   fNVDet;         // max number of the VD used
-  VDetData_t            fVDet[200];     // helper , used in FillVDetHistograms
+  murat::VDetData_t     fVDet[200];     // helper , used in FillVDetHistograms
 
   TString               fVDetBlockName;
 //-----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ public:
   void    BookHistograms();
   void    FillHistograms();
 
-  VDetData_t*  GetVDetData(int VDetID);
+  murat::VDetData_t*  GetVDetData(int VDetID);
 
   void    Debug();
 //-----------------------------------------------------------------------------

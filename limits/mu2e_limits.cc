@@ -26,7 +26,7 @@ int mu2e_limits(int         Mode  ,
 //------------------------------------------------------------------------------------------
 // define channels, channel with the name=0 - the last one, use "trk_1" histograms
 // 
-//  ana init    bit      name           Module    HistSet HistBin  HistName  xmin xmax Rebin
+//  ana init    bit       name                Module          HistSet   HistBin  HistName   xmin xmax Rebin
 //------------------------------------------------------------------------------------------
     { 0,  0,   1<<0, (char*) "mu2e", (char*) "Mu2eLimits",  (char*) "trk",   1, (char*) "p", 101., 106., 1},
     { 0,  0,      0,      0        , 0                   ,  0            ,   0,           0,  0.,  -1.,  0}

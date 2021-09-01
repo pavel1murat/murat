@@ -11,9 +11,8 @@
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "RecoDataProducts/inc/CaloHit.hh"
+#include "RecoDataProducts/inc/CaloCluster.hh"
 
 #include "BTrk/KalmanTrack/KalRep.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
@@ -337,9 +336,9 @@ namespace mu2e {
     fListOfGenParticles = (GenParticleCollection*) &(*genpHandle);
     fEle                = (GenParticle*) &fListOfGenParticles->at(0);
 
-    art::Handle<PtrStepPointMCVectorCollection> mcptrHandle;
-    Evt->getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandle);
-    fListOfMcStrawHits = (PtrStepPointMCVectorCollection*) &(*mcptrHandle);
+    // art::Handle<PtrStepPointMCVectorCollection> mcptrHandle;
+    // Evt->getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandle);
+    // fListOfMcStrawHits = (PtrStepPointMCVectorCollection*) &(*mcptrHandle);
 //-----------------------------------------------------------------------------
 // reconstructed tracks
 //-----------------------------------------------------------------------------

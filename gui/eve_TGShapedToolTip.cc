@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-
+#include "TVirtualX.h"
 #include "murat/gui/eve_TGShapedToolTip.hh"
 
 ClassImp(TGShapedToolTip)

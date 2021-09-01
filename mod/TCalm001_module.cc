@@ -21,13 +21,12 @@
 #include "BTrk/ProbTools/ChisqConsistency.hh"
 #include "BTrk/BbrGeom/BbrVectorErr.hh"
 
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
+#include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
+#include "Offline/RecoDataProducts/inc/StrawHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
+#include "Offline/MCDataProducts/inc/GenParticle.hh"
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -351,7 +350,7 @@ namespace mu2e {
 //     if ((row < 0) || (row > 9999)) row = -9999;
 //     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(Cluster->diskId());
+    Hist->fVaneID->Fill(Cluster->diskID());
     Hist->fEnergy->Fill(Cluster->energyDep());
     Hist->fT0->Fill(Cluster->time());
     Hist->fRow->Fill(row);

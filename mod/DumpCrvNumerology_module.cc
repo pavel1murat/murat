@@ -2,9 +2,9 @@
 // Print the CRV geometry
 //
 
-#include "GeometryService/inc/GeomHandle.hh"
-#include "CosmicRayShieldGeom/inc/CosmicRayShield.hh"
-#include "CRVResponse/inc/CrvHelper.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/CosmicRayShieldGeom/inc/CosmicRayShield.hh"
+#include "Offline/CRVResponse/inc/CrvHelper.hh"
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"

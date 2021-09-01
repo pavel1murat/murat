@@ -2,8 +2,8 @@
 // Print the Tracker geometry
 //
 
-#include "GeometryService/inc/GeomHandle.hh"
-#include "TrackerGeom/inc/Tracker.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/TrackerGeom/inc/Tracker.hh"
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
@@ -103,7 +103,7 @@ namespace mu2e {
 	    
 	    double z    = straw->getMidPoint().z();  
 	    double hl   = straw->halfLength();
-	    double r    = straw->getRadius();
+	    double r    = tracker->strawProperties()._strawOuterRadius;;
 	    
 	    double phi1 = phi/M_PI*180.;
 	    printf("  %3i %6i %5i %4i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",

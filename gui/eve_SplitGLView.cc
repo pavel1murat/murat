@@ -5,7 +5,8 @@
 /// \macro_code
 ///
 /// \author Bertrand Bellenot
-
+//-----------------------------------------------------------------------------
+#include "TVirtualX.h"
 
 #include "murat/gui/eve_SplitGLView.hh"
 #include "murat/gui/eve_HtmlObjTable.hh"

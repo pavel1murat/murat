@@ -1,0 +1,38 @@
+#!/bin/bash
+# echo pwd  `pwd`
+#------------------------------------------------------------------------------
+# make sure Stntuple build_config is executed
+#------------------------------------------------------------------------------
+pushd ../Stntuple ; scripts/build_config_muse ; popd ;
+#------------------------------------------------------------------------------
+# 'murat' and its subpackages, excluding Stntuple
+#------------------------------------------------------------------------------
+base=$MUSE_WORK_DIR/build
+
+pkg=`pwd | awk -F / '{print $(NF-1)}'`
+
+echo "murat::build_congig_muse: pkg="$pkg
+
+pkg_include_dir=$base/include/$pkg
+
+if [ ! -d $pkg_include_dir ] ; then mkdir -p $pkg_include_dir ; fi
+
+for d in alg ana gaas gui mod obj limits mclimit plot pet petr tdr; do
+    if [ ! -e $pkg_include_dir/$d ] ; then 
+	echo `pwd`$0 : creating symbolic link $pkg_include_dir/$d
+	ln -s ../../../$pkg/$d/$d $pkg_include_dir/$d
+    fi
+done
+
+#------------------------------------------------------------------------------
+# murat/Stntuple and its subpackages
+#------------------------------------------------------------------------------
+# if [ ! -d ../$dir/Stntuple ] ; then mkdir -p ../$dir/Stntuple ; fi
+# 
+# # for d in alg base gui loop mod obj val ; do
+# for d in alg base loop mod obj val ; do
+#     if [ ! -e ../$dir/Stntuple/$d ] ; then 
+# 	echo `pwd`$0 : creating symbolic link ../$dir/Stntuple/$d
+# 	ln -s ../../murat/Stntuple/$d/$d ../$dir/Stntuple/$d
+#     fi
+# done

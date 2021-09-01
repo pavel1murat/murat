@@ -23,13 +23,12 @@
 
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "RecoDataProducts/inc/StrawHit.hh"
+#include "RecoDataProducts/inc/CaloHit.hh"
+#include "RecoDataProducts/inc/CaloCluster.hh"
 #include "RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
-#include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
+// #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
 #include "MCDataProducts/inc/GenParticleCollection.hh"
 #include "MCDataProducts/inc/SimParticleCollection.hh"
 #include "MCDataProducts/inc/StepPointMCCollection.hh"
@@ -135,7 +134,7 @@ namespace mu2e {
     GenParticleCollection*              fListOfGenParticles;
     TrkToCaloExtrapolCollection*        fListOfExtrapolatedTracks;
     StrawHitCollection*                 fListOfStrawHits;
-    PtrStepPointMCVectorCollection*     fListOfMcStrawHits;
+    // PtrStepPointMCVectorCollection*     fListOfMcStrawHits;
 
     TTracker*                     fTracker;
 

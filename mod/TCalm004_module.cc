@@ -17,9 +17,8 @@
 #include "GeometryService/inc/GeometryService.hh"
 #include "GeometryService/inc/GeomHandle.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "RecoDataProducts/inc/CaloHit.hh"
+#include "RecoDataProducts/inc/CaloCluster.hh"
 
 #include "BTrk/KalmanTrack/KalRep.hh"
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
@@ -394,7 +393,7 @@ namespace mu2e {
     if ((row < 0) || (row > 9999)) row = -9999;
     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(cl->diskId());
+    Hist->fVaneID->Fill(cl->diskID());
     Hist->fEnergy->Fill(cl->energyDep());
     Hist->fT0->Fill(cl->time());
     Hist->fRow->Fill(row);
@@ -922,9 +921,9 @@ namespace mu2e {
     fListOfGenParticles = (GenParticleCollection*) &(*genpHandle);
     fEle                = (GenParticle*) &fListOfGenParticles->at(0);
 
-    art::Handle<PtrStepPointMCVectorCollection> mcptrHandle;
-    Evt.getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandle);
-    fListOfMcStrawHits = (PtrStepPointMCVectorCollection*) &(*mcptrHandle);
+    // art::Handle<PtrStepPointMCVectorCollection> mcptrHandle;
+    // Evt.getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandle);
+    // fListOfMcStrawHits = (PtrStepPointMCVectorCollection*) &(*mcptrHandle);
 //-----------------------------------------------------------------------------
 // straw hits 
 //-----------------------------------------------------------------------------

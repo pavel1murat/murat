@@ -26,15 +26,14 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Mu2e includes.
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
+#include "Offline/ConditionsService/inc/ConditionsHandle.hh"
+#include "Offline/GeometryService/inc/GeometryService.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
 
-#include "CalorimeterGeom/inc/DiskCalorimeter.hh"
-#include "CalorimeterGeom/inc/Calorimeter.hh"
-// #include "Mu2eUtilities/inc/SimParticlesWithHits.hh"
+#include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
 
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
 

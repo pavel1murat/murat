@@ -31,9 +31,8 @@
 
 #include "CalorimeterGeom/inc/DiskCalorimeter.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "RecoDataProducts/inc/CaloHit.hh"
+#include "RecoDataProducts/inc/CaloCluster.hh"
 
 #include "BTrk/KalmanTrack/KalRep.hh"
 #include "BTrk/ProbTools/ChisqConsistency.hh"
@@ -489,7 +488,7 @@ namespace mu2e {
     int                    nhits;
     float                  t, e, r, e700, n700;
     TObjHandle*            phit;
-    mu2e::CaloCrystalHit*  hit;
+    mu2e::CaloHit*  hit;
 					// determine crystal coordinates
     TDisk* disk = Cr->Disk();
 
@@ -511,7 +510,7 @@ namespace mu2e {
     n700 = 0;
     for (int i=0; i<nhits; i++) {
       phit = (TObjHandle*) Cr->ListOfHits()->UncheckedAt(i);
-      hit  = (mu2e::CaloCrystalHit*) phit->Object();
+      hit  = (mu2e::CaloHit*) phit->Object();
       t   = hit->time();
       Hist->fTime[idisk]->Fill(t);
       if (t > 700.) {
@@ -552,7 +551,7 @@ namespace mu2e {
     if ((row < 0) || (row > 9999)) row = -9999;
     if ((col < 0) || (col > 9999)) col = -9999;
 
-    Hist->fVaneID->Fill(cl->diskId());
+    Hist->fVaneID->Fill(cl->diskID());
     Hist->fEnergy->Fill(cl->energyDep());
     Hist->fT0->Fill(cl->time());
     Hist->fRow->Fill(row);
@@ -764,7 +763,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // crystals - count crystals with E > 1MeV
 //-----------------------------------------------------------------------------
-    CaloCrystalHit* cch;
+    CaloHit* cch;
 
     int n_cch_1mev = 0;
 
@@ -792,7 +791,7 @@ namespace mu2e {
       
       for (int ic=0; ic<fNCaloCrystalHits; ic++) {
 	cch        = &fListOfCaloCrystalHits->at(ic);
-	crystal_id = cch->id();
+	crystal_id = cch->crystalID();
 
 	if (cch->energyDep() > 1.) {
 	  n_cch_1mev += 1;
@@ -1139,13 +1138,13 @@ namespace mu2e {
     fListOfGenParticles = (GenParticleCollection*) &(*genpHandle);
     fEle                = (GenParticle*) &fListOfGenParticles->at(0);
 
-    art::Handle<PtrStepPointMCVectorCollection> mcptrHandle;
-    Evt.getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandle);
+    // art::Handle<PtrStepPointMCVectorCollection> mcptrHandle;
+    // Evt.getByLabel(fStrawHitMaker,"StrawHitMCPtr",mcptrHandle);
 
-    fListOfMcStrawHits = 0;
-    if (mcptrHandle.isValid()) {
-      fListOfMcStrawHits = (PtrStepPointMCVectorCollection*) mcptrHandle.product();
-    }
+    // fListOfMcStrawHits = 0;
+    // if (mcptrHandle.isValid()) {
+    //   fListOfMcStrawHits = (PtrStepPointMCVectorCollection*) mcptrHandle.product();
+    // }
 //-----------------------------------------------------------------------------
 // reconstructed tracks
 //-----------------------------------------------------------------------------
@@ -1187,9 +1186,9 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // calorimeter clusters
 //-----------------------------------------------------------------------------
-    art::Handle<CaloCrystalHitCollection> ccHandle;
+    art::Handle<CaloHitCollection> ccHandle;
     Evt.getByLabel(fCrystalHitMaker.data(),ccHandle);
-    fListOfCaloCrystalHits = (CaloCrystalHitCollection*) ccHandle.product();
+    fListOfCaloCrystalHits = (CaloHitCollection*) ccHandle.product();
     fNCaloCrystalHits      = fListOfCaloCrystalHits->size();
 //-----------------------------------------------------------------------------
 // track extrapolation results

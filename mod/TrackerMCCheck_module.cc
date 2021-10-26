@@ -570,15 +570,15 @@ namespace mu2e {
 	const ComboHit* sh = &fStrawHitColl->at(jclosest);
 	const Straw* straw = &_tracker->getStraw(sh->strawId());
 
-	const XYZVec* hp = &fStrawHitColl->at(jclosest).pos();
+	const XYZVectorF hp = fStrawHitColl->at(jclosest).pos();
 
-	double dx = sp->x()-hp->x();
-	double dy = sp->y()-hp->y();
+	double dx = sp->x()-hp.x();
+	double dy = sp->y()-hp.y();
 
 	double dw = dx*straw->getDirection().x()+dy*straw->getDirection().y();
 
 	rs = sqrt(sp->x()*sp->x()+sp->y()*sp->y());
-	rh = sqrt(hp->x()*hp->x()+hp->y()*hp->y());
+	rh = sqrt(hp.x()*hp.x()+hp.y()*hp.y());
 
 	dr = rh-rs;
 

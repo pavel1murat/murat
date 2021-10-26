@@ -28,10 +28,9 @@
 #include "RecoDataProducts/inc/CaloCluster.hh"
 #include "RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
-// #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
+#include "MCDataProducts/inc/GenParticle.hh"
+#include "MCDataProducts/inc/SimParticle.hh"
+#include "MCDataProducts/inc/StepPointMC.hh"
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"

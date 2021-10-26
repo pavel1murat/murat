@@ -24,7 +24,7 @@
 
 #include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
 
-#include "Offline/RecoDataProducts/inc/StrawHitCollection.hh"
+#include "Offline/RecoDataProducts/inc/StrawHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 

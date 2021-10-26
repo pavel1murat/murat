@@ -17,7 +17,7 @@
 #include "art_root_io/TFileService.h"
 
 #include "MCDataProducts/inc/GenParticle.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
+#include "MCDataProducts/inc/GenParticle.hh"
 
 #include "TH1F.h"
 

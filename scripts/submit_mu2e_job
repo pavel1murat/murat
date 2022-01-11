@@ -165,7 +165,7 @@ if [ $DSID == "undefined" ] ; then export NAME_STUB=$JOB
 else                                      NAME_STUB=${DSID}_$JOB
 fi
 
-export      LOGFILE=$NAME_STUB.log
+export      LOGFILE=`echo $NAME_STUB | sed 's/cnf./log./'`.log
 
 if [ $OUTPUT_DIR == "undefined" ] ; then 
     dsid=$DSID

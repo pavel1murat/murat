@@ -56,7 +56,7 @@ public:
     TH2F*      fXEndVsZEnd;
     TH2F*      fYVsX_2480;
     TH2F*      fYVsX_2513;
-    TH2F*      fCosThVsMom;
+    TH2F*      fCosThVsMom[2];
     TH2F*      fCosThVsMomPV;		// for antiprotons
   };
 
@@ -77,7 +77,7 @@ public:
     TH1F*      fStepLength;
 
     TH1F*      fMom[2];
-    TH2F*      fCosThVsMom;
+    TH2F*      fCosThVsMom[2];
     TH1F*      fEKin;
 
     TH2F*      fYVsZ;
@@ -98,7 +98,7 @@ public:
     TH1F*      fPp      ;                // momentum component parallel to the solenoid axis
     TH1F*      fTanTh   ;		       // tan (pitch angle)
     TH1F*      fEKin    ;
-    TH2F*      fCosThVsMom ;	       // cos (pitch angle) vs Mom
+    TH2F*      fCosThVsMom[2];	       // cos (pitch angle) vs Mom
     TH2F*      fCosThVsMomPV;		// for antiprotons
     TH2F*      fTimeVsMom;
     TH2F*      fTimeVsMomW;

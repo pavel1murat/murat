@@ -264,8 +264,9 @@ void TSpmcAnaModule::BookHistograms() {
   book_spmc_histset[204] = 1;		// positrons with 2 < p < 3 MeV/c
   book_spmc_histset[205] = 1;		// positrons with p > 3 MeV/c
 
-  book_spmc_histset[301] = 1;           // mu- p < 50 MeV/c
-  book_spmc_histset[302] = 1;           // mu- p > 50 MeV/c
+  book_spmc_histset[301] = 1;           // mu- p <  50 MeV/c
+  book_spmc_histset[302] = 1;           // mu- p >  50 MeV/c
+  book_spmc_histset[303] = 1;           // mu- p > 100 MeV/c
 
   book_spmc_histset[ 506] = 1;		// negative pions with weight
   book_spmc_histset[ 521] = 1;		// antiprotons, with Striganov weights
@@ -988,8 +989,9 @@ void TSpmcAnaModule::FillHistograms() {
 // mu-
 //-----------------------------------------------------------------------------
       FillStepPointMCHistograms(fHist.fStepPointMC[3],spmc,&spmc_data);
-      if   (p <  50)                FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,&spmc_data);
-      else                          FillStepPointMCHistograms(fHist.fStepPointMC[302],spmc,&spmc_data);
+      if      (p <  50)             FillStepPointMCHistograms(fHist.fStepPointMC[301],spmc,&spmc_data);
+      else if (p < 100)             FillStepPointMCHistograms(fHist.fStepPointMC[302],spmc,&spmc_data);
+      else                          FillStepPointMCHistograms(fHist.fStepPointMC[303],spmc,&spmc_data);
     }
     else if (pdg_code     ==   -13) FillStepPointMCHistograms(fHist.fStepPointMC[4],spmc,&spmc_data);
     else if (pdg_code     ==    22) FillStepPointMCHistograms(fHist.fStepPointMC[5],spmc,&spmc_data);

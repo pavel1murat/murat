@@ -12,7 +12,7 @@
 #include "TH1.h"
 
 #include "murat/scripts/plot_utilities.hh"
-#include "murat/scripts/create_ntuple.C"
+// #include "murat/scripts/create_ntuple.C"
 
 
 TCanvas* c;
@@ -26,12 +26,15 @@ int make_proton_pulse_graph(TGraph*& Graph, int PulseNumber) {
 
   TTree* t = new TTree("a","a");
   
-  if (nt_pulse == NULL) create_ntuple("ConditionsService/data/potTimingDistribution_avg.txt",nt_pulse);
+  if (nt_pulse == NULL) {
+    nt_pulse = new TTree("proton_pulse","Proton Pulse");
+    nt_pulse->ReadFile("ConditionsService/data/potTimingDistribution_avg.txt","var0:var1");
+  }
 
   float var[100];
 
-  TBranch* b1 = nt_pulse->GetBranch("var1");
-  TBranch* b2 = nt_pulse->GetBranch("var2");
+  TBranch* b1 = nt_pulse->GetBranch("var0");
+  TBranch* b2 = nt_pulse->GetBranch("var1");
 
   nt_pulse->SetBranchAddress("var0",&var[0]);
   nt_pulse->SetBranchAddress("var1",&var[1]);
@@ -92,9 +95,9 @@ void plot_proton_pulse_shape(int NPulses = 1, int DrawArrivals = 0, int Print = 
 
   draw_label_ndc("Mu2e proton beam time structure",0.2,0.85,0.06,52);
 
-  if (DrawArrivvals != 0) {
-    g_pion_
-  }
+  // if (DrawArrivals != 0) {
+  //   g_pion_
+  // }
 
   if (Print != 0) {
     char name[100];
@@ -112,12 +115,11 @@ void plot_proton_pulse_with_ac_dipole(float Scale = 50, int Print = 0) {
   TCanvas* c = new TCanvas("c_pulse","pulse",1300,700);
   c->SetLogy(1);
   
-  TNtuple* nt_pulse (NULL);
-  TNtuple* ac_dipole(NULL);
+  TTree* nt_pulse = new TTree("nt_pulse","nt_pulse");
+  nt_pulse->ReadFile("ConditionsService/data/potTimingDistribution_avg.txt","var0:var1");
 
-  create_ntuple("ConditionsService/data/potTimingDistribution_avg.txt",nt_pulse);
-
-  create_ntuple("ConditionsService/data/acDipoleTransmissionFunction.txt",ac_dipole);
+  TTree* ac_dipole = new TTree("nt_pulse","nt_pulse");
+  ac_dipole->ReadFile("ConditionsService/data/acDipoleTransmissionFunction.txt","var0:var1");
 
   float var[100];
 //-----------------------------------------------------------------------------
@@ -138,7 +140,8 @@ void plot_proton_pulse_with_ac_dipole(float Scale = 50, int Print = 0) {
   TGraph* gr_pulse = new TGraph(nent,x,y);
   gr_pulse->SetFillStyle(1001);
   gr_pulse->SetFillColor(624);
-  gr_pulse->Draw("al,fill");
+  //  gr_pulse->Draw("al,fill");
+  gr_pulse->Draw("al");
 
   gr_pulse->SetTitle("");
   gr_pulse->GetXaxis()->SetTitle("Time, ns");

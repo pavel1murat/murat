@@ -4,7 +4,7 @@
 #include "TMath.h"
 #include "TF1.h"
 
-#include "murat/ana/poi.hh"
+// #include "murat/ana/poi.hh"
 
 
 
@@ -167,7 +167,7 @@ root [46] limit95(1.6,6.6)
 // we observe 'Observed; events, what is the probability for the background
 // to fluctuate that high?
 //-----------------------------------------------------------------------------
-int fluct_prob(double Expected, double Observed) {
+int fluct_prob(double Expected, double Observed, float NTries = 1e8) {
   
   // starting value
 
@@ -184,7 +184,7 @@ int fluct_prob(double Expected, double Observed) {
   
   double y1, pp;
 
-  int ntries = 100000000;
+  long int ntries = (long int) NTries;
 
   pp = 0;
   for (int i=0;i<ntries; i++) {

@@ -118,6 +118,7 @@ murat : {
     DumpEventNumber : { module_type:DumpEventNumber
     }
 
+
     DumpMCTrajectories : { module_type:DumpMCTrajectories
 	simpCollTag  : "compressDigiMCs"
 	mctrCollTag  : "compressDigiMCs"
@@ -144,6 +145,13 @@ murat : { @table::murat
     analyzers : { 
 	DumpEventNumber    : { @table::murat.DumpEventNumber    }
 	DumpMCTrajectories : { @table::murat.DumpMCTrajectories }
+	
+	DumpGeometry : { module_type:DumpGeometry
+	    dumpVirtualDetectors  : 0
+	    dumpTrackerNumerology : 0
+	    dumpCRVNumerology     : 0
+	    dumpCaloGeometry      : 0
+	}
     }
 }
 END_PROLOG

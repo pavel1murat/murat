@@ -10,9 +10,18 @@
 #include "art/Framework/Core/ModuleMacros.h"
 
 #include "GeometryService/inc/GeomHandle.hh"
+
 #include "GeometryService/inc/VirtualDetector.hh"
 #include "DataProducts/inc/VirtualDetectorId.hh"
+
 #include "TrackerGeom/inc/Tracker.hh"
+
+#include "CosmicRayShieldGeom/inc/CosmicRayShield.hh"
+#include "CRVResponse/inc/CrvHelper.hh"
+
+#include "CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "CalorimeterGeom/inc/Disk.hh"
+#include "CalorimeterGeom/inc/Crystal.hh"
 
 // C++ includes.
 #include <iostream>
@@ -178,10 +187,125 @@ namespace mu2e {
 
 //-----------------------------------------------------------------------------
   void DumpGeometry::dumpCRVNumerology() {
+    GeomHandle<CosmicRayShield> crvh; 
+
+    const CosmicRayShield*  crv = crvh.get();
+
+    const std::vector<CRSScintillatorShield>* shields = &crv->getCRSScintillatorShields();
+
+    int nsectors = shields->size(); 
+    printf("CRV N(sectors): %i\n", nsectors);
+
+    int bar_index = 0;
+      
+    for (int is=0; is<nsectors; is++) { 
+      const CRSScintillatorShield* shield = &shields->at(is);
+
+      const std::vector<CRSScintillatorModule>* modules = &shield->getCRSScintillatorModules();
+      const CRSScintillatorModule*    m0    = &modules->at(0);
+      const CRSScintillatorLayer*     l0    = &m0->getLayers().at(0);
+      const std::shared_ptr<CRSScintillatorBar> b0 = l0->getBars().at(0);
+      const CRSScintillatorBarDetail* bd0   = &b0->getBarDetail();
+
+      int nmodules = modules->size();
+      
+      printf( "sector %2i name : %-10s nmodules: %3i nlayers: %3lu nbars: %3lu ",
+	      is,shield->getName().data(),
+	      nmodules,
+	      m0->getLayers().size(),
+	      l0->getBars().size());
+      
+      printf(" ----------------------- bar_index: %4i %4i %4i %4i  %10.3f %10.3f %10.3f\n", 
+	     bar_index,
+	     bd0->getThicknessDirection(),bd0->getWidthDirection(),bd0->getLengthDirection(),
+	     b0->getHalfThickness(),b0->getHalfWidth(),b0->getHalfLength());
+
+      for(int im = 0; im<nmodules; im++) {
+
+	const CRSScintillatorModule* module = &modules->at(im);
+
+        const std::vector<CRSScintillatorLayer>* layers = &module->getLayers();
+
+	int nlayers = layers->size();
+
+	printf(" module: %3i nlayers : %3i\n", im, nlayers);
+
+        for (int il=0; il<nlayers; il++) {
+
+	  const CRSScintillatorLayer* layer = &layers->at(il);
+	  const CLHEP::Hep3Vector* lpos =  &layer->getPosition();
+	  
+          // const std::vector<double> & hl = layer->getHalfLengths();
+
+          // const CLHEP::Hep3Vector &layerCenterInMu2e=layer->getPosition();
+
+          const std::vector<std::shared_ptr<CRSScintillatorBar> >* bars = &layer->getBars();
+          std::vector<std::shared_ptr<CRSScintillatorBar> >::const_iterator ibar;
+
+	  int nbars = bars->size();
+
+          for (int ib=0; ib<nbars; ib++) {
+	    const std::shared_ptr<CRSScintillatorBar> bar = bars->at(ib);
+	    int ibb, iss, imm, ill;
+	    CrvHelper::GetCrvCounterInfo(crvh, mu2e::CRSScintillatorBarIndex(bar_index), iss, imm, ill, ibb);
+	    
+	    if (ib == 0) {
+	      printf(" ----------------------- layer : %3i nbars: %4i bar_index: %4i %4i %4i %4i %4i %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n", 
+		     il, nbars, bar_index, iss, imm, ill, ibb,
+		     lpos->x(),lpos->y(),lpos->z(),
+		     layer->getHalfThickness(),
+		     layer->getHalfWidth(),
+		     layer->getHalfLength()
+		     );
+	    }
+
+	    const CRSScintillatorBarDetail* bd = &bar->getBarDetail();
+	    
+	    printf("%5i %3i %3i %2i %3i %2i %2i %2i %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+		   bar_index,is,im,il,ib,
+		   bd->getThicknessDirection(),bd->getWidthDirection(),bd->getLengthDirection(),
+		   bar->getPosition().x(),bar->getPosition().y(),bar->getPosition().z(),
+		   bar->getHalfThickness(),bar->getHalfWidth(),bar->getHalfLength());
+
+	    bar_index++;
+	  }
+	}
+      }
+    }
   }
 
 //-----------------------------------------------------------------------------
   void DumpGeometry::dumpCaloGeometry() {
+    GeomHandle<DiskCalorimeter> ch;
+    const DiskCalorimeter* cal = ch.get();
+
+    const CaloInfo&     ci = cal->caloInfo();
+
+    int ndisks = cal->nDisk();
+
+    printf("Calorimeter N(disks): %i\n", ndisks);
+
+    printf("crystal halfLength     : %10.3f\n",ci.getDouble("crystalZLength")/2.);
+    printf("crystal halfTrans      : %10.3f\n",ci.getDouble("crystalXYLength")/2.);
+    printf("crystal wrap thickness : %10.3f\n",ci.getDouble("wrapperThickness"));
+    printf("crystal case thickness : %10.3f\n",ci.getDouble("crystalFrameThickness"));
+
+    for ( int i=0; i<ndisks; i++) {
+      const Disk& disk = cal->disk(i);
+
+      int ncrystals = disk.nCrystals();
+
+      printf(" -- id, ncrystals, Rin, Rout: %i, %3i, %10.4f, %10.4f",
+	     disk.id(),ncrystals,disk.innerRadius(),disk.outerRadius());
+
+      const DiskGeomInfo& gi = disk.geomInfo();
+
+      printf(" center: %12.3f %12.3f %12.3f\n",gi.origin().x(),gi.origin().y(),gi.origin().z());
+
+      const Crystal cr0 = disk.crystal(0);
+
+      printf ("crystal Z : %12.4f\n",cr0.position().z());
+    }
   }
 
 //-----------------------------------------------------------------------------  
@@ -189,7 +313,7 @@ namespace mu2e {
 
     if (_dumpVirtualDetectors  != 0) dumpVirtualDetectors ();
     if (_dumpTrackerNumerology != 0) dumpTrackerNumerology();
-    if (_dumpCRVNumerology     != 0) dumpTrackerNumerology();
+    if (_dumpCRVNumerology     != 0) dumpCRVNumerology    ();
     if (_dumpCaloGeometry      != 0) dumpCaloGeometry     ();
 
   }

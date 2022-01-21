@@ -1,25 +1,22 @@
 # -*- mode: tcl -*-
-#
-# Print CRV geometry
-#
+###############################################################################
+# Print positions of virtual detectors
+###############################################################################
 #include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"
 #include "fcl/standardServices.fcl"
-BEGIN_PROLOG
-  TRIGGER_PATHS @protect_ignore: []
-END_PROLOG
 
-#include "Stntuple/fcl/stnmaker.fcl"
+#include "murat/fcl/prolog.fcl"
 
-source       : { module_type : EmptyEvent }
+process_name : Dump
 
-physics : { @table::Stntuple.physics 
-  analyzers :  {
-    DumpCrvNumerology : { module_type : DumpCrvNumerology }
-  }
+services     : { @table::Services.SimAndReco }
+source       : { module_type : EmptyEvent    }
 
-  e1         : [DumpCrvNumerology]
-
-  end_paths  : [e1]
+physics : {
+    analyzers :  { @table::murat.analyzers }
+    e1         : [ DumpGeometry ]
+    end_paths  : [ e1           ]
 }
-
+#------------------------------------------------------------------------------
+physics.analyzers.DumpGeometry.dumpCRVNumerology : 1

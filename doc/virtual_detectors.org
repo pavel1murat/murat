@@ -123,7 +123,7 @@
   - make an input file for B-field printing: file:../test/virtual_detector_xyz.txt
   - use [[file:../fcl/print_bfield.fcl][murat/fcl/print_bfield.fcl]] to print the B-field 3-vectors at virtual detectors
     
-#+begin_quote
+#+begin_src
 # nominal field in the DS
 # id          name                                 X                 Y              Z                 Bx               By              Bz
 #--------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,7 +173,7 @@
  109 VirtualDetector_EMC_FEB_1_EdgeOut      -3904.0000000000    0.0000000000 12787.8900000000   -0.0018691091    0.0000720461    0.9829577885
  110 VirtualDetector_Coll1_pBarCollar_In     3904.0000000000    0.0000000000 -3204.4900000000   -0.0195587924    0.0000000000    2.3981531470
  111 VirtualDetector_Coll1_pBarCollar_Out    3904.0000000000    0.0000000000 -3004.5100000000   -0.0513226360    0.0000000000    2.3323847498
-#+end_quote
+#+end_src
 * ------------------------------------------------------------------------------
 * back: file:./AAA_MU2E.org
 * ------------------------------------------------------------------------------

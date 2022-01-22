@@ -12,7 +12,13 @@ const int nY   =  97, nYhalf =  48;
 
 const double epsilon=1e-7;
 
-double step=25, R=2929, L0=7000, L1=0, L3=1950, L5=0, L6=13142;
+double step =    25;
+double R    =  2929;         // radius of the TSu /TSd C's
+double L0   =  7000;
+double L1   =     0;
+double L3   =  1950;         // total length of the TS3 collimator
+double L5   =     0;
+double L6   = 13142;
 
 double X0PS = 2804, X0TSu = 4,   X0TSd =-5096, X0DS =-5096;
 double Y0PS =-1200, Y0TSu =-1200,Y0TSd =-1200, Y0DS =-1200;
@@ -109,7 +115,7 @@ void xyz2uys(double Mu2eX, double Mu2eY, double Mu2eZ)  {
     // Determine the point on the magnetic axis closest to the input point
     // and get coordinates of the point on a system attached to the axis
     
-    r0.SetXYZ(-(R+L3/2),0,Mu2eZ);
+    r0.SetXYZ(-(R+L3/2),0,Mu2eZ);   // R+L3/2 = 3904
     r1.SetXYZ(Mu2eX,Mu2eY,Mu2eZ);
     Mu2eToLocal(r0,r1,r2);
     u=r2.X();

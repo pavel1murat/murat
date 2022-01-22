@@ -8,15 +8,15 @@
 
 #include "murat/fcl/prolog.fcl"
 
-process_name : Dump
+process_name : DumpCRVNumerology
 
 services     : { @table::Services.SimAndReco }
-source       : { module_type : EmptyEvent }
+source       : { module_type : EmptyEvent    }
 
 physics : {
     analyzers :  { @table::murat.analyzers }
     e1         : [ DumpGeometry ]
-    end_paths  : [ e1   ]
+    end_paths  : [ e1           ]
 }
 #------------------------------------------------------------------------------
-physics.analyzers.DumpGeometry.dumpTrackerNumerology : 1
+physics.analyzers.DumpGeometry.dumpCRVNumerology : 1

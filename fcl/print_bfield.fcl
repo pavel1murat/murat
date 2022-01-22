@@ -1,0 +1,25 @@
+# -*- mode:tcl -*- 
+#include "fcl/minimalMessageService.fcl"
+#include "fcl/standardProducers.fcl"
+#include "fcl/standardServices.fcl"
+
+process_name: PrintBField
+
+source: {
+  module_type: EmptyEvent
+  maxEvents: 1
+}
+
+services: { @table::Services.SimAndReco }
+
+physics: {
+    analyzers: {
+        bftest: { module_type: BFieldTest
+# 'data' - the name doesn't matter, important is the location of the .txt file
+           data  : { csv_name : "murat/test/virtual_detector_xyz.txt"}
+        }
+    }
+
+    e1       : [bftest]
+    end_paths: [ e1   ]
+}

@@ -8,7 +8,7 @@
 
 #include "murat/fcl/prolog.fcl"
 
-process_name  : Dump
+process_name  : DumpTrackerNumerology
 
 services      : { @table::Services.SimAndReco }
 source        : { module_type : EmptyEvent }

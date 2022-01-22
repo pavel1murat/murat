@@ -8,7 +8,7 @@
 
 #include "murat/fcl/prolog.fcl"
 
-process_name : Dump
+process_name : DumpCaloGeometry
 
 services     : { @table::Services.SimAndReco }
 source       : { module_type : EmptyEvent    }
@@ -19,4 +19,4 @@ physics : {
     end_paths  : [ e1           ]
 }
 #------------------------------------------------------------------------------
-physics.analyzers.DumpGeometry.dumpCRVNumerology : 1
+physics.analyzers.DumpGeometry.dumpCaloGeometry : 1

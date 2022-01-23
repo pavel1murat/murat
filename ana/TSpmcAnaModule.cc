@@ -646,7 +646,74 @@ void TSpmcAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fTMaxSpmc->Fill(fTMaxSpmc);
 }
 
+
+
 //-----------------------------------------------------------------------------
+// to save time, calculate a number of variables just once per step
+//-----------------------------------------------------------------------------
+void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
+
+  int id          = Step->VolumeID();
+  VDetData_t* vdd = fVDet+id;
+  int pdg_code    = Step->PDGCode();
+
+  float  q(0);
+  if (abs(pdg_code) < 2500) {
+    SpmcData->fParticle = GetParticleCache(pdg_code);
+    SpmcData->fQ        = SpmcData->fParticle->Charge()/3.; // Charge() - in units of a quark charge (e- : -3)
+  }
+  else {
+    SpmcData->fParticle = NULL;
+    SpmcData->fQ        = 0;             // don't know what else to do
+  }
+
+  SpmcData->fM = 0;
+  SpmcData->fP = Step->Mom()->Mag();
+  
+  if (SpmcData->fParticle != nullptr) {
+    SpmcData->fM    = SpmcData->fParticle->Mass()*1e3;                     // convert GeV -> MeV
+  }
+  else {
+    if (GetDebugBit(3) == 0) printf(">>> TSpmcAnaModule::InitSpmcData WARNING: no particle with PDF code=%i cached from ROOT particle DB\n",pdg_code);
+  }
+
+  SpmcData->fEKin = sqrt(SpmcData->fP*SpmcData->fP+SpmcData->fM*SpmcData->fM)-SpmcData->fM;
+//-----------------------------------------------------------------------------
+// the following depends on the VD orientation
+// pT is also calculated in the local coord system
+//-----------------------------------------------------------------------------
+  double phi     = vdd->fPhiXZ*M_PI/180;
+  double cos_phi = cos(phi);
+  double sin_phi = sin(phi);
+
+  SpmcData->fPzLoc = Step->Mom()->Pz()*cos_phi - Step->Mom()->Px()*sin_phi;
+  SpmcData->fPxLoc = Step->Mom()->Px()*cos_phi + Step->Mom()->Pz()*sin_phi;
+  SpmcData->fPyLoc = Step->Mom()->Py();
+
+  SpmcData->fPtLoc = sqrt(SpmcData->fPyLoc*SpmcData->fPyLoc + SpmcData->fPxLoc*SpmcData->fPxLoc);
+
+  SpmcData->fCosTh = SpmcData->fPzLoc/SpmcData->fP;
+  SpmcData->fTanTh = SpmcData->fPtLoc/SpmcData->fPzLoc;
+
+  // calculate local X and local Z
+
+  double dx   = Step->Pos()->X()-vdd->fX;
+  double dz   = Step->Pos()->Z()-vdd->fZ;
+
+  SpmcData->fXLoc = dx*cos_phi - dz*sin_phi;
+  SpmcData->fYLoc = dx*sin_phi + dz*cos_phi;
+
+  SpmcData->fR     = 0.3*10*SpmcData->fPtLoc/vdd->fBField;  // in [cm]
+
+  double nx  = SpmcData->fPxLoc/SpmcData->fPtLoc;
+  double ny  = SpmcData->fPxLoc/SpmcData->fPtLoc;
+
+  SpmcData->fX0 = SpmcData->fXLoc + ny*SpmcData->fR*q;
+  SpmcData->fY0 = SpmcData->fYLoc - nx*SpmcData->fR*q;
+
+}
+
+  //-----------------------------------------------------------------------------
 void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
 
   StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
@@ -672,17 +739,10 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fTime   ->Fill(Step->Time(),Weight);
   hist->fStepLength->Fill(Step->StepLength(),Weight);
 
-  double p = Step->Mom()->Mag();
-  hist->fMom[0]->Fill(p,Weight);
-  hist->fMom[1]->Fill(p,Weight);
+  hist->fMom[0]->Fill(SpmcData->fP,Weight);
+  hist->fMom[1]->Fill(SpmcData->fP,Weight);
   
-  double m(0);
-  if (SpmcData->fParticle) {
-    m = SpmcData->fParticle->Mass()*1e3;        // convert GeV -> MeV
-  }
-
-  double ekin = sqrt(p*p+m*m)-m;
-  hist->fEKin->Fill(ekin,Weight);
+  hist->fEKin->Fill(SpmcData->fEKin,Weight);
 
   float x = Step->Pos()->X();
   float y = Step->Pos()->Y();
@@ -692,17 +752,14 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
 
   if (fabs(z-2929.) < 0.1) x = x+3904;
 
+  // TODO these should be local X and Y coordinates... figure that out....
   hist->fYVsX->Fill(x,y,Weight);		// useful for stage 2
   hist->fYVsZ->Fill(z,y,Weight);		// useful for stage 1
 //-----------------------------------------------------------------------------
 // for Spmc block always define cos(th) as pz/p
 //-----------------------------------------------------------------------------
-  float pp;
-  pp = Step->Mom()->Pz();
-
-  float cos_th = pp/p;
-  hist->fCosThVsMom[0]->Fill(p,cos_th,Weight);
-  hist->fCosThVsMom[1]->Fill(p,cos_th,Weight);
+  hist->fCosThVsMom[0]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
+  hist->fCosThVsMom[1]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
 
   hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
@@ -748,64 +805,35 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
 }
 
 //-----------------------------------------------------------------------------
-void TSpmcAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step, double Weight) {
+  void TSpmcAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
 
   VDetHist_t* hist = (VDetHist_t*) Hist;
 
-  int id = (Step->VolumeID());
+  int id = Step->VolumeID();
 
-  VDetData_t* vdd = fVDet+id;
-  
   hist->fIndex   ->Fill(id              ,Weight);
   hist->fPDGCode ->Fill(Step->PDGCode() ,Weight);
   hist->fGenCode ->Fill(Step->GenIndex(),Weight);
 
-  float p = Step->Mom()->Mag();
-  hist->fMom[0]->Fill(p,Weight);
-  hist->fMom[1]->Fill(p,Weight);
+  hist->fMom[0]->Fill(SpmcData->fP,Weight);
+  hist->fMom[1]->Fill(SpmcData->fP,Weight);
 
   hist->fTime    ->Fill(Step->Time (),Weight);
   hist->fPTime   ->Fill(Step->ProperTime(),Weight);
 
-  // calculate local X and local Z
+  hist->fYVsX    ->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);
 
-  double phi  = vdd->fPhiXZ*M_PI/180;
+  hist->fPt   ->Fill(SpmcData->fPtLoc,Weight);
+  hist->fPp   ->Fill(SpmcData->fPzLoc,Weight);
+  hist->fTanTh->Fill(SpmcData->fTanTh,Weight);
 
-  double dx   = Step->Pos()->X()-vdd->fX;
-  double dz   = Step->Pos()->Z()-vdd->fZ;
-
-  double xloc =  dx*cos(phi) - dz*sin(phi);
-  double zloc =  dx*sin(phi) + dz*cos(phi);
-
-  hist->fYVsX    ->Fill(xloc,Step->Pos()->Y(),Weight);
-  hist->fYVsZ    ->Fill(zloc,Step->Pos()->Y(),Weight);
-
-  float py = Step->Mom()->Py();
-
-  float px, pp, pt;
-  if (vdd->fIZLocal == 3) {
-    px = Step->Mom()->Px();
-    pp = Step->Mom()->Pz();
-  }
-  else {
-    px = Step->Mom()->Pz();
-    pp = -Step->Mom()->Px();
-  }
-
-  pt = sqrt(px*px+py*py);
-
-  hist->fPt   ->Fill(pt   ,Weight);
-  hist->fPp   ->Fill(pp   ,Weight);
-  hist->fTanTh->Fill(pt/pp,Weight);
-
-  float cos_th = pp/p;
-  hist->fCosThVsMom[0]->Fill(p,cos_th,Weight);
-  hist->fCosThVsMom[1]->Fill(p,cos_th,Weight);
+  hist->fCosThVsMom[0]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
+  hist->fCosThVsMom[1]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
 
   hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 
-  hist->fTimeVsMom->Fill(p,Step->Time(),Weight);
-  hist->fPTimeVsMom->Fill(p,Step->ProperTime(),Weight);
+  hist->fTimeVsMom-> Fill(SpmcData->fP,Step->Time()      ,Weight);
+  hist->fPTimeVsMom->Fill(SpmcData->fP,Step->ProperTime(),Weight);
 
   //  surv_prob = 1;
 }
@@ -959,13 +987,8 @@ void TSpmcAnaModule::FillHistograms() {
 // particles of interest are electrons, pions, muons and photons,
 // speed up the mass extraction
 //-----------------------------------------------------------------------------
-    if (abs_pdg_code < 2500) spmc_data.fParticle = GetParticleCache(pdg_code);
-    else                     spmc_data.fParticle = NULL;
-
-    if (spmc_data.fParticle == NULL) {
-      if (GetDebugBit(3) == 0) printf(">>> WARNING: no particle with PDF code=%i cached from ROOT particle DB\n",pdg_code);
-    }
-
+    InitSpmcData(spmc,&spmc_data);
+    
     FillStepPointMCHistograms(fHist.fStepPointMC[0],spmc,&spmc_data);
 
     if      (pdg_code ==   11) {
@@ -1042,27 +1065,29 @@ void TSpmcAnaModule::FillHistograms() {
 // in different detectors
 // note, that there is not 'last plane' to TGTSTOPS and such - pbars just stop 
 //-----------------------------------------------------------------------------
+      SpmcData_t vdspmc_data;
       int nh = 0;
       for (int i=0; i<fNVDetHits; i++) {
-	TStepPointMC* step = fVDetBlock->StepPointMC(i);
-	if (step->PDGCode() == -2212) {
-	  if      ((step->SimID() < 100000) && (step->VolumeID() ==  91)) {
-	    FillVDetHistograms(fHist.fVDet[3091],step);
+	TStepPointMC* vdstep = fVDetBlock->StepPointMC(i);
+	InitSpmcData(vdstep,&vdspmc_data);
+	if (vdstep->PDGCode() == -2212) {
+	  if      ((vdstep->SimID() < 100000) && (vdstep->VolumeID() ==  91)) {
+	    FillVDetHistograms(fHist.fVDet[3091],vdstep,&vdspmc_data);
 	    nh++;
 	  }
-	  else if (step->VolumeID() ==  92) FillVDetHistograms(fHist.fVDet[3092],step);
-	  else if (step->VolumeID() ==   1) FillVDetHistograms(fHist.fVDet[3001],step);
-	  else if (step->VolumeID() ==   2) FillVDetHistograms(fHist.fVDet[3002],step);
-	  else if (step->VolumeID() ==   3) FillVDetHistograms(fHist.fVDet[3003],step);
-	  else if (step->VolumeID() ==   4) FillVDetHistograms(fHist.fVDet[3004],step);
-	  else if (step->VolumeID() ==   5) FillVDetHistograms(fHist.fVDet[3005],step);
-	  else if (step->VolumeID() ==   6) FillVDetHistograms(fHist.fVDet[3006],step);
-	  else if (step->VolumeID() ==   7) FillVDetHistograms(fHist.fVDet[3007],step);
-	  else if (step->VolumeID() ==   8) FillVDetHistograms(fHist.fVDet[3008],step);
-	  else if (step->VolumeID() ==   9) FillVDetHistograms(fHist.fVDet[3009],step);
-	  else if (step->VolumeID() ==  10) FillVDetHistograms(fHist.fVDet[3009],step);
-	  else if (step->VolumeID() ==  98) FillVDetHistograms(fHist.fVDet[3098],step);
-	  else if (step->VolumeID() ==  99) FillVDetHistograms(fHist.fVDet[3099],step);
+	  else if (vdstep->VolumeID() ==  92) FillVDetHistograms(fHist.fVDet[3092],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   1) FillVDetHistograms(fHist.fVDet[3001],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   2) FillVDetHistograms(fHist.fVDet[3002],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   3) FillVDetHistograms(fHist.fVDet[3003],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   4) FillVDetHistograms(fHist.fVDet[3004],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   5) FillVDetHistograms(fHist.fVDet[3005],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   6) FillVDetHistograms(fHist.fVDet[3006],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   7) FillVDetHistograms(fHist.fVDet[3007],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   8) FillVDetHistograms(fHist.fVDet[3008],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==   9) FillVDetHistograms(fHist.fVDet[3009],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==  10) FillVDetHistograms(fHist.fVDet[3009],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==  98) FillVDetHistograms(fHist.fVDet[3098],vdstep,&vdspmc_data);
+	  else if (vdstep->VolumeID() ==  99) FillVDetHistograms(fHist.fVDet[3099],vdstep,&vdspmc_data);
 	}
       }
 
@@ -1073,35 +1098,35 @@ void TSpmcAnaModule::FillHistograms() {
 	FillSimpHistograms(fHist.fSimp[1022],simp,sd);
 	FillSimpHistograms(fHist.fSimp[1024],simp,sd,fWeight);
 //-----------------------------------------------------------------------------
-// for antiprotons P>100 MeV/c reached the last plane, antiproton hits 
-// in different detectors
+// for antiprotons P>100 MeV/c reached the last plane, antiproton hits at different detectors
 // note, that there is not 'last plane' to TGTSTOPS and such - pbars just stop 
 //-----------------------------------------------------------------------------
+	SpmcData_t vdspmc_data;
 	int nh = 0;
 	for (int i=0; i<fNVDetHits; i++) {
-	  TStepPointMC* step = fVDetBlock->StepPointMC(i);
-	  if (step->PDGCode() == -2212) {
-	    if      ((step->SimID() < 100000) && (step->VolumeID() ==  91)) {
-	      FillVDetHistograms(fHist.fVDet[4091],step);
+	  TStepPointMC* vdstep = fVDetBlock->StepPointMC(i);
+	  InitSpmcData(vdstep,&vdspmc_data);
+	  if (vdstep->PDGCode() == -2212) {
+	    if      ((vdstep->SimID() < 100000) && (vdstep->VolumeID() ==  91)) {
+	      FillVDetHistograms(fHist.fVDet[4091],vdstep,&vdspmc_data);
 	      nh++;
 	    }
-	    else if (step->VolumeID() ==  92) FillVDetHistograms(fHist.fVDet[4092],step);
-	    else if (step->VolumeID() ==   1) FillVDetHistograms(fHist.fVDet[4001],step);
-	    else if (step->VolumeID() ==   2) FillVDetHistograms(fHist.fVDet[4002],step);
-	    else if (step->VolumeID() ==   3) FillVDetHistograms(fHist.fVDet[4003],step);
-	    else if (step->VolumeID() ==   4) FillVDetHistograms(fHist.fVDet[4004],step);
-	    else if (step->VolumeID() ==   5) FillVDetHistograms(fHist.fVDet[4005],step);
-	    else if (step->VolumeID() ==   6) FillVDetHistograms(fHist.fVDet[4006],step);
-	    else if (step->VolumeID() ==   7) FillVDetHistograms(fHist.fVDet[4007],step);
-	    else if (step->VolumeID() ==   8) FillVDetHistograms(fHist.fVDet[4008],step);
-	    else if (step->VolumeID() ==   9) FillVDetHistograms(fHist.fVDet[4009],step);
-	    else if (step->VolumeID() ==  10) FillVDetHistograms(fHist.fVDet[4010],step);
-	    else if (step->VolumeID() ==  98) FillVDetHistograms(fHist.fVDet[4098],step);
-	    else if (step->VolumeID() ==  99) FillVDetHistograms(fHist.fVDet[4099],step);
+	    else if (vdstep->VolumeID() ==  92) FillVDetHistograms(fHist.fVDet[4092],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   1) FillVDetHistograms(fHist.fVDet[4001],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   2) FillVDetHistograms(fHist.fVDet[4002],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   3) FillVDetHistograms(fHist.fVDet[4003],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   4) FillVDetHistograms(fHist.fVDet[4004],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   5) FillVDetHistograms(fHist.fVDet[4005],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   6) FillVDetHistograms(fHist.fVDet[4006],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   7) FillVDetHistograms(fHist.fVDet[4007],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   8) FillVDetHistograms(fHist.fVDet[4008],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==   9) FillVDetHistograms(fHist.fVDet[4009],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==  10) FillVDetHistograms(fHist.fVDet[4010],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==  98) FillVDetHistograms(fHist.fVDet[4098],vdstep,&vdspmc_data);
+	    else if (vdstep->VolumeID() ==  99) FillVDetHistograms(fHist.fVDet[4099],vdstep,&vdspmc_data);
 	  }
 	}
       }
-
     }
 //-----------------------------------------------------------------------------
 // all hits with T < 100 ns
@@ -1132,230 +1157,246 @@ void TSpmcAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   for (int i=0; i<fNVDetHits; i++) {
     TStepPointMC* step = fVDetBlock->StepPointMC(i);
+    InitSpmcData(step,&spmc_data);
 
-    if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[ 9],step);
+    if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[ 9],step,&spmc_data);
     if (step->VolumeID() == 13) {
-      FillVDetHistograms(fHist.fVDet[13],step);
+      FillVDetHistograms(fHist.fVDet[13],step,&spmc_data);
       float x = step->Pos()->X()+3904.;
       float y = step->Pos()->Y();
       float r = sqrt(x*x+y*y);
       if ((r >= 400) && (r < 800)) { 
-	FillVDetHistograms(fHist.fVDet[14],step);
+	FillVDetHistograms(fHist.fVDet[14],step,&spmc_data);
       }
     }
 
     if (step->PDGCode() == 11) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[101],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[102],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[103],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[104],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[105],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[106],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[107],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[108],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[109],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[110],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[198],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[199],step);
+//-----------------------------------------------------------------------------
+// e-
+//-----------------------------------------------------------------------------
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[101],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[102],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[103],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[104],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[105],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[106],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[107],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[108],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[109],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[110],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[198],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[199],step,&spmc_data);
 
-      float pe = step->Mom()->Mag();
-
-      if (pe > 100) {
-	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[701],step);
-	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[702],step);
-	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[703],step);
-	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[704],step);
-	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[705],step);
-	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[706],step);
-	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[707],step);
-	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[708],step);
-	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[709],step);
-	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[710],step);
-	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[798],step);
-	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[799],step);
+      if (spmc_data.fP > 100) {
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[701],step,&spmc_data);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[702],step,&spmc_data);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[703],step,&spmc_data);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[704],step,&spmc_data);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[705],step,&spmc_data);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[706],step,&spmc_data);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[707],step,&spmc_data);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[708],step,&spmc_data);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[709],step,&spmc_data);
+	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[710],step,&spmc_data);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[798],step,&spmc_data);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[799],step,&spmc_data);
       }
     }
     if (step->PDGCode() == -11) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[201],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[202],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[203],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[204],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[205],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[206],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[207],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[208],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[209],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[210],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[298],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[299],step);
+//-----------------------------------------------------------------------------
+// e+
+//-----------------------------------------------------------------------------
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[201],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[202],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[203],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[204],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[205],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[206],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[207],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[208],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[209],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[210],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[298],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[299],step,&spmc_data);
     }
     if (step->PDGCode() == 13) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[301],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[302],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[303],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[304],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[305],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[306],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[307],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[308],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[309],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[310],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[398],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[399],step);
+//-----------------------------------------------------------------------------
+// mu-
+//-----------------------------------------------------------------------------
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[301],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[302],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[303],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[304],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[305],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[306],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[307],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[308],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[309],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[310],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[398],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[399],step,&spmc_data);
 
-      float pmu = step->Mom()->Mag();
-      if (pmu < 50) {
-	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[501],step);
-	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[502],step);
-	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[503],step);
-	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[504],step);
-	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[505],step);
-	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[506],step);
-	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[507],step);
-	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[508],step);
-	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[509],step);
-	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[510],step);
-	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[598],step);
-	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[599],step);
+      if (spmc_data.fP < 50) {
+//-----------------------------------------------------------------------------
+// mu- P < 50 MeV/c
+//-----------------------------------------------------------------------------
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[501],step,&spmc_data);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[502],step,&spmc_data);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[503],step,&spmc_data);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[504],step,&spmc_data);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[505],step,&spmc_data);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[506],step,&spmc_data);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[507],step,&spmc_data);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[508],step,&spmc_data);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[509],step,&spmc_data);
+	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[510],step,&spmc_data);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[598],step,&spmc_data);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[599],step,&spmc_data);
       }
       else {
-	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[601],step);
-	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[602],step);
-	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[603],step);
-	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[604],step);
-	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[605],step);
-	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[606],step);
-	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[607],step);
-	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[608],step);
-	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[609],step);
-	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[610],step);
-	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[698],step);
-	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[699],step);
+//-----------------------------------------------------------------------------
+// mu- P >= 50 MeV/c
+//-----------------------------------------------------------------------------
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[601],step,&spmc_data);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[602],step,&spmc_data);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[603],step,&spmc_data);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[604],step,&spmc_data);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[605],step,&spmc_data);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[606],step,&spmc_data);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[607],step,&spmc_data);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[608],step,&spmc_data);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[609],step,&spmc_data);
+	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[610],step,&spmc_data);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[698],step,&spmc_data);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[699],step,&spmc_data);
       }
     }
     if (step->PDGCode() == -13) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[401],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[402],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[403],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[404],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[405],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[406],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[407],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[408],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[409],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[410],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step);
+//-----------------------------------------------------------------------------
+// mu+
+//-----------------------------------------------------------------------------
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[401],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[402],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[403],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[404],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[405],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[406],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[407],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[408],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[409],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[410],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step,&spmc_data);
     }
-//-----------------------------------------------------------------------------
-// negative pions
-//-----------------------------------------------------------------------------
     if (step->PDGCode() == -211) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1001],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1002],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1003],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1004],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1005],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1006],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1007],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1008],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1009],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1010],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1098],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1099],step);
+//-----------------------------------------------------------------------------
+// pi-
+//-----------------------------------------------------------------------------
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1001],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1002],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1003],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1004],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1005],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1006],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1007],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1008],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1009],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1010],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1098],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1099],step,&spmc_data);
 
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1201],step,fWeight);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1202],step,fWeight);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1203],step,fWeight);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1204],step,fWeight);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1205],step,fWeight);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1206],step,fWeight);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1207],step,fWeight);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1208],step,fWeight);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1209],step,fWeight);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1210],step,fWeight);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1298],step,fWeight);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1299],step,fWeight);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1201],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1202],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1203],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1204],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1205],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1206],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1207],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1208],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1209],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1210],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1298],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1299],step,&spmc_data,fWeight);
     }
 //-----------------------------------------------------------------------------
-// positive pions
+// pi+
 //-----------------------------------------------------------------------------
     if (step->PDGCode() ==  211) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1101],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1102],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1103],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1104],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1105],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1106],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1107],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1108],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1109],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1110],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1198],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1199],step);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1101],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1102],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1103],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1104],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1105],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1106],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1107],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1108],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1109],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1110],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1198],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1199],step,&spmc_data);
 
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1301],step,fWeight);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1302],step,fWeight);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1303],step,fWeight);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1304],step,fWeight);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1305],step,fWeight);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1306],step,fWeight);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1307],step,fWeight);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1308],step,fWeight);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1309],step,fWeight);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1310],step,fWeight);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1398],step,fWeight);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1399],step,fWeight);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1301],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1302],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1303],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1304],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1305],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1306],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1307],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1308],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1309],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1310],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1398],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1399],step,&spmc_data,fWeight);
     }
 //-----------------------------------------------------------------------------
 // pbars
 //-----------------------------------------------------------------------------
     if (step->PDGCode() == -2212) {
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2001],step);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2002],step);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2003],step);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2004],step);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2005],step);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2006],step);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2007],step);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2008],step);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2009],step);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2010],step);
-      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2091],step);
-      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2001],step,&spmc_data);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2002],step,&spmc_data);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2003],step,&spmc_data);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2004],step,&spmc_data);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2005],step,&spmc_data);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2006],step,&spmc_data);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2007],step,&spmc_data);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2008],step,&spmc_data);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2009],step,&spmc_data);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2010],step,&spmc_data);
+      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2091],step,&spmc_data);
+      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step,&spmc_data);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step,&spmc_data);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2099],step,&spmc_data);
 
-      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2201],step,fWeight);
-      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2202],step,fWeight);
-      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2203],step,fWeight);
-      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2204],step,fWeight);
-      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2205],step,fWeight);
-      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2206],step,fWeight);
-      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2207],step,fWeight);
-      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2208],step,fWeight);
-      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2209],step,fWeight);
-      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2210],step,fWeight);
-      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2291],step,fWeight);
-      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2292],step,fWeight);
-      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2298],step,fWeight);
-      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2299],step,fWeight);
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2201],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2202],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2203],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2204],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2205],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2206],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2207],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2208],step,&spmc_data,fWeight);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2209],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2210],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2291],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2292],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2298],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2299],step,&spmc_data,fWeight);
 
       if (pbar_stopped_in_st) {
-	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2501],step,fWeight);
-	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2502],step,fWeight);
-	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2503],step,fWeight);
-	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2504],step,fWeight);
-	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2505],step,fWeight);
-	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2506],step,fWeight);
-	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2507],step,fWeight);
-	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2508],step,fWeight);
-	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2509],step,fWeight);
-	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2510],step,fWeight);
-	if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2591],step,fWeight);
-	if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2592],step,fWeight);
-	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2598],step,fWeight);
-	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2599],step,fWeight);
+	if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[2501],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[2502],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[2503],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[2504],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[2505],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[2506],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[2507],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2508],step,&spmc_data,fWeight);
+	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2509],step,&spmc_data,fWeight);
+	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2510],step,&spmc_data,fWeight);
+	if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2591],step,&spmc_data,fWeight);
+	if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2592],step,&spmc_data,fWeight);
+	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2598],step,&spmc_data,fWeight);
+	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[2599],step,&spmc_data,fWeight);
       }
     }
   }

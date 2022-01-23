@@ -112,8 +112,26 @@ public:
     double        fWeight;
   };
 
+//-----------------------------------------------------------------------------
+// assume Zlocal is normal to the virtual detector plane, YLocal points upwards
+//-----------------------------------------------------------------------------
   struct SpmcData_t {
-    TParticlePDG*  fParticle;		// so far, not used
+    TParticlePDG*  fParticle;		//
+    float          fQ;                  // charge, e- : -1
+    float          fM;
+    float          fP;
+    float          fPtLoc;
+    float          fPxLoc;
+    float          fPyLoc;
+    float          fPzLoc;
+    float          fEKin;
+    float          fXLoc;               // X in the locall coord system of the virtual detector
+    float          fYLoc;               // Y in the locall coord system of the virtual detector
+    float          fCosTh;              // cos(pitch angle wrt the beamline axis)
+    float          fTanTh;              // tan(pitch angle wrt the beamline axis)
+    float          fR;                  // trajectory radius
+    float          fX0;                 // X coordinate of the trajectory axis in the local coordinate system
+    float          fY0;			// Y coordinate of the trajectory axis in the local coordinate system
   };
 
 //-----------------------------------------------------------------------------
@@ -204,7 +222,9 @@ public:
   void    FillEventHistograms        (HistBase_t* Hist);
   void    FillSimpHistograms         (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData, double Weight = 1.);
   void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
-  void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step,                       double Weight = 1.);
+  void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
+
+  void    InitSpmcData               (TStepPointMC* Step, SpmcData_t* SpmcData);
 
   void    BookHistograms();
   void    FillHistograms();

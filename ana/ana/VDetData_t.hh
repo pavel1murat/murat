@@ -11,8 +11,8 @@ namespace murat {
     int    fIZLocal;
     double fX      ;		        // for X dist
     double fZ      ;
-    double fBField ;                    // main component, orthogonal to the detector plane
-    double fPhiXZ  ;
+    double fBField ;                    // magnitude of the B-field, assumed to be orthogonal to the detector plane
+    double fPhiXZ  ;                    // angle of the local unit Z vector in the global system
   };
 }
 #endif

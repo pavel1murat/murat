@@ -713,57 +713,6 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
 
 }
 
-  //-----------------------------------------------------------------------------
-void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
-
-  StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
-  
-  int pdg_code = Step->PDGCode();
-
-  int id = Step->VolumeID();
-
-  // VDetData_t* vdd = fVDet+id;
-
-  hist->fVolumeID->Fill(id,Weight);
-  hist->fGenIndex->Fill(Step->GenIndex(),Weight);
-  hist->fSimID   ->Fill(Step->SimID(),Weight);
-  hist->fPDGCode[0] ->Fill(pdg_code,Weight);
-  hist->fPDGCode[1] ->Fill(pdg_code,Weight);
-  hist->fCreationCode->Fill(Step->CreationCode(),Weight);
-  hist->fParentSimID ->Fill(Step->ParentSimID(),Weight);
-  hist->fParentPDGCode->Fill(Step->ParentPDGCode(),Weight);
-  hist->fEndProcessCode->Fill(Step->EndProcessCode(),Weight);
-
-  hist->fEDepTot->Fill(Step->EDepTot(),Weight);
-  hist->fEDepNio->Fill(Step->EDepNio(),Weight);
-  hist->fTime   ->Fill(Step->Time(),Weight);
-  hist->fStepLength->Fill(Step->StepLength(),Weight);
-
-  hist->fMom[0]->Fill(SpmcData->fP,Weight);
-  hist->fMom[1]->Fill(SpmcData->fP,Weight);
-  
-  hist->fEKin->Fill(SpmcData->fEKin,Weight);
-
-  // float x = Step->Pos()->X();
-  // float y = Step->Pos()->Y();
-  // float z = Step->Pos()->Z();
-
-  // // hack for stage 2:
-
-  // if (fabs(z-2929.) < 0.1) x = x+3904;
-
-  // TODO these should be local X and Y coordinates... figure that out....
-  hist->fYVsX->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);		// useful for stage 2
-  hist->fYcVsZc->Fill(SpmcData->fX0,SpmcData->fY0,Weight);		// useful for stage 1
-//-----------------------------------------------------------------------------
-// for Spmc block always define cos(th) as pz/p
-//-----------------------------------------------------------------------------
-  hist->fCosThVsMom[0]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
-  hist->fCosThVsMom[1]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
-
-  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
-}
-
 //-----------------------------------------------------------------------------
 void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpData_t* Sd, double Weight) {
 
@@ -805,6 +754,56 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
 }
 
 //-----------------------------------------------------------------------------
+void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
+
+  StepPointMCHist_t* hist = (StepPointMCHist_t*) Hist;
+  
+  int pdg_code = Step->PDGCode();
+
+  int id = Step->VolumeID();
+
+  // VDetData_t* vdd = fVDet+id;
+
+  hist->fVolumeID->Fill(id,Weight);
+  hist->fGenIndex->Fill(Step->GenIndex(),Weight);
+  hist->fSimID   ->Fill(Step->SimID(),Weight);
+  hist->fPDGCode[0] ->Fill(pdg_code,Weight);
+  hist->fPDGCode[1] ->Fill(pdg_code,Weight);
+  hist->fCreationCode->Fill(Step->CreationCode(),Weight);
+  hist->fParentSimID ->Fill(Step->ParentSimID(),Weight);
+  hist->fParentPDGCode->Fill(Step->ParentPDGCode(),Weight);
+  hist->fEndProcessCode->Fill(Step->EndProcessCode(),Weight);
+
+  hist->fEDepTot->Fill(Step->EDepTot(),Weight);
+  hist->fEDepNio->Fill(Step->EDepNio(),Weight);
+  hist->fTime   ->Fill(Step->Time(),Weight);
+  hist->fStepLength->Fill(Step->StepLength(),Weight);
+
+  hist->fMom[0]->Fill(SpmcData->fP,Weight);
+  hist->fMom[1]->Fill(SpmcData->fP,Weight);
+  
+  hist->fEKin->Fill(SpmcData->fEKin,Weight);
+
+  // float x = Step->Pos()->X();
+  // float y = Step->Pos()->Y();
+  // float z = Step->Pos()->Z();
+
+  // // hack for stage 2:
+
+  // if (fabs(z-2929.) < 0.1) x = x+3904;
+
+  hist->fYVsX  ->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);
+  hist->fYcVsXc->Fill(SpmcData->fX0  ,SpmcData->fY0  ,Weight);
+//-----------------------------------------------------------------------------
+// for Spmc block always define cos(th) as pz/p
+//-----------------------------------------------------------------------------
+  hist->fCosThVsMom[0]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
+  hist->fCosThVsMom[1]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
+
+  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
+}
+
+//-----------------------------------------------------------------------------
   void TSpmcAnaModule::FillVDetHistograms(HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight) {
 
   VDetHist_t* hist = (VDetHist_t*) Hist;
@@ -822,7 +821,7 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
   hist->fPTime   ->Fill(Step->ProperTime(),Weight);
 
   hist->fYVsX    ->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);
-  hist->fYcVsZc  ->Fill(SpmcData->fX0  ,SpmcData->fY0  ,Weight);
+  hist->fYcVsXc  ->Fill(SpmcData->fX0  ,SpmcData->fY0  ,Weight);
 
   hist->fPt   ->Fill(SpmcData->fPtLoc,Weight);
   hist->fPp   ->Fill(SpmcData->fPzLoc,Weight);

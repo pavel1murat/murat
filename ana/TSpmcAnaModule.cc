@@ -110,6 +110,31 @@ void TSpmcAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
+void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
+  SimpHist_t* hist = (SimpHist_t*) Hist;
+
+  HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
+  HBook1F(hist->fStage      ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
+  HBook1F(hist->fGeneratorID,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
+  HBook1F(hist->fTime       ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
+  HBook1F(hist->fParentMom  ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
+  HBook1F(hist->fParentPDG  ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
+
+  HBook1F(hist->fStartMom[0],"mom"        ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
+  HBook1F(hist->fStartMom[1],"mom_1"      ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
+  HBook2F(hist->fYVsX       ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fXEndVsZEnd ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
+  HBook2F(hist->fYVsX_2480  ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fYVsX_2513  ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+
+
+  HBook2F(hist->fCosThVsMom[0] ,"cth_vs_mom"  ,Form("%s: Cos(Th) vs Mom[0]",Folder), 250,   0, 5000,100,-1,1,Folder);
+  HBook2F(hist->fCosThVsMom[1] ,"cth_vs_mom_1",Form("%s: Cos(Th) vs Mom[1]",Folder), 250,   0,  250,100,-1,1,Folder);
+
+  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
+}
+
+//-----------------------------------------------------------------------------
 void TSpmcAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const char* Folder) {
   //     char name [200];
   //     char title[200];
@@ -139,32 +164,7 @@ void TSpmcAnaModule::BookStepPointMCHistograms(HistBase_t* Hist, const char* Fol
   HBook1F(hist->fEKin           ,"ekin"    ,Form("%s: kinetic energy"  ,Folder), 400,   0,   100,Folder);
 
   HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: Y vs X"       ,Folder), 100, -250,  250, 100, -250, 250, Folder);
-  HBook2F(hist->fYVsZ           ,"y_vs_z"     ,Form("%s: Y vs Z"       ,Folder), 500, -250,  250, 500, -250, 250, Folder);
-
-  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
-}
-
-//-----------------------------------------------------------------------------
-void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
-  SimpHist_t* hist = (SimpHist_t*) Hist;
-
-  HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
-  HBook1F(hist->fStage      ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
-  HBook1F(hist->fGeneratorID,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
-  HBook1F(hist->fTime       ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fParentMom  ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fParentPDG  ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
-
-  HBook1F(hist->fStartMom[0],"mom"        ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
-  HBook1F(hist->fStartMom[1],"mom_1"      ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
-  HBook2F(hist->fYVsX       ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fXEndVsZEnd ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
-  HBook2F(hist->fYVsX_2480  ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fYVsX_2513  ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-
-
-  HBook2F(hist->fCosThVsMom[0] ,"cth_vs_mom"  ,Form("%s: Cos(Th) vs Mom[0]",Folder), 250,   0, 5000,100,-1,1,Folder);
-  HBook2F(hist->fCosThVsMom[1] ,"cth_vs_mom_1",Form("%s: Cos(Th) vs Mom[1]",Folder), 250,   0,  250,100,-1,1,Folder);
+  HBook2F(hist->fYcVsXc         ,"yc_vs_xc"   ,Form("%s: Yc vs Xc"     ,Folder), 500, -250,  250, 500, -250, 250, Folder);
 
   HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
 }
@@ -182,7 +182,7 @@ void TSpmcAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fTime    ,"time"    ,Form("%s: Hit Time  "    ,Folder), 200, 0,2000,Folder);
   HBook1F(hist->fPTime   ,"ptime"   ,Form("%s: Hit properTime",Folder), 500, 0,500,Folder);
   HBook2F(hist->fYVsX    ,"y_vs_x"  ,Form("%s: Y vs X (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fYVsZ    ,"y_vs_z"  ,Form("%s: Y vs Z (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fYcVsXc  ,"yc_vs_xc",Form("%s: Yc vs Xc (all)",Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook1F(hist->fPt      ,"pt"      ,Form("%s: Pt"            ,Folder), 200, 0, 200,Folder);
   HBook1F(hist->fPp      ,"pp"      ,Form("%s: P(parallel)"   ,Folder), 200, 0, 200,Folder);
   HBook1F(hist->fTanTh   ,"tan_th"  ,Form("%s: tan(pitch ang)",Folder), 500, -1, 4,Folder);
@@ -744,17 +744,17 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
   
   hist->fEKin->Fill(SpmcData->fEKin,Weight);
 
-  float x = Step->Pos()->X();
-  float y = Step->Pos()->Y();
-  float z = Step->Pos()->Z();
+  // float x = Step->Pos()->X();
+  // float y = Step->Pos()->Y();
+  // float z = Step->Pos()->Z();
 
-  // hack for stage 2:
+  // // hack for stage 2:
 
-  if (fabs(z-2929.) < 0.1) x = x+3904;
+  // if (fabs(z-2929.) < 0.1) x = x+3904;
 
   // TODO these should be local X and Y coordinates... figure that out....
-  hist->fYVsX->Fill(x,y,Weight);		// useful for stage 2
-  hist->fYVsZ->Fill(z,y,Weight);		// useful for stage 1
+  hist->fYVsX->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);		// useful for stage 2
+  hist->fYcVsZc->Fill(SpmcData->fX0,SpmcData->fY0,Weight);		// useful for stage 1
 //-----------------------------------------------------------------------------
 // for Spmc block always define cos(th) as pz/p
 //-----------------------------------------------------------------------------
@@ -822,6 +822,7 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
   hist->fPTime   ->Fill(Step->ProperTime(),Weight);
 
   hist->fYVsX    ->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);
+  hist->fYcVsZc  ->Fill(SpmcData->fX0  ,SpmcData->fY0  ,Weight);
 
   hist->fPt   ->Fill(SpmcData->fPtLoc,Weight);
   hist->fPp   ->Fill(SpmcData->fPzLoc,Weight);

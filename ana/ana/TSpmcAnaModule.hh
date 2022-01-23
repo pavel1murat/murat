@@ -80,8 +80,8 @@ public:
     TH2F*      fCosThVsMom[2];
     TH1F*      fEKin;
 
-    TH2F*      fYVsZ;
-    TH2F*      fYVsX;
+    TH2F*      fYVsX;			// in local coord system
+    TH2F*      fYcVsXc;			// in local coord system
     TH2F*      fCosThVsMomPV;		// for antiprotons
   };
 
@@ -92,8 +92,8 @@ public:
     TH1F*      fMom[2]  ;
     TH1F*      fTime    ;
     TH1F*      fPTime   ;                // proper time
-    TH2F*      fYVsX    ;                // different VD's have different orientation
-    TH2F*      fYVsZ    ;                // fill both hist's
+    TH2F*      fYVsX    ;                // local coordinates
+    TH2F*      fYcVsXc  ;                // trajectory axis
     TH1F*      fPt      ;                // transverse mom
     TH1F*      fPp      ;                // momentum component parallel to the solenoid axis
     TH1F*      fTanTh   ;		       // tan (pitch angle)
@@ -125,10 +125,10 @@ public:
     float          fPyLoc;
     float          fPzLoc;
     float          fEKin;
-    float          fXLoc;               // X in the locall coord system of the virtual detector
-    float          fYLoc;               // Y in the locall coord system of the virtual detector
     float          fCosTh;              // cos(pitch angle wrt the beamline axis)
     float          fTanTh;              // tan(pitch angle wrt the beamline axis)
+    float          fXLoc;               // X in the locall coord system of the virtual detector
+    float          fYLoc;               // Y in the locall coord system of the virtual detector
     float          fR;                  // trajectory radius
     float          fX0;                 // X coordinate of the trajectory axis in the local coordinate system
     float          fY0;			// Y coordinate of the trajectory axis in the local coordinate system

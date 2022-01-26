@@ -4,6 +4,7 @@
 #pragma link off all   functions;
 
 #pragma link C++ class murat::TSpmcAnaModule;
+#pragma link C++ class murat::TSpmcAnaModule::SpmcData_t;
 
 #endif
 

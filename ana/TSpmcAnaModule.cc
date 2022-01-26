@@ -20,6 +20,7 @@
 // bit:11 : electrons with T > 1000 ns and momentum <  2 MeV/c
 // bit:13 : events with electrons in SPMC block used for selections
 // bit:14 : events with p>100 MeV/c, cos_th < 1/sqrt(2) . electrons in SPMC block used to select events
+// bit:15 : VD5 Yc > 200 mm
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -113,19 +114,22 @@ void TSpmcAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
 void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   SimpHist_t* hist = (SimpHist_t*) Hist;
 
-  HBook1F(hist->fVolumeID   ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
-  HBook1F(hist->fStage      ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
-  HBook1F(hist->fGeneratorID,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
-  HBook1F(hist->fTime       ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fParentMom  ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fParentPDG  ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
+  HBook1F(hist->fVolumeID    ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
+  HBook1F(hist->fStage       ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
+  HBook1F(hist->fGeneratorID ,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
+  HBook1F(hist->fTime        ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
+  HBook1F(hist->fParentMom   ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
+  HBook1F(hist->fParentPDG   ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
 
-  HBook1F(hist->fStartMom[0],"mom"        ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
-  HBook1F(hist->fStartMom[1],"mom_1"      ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
-  HBook2F(hist->fYVsX       ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fXEndVsZEnd ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
-  HBook2F(hist->fYVsX_2480  ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fYVsX_2513  ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook1F(hist->fStartMom[0] ,"mom"        ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
+  HBook1F(hist->fStartMom[1] ,"mom_1"      ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
+  HBook2F(hist->fYVsX        ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fXEndVsZEnd  ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
+  HBook2F(hist->fYcVsZEnd    ,"yc_vs_ze"   ,Form("%s: yc vs zend "   ,Folder), 250,  -5000, 20000, 200,   -200, 200,Folder);
+  HBook2F(hist->fPVD9VsZEnd  ,"pvd9_vs_ze" ,Form("%s: pvd9 vs zend " ,Folder), 250,  -5000, 20000, 200,      0, 200,Folder);
+
+  HBook2F(hist->fYVsX_2480   ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fYVsX_2513   ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
 
 
   HBook2F(hist->fCosThVsMom[0] ,"cth_vs_mom"  ,Form("%s: Cos(Th) vs Mom[0]",Folder), 250,   0, 5000,100,-1,1,Folder);
@@ -183,6 +187,7 @@ void TSpmcAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fPTime   ,"ptime"   ,Form("%s: Hit properTime",Folder), 500, 0,500,Folder);
   HBook2F(hist->fYVsX    ,"y_vs_x"  ,Form("%s: Y vs X (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYcVsXc  ,"yc_vs_xc",Form("%s: Yc vs Xc (all)",Folder), 250, -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fYcVsP   ,"yc_vs_p" ,Form("%s: Yc vs P"       ,Folder), 250,    0, 250, 250, -250, 250,Folder);
   HBook1F(hist->fPt      ,"pt"      ,Form("%s: Pt"            ,Folder), 200, 0, 200,Folder);
   HBook1F(hist->fPp      ,"pp"      ,Form("%s: P(parallel)"   ,Folder), 200, 0, 200,Folder);
   HBook1F(hist->fTanTh   ,"tan_th"  ,Form("%s: tan(pitch ang)",Folder), 500, -1, 4,Folder);
@@ -657,21 +662,21 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
   VDetData_t* vdd = fVDet+id;
   int pdg_code    = Step->PDGCode();
 
-  float  q(0);
+  // float  q(0);
   if (abs(pdg_code) < 2500) {
     SpmcData->fParticle = GetParticleCache(pdg_code);
-    SpmcData->fQ        = SpmcData->fParticle->Charge()/3.; // Charge() - in units of a quark charge (e- : -3)
   }
   else {
     SpmcData->fParticle = NULL;
-    SpmcData->fQ        = 0;             // don't know what else to do
   }
 
   SpmcData->fM = 0;
+  SpmcData->fQ = 0; 
   SpmcData->fP = Step->Mom()->Mag();
   
   if (SpmcData->fParticle != nullptr) {
     SpmcData->fM    = SpmcData->fParticle->Mass()*1e3;                     // convert GeV -> MeV
+    SpmcData->fQ    = SpmcData->fParticle->Charge()/3.; // Charge() - in units of a quark charge (e- : -3)
   }
   else {
     if (GetDebugBit(3) == 0) printf(">>> TSpmcAnaModule::InitSpmcData WARNING: no particle with PDF code=%i cached from ROOT particle DB\n",pdg_code);
@@ -686,8 +691,8 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
   double cos_phi = cos(phi);
   double sin_phi = sin(phi);
 
-  SpmcData->fPzLoc = Step->Mom()->Pz()*cos_phi - Step->Mom()->Px()*sin_phi;
-  SpmcData->fPxLoc = Step->Mom()->Px()*cos_phi + Step->Mom()->Pz()*sin_phi;
+  SpmcData->fPzLoc = Step->Mom()->Pz()*cos_phi + Step->Mom()->Px()*sin_phi;
+  SpmcData->fPxLoc = Step->Mom()->Px()*cos_phi - Step->Mom()->Pz()*sin_phi;
   SpmcData->fPyLoc = Step->Mom()->Py();
 
   SpmcData->fPtLoc = sqrt(SpmcData->fPyLoc*SpmcData->fPyLoc + SpmcData->fPxLoc*SpmcData->fPxLoc);
@@ -701,15 +706,19 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
   double dz   = Step->Pos()->Z()-vdd->fZ;
 
   SpmcData->fXLoc = dx*cos_phi - dz*sin_phi;
-  SpmcData->fYLoc = dx*sin_phi + dz*cos_phi;
+  SpmcData->fYLoc =  Step->Pos()->Y(); // dx*sin_phi + dz*cos_phi;
 
   SpmcData->fR     = 0.3*10*SpmcData->fPtLoc/vdd->fBField;  // in [cm]
 
   double nx  = SpmcData->fPxLoc/SpmcData->fPtLoc;
-  double ny  = SpmcData->fPxLoc/SpmcData->fPtLoc;
+  double ny  = SpmcData->fPyLoc/SpmcData->fPtLoc;
 
-  SpmcData->fX0 = SpmcData->fXLoc + ny*SpmcData->fR*q;
-  SpmcData->fY0 = SpmcData->fYLoc - nx*SpmcData->fR*q;
+  SpmcData->fX0 = SpmcData->fXLoc + ny*SpmcData->fR*SpmcData->fQ;
+  SpmcData->fY0 = SpmcData->fYLoc - nx*SpmcData->fR*SpmcData->fQ;
+
+  if ((GetDebugBit(15) == 1) and (id == 5) and (SpmcData->fY0 > 200)) {
+    GetHeaderBlock()->Print(Form("bit_015: SpmcData->fY0 ad VD5 = %10.3f R = %10.3f\n",SpmcData->fY0,SpmcData->fR));
+  }
 
 }
 
@@ -740,6 +749,8 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
 
   hist->fYVsX->Fill(xe,ye,Weight);
   hist->fXEndVsZEnd->Fill(ze,xe,Weight);
+  hist->fYcVsZEnd->Fill(ze,Sd->fY0,Weight);
+  hist->fPVD9VsZEnd->Fill(ze,Sd->fPVD9,Weight);
 //-----------------------------------------------------------------------------
 // looks like something to do with the stopping target - but this is still 34 foils..
 //-----------------------------------------------------------------------------
@@ -822,6 +833,7 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
 
   hist->fYVsX    ->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);
   hist->fYcVsXc  ->Fill(SpmcData->fX0  ,SpmcData->fY0  ,Weight);
+  hist->fYcVsP   ->Fill(SpmcData->fP   ,SpmcData->fY0  ,Weight);
 
   hist->fPt   ->Fill(SpmcData->fPtLoc,Weight);
   hist->fPp   ->Fill(SpmcData->fPzLoc,Weight);
@@ -850,7 +862,8 @@ void TSpmcAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // SIM_PARTICLE histograms
 //-----------------------------------------------------------------------------
-  SimpData_t* sd = nullptr;  // temp
+  SimpData_t  simp_data;
+  SimpData_t* sd = &simp_data;  // temp
 
   int pbar_stopped_in_st = 0;
 
@@ -862,6 +875,10 @@ void TSpmcAnaModule::FillHistograms() {
     int    vid1   = simp->EndVolumeIndex();
     double pend   = simp->EndMom()->P();
     double tend   = simp->EndPos()->T();
+
+    sd->fStepVD9  = nullptr;
+    sd->fPVD9     = -1;
+    sd->fY0       = -1.e6;
 
     FillSimpHistograms(fHist.fSimp[  0],simp,sd);
     if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[  1],simp,sd);
@@ -922,8 +939,23 @@ void TSpmcAnaModule::FillHistograms() {
     if ((pend == 0) && (vid1 > 2900) && (vid1 < 3000)) {
 //-----------------------------------------------------------------------------
 // particle stopped in the stopping target
-// stopping target foil volume indices change in time...
+// BEWARE: stopping target foil volume indices change in time...
+// for stopped particle, find its VD9 hit
 //-----------------------------------------------------------------------------
+      SpmcData_t vd9_data;
+
+      for (int i=0; i<fNVDetHits; i++) {
+	TStepPointMC* vdstep = fVDetBlock->StepPointMC(i);
+	if  ((vdstep->SimID() == simp_id) and (vdstep->VolumeID() == 9)) {
+	  sd->fStepVD9 = vdstep;
+	  sd->fPVD9    = vdstep->Mom()->Mag();
+	  break;
+	}
+      }
+
+      if (sd->fStepVD9 != nullptr) InitSpmcData(sd->fStepVD9,&vd9_data);
+      sd->fY0 = vd9_data.fY0;
+
       FillSimpHistograms(fHist.fSimp[600],simp,sd);
       if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[601],simp,sd);
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[602],simp,sd);

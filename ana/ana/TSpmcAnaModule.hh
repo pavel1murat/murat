@@ -54,6 +54,8 @@ public:
 
     TH2F*      fYVsX;
     TH2F*      fXEndVsZEnd;
+    TH2F*      fYcVsZEnd;
+    TH2F*      fPVD9VsZEnd;
     TH2F*      fYVsX_2480;
     TH2F*      fYVsX_2513;
     TH2F*      fCosThVsMom[2];
@@ -94,6 +96,7 @@ public:
     TH1F*      fPTime   ;                // proper time
     TH2F*      fYVsX    ;                // local coordinates
     TH2F*      fYcVsXc  ;                // trajectory axis
+    TH2F*      fYcVsP   ;                // Yc vs P
     TH1F*      fPt      ;                // transverse mom
     TH1F*      fPp      ;                // momentum component parallel to the solenoid axis
     TH1F*      fTanTh   ;		       // tan (pitch angle)
@@ -109,6 +112,9 @@ public:
     int           fIndex;		// so far, not used
     TSimParticle* fParent;              // parent (in production vertex)
     int           fStage;               // for this particle
+    TStepPointMC* fStepVD9;
+    float         fPVD9;                // P(VD9), defined for stopped particles
+    float         fY0;
     double        fWeight;
   };
 

@@ -570,7 +570,11 @@ namespace mu2e {
 	const ComboHit* sh = &fStrawHitColl->at(jclosest);
 	const Straw* straw = &_tracker->getStraw(sh->strawId());
 
+<<<<<<< HEAD
 	const XYZVectorF hp = fStrawHitColl->at(jclosest).pos();
+=======
+	const XYZVectorF* hp = &fStrawHitColl->at(jclosest).pos();
+>>>>>>> 34081a1 (work with the last version of OFFLINE)
 
 	double dx = sp->x()-hp.x();
 	double dy = sp->y()-hp.y();

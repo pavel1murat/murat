@@ -23,14 +23,20 @@
 
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
-#include "RecoDataProducts/inc/StrawHit.hh"
-#include "RecoDataProducts/inc/CaloHit.hh"
-#include "RecoDataProducts/inc/CaloCluster.hh"
-#include "RecoDataProducts/inc/TrkToCaloExtrapol.hh"
+#include "Offline/RecoDataProducts/inc/StrawHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
+#include "Offline/RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
+<<<<<<< HEAD
 #include "MCDataProducts/inc/GenParticle.hh"
 #include "MCDataProducts/inc/SimParticle.hh"
 #include "MCDataProducts/inc/StepPointMC.hh"
+=======
+#include "Offline/MCDataProducts/inc/GenParticle.hh"
+#include "Offline/MCDataProducts/inc/SimParticle.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
+>>>>>>> 34081a1 (work with the last version of OFFLINE)
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -56,7 +62,6 @@ class TAnaTrackID;
 
 namespace mu2e {
   class TTracker;
-  class VaneCalorimeter;
 }
 
 namespace mu2e {

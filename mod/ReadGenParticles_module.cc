@@ -17,7 +17,10 @@
 #include "art_root_io/TFileService.h"
 
 #include "MCDataProducts/inc/GenParticle.hh"
+<<<<<<< HEAD
 #include "MCDataProducts/inc/GenParticle.hh"
+=======
+>>>>>>> 34081a1 (work with the last version of OFFLINE)
 
 #include "TH1F.h"
 

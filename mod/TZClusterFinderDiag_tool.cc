@@ -17,8 +17,8 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "Mu2eUtilities/inc/ModuleHistToolBase.hh"
-#include "Mu2eUtilities/inc/McUtilsToolBase.hh"
+#include "Offline/Mu2eUtilities/inc/ModuleHistToolBase.hh"
+#include "Offline/Mu2eUtilities/inc/McUtilsToolBase.hh"
 
 using namespace std;
 

@@ -12,26 +12,25 @@
 #include "art/Utilities/make_tool.h"
 #include "art_root_io/TFileService.h"
 // conditions
-#include "GeometryService/inc/DetectorSystem.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "ConditionsService/inc/ConditionsHandle.hh"
-#include "TrackerGeom/inc/Tracker.hh"
+#include "Offline/GeometryService/inc/DetectorSystem.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/ConditionsService/inc/ConditionsHandle.hh"
+#include "Offline/TrackerGeom/inc/Tracker.hh"
 // root
 #include "TVector2.h"
 // data
-#include "RecoDataProducts/inc/ComboHit.hh"
-#include "RecoDataProducts/inc/TimeCluster.hh"
+#include "Offline/RecoDataProducts/inc/ComboHit.hh"
+#include "Offline/RecoDataProducts/inc/TimeCluster.hh"
 
 // #include "CalPatRec/inc/LsqSums2.hh"
-#include "Mu2eUtilities/inc/ModuleHistToolBase.hh"
+#include "Offline/Mu2eUtilities/inc/ModuleHistToolBase.hh"
 
 #include <algorithm>
 #include <cmath>
 #include "CLHEP/Vector/ThreeVector.h"
-// #include "Mu2eUtilities/inc/TwoLinePCA.hh"
-#include "Mu2eUtilities/inc/polyAtan2.hh"
+#include "Offline/Mu2eUtilities/inc/polyAtan2.hh"
 
-#include "TrkReco/inc/TrkTimeCalculator.hh"
+#include "Offline/TrkReco/inc/TrkTimeCalculator.hh"
 
 //------------------------------------------------------------------------------
 #include "murat/mod/TZClusterFinder_types.hh"

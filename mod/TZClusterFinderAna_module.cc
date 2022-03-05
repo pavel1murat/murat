@@ -31,15 +31,9 @@
 #include "TH2F.h"
 #include "TVector2.h"
 // data
-<<<<<<< HEAD
-#include "RecoDataProducts/inc/ComboHit.hh"
-#include "RecoDataProducts/inc/StrawHitFlag.hh"
-#include "MCDataProducts/inc/StrawDigiMC.hh"
-=======
 #include "Offline/RecoDataProducts/inc/ComboHit.hh"
 #include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 #include "Offline/MCDataProducts/inc/StrawDigiMC.hh"
->>>>>>> 34081a1 (work with the last version of OFFLINE)
 // Utilities
 #include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"
 // diagnostics
@@ -47,13 +41,8 @@
 #include <algorithm>
 #include <cmath>
 #include "CLHEP/Vector/ThreeVector.h"
-<<<<<<< HEAD
-#include "MCDataProducts/inc/StrawGasStep.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
-=======
 #include "Offline/MCDataProducts/inc/StrawGasStep.hh"
 #include "Offline/MCDataProducts/inc/StepPointMC.hh"
->>>>>>> 34081a1 (work with the last version of OFFLINE)
 // ------------------------------------------------------------------------------
 // #include "murat/mod/TZClusterFinder_types.hh"
 

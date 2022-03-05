@@ -26,20 +26,9 @@
 #include "Offline/RecoDataProducts/inc/StrawHit.hh"
 #include "Offline/RecoDataProducts/inc/PIDProduct.hh"
 
-<<<<<<< HEAD
-#include "RecoDataProducts/inc/StrawHit.hh"
-#include "RecoDataProducts/inc/StrawHitFlag.hh"
-#include "RecoDataProducts/inc/PIDProduct.hh"
-
-#include "MCDataProducts/inc/GenParticle.hh"
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
-// #include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-=======
 #include "Offline/MCDataProducts/inc/GenParticle.hh"
 #include "Offline/MCDataProducts/inc/SimParticle.hh"
 #include "Offline/MCDataProducts/inc/StepPointMC.hh"
->>>>>>> 34081a1 (work with the last version of OFFLINE)
 
 #include "BTrk/BbrGeom/BbrVectorErr.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"

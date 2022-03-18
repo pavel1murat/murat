@@ -947,7 +947,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // initialize tracks and determine track quality
 //-----------------------------------------------------------------------------
-    StntupleInitMu2eTrackBlock(fTrackBlock[0],&Evt,0);
+//    StntupleInitMu2eTrackBlock(fTrackBlock[0],&Evt,0);
 
     fNGoodTracks    = 0;
     fNMatchedTracks = 0;

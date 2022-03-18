@@ -28,15 +28,9 @@
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 #include "Offline/RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
-<<<<<<< HEAD
-#include "MCDataProducts/inc/GenParticle.hh"
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
-=======
 #include "Offline/MCDataProducts/inc/GenParticle.hh"
 #include "Offline/MCDataProducts/inc/SimParticle.hh"
 #include "Offline/MCDataProducts/inc/StepPointMC.hh"
->>>>>>> 34081a1 (work with the last version of OFFLINE)
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"

@@ -389,7 +389,7 @@ namespace mu2e {
 //     fListOfExtrapolatedTracks = (TrkToCaloExtrapolCollection*) &(*texHandle);
 
     StntupleInitMu2eClusterBlock(fClusterBlock,Evt,0);
-    StntupleInitMu2eTrackBlock  (fTrackBlock  ,Evt,0);
+    //    StntupleInitMu2eTrackBlock  (fTrackBlock  ,Evt,0);
   }
 
 

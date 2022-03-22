@@ -44,7 +44,7 @@
 #include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/obj/TStnNode.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
-#include "DataProducts/inc/VirtualDetectorId.hh"
+#include "Offline/DataProducts/inc/VirtualDetectorId.hh"
 
 //------------------------------------------------------------------------------
 // Mu2e offline includes

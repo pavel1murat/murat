@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
 // #include "CalorimeterGeom/inc/HexMap.hh"
 
-#include "ana/TTrackRecoEffAnaModule.hh"
+#include "murat/ana/TTrackRecoEffAnaModule.hh"
 
 ClassImp(TTrackRecoEffAnaModule)
 //-----------------------------------------------------------------------------

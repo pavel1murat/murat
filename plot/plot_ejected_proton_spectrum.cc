@@ -5,7 +5,7 @@
 #include "TCanvas.h"
 #include "TAxis.h"
 #include "TF1.h"
-#include "Mu2eUtilities/inc/EjectedProtonSpectrum.hh"
+#include "Offline/Mu2eUtilities/inc/EjectedProtonSpectrum.hh"
 #include "murat/plot/murat_plot_functions.hh"
 
 TF1* ep_fun;

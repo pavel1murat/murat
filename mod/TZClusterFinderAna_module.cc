@@ -12,14 +12,16 @@
 //            3 : ele 90 < p < 110
 //            4 : everything else
 //////////////////////////////////////////////////////////////////////////////
-#include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
+
+#include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
-#include "GeometryService/inc/GeomHandle.hh"
 #include "art/Framework/Core/EDAnalyzer.h"
-#include "GeometryService/inc/DetectorSystem.hh"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art_root_io/TFileService.h"
+
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/DetectorSystem.hh"
 // conditions
 #include "Offline/ConditionsService/inc/ConditionsHandle.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
@@ -34,9 +36,7 @@
 #include "Offline/RecoDataProducts/inc/ComboHit.hh"
 #include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 #include "Offline/MCDataProducts/inc/StrawDigiMC.hh"
-// Utilities
-#include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"
-// diagnostics
+#include "Offline/Mu2eUtilities/inc/SimParticleTimeOffset.hh"
 
 #include <algorithm>
 #include <cmath>

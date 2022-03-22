@@ -27,14 +27,13 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Mu2e includes.
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GeometryService/inc/VirtualDetector.hh"
+#include "Offline/GeometryService/inc/GeometryService.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/VirtualDetector.hh"
 
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
-// #include "Offline/Mu2eUtilities/inc/SortedStepPoints.hh"
 #include "Offline/Mu2eUtilities/inc/TrackTool.hh"
 #include "Offline/Mu2eUtilities/inc/TwoLinePCA.hh"
 

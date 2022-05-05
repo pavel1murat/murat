@@ -52,6 +52,8 @@ public:
   void           fit(const char* File, const char* Module, const char* Hist, 
 		     double X0, double XMin, double XMax, double Sigma = -1.);
 
+  void           plot_acceptance_vs_escale();
+
   TF1* GetFunc() { return fFunc; }
   TH1* GetHist() { return (TH1*) fHist; }
 
@@ -225,5 +227,26 @@ void cb2::fit(const char* File, const char* Module, const char* Hist,
   fHist = (TH1F*) gh1(File,Module,Hist)->Clone("h_fit_crystal_ball");
 
   this->fit(fHist,X0,XMin,XMax,Sigma);
+}
+
+
+//-----------------------------------------------------------------------------
+void cb2::plot_acceptance_vs_escale() {
+
+  double fi_0 = fFunc->Integral(103.6,104.9);
+
+  TH1F* h1 = new TH1F("h1","CE acceptance vs energy scale",20,-0.1,0.1);
+
+  for (int ix=-10; ix<10; ix++) {
+    double a = 103.6+ix*0.01;
+    double b = 104.9+ix*0.01;
+    double fi_1 = fFunc->Integral(a,b);
+    printf("ix, a, b, fi_0, fi_1, fi_1/fi_0: %3i %12.5e  %12.5e %12.5e %12.5e %12.5e\n",
+	   ix,a,b,fi_0,fi_1, fi_1/fi_0);
+    h1->SetBinContent(ix+11,fi_1/fi_0);
+    h1->SetBinError(ix+11,0);
+  }
+
+  h1->Draw();
 }
 

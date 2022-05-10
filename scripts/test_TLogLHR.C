@@ -1,5 +1,5 @@
 // -*- mode:c++ -*-
-// it makes sens to have test script names including teh name of the tested class explicitly
+// it makes sens to have test script names including the name of the tested class explicitly
 //
 
 #include "TCanvas.h"
@@ -7,15 +7,16 @@
 #include "TH1D.h"
 #include "TMath.h"
 
-#include "murat/alg/TLogLHR.hh"
+#include "murat/limits/TLogLHR.hh"
 
 TLogLHR*          g_llhr(nullptr);
 
-TH1D *h_lhr_001_pu, *h_lhr_001_pb;
+TH1D              *h_lhr_001_pu;  // unbiased
+TH1D              *h_lhr_001_pb;  // biased
 //-----------------------------------------------------------------------------
 // show how a measurement of N events changes the background expectation
 //-----------------------------------------------------------------------------
-void lhr_001(double CL, double MuB, double  MuS, double NObs) {
+void test_lhr_001(double CL, double MuB, double  MuS, double NObs) {
   TLogLHR*   llhr(nullptr);
   
   if (llhr == nullptr) llhr = new TLogLHR("lhr_005",CL);
@@ -28,12 +29,11 @@ void lhr_001(double CL, double MuB, double  MuS, double NObs) {
 
   llhr->InitPoissonDist(MuB,MuS,  -1,pu,nmax);
   llhr->InitPoissonDist(MuB,MuS,NObs,pb,nmax);
-
-  //-----------------------------------------------------------------------------
-  // plottting
-  //-----------------------------------------------------------------------------
-  h_lhr_001_pu = new TH1D("h_pu","h p(unbiased)",nmax,0,nmax);
-  h_lhr_001_pb = new TH1D("h_pb","p(biased)"    ,nmax,0,nmax);
+//-----------------------------------------------------------------------------
+// plottting
+//-----------------------------------------------------------------------------
+  h_lhr_001_pu = new TH1D("h_pu","p(unbiased)",nmax,0,nmax);
+  h_lhr_001_pb = new TH1D("h_pb","p(biased)"  ,nmax,0,nmax);
 
   printf(" lhr_001: booked hists\n");
 
@@ -55,12 +55,18 @@ void lhr_001(double CL, double MuB, double  MuS, double NObs) {
 
   h_lhr_001_pu->Draw();
   h_lhr_001_pb->Draw("sames");
+
+  TLegend* leg = new TLegend(0.5,0.5,0.7,0.8);
+  leg->AddEntry(h_lhr_001_pu,"unbiased","p");
+  leg->AddEntry(h_lhr_001_pb,"biased"  ,"p");
+
+  leg->Draw();
 }
 
 //-----------------------------------------------------------------------------
 // for "5-sigma" consistency, set CL = -1
 //-----------------------------------------------------------------------------
-void lhr_005(double CL, double B=0.1, double  SMin = 0, double SMax = 0, double NPoints = 1) {
+void test_lhr_005(double CL, double B=0.1, double  SMin = 0, double SMax = 0, double NPoints = 1) {
   TLogLHR*   llhr;
   
   if (llhr == nullptr) llhr = new TLogLHR("lhr_005",CL);
@@ -112,7 +118,7 @@ void lhr_005(double CL, double B=0.1, double  SMin = 0, double SMax = 0, double 
 // scan a range of signal hypotheses [SMin,SMax] with a step 'Step'
 // determine CL confidence interval around the measurement of N events
 //-----------------------------------------------------------------------------
-void lhr_006(double CL, double MuB=0.1, double N = 5, double  SMin = 0, double SMax = 0, int NPoints = 1) {
+void test_lhr_006(double CL, double MuB=0.1, double N = 5, double  SMin = 0, double SMax = 0, int NPoints = 1) {
   TLogLHR*   llhr(nullptr);
 
   if (llhr == nullptr) llhr = new TLogLHR("lhr_006",CL);
@@ -168,7 +174,7 @@ void lhr_006(double CL, double MuB=0.1, double N = 5, double  SMin = 0, double S
 // scan a range of signal hypotheses [SMin,SMax] with a step 'Step'
 // determine CLb propability of a CL-level observation of a signal
 //-----------------------------------------------------------------------------
-void lhr_007(double CL, double MuB=0.1, double  SMin = 0, double SMax = 0, int NPoints = 1) {
+void test_lhr_007(double CL, double MuB=0.1, double  SMin = 0, double SMax = 0, int NPoints = 1) {
   TLogLHR*   llhr(nullptr);
 
   if (llhr == nullptr) llhr = new TLogLHR("lhr_007",CL);
@@ -240,8 +246,8 @@ void lhr_008(double CL, double MuB=0.1, double  SMin = 0, double SMax = 0, int N
   gPad->Update();
 }
 
-
-void lhr_011(double CL, double MuB=0.1, double N = 5) {
+//-----------------------------------------------------------------------------
+void test_lhr_011(double CL, double MuB=0.1, double N = 5) {
   TLogLHR*   llhr;
 
   if (llhr == nullptr) llhr = new TLogLHR("lhr_011",CL);

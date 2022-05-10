@@ -65,7 +65,7 @@ void  TLogLHR::SetCL(double CL) {
   double alpha = 1-TMath::Erf(5./sqrt(2));
   
   if (CL > 0) fCL = CL;
-  else        fCL = 1-alpha/2; // always two-sided: 1-5.7330314e-07
+  else        fCL = 1-alpha/2; // always one-sided: 1-5.7330314e-07/2
 
   fLog1mCL        = log(1-fCL);
 }
@@ -112,7 +112,7 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, double N, double* Prob, in
   if (fDebugLevel > 0) printf(">>> InitPoissonDist: EXIT\n");
 }
 
-
+//-----------------------------------------------------------------------------
 void TLogLHR::Init(double MuB, double MuS, double NMeas, double MuBest) {
   // 'N' is the 'measured number of events'
 

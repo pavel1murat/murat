@@ -13,9 +13,8 @@ x = subprocess.call(os.getenv("MUSE_WORK_DIR")+'/murat/scripts/build_config_muse
 
 murat_env = env.Clone()
 
-murat_env['CPPPATH' ].append('-I'+os.environ['MUSE_WORK_DIR']+'/build/include');
-murat_env['CXXFLAGS'].append('-I'+os.environ['MUSE_WORK_DIR']+'/build/include');
-murat_env.Append(FORTRANFLAGS = ['-I'+os.environ['MUSE_WORK_DIR']+'/build/include']);
+murat_env['CPPPATH' ].append(os.environ['MUSE_WORK_DIR']+'/include');
+murat_env.Append(FORTRANPATH = [os.environ['MUSE_WORK_DIR']+'/include']);
 #------------------------------------------------------------------------------
 # done
 #------------------------------------------------------------------------------

@@ -90,13 +90,13 @@ namespace mu2e {
     explicit TrackRecoCheck(fhicl::ParameterSet const& pset);
     virtual ~TrackRecoCheck();
 
-    void     Debug_11(art::Event* Evt);   // handles fDr
+    void     Debug_11(const art::Event* Evt);   // handles fDr
 //-----------------------------------------------------------------------------
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
     virtual void     beginJob();
     virtual void     endJob  ();
-    virtual bool     filter (art::Event& Evt);
+    virtual void     analyzer(const art::Event& Evt);
   };
 
 
@@ -136,7 +136,7 @@ namespace mu2e {
 
 
   //-----------------------------------------------------------------------------
-  bool TrackRecoCheck::filter(art::Event& Evt) {
+  void TrackRecoCheck::analyzer(const art::Event& Evt) {
     const char* oname = "TrackRecoCheck::filter";
 
     if (DebugBit(11)) printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
@@ -144,14 +144,12 @@ namespace mu2e {
 // do the rest
 //-----------------------------------------------------------------------------
     if (DebugBit(11)) Debug_11(&Evt);
-
-    return 1;
   }
 
 //-----------------------------------------------------------------------------
 // fill E(hit) vs path distributions
 //-----------------------------------------------------------------------------
-  void TrackRecoCheck::Debug_11(art::Event* Evt) {
+  void TrackRecoCheck::Debug_11(const art::Event* Evt) {
     const char* oname = "TrackRecoCheck::Debug_11";
 
     //     GeomHandle<Mu2eDetectorModel> detmodel;

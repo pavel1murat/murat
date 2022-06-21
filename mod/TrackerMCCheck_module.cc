@@ -144,16 +144,16 @@ namespace mu2e {
 
     void     bookHistograms();
     void     getData(const art::Event* Evt);
-    void     Init   (art::Event* Evt);
+    void     Init   (const art::Event* Evt);
     void     Debug_003();   // handles fDr
     void     Debug_004();
 //-----------------------------------------------------------------------------
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
     virtual void     beginJob();
-    virtual bool     beginRun(art::Run& );
+    virtual void     beginRun(const art::Run& );
     virtual void     endJob  ();
-    virtual bool     filter (art::Event& Evt);
+    virtual void     analyzer(const art::Event& Evt);
   };
 
 
@@ -249,10 +249,9 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  bool TrackerMCCheck::beginRun(art::Run& ) {
+  void TrackerMCCheck::beginRun(const art::Run& ) {
     mu2e::GeomHandle<mu2e::Tracker> th;
     _tracker = th.get();
-    return true;
   }
 
 
@@ -293,12 +292,12 @@ namespace mu2e {
    }
 
 //-----------------------------------------------------------------------------
-  void TrackerMCCheck::Init(art::Event* Evt) {
+  void TrackerMCCheck::Init(const art::Event* Evt) {
   }
 
 
   //-----------------------------------------------------------------------------
-  bool TrackerMCCheck::filter(art::Event& Evt) {
+  void TrackerMCCheck::analyzer(const art::Event& Evt) {
     const char* oname = "TrackerMCCheck::filter";
 
     printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
@@ -366,7 +365,6 @@ namespace mu2e {
     if      (DebugBit(3)) Debug_003();
     else if (DebugBit(4)) Debug_004();
 
-    return true;
   }
 
 //-----------------------------------------------------------------------------

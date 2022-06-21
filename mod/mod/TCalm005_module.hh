@@ -106,17 +106,17 @@ namespace mu2e {
     void FillEventHistograms  (EventHist_t*   Hist);
     void FillHistograms();
 
-    void Debug(art::Event* Evt);
-    void Init (art::Event* Evt);
+    void Debug(const art::Event* Evt);
+    void Init (const art::Event* Evt);
 //-----------------------------------------------------------------------------
 // overloaded methods of TAnaModule
 //-----------------------------------------------------------------------------
-    void getData(art::Event* Evt);
+    void getData(const art::Event* Evt);
 //-----------------------------------------------------------------------------
 // overloaded framework module methods
 //-----------------------------------------------------------------------------
-    virtual bool filter  (art::Event& e);
-    virtual bool beginRun(art::Run&   r);
+    virtual void analyze (const art::Event& e);
+    virtual void beginRun(const art::Run&   r);
     virtual void beginJob();
     virtual void endJob  ();
 

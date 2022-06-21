@@ -109,9 +109,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // begin run 
 //-----------------------------------------------------------------------------
-  bool TCalm006::beginRun(art::Run& R) {
-
-    return true;
+  void TCalm006::beginRun(const art::Run& R) {
   }
 
 
@@ -174,7 +172,7 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  void TCalm006::getData(art::Event* Evt) {
+  void TCalm006::getData(const art::Event* Evt) {
     const char* oname = "TCalm006::getData";
 //-----------------------------------------------------------------------------
 // CaloCrystalHitCollection
@@ -196,7 +194,7 @@ namespace mu2e {
 
 
 //-----------------------------------------------------------------------------
-  void TCalm006::Init(art::Event* Evt) {
+  void TCalm006::Init(const art::Event* Evt) {
     //    const char oname[] = "TCalm006::Init";
 
     int             id, ring, l, k;
@@ -232,7 +230,7 @@ namespace mu2e {
 
 
 //-----------------------------------------------------------------------------
-  void TCalm006::Debug(art::Event* Evt) {
+  void TCalm006::Debug(const art::Event* Evt) {
     //    const char* oname = "TCalm006::Debug";
 //-----------------------------------------------------------------------------
 // bit 000: calorimeter step points
@@ -261,10 +259,8 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  bool TCalm006::filter(art::Event& Evt) {
+  void  TCalm006::analyzer(const art::Event& Evt) {
     const char* oname = "TCalm006::filter";
-
-    bool rc(true);
 
     fEventNumber = Evt.event();
     fRunNumber   = Evt.run();
@@ -286,8 +282,6 @@ namespace mu2e {
     CaloCluster  x;
 
     aaa(&x);
-    
-    return rc;
   }
   
 }  // end namespace mu2e

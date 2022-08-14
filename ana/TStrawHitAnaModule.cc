@@ -269,7 +269,7 @@ int TStrawHitAnaModule::Event(int ientry) {
   //  TLorentzVector        mom;
 
   fStrawHitDataBlock->GetEntry(ientry);
-  fSimpBlock->GetEntry(ientry);
+  if (fSimpBlock) fSimpBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
@@ -305,13 +305,19 @@ int TStrawHitAnaModule::Event(int ientry) {
 
     int sim_id = hit->SimID();
     shp->fSppTime = -1;
-
-    TSimParticle* simp = fSimpBlock->FindParticle(sim_id);
-    if (simp) {
-      shp->fSppTime = simp->StartPos()->T();
-    }
-    else {
-      GetHeaderBlock()->Print(Form(" ERROR in TStrawHitAnaModule::Event: simp=NULL for hit=%i and sim_id=%i",i,sim_id));
+//-----------------------------------------------------------------------------
+// MC information may be missing
+//-----------------------------------------------------------------------------
+    if (fSimpBlock and (fSimpBlock->NParticles() > 0)) { 
+      TSimParticle* simp(nullptr);
+    
+      simp = fSimpBlock->FindParticle(sim_id);
+      if (simp) {
+	shp->fSppTime = simp->StartPos()->T();
+      }
+      else {
+	GetHeaderBlock()->Print(Form(" ERROR in TStrawHitAnaModule::Event: simp=NULL for hit=%i and sim_id=%i",i,sim_id));
+      }
     }
   }
 
@@ -427,23 +433,25 @@ void TStrawHitAnaModule::PrintStrawHit(TStrawHitData* Hit, StrawHitPar_t* Shp, c
 
   if (opt == "banner") return;
 
-  int simID = Hit->SimID();
-  TSimParticle* sim = fSimpBlock->FindParticle(simID);
-
-  int parentID = sim->ParentID();
-
-  float pmom   = -1;
-  int   pgenID = -1;
-
+  float pmom     = -1;
+  int   pgenID   = -1;
+  int   parentID = -1;
   
-  TSimParticle* parent = sim;
+  if (fSimpBlock and (fSimpBlock->NParticles() > 0)) {
+    int simID = Hit->SimID();
+    TSimParticle* sim = fSimpBlock->FindParticle(simID);
 
-  while (parent != nullptr) {
-    parent   = fSimpBlock->FindParticle(parentID);
-    if (parent) {
-      pmom     = parent->StartMom()->P();
-      pgenID   = parent->GeneratorID();
-      parentID = parent->ParentID();
+    parentID = sim->ParentID();
+
+    TSimParticle* parent = sim;
+    
+    while (parent != nullptr) {
+      parent   = fSimpBlock->FindParticle(parentID);
+      if (parent) {
+	pmom     = parent->StartMom()->P();
+	pgenID   = parent->GeneratorID();
+	parentID = parent->ParentID();
+      }
     }
   }
 

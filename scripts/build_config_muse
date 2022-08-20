@@ -5,8 +5,8 @@
 #------------------------------------------------------------------------------
 base=$MUSE_WORK_DIR
 
-echo murat::build_config_muse:000: MU2E_VERBOSE:.$MU2E_VERBOSE.
-echo murat::build_congig_muse:001: pwd=`pwd`
+# echo murat::build_config_muse:000: MU2E_VERBOSE:.$MU2E_VERBOSE.
+# echo murat::build_congig_muse:001: pwd=`pwd`
 
 pushd $MUSE_WORK_DIR ; Stntuple/scripts/build_config_muse ; popd ;
 #------------------------------------------------------------------------------
@@ -15,7 +15,7 @@ pushd $MUSE_WORK_DIR ; Stntuple/scripts/build_config_muse ; popd ;
 # pkg=`pwd | awk -F / '{print $(NF-1)}'`
 pkg=`echo $0 | awk -F / '{print $(NF-2)}'`
 
-echo "murat::build_congig_muse:002: pwd="`pwd`   pkg=$pkg
+# echo "murat::build_congig_muse:002: pwd="`pwd`   pkg=$pkg
 
 pkg_include_dir=$base/include/$pkg
 
@@ -31,16 +31,3 @@ for d in alg ana gaas gui mod obj limits mclimit plot pet petr tdr; do
 	$cmd
     fi
 done
-
-#------------------------------------------------------------------------------
-# murat/Stntuple and its subpackages
-#------------------------------------------------------------------------------
-# if [ ! -d ../$dir/Stntuple ] ; then mkdir -p ../$dir/Stntuple ; fi
-# 
-# # for d in alg base gui loop mod obj val ; do
-# for d in alg base loop mod obj val ; do
-#     if [ ! -e ../$dir/Stntuple/$d ] ; then 
-# 	echo `pwd`$0 : creating symbolic link ../$dir/Stntuple/$d
-# 	ln -s ../../murat/Stntuple/$d/$d ../$dir/Stntuple/$d
-#     fi
-# done

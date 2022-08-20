@@ -7,7 +7,7 @@ sys.path.append(os.getenv("MUSE_WORK_DIR")+'/site_scons')
 # last two components of the path. Ex: /not/this/but/THIS/AND_THIS
 #                                      "AND_THIS" is usually "src"
 #------------------------------------------------------------------------------
-print("murat/SConscript: PWD:"+os.getenv("PWD"))
+# print("murat/SConscript: PWD:"+os.getenv("PWD"))
 
 x = subprocess.call(os.getenv("MUSE_WORK_DIR")+'/murat/scripts/build_config_muse',shell=True)
 

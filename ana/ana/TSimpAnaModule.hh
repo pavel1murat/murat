@@ -5,10 +5,8 @@
 #define murat_ana_TSimpAnaModule_hh
 
 #include "Stntuple/obj/TStnTrackBlock.hh"
-#include "Stntuple/obj/TTrackStrawHitBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
-#include "Stntuple/obj/TStrawDataBlock.hh"
 #include "Stntuple/obj/TStepPointMCBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"

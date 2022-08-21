@@ -359,9 +359,9 @@ void TTrackPidAnaModule::FillHistograms() {
 
 //-----------------------------------------------------------------------------
 int TTrackPidAnaModule::FindTrack(TAnaPart* Part, int Index) {
-  TStnTrack           *t1, *t2;
-  TTrackStrawHitData  *h1, *h2;
-  int                  nh1, nh2, ncommon;
+  TStnTrack       *t1, *t2;
+  TTrackStrawHit  *h1, *h2;
+  int             nh1, nh2, ncommon;
 
   Part->fTrack[Index] = NULL;
 

@@ -72,7 +72,7 @@ public:
 					// pointers to the data blocks used
 
   TString              fHitBlockName;
-  TTrackStrawHitBlock* fTrackStrawHitDataBlock;
+  TTrackStrawHitBlock* fTrackStrawHitBlock;
 
   int                   fNTracks;
 
@@ -108,8 +108,8 @@ public:
   void    BookTrackHistograms        (HistBase_t* Hist, const char* Folder);
 
   void    FillEventHistograms        (HistBase_t* Hist);
-  void    FillTrackHistograms        (HistBase_t* Hist, TrackPar_t*        Trk);
-  void    FillTrackStrawHitHistograms(HistBase_t* Hist, TTrackStrawHitData* Hit);
+  void    FillTrackHistograms        (HistBase_t* Hist, TrackPar_t*     Trk);
+  void    FillTrackStrawHitHistograms(HistBase_t* Hist, TTrackStrawHit* Hit);
 
   void    BookHistograms();
   void    FillHistograms();

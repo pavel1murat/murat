@@ -23,7 +23,7 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/obj/TStrawHitData.hh"
+#include "Stntuple/obj/TStrawHit.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
 // Mu2e offline includes
@@ -156,7 +156,7 @@ void TTrackStrawHitAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackStrawHitAnaModule::FillTrackStrawHitHistograms(HistBase_t* Hist, TTrackStrawHitData* Hit) {
+void TTrackStrawHitAnaModule::FillTrackStrawHitHistograms(HistBase_t* Hist, TTrackStrawHit* Hit) {
 
   TrackStrawHitHist_t* hist = (TrackStrawHitHist_t*) Hist;
   
@@ -212,7 +212,7 @@ int TTrackStrawHitAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock(fHitBlockName.Data() ,"TTrackStrawDataBlock" ,&fTrackStrawHitDataBlock);
+  RegisterDataBlock(fHitBlockName.Data() ,"TTrackStrawHitBlock" ,&fTrackStrawHitBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -234,7 +234,7 @@ void TTrackStrawHitAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // track histograms
 //-----------------------------------------------------------------------------
-  int ntrk = fTrackStrawHitDataBlock->NTracks();
+  int ntrk = fTrackStrawHitBlock->NTracks();
 
   for (int it=0; it<ntrk; it++) {
     FillTrackHistograms(fHist.fTrack[0],&fTp[it]);
@@ -243,14 +243,14 @@ void TTrackStrawHitAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // straw hit histograms
 //-----------------------------------------------------------------------------
-  TTrackStrawHitData* hit;
-  float               dr;
+  TTrackStrawHit* hit;
+  float           dr;
 
   for (int it=0; it<ntrk; it++) {
-    int nhits = fTrackStrawHitDataBlock->NTrackHits(it);
-    int first = fTrackStrawHitDataBlock->First(it);
+    int nhits = fTrackStrawHitBlock->NTrackHits(it);
+    int first = fTrackStrawHitBlock->First(it);
     for (int i=0; i<nhits; i++) {
-      hit = fTrackStrawHitDataBlock->Hit(first+i);
+      hit = fTrackStrawHitBlock->Hit(first+i);
       dr  = hit->DriftRadius()-fabs(hit->McDoca());
 
       FillTrackStrawHitHistograms(fHist.fTrackStrawHit[0],hit);
@@ -275,27 +275,27 @@ int TTrackStrawHitAnaModule::Event(int ientry) {
   //  double                p;
   //  TLorentzVector        mom;
 
-  fTrackStrawHitDataBlock->GetEntry(ientry);
+  fTrackStrawHitBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 // if there are several hits, use the first one
 //-----------------------------------------------------------------------------
-  fNTracks    = fTrackStrawHitDataBlock->NTracks();
+  fNTracks    = fTrackStrawHitBlock->NTracks();
 
   for (int it=0; it<fNTracks; it++) {
-    int nhits    = fTrackStrawHitDataBlock->NTrackHits(it);
-    int first    = fTrackStrawHitDataBlock->First(it);
+    int nhits    = fTrackStrawHitBlock->NTrackHits(it);
+    int first    = fTrackStrawHitBlock->First(it);
 
     fTp[it].fNHits   = nhits;
     fTp[it].fNActive = 0;
     fTp[it].fN500    = 0;
 
-    TTrackStrawHitData* hit;
-    float               dr;
+    TTrackStrawHit* hit;
+    float           dr;
 
     for (int i=0; i<nhits; i++) {
-      hit = fTrackStrawHitDataBlock->Hit(first+i);
+      hit = fTrackStrawHitBlock->Hit(first+i);
       if (hit->Active()) fTp[it].fNActive += 1;
       dr = hit->DriftRadius()-fabs(hit->McDoca());
       if (dr > 0.5) fTp[it].fN500 += 1;

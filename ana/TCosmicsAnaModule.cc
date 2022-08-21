@@ -91,7 +91,7 @@ int TCosmicsAnaModule::BeginJob() {
 
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
-  RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
+  RegisterDataBlock("StrawHitBlock" ,"TStrawHitBlock"   ,&fStrawHitBlock);
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"       ,&fSimpBlock);
   RegisterDataBlock("VDetBlock"     ,"TStepPointMCBlock",&fVDetBlock);
@@ -830,7 +830,7 @@ int TCosmicsAnaModule::Event(int ientry) {
   }
 
   fNCalHits   = fCalDataBlock->NHits();
-  fNStrawHits = fStrawDataBlock->NHits();
+  fNStrawHits = fStrawHitBlock->NHits();
 
   fDiskCalorimeter->InitEvent(fCalDataBlock);
 

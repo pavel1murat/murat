@@ -16,7 +16,7 @@
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
-#include "Stntuple/obj/TStrawDataBlock.hh"
+#include "Stntuple/obj/TStrawHitBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStnTrackSeedBlock.hh"
@@ -149,7 +149,7 @@ public:
 					// pointers to the data blocks used
 					// 0: TPR, 1: CPR
 
-  TStrawDataBlock*       fStrawDataBlock;
+  TStrawHitBlock*        fStrawHitBlock;
   TGenpBlock*            fGenpBlock;
   TSimpBlock*            fSimpBlock;
   TStnTimeClusterBlock*  fTimeClusterBlock[2];

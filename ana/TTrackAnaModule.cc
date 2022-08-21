@@ -107,7 +107,7 @@ int TTrackAnaModule::BeginJob() {
 
   RegisterDataBlock("ClusterBlock"        ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"        ,"TCalDataBlock"    ,&fCalDataBlock);
-  RegisterDataBlock("StrawDataBlock"      ,"TStrawDataBlock"  ,&fStrawDataBlock);
+  RegisterDataBlock("StrawHitBlock"       ,"TStrawHitBlock"   ,&fStrawHitBlock);
   RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
   RegisterDataBlock("SpmcBlockVDet"       ,"TStepPointMCBlock",&fVDetBlock);
@@ -1061,7 +1061,7 @@ int TTrackAnaModule::Event(int ientry) {
   fTrackBlock->GetEntry(ientry);
   fTrackStrawHitBlock->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
-  fStrawDataBlock->GetEntry(ientry);
+  fStrawHitBlock->GetEntry(ientry);
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);

@@ -26,6 +26,7 @@
 #include "murat/ana/TTrackStrawHitAnaModule.hh"
 #include "murat/ana/TTriggerAnaModule.hh"
 #include "murat/ana/TValCalPatRecModule.hh"
+#include "murat/ana/TVstAnaModule.hh"
 #include "murat/ana/TVDetAnaModule.hh"
 //-----------------------------------------------------------------------------
 // hide CDF  names inside the namespace to preserve them
@@ -92,6 +93,7 @@ TTrackStrawHitAnaModule*   m_tsh   = NULL;
 TTrackRecoEffAnaModule*    m_eff   = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
 TVDetAnaModule*            m_vdt   = NULL;
+TVstAnaModule*             m_vst   = NULL;
 //-----------------------------------------------------------------------------
 // modules known to clash with Stntuple and su2020
 //-----------------------------------------------------------------------------

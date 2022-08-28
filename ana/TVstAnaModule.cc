@@ -54,17 +54,78 @@ TVstAnaModule::TVstAnaModule(const char* name, const char* title): TStnModule(na
   fMaxEDep[3] = 0.0058;
   fMaxEDep[4] = 0.0055;
   fMaxEDep[5] = 0.0058;
+
+  for (int i=0; i<6; i++) {
+    Panel_t* panel = fPanel+i;
+    panel->fNHits      = 0;
+    panel->fNGoodHits  = 0;
+  }
 }
 
 //-----------------------------------------------------------------------------
 TVstAnaModule::~TVstAnaModule() {
+  for (int i=0; i<6; i++) {
+    Panel_t* panel = fPanel+i;
+    for (int ich=0; ich<100; ich++) {
+      panel->fChannel[ich].Delete();
+    }
+  }
 }
 
+//-----------------------------------------------------------------------------
+// register data blocks and book histograms
+//-----------------------------------------------------------------------------
+int TVstAnaModule::BeginJob() {
+//-----------------------------------------------------------------------------
+// register data blocks
+//-----------------------------------------------------------------------------
+  RegisterDataBlock("StrawHitBlock" ,"TStrawHitBlock" ,&fStrawHitBlock);
+//-----------------------------------------------------------------------------
+// book histograms
+//-----------------------------------------------------------------------------
+  BookHistograms();
+
+  return 0;
+}
+
+//_____________________________________________________________________________
+int TVstAnaModule::BeginRun() {
+  int rn = GetHeaderBlock()->RunNumber();
+  TStntuple::Init(rn);
+  return 0;
+}
+
+
+//-----------------------------------------------------------------------------
+void TVstAnaModule::BookPanelHistograms(HistBase_t* Hist, const char* Folder) {
+  //  char name [200];
+  //  char title[200];
+  PanelHist_t* hist = (PanelHist_t*) Hist;
+
+  HBook1F(hist->fNHits            ,"nh"      ,Form("%s: N(hits)"                ,Folder),  100,    0, 100,Folder);
+  HBook1F(hist->fNGoodHits        ,"nhg"     ,Form("%s: N(good hits)"           ,Folder),  100,    0, 100,Folder);
+}
+
+//-----------------------------------------------------------------------------
+void TVstAnaModule::BookChannelHistograms(HistBase_t* Hist, const char* Folder) {
+  //  char name [200];
+  //  char title[200];
+  ChannelHist_t* hist = (ChannelHist_t*) Hist;
+
+  HBook1F(hist->fNSig             ,"nsig"       ,Form("%s: N(signals)"             ,Folder),    5,    0,   5,Folder);
+  HBook1F(hist->fDT10             ,"dt10"       ,Form("%s: T(1)-T(0)"              ,Folder),  200, -100, 100,Folder);
+  HBook1F(hist->fDTot10           ,"dtot10"     ,Form("%s: TOT(1)-TOT(0)"          ,Folder),  200, -100, 100,Folder);
+  HBook1F(hist->fDTNext           ,"dtnext"     ,Form("%s: <T>(i+1)-<T>(i)"        ,Folder),  200, -100, 100,Folder);
+}
 
 //-----------------------------------------------------------------------------
 void TVstAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
+
+//-----------------------------------------------------------------------------
+// book event histograms
+//-----------------------------------------------------------------------------
   EventHist_t* hist = (EventHist_t*) Hist;
 
   HBook1F(hist->fRunNumber        ,"runnum"     ,Form("%s: Run   Number"           ,Folder), 1000, 1e5, 1.e5+1000,Folder);
@@ -106,8 +167,8 @@ void TVstAnaModule::BookStrawHitHistograms(HistBase_t* Hist, const char* Folder)
   StrawHitHist_t* hist = (StrawHitHist_t*) Hist;
 
   HBook1F(hist->fEDep         ,"edep0"      ,Form("%s: EDep"                 ,Folder),  200,    0,  0.01,Folder);
-  HBook1F(hist->fTime[0]      ,"t0"         ,Form("%s: Time[0]"              ,Folder), 1000,    0, 10000,Folder);
-  HBook1F(hist->fTime[1]      ,"t1"         ,Form("%s: Time[1]"              ,Folder), 1000,    0, 10000,Folder);
+  HBook1F(hist->fTime[0]      ,"t0"         ,Form("%s: Time[0]"              ,Folder),  600,    0, 30000,Folder);
+  HBook1F(hist->fTime[1]      ,"t1"         ,Form("%s: Time[1]"              ,Folder),  600,    0, 30000,Folder);
   HBook1F(hist->fTOT [0]      ,"tot0"       ,Form("%s: TOT [0]"              ,Folder),  100,    0,   100,Folder);
   HBook1F(hist->fTOT [1]      ,"tot1"       ,Form("%s: TOT [1]"              ,Folder),  100,    0,   100,Folder);
   HBook1F(hist->fDt           ,"dt"         ,Form("%s: DeltaT = T1-T2"       ,Folder),  100,  -50,    50,Folder);
@@ -152,7 +213,7 @@ void TVstAnaModule::BookHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// book GENP histograms
+// book straw hit histograms
 //-----------------------------------------------------------------------------
   TString*  hit_selection  [kNStrawHitHistSets];
   for (int i=0; i<kNStrawHitHistSets; i++) hit_selection[i] = nullptr;
@@ -190,6 +251,42 @@ void TVstAnaModule::BookHistograms() {
       BookStrawHitHistograms(fHist.fStrawHit[i],Form("Hist/%s",folder_name));
     }
   }
+//-----------------------------------------------------------------------------
+// book channel histograms
+//-----------------------------------------------------------------------------
+  char panel_folder_name[100], channel_folder_name[100];
+  for (int ip=0; ip<6; ip++) {
+    sprintf(panel_folder_name,"panel_%i",ip);
+    hist_folder->AddFolder(panel_folder_name,panel_folder_name);
+    TFolder* panel_fol  = (TFolder*) hist_folder->FindObject(panel_folder_name);
+    BookPanelHistograms(&fHist.fPanel[ip],Form("Hist/%s",panel_folder_name));
+    for (int ich=0; ich<96; ich++) { 
+      sprintf(channel_folder_name,"ch_%02i",ich);
+      panel_fol->AddFolder(channel_folder_name,channel_folder_name);
+      // TFolder* channel_fol  = (TFolder*) panel_fol->FindObject(channel_folder_name);
+      BookChannelHistograms(&fHist.fPanel[ip].fChannel[ich],Form("Hist/%s/%s",panel_folder_name, channel_folder_name));
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+void TVstAnaModule::FillChannelHistograms(HistBase_t* Hist, ChannelData_t* ChData) {
+
+  ChannelHist_t* hist = (ChannelHist_t*) Hist;
+  
+  hist->fNSig->Fill(ChData->fNSig);
+  hist->fDT10->Fill(ChData->fDT10);
+  hist->fDTot10->Fill(ChData->fDTot10);
+  hist->fDTNext->Fill(ChData->fDTNext);
+}
+
+//-----------------------------------------------------------------------------
+void TVstAnaModule::FillPanelHistograms(HistBase_t* Hist, Panel_t* Panel) {
+
+  PanelHist_t* hist = (PanelHist_t*) Hist;
+  
+  hist->fNHits->Fill(Panel->fNHits);
+  hist->fNGoodHits->Fill(Panel->fNGoodHits);
 }
 
 //-----------------------------------------------------------------------------
@@ -212,8 +309,6 @@ void TVstAnaModule::FillStrawHitHistograms(HistBase_t* Hist, TStrawHit* Hit, Str
   hist->fPreamp->Fill(Hit->Preamp());
 }
 
-//-----------------------------------------------------------------------------
-// 
 //-----------------------------------------------------------------------------
 void TVstAnaModule::FillEventHistograms(HistBase_t* Hist) {
 //   double            cos_th, xv, yv, rv, zv, p;
@@ -247,22 +342,6 @@ void TVstAnaModule::FillEventHistograms(HistBase_t* Hist) {
   hist->fNGoodHitPanels->Fill(fAllHits.fNHitPanels);
   hist->fNGoodHitFaces ->Fill(fAllHits.fNHitFaces );
 
-}
-
-//-----------------------------------------------------------------------------
-// register data blocks and book histograms
-//-----------------------------------------------------------------------------
-int TVstAnaModule::BeginJob() {
-//-----------------------------------------------------------------------------
-// register data blocks
-//-----------------------------------------------------------------------------
-  RegisterDataBlock("StrawHitBlock" ,"TStrawHitBlock" ,&fStrawHitBlock);
-//-----------------------------------------------------------------------------
-// book histograms
-//-----------------------------------------------------------------------------
-  BookHistograms();
-
-  return 0;
 }
 
 //_____________________________________________________________________________
@@ -301,17 +380,43 @@ void TVstAnaModule::FillHistograms() {
       FillStrawHitHistograms(fHist.fStrawHit[90+panel],hit,shp);
     } 
   }
+//-----------------------------------------------------------------------------
+// panel and channel histograms
+//-----------------------------------------------------------------------------
+  for (int ip=0; ip<6; ip++) {
+    Panel_t* panel = &fPanel[ip];
+
+    FillPanelHistograms(&fHist.fPanel[ip],panel);
+
+    if (panel->fNGoodHits == 0)                                       continue;
+
+    for (int ich=0; ich<96; ich++) {
+      int nh = panel->fChannel[ich].GetEntriesFast();
+      if (nh > 0) {
+	for (int ih=0; ih<nh; ih++) {
+	  ChannelData_t* chd = (ChannelData_t*) panel->fChannel[ich].UncheckedAt(ih);
+
+  
+	  int ich_next = ich+1;
+	  int nh_next = panel->fChannel[ich_next].GetEntriesFast();
+
+	  if (nh_next > 0) {
+	    for (int ih1=0; ih1<nh_next; ih1++) {
+	      ChannelData_t* chd_next = (ChannelData_t*) panel->fChannel[ich_next].UncheckedAt(ih1);
+
+	      float t      = (chd->fHit->Time(0)+chd->fHit->Time(1))/2.;
+	      float t_next = (chd_next->fHit->Time(0)+chd_next->fHit->Time(1))/2.;
+	      
+	      chd->fDTNext = t_next-t;
+	    }
+	  
+	    FillChannelHistograms(&fHist.fPanel[ip].fChannel[ich],chd);
+	  }
+	}
+      }
+    }
+  }
 }
-
-
-
-//_____________________________________________________________________________
-int TVstAnaModule::BeginRun() {
-  int rn = GetHeaderBlock()->RunNumber();
-  TStntuple::Init(rn);
-  return 0;
-}
-
 
 //_____________________________________________________________________________
 int TVstAnaModule::Event(int ientry) {
@@ -321,14 +426,14 @@ int TVstAnaModule::Event(int ientry) {
 
   fStrawHitBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
-// assume electron in the first particle, otherwise the logic will need to 
-// be changed
-// if there are several hits, use the first one
+// clear the local storage
 //-----------------------------------------------------------------------------
-  fNStrawHits        = fStrawHitBlock->NHits();
-
   fAllHits.Clear();
   fGoodHits.Clear();
+
+  for (int i=0; i<6; i++) fPanel[i].Clear();
+
+  fNStrawHits        = fStrawHitBlock->NHits();
 
   TStrawHit* hit;
   for (int i=0; i<fNStrawHits; i++) {
@@ -337,30 +442,69 @@ int TVstAnaModule::Event(int ientry) {
       break;
     }
 
-    hit = fStrawHitBlock->Hit(i);
+    hit     = fStrawHitBlock->Hit(i);
 
-    int panel = hit->Panel();
+    int ip  = hit->Panel();
+    int ich = hit->Straw();
+//-----------------------------------------------------------------------------
+// within the panel, everything is ordered by channel
+// for the moment, ignore the case ot 2 hits in the same channel
+//-----------------------------------------------------------------------------
+    Panel_t* panel = &fPanel[ip];
 
+    ChannelData_t* chd = new ChannelData_t();
+
+					// this belongs to a constructor
+    chd->fHit    = hit;
+    chd->fDTNext = -999;
+
+    if ((hit->Time(0) > 0) and (hit->Time(1) > 0)) {
+      chd->fDT10   = hit->Time(1)-hit->Time(0);
+      chd->fNSig   = 2;
+    }
+    else {
+      chd->fNSig   = 1;
+      if      (hit->Time(0) > 0) chd->fDT10   = -999;
+      else if (hit->Time(1) > 0) chd->fDT10   =  999;
+      else {
+	chd->fNSig  = 0;
+      }
+    }
+
+    if ((hit->TOT(0) > 0) and (hit->TOT(1) > 0)) {
+      chd->fDTot10 = hit->TOT (1)-hit->TOT (0);
+    }
+    else { 
+      if      (hit->TOT(0) > 0) chd->fDTot10 = -999;
+      else if (hit->TOT(1) > 0) chd->fDTot10 =  999;
+    }
+    
     fAllHits.fNHits++;
-    fAllHits.fNHitsPerPanel[panel]++;
+    fAllHits.fNHitsPerPanel[ip]++;
 
-    if ((hit->EDep() > fMinEDep[panel]) and (hit->EDep() < fMaxEDep[panel])) {
+    if (GoodHit(hit)) {
       fGoodHits.fNHits++;
-      fGoodHits.fNHitsPerPanel[panel]++;
+      fGoodHits.fNHitsPerPanel[ip]++;
+//-----------------------------------------------------------------------------
+// for more detailed analysis, store only good hits
+//-----------------------------------------------------------------------------
+      panel->fNHits++;
+      panel->fNGoodHits++;
+      panel->fChannel[ich].Add(chd);
     }
   }
 
   for (int i=0; i<6; i++) {
     int face = kFace[i];
-    fAllHits.fNHitsPerFace[face] += fAllHits.fNHitsPerPanel[i];
+    fAllHits.fNHitsPerFace [face] += fAllHits.fNHitsPerPanel[i];
     fGoodHits.fNHitsPerFace[face] += fGoodHits.fNHitsPerPanel[i];
 
-    if (fAllHits.fNHitsPerPanel[i] > 0) fAllHits.fNHitPanels += 1;
+    if (fAllHits.fNHitsPerPanel [i] > 0) fAllHits.fNHitPanels += 1;
     if (fGoodHits.fNHitsPerPanel[i] > 0) fGoodHits.fNHitPanels += 1;
   }
 
   for (int i=0; i<2; i++) {
-    if (fAllHits.fNHitsPerFace[i] > 0) fAllHits.fNHitFaces += 1;
+    if (fAllHits.fNHitsPerFace [i] > 0) fAllHits.fNHitFaces += 1;
     if (fGoodHits.fNHitsPerFace[i] > 0) fGoodHits.fNHitFaces += 1;
   }
 

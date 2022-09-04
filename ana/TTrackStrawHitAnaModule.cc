@@ -61,6 +61,8 @@ void TTrackStrawHitAnaModule::BookTrackStrawHitHistograms(HistBase_t* Hist, cons
 	  300, 0, 3   , 300, 0,3, Folder);
 
   HBook1F(hist->fDr  ,"dr"     ,Form("%s: Drift - abs(mcdoca)" ,Folder), 250, -1, 4 ,Folder);
+  HBook1F(hist->fStation,"station",Form("%s: station" ,Folder), 20, -0.5, 19.5, Folder);
+  HBook1F(hist->fLayer  ,"layer"  ,Form("%s: layer"   ,Folder),  5, -0.5,  4.5, Folder);
 }
 
 
@@ -171,6 +173,8 @@ void TTrackStrawHitAnaModule::FillTrackStrawHitHistograms(HistBase_t* Hist, TTra
   hist->fTime->Fill(Hit->Time());
   hist->fDriftRadiusVsMcDoca->Fill(fabs(mcdoca),rdrift);
   hist->fDr->Fill(dr);
+  hist->fStation->Fill(Hit->Station());
+  hist->fLayer->Fill(Hit->Layer());
 }
 
 //-----------------------------------------------------------------------------

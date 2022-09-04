@@ -123,6 +123,7 @@ void TStrawHitAnaModule::BookHistograms() {
   for (int i=0; i<kNStrawHitHistSets; i++) hit_selection[i] = nullptr;
 
   hit_selection[  0] = new TString("all      hits");
+  hit_selection[  1] = new TString("all      hits in events with N>=20 hits");
   hit_selection[ 10] = new TString("e+/-     hits");
   hit_selection[ 11] = new TString("e+/-     hits, P <  20 MeV/c");
   hit_selection[ 12] = new TString("e+/-     hits, P >= 20 MeV/c");
@@ -236,6 +237,9 @@ void TStrawHitAnaModule::FillHistograms() {
     int pdg_id = hit->PdgID();
 
     FillStrawHitHistograms(fHist.fStrawHit[0],hit,shp);
+
+    if (fNStrawHits >= 20) FillStrawHitHistograms(fHist.fStrawHit[1],hit,shp);
+
     if      (abs(pdg_id) ==    11) { 
       FillStrawHitHistograms(fHist.fStrawHit[ 10],hit,shp);
       if (hit->McMom() < 20) FillStrawHitHistograms(fHist.fStrawHit[ 11],hit,shp);
@@ -247,6 +251,7 @@ void TStrawHitAnaModule::FillHistograms() {
 
     if      (hit->Time(0) >  200.) FillStrawHitHistograms(fHist.fStrawHit[200],hit,shp);
     if      (hit->Time(0) >  500.) FillStrawHitHistograms(fHist.fStrawHit[500],hit,shp);
+
   }
 }
 

@@ -35,6 +35,8 @@ public:
     TH1F*    fTime;
     TH2F*    fDriftRadiusVsMcDoca;
     TH1F*    fDr;                   // drift-mcdoca
+    TH1F*    fStation;
+    TH1F*    fLayer;
   };
 
   struct EventHist_t : public HistBase_t {

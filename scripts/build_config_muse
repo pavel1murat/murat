@@ -8,7 +8,8 @@ base=$MUSE_WORK_DIR
 # echo murat::build_config_muse:000: MU2E_VERBOSE:.$MU2E_VERBOSE.
 # echo murat::build_congig_muse:001: pwd=`pwd`
 
-pushd $MUSE_WORK_DIR ; Stntuple/scripts/build_config_muse ; popd ;
+# pushd $MUSE_WORK_DIR ; Stntuple/scripts/build_config_muse murat ; popd ;
+cd $MUSE_WORK_DIR ; Stntuple/scripts/build_config_muse murat ; cd ~- ;
 #------------------------------------------------------------------------------
 # 'murat' and its subpackages, excluding Stntuple
 #------------------------------------------------------------------------------

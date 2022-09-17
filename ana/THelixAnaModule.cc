@@ -40,9 +40,9 @@ THelixAnaModule::THelixAnaModule(const char* name, const char* title):
   fPdgCode     = 11;
   fProcessCode = 2;			// conversionGun, 28:StoppedParticleReactionGun
 
-  fHelixBlockName[0]  = "HelixBlockTpr";
-  fHelixBlockName[1]  = "HelixBlockCpr";
-  fHelixBlockName[2]  = "HelixBlock";
+  fHelixBlockName[0]  = "HelixBlock";
+  // fHelixBlockName[1]  = "HelixBlockCpr";
+  // fHelixBlockName[2]  = "HelixBlock";
 
   fTrackSeedBlockName = "TrackSeedBlockName";
 }
@@ -267,20 +267,20 @@ void THelixAnaModule::BookHistograms() {
 //--------------------------------------------------------------------------------
 // book track seed histograms
 //--------------------------------------------------------------------------------
-  int book_track_seed_histset[kNTrackSeedHistSets];
-  for (int i=0; i<kNTrackSeedHistSets; ++i)  book_track_seed_histset[i] = 0;
+  // int book_track_seed_histset[kNTrackSeedHistSets];
+  // for (int i=0; i<kNTrackSeedHistSets; ++i)  book_track_seed_histset[i] = 0;
 
-  book_track_seed_histset[  0] = 1;   // all track seeds
+  // book_track_seed_histset[  0] = 1;   // all track seeds
 
-  for (int i=0; i<kNTrackSeedHistSets; i++) {
-    if (book_track_seed_histset[i] != 0) {
-      sprintf(folder_name,"tseed_%i",i);
-      fol = (TFolder*) hist_folder->FindObject(folder_name);
-      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fTrackSeed[i] = new TrackSeedHist_t;
-      BookTrackSeedHistograms(fHist.fTrackSeed[i],Form("Hist/%s",folder_name));
-    }
-  }
+  // for (int i=0; i<kNTrackSeedHistSets; i++) {
+  //   if (book_track_seed_histset[i] != 0) {
+  //     sprintf(folder_name,"tseed_%i",i);
+  //     fol = (TFolder*) hist_folder->FindObject(folder_name);
+  //     if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+  //     fHist.fTrackSeed[i] = new TrackSeedHist_t;
+  //     BookTrackSeedHistograms(fHist.fTrackSeed[i],Form("Hist/%s",folder_name));
+  //   }
+  // }
 }
 
 
@@ -546,12 +546,12 @@ void THelixAnaModule::FillHistograms() {
 //--------------------------------------------------------------------------------
 // track seed histograms
 //--------------------------------------------------------------------------------
-  TStnTrackSeed* ts;
+  // TStnTrackSeed* ts;
 
-  for (int i=0; i<fNTrackSeeds; ++i){
-    ts = fTrackSeedBlock->TrackSeed(i);
-    FillTrackSeedHistograms(fHist.fTrackSeed[0],ts);
-  }
+  // for (int i=0; i<fNTrackSeeds; ++i){
+  //   ts = fTrackSeedBlock->TrackSeed(i);
+  //   FillTrackSeedHistograms(fHist.fTrackSeed[0],ts);
+  // }
 
 }
 
@@ -578,10 +578,10 @@ int THelixAnaModule::Event(int ientry) {
   fTimeClusterBlock[0]->GetEntry(ientry);
   fTimeClusterBlock[1]->GetEntry(ientry);
 
-  fTrackSeedBlock->GetEntry(ientry);
+  //  fTrackSeedBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
   fNGenp       = fGenpBlock->NParticles();
-  fNTrackSeeds = fTrackSeedBlock->NTrackSeeds();
+  //  fNTrackSeeds = fTrackSeedBlock->NTrackSeeds();
 
   TGenParticle* genp;
   int           pdg_code, process_code;

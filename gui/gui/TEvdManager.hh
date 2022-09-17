@@ -21,6 +21,17 @@ class TExtrapolator;
 
 class TEvdManager : public TVisManager {
 public:
+					// different view types
+  enum {
+    kUndefined = -1,
+    kXY        =  1,
+    kRZ        =  2,
+    kTZ        =  3,
+    kCal       =  4,
+    kCrv       =  5,
+    kVST       =  6			// VST view
+  };
+
 //-----------------------------------------------------------------------------
 // command codes
 //-----------------------------------------------------------------------------
@@ -134,13 +145,16 @@ public:
 
   void UpdateViews();
 
-  virtual TCanvas*  NewCanvas(const char* Name,
-			      const char* Title,
-			      Int_t       SizeX,
-			      Int_t       SizeY);
 //-----------------------------------------------------------------------------
 // different views
 //-----------------------------------------------------------------------------
+  virtual TCanvas*  NewCanvas(const char* Name,
+			      const char* Title,
+			      Int_t       SizeX,
+			      Int_t       SizeY) override;
+
+  virtual int   GetViewID(const char* View) override;
+
   virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2);
 
   // Int_t   OpenTrkXYView();

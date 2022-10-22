@@ -43,15 +43,10 @@ namespace mu2e {
 
     const Tracker*  tracker = handle.get();
 
-    int             nstations, nplanes, iface, npanels, nlayers;
-    //    int             nstraws;
-
-    //    const Station*  station;
-
     const Straw* straw;
     StrawId      sid;
 
-    nstations = StrawId::_nstations; // tracker->nStations();
+    int nstations = 1; // StrawId::_nstations; // tracker->nStations();
 
     printf("Tracker N(stations): %i\n", nstations);
 
@@ -67,30 +62,30 @@ namespace mu2e {
       printf("--------------------------------------------------------------------\n");
       //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
 
-      nplanes = 2; // station->nPlanes();
+      int nplanes = 1; // 2; // station->nPlanes();
 
       for (int iplane=0; iplane<nplanes; iplane++) {
 	int ipl = nplanes*ist+iplane;
 
 	const Plane* plane = &tracker->getPlane(ipl);
 
-	npanels = plane->nPanels();
+	int npanels = plane->nPanels();
 
 	for (int ipanel=0; ipanel<npanels; ipanel++) {
 
 	  const Panel* panel = &plane->getPanel(ipanel);
 
-	  iface   = ipanel%2;
-	  nlayers = panel->nLayers();
+	  int iface   = ipanel%2;
+	  // nlayers = panel->nLayers();
 
-	  for (int il=0; il<nlayers; il++) {
+	  // for (int il=0; il<nlayers; il++) {
 	    //	    const Layer* lay = &panel->getLayer(il);
 	      
-	    // nstraws = zl->nStraws();
+	  int nstraws = panel->nStraws();
 
-	    // 	      for (int is=0; is<nstraws; is++) {
-	    int is = 0;
-	    straw       = &panel->getStraw(il);
+	  for (int is=0; is<nstraws; is++) {
+	    int il = is % 2;
+	    straw       = &panel->getStraw(is);
 	    sid         = straw->id();
 	    
 	    double x    = straw->getMidPoint().x();  

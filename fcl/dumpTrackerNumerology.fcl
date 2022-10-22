@@ -3,11 +3,11 @@
 # Print some information about the TTracker.
 #
 ###############################################################################
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
 
-#include "Stntuple/fcl/stnmaker.fcl"
+#include "Stntuple/fcl/stntuple.fcl"
 
 process_name : dump
 

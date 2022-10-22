@@ -458,7 +458,7 @@ void TStrawHitAnaModule::PrintStrawHit(TStrawHit* Hit, StrawHitPar_t* Shp, const
     }
   }
 
-  printf("%6i %6i %6i %5i %5i %10.3f %10i %10i %8i %8i %9.3f %10i %5i %9.3f %12.3e\n",
+  printf("%6i %9.3f %9.3f %5.1f %5.1f %10.3f %10i %10i %8i %8i %9.3f %10i %5i %9.3f %12.3e\n",
 	 Hit->StrawID(), 
 	 Hit->Time(0),
 	 Hit->Time(1),

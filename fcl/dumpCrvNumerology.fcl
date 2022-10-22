@@ -2,14 +2,15 @@
 #
 # Print CRV geometry
 #
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
+
 BEGIN_PROLOG
   TRIGGER_PATHS @protect_ignore: []
 END_PROLOG
 
-#include "Stntuple/fcl/stnmaker.fcl"
+#include "Stntuple/fcl/stntuple.fcl"
 
 source       : { module_type : EmptyEvent }
 

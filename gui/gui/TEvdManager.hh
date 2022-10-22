@@ -155,9 +155,10 @@ public:
 
   virtual int   GetViewID(const char* View) override;
 
-  virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2);
+  virtual void  OpenView(const char* View) override;
+  virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2) override;
 
-  // Int_t   OpenTrkXYView();
+  Int_t   OpenTrkXYView();
   Int_t   OpenTrkXYView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);
   
   Int_t   OpenTrkTZView();
@@ -165,6 +166,6 @@ public:
   
   void    CloseWindow();
 
-  ClassDef(TEvdManager, 0)
+  //  ClassDef(TEvdManager, 0)
 };
 #endif

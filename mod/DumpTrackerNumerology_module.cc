@@ -46,13 +46,13 @@ namespace mu2e {
     const Straw* straw;
     StrawId      sid;
 
-    int nstations = 1; // StrawId::_nstations; // tracker->nStations();
+    int nstations = StrawId::_nstations ; 
 
     printf("Tracker N(stations): %i\n", nstations);
-
+//-----------------------------------------------------------------------------
+// station as a concept doesn't exist in the Mu2e offline software
+//-----------------------------------------------------------------------------
     for (int ist=0; ist<nstations; ist++) {
-
-      //      station = &tracker->getStations().at(ist);
 
       printf("---------------------------------------------------------------------------------");
       printf("--------------------------------------------------------------------\n");
@@ -62,7 +62,7 @@ namespace mu2e {
       printf("--------------------------------------------------------------------\n");
       //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
 
-      int nplanes = 1; // 2; // station->nPlanes();
+      int nplanes = 2; 
 
       for (int iplane=0; iplane<nplanes; iplane++) {
 	int ipl = nplanes*ist+iplane;

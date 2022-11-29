@@ -56,7 +56,6 @@ TComboHitVisNode::TComboHitVisNode(const char* Name, HitData_t* Data): TStnVisNo
   fTimeWindow = 1.e6;
 
   fListOfHits  = new TObjArray();
-  //  fTimeCluster = NULL;
 }
 
 //_____________________________________________________________________________

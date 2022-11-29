@@ -42,8 +42,6 @@ TEvdManager::TEvdManager(const char* Name, const char* Title): TVisManager(Name,
   fTMin       = 0;
   fTMax       = 1.e5;
 
-  fTimeCluster = -1;
-
   //  fTitleNode
 }
 
@@ -517,14 +515,4 @@ void TEvdManager::CloseWindow() {
 
   delete this;
 }
-
-
-// void TEvdManager::SetStations(int IMin, int IMax) {
-//   fMinStation = IMin;
-//   fMaxStation = IMax;
-// }
-
-// void TEvdManager::SetTimeCluster(int I) {
-//   fTimeCluster = I;
-// }
 

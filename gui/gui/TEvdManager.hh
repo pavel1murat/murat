@@ -90,7 +90,6 @@ protected:
 
   int                 fMinStation;
   int                 fMaxStation;
-  int                 fTimeCluster;
   int                 fDebugLevel;
 
   float               fTMin;
@@ -126,7 +125,6 @@ public:
   
   int    MinStation() { return fMinStation; }
   int    MaxStation() { return fMaxStation; }
-  int    TimeCluster() { return fTimeCluster; }
 
   double TMin() { return fTMin; }
   double TMax() { return fTMax; }

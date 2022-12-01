@@ -2,10 +2,6 @@
 #
 # Print CRV geometry
 #
-#include "Offline/fcl/minimalMessageService.fcl"
-#include "Offline/fcl/standardProducers.fcl"
-#include "Offline/fcl/standardServices.fcl"
-
 BEGIN_PROLOG
   TRIGGER_PATHS @protect_ignore: []
 END_PROLOG
@@ -14,13 +10,12 @@ END_PROLOG
 
 source       : { module_type : EmptyEvent }
 
-physics : { @table::Stntuple.physics 
+physics : { 
   analyzers :  {
     DumpCrvNumerology : { module_type : DumpCrvNumerology }
   }
 
-  e1         : [DumpCrvNumerology]
-
-  end_paths  : [e1]
+  e1         : [ DumpCrvNumerology ]
+  end_paths  : [ e1 ]
 }
 

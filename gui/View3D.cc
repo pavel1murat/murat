@@ -17,18 +17,20 @@ ClassImp(View3D);
 
 //-----------------------------------------------------------------------------
 View3D::View3D() : TObject() {
-
+  const char* mu2e_subproject_dir = "/mu2e/app/users/murat/subprojects";
   InitGeometry();
 
 /*  mu2egpvm* :
-  /mu2e/data/users/murat/su2020/subprojects/crv_satellite_peak/cry32s41b0_trajectories:
+  /mu2e/app/users/murat/subprojects/su2020/crv_satellite_peak/cry32s41b0_trajectories:
   total used in directory 13408 available 5142859264
   drwxr-sr-x  2 murat mu2e 34816 May 22  2021 .
   drwxr-sr-x 13 murat mu2e  4096 Jun 27  2021 ..
   -rw-r--r--  1 murat mu2e  5368 May 22  2021 1002_000331_369087.txt
   -rw-r--r--  1 murat mu2e 37820 May 22  2021 1002_000404_096896.txt
 */
-  ReadTrajectories("/projects/mu2e/app/users/murat/subprojects/su2020/crv_satellite_peak/cry32s41b0_trajectories");
+  const char* sp_dir = gEnv->GetValue("muse.SubprojectDir",mu2e_subproject_dir);
+  TString dir = Form("%s/su2020/crv_satellite_peak/cry32s41b0_trajectories",sp_dir);
+  ReadTrajectories(dir.Data());
   
   double x0[3] = { -390.4, 0., 500.};
   double v [3] = { 200,  800,  250};

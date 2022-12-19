@@ -150,10 +150,10 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
-    virtual void     beginJob();
-    virtual void     beginRun(const art::Run& );
-    virtual void     endJob  ();
-    virtual void     analyzer(const art::Event& Evt);
+    virtual void     beginJob()                      override;
+    virtual void     beginRun(const art::Run& )      override;;
+    virtual void     endJob  ()                      override;
+    virtual void     analyze (const art::Event& Evt) override;
   };
 
 
@@ -297,8 +297,8 @@ namespace mu2e {
 
 
   //-----------------------------------------------------------------------------
-  void TrackerMCCheck::analyzer(const art::Event& Evt) {
-    const char* oname = "TrackerMCCheck::filter";
+  void TrackerMCCheck::analyze(const art::Event& Evt) {
+    const char* oname = "TrackerMCCheck::analyzer";
 
     printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
 
@@ -306,7 +306,6 @@ namespace mu2e {
 // get event data and initialize data blocks
 //-----------------------------------------------------------------------------
     getData(&Evt);
-
 //-----------------------------------------------------------------------------
 // particle parameters at virtual detectors
 //-----------------------------------------------------------------------------
@@ -360,8 +359,6 @@ namespace mu2e {
       }
     }
 
-
-
     if      (DebugBit(3)) Debug_003();
     else if (DebugBit(4)) Debug_004();
 
@@ -376,12 +373,13 @@ namespace mu2e {
     int                    gen_code; //, sim_id;
 
     const mu2e::ComboHit           *hit (nullptr);
-    const mu2e::StepPointMC        *step(nullptr); 
 
     static const double MIN_PITCH = 1;
     static const double MAX_PITCH = sqrt(3);
 
     nhits = fStrawHitColl->size();
+
+    printf(" ---- Debug_04 nhits : %4i\n",nhits);
 
     fHist.fNStrawHits[0]->Fill(nhits);
     fHist.fNStrawHits[1]->Fill(nhits);
@@ -390,34 +388,29 @@ namespace mu2e {
 
     for (int i=0;  i<nhits;  i++) {
 
-      const mu2e::StrawDigiMC* mcdigi = &_mcdigis->at(i);
+      const mu2e::StrawDigiMC* sdmc = &_mcdigis->at(i);
 
-      if (mcdigi->wireEndTime(mu2e::StrawEnd::cal) < mcdigi->wireEndTime(mu2e::StrawEnd::hv)) {
-	// thanks Dave ... step = mcdigi->stepPointMC(mu2e::StrawEnd::cal).get();
-      }
-      else {
-	// thanks Dave ... step = mcdigi->stepPointMC(mu2e::StrawEnd::hv ).get();
-      }
+      const StrawGasStep* sgs = sdmc->earlyStrawGasStep().get();
 
       nsteps_per_hit = 1.;
     
       hit   = &fStrawHitColl->at(i);
 
-      if (step) {
-	art::Ptr<mu2e::SimParticle> const& simptr = step->simParticle(); 
-	art::Ptr<mu2e::SimParticle> mother = simptr;
-	while(mother->hasParent())  mother = mother->parent();
-	const mu2e::SimParticle *   sim    = mother.operator ->();
+      if (sgs) {
+	// art::Ptr<mu2e::SimParticle> const& simptr = sgs->simParticle(); 
+	// art::Ptr<mu2e::SimParticle> mother = simptr;
+	// while(mother->hasParent())  mother = mother->parent();
+	const mu2e::SimParticle *   sim    = sgs->simParticle().get(); // mother.operator ->();
       
-	p             = step->momentum().mag();
+	p             = sgs->momentum().R();
 	ehit          = hit->energyDep();
-	pdg_id        = simptr->pdgId();
-	mother_pdg_id = sim->pdgId();
+	pdg_id        = sim->pdgId();
+	mother_pdg_id = pdg_id; // sim->pdgId();
 	dt            = -99.; // undefined now // hit->dt();
 	//      sim_id        = simptr->id().asInt();
 
-	if (simptr->fromGenerator()) gen_code = simptr->genParticle()->generatorId().id();
-	else                         gen_code = -1;
+	if (sim->fromGenerator()) gen_code = sim->genParticle()->generatorId().id();
+	else                      gen_code = -1;
 
 	if ((pdg_id == fPdgCode) && (gen_code == fGeneratorCode)) {
 	  nhits_ce += 1;
@@ -478,7 +471,7 @@ namespace mu2e {
 	fHist.fMomMu->Fill(p);
       }
       else if (pdg_id ==1000010020) {
-					// protons
+					// deuterons
 	fHist.fEHitDeut->Fill(ehit);
 	//	fHist.fEHitMuVsPath->Fill(path,ehit);
 	fHist.fMomDeut->Fill(p);

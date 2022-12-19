@@ -76,6 +76,7 @@ murat : {
 # track reco validation
 #------------------------------------------------------------------------------
     TrackerMCCheck                   : { module_type:TrackerMCCheck # the class name
+
 	g4ModuleLabel                : g4run
 	strawHitCollTag              : makeSH
 	strawDigiMCCollTag           : compressDigiMCs # could've been "makeSD"

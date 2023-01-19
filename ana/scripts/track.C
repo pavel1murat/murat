@@ -25,7 +25,7 @@ def_name track_100  ("track_anaB");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  track_ana(const char* TrackBlockName = "TrackBlockPar", int PdgCode = 11, int MCProcessCode = 2, int DebugBit = -1) {
+void  track_ana(const char* TrackBlockName = "TrackBlock", int PdgCode = 11, int MCProcessCode = 2, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------

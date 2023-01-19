@@ -8,6 +8,14 @@ FlagStrawHits_maximumEnergy: 0.005
 
 murat : { 
 
+#------------------------------------------------------------------------------
+    ComboHitSorter : { module_type : ComboHitSorter
+        chCollTag                                   : "makePH"
+        chfCollTag                                  : "FlagBkgHits:ComboHits"
+        sdmcCollTag                                 : "compressDigiMCs"
+        debugLevel                                  : 0
+    }
+
     FilterEcalMVATrigger: { module_type : FilterEcalMVATrigger
 	diagLevel              : 2
 	MVAMethod              : BDT
@@ -134,7 +142,8 @@ murat : {
 # final definition of the table 'murat'
 #------------------------------------------------------------------------------
 murat : { @table::murat 
-    producers : {}
+    producers : {
+    }
 
     filters : {
 	TrackerMCCheck   : { @table::murat.TrackerMCCheck   }
@@ -145,6 +154,7 @@ murat : { @table::murat
     analyzers : { 
 	DumpEventNumber    : { @table::murat.DumpEventNumber    }
 	DumpMCTrajectories : { @table::murat.DumpMCTrajectories }
+        ComboHitSorter     : { @table::murat.ComboHitSorter     }
     }
 }
 END_PROLOG

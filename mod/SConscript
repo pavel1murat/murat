@@ -31,6 +31,7 @@ def local_build():
 
                   'Stntuple_val',
 #
+                  'mu2e_CalPatRec',
                   'mu2e_TrkReco',
                   'mu2e_TrkHitReco',
                   'mu2e_TrackerConditions',

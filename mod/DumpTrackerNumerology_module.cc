@@ -47,65 +47,57 @@ namespace mu2e {
     StrawId      sid;
 
     int nstations = StrawId::_nstations ; 
+    int nplanes   = StrawId::_nplanes   ; 
 
     printf("Tracker N(stations): %i\n", nstations);
 //-----------------------------------------------------------------------------
 // station as a concept doesn't exist in the Mu2e offline software
+// so loop over planels
 //-----------------------------------------------------------------------------
-    for (int ist=0; ist<nstations; ist++) {
+    for (int ipl=0; ipl<nplanes; ipl++) {
 
-      printf("---------------------------------------------------------------------------------");
-      printf("--------------------------------------------------------------------\n");
-      printf(" Station Plane Face Panel Layer Straw  StrawID   R(straw)  X(straw)");
-      printf("  Y(straw)   Z(straw)   Rho(straw)     L/2       phi    wireNx   wireNy\n"); 
-      printf("---------------------------------------------------------------------------------");
-      printf("--------------------------------------------------------------------\n");
-      //      printf("Station ID = %2i Z = %10.3f nsectors = %3i\n",dev.id(), dev.origin().z(),dev.nSectors());
+      const Plane* plane = &tracker->getPlane(ipl);
+      int iplane = plane->getPanel(0).getStraw(0).id().plane();
+      int ist = iplane/2;
 
-      int nplanes = 2; 
+      int npanels = plane->nPanels();
 
-      for (int iplane=0; iplane<nplanes; iplane++) {
-	int ipl = nplanes*ist+iplane;
+      for (int ipanel=0; ipanel<npanels; ipanel++) {
 
-	const Plane* plane = &tracker->getPlane(ipl);
+        printf("---------------------------------------------------------------");
+        printf("-----------------------------------------------------------------------\n");
+        printf("Station Plane Face Panel Layer Straw StrawID R(straw)  X(straw)");
+        printf("   Y(straw)   Z(straw)  Rho(straw)     L/2       phi    wireNx   wireNy\n"); 
+        printf("---------------------------------------------------------------");
+        printf("-----------------------------------------------------------------------\n");
 
-	int npanels = plane->nPanels();
+        const Panel* panel = &plane->getPanel(ipanel);
 
-	for (int ipanel=0; ipanel<npanels; ipanel++) {
+        int iface   = panel->getStraw(0).id().face();
+        int nstraws = panel->nStraws();
 
-	  const Panel* panel = &plane->getPanel(ipanel);
-
-	  int iface   = ipanel%2;
-	  // nlayers = panel->nLayers();
-
-	  // for (int il=0; il<nlayers; il++) {
-	    //	    const Layer* lay = &panel->getLayer(il);
-	      
-	  int nstraws = panel->nStraws();
-
-	  for (int is=0; is<nstraws; is++) {
-	    int il = is % 2;
-	    straw       = &panel->getStraw(is);
-	    sid         = straw->id();
+        for (int is=0; is<nstraws; is++) {
+          int il = is % 2;
+          straw       = &panel->getStraw(is);
+          sid         = straw->id();
 	    
-	    double x    = straw->getMidPoint().x();  
-	    double y    = straw->getMidPoint().y();  
-	    double rho  = sqrt(x*x+y*y);
+          double x    = straw->getMidPoint().x();  
+          double y    = straw->getMidPoint().y();  
+          double rho  = sqrt(x*x+y*y);
 
-	    double phi  = straw->direction().phi();
-	    double nx   = straw->direction().x();
-	    double ny   = straw->direction().y();
+          double phi  = straw->direction().phi();
+          double nx   = straw->direction().x();
+          double ny   = straw->direction().y();
 	    
-	    double z    = straw->getMidPoint().z();  
-	    double hl   = straw->halfLength();
-	    double r    = tracker->strawProperties()._strawOuterRadius;;
+          double z    = straw->getMidPoint().z();  
+          double hl   = straw->halfLength();
+          double r    = tracker->strawProperties()._strawOuterRadius;;
 	    
-	    double phi1 = phi/M_PI*180.;
-	    printf("  %3i %6i %5i %4i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
-		   ist,iplane,iface, ipanel,
-		   il,is, straw->id().asUint16(),r,x,y,z,rho, hl,phi1,nx,ny);
-	  }
-	}
+          double phi1 = phi/M_PI*180.;
+          printf(" %3i %6i %5i %4i %5i %5i %8i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
+                 ist,iplane,iface, ipanel,
+                 il,is, straw->id().asUint16(),r,x,y,z,rho, hl,phi1,nx,ny);
+        }
       }
     }
   }

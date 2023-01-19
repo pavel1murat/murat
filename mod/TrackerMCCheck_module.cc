@@ -367,7 +367,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   void TrackerMCCheck::Debug_004() {
 
-    float                  dt, p, ehit(-1.), wpos, errpos;
+    float                  dt, p(-1.), ehit(-1.), wpos, errpos;
 
     int                    nhits, nhits_ce, pdg_id(-1), mother_pdg_id, nsteps_per_hit;
     int                    gen_code; //, sim_id;

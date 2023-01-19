@@ -1,0 +1,48 @@
+# -*- mode:tcl -*-
+# variables which need defaults:
+# -----------------------------
+# :DEFAULT: TRIGGER_PATH=p6
+#------------------------------------------------------------------------------
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
+BEGIN_PROLOG
+  INPUT_MODULE  @protect_ignore: RootInput        # choices: EmptyEvent / RootInput
+  TRIGGER_PATH  @protect_ignore: [ p1       ]     # defined below
+END_PROLOG
+
+#include "murat/fcl/prolog.fcl"
+
+#include "Stntuple/fcl/stntuple.fcl"
+
+process_name : TestDeltaFinder
+
+physics : {
+
+    producers : { @table::Reconstruction.producers }
+
+    filters   : { @table::Reconstruction.filters   }
+    analyzers : { 
+        @table::stntuple.analyzers       
+        @table::murat.analyzers       
+    }
+
+    p1: [ @sequence::TrkHitReco.PrepareHits ]
+
+    trigger_paths : [ @sequence::TRIGGER_PATH ]
+
+    e1            : [ ComboHitSorter ] ## MuHitDisplay  ] # defaultOutput ]
+    end_paths     : [ e1             ]
+}
+
+physics.analyzers.ComboHitSorter.debugLevel : 0 ## 1
+#------------------------------------------------------------------------------
+# uncomment to write the DST out
+#------------------------------------------------------------------------------
+# physics.out : [detectorOutput]
+# outputs.detectorOutput.fileName           : "sim.murat.bbb.ccc.read_reco_stn_tcn.art"
+services.TFileService.fileName            : "comboHitSorter_test.root"
+source.fileNames   : [ "/mu2e/data2/users/murat/datasets/mdc2020/CeEndpointMix2BBSignal/dig.mu2e.CeEndpointMix2BBSignal.MDC2020r_perfect_v1_0.001210_00000000.art" ]
+#------------------------------------------------------------------------------
+# everything below is appended by murat/scripts/submit_mu2e_job
+#------------------------------------------------------------------------------

@@ -27,7 +27,7 @@
 // 37  : TRK_26 LLHR_CAL > 5
 // 38  : EVT_7: events with E_CL > 60 and no CalPatRec tracks and TrkPatRec
 // 39  : trk_1: events with |SIN_TC| > 0.6
-// 40  : EVT_7: events with E_CL > 60 and no tracks at all
+// 40  : trk_0: events with P > 60 MeV/c
 //
 // 3 different ID : 
 ///////////////////////////////////////////////////////////////////////////////
@@ -638,13 +638,6 @@ void TTrackAnaModule::FillHistograms() {
     if (GetDebugBit(38)) {
       if ((fNCalPatRec <= 0) && (fNTracks[0] > 0)) {
 	GetHeaderBlock()->Print(Form(" bit:038 cl_e = %10.3f, cl_time = %10.3f fNCalPatRec = 0",cl_e,cl0->Time()));
-      }
-    }
-
-    if (GetDebugBit(40)) {
-      if (fNTracks[0] <= 0) {
-	GetHeaderBlock()->Print(Form(" bit:040 cl_e = %10.3f, cl_time = %10.3f fNTracks[0] = %3i",
-				     cl_e,cl0->Time(),fNTracks[0]));
       }
     }
   }
@@ -1284,6 +1277,12 @@ void TTrackAnaModule::Debug() {
 	  GetHeaderBlock()->Print(Form("bit:010 e = %10.3f p = %10.3f",
 				       ecl,trk->fP));
 	}
+      }
+    }
+
+    if (GetDebugBit(40)) {
+      if (trk->fP < 60) {
+	GetHeaderBlock()->Print(Form(" bit:040 trk->fP = %10.3f",trk->fP));
       }
     }
   }

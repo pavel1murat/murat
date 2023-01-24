@@ -894,8 +894,8 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 //-----------------------------------------------------------------------------
 // momentum corrections for KPAR and KDAR
 //-----------------------------------------------------------------------------
-  const double kMomentumCorr[2] = { 0.034 , 0.030 } ; // SU2020 // CD3: { 0.049, 0.020 };
-  const double kDtTcmCorr   [2] = { 0.    , 0.    } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
+  const double kMomentumCorr[2] = { 0.0 , 0.0 } ; // SU2020 // CD3: { 0.049, 0.020 };
+  const double kDtTcmCorr   [2] = { 0.  , 0.  } ; // { 0.22 , -0.30 }; // ns, sign: fit peak positions
 //-----------------------------------------------------------------------------
 // loop over tracks
 //-----------------------------------------------------------------------------
@@ -904,7 +904,8 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
   for (int itrk=0; itrk<ntrk; itrk++) {
     TrackPar_t*   tp = TrackPar+itrk;
     TStnTrack* track = TrackBlock->Track(itrk);
-    int fit_type     = tp->fFitType;
+    //    int fit_type     = tp->fFitType;
+    int fit_type = 0;
 //-----------------------------------------------------------------------------
 // process hit masks
 //-----------------------------------------------------------------------------

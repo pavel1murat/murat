@@ -1069,6 +1069,8 @@ int TTrackAnaModule::Event(int ientry) {
   fEvtPar.fNCrvClusters     = -1;
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
+  fEvtPar.fNStrawHits       = GetHeaderBlock()->NStrawHits();
+  fEvtPar.fNComboHits       = GetHeaderBlock()->NComboHits();
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
   fEvtPar.fParticle         = NULL;
   fEvtPar.fPartE            = -1.;

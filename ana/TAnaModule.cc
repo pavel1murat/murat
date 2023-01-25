@@ -286,6 +286,49 @@ void TAnaModule::BookCrvPulseHistograms   (CrvPulseHist_t*   Hist, const char* F
 }
 
 //-----------------------------------------------------------------------------
+void TAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+  //  char name [200];
+  //  char title[200];
+
+  HBook1F(Hist->fEventWeight[0],"eventweight_0" ,Form("%s: Event Weight"            ,Folder), 100, -1.,   2.,Folder);
+  HBook1F(Hist->fEventWeight[1],"eventweight_1" ,Form("%s: Log10(Event Weight)"     ,Folder), 100,-15.,   5.,Folder);
+  HBook1F(Hist->fEventE        ,"event_energy"  ,Form("%s: Relevant Event Energy"   ,Folder), 400,  0., 200.,Folder);
+  HBook1F(Hist->fInstLumi[0]   ,"inst_lumi_0"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(Hist->fInstLumi[1]   ,"inst_lumi_1"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(Hist->fInstLumi[2]   ,"inst_lumi_2"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(Hist->fBatchWeight[0],"batchweight_0" ,Form("%s: Log10(One Batch Weight)" ,Folder), 100, -20., 2.,Folder);
+  HBook1F(Hist->fBatchWeight[1],"batchweight_1" ,Form("%s: Log10(Two Batch Weight)" ,Folder), 100, -20., 2.,Folder);
+
+  HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
+  HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
+  HBook1D(Hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
+  HBook1F(Hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
+  HBook1F(Hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
+  //  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
+  HBook1F(Hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
+  HBook1F(Hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
+  HBook1F(Hist->fNShTot[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
+  HBook1F(Hist->fNShTot[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),500,0,10000,Folder);
+  HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
+  HBook1F(Hist->fNChTot[0],"nch_0" ,Form("%s: Number of Combo Hits [0]"        ,Folder),250,0,250,Folder);
+  HBook1F(Hist->fNChTot[1],"nch_1" ,Form("%s: Number of Combo Hits [1]"        ,Folder),500,0,10000,Folder);
+  HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
+  HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
+  HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
+  HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
+  HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
+  HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
+  HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
+  HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
+
+  HBook1F(Hist->fNCrvClusters    ,"ncrvcl"  ,Form("%s: N(CRV Clusters)"                 ,Folder),100,0,  100,Folder);
+  HBook1F(Hist->fNCrvCoincidences[0],"ncrvco_0"  ,Form("%s: N(CRV coincidences)[0]"     ,Folder),200,0, 1000,Folder);
+  HBook1F(Hist->fNCrvCoincidences[1],"ncrvco_1"  ,Form("%s: N(CRV coincidences)[1]"     ,Folder),200,0,  200,Folder);
+  HBook1F(Hist->fNCrvPulses[0]   ,"ncrvp_0" ,Form("%s: N(CRV pulses)[0]"                ,Folder),500,0,10000,Folder);
+  HBook1F(Hist->fNCrvPulses[1]   ,"ncrvp_1" ,Form("%s: N(CRV pulses)[1]"                ,Folder),500,0,  500,Folder);
+}
+
+//-----------------------------------------------------------------------------
 void TAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
@@ -432,47 +475,6 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 // PID histograms
 //-----------------------------------------------------------------------------
   HBook1F(Hist->fPidMvaOut  ,"pidmvaout",Form("%s:PID MVA output"     ,Folder), 200, -0.5, 1.5,Folder);
-}
-
-//-----------------------------------------------------------------------------
-void TAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
-  //  char name [200];
-  //  char title[200];
-
-  HBook1F(Hist->fEventWeight[0],"eventweight_0" ,Form("%s: Event Weight"            ,Folder), 100, -1.,   2.,Folder);
-  HBook1F(Hist->fEventWeight[1],"eventweight_1" ,Form("%s: Log10(Event Weight)"     ,Folder), 100,-15.,   5.,Folder);
-  HBook1F(Hist->fEventE        ,"event_energy"  ,Form("%s: Relevant Event Energy"   ,Folder), 400,  0., 200.,Folder);
-  HBook1F(Hist->fInstLumi[0]   ,"inst_lumi_0"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
-  HBook1F(Hist->fInstLumi[1]   ,"inst_lumi_1"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
-  HBook1F(Hist->fInstLumi[2]   ,"inst_lumi_2"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
-  HBook1F(Hist->fBatchWeight[0],"batchweight_0" ,Form("%s: Log10(One Batch Weight)" ,Folder), 100, -20., 2.,Folder);
-  HBook1F(Hist->fBatchWeight[1],"batchweight_1" ,Form("%s: Log10(Two Batch Weight)" ,Folder), 100, -20., 2.,Folder);
-
-  HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
-  HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
-  HBook1D(Hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
-  HBook1F(Hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
-  HBook1F(Hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
-  //  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
-  HBook1F(Hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNShTot[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
-  HBook1F(Hist->fNShTot[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),250,0,5000,Folder);
-  HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
-  HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
-  HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
-  HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
-  HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
-  HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
-
-  HBook1F(Hist->fNCrvClusters    ,"ncrvcl"  ,Form("%s: N(CRV Clusters)"                 ,Folder),100,0,  100,Folder);
-  HBook1F(Hist->fNCrvCoincidences[0],"ncrvco_0"  ,Form("%s: N(CRV coincidences)[0]"     ,Folder),200,0, 1000,Folder);
-  HBook1F(Hist->fNCrvCoincidences[1],"ncrvco_1"  ,Form("%s: N(CRV coincidences)[1]"     ,Folder),200,0,  200,Folder);
-  HBook1F(Hist->fNCrvPulses[0]   ,"ncrvp_0" ,Form("%s: N(CRV pulses)[0]"                ,Folder),500,0,10000,Folder);
-  HBook1F(Hist->fNCrvPulses[1]   ,"ncrvp_1" ,Form("%s: N(CRV pulses)[1]"                ,Folder),500,0,  500,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -631,6 +633,9 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
   Hist->fNTracks[1]->Fill  (Evp->fNTracks[1]);
   Hist->fNShTot[0]->Fill(Evp->fNStrawHits);
   Hist->fNShTot[1]->Fill(Evp->fNStrawHits);
+
+  Hist->fNChTot[0]->Fill(Evp->fNComboHits);
+  Hist->fNChTot[1]->Fill(Evp->fNComboHits);
 
   double emax   = -1;
   double dt     = 9999.;

@@ -1,12 +1,7 @@
 # -*- mode: tcl -*-
 #
-# Print some information about the TTracker.
-#
+# print tracker geometry constants
 ###############################################################################
-#include "Offline/fcl/minimalMessageService.fcl"
-#include "Offline/fcl/standardProducers.fcl"
-#include "Offline/fcl/standardServices.fcl"
-
 #include "Stntuple/fcl/stntuple.fcl"
 
 process_name : dump
@@ -15,7 +10,9 @@ source  : { module_type : EmptyEvent }
 
 physics : {
   analyzers :  {
-    DumpTrackerNumerology : { module_type : DumpTrackerNumerology }
+    DumpTrackerNumerology : { module_type : DumpTrackerNumerology 
+        diagLevel : 0
+    }
   }
 
   e1         : [DumpTrackerNumerology]

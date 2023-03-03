@@ -3,8 +3,8 @@
 //
 // Tmp(0) : corrected momentum at the tracker front - not yet
 // 
-// use of debug bits: bits 0-2 are reserved
-//  0  : all events
+// use of debug bits: 
+//  0  : one line per track
 //  1  : passed events
 //  2  : rejected events
 // 
@@ -58,7 +58,7 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TTrackAnaModule::TTrackAnaModule(const char* name, const char* title): TAnaModule(name,title)
 {
-  fTrackBlockName         = "TrackBlockPar";
+  fTrackBlockName         = "TrackBlock";
   fTrackStrawHitBlockName = "TrackStrawHitBlock";
   fTrackNumber.Set(100);
 
@@ -105,12 +105,15 @@ int TTrackAnaModule::BeginJob() {
   RegisterDataBlock(fTrackBlockName.Data()        ,"TStnTrackBlock"     ,&fTrackBlock  );
   RegisterDataBlock(fTrackStrawHitBlockName.Data(),"TTrackStrawHitBlock",&fTrackStrawHitBlock);
 
-  RegisterDataBlock("ClusterBlock"        ,"TStnClusterBlock" ,&fClusterBlock);
-  RegisterDataBlock("CalDataBlock"        ,"TCalDataBlock"    ,&fCalDataBlock);
-  RegisterDataBlock("StrawHitBlock"       ,"TStrawHitBlock"   ,&fStrawHitBlock);
-  RegisterDataBlock("GenpBlock"           ,"TGenpBlock"       ,&fGenpBlock);
-  RegisterDataBlock("SimpBlock"           ,"TSimpBlock"       ,&fSimpBlock);
-  RegisterDataBlock("SpmcBlockVDet"       ,"TStepPointMCBlock",&fVDetBlock);
+  RegisterDataBlock("KSFBlock"     ,"TStnTrackSeedBlock",&fTrackSeedBlock);
+  RegisterDataBlock("HelixBlock"   ,"TStnHelixBlock"    ,&fHelixBlock    );
+
+  RegisterDataBlock("ClusterBlock" ,"TStnClusterBlock" ,&fClusterBlock );
+  RegisterDataBlock("CalDataBlock" ,"TCalDataBlock"    ,&fCalDataBlock );
+  RegisterDataBlock("StrawHitBlock","TStrawHitBlock"   ,&fStrawHitBlock);
+  RegisterDataBlock("GenpBlock"    ,"TGenpBlock"       ,&fGenpBlock    );
+  RegisterDataBlock("SimpBlock"    ,"TSimpBlock"       ,&fSimpBlock    );
+  RegisterDataBlock("SpmcBlockVDet","TStepPointMCBlock",&fVDetBlock    );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -242,6 +245,25 @@ void TTrackAnaModule::BookHistograms() {
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
       fHist.fEvent[i] = new EventHist_t;
       BookEventHistograms(fHist.fEvent[i],Form("Hist/%s",folder_name));
+    }
+  }
+//-----------------------------------------------------------------------------
+// book helix histograms
+//-----------------------------------------------------------------------------
+  int book_helix_histset[kNHelixHistSets];
+  for (int i=0; i<kNHelixHistSets; i++) book_helix_histset[i] = 0;
+
+  book_helix_histset[ 0] = 1;		// all events
+  book_helix_histset[ 1] = 1;		// events with N(reconstructed tracks) > 0
+  book_helix_histset[ 2] = 1;		// helices with a TrackSeed
+
+  for (int i=0; i<kNHelixHistSets; i++) {
+    if (book_helix_histset[i] != 0) {
+      sprintf(folder_name,"hel_%i",i);
+      fol = (TFolder*) hist_folder->FindObject(folder_name);
+      if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+      fHist.fHelix[i] = new HelixHist_t;
+      BookHelixHistograms(fHist.fHelix[i],Form("Hist/%s",folder_name));
     }
   }
 //-----------------------------------------------------------------------------
@@ -654,6 +676,19 @@ void TTrackAnaModule::FillHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
+// helix histograms
+// HEL_0: all
+// HEL_1: helices in events with reconstructed tracks
+//-----------------------------------------------------------------------------
+  int nhel = fHelixBlock->NHelices();
+  for (int i=0; i<nhel; i++) {
+    TStnHelix*  hel = fHelixBlock->Helix(i);
+    HelixPar_t* hp  = fHelixPar+i;
+    FillHelixHistograms(fHist.fHelix[0],hel,hp);
+    if (fNTracks[0] > 0) FillHelixHistograms(fHist.fHelix[1],hel,hp);
+    if (hel->fTrackSeedIndex >= 0) FillHelixHistograms(fHist.fHelix[2],hel,hp);
+  }
+//-----------------------------------------------------------------------------
 // Simp histograms
 //-----------------------------------------------------------------------------
   if (fSimp) {
@@ -1052,6 +1087,8 @@ int TTrackAnaModule::Event(int ientry) {
   TDiskCalorimeter::GeomData_t disk_geom;
 
   fTrackBlock->GetEntry(ientry);
+  fTrackSeedBlock->GetEntry(ientry);
+  fHelixBlock->GetEntry(ientry);
   fTrackStrawHitBlock->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
   fStrawHitBlock->GetEntry(ientry);
@@ -1225,8 +1262,7 @@ void TTrackAnaModule::Debug() {
 // bit 0: all tracks
 //-----------------------------------------------------------------------------
     if (GetDebugBit(0) == 1) {
-	GetHeaderBlock()->Print(Form("bit_000: All p = %10.3f",
-				     trk->Momentum()->P()));
+      GetHeaderBlock()->Print(Form("bit_000: All p = %10.3f",trk->Momentum()->P()));
     }
 //-----------------------------------------------------------------------------
 // bit 1: IDWord =0 0 tracks

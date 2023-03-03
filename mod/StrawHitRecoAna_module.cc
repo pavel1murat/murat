@@ -5,12 +5,6 @@
 // this module doesn't do reconstruction
 // on input, it takes a list  of StrawHitFlags flags and evaluates performance
 // of the delta electron tagging
-//
-// hit type = 0 : proton
-//            1 : ele 0 < p < 20
-//            2 : ele 20 < p < 90
-//            3 : ele 90 < p < 110
-//            4 : everything else
 //////////////////////////////////////////////////////////////////////////////
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -34,9 +28,6 @@
 #include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 #include "Offline/MCDataProducts/inc/StrawDigiMC.hh"
 #include "Offline/DataProducts/inc/PDGCode.hh"
-// Utilities
-#include "Offline/Mu2eUtilities/inc/SimParticleTimeOffset.hh"
-// diagnostics
 
 #include <algorithm>
 #include <cmath>
@@ -89,6 +80,8 @@ namespace mu2e {
       float  sigw_over_werr;
       float  sigws;
       float  sigws_over_werr;
+
+      float  ss_wres[10];
     };
 
   protected:
@@ -100,6 +93,7 @@ namespace mu2e {
       TH1F* fSigwOverWres;
       TH1F* fSigws;
       TH1F* fSigwsOverWres;
+      TH1F* fSSWres;
     };
 
     struct EventHist_t {
@@ -147,6 +141,10 @@ namespace mu2e {
     int                            _nComboHits;
     int                            _nStrawHits; // not the total number of straw hits, but the
                                                 // number of straw hits from combohits
+
+    int                            _n2;
+    int                            _n3;
+
     HlPrint*                       _hlp;
 
     TRandom3                       _trn;
@@ -175,6 +173,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
     virtual void beginJob();
     virtual void beginRun(const art::Run&   r);
+    virtual void endRun  (const art::Run&   r);
     virtual void analyze (const art::Event& e);
   };
 
@@ -204,19 +203,20 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
   void StrawHitRecoAna::bookEventHistograms(EventHist_t* Hist, int HistSet, art::TFileDirectory* Dir) {
 
-    Hist->fEventNumber     = Dir->make<TH1F>(Form("event_%02i", HistSet), "Event Number", 100, 0., 100000.);
-    Hist->fNch             = Dir->make<TH1F>(Form("nch_%02i"  , HistSet), "N(combo hits)"  ,1000, 0., 10000.);
-    Hist->fNsh             = Dir->make<TH1F>(Form("nsh_%02i"  , HistSet), "N(straw hits)"  ,1000, 0., 10000.);
-    Hist->fNssch           = Dir->make<TH1F>(Form("nssch_%02i", HistSet), "N(1-straw hits)",1000, 0., 10000.);
+    Hist->fEventNumber   = Dir->make<TH1F>(Form("event_%02i", HistSet), "Event Number", 100, 0., 100000.);
+    Hist->fNch           = Dir->make<TH1F>(Form("nch_%02i"  , HistSet), "N(combo hits)"  ,1000, 0., 10000.);
+    Hist->fNsh           = Dir->make<TH1F>(Form("nsh_%02i"  , HistSet), "N(straw hits)"  ,1000, 0., 10000.);
+    Hist->fNssch         = Dir->make<TH1F>(Form("nssch_%02i", HistSet), "N(1-straw hits)",1000, 0., 10000.);
   }
 
 //-----------------------------------------------------------------------------
   void StrawHitRecoAna::bookComboHitHistograms(ComboHitHist_t* Hist, int HistSet, art::TFileDirectory* Dir) {
 
-    Hist->fNsh          = Dir->make<TH1F>("nsh"           , "N(straw hits)",   10, 0.,  10.);
-    Hist->fWres         = Dir->make<TH1F>("wres"          , "Wres"         ,  200, 0., 200.);
-    Hist->fSigw         = Dir->make<TH1F>("sigw"          , "sigw"         ,  200, 0., 200.);
-    Hist->fSigwOverWres = Dir->make<TH1F>("sigw_over_wres", "sigw/wres"    ,  200, 0.,  10.);
+    Hist->fNsh           = Dir->make<TH1F>("nsh"            , "N(straw hits)",   10, 0.,  10.);
+    Hist->fSSWres        = Dir->make<TH1F>("ss_wres"        , "ss Wres"      ,  200, 0., 200.);
+    Hist->fWres          = Dir->make<TH1F>("wres"           , "Wres"         ,  200, 0., 200.);
+    Hist->fSigw          = Dir->make<TH1F>("sigw"           , "sigw"         ,  200, 0., 200.);
+    Hist->fSigwOverWres  = Dir->make<TH1F>("sigw_over_wres" , "sigw/wres"    ,  200, 0.,  10.);
     Hist->fSigws         = Dir->make<TH1F>("sigws"          , "sigws"         ,  200, 0., 200.);
     Hist->fSigwsOverWres = Dir->make<TH1F>("sigws_over_wres", "sigw/wres"    ,  200, 0.,  10.);
   }
@@ -282,6 +282,82 @@ namespace mu2e {
     _tracker = ttHandle.get();
   }
 
+//----------------------------------------------------------------------------------------------------
+  void StrawHitRecoAna::endRun(const art::Run& R) {
+
+    ComboHitPar_t chp;
+
+    TRandom3 trn;
+
+    TH1F* hrn = _hist.fComboHit[0]->fSSWres;
+
+    float sig[10];
+//-----------------------------------------------------------------------------
+// total number of two-sh combo hits
+//-----------------------------------------------------------------------------
+    int nh = 2;
+
+    _n2 = _hist.fComboHit[2]->fNsh->GetEntries();
+
+    for (int i=0; i<_n2; i++) {
+      float sy(0), sy2(0), sw(0);
+      for (int k=0; k<nh; k++) {
+                                        // resolution
+        sig[k] = hrn->GetRandom();
+
+        float y = trn.Gaus(0,sig[k]);
+        
+        sy  += y;
+        sy2 += y*y;
+        sw  += 1./(sig[k]*sig[k]);
+      }
+    
+      double w2m = sy2/nh;
+      double wm  = sy /nh;
+
+      chp.werr           = sqrt(1/sw);
+      chp.sigw           = sqrt(w2m-wm*wm)*sqrt(nh/(nh-1.));
+      chp.sigw_over_werr = chp.sigw/chp.werr;
+      
+      chp.sigws           = chp.sigw*_scale2;
+      chp.sigws_over_werr = chp.sigws/chp.werr;
+      
+      fillComboHitHistograms(_hist.fComboHit[12],nullptr, &chp);  // all
+    } 
+//-----------------------------------------------------------------------------
+// the same for nsh=3 hits
+//-----------------------------------------------------------------------------
+    nh = 3;
+
+    _n3 = _hist.fComboHit[3]->fNsh->GetEntries();
+
+    for (int i=0; i<_n3; i++) {
+      float sy(0), sy2(0), sw(0);
+      for (int k=0; k<nh; k++) {
+                                        // resolution
+        sig[k] = hrn->GetRandom();
+        
+        float y = trn.Gaus(0,sig[k]);
+        
+        sy  += y;
+        sy2 += y*y;
+        sw  += 1./(sig[k]*sig[k]);
+      }
+        
+      double w2m = sy2/nh;
+      double wm  = sy /nh;
+
+      chp.werr           = sqrt(1/sw);
+      chp.sigw           = sqrt(w2m-wm*wm)*sqrt(nh/(nh-1.));
+      chp.sigw_over_werr = chp.sigw/chp.werr;
+
+      chp.sigws           = chp.sigw*_scale2;
+      chp.sigws_over_werr = chp.sigws/chp.werr;
+      
+      fillComboHitHistograms(_hist.fComboHit[13],nullptr, &chp);  // all
+    }
+  }
+
 //-----------------------------------------------------------------------------
   void  StrawHitRecoAna::fillEventHistograms(EventHist_t* Hist) {
     Hist->fEventNumber->Fill(_eventNum);
@@ -300,6 +376,10 @@ namespace mu2e {
     Hist->fSigwOverWres->Fill(Chp->sigw_over_werr);
     Hist->fSigws->Fill(Chp->sigws);
     Hist->fSigwsOverWres->Fill(Chp->sigws_over_werr);
+
+    for (int i=0; i<Chp->nsh; i++) {
+      Hist->fSSWres->Fill(Chp->ss_wres[i]);
+    }
   }
 
 //-----------------------------------------------------------------------------
@@ -311,12 +391,13 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
     fillEventHistograms(_hist.fEvent[0]);
 //-----------------------------------------------------------------------------
-// straw hit histograms, mc_hit_info relates to the straw hit type
-// 0:p, 1:ele p<20, 2:ele 20<p<80  3:ele 100<p<110 4:everything else
+// straw hit histograms, 
 //-----------------------------------------------------------------------------
     ComboHitPar_t chp;
 
-    int n2(0), n3(0);
+    _n2 = 0; 
+    _n3 = 0;
+
 
     for (int i=0; i<_nComboHits; i++) {
       const ComboHit* ch = &_chColl->at(i);
@@ -331,63 +412,33 @@ namespace mu2e {
         float wp = sh->wireDist();
         sw      += wp;
         sw2     += wp*wp;
+
+        chp.ss_wres[ish] = sh->wireRes();
       }
 
-      chp.sigw            = sqrt(sw2/nsh-sw*sw/nsh/nsh);
+      chp.nsh             = ch->nStrawHits();
+      chp.werr            = ch->wireRes();
+//-----------------------------------------------------------------------------
+// resolution estimated based on the spread of the hits along the wire
+//-----------------------------------------------------------------------------
+      chp.sigw            = sqrt(sw2/nsh-sw*sw/nsh/nsh)*sqrt(nsh/(nsh-1+1.e-12));
       chp.sigw_over_werr  = chp.sigw/ch->wireRes();
       chp.sigws           = chp.sigw;
       chp.sigws_over_werr = chp.sigw_over_werr;
-
 
       fillComboHitHistograms(_hist.fComboHit[0],ch,&chp);  // all
 
       if (nsh > 1) fillComboHitHistograms(_hist.fComboHit[1],ch,&chp);
       if (nsh == 2) { 
-        n2 += 1;
+        _n2 += 1;
         fillComboHitHistograms(_hist.fComboHit[2],ch,&chp);
       }
 
       if (nsh == 3) { 
-        n3 += 1;
+        _n3 += 1;
         fillComboHitHistograms(_hist.fComboHit[3],ch,&chp);
       }
     }
-
-    chp.nsh  =  2.;
-    chp.werr = 37.;
-
-    for (int i=0; i<n2; i++) {
-      double w1 = _trn.Gaus(0,chp.werr);
-      double w2 = _trn.Gaus(0,chp.werr);
-
-      double w2m = (w1*w1+w2*w2)/2;
-      double wm  = (w1+w2)/2;
-
-      chp.sigw           = sqrt(w2m-wm*wm);
-      chp.sigw_over_werr = chp.sigw/chp.werr;
-
-      chp.sigws           = chp.sigw*_scale2;
-      chp.sigws_over_werr = pow(chp.sigws/chp.werr,2);
-
-      fillComboHitHistograms(_hist.fComboHit[12],nullptr, &chp);  // all
-    } 
-
-    for (int i=0; i<n3; i++) {
-      double w1 = _trn.Gaus(0,chp.werr);
-      double w2 = _trn.Gaus(0,chp.werr);
-      double w3 = _trn.Gaus(0,chp.werr);
-
-      double w2m = (w1*w1+w2*w2+w3*w3)/3;
-      double wm  = (w1+w2+w3)/3;
-
-      chp.sigw           = sqrt(w2m-wm*wm);
-      chp.sigw_over_werr = chp.sigw/chp.werr;
-
-      chp.sigws           = chp.sigw*_scale3;
-      chp.sigws_over_werr = pow(chp.sigws/chp.werr,2);
-
-      fillComboHitHistograms(_hist.fComboHit[13],nullptr, &chp);  // all
-    } 
   }
 
 //-----------------------------------------------------------------------------

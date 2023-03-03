@@ -76,8 +76,8 @@ namespace mu2e {
       }
 
       const Plane* plane = &tracker->getPlane(ipl);
-      int iplane = plane->getPanel(0).getStraw(0).id().plane();
-      int ist = iplane/2;
+      int iplane  = plane->getPanel(0).getStraw(0).id().plane();
+      int ist     = iplane/2;
 
       int npanels = plane->nPanels();
 
@@ -114,7 +114,7 @@ namespace mu2e {
 	    
           double z    = straw->getMidPoint().z();  
           double hl   = straw->halfLength();
-          double r    = tracker->strawProperties()._strawOuterRadius;;
+          double r    = tracker->strawProperties()._strawOuterRadius;
 	    
           double phi1 = phi/M_PI*180.;
           printf(" %3i %6i %5i %4i %5i %5i %8i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",

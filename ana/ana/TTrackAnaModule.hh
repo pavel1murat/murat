@@ -5,6 +5,8 @@
 #define murat_ana_TTrackAnaModule_hh
 
 #include "Stntuple/obj/TStnTrackBlock.hh"
+#include "Stntuple/obj/TStnTrackSeedBlock.hh"
+#include "Stntuple/obj/TStnHelixBlock.hh"
 #include "Stntuple/obj/TTrackStrawHitBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
@@ -18,6 +20,10 @@
 #include "Stntuple/geom/TDiskCalorimeter.hh"
 #include "Stntuple/geom/TStnCrystal.hh"
 
+//-----------------------------------------------------------------------------
+// among other things, includes definitions of various histogram structures - 
+// TrackHist_t etc
+//-----------------------------------------------------------------------------
 #include "murat/ana/TAnaModule.hh"
 
 namespace murat {
@@ -28,7 +34,7 @@ public:
 //  histograms
 //-----------------------------------------------------------------------------
   struct CaloHist_t {
-    TH1F*    fDiskID;		       // per crystal hit
+    TH1F*    fDiskID;                  // per crystal hit
     TH1F*    fEnergy  [kNDisks];
     TH1F*    fTime    [kNDisks];
     TH1F*    fNHits   [kNDisks];
@@ -51,8 +57,8 @@ public:
     TH1F*    fY;
     TH1F*    fZ;
     TH1F*    fR;
-    TH1F*    fNCr0;			// all clustered
-    TH1F*    fNCr1;			// above 1MeV
+    TH1F*    fNCr0;                     // all clustered
+    TH1F*    fNCr1;                     // above 1MeV
     TH1F*    fYMean;
     TH1F*    fZMean;
     TH1F*    fSigY;
@@ -66,87 +72,92 @@ public:
 
 
   struct TrackEffHist_t {
-    TH1F*    fPtMc;			// denominator
-    TH1F*    fPtReco;			// numerator
+    TH1F*    fPtMc;                     // denominator
+    TH1F*    fPtReco;                   // numerator
   };
 //-----------------------------------------------------------------------------
-  enum { kNEventHistSets   = 100 };
-  enum { kNTrackHistSets   = 400 };
-  enum { kNTrackStrawHitHistSets   = 10 };
-  enum { kNClusterHistSets = 100 };
-  enum { kNCaloHistSets    = 100 };
-  enum { kNGenpHistSets    = 100 };
-  enum { kNSimpHistSets    = 100 };
+  enum { kNEventHistSets         = 100 };
+  enum { kNTrackHistSets         = 400 };
+  enum { kNHelixHistSets         = 100 };
+  enum { kNTrackStrawHitHistSets =  10 };
+  enum { kNClusterHistSets       = 100 };
+  enum { kNCaloHistSets          = 100 };
+  enum { kNGenpHistSets          = 100 };
+  enum { kNSimpHistSets          = 100 };
 
   struct Hist_t {
-    TH1F*                  fCrystalR[2];	          // crystal radius
-    EventHist_t*           fEvent  [kNEventHistSets  ];
-    TrackHist_t*           fTrack  [kNTrackHistSets  ];
-    ClusterHist_t*         fCluster[kNClusterHistSets];
+    TH1F*                  fCrystalR[2];                  // crystal radius
     CaloHist_t*            fCalo   [kNCaloHistSets   ];
+    ClusterHist_t*         fCluster[kNClusterHistSets];
+    EventHist_t*           fEvent  [kNEventHistSets  ];
     GenpHist_t*            fGenp   [kNGenpHistSets   ];
+    HelixHist_t*           fHelix  [kNHelixHistSets  ];
     SimpHist_t*            fSimp   [kNSimpHistSets   ];
+    TrackHist_t*           fTrack  [kNTrackHistSets  ];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
-  TString                fTrackBlockName;	     // 
-  TString                fTrackStrawHitBlockName; // 
-					     // pointers to the data blocks used
-  TStnTrackBlock*        fTrackBlock;
-  TTrackStrawHitBlock*   fTrackStrawHitBlock;
-  TStnClusterBlock*      fClusterBlock;
-  TCalDataBlock*         fCalDataBlock;
-  TStrawHitBlock*        fStrawHitBlock;
-  TStepPointMCBlock*     fVDetBlock;
-  TGenpBlock*            fGenpBlock;
-  TSimpBlock*            fSimpBlock;
-					// additional track parameters (assume ntracks < 20)
-  TrackPar_t        fTrackPar[20];
+  TString              fTrackBlockName;      // 
+  TString              fTrackStrawHitBlockName; // 
+                                             // pointers to the data blocks used
+  TStnTrackBlock*      fTrackBlock;
+  TStnTrackSeedBlock*  fTrackSeedBlock;
+  TStnHelixBlock*      fHelixBlock;
+  TTrackStrawHitBlock* fTrackStrawHitBlock;
+  TStnClusterBlock*    fClusterBlock;
+  TCalDataBlock*       fCalDataBlock;
+  TStrawHitBlock*      fStrawHitBlock;
+  TStepPointMCBlock*   fVDetBlock;
+  TGenpBlock*          fGenpBlock;
+  TSimpBlock*          fSimpBlock;
+                                        // additional parameters (assume nhelices/ntracks < 20)
+  HelixPar_t           fHelixPar[20];
+  TrackPar_t           fTrackPar[20];
 
-  SimPar_t          fSimPar;
-					// histograms filled
-  Hist_t            fHist;
+  SimPar_t             fSimPar;
+                                        // histograms filled
+  Hist_t               fHist;
 
-  TGenParticle*     fParticle;		// electron or muon
-  int               fDirection;         // 1:downstream, -1:upstream  [direction of the particle]
+  TGenParticle*        fParticle;       // electron or muon
+  int                  fDirection;         // 1:downstream, -1:upstream  [direction of the particle]
 
-  TSimParticle*     fSimp;
-  double            fEleE;		// electron energy
+  TSimParticle*        fSimp;
+  double               fEleE;           // electron energy
 
-  int               fCalorimeterType;
+  int                  fCalorimeterType;
 
-  int               fNClusters;
-  int               fNTracks[10];
-  int               fNGoodTracks;
-  int               fNCalPatRec;
-  int               fNMatchedTracks;
-  int               fNStrawHits;
-  int               fNCalHits;
-  int               fNGenp;		// N(generated particles)
+  int                  fNClusters;
+  int                  fNTracks[10];
+  int                  fNGoodTracks;
+  int                  fNCalPatRec;
+  int                  fNMatchedTracks;
+  int                  fNStrawHits;
+  int                  fNCalHits;
+  int                  fNGenp;          // N(generated particles)
 
-  int               fNHyp;
-  int               fBestHyp[10];
-					// fTrackNumber[i]: track number, 
-					// corresponding to OBSP particle #i
-					// or -1
-  TStnArrayI        fTrackNumber;
+  int                  fNHyp;
+  int                  fBestHyp[10];
+                                        // fTrackNumber[i]: track number, 
+                                        // corresponding to OBSP particle #i
+                                        // or -1
+  TStnArrayI           fTrackNumber;
 
-  int               fBestID;
+  int                  fBestID;
 
-  TStnTrack*        fTrack;
-  TStnCluster*      fCluster;
+  TStnTrack*           fTrack;
+  TStnCluster*         fCluster;
 
-  TDiskCalorimeter* fDiskCalorimeter;
+  TDiskCalorimeter*    fDiskCalorimeter;
 
-  double            fMinETrig;          // minimal energy of the cluster to trigger on
-					// Tcm - track-cluster matching
-  double            fMinDtTcm;
-  double            fMaxDtTcm;
+  double               fMinETrig;       // minimal energy of the cluster to trigger on
+                                        // Tcm - track-cluster matching
+  double               fMinDtTcm;
+  double               fMaxDtTcm;
 
-  double            fLumWt;
-  int               fApplyCorrections;  // 0: do not apply momentum ant DT corrections
+  double               fLumWt;
+  int                  fApplyCorrections;  // 0: do not apply momentum ant DT corrections
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -165,7 +176,6 @@ public:
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
-//  void               SetFillDioHist  (int YesNo) { fFillDioHist   = YesNo; }
   void               SetDirection    (int Dir  ) { fDirection     = Dir  ; }
 
   void               SetTrackBlockName         (const char* Name) { fTrackBlockName         = Name; }
@@ -184,8 +194,8 @@ public:
 //-----------------------------------------------------------------------------
   void    BookCaloHistograms      (CaloHist_t*    Hist, const char* Folder);
   void    BookClusterHistograms   (ClusterHist_t* Hist, const char* Folder);
-  void    FillCaloHistograms     (CaloHist_t*    Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms  (ClusterHist_t* Hist, TStnCluster*  Cluster);
+  void    FillCaloHistograms      (CaloHist_t*    Hist, TStnCrystal*  Crystal);
+  void    FillClusterHistograms   (ClusterHist_t* Hist, TStnCluster*  Cluster);
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
 

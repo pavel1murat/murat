@@ -333,14 +333,32 @@ void TAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fP      ,"p"       ,Form("%s: Momentum"     ,Folder),1000,     0, 200,Folder);
-  HBook1F(Hist->fPdgCode[0],"pdg_code_0",Form("%s: PDG Code[0]"     ,Folder),200, -100, 100,Folder);
-  HBook1F(Hist->fPdgCode[1],"pdg_code_1",Form("%s: PDG Code[1]"     ,Folder),500, -2500, 2500,Folder);
-  HBook1F(Hist->fGenID  ,"gen_id"  ,Form("%s: Generator ID" ,Folder), 100,     0, 100,Folder);
-  HBook1F(Hist->fZ0     ,"z0"      ,Form("%s: Z0"           ,Folder), 500,  5400, 6400,Folder);
-  HBook1F(Hist->fT0     ,"t0"      ,Form("%s: T0"           ,Folder), 200,     0, 2000,Folder);
-  HBook1F(Hist->fR0     ,"r"       ,Form("%s: R0"           ,Folder), 100,     0,  100,Folder);
-  HBook1F(Hist->fCosTh  ,"cos_th"  ,Form("%s: Cos(Theta)"   ,Folder), 200,   -1.,   1.,Folder);
+  HBook1F(Hist->fP         ,"p"     ,Form("%s: Momentum"     ,Folder),1000,     0, 200,Folder);
+  HBook1F(Hist->fPdgCode[0],"pdg_0" ,Form("%s: PDG Code[0]"     ,Folder),200, -100, 100,Folder);
+  HBook1F(Hist->fPdgCode[1],"pdg_1" ,Form("%s: PDG Code[1]"     ,Folder),500, -2500, 2500,Folder);
+  HBook1F(Hist->fGenID     ,"gen_id",Form("%s: Generator ID" ,Folder), 100,     0, 100,Folder);
+  HBook1F(Hist->fZ0        ,"z0"    ,Form("%s: Z0"           ,Folder), 500,  5400, 6400,Folder);
+  HBook1F(Hist->fT0        ,"t0"    ,Form("%s: T0"           ,Folder), 200,     0, 2000,Folder);
+  HBook1F(Hist->fR0        ,"r"     ,Form("%s: R0"           ,Folder), 100,     0,  100,Folder);
+  HBook1F(Hist->fCosTh     ,"cos_th",Form("%s: Cos(Theta)"   ,Folder), 200,   -1.,   1.,Folder);
+}
+
+//-----------------------------------------------------------------------------
+void TAnaModule::BookHelixHistograms(HelixHist_t* Hist, const char* Folder) {
+//   char name [200];
+//   char title[200];
+
+  HBook1F(Hist->fBestAlg ,"best_alg",Form("%s: best algorithm"       ,Folder),  10,     0  ,  10  ,Folder);
+  HBook1F(Hist->fChi2XY  ,"chi2xy"  ,Form("%s: Chi2(XY)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
+  HBook1F(Hist->fChi2ZPhi,"chi2zp"  ,Form("%s: Chi2(ZP)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
+  HBook1F(Hist->fCosTh   ,"cos_th"  ,Form("%s: cos_th"               ,Folder), 200,    -1  ,   1  ,Folder);
+  HBook1F(Hist->fD0      ,"d0"      ,Form("%s: D0"                   ,Folder), 250,   250  , 250  ,Folder);
+  HBook1F(Hist->fHelicity,"hel"     ,Form("%s: helicity"             ,Folder),   3,    -1.5,  1.5 ,Folder);
+  HBook1F(Hist->fLambda  ,"lam"     ,Form("%s: lambda=dphi/dz"       ,Folder), 200,   -500 , 500  ,Folder);
+  HBook1F(Hist->fNCh     ,"nch"     ,Form("%s: N(combo hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
+  HBook1F(Hist->fNSh     ,"nsh"     ,Form("%s: N(straw hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
+  HBook1F(Hist->fP       ,"p"       ,Form("%s: P"                    ,Folder), 250,     0  , 250  ,Folder);
+  HBook1F(Hist->fRadius  ,"r"       ,Form("%s: Radius"               ,Folder), 200,     0  , 1000 ,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -684,6 +702,28 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
   Hist->fR0->Fill(r0);
   Hist->fP->Fill(p);
   Hist->fCosTh->Fill(cos_th);
+}
+
+//-----------------------------------------------------------------------------
+  void TAnaModule::FillHelixHistograms(HelixHist_t* Hist, TStnHelix* Helix, HelixPar_t* Help) {
+//   char name [200];
+//   char title[200];
+
+    Hist->fBestAlg->Fill(Helix->BestAlg());
+    Hist->fChi2XY->Fill(Helix->Chi2XY());
+    Hist->fChi2ZPhi->Fill(Helix->Chi2ZPhi());
+
+    float costh = Helix->Pt()/Helix->P();
+    Hist->fCosTh->Fill(costh);
+
+    Hist->fD0->Fill(Helix->D0());
+
+    Hist->fHelicity->Fill(Helix->Helicity());
+    Hist->fLambda->Fill(Helix->Lambda());
+    Hist->fNCh->Fill(Helix->fNComboHits);
+    Hist->fNSh->Fill(Helix->fNHits);
+    Hist->fP->Fill(Helix->P());
+    Hist->fRadius->Fill(Helix->Radius());
 }
 
 //-----------------------------------------------------------------------------

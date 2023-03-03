@@ -10,6 +10,7 @@
 #include "fcl/standardServices.fcl"
 
 #include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/stntuple.fcl"
 
 #                             Give this process a name
 process_name : trackerMCCheck

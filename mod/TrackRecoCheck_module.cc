@@ -26,37 +26,34 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Mu2e includes.
-#include "ProditionsService/inc/ProditionsHandle.hh"
-#include "ConditionsService/inc/ConditionsHandle.hh"
+#include "Offline/ProditionsService/inc/ProditionsHandle.hh"
+#include "Offline/ConditionsService/inc/ConditionsHandle.hh"
 // #include "ConditionsService/inc/TrackerCalibrations.hh"
-#include "TrackerConditions/inc/Mu2eDetector.hh"
+#include "Offline/TrackerConditions/inc/Mu2eDetector.hh"
 
 // #include "BTrkHelper/inc/BTrkHelper.hh"
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/GeometryService.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
 
-#include "CalorimeterGeom/inc/DiskCalorimeter.hh"
-#include "CalorimeterGeom/inc/Calorimeter.hh"
-#include "Mu2eUtilities/inc/SortedStepPoints.hh"
-#include "Mu2eUtilities/inc/TrackTool.hh"
+#include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
+#include "Offline/Mu2eUtilities/inc/SortedStepPoints.hh"
+#include "Offline/Mu2eUtilities/inc/TrackTool.hh"
 
-#include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
+#include "Offline/MCDataProducts/inc/GenParticle.hh"
+#include "Offline/MCDataProducts/inc/SimParticle.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/StrawHitPositionCollection.hh"
-#include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
+#include "Offline/RecoDataProducts/inc/StrawHit.hh"
+#include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 
-#include "BTrkData/inc/TrkStrawHit.hh"
-#include "RecoDataProducts/inc/KalRepPtrCollection.hh"
+#include "Offline/BTrkData/inc/TrkStrawHit.hh"
+#include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
 
@@ -93,13 +90,13 @@ namespace mu2e {
     explicit TrackRecoCheck(fhicl::ParameterSet const& pset);
     virtual ~TrackRecoCheck();
 
-    void     Debug_11(art::Event* Evt);   // handles fDr
+    void     Debug_11(const art::Event* Evt);   // handles fDr
 //-----------------------------------------------------------------------------
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
     virtual void     beginJob();
     virtual void     endJob  ();
-    virtual bool     filter (art::Event& Evt);
+    virtual void     analyzer(const art::Event& Evt);
   };
 
 
@@ -139,7 +136,7 @@ namespace mu2e {
 
 
   //-----------------------------------------------------------------------------
-  bool TrackRecoCheck::filter(art::Event& Evt) {
+  void TrackRecoCheck::analyzer(const art::Event& Evt) {
     const char* oname = "TrackRecoCheck::filter";
 
     if (DebugBit(11)) printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
@@ -147,14 +144,12 @@ namespace mu2e {
 // do the rest
 //-----------------------------------------------------------------------------
     if (DebugBit(11)) Debug_11(&Evt);
-
-    return 1;
   }
 
 //-----------------------------------------------------------------------------
 // fill E(hit) vs path distributions
 //-----------------------------------------------------------------------------
-  void TrackRecoCheck::Debug_11(art::Event* Evt) {
+  void TrackRecoCheck::Debug_11(const art::Event* Evt) {
     const char* oname = "TrackRecoCheck::Debug_11";
 
     //     GeomHandle<Mu2eDetectorModel> detmodel;

@@ -12,17 +12,15 @@
 #include "murat/mod/TCalm006_module.hh"
 #include "Stntuple/print/TAnaDump.hh"
 
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/GeometryService.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
 
-#include "CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
 
 namespace mu2e {
 
@@ -111,9 +109,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // begin run 
 //-----------------------------------------------------------------------------
-  bool TCalm006::beginRun(art::Run& R) {
-
-    return true;
+  void TCalm006::beginRun(const art::Run& R) {
   }
 
 
@@ -176,15 +172,15 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  void TCalm006::getData(art::Event* Evt) {
+  void TCalm006::getData(const art::Event* Evt) {
     const char* oname = "TCalm006::getData";
 //-----------------------------------------------------------------------------
 // CaloCrystalHitCollection
 //-----------------------------------------------------------------------------
-    art::Handle<CaloCrystalHitCollection> ccHandle;
+    art::Handle<CaloHitCollection> ccHandle;
     Evt->getByLabel(fCrystalHitMaker.data(),ccHandle);
     if (ccHandle.isValid()) {
-      fListOfCaloCrystalHits = (CaloCrystalHitCollection*) ccHandle.product();
+      fListOfCaloCrystalHits = (CaloHitCollection*) ccHandle.product();
       fNCaloCrystalHits      = fListOfCaloCrystalHits->size();
     }
     else {
@@ -198,11 +194,11 @@ namespace mu2e {
 
 
 //-----------------------------------------------------------------------------
-  void TCalm006::Init(art::Event* Evt) {
+  void TCalm006::Init(const art::Event* Evt) {
     //    const char oname[] = "TCalm006::Init";
 
     int             id, ring, l, k;
-    CaloCrystalHit* hit;
+    CaloHit* hit;
 
     for (int i=0; i<10; i++) {
       fEnergy[i] = 0;
@@ -212,7 +208,7 @@ namespace mu2e {
 
     for (int i=0; i<nhits; i++) {
       hit = &fListOfCaloCrystalHits->at(i);
-      id  = hit->id();
+      id  = hit->crystalID();
 
       l   = fHexMap->l(id);
       k   = fHexMap->k(id);
@@ -234,7 +230,7 @@ namespace mu2e {
 
 
 //-----------------------------------------------------------------------------
-  void TCalm006::Debug(art::Event* Evt) {
+  void TCalm006::Debug(const art::Event* Evt) {
     //    const char* oname = "TCalm006::Debug";
 //-----------------------------------------------------------------------------
 // bit 000: calorimeter step points
@@ -263,10 +259,8 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  bool TCalm006::filter(art::Event& Evt) {
+  void  TCalm006::analyzer(const art::Event& Evt) {
     const char* oname = "TCalm006::filter";
-
-    bool rc(true);
 
     fEventNumber = Evt.event();
     fRunNumber   = Evt.run();
@@ -288,8 +282,6 @@ namespace mu2e {
     CaloCluster  x;
 
     aaa(&x);
-    
-    return rc;
   }
   
 }  // end namespace mu2e

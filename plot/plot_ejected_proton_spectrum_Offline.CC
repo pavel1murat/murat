@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------
 #include "TCanvas.h"
 #include "TF1.h"
-#include "Mu2eUtilities/inc/EjectedProtonSpectrum.hh"
+#include "Offline/Mu2eUtilities/inc/EjectedProtonSpectrum.hh"
 
 
 //-----------------------------------------------------------------------------

@@ -1,0 +1,21 @@
+# -*- mode: tcl -*-
+#
+# print tracker geometry constants
+###############################################################################
+#include "Stntuple/fcl/stntuple.fcl"
+
+process_name : dump
+
+source  : { module_type : EmptyEvent }
+
+physics : {
+  analyzers :  {
+    DumpTrackerNumerology : { module_type : DumpTrackerNumerology 
+        diagLevel : 0
+    }
+  }
+
+  e1         : [DumpTrackerNumerology]
+  end_paths  : [e1]
+}
+

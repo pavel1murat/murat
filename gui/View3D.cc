@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
+#include "TEnv.h"
 #include "TObjString.h"
 #include "TSystem.h"
 #include "TGeoPgon.h"
@@ -10,16 +11,27 @@
 
 #include "TGeoManager.h"
 
+#include "Stntuple/gui/TEvdCrvSection.hh"
 #include "murat/gui/View3D.hh"
 
 ClassImp(View3D);
 
 //-----------------------------------------------------------------------------
 View3D::View3D() : TObject() {
-
+  const char* mu2e_subproject_dir = "/mu2e/app/users/murat/subprojects";
   InitGeometry();
 
-  ReadTrajectories("/projects/mu2e/app/users/murat/subprojects/su2020/crv_satellite_peak/cry32s41b0_trajectories");
+/*  mu2egpvm* :
+  /mu2e/app/users/murat/subprojects/su2020/crv_satellite_peak/cry32s41b0_trajectories:
+  total used in directory 13408 available 5142859264
+  drwxr-sr-x  2 murat mu2e 34816 May 22  2021 .
+  drwxr-sr-x 13 murat mu2e  4096 Jun 27  2021 ..
+  -rw-r--r--  1 murat mu2e  5368 May 22  2021 1002_000331_369087.txt
+  -rw-r--r--  1 murat mu2e 37820 May 22  2021 1002_000404_096896.txt
+*/
+  const char* sp_dir = gEnv->GetValue("muse.SubprojectDir",mu2e_subproject_dir);
+  TString dir = Form("%s/su2020/crv_satellite_peak/cry32s41b0_trajectories",sp_dir);
+  ReadTrajectories(dir.Data());
   
   double x0[3] = { -390.4, 0., 500.};
   double v [3] = { 200,  800,  250};
@@ -39,7 +51,7 @@ View3D::~View3D() {
 
 //-----------------------------------------------------------------------------
 int View3D::InitGeometry() {
-  fGeoManager = new TStnGeoManager("Mu2eGM");
+  fGeoManager = TStnGeoManager::Instance("Mu2eGM",nullptr);
 
   //--- define some materials
   fMaterials.fVacuum = new TGeoMaterial("Vacuum", 0,  0,   0     );

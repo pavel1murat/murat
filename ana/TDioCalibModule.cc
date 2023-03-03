@@ -570,13 +570,13 @@ void TDioCalibModule::FillEventHistograms(EventHist_t* Hist) {
   Hist->fDtClT->Fill(dt);
   Hist->fEMax->Fill(emax);
 
-  TStrawHitData*  sh;
+  TStrawHit*  sh;
   int n_good_hits = 0;
   for (int i=0; i<fNStrawHits; i++ ) {
-    sh = fStrawDataBlock->Hit(i);
-    dt = t0_cls-sh->Time() + 15;
+    sh = fStrawHitBlock->Hit(i);
+    dt = t0_cls-sh->Time(0) + 15;
     Hist->fDtClS->Fill(dt);
-    Hist->fSHTime->Fill(sh->Time());
+    Hist->fSHTime->Fill(sh->Time(0));
 
     if (fabs(dt+15.)< 50) n_good_hits += 1;
   }
@@ -1029,7 +1029,7 @@ int TDioCalibModule::BeginJob() {
   RegisterDataBlock("TrackBlock"    ,"TStnTrackBlock"   ,&fTrackBlock  );
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
-  RegisterDataBlock("StrawDataBlock","TStrawDataBlock"  ,&fStrawDataBlock);
+  RegisterDataBlock("StrawHitBlock" ,"TStrawHitBlock"   ,&fStrawHitBlock);
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"       ,&fGenpBlock);
   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"       ,&fSimpBlock);
 //-----------------------------------------------------------------------------
@@ -1573,7 +1573,7 @@ int TDioCalibModule::Event(int ientry) {
 
   fTrackBlock  ->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
-  //  fStrawDataBlock->GetEntry(ientry);
+  //  fStrawHitBlock->GetEntry(ientry);
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
@@ -1629,7 +1629,7 @@ int TDioCalibModule::Event(int ientry) {
   fNTracks[0] = fTrackBlock->NTracks();
   fNClusters  = fClusterBlock->NClusters();
   fNCalHits   = fCalDataBlock->NHits();
-  fNStrawHits = fStrawDataBlock->NHits();
+  fNStrawHits = fStrawHitBlock->NHits();
 
   fDiskCalorimeter->InitEvent(fCalDataBlock);
 

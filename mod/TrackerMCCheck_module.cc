@@ -27,31 +27,29 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Mu2e includes.
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
-#include "GeometryService/inc/VirtualDetector.hh"
+#include "Offline/GeometryService/inc/GeometryService.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/VirtualDetector.hh"
 
-#include "TrackerGeom/inc/Tracker.hh"
-#include "CalorimeterGeom/inc/DiskCalorimeter.hh"
-#include "CalorimeterGeom/inc/Calorimeter.hh"
-#include "Mu2eUtilities/inc/SortedStepPoints.hh"
-#include "Mu2eUtilities/inc/TrackTool.hh"
-#include "Mu2eUtilities/inc/TwoLinePCA.hh"
+#include "Offline/TrackerGeom/inc/Tracker.hh"
+#include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
+#include "Offline/Mu2eUtilities/inc/TrackTool.hh"
+#include "Offline/Mu2eUtilities/inc/TwoLinePCA.hh"
 
-#include "MCDataProducts/inc/StrawDigiMCCollection.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "DataProducts/inc/VirtualDetectorId.hh"
+#include "Offline/MCDataProducts/inc/StrawDigiMC.hh"
+#include "Offline/MCDataProducts/inc/GenParticle.hh"
+#include "Offline/MCDataProducts/inc/SimParticle.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
+#include "Offline/DataProducts/inc/VirtualDetectorId.hh"
 
 #include "BTrk/TrkBase/HelixParams.hh"
 #include "BTrk/KalmanTrack/KalHit.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
-#include "RecoDataProducts/inc/ComboHit.hh"
-#include "RecoDataProducts/inc/StrawHitFlagCollection.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
+#include "Offline/RecoDataProducts/inc/ComboHit.hh"
+#include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
 
@@ -146,16 +144,16 @@ namespace mu2e {
 
     void     bookHistograms();
     void     getData(const art::Event* Evt);
-    void     Init   (art::Event* Evt);
+    void     Init   (const art::Event* Evt);
     void     Debug_003();   // handles fDr
     void     Debug_004();
 //-----------------------------------------------------------------------------
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
-    virtual void     beginJob();
-    virtual bool     beginRun(art::Run& );
-    virtual void     endJob  ();
-    virtual bool     filter (art::Event& Evt);
+    virtual void     beginJob()                      override;
+    virtual void     beginRun(const art::Run& )      override;;
+    virtual void     endJob  ()                      override;
+    virtual void     analyze (const art::Event& Evt) override;
   };
 
 
@@ -251,10 +249,9 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  bool TrackerMCCheck::beginRun(art::Run& ) {
+  void TrackerMCCheck::beginRun(const art::Run& ) {
     mu2e::GeomHandle<mu2e::Tracker> th;
     _tracker = th.get();
-    return true;
   }
 
 
@@ -295,13 +292,13 @@ namespace mu2e {
    }
 
 //-----------------------------------------------------------------------------
-  void TrackerMCCheck::Init(art::Event* Evt) {
+  void TrackerMCCheck::Init(const art::Event* Evt) {
   }
 
 
   //-----------------------------------------------------------------------------
-  bool TrackerMCCheck::filter(art::Event& Evt) {
-    const char* oname = "TrackerMCCheck::filter";
+  void TrackerMCCheck::analyze(const art::Event& Evt) {
+    const char* oname = "TrackerMCCheck::analyzer";
 
     printf("[%s] RUN: %10i EVENT: %10i\n",oname,Evt.run(),Evt.event());
 
@@ -309,7 +306,6 @@ namespace mu2e {
 // get event data and initialize data blocks
 //-----------------------------------------------------------------------------
     getData(&Evt);
-
 //-----------------------------------------------------------------------------
 // particle parameters at virtual detectors
 //-----------------------------------------------------------------------------
@@ -363,29 +359,27 @@ namespace mu2e {
       }
     }
 
-
-
     if      (DebugBit(3)) Debug_003();
     else if (DebugBit(4)) Debug_004();
 
-    return true;
   }
 
 //-----------------------------------------------------------------------------
   void TrackerMCCheck::Debug_004() {
 
-    float                  dt, p, ehit(-1.), wpos, errpos;
+    float                  dt, p(-1.), ehit(-1.), wpos, errpos;
 
     int                    nhits, nhits_ce, pdg_id(-1), mother_pdg_id, nsteps_per_hit;
     int                    gen_code; //, sim_id;
 
     const mu2e::ComboHit           *hit (nullptr);
-    const mu2e::StepPointMC        *step(nullptr); 
 
     static const double MIN_PITCH = 1;
     static const double MAX_PITCH = sqrt(3);
 
     nhits = fStrawHitColl->size();
+
+    printf(" ---- Debug_04 nhits : %4i\n",nhits);
 
     fHist.fNStrawHits[0]->Fill(nhits);
     fHist.fNStrawHits[1]->Fill(nhits);
@@ -394,34 +388,29 @@ namespace mu2e {
 
     for (int i=0;  i<nhits;  i++) {
 
-      const mu2e::StrawDigiMC* mcdigi = &_mcdigis->at(i);
+      const mu2e::StrawDigiMC* sdmc = &_mcdigis->at(i);
 
-      if (mcdigi->wireEndTime(mu2e::StrawEnd::cal) < mcdigi->wireEndTime(mu2e::StrawEnd::hv)) {
-	// thanks Dave ... step = mcdigi->stepPointMC(mu2e::StrawEnd::cal).get();
-      }
-      else {
-	// thanks Dave ... step = mcdigi->stepPointMC(mu2e::StrawEnd::hv ).get();
-      }
+      const StrawGasStep* sgs = sdmc->earlyStrawGasStep().get();
 
       nsteps_per_hit = 1.;
     
       hit   = &fStrawHitColl->at(i);
 
-      if (step) {
-	art::Ptr<mu2e::SimParticle> const& simptr = step->simParticle(); 
-	art::Ptr<mu2e::SimParticle> mother = simptr;
-	while(mother->hasParent())  mother = mother->parent();
-	const mu2e::SimParticle *   sim    = mother.operator ->();
+      if (sgs) {
+	// art::Ptr<mu2e::SimParticle> const& simptr = sgs->simParticle(); 
+	// art::Ptr<mu2e::SimParticle> mother = simptr;
+	// while(mother->hasParent())  mother = mother->parent();
+	const mu2e::SimParticle *   sim    = sgs->simParticle().get(); // mother.operator ->();
       
-	p             = step->momentum().mag();
+	p             = sgs->momentum().R();
 	ehit          = hit->energyDep();
-	pdg_id        = simptr->pdgId();
-	mother_pdg_id = sim->pdgId();
+	pdg_id        = sim->pdgId();
+	mother_pdg_id = pdg_id; // sim->pdgId();
 	dt            = -99.; // undefined now // hit->dt();
 	//      sim_id        = simptr->id().asInt();
 
-	if (simptr->fromGenerator()) gen_code = simptr->genParticle()->generatorId().id();
-	else                         gen_code = -1;
+	if (sim->fromGenerator()) gen_code = sim->genParticle()->generatorId().id();
+	else                      gen_code = -1;
 
 	if ((pdg_id == fPdgCode) && (gen_code == fGeneratorCode)) {
 	  nhits_ce += 1;
@@ -482,7 +471,7 @@ namespace mu2e {
 	fHist.fMomMu->Fill(p);
       }
       else if (pdg_id ==1000010020) {
-					// protons
+					// deuterons
 	fHist.fEHitDeut->Fill(ehit);
 	//	fHist.fEHitMuVsPath->Fill(path,ehit);
 	fHist.fMomDeut->Fill(p);
@@ -571,7 +560,7 @@ namespace mu2e {
 	const ComboHit* sh = &fStrawHitColl->at(jclosest);
 	const Straw* straw = &_tracker->getStraw(sh->strawId());
 
-	const XYZVec* hp = &fStrawHitColl->at(jclosest).pos();
+	const XYZVectorF* hp = &fStrawHitColl->at(jclosest).pos();
 
 	double dx = sp->x()-hp->x();
 	double dy = sp->y()-hp->y();

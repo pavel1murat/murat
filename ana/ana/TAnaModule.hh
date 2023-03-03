@@ -20,7 +20,7 @@
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
 #include "Stntuple/obj/TStepPointMCBlock.hh"
-#include "Stntuple/obj/TStrawDataBlock.hh"
+#include "Stntuple/obj/TStrawHitBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TCrvClusterBlock.hh"
@@ -35,6 +35,7 @@
 
 #include "murat/ana/EventPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
+#include "murat/ana/HelixPar_t.hh"
 #include "murat/ana/TrackPar_t.hh"
 
 #include "murat/ana/ClusterHist_t.hh"
@@ -42,8 +43,8 @@
 #include "murat/ana/EventHist_t.hh"
 #include "murat/ana/GenpHist_t.hh"
 #include "murat/ana/SimpHist_t.hh"
+#include "murat/ana/HelixHist_t.hh"
 #include "murat/ana/TrackHist_t.hh"
-
 #include "murat/ana/TrackSeedHist_t.hh"
 
 #include "murat/ana/TTrkQualMva.hh"
@@ -108,7 +109,7 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TAnaModule(const char* name="su2020_Ana", const char* title="Ana");
+  TAnaModule(const char* name="MuratAna", const char* title="MuratAna");
   ~TAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
@@ -149,6 +150,7 @@ public:
   void    BookCrvPulseHistograms  (CrvPulseHist_t*      Hist, const char* Folder);
   void    BookGenpHistograms      (GenpHist_t*          Hist, const char* Folder);
   void    BookEventHistograms     (EventHist_t*         Hist, const char* Folder);
+  void    BookHelixHistograms     (HelixHist_t*         Hist, const char* Folder);
   void    BookSimpHistograms      (SimpHist_t*          Hist, const char* Folder);
   void    BookTrackHistograms     (TrackHist_t*         Hist, const char* Folder);
   void    BookTrackIDHistograms   (TStnTrackID::Hist_t* Hist, const char* Folder);
@@ -161,6 +163,9 @@ public:
   void    FillEventHistograms     (EventHist_t*  Hist, EventPar_t*  Evtpar  );
 
   void    FillGenpHistograms      (GenpHist_t*   Hist, TGenParticle* Genp   );
+
+  void    FillHelixHistograms     (HelixHist_t*  Hist, TStnHelix* Hel, HelixPar_t* Help);
+
   void    FillSimpHistograms      (SimpHist_t*   Hist, TSimParticle* Simp   );
 
   void    FillTrackSeedHistograms (HistBase_t*  HistR, TStnTrackSeed* TrkSeed);

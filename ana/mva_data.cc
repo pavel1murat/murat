@@ -2,6 +2,7 @@
 // note, that "andy" MVA's have less variables and have not been tested
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/ana/mva_data.hh"
+#include "TObjString.h"
 #include "TString.h"
 //-----------------------------------------------------------------------------
 // 2020-12-22 back to training, default settings:

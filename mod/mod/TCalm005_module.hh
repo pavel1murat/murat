@@ -24,15 +24,13 @@
 
 // storable objects (data products)
 
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "Offline/RecoDataProducts/inc/StrawHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 
-#include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
+#include "Offline/MCDataProducts/inc/GenParticle.hh"
+#include "Offline/MCDataProducts/inc/SimParticle.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -108,17 +106,17 @@ namespace mu2e {
     void FillEventHistograms  (EventHist_t*   Hist);
     void FillHistograms();
 
-    void Debug(art::Event* Evt);
-    void Init (art::Event* Evt);
+    void Debug(const art::Event* Evt);
+    void Init (const art::Event* Evt);
 //-----------------------------------------------------------------------------
 // overloaded methods of TAnaModule
 //-----------------------------------------------------------------------------
-    void getData(art::Event* Evt);
+    void getData(const art::Event* Evt);
 //-----------------------------------------------------------------------------
 // overloaded framework module methods
 //-----------------------------------------------------------------------------
-    virtual bool filter  (art::Event& e);
-    virtual bool beginRun(art::Run&   r);
+    virtual void analyze (const art::Event& e);
+    virtual void beginRun(const art::Run&   r);
     virtual void beginJob();
     virtual void endJob  ();
 

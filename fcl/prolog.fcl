@@ -7,6 +7,13 @@ BEGIN_PROLOG
 FlagStrawHits_maximumEnergy: 0.005
 
 murat : { 
+#------------------------------------------------------------------------------
+    ComboHitSorter : { module_type : ComboHitSorter
+        chCollTag                                   : "makePH"
+        chfCollTag                                  : "FlagBkgHits:ComboHits"
+        sdmcCollTag                                 : "compressDigiMCs"
+        debugLevel                                  : 0
+    }
 
     FilterEcalMVATrigger: { module_type : FilterEcalMVATrigger
 	diagLevel              : 2
@@ -33,6 +40,19 @@ murat : {
 	MVAlowcut1             : 0.5
 	step                   : 4
 	downscale500factor     : 0
+    }
+
+    StrawHitRecoAna : { module_type:StrawHitRecoAna
+        chCollTag              : "makePH"                # use combo hits
+        chfCollTag             : "FlagBkgHits:ComboHits" #
+        shCollTag              : "makeSH"                # assume StrawHits have been written out
+        shfCollTag             : "FlagBkgHits:StrawHits" ## input coll, so far - debugging
+        sschCollTag            : "makeSH"                # 1-straw combohits
+        sdmcCollTag            : "compressDigiMCs"
+        debugLevel             : 0
+        diagLevel              : 0
+        printComboHits         : 0
+        printSingleComboHits   : 0
     }
 
      TCalm002 : { module_type:TCalm002
@@ -76,6 +96,7 @@ murat : {
 # track reco validation
 #------------------------------------------------------------------------------
     TrackerMCCheck                   : { module_type:TrackerMCCheck # the class name
+
 	g4ModuleLabel                : g4run
 	strawHitCollTag              : makeSH
 	strawDigiMCCollTag           : compressDigiMCs # could've been "makeSD"
@@ -118,6 +139,16 @@ murat : {
     DumpEventNumber : { module_type:DumpEventNumber
     }
 
+    DumpGeometry : { module_type:DumpGeometry
+        dumpVirtualDetectors  : 1
+        dumpTrackerNumerology : 1
+        dumpCRVNumerology     : 1
+        dumpCaloGeometry      : 1
+    }
+
+    DumpTrackerNumerology : { module_type:DumpTrackerNumerology
+        diagLevel : 0
+    }
 
     DumpMCTrajectories : { module_type:DumpMCTrajectories
 	simpCollTag  : "compressDigiMCs"
@@ -129,12 +160,12 @@ murat : {
 	inputInstanceName   : ""
     }
 }
-
 #------------------------------------------------------------------------------
 # final definition of the table 'murat'
 #------------------------------------------------------------------------------
 murat : { @table::murat 
-    producers : {}
+    producers : {
+    }
 
     filters : {
 	TrackerMCCheck   : { @table::murat.TrackerMCCheck   }
@@ -145,13 +176,9 @@ murat : { @table::murat
     analyzers : { 
 	DumpEventNumber    : { @table::murat.DumpEventNumber    }
 	DumpMCTrajectories : { @table::murat.DumpMCTrajectories }
-	
-	DumpGeometry : { module_type:DumpGeometry
-	    dumpVirtualDetectors  : 0
-	    dumpTrackerNumerology : 0
-	    dumpCRVNumerology     : 0
-	    dumpCaloGeometry      : 0
-	}
+        ComboHitSorter     : { @table::murat.ComboHitSorter     }
+        StrawHitRecoAna    : { @table::murat.StrawHitRecoAna    }
+        DumpGeometry       : { @table::murat.DumpGeometry       }
     }
 }
 END_PROLOG

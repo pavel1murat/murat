@@ -15,6 +15,7 @@ namespace murat {
     int           fNTracks    [2];          // might need two for different reasons: DAR<->PAR, ELE<->MUO
     int           fNGoodTracks[2];
     int           fNStrawHits;
+    int           fNComboHits;
 
     int           fNClusters;               // calorimeter clusters
 

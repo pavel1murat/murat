@@ -10,7 +10,7 @@
 
 #include "Stntuple/loop/TStnModule.hh"
 
-#include "Stntuple/obj/TStrawDataBlock.hh"
+#include "Stntuple/obj/TStrawHitBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 
 #include "Stntuple/base/TStnArrayI.hh"
@@ -30,6 +30,7 @@ public:
 //-----------------------------------------------------------------------------
   struct StrawHitHist_t : public HistBase_t {
     TH1F*    fGeneratorCode;		       //
+    TH1F*    fSimID;		       //
     TH1F*    fPdgCode;		       //
     TH1F*    fMotherPdgCode;		       //
     TH1F*    fMcMomentum;
@@ -70,7 +71,7 @@ public:
 //-----------------------------------------------------------------------------
 public:
 					// pointers to the data blocks used
-  TStrawDataBlock*      fStrawHitDataBlock;
+  TStrawHitBlock*       fStrawHitBlock;
   TSimpBlock*           fSimpBlock;
 
   int                   fNStrawHits;
@@ -114,14 +115,14 @@ public:
   void    BookStrawHitHistograms(HistBase_t* Hist, const char* Folder);
 
   void    FillEventHistograms   (HistBase_t* Hist);
-  void    FillStrawHitHistograms(HistBase_t* Hist, TStrawHitData* Hit, StrawHitPar_t* Shp);
+  void    FillStrawHitHistograms(HistBase_t* Hist, TStrawHit* Hit, StrawHitPar_t* Shp);
 
   void    BookHistograms();
   void    FillHistograms();
 
 
   void    Debug();
-  void    PrintStrawHit(TStrawHitData* Hit, StrawHitPar_t* Shp, const char* Option = "");
+  void    PrintStrawHit(TStrawHit* Hit, StrawHitPar_t* Shp, const char* Option = "");
 //-----------------------------------------------------------------------------
 // test
 //-----------------------------------------------------------------------------

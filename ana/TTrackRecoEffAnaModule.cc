@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
 // #include "CalorimeterGeom/inc/HexMap.hh"
 
-#include "ana/TTrackRecoEffAnaModule.hh"
+#include "murat/ana/TTrackRecoEffAnaModule.hh"
 
 ClassImp(TTrackRecoEffAnaModule)
 //-----------------------------------------------------------------------------
@@ -283,14 +283,14 @@ void TTrackRecoEffAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TTrackRecoEffAnaModule::FillStrawHitHistograms(StrawHitHist_t* Hist, TStrawHitData* Hit) {
+void TTrackRecoEffAnaModule::FillStrawHitHistograms(StrawHitHist_t* Hist, TStrawHit* Hit) {
 
-  Hist->fPdgCode->Fill(Hit->PdgCode());
-  Hist->fGenCode->Fill(Hit->GeneratorCode());
-  Hist->fEnergy->Fill(Hit->Energy());
-  Hist->fTime  ->Fill(Hit->Time  ());
+  Hist->fPdgCode->Fill(Hit->PdgID());
+  Hist->fGenCode->Fill(Hit->GenID());
+  Hist->fEnergy->Fill(Hit->EDep());
+  Hist->fTime  ->Fill(Hit->Time  (0));
   Hist->fDt    ->Fill(Hit->Dt    ());
-  Hist->fMcMomentum->Fill(Hit->McMomentum());
+  Hist->fMcMomentum->Fill(Hit->McMom());
 }
 
 //-----------------------------------------------------------------------------
@@ -465,7 +465,7 @@ int TTrackRecoEffAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
 // register data blocks
 //-----------------------------------------------------------------------------
-  RegisterDataBlock("StrawDataBlock"  ,"TStrawDataBlock" ,&fStrawDataBlock);
+  RegisterDataBlock("StrawHitBlock"   ,"TStrawHitBlock"  ,&fStrawHitBlock);
   RegisterDataBlock("VDetBlock"       ,"TVDetDataBlock"  ,&fVDetDataBlock);
   RegisterDataBlock("GenpBlock"       ,"TGenpBlock"      ,&fGenpBlock);
   RegisterDataBlock("TrackBlock"      ,"TStnTrackBlock"  ,&fTrackBlock);
@@ -554,10 +554,10 @@ void TTrackRecoEffAnaModule::FillHistograms() {
 // straw hit histograms
 //-----------------------------------------------------------------------------
 //  int            nh;
-  TStrawHitData* hit;
+  TStrawHit* hit;
 
   for (int i=0; i<fNStrawHits; i++) {
-    hit = fStrawDataBlock->Hit(i);
+    hit = fStrawHitBlock->Hit(i);
     FillStrawHitHistograms(fHist.fStrawHit[0],hit);
   }
 //-----------------------------------------------------------------------------
@@ -586,9 +586,9 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
 
   //  double                p;
   //  TLorentzVector        mom;
-  TStrawHitData*        hit(NULL);
+  TStrawHit*        hit(NULL);
 
-  fStrawDataBlock->GetEntry(ientry);
+  fStrawHitBlock->GetEntry(ientry);
   fVDetDataBlock->GetEntry(ientry);
   fTrackBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
@@ -597,13 +597,13 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
 // be changed
 //-----------------------------------------------------------------------------
   fNGenp      = fGenpBlock->NParticles();
-  fNStrawHits = fStrawDataBlock->NHits();
+  fNStrawHits = fStrawHitBlock->NHits();
 
   fNHitsSignal = 0;
 
   for (int i=0; i<fNStrawHits; i++) {
-    hit = fStrawDataBlock->Hit(i);
-    if ((hit->PdgCode() == fPdgCode) && (hit->GeneratorCode() == fGeneratorCode)) {
+    hit = fStrawHitBlock->Hit(i);
+    if ((hit->PdgID() == fPdgCode) && (hit->GenID() == fGeneratorCode)) {
       fNHitsSignal += 1;
     }
   }
@@ -638,7 +638,7 @@ int TTrackRecoEffAnaModule::Event(int ientry) {
 	fPitchTF = sqrt(px*px+py*py)/pz;
       }
     }
-    else if (hit->Index() == 15) {
+    else if (hit->StrawID() == 15) {
 					// tracker END
       fNHitsTB += 1;
       if (fMomTB < 0) fMomTB = vdhit->McMomentum();

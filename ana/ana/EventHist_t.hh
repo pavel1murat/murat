@@ -25,6 +25,7 @@ namespace murat {
     TH1F*    fNTracks[2];
     TH1F*    fNShTot [2];
     TH1F*    fNGoodSH;
+    TH1F*    fNChTot [2];
     TH1F*    fDtClT;
     TH1F*    fDtClS;
     TH1F*    fSHTime;

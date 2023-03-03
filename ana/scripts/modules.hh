@@ -15,6 +15,8 @@
 #include "murat/ana/TMuonStopAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
 // #include "murat/ana/TRMCAnaModule.hh"
+#include "murat/ana/TGenAnaModule.hh"
+#include "murat/ana/TSimpAnaModule.hh"
 #include "murat/ana/TSpmcAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
 #include "murat/ana/TTrackAnaModule.hh"

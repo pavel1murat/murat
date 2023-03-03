@@ -1,44 +1,30 @@
 # -*- mode: tcl -*-
 #------------------------------------------------------------------------------
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
-
-#include "Stntuple/fcl/prolog.fcl"
-#include "murat/fcl/prolog.fcl"
-
 BEGIN_PROLOG
-#  muStops    : [ @local::mergedMuonStops ]
-  pdgCode    : 11
-  bgHitFiles : @nil
+  INPUT_MODULE  @protect_ignore: RootInput        # choices: EmptyEvent / RootInput
+  TRIGGER_PATH  @protect_ignore: [ p2 ]
 END_PROLOG
 
-#include "Stntuple/fcl/templates.fcl"
+#include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/stntuple.fcl"
 
 process_name : trackerMCCheck
-source : {
-    module_type :  RootInput
-    maxEvents   :  -1
-#    fileNames   : ["/pnfs/mu2e/tape/phy-sim/sim/mu2e/cd3-detmix-cut/v566b/art/cc/1c/sim.mu2e.cd3-detmix-cut.v566b.000004_00000000.art"]
-# MDC2018
-    fileNames   : [ "/pnfs/mu2e/tape/phy-sim/dig/mu2e/CeEndpoint-mix/MDC2018a/art/a7/01/dig.mu2e.CeEndpoint-mix.MDC2018a.001002_00000000.art" ]
-}
 
-outputs      : { @table::Stntuple.outputs   }
-producers    : { @table::Stntuple.producers }
-filters      : { @table::Stntuple.filters   }
-paths        : { @table::Stntuple.paths     }
-
+# outputs      : { @table::stntuple.outputs   }
+producers    : { @table::stntuple.producers }
+filters      : { @table::stntuple.filters   }
+paths        : { @table::stntuple.paths     }
 #------------------------------------------------------------------------------
 # physics
 #------------------------------------------------------------------------------
 physics : { 
-    producers : { @table::producers 
-	generate: @local::StoppedParticleReactionGun
-    }
+    producers : { @table::producers }
+    filters   : { @table::filters   } 
 
-    filters   : { @table::filters 
+    analyzers : { 
 	TrackerMCCheck : { @table::murat.TrackerMCCheck
+            @table::StntupleTModuleFclDefaults
+
 	    debugBits                    : { 
 		bit3:0 bit4:1 # bit5:1 
 	    }
@@ -46,24 +32,14 @@ physics : {
     }
 
     @table::paths
-#------------------------------------------------------------------------------
-# paths
-#------------------------------------------------------------------------------
-#     p1 : [ @sequence::murat.mix_time_map, 
-# 	   @sequence::Tracking.DigiSim    , 
-# 	   @sequence::TrkHitReco.PrepareHits, 
-# 	   TrackerMCCheck                 
-# 	  ]
-    
-    p2 : [ @sequence::TrkHitReco.PrepareHits, TrackerMCCheck  ]
-    
-
-    e1 : []
+   
+    p2              : [ @sequence::TrkHitReco.PrepareHits  ]
+    trigger_paths   : [ p2 ]
+    e1              : [ TrackerMCCheck ]
+    end_paths       : [ e1 ]
 }
 #------------------------------------------------------------------------------
 # print per event timing for ::event entry points
 #------------------------------------------------------------------------------
 #     services.Timing: { }
 services.TFileService.fileName : "trackerMCCheck_read.hist"
-physics.trigger_paths          : [ p2 ]
-physics.end_paths              : [ e1 ]

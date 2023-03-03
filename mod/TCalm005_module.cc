@@ -12,17 +12,15 @@
 #include "murat/mod/TCalm005_module.hh"
 #include "Stntuple/print/TAnaDump.hh"
 
-#include "GeometryService/inc/GeometryService.hh"
-#include "GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/GeometryService.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
 
-#include "CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
 
-#include "RecoDataProducts/inc/CaloCrystalHit.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
-#include "MCDataProducts/inc/StepPointMC.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
 
 namespace mu2e {
 
@@ -140,9 +138,7 @@ namespace mu2e {
 //-----------------------------------------------------------------------------
 // begin run 
 //-----------------------------------------------------------------------------
-  bool TCalm005::beginRun(art::Run& R) {
-
-    return true;
+  void TCalm005::beginRun(const art::Run& R) {
   }
 
 
@@ -308,7 +304,7 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  void TCalm005::getData(art::Event* Evt) {
+  void TCalm005::getData(const art::Event* Evt) {
     const char* oname = "TCalm005::getData";
 //-----------------------------------------------------------------------------
 // generated particles
@@ -342,7 +338,7 @@ namespace mu2e {
 
 
 //-----------------------------------------------------------------------------
-  void TCalm005::Init(art::Event* Evt) {
+  void TCalm005::Init(const art::Event* Evt) {
     //  const char oname[] = "TCalm005::Init";
 
   }
@@ -350,7 +346,7 @@ namespace mu2e {
 
 
 //-----------------------------------------------------------------------------
-  void TCalm005::Debug(art::Event* Evt) {
+  void TCalm005::Debug(const art::Event* Evt) {
     //    const char* oname = "TCalm005::Debug";
 //-----------------------------------------------------------------------------
 // bit 000: calorimeter step points
@@ -361,10 +357,8 @@ namespace mu2e {
   }
 
 //-----------------------------------------------------------------------------
-  bool TCalm005::filter(art::Event& Evt) {
+  void TCalm005::analyze(const art::Event& Evt) {
     const char* oname = "TCalm005::filter";
-
-    bool rc(true);
 
     fEventNumber = Evt.event();
     fRunNumber   = Evt.run();
@@ -377,13 +371,11 @@ namespace mu2e {
 
     FillHistograms();
 					// so far - fake
-    if (TModule::fDebugBit[51] != 0) {
-      rc = 1;
-    }
+    // if (TModule::fDebugBit[51] != 0) {
+    // }
 
-    TModule::filter(Evt);
+    TModule::analyze(Evt);
     
-    return rc;
   }
   
 }  // end namespace mu2e

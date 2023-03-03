@@ -23,16 +23,14 @@
 
 #include "RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
-#include "RecoDataProducts/inc/StrawHitCollection.hh"
-#include "RecoDataProducts/inc/CaloCrystalHitCollection.hh"
-#include "RecoDataProducts/inc/CaloHitCollection.hh"
-#include "RecoDataProducts/inc/CaloClusterCollection.hh"
-#include "RecoDataProducts/inc/TrkToCaloExtrapol.hh"
+#include "Offline/RecoDataProducts/inc/StrawHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
+#include "Offline/RecoDataProducts/inc/TrkToCaloExtrapol.hh"
 
-#include "MCDataProducts/inc/PtrStepPointMCVectorCollection.hh"
-#include "MCDataProducts/inc/GenParticleCollection.hh"
-#include "MCDataProducts/inc/SimParticleCollection.hh"
-#include "MCDataProducts/inc/StepPointMCCollection.hh"
+#include "Offline/MCDataProducts/inc/GenParticle.hh"
+#include "Offline/MCDataProducts/inc/SimParticle.hh"
+#include "Offline/MCDataProducts/inc/StepPointMC.hh"
 
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -58,7 +56,6 @@ class TAnaTrackID;
 
 namespace mu2e {
   class TTracker;
-  class VaneCalorimeter;
 }
 
 namespace mu2e {
@@ -135,7 +132,7 @@ namespace mu2e {
     GenParticleCollection*              fListOfGenParticles;
     TrkToCaloExtrapolCollection*        fListOfExtrapolatedTracks;
     StrawHitCollection*                 fListOfStrawHits;
-    PtrStepPointMCVectorCollection*     fListOfMcStrawHits;
+    // PtrStepPointMCVectorCollection*     fListOfMcStrawHits;
 
     TTracker*                     fTracker;
 

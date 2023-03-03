@@ -24,7 +24,7 @@
 
 #include "murat/gui/TEvdManager.hh"
 
-ClassImp(TEvdManager)
+// ClassImp(TEvdManager)
 
 //-----------------------------------------------------------------------------
 TEvdManager::TEvdManager(const char* Name, const char* Title): TVisManager(Name, Title) {
@@ -41,8 +41,6 @@ TEvdManager::TEvdManager(const char* Name, const char* Title): TVisManager(Name,
 					// by default, no timing constraints
   fTMin       = 0;
   fTMax       = 1.e5;
-
-  fTimeCluster = -1;
 
   //  fTitleNode
 }
@@ -90,13 +88,13 @@ void TEvdManager::HandleButtons() {
   // case kXYView:
   //   OpenTrkXYView();
   //   break;
-  case TStnView::kTZ:
+  case TEvdManager::kTZ:
     OpenTrkTZView();
     break;
-  // case TStnView::kCal:
+  // case TEvdManager::kCal:
   //   OpenCalView();
   //   break;
-  // case TStnView::kCrv:
+  // case TEvdManager::kCrv:
   //   OpenCrvView();
   //   break;
   case UPDATER_BTN:
@@ -207,7 +205,7 @@ int TEvdManager::InitGui(const char* Title) {
 
 //   fMain->AddFrame(fMenuBar, fMenuBarLayout);
 
-//   trkrBtnTZ = new TGTextButton(fMain, "Tracker TZ", TStnView::kTZ);
+//   trkrBtnTZ = new TGTextButton(fMain, "Tracker TZ", TEvdManager::kTZ);
 //   trkrBtnTZ->Connect("Clicked()", "TEvdManager", this, "HandleButtons()");
 //   trkrBtnTZ->SetTextJustify(36);
 //   trkrBtnTZ->SetMargins(0, 0, 0, 0);
@@ -291,46 +289,80 @@ int TEvdManager::InitGui(const char* Title) {
 
 
 //-----------------------------------------------------------------------------
+int TEvdManager::GetViewID(const char* View) {
+
+  TString view_id = View;
+  view_id.ToLower();
+
+  if      (view_id == "xy" ) return TEvdManager::kXY;
+  else if (view_id == "rz" ) return TEvdManager::kRZ;
+  else if (view_id == "tz" ) return TEvdManager::kTZ;
+  else if (view_id == "cal") return TEvdManager::kCal;
+  else if (view_id == "crv") return TEvdManager::kCrv;
+  else if (view_id == "vst") return TEvdManager::kVST;
+  else {
+    printf("TEvdManager::%s: ERROR: unknown view type : %s\n",__func__,View);
+    return -1;
+  }
+}
+
+//-----------------------------------------------------------------------------
+void TEvdManager::OpenView(const char* View) {
+
+  TString view_id = View;
+  view_id.ToLower();
+
+  if      (view_id == "xy" ) OpenTrkXYView();
+  else if (view_id == "tz" ) OpenTrkTZView();
+  else {
+    printf("TEvdManager::OpenView: ERROR: unknown view type : %s\n",View);
+  }
+}
+
+//-----------------------------------------------------------------------------
 TCanvas* TEvdManager::NewCanvas(const char* Name, const char* Title, int SizeX, int SizeY) {
-  TStnFrame* win = new TStnFrame(Name, Title, 0, SizeX, SizeY);
+  TStnFrame* win = new TStnFrame(Name, Title, this, 0, SizeX, SizeY);
   TCanvas*c = win->GetCanvas();
   DeclareCanvas(c);
   return c;
 }
 
 
-// //_____________________________________________________________________________
-// Int_t TEvdManager::OpenTrkXYView() {
-//   // open new XY view of the detector with the default options
+//_____________________________________________________________________________
+Int_t TEvdManager::OpenTrkXYView() {
+  // open new XY view of the detector with the default options
 
-//   int n = fListOfCanvases->GetSize();
+  int n = fListOfCanvases->GetSize();
 
-//   char name[100], title[100];
+  char name[100], title[100];
 
-//   sprintf(name, "xy_view_%i", n);
-//   sprintf(title, "XY view number %i", n);
+  sprintf(name, "xy_view_%i", n);
+  sprintf(title, "XY view number %i", n);
 
-//   TStnFrame* win = new TStnFrame(name, title, kXYView, 740, 760);
-//   TCanvas* c = win->GetCanvas();
-//   fListOfCanvases->Add(c);
+  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kXY, 740, 760);
+  TCanvas* c = win->GetCanvas();
+  fListOfCanvases->Add(c);
 
-//   TString name1(name);
-//   name1 += "_1";
-//   TPad* p1 = (TPad*) c->FindObject(name1);
-//   p1->Range(-1000., -1000., 1000., 1000.);
-//   p1->cd();
-//   fTrkXYView->Draw();
+  TString name1(name);
+  name1 += "_1";
+  TPad* p1 = (TPad*) c->FindObject(name1);
+  p1->Range(-1000., -1000., 1000., 1000.);
+  p1->cd();
 
-//   TString name_title(name);
-//   name1 += "_title";
-//   TPad* title_pad = (TPad*) c->FindObject(name_title);
-//   title_pad->cd();
-//   fTitleNode->Draw();
+  TStnView* v = FindView(TEvdManager::kXY,-1);
 
-//   c->Modified();
-//   c->Update();
-//   return 0;
-// }
+  v->Draw();
+
+  TString name_title(name);
+  name1 += "_title";
+  TPad* title_pad = (TPad*) c->FindObject(name_title);
+  title_pad->cd();
+  fTitleNode->Draw();
+
+  c->Modified();
+  c->Update();
+  return 0;
+}
 
 //_____________________________________________________________________________
 Int_t TEvdManager::OpenTrkXYView(TStnView* mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2) {
@@ -349,7 +381,7 @@ Int_t TEvdManager::OpenTrkXYView(TStnView* mother, Axis_t x1, Axis_t y1, Axis_t 
   xsize = 540;
   ysize = (Int_t) (xsize*TMath::Abs((y2 - y1) / (x2 - x1)) + 20);
 
-  TStnFrame* win = new TStnFrame(name, title, TStnView::kXY, xsize, ysize);
+  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kXY, xsize, ysize);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 
@@ -382,7 +414,7 @@ Int_t TEvdManager::OpenTrkTZView() {
   sprintf(name,  "zt_view_%i", n);
   sprintf(title, "ZT view number %i", n);
 
-  TStnFrame* win = new TStnFrame(name, title, TStnView::kXY, 1240, 760);
+  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kXY, 1240, 760);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 
@@ -392,7 +424,7 @@ Int_t TEvdManager::OpenTrkTZView() {
   p1->Range(-1600., 0., 1600., 1800.);
   p1->cd();
 
-  TStnView* v = FindView(TStnView::kTZ,-1);
+  TStnView* v = FindView(TEvdManager::kTZ,-1);
 
   v->Draw();
 
@@ -424,7 +456,7 @@ Int_t TEvdManager::OpenTrkTZView(TStnView* Mother, Axis_t Z1, Axis_t T1, Axis_t 
   xsize = 540;
   ysize = (Int_t) (xsize*TMath::Abs((T2 - T1) / (Z2 - Z1)) + 20);
 
-  TStnFrame* win = new TStnFrame(name, title, TStnView::kTZ, xsize, ysize);
+  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kTZ, xsize, ysize);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 
@@ -450,13 +482,13 @@ Int_t TEvdManager::OpenTrkTZView(TStnView* Mother, Axis_t Z1, Axis_t T1, Axis_t 
 void TEvdManager::OpenView(TStnView* Mother, int Px1, int Py1, int Px2, int Py2) {
   int vtype = Mother->Type();
 
-  if      (vtype == TStnView::kXY ) OpenTrkXYView(Mother,Px1,Py1,Px2,Py2);
-  //  else if (vtype == TStnView::kRZ ) OpenTrkRZView(Mother,Px1,Py1,Px2,Py2);
-  else if (vtype == TStnView::kTZ ) OpenTrkTZView(Mother,Px1,Py1,Px2,Py2);
-  // else if (vtype == TStnView::kCal) OpenCalView  (Mother,Px1,Py1,Px2,Py2);
-  // else if (vtype == TStnView::kCrv) OpenCrvView  (Mother,Px1,Py1,Px2,Py2);
+  if      (vtype == TEvdManager::kXY  ) OpenTrkXYView(Mother,Px1,Py1,Px2,Py2);
+  //  else if (vtype == TEvdManager::kRZ ) OpenTrkRZView(Mother,Px1,Py1,Px2,Py2);
+  else if (vtype == TEvdManager::kTZ ) OpenTrkTZView(Mother,Px1,Py1,Px2,Py2);
+  // else if (vtype == TEvdManager::kCal) OpenCalView  (Mother,Px1,Py1,Px2,Py2);
+  // else if (vtype == TEvdManager::rv) OpenCrvView  (Mother,Px1,Py1,Px2,Py2);
   else {
-    printf("TStnVisManager::OpenView: ERROR: unknown view type : %i\n",vtype);
+    printf("TEvdManager::OpenView: ERROR: unknown view type : %i\n",vtype);
   }
 }
 
@@ -483,14 +515,4 @@ void TEvdManager::CloseWindow() {
 
   delete this;
 }
-
-
-// void TEvdManager::SetStations(int IMin, int IMax) {
-//   fMinStation = IMin;
-//   fMaxStation = IMax;
-// }
-
-// void TEvdManager::SetTimeCluster(int I) {
-//   fTimeCluster = I;
-// }
 

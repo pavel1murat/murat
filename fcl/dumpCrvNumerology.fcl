@@ -1,0 +1,21 @@
+# -*- mode: tcl -*-
+#
+# Print CRV geometry
+#
+BEGIN_PROLOG
+  TRIGGER_PATHS @protect_ignore: []
+END_PROLOG
+
+#include "Stntuple/fcl/stntuple.fcl"
+
+source       : { module_type : EmptyEvent }
+
+physics : { 
+  analyzers :  {
+    DumpCrvNumerology : { module_type : DumpCrvNumerology }
+  }
+
+  e1         : [ DumpCrvNumerology ]
+  end_paths  : [ e1 ]
+}
+

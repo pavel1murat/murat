@@ -3,9 +3,9 @@
 # Print some information about the TTracker.
 #
 ###############################################################################
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
 
 #include "murat/fcl/prolog.fcl"
 

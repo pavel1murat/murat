@@ -13,7 +13,7 @@
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 #include "Stntuple/obj/TCalDataBlock.hh"
-#include "Stntuple/obj/TStrawDataBlock.hh"
+#include "Stntuple/obj/TStrawHitBlock.hh"
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TVDetDataBlock.hh"
@@ -105,7 +105,7 @@ public:
 public:
 					// pointers to the data blocks used
   TStnTrackBlock*       fTrackBlock;
-  TStrawDataBlock*      fStrawDataBlock;
+  TStrawHitBlock*       fStrawHitBlock;
   TGenpBlock*           fGenpBlock;
   TVDetDataBlock*       fVDetDataBlock;
 					// histograms filled
@@ -200,7 +200,7 @@ public:
   void    BookTrackHistograms    (TrackHist_t*    Hist, const char* Folder);
   void    BookRecoEffHistograms  (RecoEffHist_t*  Hist, const char* Folder);
 
-  void    FillStrawHitHistograms (StrawHitHist_t* Hist, TStrawHitData*  Hit);
+  void    FillStrawHitHistograms (StrawHitHist_t* Hist, TStrawHit*    Hit  );
   void    FillEventHistograms    (EventHist_t*    Hist);
   void    FillGenpHistograms     (GenpHist_t*     Hist, TGenParticle* Genp );
   void    FillTrackHistograms    (TrackHist_t*    Hist, TStnTrack*    Track);

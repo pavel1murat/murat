@@ -6,14 +6,14 @@
 #include "TObjArray.h"
 #include "TString.h"
 
-#include "Mu2eUtilities/inc/SimParticleTimeOffset.hh"
+#include "Offline/Mu2eUtilities/inc/SimParticleTimeOffset.hh"
 
 #ifndef __CINT__
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
-#include "BTrkData/inc/TrkStrawHit.hh"
+#include "Offline/BTrkData/inc/TrkStrawHit.hh"
 
 #include "Stntuple/obj/TStnTrackBlock.hh"
 #include "Stntuple/alg/TStnTrackID.hh"

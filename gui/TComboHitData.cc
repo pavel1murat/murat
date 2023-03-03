@@ -2,7 +2,7 @@
 
 #include "TPad.h"
 #include "murat/gui/TComboHitData.hh"
-#include "Stntuple/base/TVisManager.hh"
+#include "murat/gui/TEvdManager.hh"
 
 ClassImp(TComboHitData)
 
@@ -48,10 +48,12 @@ void TComboHitData::Paint(Option_t* Option) {
 
   //  int   iv;
 
-  int view = TVisManager::Instance()->GetCurrentView()->Type();
+  TEvdManager* vm = TEvdManager::Instance();
 
-  if      (view == TStnView::kXY) PaintXY (Option);
-  else if (view == TStnView::kTZ) PaintTZ (Option);
+  int view = vm->GetCurrentView()->Type();
+
+  if      (view == vm->GetViewID("xy")) PaintXY (Option);
+  else if (view == vm->GetViewID("tz")) PaintTZ (Option);
   else {
     printf("[%s] >>> ERROR: unknown view: %i, DO NOTHING\n",oname,view);
   }

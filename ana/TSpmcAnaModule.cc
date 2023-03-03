@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 #include "murat/ana/TSpmcAnaModule.hh"
 
-#include "ana/InitVirtualDetectors.hh"
+#include "murat/ana/InitVirtualDetectors.hh"
 
 ClassImp(murat::TSpmcAnaModule)
 

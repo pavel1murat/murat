@@ -21,6 +21,17 @@ class TExtrapolator;
 
 class TEvdManager : public TVisManager {
 public:
+					// different view types
+  enum {
+    kUndefined = -1,
+    kXY        =  1,
+    kRZ        =  2,
+    kTZ        =  3,
+    kCal       =  4,
+    kCrv       =  5,
+    kVST       =  6			// VST view
+  };
+
 //-----------------------------------------------------------------------------
 // command codes
 //-----------------------------------------------------------------------------
@@ -79,7 +90,6 @@ protected:
 
   int                 fMinStation;
   int                 fMaxStation;
-  int                 fTimeCluster;
   int                 fDebugLevel;
 
   float               fTMin;
@@ -115,7 +125,6 @@ public:
   
   int    MinStation() { return fMinStation; }
   int    MaxStation() { return fMaxStation; }
-  int    TimeCluster() { return fTimeCluster; }
 
   double TMin() { return fTMin; }
   double TMax() { return fTMax; }
@@ -134,16 +143,20 @@ public:
 
   void UpdateViews();
 
-  virtual TCanvas*  NewCanvas(const char* Name,
-			      const char* Title,
-			      Int_t       SizeX,
-			      Int_t       SizeY);
 //-----------------------------------------------------------------------------
 // different views
 //-----------------------------------------------------------------------------
-  virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2);
+  virtual TCanvas*  NewCanvas(const char* Name,
+			      const char* Title,
+			      Int_t       SizeX,
+			      Int_t       SizeY) override;
 
-  // Int_t   OpenTrkXYView();
+  virtual int   GetViewID(const char* View) override;
+
+  virtual void  OpenView(const char* View) override;
+  virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2) override;
+
+  Int_t   OpenTrkXYView();
   Int_t   OpenTrkXYView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);
   
   Int_t   OpenTrkTZView();
@@ -151,6 +164,6 @@ public:
   
   void    CloseWindow();
 
-  ClassDef(TEvdManager, 0)
+  //  ClassDef(TEvdManager, 0)
 };
 #endif

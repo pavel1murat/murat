@@ -41,7 +41,7 @@ combo_hits::combo_hits(const char* Name, const char* Fn) : TNamed(Name,Name), fC
   printf("in the combo_hits constructor\n");
   fNode->Print();
 
-  TStnView* view  = new TStnView(TStnView::kTZ,-1,"TZView","TZView") ;
+  TStnView* view  = new TStnView(TEvdManager::kTZ,-1,"TZView","TZView") ;
   view->AddNode(fNode);
 
   TEvdManager::Instance()->AddView(view);

@@ -13,8 +13,8 @@
 #include "art/Framework/Core/ModuleMacros.h"
 
 // Mu2e includes.
-#include "MCDataProducts/inc/SimParticle.hh"
-#include "MCDataProducts/inc/MCTrajectoryCollection.hh"
+#include "Offline/MCDataProducts/inc/SimParticle.hh"
+#include "Offline/MCDataProducts/inc/MCTrajectoryCollection.hh"
 
 using namespace std;
 
@@ -53,6 +53,9 @@ void DumpMCTrajectories::analyze(const art::Event& event) {
   auto simpColl     = event.getValidHandle<SimParticleCollection>(_simpCollTag);
 
   auto trajectories = event.getValidHandle<MCTrajectoryCollection>(_mctrCollTag);
+  // art::Selector  selector(art::ProductInstanceNameSelector(_mctrCollTag));
+
+  // auto trajectories = event.getMany<MCTrajectoryCollection>(selector);
 
   char fn[10000];
 

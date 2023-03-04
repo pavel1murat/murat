@@ -139,11 +139,14 @@ murat : {
     DumpEventNumber : { module_type:DumpEventNumber
     }
 
+#------------------------------------------------------------------------------
+# by default, doesn't print anything
+#------------------------------------------------------------------------------
     DumpGeometry : { module_type:DumpGeometry
-        dumpVirtualDetectors  : 1
-        dumpTrackerNumerology : 1
-        dumpCRVNumerology     : 1
-        dumpCaloGeometry      : 1
+        dumpVirtualDetectors  : 0
+        dumpTrackerNumerology : 0
+        dumpCRVNumerology     : 0
+        dumpCaloGeometry      : 0
     }
 
     DumpTrackerNumerology : { module_type:DumpTrackerNumerology

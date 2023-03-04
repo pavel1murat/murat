@@ -1,16 +1,12 @@
 # -*- mode: tcl -*-
 ###############################################################################
-# Print positions of virtual detectors
+# Print positions of the CRV bars
 ###############################################################################
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
-
 #include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/stntuple.fcl"
 
-process_name : DumpCaloGeometry
+process_name : DumpCRVNumerology
 
-services     : { @table::Services.SimAndReco }
 source       : { module_type : EmptyEvent    }
 
 physics : {
@@ -19,4 +15,4 @@ physics : {
     end_paths  : [ e1           ]
 }
 #------------------------------------------------------------------------------
-physics.analyzers.DumpGeometry.dumpCaloGeometry : 1
+physics.analyzers.DumpGeometry.dumpCRVNumerology : 1

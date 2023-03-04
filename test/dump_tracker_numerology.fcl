@@ -2,21 +2,17 @@
 ###############################################################################
 # Print TTracker geometry / numerology
 ###############################################################################
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
-
 #include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/stntuple.fcl"
 
 process_name  : DumpTrackerNumerology
 
-services      : { @table::Services.SimAndReco }
 source        : { module_type : EmptyEvent }
 
 physics : {
     analyzers :  { @table::murat.analyzers }
     e1        : [ DumpGeometry ]
-    end_paths : [ e1   ]
+    end_paths : [ e1           ]
 }
 #------------------------------------------------------------------------------
 physics.analyzers.DumpGeometry.dumpTrackerNumerology : 1

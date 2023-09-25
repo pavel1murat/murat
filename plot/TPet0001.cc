@@ -92,11 +92,11 @@ TPet0001::TPet0001(int PlotMode, int BlessingMode): TPlotNote(PlotMode,BlessingM
   // else if (PlotMode == kPaperMode) {
   // }
 
-};
+}
 
 //_____________________________________________________________________________
 TPet0001::~TPet0001() {
-};
+}
 
 //-----------------------------------------------------------------------------
 const char* TPet0001::GetFiguresDir() {

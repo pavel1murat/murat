@@ -32,25 +32,25 @@ void xyz2uys(double Mu2eX, double Mu2eY, double Mu2eZ)  {
   double X1TSd = X0TSd+nXTSd*step;
   double X1DS  = X0DS +nXDS *step;
 
-  double Y1PS=Y0PS+nY*step;
-  double Y1TSu=Y0TSu+nY*step;
-  double Y1TSd=Y0TSd+nY*step;
-  double Y1DS=Y0DS+nY*step;
+  double Y1PS  = Y0PS+nY*step;
+  double Y1TSu = Y0TSu+nY*step;
+  double Y1TSd = Y0TSd+nY*step;
+  double Y1DS  = Y0DS+nY*step;
 
-  double Z1PS=Z0PS+nZPS*step;
-  double Z1TSu=Z0TSu+nZTSu*step;
-  double Z1TSd=Z0TSd+nZTSd*step;
-  double Z1DS=Z0DS+nZDS*step;
+  double Z1PS  = Z0PS+nZPS*step;
+  double Z1TSu = Z0TSu+nZTSu*step;
+  double Z1TSd = Z0TSd+nZTSd*step;
+  double Z1DS  = Z0DS+nZDS*step;
 
   double   u,y,s;
   TVector3 r0,r1,r2;
-//-----------------------------------------------------------------------------
-// PS
-//-----------------------------------------------------------------------------
-  if (Mu2eX>=X0PS && Mu2eX<=X1PS && Mu2eY>=Y0PS && Mu2eY<=Y1PS && Mu2eZ>=Z0PS && Mu2eZ<Z1PS) {
-    // Determine the point on the magnetic axis closest to the input point
-    // and get coordinates of the point on a system attached to the axis
 
+  if (Mu2eX>=X0PS && Mu2eX<=X1PS && Mu2eY>=Y0PS && Mu2eY<=Y1PS && Mu2eZ>=Z0PS && Mu2eZ<Z1PS) {
+//-----------------------------------------------------------------------------
+// point located in PS 
+// Determine the point on the magnetic axis closest to the input point
+// and get coordinates of the point on a system attached to the axis
+//-----------------------------------------------------------------------------
     r0.SetXYZ(R+L3/2,0,Mu2eZ);
     r1.SetXYZ(Mu2eX,Mu2eY,Mu2eZ);
     Mu2eToLocal(r0,r1,r2);

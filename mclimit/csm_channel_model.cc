@@ -914,17 +914,17 @@ Double_t csm_channel_model::chisquared1(const TH1 *dh)
   // number of template histograms
   nc = (Int_t) histotemplate.size();
 
-  Int_t lpoissflag[nc];  // local Poisson flag -- if error is zero for a template in a bin
-                         // reclassify it as no bin error
+  Int_t* lpoissflag = new int [nc];  // local Poisson flag -- if error is zero for a template in a bin
+                                    // reclassify it as no bin error
 
   // allocate rho1 and rho2 for all templates, even though we're only going to need
   // them for the Poisson-distributed ones
   // push them on the stack -- 8 dec 2007
 
-  Double_t rho1[nc];
-  Double_t rho2[nc];
-  Int_t zlist[nc];
-  Double_t sfgp[nc];  // scale factor needed to approximate Gaussian errors as Poisson
+  Double_t* rho1 = new double [nc];
+  Double_t* rho2 = new double [nc];
+  Int_t*    zlist= new int    [nc];
+  Double_t* sfgp = new double [nc];  // scale factor needed to approximate Gaussian errors as Poisson
 
   nbinsx = dh->GetNbinsX();
   nbinsy = dh->GetNbinsY();
@@ -1222,6 +1222,12 @@ Double_t csm_channel_model::chisquared1(const TH1 *dh)
   //    cout << "Bad chi2: " << endl;
   //    exit(0);
   //  }
+
+  delete lpoissflag;
+  delete rho1;
+  delete rho2;
+  delete zlist;
+  delete sfgp;
 
   return chi2;
 
@@ -1711,14 +1717,16 @@ void csm_pvmc(Int_t nb, Double_t *dist1, Double_t *dist2, Double_t *dist3, Doubl
   Int_t i,j,k,k1,k2;
   Double_t total;
   Double_t wta,wtb;
-  Double_t yd[nb3];
-  Double_t id[nb3];
-  Double_t xd[nb3];
-  Double_t xdis[nb3];
-  Double_t ydis[nb3];
-  Double_t ydi[nb + 1];
-  Int_t idx[nb3];
-  Int_t ifirst;
+
+  Double_t* yd   = new double [nb3];
+  Double_t* id   = new double [nb3];
+  Double_t* xd   = new double [nb3];
+  Double_t* xdis = new double [nb3];
+  Double_t* ydis = new double [nb3];
+  Double_t* ydi  = new double [nb + 1];
+  Int_t*    idx  = new int    [nb3];
+
+  Int_t    ifirst;
   Double_t x1l,x2l,x3l,y1l,y2l,y3l;
   Double_t x1,x2,x3,y1,y2,y3;
   Double_t xloc,yloc,x1i,x2i,x3i;
@@ -2166,6 +2174,14 @@ void csm_pvmc(Int_t nb, Double_t *dist1, Double_t *dist2, Double_t *dist3, Doubl
     {
       distn[i] = ydi[i+1] - ydi[i]; 
     }
+
+  delete yd  ;  
+  delete id  ;
+  delete xd  ;
+  delete xdis;
+  delete ydis;
+  delete ydi ;
+  delete idx ;
 }
 
 /*------------------------------------------------------------------------*/
@@ -2213,9 +2229,18 @@ void csm_pvmc2d(Int_t nx, Int_t ny, Double_t *xydist1,
                 Double_t *xydist2, Double_t *xydist3, Double_t *xydistn,
                 Double_t par1, Double_t par2, Double_t parn)
 {
-  Double_t ydist1[ny],ydist2[ny],ydist3[ny],ydistn[ny];
-  Double_t xtemp1[nx],xtemp2[nx],xtemp3[nx],xtempn[nx];
-  Double_t alpha1[ny*ny],alpha2[ny*ny],alpha3[ny*ny];
+  Double_t* ydist1 = new double[ny];
+  double*   ydist2 = new double[ny];
+  double*   ydist3 = new double[ny];
+  double*   ydistn = new double[ny];
+  Double_t* xtemp1 = new double[nx];
+  double*   xtemp2 = new double[nx];
+  double*   xtemp3 = new double[nx];
+  double*   xtempn = new double[nx];
+  Double_t* alpha1 = new double[ny*ny];
+  double*   alpha2 = new double[ny*ny];
+  double*   alpha3 = new double[ny*ny];
+
   Int_t i,j,k;
 
   // Project xydist1,2,3 onto the y axis and normalize
@@ -2263,6 +2288,18 @@ void csm_pvmc2d(Int_t nx, Int_t ny, Double_t *xydist1,
       // Insert the interpolated x distribution into the final output dist
       for (k=0;k<nx;k++) xydistn[k+nx*i] = xtempn[k]*ydistn[i];
     }
+
+  delete ydist1; 
+  delete ydist2;
+  delete ydist3;
+  delete ydistn;
+  delete xtemp1;
+  delete xtemp2;
+  delete xtemp3;
+  delete xtempn;
+  delete alpha1;
+  delete alpha2;
+  delete alpha3;
 }
 
 /*
@@ -2331,8 +2368,8 @@ void csm_ycont(Int_t ny, Double_t *ydist1, Double_t *ydist2,
                Double_t *ydist3, Double_t *ydistn,
                Double_t *alpha1, Double_t *alpha2, Double_t *alpha3)
 {
-  Double_t y[ny+1];
-  Double_t yn[ny+1];
+  Double_t* y  = new double [ny+1];
+  Double_t* yn = new double [ny+1];
   Int_t i;
 
   // Make arrays to describe the straight-line approximations
@@ -2372,6 +2409,9 @@ void csm_ycont(Int_t ny, Double_t *ydist1, Double_t *ydist2,
   for (i=0;i<ny;i++) y[i+1] = ydist3[i];
   csm_acnvec2(y,ny+1);
   csm_ycontaux(ny,y,yn,alpha3);
+
+  delete y;
+  delete yn;
 }
 
 void csm_ycontaux(Int_t ny, Double_t *y, Double_t *yn,

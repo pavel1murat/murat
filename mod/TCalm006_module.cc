@@ -288,4 +288,4 @@ namespace mu2e {
 
 using mu2e::TCalm006;
 
-DEFINE_ART_MODULE(TCalm006);
+DEFINE_ART_MODULE(TCalm006)

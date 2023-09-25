@@ -62,7 +62,7 @@ namespace{
    1, 104.95, 105.05,
    -1
   };
-};
+}
 
 
 TPolFitSpectrum*              TPolFitSpectrum::fgFit (0);

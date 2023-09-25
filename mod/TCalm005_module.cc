@@ -382,4 +382,4 @@ namespace mu2e {
 
 using mu2e::TCalm005;
 
-DEFINE_ART_MODULE(TCalm005);
+DEFINE_ART_MODULE(TCalm005)

@@ -221,4 +221,4 @@ namespace mu2e {
 }
 
 using mu2e::StrawChargeDeposition;
-DEFINE_ART_MODULE(StrawChargeDeposition);
+DEFINE_ART_MODULE(StrawChargeDeposition)

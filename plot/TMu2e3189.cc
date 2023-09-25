@@ -43,11 +43,11 @@ TMu2e3189::TMu2e3189(int PlotMode, int BlessingMode): TPlotNote(PlotMode,Blessin
   // else if (PlotMode == kPaperMode) {
   // }
 
-};
+}
 
 //_____________________________________________________________________________
 TMu2e3189::~TMu2e3189() {
-};
+}
 
 //-----------------------------------------------------------------------------
 const char* TMu2e3189::GetFiguresDir() {

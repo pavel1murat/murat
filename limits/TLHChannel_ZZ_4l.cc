@@ -30,7 +30,7 @@ namespace {
 		     {334.,  44.}
   };
 
-};
+}
 
 //-----------------------------------------------------------------------------
 TLHChannel_ZZ_4l::TLHChannel_ZZ_4l(int HighMassOnly): TLHChannel("ZZ_4l","ZZ_4l") {

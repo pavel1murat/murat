@@ -91,4 +91,4 @@ void DumpMCTrajectories::analyze(const art::Event& event) {
   
 }  // end namespace mu2e
 
-DEFINE_ART_MODULE(mu2e::DumpMCTrajectories);
+DEFINE_ART_MODULE(mu2e::DumpMCTrajectories)

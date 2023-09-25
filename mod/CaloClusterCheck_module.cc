@@ -173,4 +173,4 @@ namespace mu2e {
 }
 
 using mu2e::CaloClusterCheck;
-DEFINE_ART_MODULE(CaloClusterCheck);
+DEFINE_ART_MODULE(CaloClusterCheck)

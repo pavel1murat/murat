@@ -14,7 +14,7 @@
 #include "Stntuple/gui/TEvdCrvSection.hh"
 #include "murat/gui/View3D.hh"
 
-ClassImp(View3D);
+ClassImp(View3D)
 
 //-----------------------------------------------------------------------------
 View3D::View3D() : TObject() {

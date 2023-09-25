@@ -88,11 +88,11 @@ TMu2e2992::TMu2e2992(int PlotMode, int BlessingMode): TPlotNote(PlotMode,Blessin
   // else if (PlotMode == kPaperMode) {
   // }
 
-};
+}
 
 //_____________________________________________________________________________
 TMu2e2992::~TMu2e2992() {
-};
+}
 
 //-----------------------------------------------------------------------------
 const char* TMu2e2992::GetFiguresDir() {

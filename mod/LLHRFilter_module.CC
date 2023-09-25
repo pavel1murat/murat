@@ -290,4 +290,4 @@ bool LLHRFilter::filter(AbsEvent& AnEvent) {
 
 using mu2e::LLHRFilter;
 
-DEFINE_ART_MODULE(LLHRFilter);
+DEFINE_ART_MODULE(LLHRFilter)

@@ -52,7 +52,7 @@
 
 namespace mu2e { 
   class MVATools;
-};
+}
 
 namespace murat {
 

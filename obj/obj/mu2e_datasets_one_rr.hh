@@ -24,6 +24,6 @@ namespace {
   TAnalysisDataset::dataset_t  cosm01[kNRunRanges] = {      1,500000,"cosm01","DQM_V34", 3,      1,      1,      1,      1 };
   //  TAnalysisDataset::dataset_t  dio01 [kNRunRanges] = {      1,500000,"dio01" ,"DQM_V34", 3,      1,      1,      1,      1 };
   TAnalysisDataset::dataset_t  dio02 [kNRunRanges] = {      1,500000,"dio02" ,"DQM_V34", 3,      1,      1,      1,      1 };
-};
+}
 
 #endif

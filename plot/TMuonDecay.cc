@@ -32,7 +32,7 @@ namespace {
   //  TF1   *f1(0), *f2(0);
   
   //  char fn_eps[200],fn_pdf[200],cmd[500];
-};
+}
 
 
 double  TMuonDecay::fMAl   = 25133.;

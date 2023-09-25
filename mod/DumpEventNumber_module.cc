@@ -58,4 +58,4 @@ namespace mu2e {
 } // end namespace mu2e
 
 using mu2e::DumpEventNumber;
-DEFINE_ART_MODULE(DumpEventNumber);
+DEFINE_ART_MODULE(DumpEventNumber)

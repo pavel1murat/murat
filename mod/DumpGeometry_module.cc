@@ -17,7 +17,7 @@
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 
 #include "Offline/CosmicRayShieldGeom/inc/CosmicRayShield.hh"
-#include "Offline/CRVResponse/inc/CrvHelper.hh"
+#include "Offline/CRVReco/inc/CrvHelper.hh"
 
 #include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "Offline/CalorimeterGeom/inc/Disk.hh"
@@ -319,4 +319,4 @@ namespace mu2e {
   }
 }  // end namespace mu2e
 
-DEFINE_ART_MODULE(mu2e::DumpGeometry);
+DEFINE_ART_MODULE(mu2e::DumpGeometry)

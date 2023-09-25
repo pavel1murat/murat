@@ -37,7 +37,7 @@ namespace{
    2, 103.9, 104.9,
    -1
   };
-};
+}
 
 TFitDioRcSpectrum::Range_t*   TFitDioRcSpectrum::fRange(NULL);
 double                        TFitDioRcSpectrum::fP   [100][10];

@@ -151,7 +151,7 @@ namespace mu2e {
 // overloaded virtual methods of the base class
 //-----------------------------------------------------------------------------
     virtual void     beginJob()                      override;
-    virtual void     beginRun(const art::Run& )      override;;
+    virtual void     beginRun(const art::Run& )      override;
     virtual void     endJob  ()                      override;
     virtual void     analyze (const art::Event& Evt) override;
   };
@@ -601,4 +601,4 @@ namespace mu2e {
 }
 
 using mu2e::TrackerMCCheck;
-DEFINE_ART_MODULE(TrackerMCCheck);
+DEFINE_ART_MODULE(TrackerMCCheck)

@@ -93,7 +93,8 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, double N, double* Prob, in
 //-----------------------------------------------------------------------------
     double pbn = 0; for (int k=0; k<=N; k++) { pbn += TMath::Exp(-MuB)*pow(MuB,k)/fFactorial[k]; }
     
-    double pb[NMax];
+    double* pb = new double[NMax];
+
     for (int i=0; i<NMax; i++) {
       if (i <= N) pb[i] = TMath::Exp(-MuB)*pow(MuB,i)/fFactorial[i]/pbn;
       else        pb[i] = 0;
@@ -108,8 +109,11 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, double N, double* Prob, in
       }
       Prob[i] = pi;
     }
+
+    delete pb;
   }
   if (fDebugLevel > 0) printf(">>> InitPoissonDist: EXIT\n");
+
 }
 
 //-----------------------------------------------------------------------------

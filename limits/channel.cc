@@ -471,4 +471,4 @@ double channel::FluctuateBackground(float PMin, float PMax, float TMin, float TM
 
   return bgr;
 }
-};
+}

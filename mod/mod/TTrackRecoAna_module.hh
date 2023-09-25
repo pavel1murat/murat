@@ -6,7 +6,7 @@
 #include "TObjArray.h"
 #include "TString.h"
 
-#include "Offline/Mu2eUtilities/inc/SimParticleTimeOffset.hh"
+// #include "Offline/Mu2eUtilities/inc/SimParticleTimeOffset.hh"
 
 #ifndef __CINT__
 

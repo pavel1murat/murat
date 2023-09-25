@@ -148,11 +148,11 @@ TMu2e3280::TMu2e3280(int PlotMode, int BlessingMode): TPlotNote(PlotMode,Blessin
   fBgrName[2] = "Neutrons";
   fBgrName[3] = "Photons";
 
-};
+}
 
 //_____________________________________________________________________________
 TMu2e3280::~TMu2e3280() {
-};
+}
 
 //-----------------------------------------------------------------------------
 const char* TMu2e3280::GetFiguresDir() {

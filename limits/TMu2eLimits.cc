@@ -569,7 +569,7 @@ int TMu2eLimits::PlotHypothesis(const char* ChannelName    ,
   }
 
   return 0;
-};
+}
 
 
 //-----------------------------------------------------------------------------

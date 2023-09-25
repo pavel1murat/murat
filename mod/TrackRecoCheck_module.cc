@@ -250,4 +250,4 @@ namespace mu2e {
 }
 
 using mu2e::TrackRecoCheck;
-DEFINE_ART_MODULE(TrackRecoCheck);
+DEFINE_ART_MODULE(TrackRecoCheck)

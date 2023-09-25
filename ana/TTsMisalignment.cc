@@ -47,7 +47,7 @@ namespace {
 
   Data_t ds;   // data with scaled displacements
   
-};
+}
 
 //-----------------------------------------------------------------------------
 TTsMisalignment::TTsMisalignment(int ModeXZ) {

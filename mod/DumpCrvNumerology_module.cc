@@ -4,7 +4,7 @@
 
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/CosmicRayShieldGeom/inc/CosmicRayShield.hh"
-#include "Offline/CRVResponse/inc/CrvHelper.hh"
+#include "Offline/CRVReco/inc/CrvHelper.hh"
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
@@ -128,4 +128,4 @@ namespace mu2e {
   }
 }  // end namespace mu2e
 
-DEFINE_ART_MODULE(mu2e::DumpCrvNumerology);
+DEFINE_ART_MODULE(mu2e::DumpCrvNumerology)

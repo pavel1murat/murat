@@ -6,7 +6,7 @@
 namespace {
   double Tau1;
   double Tau2;
-};
+}
 
 //-----------------------------------------------------------------------------
 TCaloTimeRes::TCaloTimeRes() {

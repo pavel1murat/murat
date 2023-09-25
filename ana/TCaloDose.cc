@@ -70,7 +70,7 @@ ClassImp(TCaloDose)
 // }
 
 namespace {
-};
+}
 
 //-----------------------------------------------------------------------------
 TCaloDose::TCaloDose(const char* Process) : TStnModule("CaloDose","CaloDose") {

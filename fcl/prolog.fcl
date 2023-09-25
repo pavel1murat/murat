@@ -136,6 +136,22 @@ murat : {
 	trkPatRecLabel      : TrkPatRecDownstreameMinus
     }
 
+    TrkFragmentAna : { module_type:TrkFragmentAna
+        @table::StntupleTModuleFclDefaults
+
+	diagLevel           : 0
+	trkTag              : "daq"   # looks unused
+
+        interactiveMode     : 0
+        maxFileSize         : 2000   # in MBytes
+#------------------------------------------------------------------------------
+# if rootMacro is non-empty, it defines the name of a ROOT macro to be executed 
+# in interpreted mode in the art event loop
+# see https://github.com/Mu2e/Stntuple/blob/muse/doc/event_display.org#plugins
+#------------------------------------------------------------------------------
+        rootMacro           : ""
+    }
+
     DumpEventNumber : { module_type:DumpEventNumber
     }
 
@@ -182,6 +198,7 @@ murat : { @table::murat
         ComboHitSorter     : { @table::murat.ComboHitSorter     }
         StrawHitRecoAna    : { @table::murat.StrawHitRecoAna    }
         DumpGeometry       : { @table::murat.DumpGeometry       }
+        TrkFragmentAna     : { @table::murat.TrkFragmentAna     }
     }
 }
 END_PROLOG

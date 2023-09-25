@@ -64,11 +64,11 @@ TMu2ePhysics::TMu2ePhysics(int PlotMode, int BlessingMode): TPlotNote(PlotMode,B
   // else if (PlotMode == kPaperMode) {
   // }
 
-};
+}
 
 //_____________________________________________________________________________
 TMu2ePhysics::~TMu2ePhysics() {
-};
+}
 
 //-----------------------------------------------------------------------------
 const char* TMu2ePhysics::GetFiguresDir() {

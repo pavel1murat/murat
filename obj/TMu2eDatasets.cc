@@ -42,7 +42,7 @@ ClassImp(TMu2eDatasets)
 // it is obviously a very kludgy way to choose between different options....
 //-----------------------------------------------------------------------------
 namespace {
-};
+}
 
 //-----------------------------------------------------------------------------
 TMu2eDatasets::TMu2eDatasets(const char* Name, const char* Version, Int_t LumiBin): 

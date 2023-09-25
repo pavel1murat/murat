@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // print B-field on the axis of the Mu2e magnetic channel
+// use the printed output to ntuple it and make plots
 ///////////////////////////////////////////////////////////////////////////////
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
@@ -157,4 +158,4 @@ void PrintBField::define_points() {
 
 }  // namespace mu2e
 
-DEFINE_ART_MODULE(mu2e::PrintBField);
+DEFINE_ART_MODULE(mu2e::PrintBField)

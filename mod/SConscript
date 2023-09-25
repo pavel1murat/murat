@@ -42,10 +42,11 @@ def local_build():
                   'mu2e_GeneralUtilities',
                   'mu2e_CaloCluster',
                   'mu2e_CalorimeterGeom',
-                  'mu2e_CRVResponse',
+                  'mu2e_CRVReco',
                   'mu2e_MCDataProducts',
                   'mu2e_RecoDataProducts',
                   'mu2e_BTrkData',
+                  'mu2e_BFieldGeom',
                   'mu2e_DataProducts',
                   'mu2e_Mu2eInterfaces',
                   'mu2e_DbService',
@@ -68,14 +69,15 @@ def local_build():
                   'cetlib',
                   'cetlib_except',
                   'CLHEP',
-#                  'HepPDT',
-#                  'HepPID',
                   rootlibs,
                   # extrarootlibs,
                   'xerces-c',
                   'boost_filesystem',
                   'pthread',
                   'hep_concurrency',
+                  'artdaq-core-mu2e_Data',
+                  'artdaq-core_Data',
+                  'DTCInterface'
               ];
 
     list_of_cc_files = Glob('*.cc',strings=True);

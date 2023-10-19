@@ -27,6 +27,7 @@ void  genp_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 void  spmc_ana(int DebugBit = -1) {
   murat::m_spmc = (murat::TSpmcAnaModule*) g.x->AddModule("murat::TSpmcAnaModule",0);  
+  murat::m_spmc->SetSpmcBlockName("SpmcBlockVDet");
   if (DebugBit >= 0) murat::m_spmc->SetDebugBit(DebugBit,1);
 }
 

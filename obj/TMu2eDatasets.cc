@@ -375,7 +375,7 @@ void TMu2eDatasets::Help(int Mode) {
     initialized = 1;
   };
 
-  for (int i=0; HelpText[i]!=0; i++) {
+  for (int i=0; HelpText[i][0]!=0; i++) {
     printf("%s\n",HelpText[i]);
   }
 

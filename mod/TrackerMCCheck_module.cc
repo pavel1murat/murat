@@ -395,6 +395,9 @@ namespace mu2e {
       nsteps_per_hit = 1.;
     
       hit   = &fStrawHitColl->at(i);
+      
+      pdg_id        = 0;
+      mother_pdg_id = 0;
 
       if (sgs) {
 	// art::Ptr<mu2e::SimParticle> const& simptr = sgs->simParticle(); 

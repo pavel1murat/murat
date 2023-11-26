@@ -107,32 +107,28 @@ Double_t csm::chisquared() {
 
 
       mnp->SetMaxIterations(minuitmaxcalls); // doesn't seem to do anything in TMinuit
-      char npname[10];
+      char npname[20];
 
-      for (i=0;i < (Int_t) npns;i++)
-        {
-          sprintf(npname,"np%d",i);
-	  //cout << "setting minuit parameter: " << npname << " " << nplb[i] << " " << nphb[i] << endl;
-	  TString npname2 = npname;
-          mnp->mnparm(i,npname2,0.0,minuitstepsize,nplb[i],nphb[i],ierflag);
-          icons = 1;
-	  for (j=0;j<(Int_t) modeltofit->npcm.size();j++)
-	    {
-	      if (strcmp(modeltofit->npcm[j].pnameoutput,npn[i])==0)
-		{
-		  ierflag = mnp->FixParameter(i);
-		  icons = 0;
-		}
-	    }
-          char *s = new char[strlen(npn[i])+1];
-          strcpy(s,npn[i]);
-          npfitname.push_back(s);  // this copy is in static global storage so the minuit function knows about it
-          if (strstr(npn[i],"UNCONSTRAINED") != 0)
-  	    {
-	      icons = 0;
-	    }
-          constrainedfitparam.push_back(icons);
+      for (int i=0; i<npns; i++) {
+        sprintf(npname,"np%5i",i);
+        //cout << "setting minuit parameter: " << npname << " " << nplb[i] << " " << nphb[i] << endl;
+        TString npname2 = npname;
+        mnp->mnparm(i,npname2,0.0,minuitstepsize,nplb[i],nphb[i],ierflag);
+        icons = 1;
+        for (j=0;j<(Int_t) modeltofit->npcm.size();j++) {
+          if (strcmp(modeltofit->npcm[j].pnameoutput,npn[i])==0) {
+            ierflag = mnp->FixParameter(i);
+            icons = 0;
+          }
         }
+        char *s = new char[strlen(npn[i])+1];
+        strcpy(s,npn[i]);
+        npfitname.push_back(s);  // this copy is in static global storage so the minuit function knows about it
+        if (strstr(npn[i],"UNCONSTRAINED") != 0) {
+          icons = 0;
+        }
+        constrainedfitparam.push_back(icons);
+      }
 
       arglist[0] = 1;
       mnp->mnexcm("SET ERR", arglist ,1,ierflag); 

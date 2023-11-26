@@ -481,7 +481,7 @@ namespace mu2e {
     if (fNClusters  > 0) FillEventHistograms(fHist.fEvent[3]);
     else                 FillEventHistograms(fHist.fEvent[4]);
 
-    if ((fNTracks == 0) && (fabs(cos_th) < 0.4)) {
+    if ((fNTracks[0] == 0) && (fabs(cos_th) < 0.4)) {
       FillEventHistograms(fHist.fEvent[5]); 
     }
 					// fill event histograms for events with good tracks
@@ -515,13 +515,13 @@ namespace mu2e {
 
     //    HelixParams  helix;
 //-----------------------------------------------------------------------------
-// cluster histograms
+// cluster histograms, assume one list of tracks
 //-----------------------------------------------------------------------------
     CaloCluster* cl;
     for (int i=0; i<fNClusters; ++i ) {
       cl = /*(CaloCluster*)*/ &fListOfClusters->at(i);
       FillClusterHistograms(fHist.fCluster[0],cl);
-      if (fNTracks > 0) {
+      if (fNTracks[0] > 0) {
 	FillClusterHistograms(fHist.fCluster[1],cl);
       }
     }

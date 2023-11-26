@@ -689,11 +689,11 @@ void TCosmicsAnaModule::FillHistograms() {
     id = cl->DiskID();
     FillClusterHistograms(fHist.fCluster[0],cl);
 
-    if (fNTracks[0]     >  0 ) FillClusterHistograms(fHist.fCluster[1],cl);
-    if (fNGoodTracks    >  0 ) FillClusterHistograms(fHist.fCluster[2],cl);
-    if (fNMatchedTracks >  0 ) FillClusterHistograms(fHist.fCluster[3],cl);
-    if (cl->Energy()    > 10.) FillClusterHistograms(fHist.fCluster[4],cl);
-    if (cl->Energy()    > 60.) FillClusterHistograms(fHist.fCluster[5],cl);
+    if (fNTracks[0]        >  0 ) FillClusterHistograms(fHist.fCluster[1],cl);
+    if (fNGoodTracks[0]    >  0 ) FillClusterHistograms(fHist.fCluster[2],cl);
+    if (fNMatchedTracks[0] >  0 ) FillClusterHistograms(fHist.fCluster[3],cl);
+    if (cl->Energy()       > 10.) FillClusterHistograms(fHist.fCluster[4],cl);
+    if (cl->Energy()       > 60.) FillClusterHistograms(fHist.fCluster[5],cl);
 
     if      (id == 0         ) FillClusterHistograms(fHist.fCluster[6],cl);
     else if (id == 1         ) FillClusterHistograms(fHist.fCluster[7],cl);

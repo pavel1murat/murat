@@ -19,13 +19,13 @@ TLogLHR::TLogLHR(const char* Name, double CL, int DebugLevel):
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
-  fHist.fLHb    = new TH1D(Form("h_lhb_%s"     ,GetName()),"LHb"    ,MaxNx,-0.5,MaxNx-0.5);
+  fHist.fLHb    = new TH1D(Form("h_lhb_%s"     ,GetName()),"LHb"    ,MaxNx,-0.5,float(MaxNx)-0.5);
   fHist.fLHb->SetMarkerStyle(20);
   fHist.fLHb->SetMarkerSize(1);
   fHist.fLHb->SetLineColor(kBlue);
   fHist.fLHb->SetMarkerColor(kBlue);
   
-  fHist.fLHs    = new TH1D(Form("h_lhs_%s"     ,GetName()),"LHs"    ,MaxNx,-0.5,MaxNx-0.5);
+  fHist.fLHs    = new TH1D(Form("h_lhs_%s"     ,GetName()),"LHs"    ,MaxNx,-0.5,float(MaxNx)-0.5);
   fHist.fLHs->SetMarkerStyle(20);
   fHist.fLHs->SetMarkerSize(1);
   fHist.fLHs->SetLineColor(kRed);
@@ -110,7 +110,7 @@ void TLogLHR::InitPoissonDist(double MuB, double MuS, double N, double* Prob, in
       Prob[i] = pi;
     }
 
-    delete pb;
+    delete [] pb;
   }
   if (fDebugLevel > 0) printf(">>> InitPoissonDist: EXIT\n");
 

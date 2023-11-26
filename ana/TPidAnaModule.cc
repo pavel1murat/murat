@@ -215,7 +215,7 @@ void TPidAnaModule::FillHistograms() {
     pid = fPidDataBlock[0]->Pid(i);
     if (pid) {
       FillPidHistograms(fHist.fPid[0],pid);
-      if (tp->fIDWord == 0) {
+      if (tp->fIDWord[0] == 0) {
 	FillPidHistograms(fHist.fPid[1],pid);
       }
     }

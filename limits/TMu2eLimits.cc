@@ -169,7 +169,7 @@ int TMu2eLimits::Init() {
       dat          = ch_data->ana->GetData(0);  // assume only one run range
       hist_file    = dat->GetHistFileName();
 
-      if (hist_name != 0) {
+      if (hist_name[0] != 0) {
 //-----------------------------------------------------------------------------
 // so far only one Mu2e channel - momentum distribution
 //-----------------------------------------------------------------------------

@@ -2445,7 +2445,7 @@ void mclimit_csm::bayes_heinrich_withexpect(Double_t  beta,
       strcpy(pdname,null_hypothesis_pe->channame[i]);
       strcat(pdname," pseudodata");
       pdarray[i] = (TH1*) null_hypothesis_pe->chanmodel[i]->histotemplate[0]->Clone(pdname);
-      delete pdname;
+      delete [] pdname;
     }
   for (ipx=0;ipx<npx;ipx++)
     {
@@ -3096,7 +3096,7 @@ void mclimit_csm::bh_xsfit_expect(Int_t npx, Double_t *xsfitavg, Double_t *m2s,
       strcpy(pdname,test_hypothesis->channame[i]);
       strcat(pdname," pseudodata");
       pdarray[i] = (TH1*) test_hypothesis->chanmodel[i]->histotemplate[0]->Clone(pdname);
-      delete pdname;
+      delete [] pdname;
     }
 
   // don't really need to store and sort all of these, but code is take from bayes_heinrich_withexpect
@@ -3579,7 +3579,7 @@ void mclimit_csm::bh_2d_scan_expect(Int_t npx, Double_t s1true, Double_t s2true,
       strcpy(pdname,test_hypothesis->channame[i]);
       strcat(pdname," pseudodata");
       pdarray[i] = (TH1*) test_hypothesis->chanmodel[i]->histotemplate[0]->Clone(pdname);
-      delete pdname;
+      delete [] pdname;
     }
 
   // don't really need to store and sort all of these, but code is take from bayes_heinrich_withexpect
@@ -3883,7 +3883,7 @@ void mclimit_csm::bayes_heinrich_coverage_check(Double_t beta,
       strcpy(pdname,testhyppescale->channame[i]);
       strcat(pdname," pseudodata");
       pdarray[i] = (TH1*) testhyppescale->chanmodel[i]->histotemplate[0]->Clone(pdname);
-      delete pdname;
+      delete [] pdname;
     }
   for (ipx=0;ipx<npx;ipx++)
     {

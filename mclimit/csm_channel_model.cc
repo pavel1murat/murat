@@ -1223,11 +1223,11 @@ Double_t csm_channel_model::chisquared1(const TH1 *dh)
   //    exit(0);
   //  }
 
-  delete lpoissflag;
-  delete rho1;
-  delete rho2;
-  delete zlist;
-  delete sfgp;
+  delete [] lpoissflag;
+  delete [] rho1;
+  delete [] rho2;
+  delete [] zlist;
+  delete [] sfgp;
 
   return chi2;
 
@@ -2175,13 +2175,13 @@ void csm_pvmc(Int_t nb, Double_t *dist1, Double_t *dist2, Double_t *dist3, Doubl
       distn[i] = ydi[i+1] - ydi[i]; 
     }
 
-  delete yd  ;  
-  delete id  ;
-  delete xd  ;
-  delete xdis;
-  delete ydis;
-  delete ydi ;
-  delete idx ;
+  delete [] yd  ;  
+  delete [] id  ;
+  delete [] xd  ;
+  delete [] xdis;
+  delete [] ydis;
+  delete [] ydi ;
+  delete [] idx ;
 }
 
 /*------------------------------------------------------------------------*/
@@ -2289,17 +2289,17 @@ void csm_pvmc2d(Int_t nx, Int_t ny, Double_t *xydist1,
       for (k=0;k<nx;k++) xydistn[k+nx*i] = xtempn[k]*ydistn[i];
     }
 
-  delete ydist1; 
-  delete ydist2;
-  delete ydist3;
-  delete ydistn;
-  delete xtemp1;
-  delete xtemp2;
-  delete xtemp3;
-  delete xtempn;
-  delete alpha1;
-  delete alpha2;
-  delete alpha3;
+  delete [] ydist1; 
+  delete [] ydist2;
+  delete [] ydist3;
+  delete [] ydistn;
+  delete [] xtemp1;
+  delete [] xtemp2;
+  delete [] xtemp3;
+  delete [] xtempn;
+  delete [] alpha1;
+  delete [] alpha2;
+  delete [] alpha3;
 }
 
 /*
@@ -2410,8 +2410,8 @@ void csm_ycont(Int_t ny, Double_t *ydist1, Double_t *ydist2,
   csm_acnvec2(y,ny+1);
   csm_ycontaux(ny,y,yn,alpha3);
 
-  delete y;
-  delete yn;
+  delete [] y;
+  delete [] yn;
 }
 
 void csm_ycontaux(Int_t ny, Double_t *y, Double_t *yn,

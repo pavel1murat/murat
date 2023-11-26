@@ -39,7 +39,7 @@ namespace murat {
   fHist.fCumBgProb = new TH1D(Form("h_cumbg_prob_%s",GetName()),"h_cumbg_prob",MaxNx,0,MaxNx);
   fHist.fCumBsProb = new TH1D(Form("h_cumbs_prob_%s",GetName()),"h_cumbs_prob",MaxNx,0,MaxNx);
 
-  fHist.fProb      = new TH1D(Form("h_prob_2D_%s"    ,GetName()),"h prob 2D" ,MaxNx,-0.5,MaxNx-0.5);
+  fHist.fProb      = new TH1D(Form("h_prob_2D_%s"    ,GetName()),"h prob 2D" ,MaxNx,-0.5,float(MaxNx)-0.5);
   fHist.fBelt      = nullptr;
 
   fNExp            = 10000000;

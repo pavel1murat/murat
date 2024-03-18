@@ -3,38 +3,38 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/ana/scripts/modules.hh"
 
-def_name genp_001("genp_ana");
-def_name genp_002("spmc_ana");
-def_name genp_002_01("spmc_ana_old");
-def_name genp_003("mustop_ana");
-def_name genp_004("bflash_ana_spmc");
-def_name genp_005("bflash_ana_vdet");
-def_name genp_006("g4val_ana");
-def_name genp_007("dose_ana");
-def_name genp_008("pbarabs_dose_ana");
-def_name genp_009("coll31_dose_ana");
-def_name genp_010("coll32_dose_ana");
-def_name genp_011("coll3_dose_ana");
-def_name genp_012("coll1_dose_ana");
+def_name murat_genp_001   ("murat_genp_ana");
+def_name murat_genp_002   ("murat_spmc_ana");
+def_name murat_genp_002_01("murat_spmc_ana_old");
+def_name murat_genp_003   ("murat_mustop_ana");
+def_name murat_genp_004   ("murat_bflash_ana_spmc");
+def_name murat_genp_005   ("murat_bflash_ana_vdet");
+def_name murat_genp_006   ("murat_g4val_ana");
+def_name murat_genp_007   ("murat_dose_ana");
+def_name murat_genp_008   ("murat_pbarabs_dose_ana");
+def_name murat_genp_009   ("murat_coll31_dose_ana");
+def_name murat_genp_010   ("murat_coll32_dose_ana");
+def_name murat_genp_011   ("murat_coll3_dose_ana");
+def_name murat_genp_012   ("murat_coll1_dose_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  genp_ana(int DebugBit = -1) {
+void  murat_genp_ana(int DebugBit = -1) {
   m_gen = (TGenAnaModule*) g.x->AddModule("TGenAnaModule",0);  
   if (DebugBit >= 0) m_gen->SetDebugBit(DebugBit,1);
 }
 
 //-----------------------------------------------------------------------------
-void  spmc_ana(int DebugBit = -1) {
+void  murat_spmc_ana(int DebugBit = -1) {
   murat::m_spmc = (murat::TSpmcAnaModule*) g.x->AddModule("murat::TSpmcAnaModule",0);  
-  murat::m_spmc->SetSpmcBlockName("SpmcBlockVDet");
+  // murat::m_spmc->SetSpmcBlockName("SpmcBlockVDet");
   if (DebugBit >= 0) murat::m_spmc->SetDebugBit(DebugBit,1);
 }
 
 //-----------------------------------------------------------------------------
 // before Dec'2018, the data blocks were called 'VdetBlock'
 //-----------------------------------------------------------------------------
-void  spmc_ana_old(int Stage = 1, int DebugBit = -1) {
+void  murat_spmc_ana_old(int Stage = 1, int DebugBit = -1) {
   murat::m_spmc = (murat::TSpmcAnaModule*) g.x->AddModule("murat::TSpmcAnaModule",0);  
   if (Stage == 3) murat::m_spmc->SetVDetBlockName("VdetBlock");
   if (Stage == 2) murat::m_spmc->SetVDetBlockName("VdetBlock");

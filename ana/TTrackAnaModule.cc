@@ -357,6 +357,8 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 84] = 1;
   book_track_histset[ 85] = 1;
   book_track_histset[ 86] = 1;
+                                        // pi+ --> e+ nu
+  book_track_histset[101] = 1;          // all tracks weighted by the pion survival prob
   
 
   for (int i=0; i<kNTrackHistSets; i++) {
@@ -984,20 +986,26 @@ void TTrackAnaModule::FillHistograms() {
 
       if (tp->fDtClZ0 > -0.6) FillTrackHistograms(fHist.fTrack[65],trk,tp,&fSimPar);
     }
-
-    
 //-----------------------------------------------------------------------------
 // TRK_71: SetC tracks  103.5 < p < 105 : DIO studies
 //-----------------------------------------------------------------------------
     if ((tp->fIDWord[fBestID] == 0) && (trk->fP > 103.5) && (trk->fP < 105.)) {
       FillTrackHistograms(fHist.fTrack[71],trk,tp,&fSimPar);
     }
-  }
-
 //-----------------------------------------------------------------------------
 // Track Reco efficiency, Dave style
 //-----------------------------------------------------------------------------
   FillEfficiencyHistograms(fTrackBlock,TAnaModule::fTrackID[fBestID],11);
+
+
+//-----------------------------------------------------------------------------
+// TRK_101: all tracks pi+ --> e+ nu weighted with the pion survival prob
+//-----------------------------------------------------------------------------
+    if (fEvtPar.fPionSurvProb > 0) {
+      FillTrackHistograms(fHist.fTrack[101],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+    }
+  }
+
 //-----------------------------------------------------------------------------
 // cluster histograms 
 //-----------------------------------------------------------------------------
@@ -1109,8 +1117,10 @@ int TTrackAnaModule::Event(int ientry) {
   fEvtPar.fNStrawHits       = GetHeaderBlock()->NStrawHits();
   fEvtPar.fNComboHits       = GetHeaderBlock()->NComboHits();
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fNSimp            = fSimpBlock->NParticles();
   fEvtPar.fParticle         = NULL;
   fEvtPar.fPartE            = -1.;
+  fEvtPar.fPionSurvProb     = 1.;
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -1120,7 +1130,7 @@ int TTrackAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   TLorentzVector mom;
   
-  for (int i=fNGenp-1; i>=0; i--) {
+  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
     TGenParticle* genp = fGenpBlock->Particle(i);
     int pdg_code       = genp->GetPdgCode();
     int process_code   = genp->GetStatusCode();
@@ -1128,6 +1138,20 @@ int TTrackAnaModule::Event(int ientry) {
       fEvtPar.fParticle = genp;
       genp->Momentum(mom);
       fEvtPar.fPartE    = mom.Energy();
+      break;
+    }
+  }
+//-----------------------------------------------------------------------------
+// pi+ --> e+ nu case : determine the event weight
+//-----------------------------------------------------------------------------
+  for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code       = simp->PDGCode();
+    if ((abs(pdg_code) == 211) && (simp->GeneratorID() == 56)) {
+//-----------------------------------------------------------------------------
+// found the pion, survival probability
+//-----------------------------------------------------------------------------
+      fEvtPar.fPionSurvProb  = exp(-simp->fEndProperTime);
       break;
     }
   }

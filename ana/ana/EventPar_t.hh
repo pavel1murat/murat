@@ -33,6 +33,7 @@ namespace murat {
 
     double        fDioLOWt;
     double        fDioLLWt;
+    double        fPionSurvProb;            // defaults to 1
   };
 }
 #endif

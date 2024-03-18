@@ -48,6 +48,7 @@ public:
     TH1F*      fStage;
     TH1F*      fGeneratorID;
     TH1F*      fTime;
+    TH1F*      fStageDt;
     TH1F*      fParentPDG;
     TH1F*      fParentMom;
     TH1F*      fStartMom[2];
@@ -101,6 +102,9 @@ public:
     TH1F*      fPp      ;                // momentum component parallel to the solenoid axis
     TH1F*      fTanTh   ;		       // tan (pitch angle)
     TH1F*      fEKin    ;
+
+    TH1F*      fDt1508;
+
     TH2F*      fCosThVsMom[2];	       // cos (pitch angle) vs Mom
     TH2F*      fCosThVsMomPV;		// for antiprotons
     TH2F*      fTimeVsMom;
@@ -116,6 +120,7 @@ public:
     float         fPVD9;                // P(VD9), defined for stopped particles
     float         fY0;
     double        fWeight;
+    double        fTau;                 // lifetime , in ns
   };
 
 //-----------------------------------------------------------------------------
@@ -138,6 +143,8 @@ public:
     float          fR;                  // trajectory radius
     float          fX0;                 // X coordinate of the trajectory axis in the local coordinate system
     float          fY0;			// Y coordinate of the trajectory axis in the local coordinate system
+    float          fSurvivalProb;       // survival prob, calculate once
+    float          fDt1508;             // deltaT(15-8)
   };
 
 //-----------------------------------------------------------------------------
@@ -159,7 +166,7 @@ public:
 					// pointers to the data blocks used
   TGenpBlock*           fGenpBlock;  
   TSimpBlock*           fSimpBlock;  
-  TStepPointMCBlock*    fStepPointMCBlock;
+  TStepPointMCBlock*    fSpmcBlock;
   TStepPointMCBlock*    fVDetBlock;
 					// histograms filled
   Hist_t                fHist;

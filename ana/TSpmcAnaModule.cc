@@ -21,6 +21,7 @@
 // bit:13 : events with electrons in SPMC block used for selections
 // bit:14 : events with p>100 MeV/c, cos_th < 1/sqrt(2) . electrons in SPMC block used to select events
 // bit:15 : VD5 Yc > 200 mm
+// bit:21 : events with muon decays in flight
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -45,8 +46,8 @@ TSpmcAnaModule::TSpmcAnaModule(const char* name, const char* title):
 {
   // fPdgCode       = 11;
   // fGeneratorCode = 28;
-  fSpmcBlockName = "SpmcBlock";
-  fVDetBlockName = "VDetBlock";
+  fSpmcBlockName = "SpmcBlockVDet";
+  fVDetBlockName = "SpmcBlockVDet";
 
   fPdgDb = TDatabasePDG::Instance();
 
@@ -79,7 +80,7 @@ int TSpmcAnaModule::BeginJob() {
 // register data blocks 'SpmcBlock' or 'StepPointMCBlock' (old)
 //-----------------------------------------------------------------------------
   RegisterDataBlock("GenpBlock"          ,"TGenpBlock"       ,&fGenpBlock       );
-  RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock",&fStepPointMCBlock);
+  RegisterDataBlock(fSpmcBlockName.Data(),"TStepPointMCBlock",&fSpmcBlock);
   RegisterDataBlock("SimpBlock"          ,"TSimpBlock"       ,&fSimpBlock       );
   RegisterDataBlock(fVDetBlockName.Data(),"TStepPointMCBlock",&fVDetBlock       );
 //-----------------------------------------------------------------------------
@@ -118,11 +119,13 @@ void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fStage       ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
   HBook1F(hist->fGeneratorID ,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
   HBook1F(hist->fTime        ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
+  HBook1F(hist->fStageDt     ,"sdt"      ,Form("%s: Stage T1-T0" ,Folder), 400,     0, 2000,Folder);
   HBook1F(hist->fParentMom   ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
   HBook1F(hist->fParentPDG   ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
 
-  HBook1F(hist->fStartMom[0] ,"mom"        ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
-  HBook1F(hist->fStartMom[1] ,"mom_1"      ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
+  HBook1F(hist->fStartMom[0] ,"mom"      ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
+  HBook1F(hist->fStartMom[1] ,"mom_1"    ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
+
   HBook2F(hist->fYVsX        ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fXEndVsZEnd  ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
   HBook2F(hist->fYcVsZEnd    ,"yc_vs_ze"   ,Form("%s: yc vs zend "   ,Folder), 250,  -5000, 20000, 200,   -200, 200,Folder);
@@ -201,6 +204,9 @@ void TSpmcAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder) {
   HBook2F(hist->fTimeVsMom   ,"time_vs_mom" ,Form("%s: Time:Mom"  ,Folder), 250,   0, 1250 ,200,0,2000,Folder);
   HBook2F(hist->fTimeVsMomW  ,"time_vs_momw",Form("%s: Time:Mom W",Folder), 250,   0, 1250 ,200,0,2000,Folder);
   HBook2F(hist->fPTimeVsMom  ,"ptime_vs_mom",Form("%s: PTime:Mom" ,Folder), 250,   0, 1250 ,200,0,400 ,Folder);
+
+  HBook1F(hist->fDt1508      ,"dt1508"      ,Form("%s:T(15)-T(08)",Folder), 500,   0, 500,Folder);
+
 }
 
 //-----------------------------------------------------------------------------
@@ -308,26 +314,39 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[  3] = 1;		// mu-
   book_simp_histset[  4] = 1;		// mu+
   book_simp_histset[  5] = 1;		// pi-
+  book_simp_histset[  6] = 1;		// pi+
+  book_simp_histset[ 15] = 1;		// pi- with the weight of the survival prob
+  book_simp_histset[ 16] = 1;		// pi+ with the weight of the survival prob
   book_simp_histset[ 21] = 1;		// pbars
   book_simp_histset[ 22] = 1;		// photons
 
-  book_simp_histset[100] = 1;		// SimID = i (Stage 1)
+  book_simp_histset[100] = 1;		// stage=0
   book_simp_histset[101] = 1;		// e-
   book_simp_histset[102] = 1;		// e+
   book_simp_histset[103] = 1;		// mu-
   book_simp_histset[104] = 1;		// mu+
   book_simp_histset[105] = 1;		// pi-
+  book_simp_histset[106] = 1;		// pi-
+  book_simp_histset[115] = 1;		// pi- with the weight of the survival prob
+  book_simp_histset[116] = 1;		// pi+ with the weight of the survival prob
   book_simp_histset[121] = 1;		// pbars
 
-  book_simp_histset[200] = 1;		// SimID = 100000+i (Stage 2)
+  book_simp_histset[200] = 1;		// stage=1
   book_simp_histset[201] = 1;		// e-
   book_simp_histset[202] = 1;		// e+
   book_simp_histset[203] = 1;		// mu-
   book_simp_histset[204] = 1;		// mu+
   book_simp_histset[205] = 1;		// pi-
+  book_simp_histset[206] = 1;		// pi+
+  book_simp_histset[213] = 1;		// mu- decays in flight
+  book_simp_histset[214] = 1;		// mu+ decays in flight
+  book_simp_histset[215] = 1;		// pi- with the weight of the survival prob
+  book_simp_histset[216] = 1;		// pi+ with the weight of the survival prob
   book_simp_histset[221] = 1;		// pbars
+  book_simp_histset[223] = 1;		// mu- decays in flight in front of the calorimeter (Z < 12000)
+  book_simp_histset[224] = 1;		// mu+ decays in flight in front of the calorimeter (Z < 12000)
 
-  book_simp_histset[300] = 1;		// SimID = 200000+i (Stage 3)
+  book_simp_histset[300] = 1;		// stage=2
   book_simp_histset[301] = 1;		// e-
   book_simp_histset[302] = 1;		// e+
   book_simp_histset[303] = 1;		// mu-
@@ -335,7 +354,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[305] = 1;		// pi-
   book_simp_histset[321] = 1;		// pbars
 
-  book_simp_histset[400] = 1;		// SimID = 300000+i (Stage 4)
+  book_simp_histset[400] = 1;		// stage=3
   book_simp_histset[401] = 1;		// e-
   book_simp_histset[402] = 1;		// e+
   book_simp_histset[403] = 1;		// mu-
@@ -343,7 +362,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[405] = 1;		// pi-
   book_simp_histset[421] = 1;		// pbars
 
-  book_simp_histset[500] = 1;		// SimID = 400000+i (stage 5)
+  book_simp_histset[500] = 1;		// stage=4
   book_simp_histset[501] = 1;		// e-
   book_simp_histset[502] = 1;		// e+
   book_simp_histset[503] = 1;		// mu-
@@ -357,6 +376,9 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[603] = 1;		// mu-
   book_simp_histset[604] = 1;		// mu+
   book_simp_histset[605] = 1;		// pi-
+  book_simp_histset[606] = 1;		// pi+
+  book_simp_histset[615] = 1;		// pi- with the weight of pion survival prog
+  book_simp_histset[616] = 1;		// pi+ with the weight of pion survival prob
   book_simp_histset[621] = 1;		// pbars
 
   book_simp_histset[700] = 1;		// particles stopped in the stoppping target, with weight
@@ -365,6 +387,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[703] = 1;		// mu-
   book_simp_histset[704] = 1;		// mu+
   book_simp_histset[705] = 1;		// pi-
+  book_simp_histset[706] = 1;		// pi+
   book_simp_histset[721] = 1;		// pbars
 
   book_simp_histset[800] = 1;		// all particles ParentID=1
@@ -404,7 +427,8 @@ void TSpmcAnaModule::BookHistograms() {
 
   book_vdet_histset[  9] = 1;		// all particles, VDET= 9 , ST_In
   book_vdet_histset[ 13] = 1;		// all particles, VDET=13 , TT_FrontHollow
-  book_vdet_histset[ 14] = 1;		// all particles, VDET=13 , TT_FrontHollow, r > 40
+  book_vdet_histset[ 13] = 1;		// all particles, VDET=13 , TT_FrontHollow, r > 40
+  book_vdet_histset[ 15] = 1;		// all particles, VDET=15 , TT_Back, z = 11810
 
   book_vdet_histset[101] = 1;		// e-  , VDET=1: Coll1_In
   book_vdet_histset[102] = 1;		// e-  , VDET=2: Coll1_Out
@@ -416,6 +440,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[108] = 1;		// e-  , VDET=8: Coll5_Out
   book_vdet_histset[109] = 1;		// e-  , VDET=9
   book_vdet_histset[110] = 1;		// e-  , VDET=10
+  book_vdet_histset[115] = 1;		// e-  , VDET=15
   book_vdet_histset[198] = 1;		// e-  , VDET=98
   book_vdet_histset[199] = 1;		// e-  , VDET=99
 
@@ -429,34 +454,37 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[208] = 1;		// e+  , VDET=8: Coll5_Out
   book_vdet_histset[209] = 1;		// e+  , VDET=9
   book_vdet_histset[210] = 1;		// e+  , VDET=10
+  book_vdet_histset[215] = 1;		// e+  , VDET=15
   book_vdet_histset[298] = 1;		// e+  , VDET=98
   book_vdet_histset[299] = 1;		// e+  , VDET=99
 
-  book_vdet_histset[301] = 1;		// all mu- , VDET=1: Coll1_In
-  book_vdet_histset[302] = 1;		// all mu- , VDET=2: Coll1_Out
-  book_vdet_histset[303] = 1;		// all mu- , VDET=3: Coll31_In
-  book_vdet_histset[304] = 1;		// all mu- , VDET=4: Coll31_Out
-  book_vdet_histset[305] = 1;		// all mu- , VDET=5: Coll32_In 
-  book_vdet_histset[306] = 1;		// all mu- , VDET=6: Coll32_Out
-  book_vdet_histset[307] = 1;		// all mu- , VDET=7: Coll5_In
-  book_vdet_histset[308] = 1;		// all mu- , VDET=8: Coll5_Out
-  book_vdet_histset[309] = 1;		// all mu- , VDET=9: ST_In
-  book_vdet_histset[310] = 1;		// all mu- , VDET=10
-  book_vdet_histset[398] = 1;		// all mu- , VDET=98
-  book_vdet_histset[399] = 1;		// all mu- , VDET=99
+  book_vdet_histset[301] = 1;		// mu- , VDET=1: Coll1_In
+  book_vdet_histset[302] = 1;		// mu- , VDET=2: Coll1_Out
+  book_vdet_histset[303] = 1;		// mu- , VDET=3: Coll31_In
+  book_vdet_histset[304] = 1;		// mu- , VDET=4: Coll31_Out
+  book_vdet_histset[305] = 1;		// mu- , VDET=5: Coll32_In 
+  book_vdet_histset[306] = 1;		// mu- , VDET=6: Coll32_Out
+  book_vdet_histset[307] = 1;		// mu- , VDET=7: Coll5_In
+  book_vdet_histset[308] = 1;		// mu- , VDET=8: Coll5_Out
+  book_vdet_histset[309] = 1;		// mu- , VDET=9: ST_In
+  book_vdet_histset[310] = 1;		// mu- , VDET=10
+  book_vdet_histset[315] = 1;		// mu- , VDET=15
+  book_vdet_histset[398] = 1;		// mu- , VDET=98
+  book_vdet_histset[399] = 1;		// mu- , VDET=99
 
-  book_vdet_histset[401] = 1;		// all mu+ , VDET=1: Coll1_In
-  book_vdet_histset[402] = 1;		// all mu+ , VDET=2: Coll1_Out
-  book_vdet_histset[403] = 1;		// all mu+ , VDET=3: Coll31_In
-  book_vdet_histset[404] = 1;		// all mu+ , VDET=4: Coll31_Out
-  book_vdet_histset[405] = 1;		// all mu+ , VDET=5: Coll32_In 
-  book_vdet_histset[406] = 1;		// all mu+ , VDET=6: Coll32_Out
-  book_vdet_histset[407] = 1;		// all mu+ , VDET=7: Coll5_In
-  book_vdet_histset[408] = 1;		// all mu+ , VDET=8: Coll5_Out
-  book_vdet_histset[409] = 1;		// all mu+ , VDET=9: ST_In
-  book_vdet_histset[410] = 1;		// all mu+ , VDET=10
-  book_vdet_histset[498] = 1;		// all mu+ , VDET=98
-  book_vdet_histset[499] = 1;		// all mu+ , VDET=99
+  book_vdet_histset[401] = 1;		// mu+ , VDET=1: Coll1_In
+  book_vdet_histset[402] = 1;		// mu+ , VDET=2: Coll1_Out
+  book_vdet_histset[403] = 1;		// mu+ , VDET=3: Coll31_In
+  book_vdet_histset[404] = 1;		// mu+ , VDET=4: Coll31_Out
+  book_vdet_histset[405] = 1;		// mu+ , VDET=5: Coll32_In 
+  book_vdet_histset[406] = 1;		// mu+ , VDET=6: Coll32_Out
+  book_vdet_histset[407] = 1;		// mu+ , VDET=7: Coll5_In
+  book_vdet_histset[408] = 1;		// mu+ , VDET=8: Coll5_Out
+  book_vdet_histset[409] = 1;		// mu+ , VDET=9: ST_In
+  book_vdet_histset[410] = 1;		// mu+ , VDET=10
+  book_vdet_histset[415] = 1;		// mu+ , VDET=15
+  book_vdet_histset[498] = 1;		// mu+ , VDET=98
+  book_vdet_histset[499] = 1;		// mu+ , VDET=99
 
   book_vdet_histset[501] = 1;		// p<50 MeV/c mu- , VDET=1: Coll1_In
   book_vdet_histset[502] = 1;		// p<50 MeV/c mu- , VDET=2: Coll1_Out
@@ -468,6 +496,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[508] = 1;		// p<50 MeV/c mu- , VDET=8: Coll5_Out
   book_vdet_histset[509] = 1;		// p<50 MeV/c mu- , VDET=9: ST_In
   book_vdet_histset[510] = 1;		// p<50 MeV/c mu- , VDET=10
+  book_vdet_histset[515] = 1;		// p<50 MeV/c mu- , VDET=15
   book_vdet_histset[598] = 1;		// p<50 MeV/c mu- , VDET=98
   book_vdet_histset[599] = 1;		// p<50 MeV/c mu- , VDET=99
 
@@ -481,6 +510,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[608] = 1;		// p>50 MeV/c mu- , VDET=8: Coll5_Out
   book_vdet_histset[609] = 1;		// p>50 MeV/c mu- , VDET=9: ST_In
   book_vdet_histset[610] = 1;		// p>50 MeV/c mu- , VDET=10
+  book_vdet_histset[615] = 1;		// p>50 MeV/c mu- , VDET=15
   book_vdet_histset[698] = 1;		// p>50 MeV/c mu- , VDET=98
   book_vdet_histset[699] = 1;		// p>50 MeV/c mu- , VDET=99
 
@@ -494,6 +524,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[708] = 1;		// e- p>100 MeV/c , VDET=8: Coll5_Out
   book_vdet_histset[709] = 1;		// e- p>100 MeV/c , VDET=9
   book_vdet_histset[710] = 1;		// e- p>100 MeV/c , VDET=10
+  book_vdet_histset[715] = 1;		// e- p>100 MeV/c , VDET=15
   book_vdet_histset[798] = 1;		// e- p>100 MeV/c , VDET=98
   book_vdet_histset[799] = 1;		// e- p>100 MeV/c , VDET=99
 
@@ -507,6 +538,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[1008] = 1;		// pi- , VDET=8: Coll5_Out
   book_vdet_histset[1009] = 1;		// pi- , VDET=9: ST_In
   book_vdet_histset[1010] = 1;		// pi- , VDET=10
+  book_vdet_histset[1015] = 1;		// pi- , VDET=15
   book_vdet_histset[1098] = 1;		// pi- , VDET=98
   book_vdet_histset[1099] = 1;		// pi- , VDET=99
 
@@ -520,6 +552,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[1108] = 1;		// pi+ , VDET=8: Coll5_Out
   book_vdet_histset[1109] = 1;		// pi+ , VDET=9: ST_In
   book_vdet_histset[1110] = 1;		// pi+ , VDET=10
+  book_vdet_histset[1115] = 1;		// pi+ , VDET=15
   book_vdet_histset[1198] = 1;		// pi+ , VDET=98
   book_vdet_histset[1199] = 1;		// pi+ , VDET=99
 
@@ -533,6 +566,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[1208] = 1;		// pi- , VDET=8: Coll5_Out  , w/Striganov weight
   book_vdet_histset[1209] = 1;		// pi- , VDET=9: ST_In	    , w/Striganov weight
   book_vdet_histset[1210] = 1;		// pi- , VDET=10            , w/Striganov weight
+  book_vdet_histset[1215] = 1;		// pi- , VDET=15            , w/Striganov weight
   book_vdet_histset[1298] = 1;		// pi- , VDET=98	    , w/Striganov weight
   book_vdet_histset[1299] = 1;		// pi- , VDET=99            , w/Striganov weight
 
@@ -546,8 +580,37 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[1308] = 1;		// pi+ , VDET=8: Coll5_Out  , w/Striganov weight
   book_vdet_histset[1309] = 1;		// pi+ , VDET=9: ST_In	    , w/Striganov weight
   book_vdet_histset[1310] = 1;		// pi+ , VDET=10            , w/Striganov weight
+  book_vdet_histset[1315] = 1;		// pi+ , VDET=15            , w/Striganov weight
   book_vdet_histset[1398] = 1;		// pi+ , VDET=98	    , w/Striganov weight
   book_vdet_histset[1399] = 1;		// pi+ , VDET=99            , w/Striganov weight
+
+  book_vdet_histset[1401] = 1;		// pi- , VDET=1: Coll1_In   , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1402] = 1;		// pi- , VDET=2: Coll1_Out  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1403] = 1;		// pi- , VDET=3: Coll31_In  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1404] = 1;		// pi- , VDET=4: Coll31_Out , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1405] = 1;		// pi- , VDET=5: Coll32_In  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1406] = 1;		// pi- , VDET=6: Coll32_Out , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1407] = 1;		// pi- , VDET=7: Coll5_In   , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1408] = 1;		// pi- , VDET=8: Coll5_Out  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1409] = 1;		// pi- , VDET=9: ST_In	    , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1410] = 1;		// pi- , VDET=10            , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1415] = 1;		// pi- , VDET=15            , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1498] = 1;		// pi- , VDET=98	    , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1499] = 1;		// pi- , VDET=99            , w/weight of survival probability, exp(-tprop/tau)
+
+  book_vdet_histset[1501] = 1;		// pi+ , VDET=1: Coll1_In   , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1502] = 1;		// pi+ , VDET=2: Coll1_Out  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1503] = 1;		// pi+ , VDET=3: Coll31_In  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1504] = 1;		// pi+ , VDET=4: Coll31_Out , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1505] = 1;		// pi+ , VDET=5: Coll32_In  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1506] = 1;		// pi+ , VDET=6: Coll32_Out , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1507] = 1;		// pi+ , VDET=7: Coll5_In   , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1508] = 1;		// pi+ , VDET=8: Coll5_Out  , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1509] = 1;		// pi+ , VDET=9: ST_In	    , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1510] = 1;		// pi+ , VDET=10            , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1515] = 1;		// pi+ , VDET=15            , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1598] = 1;		// pi+ , VDET=98	    , w/weight of survival probability, exp(-tprop/tau)
+  book_vdet_histset[1599] = 1;		// pi+ , VDET=99            , w/weight of survival probability, exp(-tprop/tau)
 
   book_vdet_histset[2001] = 1;		// pbars , VDET=1: Coll1_In
   book_vdet_histset[2002] = 1;		// pbars , VDET=2: Coll1_Out
@@ -559,8 +622,9 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[2008] = 1;		// pbars , VDET=8: Coll5_Out
   book_vdet_histset[2009] = 1;		// pbars , VDET=9: ST_In
   book_vdet_histset[2010] = 1;		// pbars , VDET=10: ST_Out
+  book_vdet_histset[2015] = 1;		// pbars , VDET=15
   book_vdet_histset[2091] = 1;		// pbars , VDET=91: before pbar window
-  book_vdet_histset[2092] = 1;		// pbars , VDET=92: after pbar window
+  book_vdet_histset[2092] = 1;		// pbars , VDET=92: after  pbar window
   book_vdet_histset[2098] = 1;		// pbars , VDET=98
   book_vdet_histset[2099] = 1;		// pbars , VDET=99
 
@@ -573,7 +637,8 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[2207] = 1;		// pbars , VDET=7: Coll5_In		, w/Striganov weight
   book_vdet_histset[2208] = 1;		// pbars , VDET=8: Coll5_Out		, w/Striganov weight
   book_vdet_histset[2209] = 1;		// pbars , VDET=9: ST_In		, w/Striganov weight
-  book_vdet_histset[2210] = 1;		// pbars , VDET=10
+  book_vdet_histset[2210] = 1;		// pbars , VDET=10                      , w/Striganov weight
+  book_vdet_histset[2215] = 1;		// pbars , VDET=15                      , w/Striganov weight
   book_vdet_histset[2291] = 1;		// pbars , VDET=91: before pbar window	, w/Striganov weight
   book_vdet_histset[2292] = 1;		// pbars , VDET=92: after pbar window	, w/Striganov weight
   book_vdet_histset[2298] = 1;		// pbars , VDET=98			, w/Striganov weight
@@ -589,6 +654,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[2508] = 1;		// pbars , VDET=8: Coll5_Out		, w/Striganov's weight
   book_vdet_histset[2509] = 1;		// pbars , VDET=9: ST_In		, w/Striganov's weight
   book_vdet_histset[2510] = 1;		// pbars , VDET=10
+  book_vdet_histset[2515] = 1;		// pbars , VDET=15                      , w/Striganov's weight
   book_vdet_histset[2591] = 1;		// pbars , VDET=91: before pbar window	, w/Striganov's weight
   book_vdet_histset[2592] = 1;		// pbars , VDET=92: after pbar window	, w/Striganov's weight
   book_vdet_histset[2598] = 1;		// pbars , VDET=98			, w/Striganov's weight
@@ -604,6 +670,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[3008] = 1;		// pbars reaching the end, VDET=8: Coll5_Out
   book_vdet_histset[3009] = 1;		// pbars reaching the end, VDET=9: ST_In
   book_vdet_histset[3010] = 1;		// pbars reaching the end, VDET=10
+  book_vdet_histset[3015] = 1;		// pbars reaching the end, VDET=15
   book_vdet_histset[3091] = 1;		// pbars reaching the end, VDET=91: before pbar window
   book_vdet_histset[3092] = 1;		// pbars reaching the end, VDET=92: after pbar window
   book_vdet_histset[3098] = 1;		// pbars reaching the end, VDET=98
@@ -619,6 +686,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[4008] = 1;		// pbars P>100 MeV/c reaching the end, VDET=8: Coll5_Out
   book_vdet_histset[4009] = 1;		// pbars P>100 MeV/c reaching the end, VDET=9: ST_In
   book_vdet_histset[4010] = 1;		// pbars P>100 MeV/c reaching the end, VDET=10
+  book_vdet_histset[4015] = 1;		// pbars P>100 MeV/c reaching the end, VDET=15
   book_vdet_histset[4091] = 1;		// pbars P>100 MeV/c reaching the end, VDET=91: before pbar window
   book_vdet_histset[4092] = 1;		// pbars P>100 MeV/c reaching the end, VDET=92: after pbar window
   book_vdet_histset[4098] = 1;		// pbars P>100 MeV/c reaching the end, VDET=98
@@ -721,7 +789,8 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
   if ((GetDebugBit(15) == 1) and (id == 5) and (SpmcData->fY0 > 200)) {
     GetHeaderBlock()->Print(Form("bit_015: SpmcData->fY0 ad VD5 = %10.3f R = %10.3f\n",SpmcData->fY0,SpmcData->fR));
   }
-
+                                        // do this to calculate the exponential just once
+  SpmcData->fSurvivalProb = Step->SurvivalProb();
 }
 
 //-----------------------------------------------------------------------------
@@ -729,7 +798,7 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
 
   SimpHist_t* hist = (SimpHist_t*) Hist;
 
-  int stage  = Simp->GetUniqueID()/100000;
+  int stage  = Simp->SimStage();
   
   hist->fVolumeID->Fill(Simp->fEndVolumeIndex,Weight);
   hist->fStage->Fill(stage,Weight);
@@ -741,6 +810,9 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
   float te = Simp->EndPos()->T();
 
   hist->fTime->Fill(te,Weight);
+
+  float dt = (Simp->EndProperTime()-Simp->StartProperTime())*Sd->fTau;
+  hist->fStageDt->Fill(dt,Weight);
 
   // hist->fParentMom->Fill(fParent->StartMom()->P());
   // hist->fParentPDG->Fill(fParent->PDGCode());
@@ -841,6 +913,8 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fPp   ->Fill(SpmcData->fPzLoc,Weight);
   hist->fTanTh->Fill(SpmcData->fTanTh,Weight);
 
+  hist->fDt1508->Fill(SpmcData->fDt1508,Weight);
+
   hist->fCosThVsMom[0]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
   hist->fCosThVsMom[1]->Fill(SpmcData->fP,SpmcData->fCosTh,Weight);
 
@@ -849,7 +923,7 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fTimeVsMom-> Fill(SpmcData->fP,Step->Time()      ,Weight);
   hist->fPTimeVsMom->Fill(SpmcData->fP,Step->ProperTime(),Weight);
 
-  //  surv_prob = 1;
+  hist->fDt1508->Fill(SpmcData->fDt1508);
 }
 
 //-----------------------------------------------------------------------------
@@ -871,45 +945,87 @@ void TSpmcAnaModule::FillHistograms() {
 
   for (int i=0; i<fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
-    int pdg_code  = simp->PDGCode();
-    int simp_id   = simp->GetUniqueID();
-    int parent_id = simp->ParentID();
-    int    vid1   = simp->EndVolumeIndex();
-    double pend   = simp->EndMom()->P();
-    double tend   = simp->EndPos()->T();
+    int    pdg_code    = simp->PDGCode();
+    int    simp_id     = simp->GetUniqueID();
+    int    parent_id   = simp->ParentID();
+    int    vid1        = simp->EndVolumeIndex();
+    double pend        = simp->EndMom()->P();
+    double tend        = simp->EndPos()->T();
+    double zend        = simp->EndPos()->Z();
+    double srv_prob    = exp(-simp->EndProperTime());
 
     sd->fStepVD9  = nullptr;
     sd->fPVD9     = -1;
     sd->fY0       = -1.e6;
+    sd->fTau      = -1.;
+
+    if      (abs(pdg_code) ==  13) sd->fTau = 2197.;
+    else if (abs(pdg_code) == 211) sd->fTau =   26.;
 
     FillSimpHistograms(fHist.fSimp[  0],simp,sd);
     if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[  1],simp,sd);
     if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[  2],simp,sd);
     if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[  3],simp,sd);
     if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[  4],simp,sd);
-    if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[  5],simp,sd);
+    if (pdg_code ==  -211) { 
+      FillSimpHistograms(fHist.fSimp[  5],simp,sd);
+      FillSimpHistograms(fHist.fSimp[ 15],simp,sd,srv_prob);
+    }
+    if (pdg_code ==  211) { 
+      FillSimpHistograms(fHist.fSimp[  6],simp,sd);
+      FillSimpHistograms(fHist.fSimp[ 16],simp,sd,srv_prob);
+    }
     if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[ 21],simp,sd);
     if (pdg_code ==    22) FillSimpHistograms(fHist.fSimp[ 22],simp,sd);
 
-    if      (simp_id < 100000) {
+    if      (simp->SimStage() == 0) {
       FillSimpHistograms(fHist.fSimp[100],simp,sd);
       if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[101],simp,sd);
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[102],simp,sd);
       if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[103],simp,sd);
       if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[104],simp,sd);
-      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[105],simp,sd);
+      if (pdg_code ==  -211) { 
+        FillSimpHistograms(fHist.fSimp[105],simp,sd);
+        FillSimpHistograms(fHist.fSimp[115],simp,sd,srv_prob);
+      }
+      if (pdg_code ==  211) { 
+        FillSimpHistograms(fHist.fSimp[106],simp,sd);
+        FillSimpHistograms(fHist.fSimp[116],simp,sd,srv_prob);
+      }
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[121],simp,sd);
     }
-    else if (simp_id < 200000) {
+    else if (simp->SimStage() == 1) {
       FillSimpHistograms(fHist.fSimp[200],simp,sd);
       if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[201],simp,sd);
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[202],simp,sd);
-      if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[203],simp,sd);
-      if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[204],simp,sd);
-      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[205],simp,sd);
+      if (pdg_code ==    13) { 
+        FillSimpHistograms(fHist.fSimp[203],simp,sd);
+        if ((simp->fTerminationCode == 14) and (simp->EndMom()->P() > 0)) {
+          FillSimpHistograms(fHist.fSimp[213],simp,sd);                          // mu- decays in flight
+          if (zend < 12000) FillSimpHistograms(fHist.fSimp[223],simp,sd);   
+        }
+      }
+
+      if (pdg_code ==   -13) {
+        FillSimpHistograms(fHist.fSimp[204],simp,sd);
+        if ((simp->fTerminationCode == 14) and (simp->EndMom()->P() > 0)) {
+          FillSimpHistograms(fHist.fSimp[214],simp,sd);                          // mu+ decays in flight
+          if (zend < 12000) FillSimpHistograms(fHist.fSimp[224],simp,sd);   
+        }
+      }
+
+      if (pdg_code ==  -211) { 
+        FillSimpHistograms(fHist.fSimp[205],simp,sd);
+        FillSimpHistograms(fHist.fSimp[215],simp,sd,srv_prob);
+      }
+      if (pdg_code ==  211) { 
+        FillSimpHistograms(fHist.fSimp[206],simp,sd);
+        FillSimpHistograms(fHist.fSimp[216],simp,sd,srv_prob);
+      }
+
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[221],simp,sd);
     }
-    else if (simp_id < 300000) {
+    else if (simp->SimStage() == 2) {
       FillSimpHistograms(fHist.fSimp[300],simp,sd);
       if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[301],simp,sd);
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[302],simp,sd);
@@ -918,7 +1034,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[305],simp,sd);
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[321],simp,sd);
     }
-    else if (simp_id < 400000) {
+    else if (simp->SimStage() == 3) {
       FillSimpHistograms(fHist.fSimp[400],simp,sd);
       if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[401],simp,sd);
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[402],simp,sd);
@@ -927,13 +1043,14 @@ void TSpmcAnaModule::FillHistograms() {
       if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[405],simp,sd);
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[421],simp,sd);
     }
-    else if (simp_id < 500000) {
+    else if (simp->SimStage() == 4) {
       FillSimpHistograms(fHist.fSimp[500],simp,sd);
       if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[501],simp,sd);
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[502],simp,sd);
       if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[503],simp,sd);
       if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[504],simp,sd);
       if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[505],simp,sd);
+      if (pdg_code ==   211) FillSimpHistograms(fHist.fSimp[506],simp,sd);
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[521],simp,sd);
     }
 
@@ -965,7 +1082,14 @@ void TSpmcAnaModule::FillHistograms() {
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[602],simp,sd);
       if (pdg_code ==    13) FillSimpHistograms(fHist.fSimp[603],simp,sd);
       if (pdg_code ==   -13) FillSimpHistograms(fHist.fSimp[604],simp,sd);
-      if (pdg_code ==  -211) FillSimpHistograms(fHist.fSimp[605],simp,sd);
+      if (pdg_code ==  -211) {
+        FillSimpHistograms(fHist.fSimp[605],simp,sd);
+        FillSimpHistograms(fHist.fSimp[615],simp,sd,srv_prob);
+      }
+      if (pdg_code ==   211) {
+        FillSimpHistograms(fHist.fSimp[606],simp,sd);
+        FillSimpHistograms(fHist.fSimp[616],simp,sd,srv_prob);
+      }
       if (pdg_code == -2212) FillSimpHistograms(fHist.fSimp[621],simp,sd);
 
       FillSimpHistograms(fHist.fSimp[700],simp,sd,fWeight);
@@ -1003,7 +1127,7 @@ void TSpmcAnaModule::FillHistograms() {
   }
 //-----------------------------------------------------------------------------
 // StepPointMC histograms
-// for beamline studies, fStepPointMCBlock contains hits of particles for which 
+// for beamline studies, fSpmcBlock contains hits of particles for which 
 // one of the stopping conditions has been satisfied, thus, this block contains 
 // one StepPointMC per particle
 //-----------------------------------------------------------------------------
@@ -1012,9 +1136,9 @@ void TSpmcAnaModule::FillHistograms() {
 
   //  SimpData_t    sd1
 
-  int nsteps = fStepPointMCBlock->NStepPoints();
+  int nsteps = fSpmcBlock->NStepPoints();
   for (int i=0; i<nsteps; i++) {
-    spmc             = fStepPointMCBlock->StepPointMC(i);
+    spmc             = fSpmcBlock->StepPointMC(i);
     float p          = spmc->Mom()->Mag();
     float t          = spmc->Time();
     int pdg_code     = spmc->PDGCode();
@@ -1208,6 +1332,21 @@ void TSpmcAnaModule::FillHistograms() {
       }
     }
 
+    if (step->VolumeID() == 15) { 
+      FillVDetHistograms(fHist.fVDet[15],step,&spmc_data);
+//-----------------------------------------------------------------------------
+// and calculate fdT1508
+//-----------------------------------------------------------------------------
+      spmc_data.fDt1508 = -1;
+      for (int j=i-1; j>=0; j--) {
+        TStepPointMC* s2 = fVDetBlock->StepPointMC(j);
+        if (s2->VolumeID() == 8) {
+          spmc_data.fDt1508 = step->Time()-s2->Time();
+          break;
+        }
+      }
+    }
+
     if (step->PDGCode() == 11) {
 //-----------------------------------------------------------------------------
 // e-
@@ -1222,6 +1361,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[108],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[109],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[110],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[115],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[198],step,&spmc_data);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[199],step,&spmc_data);
 
@@ -1236,6 +1376,7 @@ void TSpmcAnaModule::FillHistograms() {
 	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[708],step,&spmc_data);
 	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[709],step,&spmc_data);
 	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[710],step,&spmc_data);
+        if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[715],step,&spmc_data);
 	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[798],step,&spmc_data);
 	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[799],step,&spmc_data);
       }
@@ -1254,6 +1395,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[208],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[209],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[210],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[215],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[298],step,&spmc_data);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[299],step,&spmc_data);
     }
@@ -1271,6 +1413,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[308],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[309],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[310],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[315],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[398],step,&spmc_data);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[399],step,&spmc_data);
 
@@ -1288,6 +1431,7 @@ void TSpmcAnaModule::FillHistograms() {
 	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[508],step,&spmc_data);
 	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[509],step,&spmc_data);
 	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[510],step,&spmc_data);
+        if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[515],step,&spmc_data);
 	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[598],step,&spmc_data);
 	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[599],step,&spmc_data);
       }
@@ -1305,6 +1449,7 @@ void TSpmcAnaModule::FillHistograms() {
 	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[608],step,&spmc_data);
 	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[609],step,&spmc_data);
 	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[610],step,&spmc_data);
+        if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[615],step,&spmc_data);
 	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[698],step,&spmc_data);
 	if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[699],step,&spmc_data);
       }
@@ -1323,6 +1468,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[408],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[409],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[410],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[415],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[498],step,&spmc_data);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[499],step,&spmc_data);
     }
@@ -1340,6 +1486,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1008],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1009],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1010],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[1015],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1098],step,&spmc_data);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1099],step,&spmc_data);
 
@@ -1353,8 +1500,23 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1208],step,&spmc_data,fWeight);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1209],step,&spmc_data,fWeight);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1210],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[1215],step,&spmc_data,fWeight);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1298],step,&spmc_data,fWeight);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1299],step,&spmc_data,fWeight);
+
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1401],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1402],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1403],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1404],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1405],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1406],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1407],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1408],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1409],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1410],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[1415],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1498],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1499],step,&spmc_data,spmc_data.fSurvivalProb);
     }
 //-----------------------------------------------------------------------------
 // pi+
@@ -1370,6 +1532,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1108],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1109],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1110],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[1115],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1198],step,&spmc_data);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1199],step,&spmc_data);
 
@@ -1383,8 +1546,23 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1308],step,&spmc_data,fWeight);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1309],step,&spmc_data,fWeight);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1310],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[1315],step,&spmc_data,fWeight);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1398],step,&spmc_data,fWeight);
       if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1399],step,&spmc_data,fWeight);
+
+      if (step->VolumeID() ==  1) FillVDetHistograms(fHist.fVDet[1501],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  2) FillVDetHistograms(fHist.fVDet[1502],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  3) FillVDetHistograms(fHist.fVDet[1503],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  4) FillVDetHistograms(fHist.fVDet[1504],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  5) FillVDetHistograms(fHist.fVDet[1505],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  6) FillVDetHistograms(fHist.fVDet[1506],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  7) FillVDetHistograms(fHist.fVDet[1507],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[1508],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[1509],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[1510],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[1515],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[1598],step,&spmc_data,spmc_data.fSurvivalProb);
+      if (step->VolumeID() == 99) FillVDetHistograms(fHist.fVDet[1599],step,&spmc_data,spmc_data.fSurvivalProb);
     }
 //-----------------------------------------------------------------------------
 // pbars
@@ -1400,6 +1578,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2008],step,&spmc_data);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2009],step,&spmc_data);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2010],step,&spmc_data);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[2015],step,&spmc_data);
       if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2091],step,&spmc_data);
       if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2092],step,&spmc_data);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2098],step,&spmc_data);
@@ -1415,6 +1594,7 @@ void TSpmcAnaModule::FillHistograms() {
       if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2208],step,&spmc_data,fWeight);
       if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2209],step,&spmc_data,fWeight);
       if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2210],step,&spmc_data,fWeight);
+      if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[2215],step,&spmc_data,fWeight);
       if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2291],step,&spmc_data,fWeight);
       if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2292],step,&spmc_data,fWeight);
       if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2298],step,&spmc_data,fWeight);
@@ -1431,6 +1611,7 @@ void TSpmcAnaModule::FillHistograms() {
 	if (step->VolumeID() ==  8) FillVDetHistograms(fHist.fVDet[2508],step,&spmc_data,fWeight);
 	if (step->VolumeID() ==  9) FillVDetHistograms(fHist.fVDet[2509],step,&spmc_data,fWeight);
 	if (step->VolumeID() == 10) FillVDetHistograms(fHist.fVDet[2510],step,&spmc_data,fWeight);
+        if (step->VolumeID() == 15) FillVDetHistograms(fHist.fVDet[2515],step,&spmc_data,fWeight);   // should be empty
 	if (step->VolumeID() == 91) FillVDetHistograms(fHist.fVDet[2591],step,&spmc_data,fWeight);
 	if (step->VolumeID() == 92) FillVDetHistograms(fHist.fVDet[2592],step,&spmc_data,fWeight);
 	if (step->VolumeID() == 98) FillVDetHistograms(fHist.fVDet[2598],step,&spmc_data,fWeight);
@@ -1453,7 +1634,7 @@ int TSpmcAnaModule::BeginRun() {
 //_____________________________________________________________________________
 int TSpmcAnaModule::Event(int ientry) {
 
-  fStepPointMCBlock->GetEntry(ientry);
+  fSpmcBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
   fVDetBlock->GetEntry(ientry);
@@ -1513,9 +1694,9 @@ int TSpmcAnaModule::Event(int ientry) {
 // determine t(max) for steps
 //-----------------------------------------------------------------------------
   fTMaxSpmc = -1;
-  int nsteps = fStepPointMCBlock->NStepPoints();
+  int nsteps = fSpmcBlock->NStepPoints();
   for (int i=0; i<nsteps; i++) {
-    TStepPointMC* spmc = fStepPointMCBlock->StepPointMC(i);
+    TStepPointMC* spmc = fSpmcBlock->StepPointMC(i);
     //float p          = spmc->Mom()->Mag();
     float t            = spmc->Time();
     if (t > fTMaxSpmc) fTMaxSpmc = t;
@@ -1526,23 +1707,21 @@ int TSpmcAnaModule::Event(int ientry) {
   fStage = -1;
   if (fNSimp > 0) {
     TSimParticle* simp = fSimpBlock->Particle(fNSimp-1);
-    int simp_id  = simp->GetUniqueID();
-    fStage = simp_id / 100000;
+    fStage = simp->SimStage();
   }
 
   for (int i=0; i<fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
-    //    int pdg_code = simp->PDGCode();
-    int simp_id  = simp->GetUniqueID();
+    // int pdg_code = simp->PDGCode();
+    // int simp_id  = simp->GetUniqueID();
 
     if (i < kMaxNSimp) {
-      fSimData[i].fStage = simp_id/100000;
+      fSimData[i].fStage = simp->SimStage();
     }
     else {
       printf(" TSpmcAnaModule::Event ERROR: too many SimParticles\n");
     }
   }
-    
 //-----------------------------------------------------------------------------
 // everything is precalculated, fill histograms
 //-----------------------------------------------------------------------------
@@ -1581,15 +1760,28 @@ void TSpmcAnaModule::Debug() {
 	GetHeaderBlock()->Print(Form("bit:5: pbar ID=%10i",simp_id));
       }
     }
+
+    if (GetDebugBit(21) == 1) {
+//-----------------------------------------------------------------------------
+// search for muon decays in flight : trmination_code = 14 : ProcessCode::Decay
+//-----------------------------------------------------------------------------
+      if ((abs(pdg_code) == 13) and (simp->fTerminationCode == 14)) {
+        if (simp->EndMom()->P() > 0) {
+          GetHeaderBlock()->Print(Form("bit:21: muon decay in flight"));
+          fSimpBlock->Print();
+          break;
+        }
+      }
+    }
   }
 //-----------------------------------------------------------------------------
 // for all stages except S3, StepPointMC collection represents particles reaching 
 // the "STOP" volume, one hit per particle
 //-----------------------------------------------------------------------------
   if (GetDebugBit(6) == 1) {
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* spmc = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* spmc = fSpmcBlock->StepPointMC(i);
       float p            = spmc->Mom()->Mag();
       float t            = spmc->Time();
       int pdg_code       = spmc->PDGCode();
@@ -1600,9 +1792,9 @@ void TSpmcAnaModule::Debug() {
     }
   }    
   if (GetDebugBit(7) == 1) {
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* spmc = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* spmc = fSpmcBlock->StepPointMC(i);
       float p            = spmc->Mom()->Mag();
       float t            = spmc->Time();
       int pdg_code       = spmc->PDGCode();
@@ -1645,9 +1837,9 @@ void TSpmcAnaModule::Debug() {
 // bit:10  electrons with T > 1000 ns and momentum > 20 MeV/c
 //-----------------------------------------------------------------------------
   if (GetDebugBit(10) == 1) {
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* step = fSpmcBlock->StepPointMC(i);
       if (step->PDGCode() == 11) {
 	float p            = step->Mom()->Mag();
 	float t            = step->Time();
@@ -1661,9 +1853,9 @@ void TSpmcAnaModule::Debug() {
 // bit:11  electrons with T > 1000 ns and momentum < 2 MeV/c
 //-----------------------------------------------------------------------------
   if (GetDebugBit(11) == 1) {
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* step = fSpmcBlock->StepPointMC(i);
       if (step->PDGCode() == 11) {
 	float p            = step->Mom()->Mag();
 	float t            = step->Time();
@@ -1677,9 +1869,9 @@ void TSpmcAnaModule::Debug() {
 // bit:12  hits with parent mom < 2 MeV and T > 1000 ns 
 //-----------------------------------------------------------------------------
   if (GetDebugBit(12) == 1) {
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* step = fSpmcBlock->StepPointMC(i);
       float t            = step->Time();
       int sim_id        = step->SimID();
 
@@ -1699,9 +1891,9 @@ void TSpmcAnaModule::Debug() {
 //-----------------------------------------------------------------------------
   if (GetDebugBit(13) == 1) {
     int found = 0;
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* step = fSpmcBlock->StepPointMC(i);
       float pdg_code     = step->PDGCode();
       if (pdg_code == 11) {
 	found = 1; 
@@ -1719,9 +1911,9 @@ void TSpmcAnaModule::Debug() {
 //-----------------------------------------------------------------------------
   if (GetDebugBit(14) == 1) {
     int found = 0;
-    int nsteps = fStepPointMCBlock->NStepPoints();
+    int nsteps = fSpmcBlock->NStepPoints();
     for (int i=0; i<nsteps; i++) {
-      TStepPointMC* step = fStepPointMCBlock->StepPointMC(i);
+      TStepPointMC* step = fSpmcBlock->StepPointMC(i);
       float pdg_code     = step->PDGCode();
       if (pdg_code == 11) { 
 	double p      = step->Mom()->Mag();

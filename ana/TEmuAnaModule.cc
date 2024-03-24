@@ -432,9 +432,9 @@ int TEmuAnaModule::Event(int ientry) {
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
-  fEvtPar.fParticle         = NULL;
 
-  fNSimp       = fSimpBlock->NParticles();
+  fEvtPar.fNSimp            = fSimpBlock->NParticles();
+
   fNClusters   = fClusterBlock->NClusters();
 
   fCluster = NULL;
@@ -446,15 +446,16 @@ int TEmuAnaModule::Event(int ientry) {
     fTClMax  = fCluster->Time  ();
   }
 //-----------------------------------------------------------------------------
-// MC generator info
+// MC truth
 //-----------------------------------------------------------------------------
-  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-    TGenParticle* genp = fGenpBlock->Particle(i);
-    int pdg_code       = genp->GetPdgCode();
-    int process_code   = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
-      fEvtPar.fParticle = genp;
-      break;
+  for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code       = simp->PDGCode();
+    int generator_id   = simp->GeneratorID();         // MC process code
+
+    if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
+      fEvtPar.fSimp  = simp;
+      fEvtPar.fPartE = simp->StartMom()->Energy();
     }
   }
 
@@ -462,11 +463,10 @@ int TEmuAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimPar in future
 //-----------------------------------------------------------------------------
-  fSimPar.fParticle = fSimpBlock->Particle(0);
+  fSimPar.fParticle = fEvtPar.fSimp;
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  fSimPar.fGenp     = NULL;
 //-----------------------------------------------------------------------------
 // virtual detectors - for fSimPar need parameters at the tracker front
 //-----------------------------------------------------------------------------

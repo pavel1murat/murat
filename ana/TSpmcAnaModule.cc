@@ -126,6 +126,8 @@ void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fStartMom[0] ,"mom"      ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
   HBook1F(hist->fStartMom[1] ,"mom_1"    ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
 
+  HBook1F(hist->fNStrawHits  ,"nsh"      ,Form("%s: N(straw hits)" ,Folder), 100,     0,  100,Folder);
+
   HBook2F(hist->fYVsX        ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fXEndVsZEnd  ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
   HBook2F(hist->fYcVsZEnd    ,"yc_vs_ze"   ,Form("%s: yc vs zend "   ,Folder), 250,  -5000, 20000, 200,   -200, 200,Folder);
@@ -343,8 +345,14 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[215] = 1;		// pi- with the weight of the survival prob
   book_simp_histset[216] = 1;		// pi+ with the weight of the survival prob
   book_simp_histset[221] = 1;		// pbars
-  book_simp_histset[223] = 1;		// mu- decays in flight in front of the calorimeter (Z < 12000)
-  book_simp_histset[224] = 1;		// mu+ decays in flight in front of the calorimeter (Z < 12000)
+  book_simp_histset[223] = 1;		// mu- decays in flight, p_ele > 50
+  book_simp_histset[224] = 1;		// mu+ decays in flight, p_ele > 50
+  book_simp_histset[233] = 1;		// mu- decays in flight, p_ele > 60
+  book_simp_histset[234] = 1;		// mu+ decays in flight, p_ele > 60
+  book_simp_histset[243] = 1;		// mu- decays in flight, p_ele > 50, nsh > 0
+  book_simp_histset[244] = 1;		// mu+ decays in flight, p_ele > 50, nsh > 0
+  book_simp_histset[253] = 1;		// mu- decays in flight, p_ele > 60, nsh > 0
+  book_simp_histset[254] = 1;		// mu+ decays in flight, p_ele > 60, nsh > 0
 
   book_simp_histset[300] = 1;		// stage=2
   book_simp_histset[301] = 1;		// e-
@@ -821,6 +829,8 @@ void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, Si
   hist->fStartMom[0]->Fill(p,Weight);
   hist->fStartMom[1]->Fill(p,Weight);
 
+  hist->fNStrawHits->Fill(Simp->NStrawHits(),Weight);
+
   hist->fYVsX->Fill(xe,ye,Weight);
   hist->fXEndVsZEnd->Fill(ze,xe,Weight);
   hist->fYcVsZEnd->Fill(ze,Sd->fY0,Weight);
@@ -951,7 +961,7 @@ void TSpmcAnaModule::FillHistograms() {
     int    vid1        = simp->EndVolumeIndex();
     double pend        = simp->EndMom()->P();
     double tend        = simp->EndPos()->T();
-    double zend        = simp->EndPos()->Z();
+    // double zend        = simp->EndPos()->Z();
     double srv_prob    = exp(-simp->EndProperTime());
 
     sd->fStepVD9  = nullptr;
@@ -961,6 +971,18 @@ void TSpmcAnaModule::FillHistograms() {
 
     if      (abs(pdg_code) ==  13) sd->fTau = 2197.;
     else if (abs(pdg_code) == 211) sd->fTau =   26.;
+
+    sd->fMuonDecay  = ((abs(pdg_code)          == 13) and 
+                       (simp->fTerminationCode == 14) and 
+                       (simp->EndMom()->P()     >  0)    );
+
+    sd->fEle = nullptr;
+    if (sd->fMuonDecay and (i<fNSimp-1)) {
+      TSimParticle* d = fSimpBlock->Particle(i+1);
+      if (abs(d->PDGCode()) == 11) {
+        sd->fEle = d;
+      }
+    }
 
     FillSimpHistograms(fHist.fSimp[  0],simp,sd);
     if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[  1],simp,sd);
@@ -1000,17 +1022,42 @@ void TSpmcAnaModule::FillHistograms() {
       if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[202],simp,sd);
       if (pdg_code ==    13) { 
         FillSimpHistograms(fHist.fSimp[203],simp,sd);
-        if ((simp->fTerminationCode == 14) and (simp->EndMom()->P() > 0)) {
+        if (sd->fMuonDecay) {
           FillSimpHistograms(fHist.fSimp[213],simp,sd);                          // mu- decays in flight
-          if (zend < 12000) FillSimpHistograms(fHist.fSimp[223],simp,sd);   
+          if (sd->fEle) { 
+            double pele = sd->fEle->StartMom()->P();
+            if (pele > 50) FillSimpHistograms(fHist.fSimp[223],simp,sd);   
+            if (pele > 60) FillSimpHistograms(fHist.fSimp[233],simp,sd);  
+            if (sd->fEle->NStrawHits() > 0) {
+              if (pele > 50) FillSimpHistograms(fHist.fSimp[243],simp,sd);   
+              if (pele > 60) FillSimpHistograms(fHist.fSimp[253],simp,sd);  
+            }
+          }
+          else {
+            printf("ERROR: in TSpmcAnaModule 001: sd->fEle null\n");
+          }
         }
       }
 
       if (pdg_code ==   -13) {
         FillSimpHistograms(fHist.fSimp[204],simp,sd);
-        if ((simp->fTerminationCode == 14) and (simp->EndMom()->P() > 0)) {
+//-----------------------------------------------------------------------------
+// termination_code=14: decay
+//-----------------------------------------------------------------------------
+        if (sd->fMuonDecay) {
           FillSimpHistograms(fHist.fSimp[214],simp,sd);                          // mu+ decays in flight
-          if (zend < 12000) FillSimpHistograms(fHist.fSimp[224],simp,sd);   
+          if (sd->fEle) {
+            double pele = sd->fEle->StartMom()->P();
+            if (pele > 50) FillSimpHistograms(fHist.fSimp[224],simp,sd);   
+            if (pele > 60) FillSimpHistograms(fHist.fSimp[234],simp,sd);   
+            if (sd->fEle->NStrawHits() > 0) {
+              if (pele > 50) FillSimpHistograms(fHist.fSimp[244],simp,sd);   
+              if (pele > 60) FillSimpHistograms(fHist.fSimp[254],simp,sd);  
+            }
+          }
+          else {
+            printf("ERROR: in TSpmcAnaModule 002: sd->fEle null\n");
+          }
         }
       }
 

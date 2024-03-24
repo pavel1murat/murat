@@ -221,7 +221,7 @@ int TSimpAnaModule::Event(int ientry) {
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
-  fEvtPar.fParticle         = NULL;
+  // fEvtPar.fParticle         = NULL;
   fEvtPar.fPartE            = -1.;
   fEvtPar.fNSimp            = fSimpBlock->NParticles();
 //-----------------------------------------------------------------------------
@@ -229,18 +229,16 @@ int TSimpAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 //  fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
-// look for signal particle defined by the PDG code and the generator code
+// figure MC truth
 //-----------------------------------------------------------------------------
-  TLorentzVector mom;
-  
-  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-    TGenParticle* genp = fGenpBlock->Particle(i);
-    int pdg_code       = genp->GetPdgCode();
-    int process_code   = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
-      fEvtPar.fParticle = genp;
-      genp->Momentum(mom);
-      fEvtPar.fPartE    = mom.Energy();
+  for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code       = simp->PDGCode();
+    int generator_id   = simp->GeneratorID();         // MC process code
+
+    if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
+      fEvtPar.fSimp  = simp;
+      fEvtPar.fPartE = simp->StartMom()->Energy();
       break;
     }
   }
@@ -254,11 +252,11 @@ int TSimpAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimp in the future
 //-----------------------------------------------------------------------------
-  fSimPar.fParticle = fSimpBlock->Particle(0);
+  fSimPar.fParticle = fEvtPar.fSimp;
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  fSimPar.fGenp     = fEvtPar.fParticle;
+  // fSimPar.fGenp     = fEvtPar.fParticle;
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 // use the first fit

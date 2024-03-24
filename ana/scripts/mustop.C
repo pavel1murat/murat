@@ -1,0 +1,13 @@
+///////////////////////////////////////////////////////////////////////////////
+// 
+///////////////////////////////////////////////////////////////////////////////
+#include "murat/ana/scripts/modules.hh"
+
+def_name murat_mustop_003   ("murat_mustop_ana");
+///////////////////////////////////////////////////////////////////////////////
+
+void  mustop_ana(const char* VDetBlockName = "VDetBlock", int DebugBit = -1) {
+  m_must = (TMuonStopAnaModule*) g.x->AddModule("TMuonStopAnaModule",0);
+  m_must->SetVDetBlockName(VDetBlockName);
+  if (DebugBit >= 0) m_must->SetDebugBit(DebugBit,1);
+}

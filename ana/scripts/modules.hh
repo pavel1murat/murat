@@ -16,6 +16,7 @@
 #include "murat/ana/TPidAnaModule.hh"
 // #include "murat/ana/TRMCAnaModule.hh"
 #include "murat/ana/TGenAnaModule.hh"
+#include "murat/ana/TPipenuAnaModule.hh"
 #include "murat/ana/TSimpAnaModule.hh"
 #include "murat/ana/TSpmcAnaModule.hh"
 #include "murat/ana/TStrawHitAnaModule.hh"
@@ -96,16 +97,17 @@ TVDetAnaModule*            m_vdt   = NULL;
 // modules known to clash with Stntuple and su2020
 //-----------------------------------------------------------------------------
 namespace murat {
-  TCalAnaModule*           m_cal   = NULL;
-  TCosmicsAnaModule*       m_cos   = NULL;
-  TClusterAnaModule*       m_cls   = NULL;
-  TEmuAnaModule*           m_emu   = NULL;
-  TPidAnaModule*           m_pid   = NULL;
-  TSimpAnaModule*          m_sim   = NULL;
-  TSpmcAnaModule*          m_spmc  = NULL;
-  TTrackAnaModule*         m_trk   = NULL;
-  TTrackCompModule*        m_tcm   = NULL;
-  TTriggerAnaModule*       m_trig  = NULL;
+  TCalAnaModule*           m_cal    = NULL;
+  TCosmicsAnaModule*       m_cos    = NULL;
+  TClusterAnaModule*       m_cls    = NULL;
+  TEmuAnaModule*           m_emu    = NULL;
+  TPidAnaModule*           m_pid    = NULL;
+  TPipenuAnaModule*        m_pipenu = NULL;
+  TSimpAnaModule*          m_sim    = NULL;
+  TSpmcAnaModule*          m_spmc   = NULL;
+  TTrackAnaModule*         m_trk    = NULL;
+  TTrackCompModule*        m_tcm    = NULL;
+  TTriggerAnaModule*       m_trig   = NULL;
 }
 // TStnTrackID*             trk_id  = NULL;
 // TAnalysisDataset*        a_dset  = NULL;

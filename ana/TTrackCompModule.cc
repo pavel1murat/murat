@@ -922,7 +922,7 @@ int TTrackCompModule::Event(int ientry) {
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
-  fEvtPar.fParticle         = NULL;
+  fEvtPar.fSimp             = NULL;
   fEvtPar.fPartE            = -1;
 
   fNSimp       = fSimpBlock->NParticles();
@@ -941,17 +941,14 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // MC generator info
 //-----------------------------------------------------------------------------
-  TLorentzVector    mom;
+  for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code       = simp->PDGCode();
+    int generator_id   = simp->GeneratorID();         // MC process code
 
-  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-    TGenParticle* genp = fGenpBlock->Particle(i);
-    int pdg_code       = genp->GetPdgCode();
-    int process_code   = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
-      fEvtPar.fParticle = genp;
-      genp->Momentum(mom);
-      fEvtPar.fPartE    = mom.Energy();
-      break;
+    if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
+      fEvtPar.fSimp  = simp;
+      fEvtPar.fPartE = simp->StartMom()->Energy();
     }
   }
 //-----------------------------------------------------------------------------
@@ -989,11 +986,11 @@ int TTrackCompModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimPar in future
 //-----------------------------------------------------------------------------
-  fSimPar.fParticle = fSimpBlock->Particle(0);
+  fSimPar.fParticle = fEvtPar.fSimp;
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  fSimPar.fGenp     = NULL;
+  //  fSimPar.fGenp     = NULL;
 //-----------------------------------------------------------------------------
 // sometimes, there is no GENP info - as in Bob's pbar dataset
 //-----------------------------------------------------------------------------

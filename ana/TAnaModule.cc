@@ -500,12 +500,13 @@ void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fPdgCode[0],"pdg_0"       ,Form("%s: PDG code[0]"                  ,Folder), 200,-100, 100,Folder);
-  HBook1F(Hist->fPdgCode[1],"pdg_1"       ,Form("%s: PDG code[1]"                  ,Folder),1000,-500, 500,Folder);
-  HBook1F(Hist->fNStrawHits,"nsth"        ,Form("%s: n straw hits"                 ,Folder), 200,   0, 200,Folder);
-  HBook1F(Hist->fMomTargetEnd    ,"ptarg" ,Form("%s: mom after Stopping Target"    ,Folder), 400,   0, 200,Folder);
-  HBook1F(Hist->fMomTrackerFront ,"pfront",Form("%s: mom at the Tracker Front"     ,Folder), 400,   0, 200,Folder);
-  HBook1F(Hist->fTime            ,"time"  ,Form("%s: production time"              ,Folder), 200,   0,2000,Folder);
+  HBook1F(Hist->fPdgCode[0]     ,"pdg_0" ,Form("%s: PDG code[0]"                  ,Folder), 200,-100, 100,Folder);
+  HBook1F(Hist->fPdgCode[1]     ,"pdg_1" ,Form("%s: PDG code[1]"                  ,Folder),1000,-500, 500,Folder);
+  HBook1F(Hist->fNStrawHits     ,"nsth"  ,Form("%s: n straw hits"                 ,Folder), 200,   0, 200,Folder);
+  HBook1F(Hist->fMomTargetEnd   ,"ptarg" ,Form("%s: mom after Stopping Target"    ,Folder), 400,   0, 200,Folder);
+  HBook1F(Hist->fMomTrackerFront,"pfront",Form("%s: mom at the Tracker Front"     ,Folder), 400,   0, 200,Folder);
+  HBook1F(Hist->fTime           ,"time"  ,Form("%s: production time"              ,Folder), 200,   0,2000,Folder);
+  HBook1F(Hist->fEndVolumeID    ,"evid"  ,Form("%s: end volume ID"                ,Folder), 200,2900,3100,Folder);
 }
 
 
@@ -613,14 +614,14 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
   //  double            e, m, r;
   TLorentzVector    mom;
 
-  if (Evp->fParticle) {
-    Evp->fParticle->Momentum(mom);
+  if (Evp->fSimp) {
+    mom = *Evp->fSimp->StartMom();
     p      = mom.P();
     cos_th = mom.Pz()/p;
-    xv     = Evp->fParticle->Vx()+3904.;
-    yv     = Evp->fParticle->Vy();
+    xv     = Evp->fSimp->StartPos()->X()+3904.;
+    yv     = Evp->fSimp->StartPos()->Y();
     rv     = sqrt(xv*xv+yv*yv);
-    zv     = Evp->fParticle->Vz();
+    zv     = Evp->fSimp->StartPos()->Z();
     dio_wt = TStntuple::DioWeightAl(p);
   }
 
@@ -735,6 +736,7 @@ void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
   Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront);
   Hist->fNStrawHits->Fill(Simp->fNStrawHits);
   Hist->fTime->Fill(Simp->StartPos()->T());
+  Hist->fEndVolumeID->Fill(Simp->fEndVolumeIndex);
 }
 
 
@@ -778,7 +780,7 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 
   Hist->fCosTh->Fill(Track->Momentum()->CosTheta(), Weight);
   Hist->fChi2->Fill (Track->fChi2, Weight);
-  Hist->fChi2Dof->Fill(Track->fChi2/(Track->NActive()-5.), Weight);
+  Hist->fChi2Dof->Fill(Track->Chi2Dof(), Weight);
 
   float na  = Track->NActive();
   float dna = Track->NHits()-na;
@@ -934,8 +936,6 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 			     TStnClusterBlock*   ClusterBlock, 
 			     TrackPar_t*         TrackPar    ,
 			     SimPar_t*           SimPar      ) {
-  // double                xs;
-  //  TEmuLogLH::PidData_t  dat;
 //-----------------------------------------------------------------------------
 // momentum corrections for KPAR and KDAR
 //-----------------------------------------------------------------------------
@@ -949,7 +949,6 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
   for (int itrk=0; itrk<ntrk; itrk++) {
     TrackPar_t*   tp = TrackPar+itrk;
     TStnTrack* track = TrackBlock->Track(itrk);
-    //    int fit_type     = tp->fFitType;
     int fit_type = 0;
 //-----------------------------------------------------------------------------
 // process hit masks
@@ -985,16 +984,6 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     tp->fDpFSt   = tp->fPFront-tp->fPStOut;
 
     tp->fXDpF    = tp->fDpF/track->fFitMomErr;
-
-    // if (SimPar->fParticle) {
-    //   double e     = SimPar->fParticle->StartMom()->E();
-    //   tp->fDioLOWt = TStntuple::DioWeightAl   (e);
-    //   tp->fDioLLWt = TStntuple::DioWeightAl_LL(e);
-    // }
-    // else {
-    //   tp->fDioLOWt = 1. ; // TStntuple::DioWeightAl   (SimPar->fEleE);
-    //   tp->fDioLLWt = 1. ; // TStntuple::DioWeightAl_LL(SimPar->fEleE);
-    // }
 
     tp->fLumWt   = GetHeaderBlock()->LumWeight();
 

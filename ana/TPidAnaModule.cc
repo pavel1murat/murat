@@ -255,7 +255,6 @@ int TPidAnaModule::Event(int ientry) {
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = 0;  // fGenpBlock->NParticles();
-  fEvtPar.fParticle         = nullptr;
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
@@ -265,9 +264,6 @@ int TPidAnaModule::Event(int ientry) {
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  fSimPar.fGenp     = NULL;
-//  fNGenp      = fGenpBlock->NParticles();
-//  TStnPid* hit;
 
   fNTracks[0] = fTrackBlock[0]->NTracks();
   fNTracks[1] = fTrackBlock[1]->NTracks();

@@ -52,6 +52,7 @@ public:
     TH1F*      fParentPDG;
     TH1F*      fParentMom;
     TH1F*      fStartMom[2];
+    TH1F*      fNStrawHits;
 
     TH2F*      fYVsX;
     TH2F*      fXEndVsZEnd;
@@ -121,6 +122,8 @@ public:
     float         fY0;
     double        fWeight;
     double        fTau;                 // lifetime , in ns
+    bool          fMuonDecay;
+    TSimParticle* fEle;
   };
 
 //-----------------------------------------------------------------------------

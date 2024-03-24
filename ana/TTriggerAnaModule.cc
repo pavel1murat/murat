@@ -366,8 +366,8 @@ int TTriggerAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // MC generator info
 //-----------------------------------------------------------------------------
-  TGenParticle* genp;
-  int           pdg_code, process_code;
+//  TGenParticle* genp;
+//  int           pdg_code, process_code;
 
   TStntuple* stnt = TStntuple::Instance();
 //-----------------------------------------------------------------------------
@@ -377,29 +377,31 @@ int TTriggerAnaModule::Event(int ientry) {
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
-  fEvtPar.fParticle         = nullptr;
+  fEvtPar.fSimp             = nullptr;
+//-----------------------------------------------------------------------------
+// figure MC truth
+//-----------------------------------------------------------------------------
+  for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code       = simp->PDGCode();
+    int generator_id   = simp->GeneratorID();         // MC process code
 
-  for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-    genp           = fGenpBlock->Particle(i);
-    pdg_code       = genp->GetPdgCode();
-    process_code   = genp->GetStatusCode();
-    if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
-      fEvtPar.fParticle = genp;
-      break;
+    if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
+      fEvtPar.fSimp  = simp;
+      fEvtPar.fPartE = simp->StartMom()->Energy();
     }
   }
+
 
   fWeight        =  1;
 
   TLorentzVector    mom (1.,0.,0.,0);
 
-  if (fEvtPar.fParticle) {
+  if (fEvtPar.fSimp) {
 //-----------------------------------------------------------------------------
 // flat electrons
 //-----------------------------------------------------------------------------
-    fEvtPar.fParticle->Momentum(mom);
-    double e     = mom.E();
-    fWeight      = stnt->DioWeightAl(e);
+    fWeight      = stnt->DioWeightAl(fEvtPar.fPartE);
   }
 
   // fMcMom       = mom.P();
@@ -407,11 +409,11 @@ int TTriggerAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimPar in future
 //-----------------------------------------------------------------------------
-  fSimPar.fParticle = fSimpBlock->Particle(0);
+  fSimPar.fParticle = fEvtPar.fSimp;
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  fSimPar.fGenp     = NULL;
+  // fSimPar.fGenp     = NULL;
 //-----------------------------------------------------------------------------
 // consider an event passed, if there is a track seed with loosely defined quality
 //-----------------------------------------------------------------------------

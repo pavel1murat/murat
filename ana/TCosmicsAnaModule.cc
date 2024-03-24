@@ -779,12 +779,22 @@ int TCosmicsAnaModule::Event(int ientry) {
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 //-----------------------------------------------------------------------------
-  fNGenp            = fGenpBlock->NParticles();
-  fEvtPar.fParticle = fGenpBlock->Particle(0);
+  // fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fNSimp    = fSimpBlock->NParticles();
+
+  for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
+    TSimParticle* simp = fSimpBlock->Particle(i);
+    int pdg_code       = simp->PDGCode();
+    int generator_id   = simp->GeneratorID();         // MC process code
+
+    if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
+      fEvtPar.fSimp  = simp;
+      fEvtPar.fPartE = simp->StartMom()->Energy();
+    }
+  }
 					// may want to revisit the definition of fSimp
 
-  fSimPar.fParticle = fSimpBlock->Particle(0);
-  fSimPar.fGenp     = fParticle;
+  fSimPar.fParticle = fEvtPar.fSimp;
 //-----------------------------------------------------------------------------
 // process virtual detectors - for fSimp need parameters at tracker entrance
 //-----------------------------------------------------------------------------

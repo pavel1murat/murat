@@ -3,17 +3,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/ana/scripts/modules.hh"
 
-def_name vdet_001("murat_vdet_ana");
+def_name murat_pipenu_0010 ("murat_pipenu_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  murat_vdet_ana(int DebugBit = -1) {
+void  murat_pipenu_ana(const char* TrackBlockName = "TrackBlock", int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
 //-----------------------------------------------------------------------------
-  m_vdt = (TVDetAnaModule*) g.x->AddModule("TVDetAnaModule",0);  
+  murat::m_pipenu = (murat::TPipenuAnaModule*) g.x->AddModule("murat::TPipenuAnaModule",0);  
+
+  murat::m_pipenu->SetTrackBlockName(TrackBlockName);
   
-  if (DebugBit >= 0) m_vdt->SetDebugBit(DebugBit,1);
+  printf("DebugBit:%i\n",DebugBit);
+  if (DebugBit >= 0) murat::m_pipenu->SetDebugBit(DebugBit,1);
 }
-
-

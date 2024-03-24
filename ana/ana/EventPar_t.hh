@@ -6,11 +6,10 @@ namespace murat {
 
   struct EventPar_t {
     int           fNGenp;
-    TGenParticle* fParticle;                // generator "signal" particle
-    float         fPartE;
 
     int           fNSimp;
     TSimParticle* fSimp;                    // "signal" particle (?)
+    float         fPartE;
 
     int           fNTracks    [2];          // might need two for different reasons: DAR<->PAR, ELE<->MUO
     int           fNGoodTracks[2];

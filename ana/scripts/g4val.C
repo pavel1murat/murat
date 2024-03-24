@@ -3,11 +3,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "murat/ana/scripts/modules.hh"
 
-def_name murat_genp_001   ("murat_genp_ana");
+def_name murat_g4val_006   ("murat_g4val_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
-//-----------------------------------------------------------------------------
-void  murat_genp_ana(int DebugBit = -1) {
-  m_gen = (TGenAnaModule*) g.x->AddModule("TGenAnaModule",0);  
-  if (DebugBit >= 0) m_gen->SetDebugBit(DebugBit,1);
+void  g4val_ana(int DebugBit = -1) {
+  m_g4val = (TG4ValidationModule*) g.x->AddModule("TG4ValidationModule",0);  
+  if (DebugBit >= 0) m_g4val->SetDebugBit(DebugBit,1);
 }

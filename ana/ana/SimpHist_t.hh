@@ -11,7 +11,10 @@ namespace murat {
    TH1F*    fMomTrackerFront;
    TH1F*    fNStrawHits;
    TH1F*    fTime;
+   TH1F*    fCosTh;
+   TH1F*    fStartVolumeID;
    TH1F*    fEndVolumeID;
+   TH2F*    fNshVsCosTh;
  };
 
 }

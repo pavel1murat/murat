@@ -137,12 +137,13 @@ void TSimpAnaModule::BookHistograms() {
   int book_simp_histset[kNSimpHistSets];
   for (int i=0; i<kNSimpHistSets; i++) book_simp_histset[i] = 0;
 
-  book_simp_histset[ 0] = 1;		// all particles
-  book_simp_histset[ 1] = 1;		// all particles with N(straw hits) > fMinNStrawHits
-  book_simp_histset[10] = 1;		// electrons with N(straw hits) > fMinNStrawHits
-  book_simp_histset[20] = 1;		// positrons with N(straw hits) > fMinNStrawHits
-  book_simp_histset[30] = 1;		// muons     with N(straw hits) > fMinNStrawHits
-  book_simp_histset[40] = 1;		// pions     with N(straw hits) > fMinNStrawHits
+  book_simp_histset[  0] = 1;		// all particles
+  book_simp_histset[  1] = 1;		// all particles with N(straw hits) > fMinNStrawHits
+  book_simp_histset[ 10] = 1;		// electrons with N(straw hits) > fMinNStrawHits
+  book_simp_histset[ 20] = 1;		// positrons with N(straw hits) > fMinNStrawHits
+  book_simp_histset[ 30] = 1;		// muons     with N(straw hits) > fMinNStrawHits
+  book_simp_histset[ 40] = 1;		// pions     with N(straw hits) > fMinNStrawHits
+  book_simp_histset[ 41] = 1;		// pions     with with the weight of survival probability
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -186,6 +187,7 @@ void TSimpAnaModule::FillHistograms() {
       }
       else if (abs(pdg_code) == 211) {
 	FillSimpHistograms(fHist.fSimp[40],simp);
+	FillSimpHistograms(fHist.fSimp[41],simp,fEvtPar.fPionSurvProb);
       }
     }
   }
@@ -224,6 +226,7 @@ int TSimpAnaModule::Event(int ientry) {
   // fEvtPar.fParticle         = NULL;
   fEvtPar.fPartE            = -1.;
   fEvtPar.fNSimp            = fSimpBlock->NParticles();
+  fEvtPar.fPionSurvProb     = 1.;
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -239,6 +242,10 @@ int TSimpAnaModule::Event(int ientry) {
     if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
       fEvtPar.fSimp  = simp;
       fEvtPar.fPartE = simp->StartMom()->Energy();
+
+      if (abs(pdg_code) == 211) {
+        fEvtPar.fPionSurvProb = simp->SurvivalProb();
+      }
       break;
     }
   }

@@ -279,6 +279,11 @@ void TPipenuAnaModule::BookHistograms() {
   for (int i=0; i<kNSimpHistSets; i++) book_simp_histset[i] = 0;
 
   book_simp_histset[ 0] = 1;		// all events
+  book_simp_histset[ 1] = 1;		// events with a reco track
+  book_simp_histset[ 2] = 1;		// events with a good track
+
+  book_simp_histset[10] = 1;		// all events                     volID=3015 (last foil)
+  book_simp_histset[11] = 1;		// events with a reco track and a volID=3015 (last foil)
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -296,11 +301,11 @@ void TPipenuAnaModule::BookHistograms() {
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
   book_track_histset[  0] = 1;		// all tracks
-  book_track_histset[  1] = 1;		// BEST_ID tracks
+  book_track_histset[  1] = 1;		// good (IDWord == 0) tracks
 
                                         // pi+ --> e+ nu
   book_track_histset[100] = 1;          // all tracks weighted by the pion survival prob
-  book_track_histset[101] = 1;          // tracks IDWord = 0, weighted by the pion survival prob
+  book_track_histset[101] = 1;          // tracks IDWord == 0, weighted by the pion survival prob
   
 
   for (int i=0; i<kNTrackHistSets; i++) {
@@ -633,10 +638,24 @@ void TPipenuAnaModule::FillHistograms() {
     if (hel->fTrackSeedIndex >= 0) FillHelixHistograms(fHist.fHelix[2],hel,hp);
   }
 //-----------------------------------------------------------------------------
-// Simp histograms
+// SIMP histograms
 //-----------------------------------------------------------------------------
   if (fEvtPar.fSimp) {
     FillSimpHistograms(fHist.fSimp[0],fEvtPar.fSimp);
+    if (fEvtPar.fNTracks[0] > 0) {
+      FillSimpHistograms(fHist.fSimp[1],fEvtPar.fSimp);
+      if (fEvtPar.fNGoodTracks[0] > 0) {
+        FillSimpHistograms(fHist.fSimp[2],fEvtPar.fSimp);
+      }
+    }
+
+    if (fEvtPar.fSimp->StartVolumeIndex() == 3015) { 
+//-----------------------------------------------------------------------------
+// last foil
+//-----------------------------------------------------------------------------
+      FillSimpHistograms(fHist.fSimp[10],fEvtPar.fSimp);
+      if (fEvtPar.fNTracks[0] > 0) FillSimpHistograms(fHist.fSimp[11],fEvtPar.fSimp);
+    }
   }
 //-----------------------------------------------------------------------------
 // track histograms, fill them only for the downstream e- hypothesis
@@ -793,22 +812,7 @@ int TPipenuAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
-// look for the signal particle defined by the PDG code and the generator code
-//-----------------------------------------------------------------------------
-  // TLorentzVector mom;
-  
-  // for (int i=fEvtPar.fNGenp-1; i>=0; i--) {
-  //   TGenParticle* genp = fGenpBlock->Particle(i);
-  //   int pdg_code       = genp->GetPdgCode();
-  //   int process_code   = genp->GetStatusCode();
-  //   if ((abs(pdg_code) == fPDGCode) && (process_code == fMCProcessCode)) {
-  //     fEvtPar.fParticle = genp;
-  //     genp->Momentum(mom);
-  //     fEvtPar.fPartE    = mom.Energy();
-  //     break;
-  //   }
-  // }
-//-----------------------------------------------------------------------------
+// figure teh MC truth
 // pi+ --> e+ nu case : determine the event weight
 //-----------------------------------------------------------------------------
   for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
@@ -889,22 +893,31 @@ int TPipenuAnaModule::Event(int ientry) {
 
     fDiskCalorimeter->Init(&disk_geom);
   }
-
-  fEvtPar.fNTracks[0] = fTrackBlock->NTracks();
-  if (fEvtPar.fNTracks[0] == 0) fTrack = 0;
-  else                  fTrack = fTrackBlock->Track(0);
-
+//-----------------------------------------------------------------------------
+// init calorimeter
+//-----------------------------------------------------------------------------
   fNClusters  = fClusterBlock->NClusters();
   fNCalHits   = fCalDataBlock->NHits();
-  fNStrawHits = GetHeaderBlock()->fNStrawHits;
 
   fDiskCalorimeter->InitEvent(fCalDataBlock);
 //-----------------------------------------------------------------------------
+// init calorimeter clusters - remember, the first one not necessarily is the 
+// most energetic
+//-----------------------------------------------------------------------------
+  fNClusters = fClusterBlock->NClusters();
+  if (fNClusters == 0) fCluster = 0;
+  else                 fCluster = fClusterBlock->Cluster(0);
+//-----------------------------------------------------------------------------
 // loop over tracks and calculate needed parameters
 //-----------------------------------------------------------------------------
+  fNStrawHits          = GetHeaderBlock()->fNStrawHits;
   fNHyp                = -1;
   fBestHyp[0]          = -1;
   fBestHyp[1]          = -1;
+
+  fEvtPar.fNTracks[0] = fTrackBlock->NTracks();
+  if (fEvtPar.fNTracks[0] == 0) fTrack = 0;
+  else                          fTrack = fTrackBlock->Track(0);
 
   fEvtPar.fNGoodTracks[0] = 0;
   fEvtPar.fNGoodTracks[1] = 0;
@@ -930,13 +943,6 @@ int TPipenuAnaModule::Event(int ientry) {
   }
 
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);
-//-----------------------------------------------------------------------------
-// init calorimeter clusters - remember, the first one not necessarily is the 
-// most energetic
-//-----------------------------------------------------------------------------
-  fNClusters = fClusterBlock->NClusters();
-  if (fNClusters == 0) fCluster = 0;
-  else                 fCluster = fClusterBlock->Cluster(0);
 
   FillHistograms();
 

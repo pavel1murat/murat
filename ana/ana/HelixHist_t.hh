@@ -9,7 +9,7 @@
 namespace murat {
   struct HelixHist_t : public HistBase_t {
     TH1F*    fBestAlg;
-    TH1F*    fCosTh; 
+    TH1F*    fSinTh; 
     TH1F*    fChi2XY;
     TH1F*    fChi2ZPhi;
     TH1F*    fD0;

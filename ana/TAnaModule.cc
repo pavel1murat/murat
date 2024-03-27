@@ -351,7 +351,7 @@ void TAnaModule::BookHelixHistograms(HelixHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fBestAlg ,"best_alg",Form("%s: best algorithm"       ,Folder),  10,     0  ,  10  ,Folder);
   HBook1F(Hist->fChi2XY  ,"chi2xy"  ,Form("%s: Chi2(XY)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
   HBook1F(Hist->fChi2ZPhi,"chi2zp"  ,Form("%s: Chi2(ZP)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
-  HBook1F(Hist->fCosTh   ,"cos_th"  ,Form("%s: cos_th"               ,Folder), 200,    -1  ,   1  ,Folder);
+  HBook1F(Hist->fSinTh   ,"sin_th"  ,Form("%s: sin_th = Pt/P"        ,Folder), 200,    -1  ,   1  ,Folder);
   HBook1F(Hist->fD0      ,"d0"      ,Form("%s: D0"                   ,Folder), 250,   250  , 250  ,Folder);
   HBook1F(Hist->fHelicity,"hel"     ,Form("%s: helicity"             ,Folder),   3,    -1.5,  1.5 ,Folder);
   HBook1F(Hist->fLambda  ,"lam"     ,Form("%s: lambda=dphi/dz"       ,Folder), 200,   -500 , 500  ,Folder);
@@ -359,6 +359,24 @@ void TAnaModule::BookHelixHistograms(HelixHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fNSh     ,"nsh"     ,Form("%s: N(straw hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
   HBook1F(Hist->fP       ,"p"       ,Form("%s: P"                    ,Folder), 250,     0  , 250  ,Folder);
   HBook1F(Hist->fRadius  ,"r"       ,Form("%s: Radius"               ,Folder), 200,     0  , 1000 ,Folder);
+}
+
+//-----------------------------------------------------------------------------
+void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
+  //  char name [200];
+  //  char title[200];
+
+  HBook1F(Hist->fPdgCode[0]     ,"pdg_0"       ,Form("%s: PDG code[0]"             ,Folder), 200,-100, 100,Folder);
+  HBook1F(Hist->fPdgCode[1]     ,"pdg_1"       ,Form("%s: PDG code[1]"             ,Folder),1000,-500, 500,Folder);
+  HBook1F(Hist->fNStrawHits     ,"nsth"        ,Form("%s: n straw hits"            ,Folder), 200,   0, 200,Folder);
+  HBook1F(Hist->fMomTargetEnd   ,"ptarg"       ,Form("%s: mom after ST"            ,Folder), 400,   0, 200,Folder);
+  HBook1F(Hist->fMomTrackerFront,"pfront"      ,Form("%s: mom at the Tracker Front",Folder), 400,   0, 200,Folder);
+  HBook1F(Hist->fTime           ,"time"        ,Form("%s: production time"         ,Folder), 200,   0,2000,Folder);
+  HBook1F(Hist->fCosTh          ,"costh"       ,Form("%s: cos(theta)"              ,Folder), 200,  -1,   1,Folder);
+  HBook1F(Hist->fStartVolumeID  ,"vid0"        ,Form("%s: start volume ID"         ,Folder), 200,2900,3100,Folder);
+  HBook1F(Hist->fEndVolumeID    ,"vid1"        ,Form("%s: end volume ID"           ,Folder), 200,2900,3100,Folder);
+
+  HBook2F(Hist->fNshVsCosTh     ,"nsh_vs_costh",Form("%s: nsh vs costh"            ,Folder), 20 ,-1,1,40,0,200,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -494,21 +512,6 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 //-----------------------------------------------------------------------------
   HBook1F(Hist->fPidMvaOut  ,"pidmvaout",Form("%s:PID MVA output"     ,Folder), 200, -0.5, 1.5,Folder);
 }
-
-//-----------------------------------------------------------------------------
-void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
-  //  char name [200];
-  //  char title[200];
-
-  HBook1F(Hist->fPdgCode[0]     ,"pdg_0" ,Form("%s: PDG code[0]"                  ,Folder), 200,-100, 100,Folder);
-  HBook1F(Hist->fPdgCode[1]     ,"pdg_1" ,Form("%s: PDG code[1]"                  ,Folder),1000,-500, 500,Folder);
-  HBook1F(Hist->fNStrawHits     ,"nsth"  ,Form("%s: n straw hits"                 ,Folder), 200,   0, 200,Folder);
-  HBook1F(Hist->fMomTargetEnd   ,"ptarg" ,Form("%s: mom after Stopping Target"    ,Folder), 400,   0, 200,Folder);
-  HBook1F(Hist->fMomTrackerFront,"pfront",Form("%s: mom at the Tracker Front"     ,Folder), 400,   0, 200,Folder);
-  HBook1F(Hist->fTime           ,"time"  ,Form("%s: production time"              ,Folder), 200,   0,2000,Folder);
-  HBook1F(Hist->fEndVolumeID    ,"evid"  ,Form("%s: end volume ID"                ,Folder), 200,2900,3100,Folder);
-}
-
 
 //-----------------------------------------------------------------------------
 void TAnaModule::BookTrackSeedHistograms   (HistBase_t*   HistR, const char* Folder){
@@ -714,8 +717,8 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
     Hist->fChi2XY->Fill(Helix->Chi2XY());
     Hist->fChi2ZPhi->Fill(Helix->Chi2ZPhi());
 
-    float costh = Helix->Pt()/Helix->P();
-    Hist->fCosTh->Fill(costh);
+    float sinth = Helix->Pt()/Helix->P();
+    Hist->fSinTh->Fill(sinth);
 
     Hist->fD0->Fill(Helix->D0());
 
@@ -728,15 +731,25 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp) {
+void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp, double Weight) {
 
-  Hist->fPdgCode[0]->Fill(Simp->fPdgCode);
-  Hist->fPdgCode[1]->Fill(Simp->fPdgCode);
-  Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd);
-  Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront);
-  Hist->fNStrawHits->Fill(Simp->fNStrawHits);
-  Hist->fTime->Fill(Simp->StartPos()->T());
-  Hist->fEndVolumeID->Fill(Simp->fEndVolumeIndex);
+  Hist->fPdgCode[0]->Fill(Simp->fPdgCode,Weight);
+  Hist->fPdgCode[1]->Fill(Simp->fPdgCode,Weight);
+  Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd,Weight);
+  Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront,Weight);
+
+  int nsh = Simp->NStrawHits();
+  Hist->fNStrawHits->Fill(nsh,Weight);
+
+  Hist->fTime->Fill(Simp->StartPos()->T(),Weight);
+
+  double costh = Simp->StartMom()->Z()/Simp->StartMom()->P();
+  Hist->fCosTh->Fill(costh,Weight);
+
+  Hist->fStartVolumeID->Fill(Simp->fStartVolumeIndex,Weight);
+  Hist->fEndVolumeID->Fill(Simp->fEndVolumeIndex,Weight);
+
+  Hist->fNshVsCosTh->Fill(costh,nsh,Weight);
 }
 
 

@@ -436,6 +436,7 @@ void TSpmcAnaModule::BookHistograms() {
   book_vdet_histset[  9] = 1;		// all particles, VDET= 9 , ST_In
   book_vdet_histset[ 13] = 1;		// all particles, VDET=13 , TT_FrontHollow
   book_vdet_histset[ 13] = 1;		// all particles, VDET=13 , TT_FrontHollow, r > 40
+  book_vdet_histset[ 14] = 1;		// all particles, VDET=14 
   book_vdet_histset[ 15] = 1;		// all particles, VDET=15 , TT_Back, z = 11810
 
   book_vdet_histset[101] = 1;		// e-  , VDET=1: Coll1_In

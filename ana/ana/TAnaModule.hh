@@ -166,7 +166,7 @@ public:
 
   void    FillHelixHistograms     (HelixHist_t*  Hist, TStnHelix* Hel, HelixPar_t* Help);
 
-  void    FillSimpHistograms      (SimpHist_t*   Hist, TSimParticle* Simp   );
+  void    FillSimpHistograms      (SimpHist_t*   Hist, TSimParticle* Simp    , double Weight = 1.);
 
   void    FillTrackSeedHistograms (HistBase_t*  HistR, TStnTrackSeed* TrkSeed);
 

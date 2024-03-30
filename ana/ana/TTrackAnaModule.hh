@@ -47,30 +47,6 @@ public:
     TH1F*    fRWE700  [kNDisks];
   };
 
-  struct ClusterHist_t {
-    TH1F*    fDiskID;
-    TH1F*    fEnergy;
-    TH1F*    fT0;
-    TH1F*    fRow;
-    TH1F*    fCol;
-    TH1F*    fX;
-    TH1F*    fY;
-    TH1F*    fZ;
-    TH1F*    fR;
-    TH1F*    fNCr0;                     // all clustered
-    TH1F*    fNCr1;                     // above 1MeV
-    TH1F*    fYMean;
-    TH1F*    fZMean;
-    TH1F*    fSigY;
-    TH1F*    fSigZ;
-    TH1F*    fSigR;
-    TH1F*    fFrE1;
-    TH1F*    fFrE2;
-    TH1F*    fSigE1;
-    TH1F*    fSigE2;
-  };
-
-
   struct TrackEffHist_t {
     TH1F*    fPtMc;                     // denominator
     TH1F*    fPtReco;                   // numerator
@@ -193,9 +169,7 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   void    BookCaloHistograms      (CaloHist_t*    Hist, const char* Folder);
-  void    BookClusterHistograms   (ClusterHist_t* Hist, const char* Folder);
   void    FillCaloHistograms      (CaloHist_t*    Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms   (ClusterHist_t* Hist, TStnCluster*  Cluster);
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
 

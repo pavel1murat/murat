@@ -145,45 +145,44 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookClusterHistograms   (ClusterHist_t*       Hist, const char* Folder);
-  void    BookCrvClusterHistograms(CrvClusterHist_t*    Hist, const char* Folder);
-  void    BookCrvPulseHistograms  (CrvPulseHist_t*      Hist, const char* Folder);
-  void    BookGenpHistograms      (GenpHist_t*          Hist, const char* Folder);
-  void    BookEventHistograms     (EventHist_t*         Hist, const char* Folder);
-  void    BookHelixHistograms     (HelixHist_t*         Hist, const char* Folder);
-  void    BookSimpHistograms      (SimpHist_t*          Hist, const char* Folder);
-  void    BookTrackHistograms     (TrackHist_t*         Hist, const char* Folder);
-  void    BookTrackIDHistograms   (TStnTrackID::Hist_t* Hist, const char* Folder);
-  void    BookTrackSeedHistograms (HistBase_t*          Hist, const char* Folder);
+  virtual void    BookClusterHistograms   (HistBase_t*          Hist, const char* Folder);
+  virtual void    BookCrvClusterHistograms(CrvClusterHist_t*    Hist, const char* Folder);
+  virtual void    BookCrvPulseHistograms  (CrvPulseHist_t*      Hist, const char* Folder);
+  virtual void    BookGenpHistograms      (GenpHist_t*          Hist, const char* Folder);
+  virtual void    BookEventHistograms     (HistBase_t*          Hist, const char* Folder);
+  virtual void    BookHelixHistograms     (HistBase_t*          Hist, const char* Folder);
+  virtual void    BookSimpHistograms      (SimpHist_t*          Hist, const char* Folder);
+  virtual void    BookTrackHistograms     (TrackHist_t*         Hist, const char* Folder);
+  virtual void    BookTrackIDHistograms   (TStnTrackID::Hist_t* Hist, const char* Folder);
+  virtual void    BookTrackSeedHistograms (HistBase_t*          Hist, const char* Folder);
 
-  void    FillClusterHistograms   (ClusterHist_t*     Hist, TStnCluster*            Cl   , double Weight = 1.);
-  void    FillCrvClusterHistograms(CrvClusterHist_t*  Hist, TCrvCoincidenceCluster* CrvCl);
-  void    FillCrvPulseHistograms  (CrvPulseHist_t*    Hist, TCrvRecoPulse*          Pulse);
+  virtual void    FillClusterHistograms   (HistBase_t*          Hist, TStnCluster*          Cl   , double Weight = 1.);
+  virtual void    FillCrvClusterHistograms(CrvClusterHist_t*  Hist, TCrvCoincidenceCluster* CrvCl);
+  virtual void    FillCrvPulseHistograms  (CrvPulseHist_t*    Hist, TCrvRecoPulse*          Pulse);
 
-  void    FillEventHistograms     (EventHist_t*  Hist, EventPar_t*  Evtpar  );
+  virtual void    FillEventHistograms     (HistBase_t*  Hist, EventPar_t*  Evtpar  );
 
-  void    FillGenpHistograms      (GenpHist_t*   Hist, TGenParticle* Genp   );
+  virtual void    FillGenpHistograms      (GenpHist_t*   Hist, TGenParticle* Genp   );
 
-  void    FillHelixHistograms     (HelixHist_t*  Hist, TStnHelix* Hel, HelixPar_t* Help);
+  virtual void    FillHelixHistograms     (HistBase_t*  Hist, TStnHelix* Hel, HelixPar_t* Help, double Weight = 1);
 
-  void    FillSimpHistograms      (SimpHist_t*   Hist, TSimParticle* Simp    , double Weight = 1.);
+  virtual void    FillSimpHistograms      (SimpHist_t*   Hist, TSimParticle* Simp    , double Weight = 1.);
+  virtual void    FillTrackSeedHistograms (HistBase_t*  HistR, TStnTrackSeed* TrkSeed, double Weight = 1);
 
-  void    FillTrackSeedHistograms (HistBase_t*  HistR, TStnTrackSeed* TrkSeed);
-
-  void    FillTrackHistograms     (TrackHist_t* Hist, 
+  virtual void    FillTrackHistograms     (TrackHist_t* Hist, 
 				   TStnTrack*          Trk, 
 				   TrackPar_t*         Tp, 
 				   SimPar_t*           SimPar,
 				   double              Weight = 1.);
 
-  int     InitTrackPar(TStnTrackBlock*    TrackBlock  , 
+  virtual int     InitTrackPar(TStnTrackBlock*    TrackBlock  , 
 		       TStnClusterBlock*  ClusterBlock, 
 		       TrackPar_t*        TrackPar    ,
 		       SimPar_t*          SimPar      );
   
-  void    PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const ;
+  virtual void    PrintTrack(TStnTrack* Track, TrackPar_t* Tp, Option_t* Option) const ;
 
-  double  BatchModeWeight(float lumi, int mode);
+  virtual double  BatchModeWeight(float lumi, int mode);
 
   ClassDef(murat::TAnaModule,0)
 };

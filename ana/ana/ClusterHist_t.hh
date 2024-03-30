@@ -8,7 +8,7 @@
 
 namespace murat {
 
-  struct ClusterHist_t {
+  struct ClusterHist_t : public HistBase_t {
     TH1F*    fDiskID;
     TH1F*    fEnergy;
     TH1F*    fEnergyDiff;

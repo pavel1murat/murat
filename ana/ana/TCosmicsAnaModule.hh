@@ -212,12 +212,10 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   void    BookCaloHistograms    (HistBase_t*  Hist, const char* Folder);
-  void    BookClusterHistograms (HistBase_t*  Hist, const char* Folder);
 
   //  void    BookTrackIDHistograms (TStnTrackID::Hist_t* Hist, const char* Folder);
 
   void    FillCaloHistograms     (HistBase_t*  Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms  (HistBase_t*  Hist, TStnCluster*  Cluster);
 
   void    BookHistograms();
   void    FillHistograms();

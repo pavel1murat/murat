@@ -47,33 +47,20 @@ public:
     TH1F*    fRWE700  [kNDisks];
   };
 
-  struct ClusterHist_t {
-    TH1F*    fDiskID;
-    TH1F*    fEnergy;
+  struct TimeClusterHist_t {
+    TH1F*    fNsh;
+    TH1F*    fNch;
     TH1F*    fT0;
-    TH1F*    fRow;
-    TH1F*    fCol;
-    TH1F*    fX;
-    TH1F*    fY;
-    TH1F*    fZ;
-    TH1F*    fR;
-    TH1F*    fNCr0;                     // all clustered
-    TH1F*    fNCr1;                     // above 1MeV
-    TH1F*    fYMean;
-    TH1F*    fZMean;
-    TH1F*    fSigY;
-    TH1F*    fSigZ;
-    TH1F*    fSigR;
-    TH1F*    fFrE1;
-    TH1F*    fFrE2;
-    TH1F*    fSigE1;
-    TH1F*    fSigE2;
+    TH1F*    fT0Err;
   };
-
 
   struct TrackEffHist_t {
     TH1F*    fPtMc;                     // denominator
     TH1F*    fPtReco;                   // numerator
+  };
+
+  struct PipenuHist_t {
+    TH2F*    fPVsT0;                    //
   };
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets         = 100 };
@@ -84,34 +71,39 @@ public:
   enum { kNCaloHistSets          = 100 };
   enum { kNGenpHistSets          = 100 };
   enum { kNSimpHistSets          = 100 };
+  enum { kNTimeClusterHistSets   =  10 };
+  enum { kNPipenuHistSets        = 400 };
 
   struct Hist_t {
-    TH1F*                  fCrystalR[2];                  // crystal radius
-    CaloHist_t*            fCalo   [kNCaloHistSets   ];
-    ClusterHist_t*         fCluster[kNClusterHistSets];
-    EventHist_t*           fEvent  [kNEventHistSets  ];
-    GenpHist_t*            fGenp   [kNGenpHistSets   ];
-    HelixHist_t*           fHelix  [kNHelixHistSets  ];
-    SimpHist_t*            fSimp   [kNSimpHistSets   ];
-    TrackHist_t*           fTrack  [kNTrackHistSets  ];
+    TH1F*                  fCrystalR   [2];                  // crystal radius
+    CaloHist_t*            fCalo       [kNCaloHistSets   ];
+    ClusterHist_t*         fCluster    [kNClusterHistSets];
+    EventHist_t*           fEvent      [kNEventHistSets  ];
+    GenpHist_t*            fGenp       [kNGenpHistSets   ];
+    HelixHist_t*           fHelix      [kNHelixHistSets  ];
+    SimpHist_t*            fSimp       [kNSimpHistSets   ];
+    TimeClusterHist_t*     fTimeCluster[kNTimeClusterHistSets];
+    TrackHist_t*           fTrack      [kNTrackHistSets  ];
+    PipenuHist_t*          fPipenu     [kNPipenuHistSets ];
   };
 //-----------------------------------------------------------------------------
 //  data members
 //-----------------------------------------------------------------------------
 public:
-  TString              fTrackBlockName;      // 
-  TString              fTrackStrawHitBlockName; // 
+  TString               fTrackBlockName;      // 
+  TString               fTrackStrawHitBlockName; // 
                                              // pointers to the data blocks used
-  TStnTrackBlock*      fTrackBlock;
-  TStnTrackSeedBlock*  fTrackSeedBlock;
-  TStnHelixBlock*      fHelixBlock;
-  TTrackStrawHitBlock* fTrackStrawHitBlock;
-  TStnClusterBlock*    fClusterBlock;
-  TCalDataBlock*       fCalDataBlock;
-  TStrawHitBlock*      fStrawHitBlock;
-  TStepPointMCBlock*   fVDetBlock;
-  TGenpBlock*          fGenpBlock;
-  TSimpBlock*          fSimpBlock;
+  TStnTrackBlock*       fTrackBlock;
+  TStnTrackSeedBlock*   fTrackSeedBlock;
+  TStnHelixBlock*       fHelixBlock;
+  TStnTimeClusterBlock* fTimeClusterBlock;
+  // TTrackStrawHitBlock* fTrackStrawHitBlock;
+  TStnClusterBlock*     fClusterBlock;
+  TCalDataBlock*        fCalDataBlock;
+  // TStrawHitBlock*      fStrawHitBlock;
+  TStepPointMCBlock*    fVDetBlock;
+  TGenpBlock*           fGenpBlock;
+  TSimpBlock*           fSimpBlock;
                                         // additional parameters (assume nhelices/ntracks < 20)
   HelixPar_t           fHelixPar[20];
   TrackPar_t           fTrackPar[20];
@@ -156,6 +148,8 @@ public:
 
   double               fLumWt;
   int                  fApplyCorrections;  // 0: do not apply momentum ant DT corrections
+
+  int                  fEventPassedSelections; // 1: event passed analysis selections; 0: event didn't pass
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -165,12 +159,6 @@ public:
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  // Hist_t*            GetHist        () { return &fHist;        }
-  // TStnTrackBlock*    GetTrackBlock  () { return fTrackBlock;   }
-  // TStnClusterBlock*  GetClusterBlock() { return fClusterBlock; }
-
-  // TStnTrackID*       GetTrackID(int I) { return fTrackID[I];   }
-  // TEmuLogLH*         GetLogLH       () { return fLogLH;        }
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
@@ -190,10 +178,18 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms      (CaloHist_t*    Hist, const char* Folder);
-  void    BookClusterHistograms   (ClusterHist_t* Hist, const char* Folder);
-  void    FillCaloHistograms      (CaloHist_t*    Hist, TStnCrystal*  Crystal);
-  void    FillClusterHistograms   (ClusterHist_t* Hist, TStnCluster*  Cluster);
+  void    BookCaloHistograms       (CaloHist_t*        Hist, const char* Folder);
+  void    BookTimeClusterHistograms(TimeClusterHist_t* Hist, const char* Folder);
+  void    BookPipenuHistograms     (PipenuHist_t*      Hist, const char* Folder);
+
+  void    FillCaloHistograms       (CaloHist_t*        Hist, TStnCrystal*     Crystal);
+  void    FillTimeClusterHistograms(TimeClusterHist_t* Hist, TStnTimeCluster* Tc     , double Weight = 1.);
+
+  void    FillPipenuHistograms    (PipenuHist_t*  Hist, 
+                                   TStnTrack*     Trk, 
+				   TrackPar_t*    Tp, 
+				   SimPar_t*      SimPar,
+				   double         Weight = 1.);
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
 

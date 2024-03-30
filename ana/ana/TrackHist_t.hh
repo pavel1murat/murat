@@ -33,6 +33,7 @@ namespace murat {
     TH1F*    fNActive;
     TH1F*    fNaFract;
     TH1F*    fDNa;
+    TH1F*    fNtch;                     // N(hits) in the associated time cluster
     TH1F*    fNWrong;			// MC-only histogram: N(hits) with wrong drift signs
     TH1F*    fNDoublets;
     TH1F*    fNadOverNd;		// fraction of doublets with all hits active
@@ -50,6 +51,8 @@ namespace murat {
 
     TH1F*    fT0;
     TH1F*    fT0Err;
+    TH1F*    fDtTc;                     // T(trk)-T(closest tc)
+
     TH1F*    fQ;
     TH1F*    fFitCons[2];		// fit consistency (0 to 1)
     TH1F*    fD0;
@@ -90,7 +93,7 @@ namespace murat {
     TH1F*    fTrqMvaOut;	        // output of our TRQ MVA
     TH1F*    fDeltaMVA;			// DaveTrkQual-fTrqMvaOut
 
-    TH2F*    fPVsTime;                  // 2D histogram momentum vs time at the center of the tracker (T0) (used for sensitivity calculation)
+    TH2F*    fPVsTime;                  // 2D histogram momentum vs time at the center of the tracker (T0) (used for the sensitivity calculation)
     TH1F*    fDtCRV;                    // delta(T) from CRV stub candidate
     TH1F*    fDtCRV2;                   // delta(T) from CRV stub candidate
     TH2F*    fZVsDtCRV;                 // delta(T) from CRV stub candidate

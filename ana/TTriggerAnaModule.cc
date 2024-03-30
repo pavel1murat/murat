@@ -202,7 +202,7 @@ void TTriggerAnaModule::BookHistograms() {
 }
 
 //-----------------------------------------------------------------------------
-void TTriggerAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* TPeak) {
+  void TTriggerAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* TPeak, HelixPar_t* Help, double Weight) {
   //  HelixHist_t* hist = (HelixHist_t*) Hist;
 }
 

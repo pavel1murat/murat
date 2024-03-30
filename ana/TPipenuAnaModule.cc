@@ -8,26 +8,8 @@
 //  1  : passed events
 //  2  : rejected events
 // 
-//  3  : events with set C tracks and 70mm < |dx|  < 90 mm
-//  4  : events with DpF > 1 MeV : obviously, misreconstructed ones
+//  3  : events with good tracks P > 70 and T0 > 300
 //  5  : events with N(tracks) > 1
-//  6  : events trk_41 with 0.8< E/P < 1.1 - tracks missed by CalPatRec
-//  7  : events (muo) with LogLHRCal >   20
-//  8  : events (ele) with LogLHRCal < - 20
-//  9  : events (muo) with 0.42 < E/P < 0.46
-// 10  : events (muo) with Set C track with ECL > 80 MeV
-// 28  : Set C DEM tracks with E/P > 1.1
-// 29  : TRK_19 (Set C DEM tracks with a cluster) and LLHR(cal) < 0
-// 31  : EVT_6 events with ce_costh > 0.8 
-// 32  : TRK_1 events with chi2tcm > 100. 
-// 33  : DU < -80mm - study edge effects
-// 34  : EVT_7: events with E_CL > 60 and no CalPatRec tracks 
-// 35  : TRK_1: events with P > 106 MeV/c - misreconstruction
-// 36  : TRK_23 events with P < 80: odd misidentified muons - turned out to be DIO electrons
-// 37  : TRK_26 LLHR_CAL > 5
-// 38  : EVT_7: events with E_CL > 60 and no CalPatRec tracks and TrkPatRec
-// 39  : trk_1: events with |SIN_TC| > 0.6
-// 40  : trk_0: events with P > 60 MeV/c
 //
 // 3 different ID : 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,9 +61,16 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
 
   fTrackID[0]      = TAnaModule::fTrackID_BOX;
 
-  fTrackID[0]->SetUseMask(TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit);
-  fTrackID[0]->SetMaxChi2Dof(3.5 );
+  int mask = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit ;
+  fTrackID[0]->SetMaxChi2Dof(3.0 );
   fTrackID[0]->SetMinNActive(20  );
+  fTrackID[0]->SetMaxMomErr (1.  );
+
+  mask    |= TStnTrackID::kTanDipBit;
+  fTrackID[0]->SetMinTanDip (0.5);
+  fTrackID[0]->SetMaxTanDip (1.4);
+
+  fTrackID[0]->SetUseMask(mask);
 
   fBestID           = 0;
 //-----------------------------------------------------------------------------
@@ -109,14 +98,15 @@ int TPipenuAnaModule::BeginJob() {
 // register data blocks
 //-----------------------------------------------------------------------------
   RegisterDataBlock(fTrackBlockName.Data()        ,"TStnTrackBlock"     ,&fTrackBlock  );
-  RegisterDataBlock(fTrackStrawHitBlockName.Data(),"TTrackStrawHitBlock",&fTrackStrawHitBlock);
+  // RegisterDataBlock(fTrackStrawHitBlockName.Data(),"TTrackStrawHitBlock",&fTrackStrawHitBlock);
 
-  RegisterDataBlock("KSFBlock"     ,"TStnTrackSeedBlock",&fTrackSeedBlock);
-  RegisterDataBlock("HelixBlock"   ,"TStnHelixBlock"    ,&fHelixBlock    );
+  RegisterDataBlock("KSFBlock"        ,"TStnTrackSeedBlock"  ,&fTrackSeedBlock  );
+  RegisterDataBlock("HelixBlock"      ,"TStnHelixBlock"      ,&fHelixBlock      );
+  RegisterDataBlock("TimeClusterBlock","TStnTimeClusterBlock",&fTimeClusterBlock);
 
   RegisterDataBlock("ClusterBlock" ,"TStnClusterBlock" ,&fClusterBlock );
   RegisterDataBlock("CalDataBlock" ,"TCalDataBlock"    ,&fCalDataBlock );
-  RegisterDataBlock("StrawHitBlock","TStrawHitBlock"   ,&fStrawHitBlock);
+  // RegisterDataBlock("StrawHitBlock","TStrawHitBlock"   ,&fStrawHitBlock);
   RegisterDataBlock("GenpBlock"    ,"TGenpBlock"       ,&fGenpBlock    );
   RegisterDataBlock("SimpBlock"    ,"TSimpBlock"       ,&fSimpBlock    );
   RegisterDataBlock("SpmcBlockVDet","TStepPointMCBlock",&fVDetBlock    );
@@ -154,33 +144,19 @@ void TPipenuAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) 
   }
 }
 
-//-----------------------------------------------------------------------------
-void TPipenuAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
-//   char name [200];
-//   char title[200];
 
-  HBook1F(Hist->fDiskID ,"disk_id",Form("%s: Disk ID"       ,Folder), 10, 0,  10,Folder);
-  HBook1F(Hist->fEnergy ,"energy" ,Form("%s: Cluster Energy",Folder),500, 0, 250,Folder);
-  HBook1F(Hist->fT0     ,"t0"     ,Form("%s: cluster T0"    ,Folder),200, 0,2000,Folder);
-  HBook1F(Hist->fRow    ,"row"    ,Form("%s: cluster Row"   ,Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fCol    ,"col"    ,Form("%s: cluster column",Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fX      ,"x"      ,Form("%s: cluster X"     ,Folder),200, -5000,5000,Folder);
-  HBook1F(Hist->fY      ,"y"      ,Form("%s: cluster Y"     ,Folder),200,-1000,1000,Folder);
-  HBook1F(Hist->fZ      ,"z"      ,Form("%s: cluster Z"     ,Folder),200, 11500,13500,Folder);
-  HBook1F(Hist->fR      ,"r"      ,Form("%s: cluster Radius",Folder),100, 0,  1000,Folder);
-  HBook1F(Hist->fYMean  ,"ymean"  ,Form("%s: cluster YMean" ,Folder),400,-200,200,Folder);
-  HBook1F(Hist->fZMean  ,"zmean"  ,Form("%s: cluster ZMean" ,Folder),400,-200,200,Folder);
-  HBook1F(Hist->fSigY   ,"sigy"   ,Form("%s: cluster SigY"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fSigZ   ,"sigz"   ,Form("%s: cluster SigZ"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fSigR   ,"sigr"   ,Form("%s: cluster SigR"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fNCr0   ,"ncr0"   ,Form("%s: cluster NCR[0]",Folder),100, 0,100,Folder);
-  HBook1F(Hist->fNCr1   ,"ncr1"   ,Form("%s: cluster NCR[1]",Folder),100, 0,100,Folder);
-  HBook1F(Hist->fFrE1   ,"fre1"   ,Form("%s: E1/Etot"       ,Folder),200, 0,  1,Folder);
-  HBook1F(Hist->fFrE2   ,"fre2"   ,Form("%s: (E1+E2)/Etot"  ,Folder),200, 0,  1,Folder);
-  HBook1F(Hist->fSigE1  ,"sige1"   ,Form("%s: SigmaE/Etot"  ,Folder),200, 0, 10,Folder);
-  HBook1F(Hist->fSigE2  ,"sige2"   ,Form("%s: SigmaE/Emean" ,Folder),200, 0, 10,Folder);
+//-----------------------------------------------------------------------------
+void TPipenuAnaModule::BookPipenuHistograms(PipenuHist_t* Hist, const char* Folder) {
+  HBook2F(Hist->fPVsT0 ,"p_vs_t0",Form("%s: track P s T0"       ,Folder), 200, 0,  2000, 100, 0, 100,Folder);
 }
 
+//-----------------------------------------------------------------------------
+void TPipenuAnaModule::BookTimeClusterHistograms(TimeClusterHist_t* Hist, const char* Folder) {
+  HBook1F(Hist->fNsh  ,"nsh"  ,Form("%s: N(single straw hits)",Folder), 200, 0,  200,Folder);
+  HBook1F(Hist->fNch  ,"nch"  ,Form("%s: N(combo hits)"       ,Folder), 200, 0,  200,Folder);
+  HBook1F(Hist->fT0   ,"t0"   ,Form("%s: T0"                  ,Folder), 200, 0, 2000,Folder);
+  HBook1F(Hist->fT0Err,"t0err",Form("%s: T0Err"               ,Folder), 200, 0, 2000,Folder);
+}
 
 //_____________________________________________________________________________
 void TPipenuAnaModule::BookHistograms() {
@@ -302,11 +278,22 @@ void TPipenuAnaModule::BookHistograms() {
 
   book_track_histset[  0] = 1;		// all tracks
   book_track_histset[  1] = 1;		// good (IDWord == 0) tracks
-
-                                        // pi+ --> e+ nu
-  book_track_histset[100] = 1;          // all tracks weighted by the pion survival prob
-  book_track_histset[101] = 1;          // tracks IDWord == 0, weighted by the pion survival prob
+  book_track_histset[ 50] = 1;          // all tracks weighted by the pion survival prob
+  book_track_histset[ 51] = 1;          // tracks IDWord == 0, weighted by the pion survival prob
   
+  book_track_histset[100] = 1;		// all  tracks Q=1
+  book_track_histset[101] = 1;		// good (IDWord == 0) tracks Q=1
+  book_track_histset[102] = 1;		// good (IDWord == 0) tracks Q=1 pass_event_level_cuts
+  book_track_histset[103] = 1;		// good (IDWord == 0) tracks Q=1 pass_event_level_cuts T>300
+  book_track_histset[150] = 1;          // all tracks weighted by the pion survival prob Q=1
+  book_track_histset[151] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1
+  book_track_histset[152] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1 pass_event_level_cuts 
+  book_track_histset[153] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1 pass_event_level_cuts T>300
+  
+  book_track_histset[200] = 1;		// all  tracks Q=-1
+  book_track_histset[201] = 1;		// good (IDWord == 0) tracks Q=-1
+  book_track_histset[250] = 1;          // all tracks weighted by the pion survival prob Q=-1
+  book_track_histset[251] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=-1
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -318,7 +305,23 @@ void TPipenuAnaModule::BookHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// book cluster histograms
+// book time cluster histograms
+//-----------------------------------------------------------------------------
+  int book_tc_histset[kNTimeClusterHistSets];
+  for (int i=0; i<kNTimeClusterHistSets; i++) book_tc_histset[i] = 0;
+
+  book_tc_histset[0] = 1;		// all clusters
+
+  for (int i=0; i<kNTimeClusterHistSets; i++) {
+    if (book_tc_histset[i] == 0)                            continue;
+    sprintf(folder_name,"tc_%i",i);
+    fol = (TFolder*) hist_folder->FindObject(folder_name);
+    if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+    fHist.fTimeCluster[i] = new TimeClusterHist_t;
+    BookTimeClusterHistograms(fHist.fTimeCluster[i],Form("Hist/%s",folder_name));
+  }
+//-----------------------------------------------------------------------------
+// book calorimeter cluster histograms
 //-----------------------------------------------------------------------------
   int book_cluster_histset[kNClusterHistSets];
   for (int i=0; i<kNClusterHistSets; i++) book_cluster_histset[i] = 0;
@@ -378,6 +381,39 @@ void TPipenuAnaModule::BookHistograms() {
       BookGenpHistograms(fHist.fGenp[i],Form("Hist/%s",folder_name));
     }
   }
+//-----------------------------------------------------------------------------
+// book pipenu histograms
+//-----------------------------------------------------------------------------
+  int book_pipenu_histset[kNPipenuHistSets];
+  for (int i=0; i<kNPipenuHistSets; i++) book_pipenu_histset[i] = 0;
+
+  book_pipenu_histset[  0] = 1;		// all  tracks
+  book_pipenu_histset[  1] = 1;		// good tracks
+  book_pipenu_histset[ 50] = 1;		// all  tracks, wt = pion surv prob
+  book_pipenu_histset[ 51] = 1;		// good tracks, wt = pion surv prob
+
+  book_pipenu_histset[100] = 1;		// all  tracks Q>0
+  book_pipenu_histset[101] = 1;		// good tracks Q>0
+  book_pipenu_histset[102] = 1;		// good tracks Q>0
+  book_pipenu_histset[103] = 1;		// good tracks Q>0 T>300
+  book_pipenu_histset[150] = 1;		// all  tracks, wt = pion surv prob Q>0
+  book_pipenu_histset[151] = 1;		// good tracks, wt = pion surv prob Q>0
+  book_pipenu_histset[152] = 1;		// good tracks, wt = pion surv prob Q>0
+  book_pipenu_histset[153] = 1;		// good tracks, wt = pion surv prob Q>0 T>300
+
+  book_pipenu_histset[200] = 1;		// all  tracks Q<0
+  book_pipenu_histset[201] = 1;		// good tracks Q<0
+  book_pipenu_histset[250] = 1;		// all  tracks, wt = pion surv prob Q<0
+  book_pipenu_histset[251] = 1;		// good tracks, wt = pion surv prob Q<0
+
+  for (int i=0; i<kNPipenuHistSets; i++) {
+    if (book_pipenu_histset[i] == 0)                        continue;
+    sprintf(folder_name,"pip_%i",i);
+    fol = (TFolder*) hist_folder->FindObject(folder_name);
+    if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+    fHist.fPipenu[i] = new PipenuHist_t;
+    BookPipenuHistograms(fHist.fPipenu[i],Form("Hist/%s",folder_name));
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -425,46 +461,6 @@ void TPipenuAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
     Hist->fR700  [idisk]->Fill(r);
     Hist->fRWE700[idisk]->Fill(r,e700);
   }
-}
-
-
-//-----------------------------------------------------------------------------
-void TPipenuAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
-  int   row, col;
-  float  x, y, z, r;
-
-  row = Cluster->Ix1();
-  col = Cluster->Ix2();
-
-  x   = Cluster->fX+3904.;
-  y   = Cluster->fY;
-  z   = Cluster->fZ;
-  r   = sqrt(x*x+y*y);
-
-  if ((row < 0) || (row > 9999)) row = -9999;
-  if ((col < 0) || (col > 9999)) col = -9999;
-
-  Hist->fDiskID->Fill(Cluster->DiskID());
-  Hist->fEnergy->Fill(Cluster->Energy());
-  Hist->fT0->Fill(Cluster->Time());
-  Hist->fRow->Fill(row);
-  Hist->fCol->Fill(col);
-  Hist->fX->Fill(x);
-  Hist->fY->Fill(y);
-  Hist->fZ->Fill(z);
-  Hist->fR->Fill(r);
-
-  Hist->fYMean->Fill(Cluster->fYMean);
-  Hist->fZMean->Fill(Cluster->fZMean);
-  Hist->fSigY->Fill(Cluster->fSigY);
-  Hist->fSigZ->Fill(Cluster->fSigZ);
-  Hist->fSigR->Fill(Cluster->fSigR);
-  Hist->fNCr0->Fill(Cluster->fNCrystals);
-  Hist->fNCr1->Fill(Cluster->fNCr1);
-  Hist->fFrE1->Fill(Cluster->fFrE1);
-  Hist->fFrE2->Fill(Cluster->fFrE2);
-  Hist->fSigE1->Fill(Cluster->fSigE1);
-  Hist->fSigE2->Fill(Cluster->fSigE2);
 }
 
 
@@ -550,14 +546,31 @@ void TPipenuAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
   }
 }
 
+//-----------------------------------------------------------------------------
+void    TPipenuAnaModule::FillPipenuHistograms    (PipenuHist_t*  Hist, 
+                                                   TStnTrack*     Trk, 
+                                                   TrackPar_t*    Tp, 
+                                                   SimPar_t*      SimPar,
+                                                   double         Weight) {
+  Hist->fPVsT0->Fill(Trk->fT0,Tp->fP,Weight);
+}
+
+//-----------------------------------------------------------------------------
+void    TPipenuAnaModule::FillTimeClusterHistograms(TimeClusterHist_t* Hist  , 
+                                                    TStnTimeCluster*   Tc    ,
+                                                    double             Weight) {
+  Hist->fNsh->Fill  (Tc->NHits()     ,Weight);
+  Hist->fNch->Fill  (Tc->NComboHits(),Weight);
+  Hist->fT0->Fill   (Tc->T0()        ,Weight);
+  Hist->fT0Err->Fill(Tc->T0Err()     ,Weight);
+}
+
 //_____________________________________________________________________________
 void TPipenuAnaModule::FillHistograms() {
 
   double       cos_th (-2.),  cl_e(-1.);
   int          disk_id(-1);
   TStnCluster  *cl0(NULL);
-
-  //  cos_th = fEle->momentum().pz()/fEle->momentum().vect().mag();
 
   if (fNClusters > 0) {
     cl0     = fClusterBlock->Cluster(0);
@@ -667,12 +680,60 @@ void TPipenuAnaModule::FillHistograms() {
     trk = fTrackBlock->Track(i);
     tp  = fTrackPar+i;
 
-    FillTrackHistograms(fHist.fTrack[0],trk,tp,&fSimPar);
+    int dn = tp->fTimeCluster->NHits()-trk->NActive();
+//-----------------------------------------------------------------------------
+// find closest time cluster 
+//-----------------------------------------------------------------------------
+    float dt_tc_min(1.e6);   // signed !!!
+
+    for (int itc=0; itc<fEvtPar.fNTimeClusters; itc++) {
+      TStnTimeCluster* tc = fTimeClusterBlock->TimeCluster(itc);
+      if (tc == tp->fTimeCluster)                 continue;
+      float dt = tp->fTimeCluster->T0()-tc->T0();
+      if (fabs(dt) < fabs(dt_tc_min)) {
+        dt_tc_min = dt;
+      }
+    }
+
+
+    FillTrackHistograms (fHist.fTrack [0],trk,tp,&fSimPar);
+    FillPipenuHistograms(fHist.fPipenu[0],trk,tp,&fSimPar);
+    if (trk->Charge() > 0) {
+      FillTrackHistograms (fHist.fTrack [100],trk,tp,&fSimPar);
+      FillPipenuHistograms(fHist.fPipenu[100],trk,tp,&fSimPar);
+    }
+    else {
+      FillTrackHistograms (fHist.fTrack [200],trk,tp,&fSimPar);
+      FillPipenuHistograms(fHist.fPipenu[200],trk,tp,&fSimPar);
+    }
 
     if (tp->fIDWord[fBestID] == 0) {
-					// track passes selection "C" 
+					// track passes the quality selection
 
-      FillTrackHistograms(fHist.fTrack[1],trk,tp,&fSimPar);
+      FillTrackHistograms (fHist.fTrack [  1],trk,tp,&fSimPar);
+      FillPipenuHistograms(fHist.fPipenu[  1],trk,tp,&fSimPar);
+      if (trk->Charge() > 0) {
+        FillTrackHistograms (fHist.fTrack [101],trk,tp,&fSimPar);
+        FillPipenuHistograms(fHist.fPipenu[101],trk,tp,&fSimPar);
+//-----------------------------------------------------------------------------
+// at this point, apply the analysis-specific cuts
+// 1. require the number of track hits to be consistent with the number of hits 
+// 2. require no close time clusters
+//-----------------------------------------------------------------------------
+        if ((dn < 20) and (fabs(dt_tc_min) > 100)) {
+          fEventPassedSelections = 1;
+          FillTrackHistograms (fHist.fTrack [102],trk,tp,&fSimPar);
+          FillPipenuHistograms(fHist.fPipenu[102],trk,tp,&fSimPar);
+          if (trk->T0() > 300) {
+            FillTrackHistograms (fHist.fTrack [103],trk,tp,&fSimPar);
+            FillPipenuHistograms(fHist.fPipenu[103],trk,tp,&fSimPar);
+          }
+        }
+      }
+      else {
+        FillTrackHistograms (fHist.fTrack [201],trk,tp,&fSimPar);
+        FillPipenuHistograms(fHist.fPipenu[201],trk,tp,&fSimPar);
+      }
     }
 //-----------------------------------------------------------------------------
 // track reco efficiency - filles Event histograms
@@ -683,12 +744,42 @@ void TPipenuAnaModule::FillHistograms() {
 // TRK_101: all tracks pi+ --> e+ nu weighted with the pion survival prob
 //-----------------------------------------------------------------------------
     if (fEvtPar.fPionSurvProb > 0) {
-      FillTrackHistograms(fHist.fTrack[100],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
-      
-      if (tp->fIDWord[fBestID] == 0) {
-        FillTrackHistograms(fHist.fTrack[101],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+      FillTrackHistograms (fHist.fTrack [ 50],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+      FillPipenuHistograms(fHist.fPipenu[ 50],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+      if (trk->Charge() > 0) {
+        FillTrackHistograms (fHist.fTrack [150],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        FillPipenuHistograms(fHist.fPipenu[150],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+      }
+      else {
+        FillTrackHistograms (fHist.fTrack [250],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        FillPipenuHistograms(fHist.fPipenu[250],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
       }
       
+      if (tp->fIDWord[fBestID] == 0) {
+        FillTrackHistograms (fHist.fTrack [ 51],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        FillPipenuHistograms(fHist.fPipenu[ 51],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        if (trk->Charge() > 0) {
+          FillTrackHistograms (fHist.fTrack [151],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+          FillPipenuHistograms(fHist.fPipenu[151],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+//-----------------------------------------------------------------------------
+// at this point, apply the analysis-specific cuts
+// 1. require the number of track hits to be consistent with the number of hits 
+// 2. require no close time clusters
+//-----------------------------------------------------------------------------
+          if ((dn < 20) and (fabs(dt_tc_min) > 100)) {
+            FillTrackHistograms (fHist.fTrack [152],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            FillPipenuHistograms(fHist.fPipenu[152],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            if (trk->T0() > 300) {
+              FillTrackHistograms (fHist.fTrack [153],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              FillPipenuHistograms(fHist.fPipenu[153],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            }
+          }
+        }
+        else {
+          FillTrackHistograms (fHist.fTrack [251],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+          FillPipenuHistograms(fHist.fPipenu[251],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        }
+      }
     }
   }
 
@@ -783,9 +874,10 @@ int TPipenuAnaModule::Event(int ientry) {
   fTrackBlock->GetEntry(ientry);
   fTrackSeedBlock->GetEntry(ientry);
   fHelixBlock->GetEntry(ientry);
-  fTrackStrawHitBlock->GetEntry(ientry);
+  fTimeClusterBlock->GetEntry(ientry);
+  //  fTrackStrawHitBlock->GetEntry(ientry);
   fClusterBlock->GetEntry(ientry);
-  fStrawHitBlock->GetEntry(ientry);
+  // fStrawHitBlock->GetEntry(ientry);
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
@@ -807,6 +899,8 @@ int TPipenuAnaModule::Event(int ientry) {
   fEvtPar.fSimp             = nullptr;
   fEvtPar.fPartE            = -1.;
   fEvtPar.fPionSurvProb     = 1.;
+  fEvtPar.fNHelices         = fHelixBlock->NHelices();
+  fEvtPar.fNTimeClusters    = fTimeClusterBlock->NTimeClusters();
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
@@ -943,6 +1037,40 @@ int TPipenuAnaModule::Event(int ientry) {
   }
 
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);
+//-----------------------------------------------------------------------------
+// additional initializations - helices and time clusters
+//-----------------------------------------------------------------------------
+  for (int itrk=0; itrk<ntrk; itrk++) {
+    TStnTrack*   trk = fTrackBlock->Track(itrk);
+    TrackPar_t*  tp  = fTrackPar+itrk;
+
+    tp->fHelix       = nullptr;
+    tp->fTimeCluster = nullptr;
+
+    int ih = trk->fHelixIndex;
+    if (ih < fEvtPar.fNHelices) {
+      tp->fHelix = fHelixBlock->Helix(ih);
+    }
+//-----------------------------------------------------------------------------
+// currently, at least in the KK case, an TStnHelix doesn't have a helix index stored
+// find a time cluster closest to teh track in time
+//-----------------------------------------------------------------------------
+    TStnTimeCluster* closest_tc(nullptr);
+    float min_dt = 1.e6;
+    for (int itc=0; itc<fEvtPar.fNTimeClusters; itc++) {
+      TStnTimeCluster* tc = fTimeClusterBlock->TimeCluster(itc);
+      float dt = trk->T0()-tc->T0();
+      if (fabs(dt) < fabs(min_dt)) {
+        closest_tc = tc;
+        min_dt     = dt;
+      }
+    }
+
+    tp->fTimeCluster = closest_tc;
+    tp->fDtTc        = min_dt;
+  }
+
+  fEventPassedSelections = 0;
 
   FillHistograms();
 
@@ -972,58 +1100,17 @@ void TPipenuAnaModule::Debug() {
 //-----------------------------------------------------------------------------
     if (GetDebugBit(1) == 1) {
       if (tp->fIDWord[fBestID] == 0) {
-	GetHeaderBlock()->Print(Form("bit_001: IDWord=0 p = %10.3f",
-				     trk->Momentum()->P()));
+	GetHeaderBlock()->Print(Form("bit_001: IDWord=0 p = %10.3f",trk->Momentum()->P()));
       }
     }
 //-----------------------------------------------------------------------------
-// bit 3: Set C tracks with large DX : 70mm < |DX| < 90mm
+// bit 3: good tracks with P > 70 T0 > 300
 //-----------------------------------------------------------------------------
     if (GetDebugBit(3) == 1) {
-      if (tp->fIDWord[fBestID] == 0) {
-	TStnTrack::InterData_t*    vr = trk->fVMaxEp; // residuals
-	if ((vr && (fabs(vr->fDx) > 70) && (fabs(vr->fDx) < 90))) {
-	  GetHeaderBlock()->Print(Form("large DX: %f",vr->fDx));
+      if (fEventPassedSelections == 1) {
+        if ((tp->fP > 70) and (trk->fT0 > 300)) {
+	  GetHeaderBlock()->Print(Form("large P: %f",tp->fP));
 	}
-      }
-    }
-//-----------------------------------------------------------------------------
-// bit 4: tracks with DpF > 1MeV - positive tail...
-//-----------------------------------------------------------------------------
-    if (GetDebugBit(4) == 1) {
-      if (tp->fDpF > 1.) {
-	GetHeaderBlock()->Print(Form("pF pRec, fDpf = %10.3f  %10.3f  %10.3f",
-				     trk->fPFront, trk->Momentum()->P(),tp->fDpF));
-      }
-    }
-//-----------------------------------------------------------------------------
-// bit 9: Set C tracks with DpF > 1MeV - positive tail...
-//-----------------------------------------------------------------------------
-    if (GetDebugBit(9) == 1) {
-      double ep = trk->Ep();
-      if (tp->fIDWord[fBestID] == 0) { 
-	if (((ep > 0.42) && (ep < 0.46)) || ((ep > 0.35) && (ep < 0.39))) {
-	  GetHeaderBlock()->Print(Form("bit:009 ep = %10.3f e = %10.3f p = %10.3f",
-				       trk->fEp,trk->fEp*trk->fP,trk->fP));
-	}
-      }
-    }
-//-----------------------------------------------------------------------------
-// bit 10: Set C tracks with Ecl > 80
-//-----------------------------------------------------------------------------
-    if (GetDebugBit(10) == 1) {
-      double ecl = trk->ClusterE();
-      if (tp->fIDWord[fBestID] == 0) { 
-	if (ecl > 60) {
-	  GetHeaderBlock()->Print(Form("bit:010 e = %10.3f p = %10.3f",
-				       ecl,trk->fP));
-	}
-      }
-    }
-
-    if (GetDebugBit(40)) {
-      if (trk->fP < 60) {
-	GetHeaderBlock()->Print(Form(" bit:040 trk->fP = %10.3f",trk->fP));
       }
     }
   }

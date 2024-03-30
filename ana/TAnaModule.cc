@@ -230,29 +230,31 @@ double TAnaModule::BatchModeWeight(float lumi, int mode) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
+void TAnaModule::BookClusterHistograms(HistBase_t* Hist, const char* Folder) {
 
-  HBook1F(Hist->fDiskID ,"disk_id",Form("%s: Disk ID"       ,Folder), 10, 0,  10,Folder);
-  HBook1F(Hist->fEnergy ,"energy" ,Form("%s: Cluster Energy",Folder),500, 0, 250,Folder);
-  HBook1F(Hist->fEnergyDiff ,"energydiff" ,Form("%s: Cluster Energy - Gen Energy",Folder),500, -50, 50,Folder);
-  HBook1F(Hist->fT0     ,"t0"     ,Form("%s: cluster T0"    ,Folder),200, 0,2000,Folder);
-  HBook1F(Hist->fRow    ,"row"    ,Form("%s: cluster Row"   ,Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fCol    ,"col"    ,Form("%s: cluster column",Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fX      ,"x"      ,Form("%s: cluster X"     ,Folder),200, -5000,5000,Folder);
-  HBook1F(Hist->fY      ,"y"      ,Form("%s: cluster Y"     ,Folder),200,-1000,1000,Folder);
-  HBook1F(Hist->fZ      ,"z"      ,Form("%s: cluster Z"     ,Folder),200, 11500,13500,Folder);
-  HBook1F(Hist->fR      ,"r"      ,Form("%s: cluster Radius",Folder),100, 0,  1000,Folder);
-  HBook1F(Hist->fYMean  ,"ymean"  ,Form("%s: cluster YMean" ,Folder),400,-200,200,Folder);
-  HBook1F(Hist->fZMean  ,"zmean"  ,Form("%s: cluster ZMean" ,Folder),400,-200,200,Folder);
-  HBook1F(Hist->fSigY   ,"sigy"   ,Form("%s: cluster SigY"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fSigZ   ,"sigz"   ,Form("%s: cluster SigZ"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fSigR   ,"sigr"   ,Form("%s: cluster SigR"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fNCr0   ,"ncr0"   ,Form("%s: cluster NCR[0]",Folder),100, 0,100,Folder);
-  HBook1F(Hist->fNCr1   ,"ncr1"   ,Form("%s: cluster NCR[1]",Folder),100, 0,100,Folder);
-  HBook1F(Hist->fFrE1   ,"fre1"   ,Form("%s: E1/Etot"       ,Folder),200, 0,  1,Folder);
-  HBook1F(Hist->fFrE2   ,"fre2"   ,Form("%s: (E1+E2)/Etot"  ,Folder),200, 0,  1,Folder);
-  HBook1F(Hist->fSigE1  ,"sige1"   ,Form("%s: SigmaE/Etot"  ,Folder),200, 0, 10,Folder);
-  HBook1F(Hist->fSigE2  ,"sige2"   ,Form("%s: SigmaE/Emean" ,Folder),200, 0, 10,Folder);
+  ClusterHist_t* hist = (ClusterHist_t*) Hist;
+
+  HBook1F(hist->fDiskID ,"disk_id",Form("%s: Disk ID"       ,Folder), 10, 0,  10,Folder);
+  HBook1F(hist->fEnergy ,"energy" ,Form("%s: Cluster Energy",Folder),500, 0, 250,Folder);
+  HBook1F(hist->fEnergyDiff ,"energydiff" ,Form("%s: Cluster Energy - Gen Energy",Folder),500, -50, 50,Folder);
+  HBook1F(hist->fT0     ,"t0"     ,Form("%s: cluster T0"    ,Folder),200, 0,2000,Folder);
+  HBook1F(hist->fRow    ,"row"    ,Form("%s: cluster Row"   ,Folder),200, 0, 200,Folder);
+  HBook1F(hist->fCol    ,"col"    ,Form("%s: cluster column",Folder),200, 0, 200,Folder);
+  HBook1F(hist->fX      ,"x"      ,Form("%s: cluster X"     ,Folder),200, -5000,5000,Folder);
+  HBook1F(hist->fY      ,"y"      ,Form("%s: cluster Y"     ,Folder),200,-1000,1000,Folder);
+  HBook1F(hist->fZ      ,"z"      ,Form("%s: cluster Z"     ,Folder),200, 11500,13500,Folder);
+  HBook1F(hist->fR      ,"r"      ,Form("%s: cluster Radius",Folder),100, 0,  1000,Folder);
+  HBook1F(hist->fYMean  ,"ymean"  ,Form("%s: cluster YMean" ,Folder),400,-200,200,Folder);
+  HBook1F(hist->fZMean  ,"zmean"  ,Form("%s: cluster ZMean" ,Folder),400,-200,200,Folder);
+  HBook1F(hist->fSigY   ,"sigy"   ,Form("%s: cluster SigY"  ,Folder),100, 0,100,Folder);
+  HBook1F(hist->fSigZ   ,"sigz"   ,Form("%s: cluster SigZ"  ,Folder),100, 0,100,Folder);
+  HBook1F(hist->fSigR   ,"sigr"   ,Form("%s: cluster SigR"  ,Folder),100, 0,100,Folder);
+  HBook1F(hist->fNCr0   ,"ncr0"   ,Form("%s: cluster NCR[0]",Folder),100, 0,100,Folder);
+  HBook1F(hist->fNCr1   ,"ncr1"   ,Form("%s: cluster NCR[1]",Folder),100, 0,100,Folder);
+  HBook1F(hist->fFrE1   ,"fre1"   ,Form("%s: E1/Etot"       ,Folder),200, 0,  1,Folder);
+  HBook1F(hist->fFrE2   ,"fre2"   ,Form("%s: (E1+E2)/Etot"  ,Folder),200, 0,  1,Folder);
+  HBook1F(hist->fSigE1  ,"sige1"   ,Form("%s: SigmaE/Etot"  ,Folder),200, 0, 10,Folder);
+  HBook1F(hist->fSigE2  ,"sige2"   ,Form("%s: SigmaE/Emean" ,Folder),200, 0, 10,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -286,46 +288,47 @@ void TAnaModule::BookCrvPulseHistograms   (CrvPulseHist_t*   Hist, const char* F
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookEventHistograms(EventHist_t* Hist, const char* Folder) {
+void TAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
+  EventHist_t* hist = (EventHist_t*) Hist;
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fEventWeight[0],"eventweight_0" ,Form("%s: Event Weight"            ,Folder), 100, -1.,   2.,Folder);
-  HBook1F(Hist->fEventWeight[1],"eventweight_1" ,Form("%s: Log10(Event Weight)"     ,Folder), 100,-15.,   5.,Folder);
-  HBook1F(Hist->fEventE        ,"event_energy"  ,Form("%s: Relevant Event Energy"   ,Folder), 400,  0., 200.,Folder);
-  HBook1F(Hist->fInstLumi[0]   ,"inst_lumi_0"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
-  HBook1F(Hist->fInstLumi[1]   ,"inst_lumi_1"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
-  HBook1F(Hist->fInstLumi[2]   ,"inst_lumi_2"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
-  HBook1F(Hist->fBatchWeight[0],"batchweight_0" ,Form("%s: Log10(One Batch Weight)" ,Folder), 100, -20., 2.,Folder);
-  HBook1F(Hist->fBatchWeight[1],"batchweight_1" ,Form("%s: Log10(Two Batch Weight)" ,Folder), 100, -20., 2.,Folder);
+  HBook1F(hist->fEventWeight[0],"eventweight_0" ,Form("%s: Event Weight"            ,Folder), 100, -1.,   2.,Folder);
+  HBook1F(hist->fEventWeight[1],"eventweight_1" ,Form("%s: Log10(Event Weight)"     ,Folder), 100,-15.,   5.,Folder);
+  HBook1F(hist->fEventE        ,"event_energy"  ,Form("%s: Relevant Event Energy"   ,Folder), 400,  0., 200.,Folder);
+  HBook1F(hist->fInstLumi[0]   ,"inst_lumi_0"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(hist->fInstLumi[1]   ,"inst_lumi_1"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(hist->fInstLumi[2]   ,"inst_lumi_2"   ,Form("%s: POT"                     ,Folder), 300,  0.,1.5e8,Folder);
+  HBook1F(hist->fBatchWeight[0],"batchweight_0" ,Form("%s: Log10(One Batch Weight)" ,Folder), 100, -20., 2.,Folder);
+  HBook1F(hist->fBatchWeight[1],"batchweight_1" ,Form("%s: Log10(Two Batch Weight)" ,Folder), 100, -20., 2.,Folder);
 
-  HBook1F(Hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
-  HBook1F(Hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
-  HBook1D(Hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
-  HBook1F(Hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
-  HBook1F(Hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
-  //  HBook1F(Hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
-  HBook1F(Hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
-  HBook1F(Hist->fNShTot[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
-  HBook1F(Hist->fNShTot[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),500,0,10000,Folder);
-  HBook1F(Hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
-  HBook1F(Hist->fNChTot[0],"nch_0" ,Form("%s: Number of Combo Hits [0]"        ,Folder),250,0,250,Folder);
-  HBook1F(Hist->fNChTot[1],"nch_1" ,Form("%s: Number of Combo Hits [1]"        ,Folder),500,0,10000,Folder);
-  HBook1F(Hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
-  HBook1F(Hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
-  HBook1F(Hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
-  HBook1F(Hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
-  HBook1F(Hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(Hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
+  HBook1F(hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
+  HBook1F(hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
+  HBook1D(hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
+  HBook1F(hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
+  HBook1F(hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
+  //  HBook1F(hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
+  HBook1F(hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
+  HBook1F(hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
+  HBook1F(hist->fNShTot[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
+  HBook1F(hist->fNShTot[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),500,0,10000,Folder);
+  HBook1F(hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
+  HBook1F(hist->fNChTot[0],"nch_0" ,Form("%s: Number of Combo Hits [0]"        ,Folder),250,0,250,Folder);
+  HBook1F(hist->fNChTot[1],"nch_1" ,Form("%s: Number of Combo Hits [1]"        ,Folder),500,0,10000,Folder);
+  HBook1F(hist->fDtClT     ,"dt_clt"   ,Form("%s: DT(cluster-track)"               ,Folder),100,-100,100,Folder);
+  HBook1F(hist->fDtClS     ,"dt_cls"   ,Form("%s: DT(cluster-straw hit)"           ,Folder),200,-200,200,Folder);
+  HBook1F(hist->fSHTime    ,"shtime"   ,Form("%s: Straw Hit Time"                  ,Folder),400,0,2000,Folder);
+  HBook1F(hist->fEClMax    ,"eclmax"   ,Form("%s: Max cluster energy"              ,Folder),150,0,150,Folder);
+  HBook1F(hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
+  HBook1F(hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
+  HBook1F(hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
+  HBook1F(hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
 
-  HBook1F(Hist->fNCrvClusters    ,"ncrvcl"  ,Form("%s: N(CRV Clusters)"                 ,Folder),100,0,  100,Folder);
-  HBook1F(Hist->fNCrvCoincidences[0],"ncrvco_0"  ,Form("%s: N(CRV coincidences)[0]"     ,Folder),200,0, 1000,Folder);
-  HBook1F(Hist->fNCrvCoincidences[1],"ncrvco_1"  ,Form("%s: N(CRV coincidences)[1]"     ,Folder),200,0,  200,Folder);
-  HBook1F(Hist->fNCrvPulses[0]   ,"ncrvp_0" ,Form("%s: N(CRV pulses)[0]"                ,Folder),500,0,10000,Folder);
-  HBook1F(Hist->fNCrvPulses[1]   ,"ncrvp_1" ,Form("%s: N(CRV pulses)[1]"                ,Folder),500,0,  500,Folder);
+  HBook1F(hist->fNCrvClusters    ,"ncrvcl"  ,Form("%s: N(CRV Clusters)"                 ,Folder),100,0,  100,Folder);
+  HBook1F(hist->fNCrvCoincidences[0],"ncrvco_0"  ,Form("%s: N(CRV coincidences)[0]"     ,Folder),200,0, 1000,Folder);
+  HBook1F(hist->fNCrvCoincidences[1],"ncrvco_1"  ,Form("%s: N(CRV coincidences)[1]"     ,Folder),200,0,  200,Folder);
+  HBook1F(hist->fNCrvPulses[0]   ,"ncrvp_0" ,Form("%s: N(CRV pulses)[0]"                ,Folder),500,0,10000,Folder);
+  HBook1F(hist->fNCrvPulses[1]   ,"ncrvp_1" ,Form("%s: N(CRV pulses)[1]"                ,Folder),500,0,  500,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -344,21 +347,23 @@ void TAnaModule::BookGenpHistograms(GenpHist_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookHelixHistograms(HelixHist_t* Hist, const char* Folder) {
+void TAnaModule::BookHelixHistograms(HistBase_t* Hist, const char* Folder) {
 //   char name [200];
 //   char title[200];
 
-  HBook1F(Hist->fBestAlg ,"best_alg",Form("%s: best algorithm"       ,Folder),  10,     0  ,  10  ,Folder);
-  HBook1F(Hist->fChi2XY  ,"chi2xy"  ,Form("%s: Chi2(XY)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
-  HBook1F(Hist->fChi2ZPhi,"chi2zp"  ,Form("%s: Chi2(ZP)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
-  HBook1F(Hist->fSinTh   ,"sin_th"  ,Form("%s: sin_th = Pt/P"        ,Folder), 200,    -1  ,   1  ,Folder);
-  HBook1F(Hist->fD0      ,"d0"      ,Form("%s: D0"                   ,Folder), 250,   250  , 250  ,Folder);
-  HBook1F(Hist->fHelicity,"hel"     ,Form("%s: helicity"             ,Folder),   3,    -1.5,  1.5 ,Folder);
-  HBook1F(Hist->fLambda  ,"lam"     ,Form("%s: lambda=dphi/dz"       ,Folder), 200,   -500 , 500  ,Folder);
-  HBook1F(Hist->fNCh     ,"nch"     ,Form("%s: N(combo hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
-  HBook1F(Hist->fNSh     ,"nsh"     ,Form("%s: N(straw hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
-  HBook1F(Hist->fP       ,"p"       ,Form("%s: P"                    ,Folder), 250,     0  , 250  ,Folder);
-  HBook1F(Hist->fRadius  ,"r"       ,Form("%s: Radius"               ,Folder), 200,     0  , 1000 ,Folder);
+  HelixHist_t* hist = (HelixHist_t*) Hist;
+
+  HBook1F(hist->fBestAlg ,"best_alg",Form("%s: best algorithm"       ,Folder),  10,     0  ,  10  ,Folder);
+  HBook1F(hist->fChi2XY  ,"chi2xy"  ,Form("%s: Chi2(XY)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
+  HBook1F(hist->fChi2ZPhi,"chi2zp"  ,Form("%s: Chi2(ZP)/DOF"         ,Folder), 200,     0  ,  20  ,Folder);
+  HBook1F(hist->fSinTh   ,"sin_th"  ,Form("%s: sin_th = Pt/P"        ,Folder), 200,    -1  ,   1  ,Folder);
+  HBook1F(hist->fD0      ,"d0"      ,Form("%s: D0"                   ,Folder), 250,   250  , 250  ,Folder);
+  HBook1F(hist->fHelicity,"hel"     ,Form("%s: helicity"             ,Folder),   3,    -1.5,  1.5 ,Folder);
+  HBook1F(hist->fLambda  ,"lam"     ,Form("%s: lambda=dphi/dz"       ,Folder), 200,   -500 , 500  ,Folder);
+  HBook1F(hist->fNCh     ,"nch"     ,Form("%s: N(combo hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
+  HBook1F(hist->fNSh     ,"nsh"     ,Form("%s: N(straw hits)"        ,Folder), 200,    -0.5, 199.5,Folder);
+  HBook1F(hist->fP       ,"p"       ,Form("%s: P"                    ,Folder), 250,     0  , 250  ,Folder);
+  HBook1F(hist->fRadius  ,"r"       ,Form("%s: Radius"               ,Folder), 200,     0  , 1000 ,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -433,7 +438,8 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fNActive    ,"nactv"    ,Form("%s: N(active)"         ,Folder), 200,  0  , 200 ,Folder);
   HBook1F(Hist->fNaFract    ,"nafr"     ,Form("%s: N(active fraction)",Folder), 110,  0.5,1.05 ,Folder);
   HBook1F(Hist->fDNa        ,"dna"      ,Form("%s: Nhits-Nactive"     ,Folder), 100, -0.5 ,99.5,Folder);
-  HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100, 0,100,Folder);
+  HBook1F(Hist->fNtch       ,"ntch"     ,Form("%s: N timecluster hits",Folder), 200, -0.5 ,199.5,Folder);
+  HBook1F(Hist->fNWrong     ,"nwrng"    ,Form("%s: N(wrong drift sgn)",Folder), 100,  0   ,100,Folder);
   HBook1F(Hist->fNDoublets  ,"nd"       ,Form("%s: N(doublets)"       ,Folder),  50, 0, 50,Folder);
   HBook1F(Hist->fNadOverNd  ,"nad_nd"   ,Form("%s: Nad/N(doublets)"   ,Folder), 110, 0,1.1,Folder);
   HBook1F(Hist->fNSSD       ,"nssd"     ,Form("%s: N(SS doublets)"    ,Folder),  50, 0, 50,Folder);
@@ -447,8 +453,10 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
   HBook1F(Hist->fNmaOverNa  ,"nma_na"   ,Form("%s: NMatActive/Nactive",Folder), 200, 0,   2,Folder);
   HBook1F(Hist->fNBend      ,"nbend"    ,Form("%s: Nbend"             ,Folder), 100, 0,1000,Folder);
 
-  HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200, 0,2000,Folder);
-  HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100, 0,  10,Folder);
+  HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200,    0, 2000,Folder);
+  HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100,    0,   10,Folder);
+  HBook1F(Hist->fDtTc       ,"dttc"     ,Form("%s: T(trk)-T(TC)"      ,Folder), 100, -100,  100,Folder);
+
   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
   HBook1F(Hist->fFitCons[0] ,"fcon"     ,Form("%s: track fit cons [0]",Folder), 200, 0,   1,Folder);
   HBook1F(Hist->fFitCons[1] ,"fcon1"    ,Form("%s: track fit cons [1]",Folder), 1000, 0,   0.1,Folder);
@@ -531,8 +539,10 @@ void TAnaModule::BookTrackSeedHistograms   (HistBase_t*   HistR, const char* Fol
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster, double Weight) {
+void TAnaModule::FillClusterHistograms(HistBase_t* Hist, TStnCluster* Cluster, double Weight) {
   // if(Weight == 0.) return; //ignore 0 weight events
+
+  ClusterHist_t* hist = (ClusterHist_t*) Hist;
   int   row, col;
   float  x, y, z, r;
 
@@ -547,28 +557,28 @@ void TAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster
   if ((row < 0) || (row > 9999)) row = -9999;
   if ((col < 0) || (col > 9999)) col = -9999;
 
-  Hist->fDiskID->Fill(Cluster->DiskID(), Weight);
-  Hist->fEnergy->Fill(Cluster->Energy(), Weight);
-  Hist->fEnergyDiff->Fill((Cluster->Energy() - fEleE), Weight); //assuming generated energy is ideal cluster energy
-  Hist->fT0->Fill(Cluster->Time(), Weight);
-  Hist->fRow->Fill(row, Weight);
-  Hist->fCol->Fill(col, Weight);
-  Hist->fX->Fill(x, Weight);
-  Hist->fY->Fill(y, Weight);
-  Hist->fZ->Fill(z, Weight);
-  Hist->fR->Fill(r, Weight);
+  hist->fDiskID->Fill(Cluster->DiskID(), Weight);
+  hist->fEnergy->Fill(Cluster->Energy(), Weight);
+  hist->fEnergyDiff->Fill((Cluster->Energy() - fEleE), Weight); //assuming generated energy is ideal cluster energy
+  hist->fT0->Fill(Cluster->Time(), Weight);
+  hist->fRow->Fill(row, Weight);
+  hist->fCol->Fill(col, Weight);
+  hist->fX->Fill(x, Weight);
+  hist->fY->Fill(y, Weight);
+  hist->fZ->Fill(z, Weight);
+  hist->fR->Fill(r, Weight);
 
-  Hist->fYMean->Fill(Cluster->fYMean, Weight);
-  Hist->fZMean->Fill(Cluster->fZMean, Weight);
-  Hist->fSigY->Fill(Cluster->fSigY, Weight);
-  Hist->fSigZ->Fill(Cluster->fSigZ, Weight);
-  Hist->fSigR->Fill(Cluster->fSigR, Weight);
-  Hist->fNCr0->Fill(Cluster->fNCrystals, Weight);
-  Hist->fNCr1->Fill(Cluster->fNCr1, Weight);
-  Hist->fFrE1->Fill(Cluster->fFrE1, Weight);
-  Hist->fFrE2->Fill(Cluster->fFrE2, Weight);
-  Hist->fSigE1->Fill(Cluster->fSigE1, Weight);
-  Hist->fSigE2->Fill(Cluster->fSigE2, Weight);
+  hist->fYMean->Fill(Cluster->fYMean, Weight);
+  hist->fZMean->Fill(Cluster->fZMean, Weight);
+  hist->fSigY->Fill(Cluster->fSigY, Weight);
+  hist->fSigZ->Fill(Cluster->fSigZ, Weight);
+  hist->fSigR->Fill(Cluster->fSigR, Weight);
+  hist->fNCr0->Fill(Cluster->fNCrystals, Weight);
+  hist->fNCr1->Fill(Cluster->fNCr1, Weight);
+  hist->fFrE1->Fill(Cluster->fFrE1, Weight);
+  hist->fFrE2->Fill(Cluster->fFrE2, Weight);
+  hist->fSigE1->Fill(Cluster->fSigE1, Weight);
+  hist->fSigE2->Fill(Cluster->fSigE2, Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -612,7 +622,9 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
 //-----------------------------------------------------------------------------
 // need MC truth branch
 //-----------------------------------------------------------------------------
-  void TAnaModule::FillEventHistograms(EventHist_t* Hist, EventPar_t* Evp) {
+  void TAnaModule::FillEventHistograms(HistBase_t* Hist, EventPar_t* Evp) {
+
+    EventHist_t* hist = (EventHist_t*) Hist;
     double            cos_th(-2), xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p(-1.), dio_wt(-1.);
   //  double            e, m, r;
   TLorentzVector    mom;
@@ -628,53 +640,53 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
     dio_wt = TStntuple::DioWeightAl(p);
   }
 
-  Hist->fEventWeight[0]->Fill(fEventWeight);
-  Hist->fEventWeight[1]->Fill(log10(fEventWeight));
-  Hist->fEventE        ->Fill(Evp->fPartE  , fEventWeight);
-  Hist->fInstLumi[0]   ->Fill(Evp->fInstLum, fEventWeight);
+  hist->fEventWeight[0]->Fill(fEventWeight);
+  hist->fEventWeight[1]->Fill(log10(fEventWeight));
+  hist->fEventE        ->Fill(Evp->fPartE  , fEventWeight);
+  hist->fInstLumi[0]   ->Fill(Evp->fInstLum, fEventWeight);
 
   if (fBatchMode == 1) {
-    Hist->fInstLumi[1]->Fill(Evp->fInstLum, fEventWeight/Evp->fOneBatchWeight);
-    Hist->fInstLumi[2]->Fill(Evp->fInstLum, fEventWeight/Evp->fOneBatchWeight*Evp->fTwoBatchWeight);
+    hist->fInstLumi[1]->Fill(Evp->fInstLum, fEventWeight/Evp->fOneBatchWeight);
+    hist->fInstLumi[2]->Fill(Evp->fInstLum, fEventWeight/Evp->fOneBatchWeight*Evp->fTwoBatchWeight);
   } else if(fBatchMode == 2) {
-    Hist->fInstLumi[1]->Fill(Evp->fInstLum, fEventWeight/Evp->fTwoBatchWeight);
-    Hist->fInstLumi[2]->Fill(Evp->fInstLum, fEventWeight/Evp->fTwoBatchWeight*Evp->fOneBatchWeight);
+    hist->fInstLumi[1]->Fill(Evp->fInstLum, fEventWeight/Evp->fTwoBatchWeight);
+    hist->fInstLumi[2]->Fill(Evp->fInstLum, fEventWeight/Evp->fTwoBatchWeight*Evp->fOneBatchWeight);
   }
 
-  Hist->fBatchWeight[0]->Fill(log10(Evp->fOneBatchWeight));
-  Hist->fBatchWeight[1]->Fill(log10(Evp->fTwoBatchWeight));
+  hist->fBatchWeight[0]->Fill(log10(Evp->fOneBatchWeight));
+  hist->fBatchWeight[1]->Fill(log10(Evp->fTwoBatchWeight));
 
-  Hist->fMcMom->Fill(p);
-  Hist->fDioMom->Fill(p,dio_wt);
-  Hist->fMcCosTh->Fill(cos_th);
-  Hist->fRv->Fill(rv);
-  Hist->fZv->Fill(zv);
+  hist->fMcMom->Fill(p);
+  hist->fDioMom->Fill(p,dio_wt);
+  hist->fMcCosTh->Fill(cos_th);
+  hist->fRv->Fill(rv);
+  hist->fZv->Fill(zv);
 
-  // Hist->fNClusters->Fill(fNClusters);
-  Hist->fNTracks[0]->Fill  (Evp->fNTracks[0]);
-  Hist->fNTracks[1]->Fill  (Evp->fNTracks[1]);
-  Hist->fNShTot[0]->Fill(Evp->fNStrawHits);
-  Hist->fNShTot[1]->Fill(Evp->fNStrawHits);
+  // hist->fNClusters->Fill(fNClusters);
+  hist->fNTracks[0]->Fill  (Evp->fNTracks[0]);
+  hist->fNTracks[1]->Fill  (Evp->fNTracks[1]);
+  hist->fNShTot[0]->Fill(Evp->fNStrawHits);
+  hist->fNShTot[1]->Fill(Evp->fNStrawHits);
 
-  Hist->fNChTot[0]->Fill(Evp->fNComboHits);
-  Hist->fNChTot[1]->Fill(Evp->fNComboHits);
+  hist->fNChTot[0]->Fill(Evp->fNComboHits);
+  hist->fNChTot[1]->Fill(Evp->fNComboHits);
 
   double emax   = -1;
   double dt     = 9999.;
 
-  Hist->fDtClT->Fill(dt);
-  Hist->fEClMax->Fill(emax);
+  hist->fDtClT->Fill(dt);
+  hist->fEClMax->Fill(emax);
 
-  // Hist->fNHyp->Fill(fNHyp);
-  // Hist->fBestHyp[0]->Fill(fBestHyp[0]);
-  // Hist->fBestHyp[1]->Fill(fBestHyp[1]);
-  Hist->fNGenp->Fill(Evp->fNGenp);
+  // hist->fNHyp->Fill(fNHyp);
+  // hist->fBestHyp[0]->Fill(fBestHyp[0]);
+  // hist->fBestHyp[1]->Fill(fBestHyp[1]);
+  hist->fNGenp->Fill(Evp->fNGenp);
 
-  Hist->fNCrvClusters->Fill(Evp->fNCrvClusters);
-  Hist->fNCrvCoincidences[0]->Fill(Evp->fNCrvCoincidences);
-  Hist->fNCrvCoincidences[1]->Fill(Evp->fNCrvCoincidences);
-  Hist->fNCrvPulses[0]->Fill(Evp->fNCrvPulses);
-  Hist->fNCrvPulses[1]->Fill(Evp->fNCrvPulses);
+  hist->fNCrvClusters->Fill(Evp->fNCrvClusters);
+  hist->fNCrvCoincidences[0]->Fill(Evp->fNCrvCoincidences);
+  hist->fNCrvCoincidences[1]->Fill(Evp->fNCrvCoincidences);
+  hist->fNCrvPulses[0]->Fill(Evp->fNCrvPulses);
+  hist->fNCrvPulses[1]->Fill(Evp->fNCrvPulses);
 }
 
 //-----------------------------------------------------------------------------
@@ -709,25 +721,27 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
 }
 
 //-----------------------------------------------------------------------------
-  void TAnaModule::FillHelixHistograms(HelixHist_t* Hist, TStnHelix* Helix, HelixPar_t* Help) {
+  void TAnaModule::FillHelixHistograms(HistBase_t* Hist, TStnHelix* Helix, HelixPar_t* Help, double Weight) {
 //   char name [200];
 //   char title[200];
 
-    Hist->fBestAlg->Fill(Helix->BestAlg());
-    Hist->fChi2XY->Fill(Helix->Chi2XY());
-    Hist->fChi2ZPhi->Fill(Helix->Chi2ZPhi());
+    HelixHist_t* hist = (HelixHist_t*) Hist;
+
+    hist->fBestAlg->Fill(Helix->BestAlg(),Weight);
+    hist->fChi2XY->Fill(Helix->Chi2XY(),Weight);
+    hist->fChi2ZPhi->Fill(Helix->Chi2ZPhi(),Weight);
 
     float sinth = Helix->Pt()/Helix->P();
-    Hist->fSinTh->Fill(sinth);
+    hist->fSinTh->Fill(sinth,Weight);
 
-    Hist->fD0->Fill(Helix->D0());
+    hist->fD0->Fill(Helix->D0(),Weight);
 
-    Hist->fHelicity->Fill(Helix->Helicity());
-    Hist->fLambda->Fill(Helix->Lambda());
-    Hist->fNCh->Fill(Helix->fNComboHits);
-    Hist->fNSh->Fill(Helix->fNHits);
-    Hist->fP->Fill(Helix->P());
-    Hist->fRadius->Fill(Helix->Radius());
+    hist->fHelicity->Fill(Helix->Helicity(),Weight);
+    hist->fLambda->Fill(Helix->Lambda(),Weight);
+    hist->fNCh->Fill(Helix->fNComboHits,Weight);
+    hist->fNSh->Fill(Helix->fNHits,Weight);
+    hist->fP->Fill(Helix->P(),Weight);
+    hist->fRadius->Fill(Helix->Radius(),Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -770,11 +784,6 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 
   Hist->fPDio->  Fill (Tp->fP,Tp->fDioLLWt);     // fixed for debugging
 
-  //  Hist->fPDio->Fill(Tp->fP,Tp->fDioWt);
-
-  // Hist->fPlw->Fill   (Tp->fP, Tp->fLumWt);
-  // Hist->fPDiolw->Fill(Tp->fP, Tp->fTotWt);
-
   Hist->fFitMomErr->Fill(Track->fFitMomErr,Weight);
 
   Hist->fPt    ->Fill(Track->fPt    , Weight);
@@ -801,6 +810,11 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
   Hist->fNActive->Fill(na, Weight);
   Hist->fNaFract->Fill(na/(Track->NHits()+0.), Weight);
   Hist->fDNa->Fill(dna, Weight);
+
+  if (Tp->fTimeCluster != nullptr) Hist->fNtch->Fill(Tp->fTimeCluster->NHits(),Weight);
+  else                             Hist->fNtch->Fill(-1,Weight);
+  Hist->fDtTc->Fill(Tp->fDtTc,Weight);
+
   Hist->fNWrong->Fill(Track->NWrong(), Weight);
 
   float nd = Track->NDoublets();
@@ -913,7 +927,7 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 //--------------------------------------------------------------------------------
 // function to fill TrasckSeedHit block
 //--------------------------------------------------------------------------------
-void TAnaModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* TrkSeed) {
+  void TAnaModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* TrkSeed, double Weight) {
   
   TrackSeedHist_t* Hist = (TrackSeedHist_t*) HistR;
   
@@ -928,18 +942,18 @@ void TAnaModule::FillTrackSeedHistograms(HistBase_t*   HistR, TStnTrackSeed* Trk
   double      tanDip   = TrkSeed->TanDip();  
   double      p        = pT/std::cos( std::atan(tanDip));
   
-  Hist->fNHits      ->Fill(nhits);	 
-  Hist->fClusterTime->Fill(clusterT);
-  Hist->fClusterEnergy->Fill(clusterE);
+  Hist->fNHits      ->Fill(nhits,Weight);	 
+  Hist->fClusterTime->Fill(clusterT,Weight);
+  Hist->fClusterEnergy->Fill(clusterE,Weight);
   
-  Hist->fRadius     ->Fill(radius);    
-  Hist->fMom        ->Fill(p);	 
-  Hist->fPt         ->Fill(pT);	 
-  Hist->fTanDip     ->Fill(tanDip);    
+  Hist->fRadius     ->Fill(radius,Weight);    
+  Hist->fMom        ->Fill(p,Weight);	 
+  Hist->fPt         ->Fill(pT,Weight);	 
+  Hist->fTanDip     ->Fill(tanDip,Weight);    
   
-  Hist->fChi2       ->Fill(TrkSeed->Chi2()/(nhits-5.));
-  Hist->fFitCons    ->Fill(TrkSeed->FitCons());
-  Hist->fD0         ->Fill(TrkSeed->D0());
+  Hist->fChi2       ->Fill(TrkSeed->Chi2()/(nhits-5.),Weight);
+  Hist->fFitCons    ->Fill(TrkSeed->FitCons(),Weight);
+  Hist->fD0         ->Fill(TrkSeed->D0(),Weight);
 }
 
 //-----------------------------------------------------------------------------

@@ -21,6 +21,7 @@
 
 #include "murat/ana/HistBase_t.h"
 #include "murat/ana/TrackPar_t.hh"
+#include "murat/ana/HelixPar_t.hh"
 
 #include "murat/ana/AnaDefs.hh"
 
@@ -163,7 +164,7 @@ public:
   void    BookHistograms();
 
   void    FillTimeClusterHistograms(HistBase_t* Hist, TStnTimeCluster* TPeak);
-  void    FillHelixHistograms      (HistBase_t* Hist, TStnHelix*       Helix);
+  void    FillHelixHistograms      (HistBase_t* Hist, TStnHelix*       Helix, HelixPar_t* Help, double Weight = 1);
   void    FillTrackSeedHistograms  (HistBase_t* Hist, TStnTrackSeed*   Seed , double Weight = 1);
   //  void    FillTrackHistograms      (HistBase_t* Hist, TStnTrack*       Trk);
   void    FillTriggerHistograms    (HistBase_t* Hist);

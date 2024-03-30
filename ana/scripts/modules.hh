@@ -10,6 +10,7 @@
 #include "murat/ana/TDioCalibModule.hh"
 #include "murat/ana/TDoseAnaModule.hh"
 #include "murat/ana/TEmuAnaModule.hh"
+#include "murat/ana/TFilterModule.hh"
 #include "murat/ana/TG4ValidationModule.hh"
 #include "murat/ana/THelixAnaModule.hh"
 #include "murat/ana/TMuonStopAnaModule.hh"
@@ -94,13 +95,14 @@ TTrackRecoEffAnaModule*    m_eff   = NULL;
 TValCalPatRecModule*       m_vcpr  = NULL;
 TVDetAnaModule*            m_vdt   = NULL;
 //-----------------------------------------------------------------------------
-// modules known to clash with Stntuple and su2020
+// avoiding clashes with Stntuple and su2020
 //-----------------------------------------------------------------------------
 namespace murat {
   TCalAnaModule*           m_cal    = NULL;
   TCosmicsAnaModule*       m_cos    = NULL;
   TClusterAnaModule*       m_cls    = NULL;
   TEmuAnaModule*           m_emu    = NULL;
+  TFilterModule*           m_filter = NULL;
   TPidAnaModule*           m_pid    = NULL;
   TPipenuAnaModule*        m_pipenu = NULL;
   TSimpAnaModule*          m_sim    = NULL;

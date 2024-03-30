@@ -148,34 +148,6 @@ void TTrackAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
   }
 }
 
-//-----------------------------------------------------------------------------
-void TTrackAnaModule::BookClusterHistograms(ClusterHist_t* Hist, const char* Folder) {
-//   char name [200];
-//   char title[200];
-
-  HBook1F(Hist->fDiskID ,"disk_id",Form("%s: Disk ID"       ,Folder), 10, 0,  10,Folder);
-  HBook1F(Hist->fEnergy ,"energy" ,Form("%s: Cluster Energy",Folder),500, 0, 250,Folder);
-  HBook1F(Hist->fT0     ,"t0"     ,Form("%s: cluster T0"    ,Folder),200, 0,2000,Folder);
-  HBook1F(Hist->fRow    ,"row"    ,Form("%s: cluster Row"   ,Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fCol    ,"col"    ,Form("%s: cluster column",Folder),200, 0, 200,Folder);
-  HBook1F(Hist->fX      ,"x"      ,Form("%s: cluster X"     ,Folder),200, -5000,5000,Folder);
-  HBook1F(Hist->fY      ,"y"      ,Form("%s: cluster Y"     ,Folder),200,-1000,1000,Folder);
-  HBook1F(Hist->fZ      ,"z"      ,Form("%s: cluster Z"     ,Folder),200, 11500,13500,Folder);
-  HBook1F(Hist->fR      ,"r"      ,Form("%s: cluster Radius",Folder),100, 0,  1000,Folder);
-  HBook1F(Hist->fYMean  ,"ymean"  ,Form("%s: cluster YMean" ,Folder),400,-200,200,Folder);
-  HBook1F(Hist->fZMean  ,"zmean"  ,Form("%s: cluster ZMean" ,Folder),400,-200,200,Folder);
-  HBook1F(Hist->fSigY   ,"sigy"   ,Form("%s: cluster SigY"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fSigZ   ,"sigz"   ,Form("%s: cluster SigZ"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fSigR   ,"sigr"   ,Form("%s: cluster SigR"  ,Folder),100, 0,100,Folder);
-  HBook1F(Hist->fNCr0   ,"ncr0"   ,Form("%s: cluster NCR[0]",Folder),100, 0,100,Folder);
-  HBook1F(Hist->fNCr1   ,"ncr1"   ,Form("%s: cluster NCR[1]",Folder),100, 0,100,Folder);
-  HBook1F(Hist->fFrE1   ,"fre1"   ,Form("%s: E1/Etot"       ,Folder),200, 0,  1,Folder);
-  HBook1F(Hist->fFrE2   ,"fre2"   ,Form("%s: (E1+E2)/Etot"  ,Folder),200, 0,  1,Folder);
-  HBook1F(Hist->fSigE1  ,"sige1"   ,Form("%s: SigmaE/Etot"  ,Folder),200, 0, 10,Folder);
-  HBook1F(Hist->fSigE2  ,"sige2"   ,Form("%s: SigmaE/Emean" ,Folder),200, 0, 10,Folder);
-}
-
-
 //_____________________________________________________________________________
 void TTrackAnaModule::BookHistograms() {
 
@@ -479,48 +451,6 @@ void TTrackAnaModule::FillCaloHistograms(CaloHist_t* Hist, TStnCrystal* Cr) {
     Hist->fRWE700[idisk]->Fill(r,e700);
   }
 }
-
-
-//-----------------------------------------------------------------------------
-void TTrackAnaModule::FillClusterHistograms(ClusterHist_t* Hist, TStnCluster* Cluster) {
-  int   row, col;
-  float  x, y, z, r;
-
-  row = Cluster->Ix1();
-  col = Cluster->Ix2();
-
-  x   = Cluster->fX+3904.;
-  y   = Cluster->fY;
-  z   = Cluster->fZ;
-  r   = sqrt(x*x+y*y);
-
-  if ((row < 0) || (row > 9999)) row = -9999;
-  if ((col < 0) || (col > 9999)) col = -9999;
-
-  Hist->fDiskID->Fill(Cluster->DiskID());
-  Hist->fEnergy->Fill(Cluster->Energy());
-  Hist->fT0->Fill(Cluster->Time());
-  Hist->fRow->Fill(row);
-  Hist->fCol->Fill(col);
-  Hist->fX->Fill(x);
-  Hist->fY->Fill(y);
-  Hist->fZ->Fill(z);
-  Hist->fR->Fill(r);
-
-  Hist->fYMean->Fill(Cluster->fYMean);
-  Hist->fZMean->Fill(Cluster->fZMean);
-  Hist->fSigY->Fill(Cluster->fSigY);
-  Hist->fSigZ->Fill(Cluster->fSigZ);
-  Hist->fSigR->Fill(Cluster->fSigR);
-  Hist->fNCr0->Fill(Cluster->fNCrystals);
-  Hist->fNCr1->Fill(Cluster->fNCr1);
-  Hist->fFrE1->Fill(Cluster->fFrE1);
-  Hist->fFrE2->Fill(Cluster->fFrE2);
-  Hist->fSigE1->Fill(Cluster->fSigE1);
-  Hist->fSigE2->Fill(Cluster->fSigE2);
-}
-
-
 
 //-----------------------------------------------------------------------------
 // fill efficiency histograms : need 10 histogram sets

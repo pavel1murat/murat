@@ -166,6 +166,8 @@ murat : {
     GenpHist      : { module_type:GenpHist
         @table::StntupleTModuleFclDefaults
         genpCollTag : "generate"
+        sgsCollTag  : "compressDetStepMCs"
+        sdmcCollTag : "compressDidiMCs"
     }
 }
 #------------------------------------------------------------------------------

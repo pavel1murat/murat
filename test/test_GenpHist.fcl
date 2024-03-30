@@ -1,0 +1,93 @@
+# -*- mode:tcl -*- 
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+  INPUT_MODULE  @protect_ignore: RootInput
+END_PROLOG
+
+#include "Stntuple/fcl/stntuple_external_prologs.fcl"
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+#include "Stntuple/fcl/stntuple_services.fcl"
+#include "Stntuple/fcl/stntuple_outputs.fcl"
+#------------------------------------------------------------------------------
+# here come table definitions
+#------------------------------------------------------------------------------
+#include "Stntuple/fcl/stntuple_table.fcl"
+
+process_name : emoe
+
+services.SeedService.baseSeed: 8
+#------------------------------------------------------------------------------
+# geometry and the magnetic field
+#------------------------------------------------------------------------------
+services.GeometryService.inputFile  : "pipenu/datasets/bpip0b0/geom_pipenu_bpip0b0.txt"
+services.GeometryService.bFieldFile : "pipenu/common/bfgeom_DS70_v01.txt"
+services.TFileService.fileName      : "test_genp.hist"
+#------------------------------------------------------------------------------
+# Enable these commands not to have the printout for each event in the log file
+#------------------------------------------------------------------------------
+services.message.destinations.log.categories.ArtReport.reportEvery : 50
+services.message.destinations.log.categories.ArtReport.limit       : 5
+services.message.destinations.log.categories.ArtReport.timespan    : 1000
+
+
+source : { module_type : @local::INPUT_MODULE
+    # reportFrequency : 1
+    #    fileNames : ["dsStopsToHitsConversion.root"]
+    #    maxEvents   : -1
+}
+
+physics : {
+    producers : { @table::stntuple.producers 
+
+        generate : { @table::EventGeneratorMu
+            simpCollTag    : "" # "TargetStopResampler"
+            stopPdgCode    : 211                              ## stopped pi+
+            lifetime       : 26. ## 2196.98                   ## charged pion lifetime, ns
+#------------------------------------------------------------------------------
+# pi+ --> e+ nu, the radiative corrections are a universal function
+#------------------------------------------------------------------------------
+            generator  : { tool_type: "StoppedPiENuGenerator" 
+                spectrum: {
+                    pdgCode            : -11                      ## e+
+                    spectrumShape      : "ceLeadingLog"
+                    spectrumVariable   :  "totalEnergy" ## "kineticEnergy" / "momentum" / "totalEnergy"
+                    ehi                : 69.785
+                    elow               : 0.
+                    spectrumResolution : 0.1                # MeV
+                }
+            }
+        }
+    } 
+
+    filters   : { @table::stntuple.filters   } 
+
+    analyzers : { @table::murat.analyzers    } 
+
+#    p1 : [ TargetStopResampler, generate, genCounter ]
+#    p1 : [ generate, genCounter ]
+    p1 : [ ]
+    e1 : [ GenpHist ]
+
+    trigger_paths : [ p1 ]
+    end_paths     : [ e1 ] 
+}
+
+physics.filters.TargetStopResampler.mu2e.products.genParticleMixer.mixingMap : [[ "generate", "" ]]
+physics.filters.TargetStopResampler.mu2e.MaxEventsToSkip : 0
+physics.filters.TargetStopResampler.fileNames            : [
+  "/exp/mu2e/data/projects/pipenu/datasets/bpip0b0s21r0000/sim.mu2e.bpip0b0s21r0000.pipenu.001210_00000000.art"
+]
+
+source.firstRun   : 1210
+source.firstSubRun:    0
+
+# outputs.PrimaryOutput.fileName: "dts.user.bpip2b0s31r0000.pipenu.001210_00000000.art"
+
+physics.analyzers.GenpHist.genpCollTag : "compressDigiMCs"
+physics.analyzers.GenpHist.sgsCollTag  : "compressDigiMCs"
+physics.analyzers.GenpHist.sdmcCollTag : "compressDigiMCs"
+

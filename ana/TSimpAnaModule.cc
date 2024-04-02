@@ -170,24 +170,26 @@ void TSimpAnaModule::FillHistograms() {
 // Simp histograms
 //-----------------------------------------------------------------------------
   TSimParticle* simp;
+  SimpData_t    sd;
+
   for (int i=0; i<fEvtPar.fNSimp; i++) {
     simp = fSimpBlock->Particle(i);
-    FillSimpHistograms(fHist.fSimp[0],simp);
+    FillSimpHistograms(fHist.fSimp[0],simp,&sd);
     int pdg_code = simp->PDGCode();
     if (simp->NStrawHits() > fMinNStrawHits) {
-      FillSimpHistograms(fHist.fSimp[1],simp);
+      FillSimpHistograms(fHist.fSimp[1],simp,&sd);
       if (pdg_code == 11) {
-	FillSimpHistograms(fHist.fSimp[10],simp);
+	FillSimpHistograms(fHist.fSimp[10],simp,&sd);
       }
       else if (pdg_code == -11) {
-	FillSimpHistograms(fHist.fSimp[20],simp);
+	FillSimpHistograms(fHist.fSimp[20],simp,&sd);
       }
       else if (abs(pdg_code) == 13) {
-	FillSimpHistograms(fHist.fSimp[30],simp);
+	FillSimpHistograms(fHist.fSimp[30],simp,&sd);
       }
       else if (abs(pdg_code) == 211) {
-	FillSimpHistograms(fHist.fSimp[40],simp);
-	FillSimpHistograms(fHist.fSimp[41],simp,fEvtPar.fPionSurvProb);
+	FillSimpHistograms(fHist.fSimp[40],simp,&sd);
+	FillSimpHistograms(fHist.fSimp[41],simp,&sd,fEvtPar.fPionSurvProb);
       }
     }
   }

@@ -10,8 +10,6 @@
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
 
-#include "Stntuple/loop/TStnModule.hh"
-
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 #include "Stntuple/obj/TStepPointMCBlock.hh"
@@ -20,49 +18,33 @@
 
 #include "Stntuple/alg/TStntuple.hh"
 
+#include "murat/ana/TAnaModule.hh"
+
 #include "murat/ana/HistBase_t.h"
+#include "murat/ana/EventPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
+#include "murat/ana/SimpHist_t.hh"
+#include "murat/ana/SimpData_t.hh"
 #include "murat/ana/VDetData_t.hh"
 
 #include "murat/ana/AnaDefs.hh"
 
 namespace murat {
 
-class TSpmcAnaModule: public TStnModule {
+class TSpmcAnaModule: public TAnaModule {
 public:
   enum { kMaxNSimp = 1000 };
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct EventHist_t : public HistBase_t {
-    TH1F*      fRunNumber;
-    TH1F*      fEventNumber;
-    TH1F*      fNSimp;
-    TH1F*      fTMaxSimp[2];
-    TH1F*      fTMaxSpmc;
-    TH1F*      fLogWeight;
-  };
-
-  struct SimpHist_t : public HistBase_t {
-    TH1F*      fVolumeID;		       //
-    TH1F*      fStage;
-    TH1F*      fGeneratorID;
-    TH1F*      fTime;
-    TH1F*      fStageDt;
-    TH1F*      fParentPDG;
-    TH1F*      fParentMom;
-    TH1F*      fStartMom[2];
-    TH1F*      fNStrawHits;
-
-    TH2F*      fYVsX;
-    TH2F*      fXEndVsZEnd;
-    TH2F*      fYcVsZEnd;
-    TH2F*      fPVD9VsZEnd;
-    TH2F*      fYVsX_2480;
-    TH2F*      fYVsX_2513;
-    TH2F*      fCosThVsMom[2];
-    TH2F*      fCosThVsMomPV;		// for antiprotons
-  };
+  // struct EventHist_t : public HistBase_t {
+  //   TH1F*      fRunNumber;
+  //   TH1F*      fEventNumber;
+  //   TH1F*      fNSimp;
+  //   TH1F*      fTMaxSimp[2];
+  //   TH1F*      fTMaxSpmc;
+  //   TH1F*      fLogWeight;
+  // };
 
   struct StepPointMCHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
@@ -112,20 +94,6 @@ public:
     TH2F*      fTimeVsMomW;
     TH2F*      fPTimeVsMom;
   };
-
-  struct SimpData_t {
-    int           fIndex;		// so far, not used
-    TSimParticle* fParent;              // parent (in production vertex)
-    int           fStage;               // for this particle
-    TStepPointMC* fStepVD9;
-    float         fPVD9;                // P(VD9), defined for stopped particles
-    float         fY0;
-    double        fWeight;
-    double        fTau;                 // lifetime , in ns
-    bool          fMuonDecay;
-    TSimParticle* fEle;
-  };
-
 //-----------------------------------------------------------------------------
 // assume Zlocal is normal to the virtual detector plane, YLocal points upwards
 //-----------------------------------------------------------------------------
@@ -188,9 +156,11 @@ public:
   int                   fNVDetHits  ;
   int                   fNVDet;
   VDetData_t            fVDet[200];
-  int                   fStageID;
-  int                   fNSimp;
+  // int                   fStageID;
+  //  int                   fNSimp;
   int                   fStage;
+
+  EventPar_t            fEvtPar;
 
   SimpData_t            fSimData[kMaxNSimp];
 
@@ -216,7 +186,7 @@ public:
 //-----------------------------------------------------------------------------
   void SetSpmcBlockName(const char* Name) { fSpmcBlockName = Name; }
   void SetVDetBlockName(const char* Name) { fVDetBlockName = Name; }
-  void SetStageID      (int ID) { fStageID = ID; }
+  //  void SetStageID      (int ID) { fStageID = ID; }
 
   void          SetParticleCache(int PdgCode, TParticlePDG* P) { fParticleCache[2500+PdgCode] = P; }
   TParticlePDG* GetParticleCache(int PdgCode) { return fParticleCache[2500+PdgCode]; }
@@ -230,13 +200,12 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
-  void    BookSimpHistograms         (HistBase_t* Hist, const char* Folder);
+  // void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
+  //  void    BookSimpHistograms         (HistBase_t* Hist, const char* Folder);
   void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookVDetHistograms         (HistBase_t* Hist, const char* Folder);
 
-  void    FillEventHistograms        (HistBase_t* Hist);
-  void    FillSimpHistograms         (HistBase_t* Hist, TSimParticle* Simp, SimpData_t* SimpData, double Weight = 1.);
+  //  void    FillEventHistograms        (HistBase_t* Hist);
   void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
   void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
 

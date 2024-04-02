@@ -139,17 +139,12 @@ public:
   TStnTrack*           fTrack;
   TStnCluster*         fCluster;
 
-  TDiskCalorimeter*    fDiskCalorimeter;
-
-  double               fMinETrig;       // minimal energy of the cluster to trigger on
-                                        // Tcm - track-cluster matching
-  double               fMinDtTcm;
-  double               fMaxDtTcm;
-
   double               fLumWt;
   int                  fApplyCorrections;  // 0: do not apply momentum ant DT corrections
 
   int                  fEventPassedSelections; // 1: event passed analysis selections; 0: event didn't pass
+  int                  fDnMax;
+  int                  fN300;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -163,6 +158,7 @@ public:
 // modifiers
 //-----------------------------------------------------------------------------
   void               SetDirection    (int Dir  ) { fDirection     = Dir  ; }
+  void               SetDnMax        (int N    ) { fDnMax         = N    ; }
 
   void               SetTrackBlockName         (const char* Name) { fTrackBlockName         = Name; }
   void               SetTrackStrawHitBlockName (const char* Name) { fTrackStrawHitBlockName = Name; }

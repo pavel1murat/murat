@@ -624,7 +624,8 @@ void TTrackAnaModule::FillHistograms() {
 // Simp histograms
 //-----------------------------------------------------------------------------
   if (fSimp) {
-    FillSimpHistograms(fHist.fSimp[0],fSimp);
+    SimpData_t sd;
+    FillSimpHistograms(fHist.fSimp[0],fSimp,&sd);
   }
 //-----------------------------------------------------------------------------
 // track histograms, fill them only for the downstream e- hypothesis

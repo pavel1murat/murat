@@ -44,14 +44,14 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
   fTrackStrawHitBlockName = "TrackStrawHitBlock";
   fTrackNumber.Set(100);
 
-  fDiskCalorimeter = new TDiskCalorimeter();
+  //  fDiskCalorimeter = new TDiskCalorimeter();
   fCalorimeterType = 2;
 
   fMinT0           = 700; 
-  fMinETrig        = 50.;               // MeV
+  //  fMinETrig        = 50.;               // MeV
 					// track-cluster matching timing cut
-  fMinDtTcm        = -5.;
-  fMaxDtTcm        =  8.;
+  // fMinDtTcm        = -5.;
+  // fMaxDtTcm        =  8.;
 //-----------------------------------------------------------------------------
 // initialize Track ID
 // 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
@@ -62,13 +62,13 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
   fTrackID[0]      = TAnaModule::fTrackID_BOX;
 
   int mask = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit ;
-  fTrackID[0]->SetMaxChi2Dof(3.0 );
+  fTrackID[0]->SetMaxChi2Dof(2.5 );
   fTrackID[0]->SetMinNActive(20  );
   fTrackID[0]->SetMaxMomErr (1.  );
 
   mask    |= TStnTrackID::kTanDipBit;
   fTrackID[0]->SetMinTanDip (0.5);
-  fTrackID[0]->SetMaxTanDip (1.4);
+  fTrackID[0]->SetMaxTanDip (0.9);
 
   fTrackID[0]->SetUseMask(mask);
 
@@ -78,7 +78,8 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
 // 2:conversionGun, 28:StoppedParticleReactionGun - see 
 //-----------------------------------------------------------------------------
   fDirection        = 1;
-  fApplyCorrections = 0;
+
+  fDnMax            = 15;
 
   fPDGCode          = -11;
   fMCProcessCode    = 181;   // mu2e::ProcessCode::mu2ePienu;
@@ -255,11 +256,15 @@ void TPipenuAnaModule::BookHistograms() {
   for (int i=0; i<kNSimpHistSets; i++) book_simp_histset[i] = 0;
 
   book_simp_histset[ 0] = 1;		// all events
-  book_simp_histset[ 1] = 1;		// events with a reco track
+  book_simp_histset[ 1] = 1;		// events with a      track
   book_simp_histset[ 2] = 1;		// events with a good track
 
   book_simp_histset[10] = 1;		// all events                     volID=3015 (last foil)
   book_simp_histset[11] = 1;		// events with a reco track and a volID=3015 (last foil)
+
+  book_simp_histset[31] = 1;		// muons events with a      track T>300
+  book_simp_histset[32] = 1;		// muons events with a      track T>300
+  book_simp_histset[33] = 1;		// muons events with a      track T>300
 
   for (int i=0; i<kNSimpHistSets; i++) {
     if (book_simp_histset[i] != 0) {
@@ -568,15 +573,8 @@ void    TPipenuAnaModule::FillTimeClusterHistograms(TimeClusterHist_t* Hist  ,
 //_____________________________________________________________________________
 void TPipenuAnaModule::FillHistograms() {
 
-  double       cos_th (-2.),  cl_e(-1.);
+  double       cos_th (-2.); //,  cl_e(-1.);
   int          disk_id(-1);
-  TStnCluster  *cl0(NULL);
-
-  if (fNClusters > 0) {
-    cl0     = fClusterBlock->Cluster(0);
-    cl_e    = cl0->Energy();
-    disk_id = cl0->DiskID();
-  }
 //-----------------------------------------------------------------------------
 // event histograms
 //-----------------------------------------------------------------------------
@@ -610,22 +608,6 @@ void TPipenuAnaModule::FillHistograms() {
     }
   }
 
-  if ((cl_e > fMinETrig) && (cl0->Time() > 500)) {
-    FillEventHistograms(fHist.fEvent[7],&fEvtPar); 
-
-    if (GetDebugBit(34)) {
-      if (fNCalPatRec <= 0) {
-	GetHeaderBlock()->Print(Form(" bit:034 cl_e = %10.3f, cl_time = %10.3f fNCalPatRec = 0",cl_e,cl0->Time()));
-      }
-    }
-
-    if (GetDebugBit(38)) {
-      if ((fNCalPatRec <= 0) && (fEvtPar.fNTracks[0] > 0)) {
-	GetHeaderBlock()->Print(Form(" bit:038 cl_e = %10.3f, cl_time = %10.3f fNCalPatRec = 0",cl_e,cl0->Time()));
-      }
-    }
-  }
-
   if      (disk_id == 0) FillEventHistograms(fHist.fEvent[8],&fEvtPar);
   else if (disk_id == 1) FillEventHistograms(fHist.fEvent[9],&fEvtPar);
 //-----------------------------------------------------------------------------
@@ -654,11 +636,21 @@ void TPipenuAnaModule::FillHistograms() {
 // SIMP histograms
 //-----------------------------------------------------------------------------
   if (fEvtPar.fSimp) {
-    FillSimpHistograms(fHist.fSimp[0],fEvtPar.fSimp);
+    SimpData_t sd;
+
+    TSimParticle* mom = fSimpBlock->Particle(fEvtPar.fSimp->ParentID());
+
+    FillSimpHistograms(fHist.fSimp[0],fEvtPar.fSimp,&sd);
     if (fEvtPar.fNTracks[0] > 0) {
-      FillSimpHistograms(fHist.fSimp[1],fEvtPar.fSimp);
+      FillSimpHistograms(fHist.fSimp[ 1],fEvtPar.fSimp,&sd);
+      FillSimpHistograms(fHist.fSimp[31],mom,&sd);
       if (fEvtPar.fNGoodTracks[0] > 0) {
-        FillSimpHistograms(fHist.fSimp[2],fEvtPar.fSimp);
+        FillSimpHistograms(fHist.fSimp[ 2],fEvtPar.fSimp,&sd);
+        FillSimpHistograms(fHist.fSimp[32],mom,&sd);
+      }
+
+      if (fN300 > 0) {
+        FillSimpHistograms(fHist.fSimp[33],mom,&sd);
       }
     }
 
@@ -666,8 +658,8 @@ void TPipenuAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // last foil
 //-----------------------------------------------------------------------------
-      FillSimpHistograms(fHist.fSimp[10],fEvtPar.fSimp);
-      if (fEvtPar.fNTracks[0] > 0) FillSimpHistograms(fHist.fSimp[11],fEvtPar.fSimp);
+      FillSimpHistograms(fHist.fSimp[10],fEvtPar.fSimp,&sd);
+      if (fEvtPar.fNTracks[0] > 0) FillSimpHistograms(fHist.fSimp[11],fEvtPar.fSimp,&sd);
     }
   }
 //-----------------------------------------------------------------------------
@@ -677,14 +669,15 @@ void TPipenuAnaModule::FillHistograms() {
   TrackPar_t*  tp;
 
   for (int i=0; i<fEvtPar.fNTracks[0]; ++i ) {
-    trk = fTrackBlock->Track(i);
-    tp  = fTrackPar+i;
+    trk       = fTrackBlock->Track(i);
+    tp        = fTrackPar+i;
 
-    int dn = tp->fTimeCluster->NHits()-trk->NActive();
+    tp->fDnTrackTc = tp->fTimeCluster->NHits()-trk->NActive();
+    tp->fDtTrackTc = tp->fTimeCluster->NHits()-trk->NActive();
 //-----------------------------------------------------------------------------
 // find closest time cluster 
 //-----------------------------------------------------------------------------
-    float dt_tc_min(1.e6);   // signed !!!
+    float dt_tc_min = 1.e6;   // signed !!!
 
     for (int itc=0; itc<fEvtPar.fNTimeClusters; itc++) {
       TStnTimeCluster* tc = fTimeClusterBlock->TimeCluster(itc);
@@ -695,6 +688,7 @@ void TPipenuAnaModule::FillHistograms() {
       }
     }
 
+    tp->fDtTcTc = dt_tc_min;
 
     FillTrackHistograms (fHist.fTrack [0],trk,tp,&fSimPar);
     FillPipenuHistograms(fHist.fPipenu[0],trk,tp,&fSimPar);
@@ -720,7 +714,7 @@ void TPipenuAnaModule::FillHistograms() {
 // 1. require the number of track hits to be consistent with the number of hits 
 // 2. require no close time clusters
 //-----------------------------------------------------------------------------
-        if ((dn < 20) and (fabs(dt_tc_min) > 100)) {
+        if ((tp->fDnTrackTc <= fDnMax) and (fabs(tp->fDtTcTc) > 100)) {
           fEventPassedSelections = 1;
           FillTrackHistograms (fHist.fTrack [102],trk,tp,&fSimPar);
           FillPipenuHistograms(fHist.fPipenu[102],trk,tp,&fSimPar);
@@ -739,7 +733,6 @@ void TPipenuAnaModule::FillHistograms() {
 // track reco efficiency - filles Event histograms
 //-----------------------------------------------------------------------------
     FillEfficiencyHistograms(fTrackBlock,TAnaModule::fTrackID[fBestID],11);
-
 //-----------------------------------------------------------------------------
 // TRK_101: all tracks pi+ --> e+ nu weighted with the pion survival prob
 //-----------------------------------------------------------------------------
@@ -766,7 +759,7 @@ void TPipenuAnaModule::FillHistograms() {
 // 1. require the number of track hits to be consistent with the number of hits 
 // 2. require no close time clusters
 //-----------------------------------------------------------------------------
-          if ((dn < 20) and (fabs(dt_tc_min) > 100)) {
+          if ((tp->fDnTrackTc <= fDnMax) and (fabs(tp->fDtTcTc) > 100)) {
             FillTrackHistograms (fHist.fTrack [152],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
             FillPipenuHistograms(fHist.fPipenu[152],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
             if (trk->T0() > 300) {
@@ -803,54 +796,6 @@ void TPipenuAnaModule::FillHistograms() {
     else if (id == 1         ) FillClusterHistograms(fHist.fCluster[7],cl);
   }
 //-----------------------------------------------------------------------------
-// calorimeter histograms
-//-----------------------------------------------------------------------------
-  TDisk*         disk;
-  TStnCrystal*   cr;
-
-  if (fCalorimeterType == 2) {
-    int nd = fDiskCalorimeter->NDisks();
-
-    for (int i=0; i<nd; i++) {
-      disk = fDiskCalorimeter->Disk(i);
-      for (int ic=0; ic<disk->NCrystals(); ic++) {
-	cr = disk->Crystal(ic);
-	FillCaloHistograms(fHist.fCalo[0],cr);
-
-	if (cr->Energy() > 0) {
-	  FillCaloHistograms(fHist.fCalo[1],cr);
-	}
-	if (cr->Energy() > 0.1) {
-	  FillCaloHistograms(fHist.fCalo[2],cr);
-	}
-	if (cr->Energy() > 1.0) {
-	  FillCaloHistograms(fHist.fCalo[3],cr);
-	}
-      }
-    }
-  }
-//-----------------------------------------------------------------------------
-// radial distributions for crystals
-//-----------------------------------------------------------------------------
-  static int first_entry(1);
-
-  if (first_entry == 1) {
-    first_entry = 0;
-
-    if (fCalorimeterType == 2) {
-      int nd = fDiskCalorimeter->NDisks();
-	
-      for (int i=0; i<nd; i++) {
-	disk = fDiskCalorimeter->Disk(i);
-	for (int ic=0; ic<disk->NCrystals(); ic++) {
-	  cr = disk->Crystal(ic);
-
-	  fHist.fCrystalR[i]->Fill(cr->Radius());
-	}
-      }
-    }
-  }
-//-----------------------------------------------------------------------------
 // fill GENP histograms
 // GEN_0: all particles
 //-----------------------------------------------------------------------------
@@ -869,7 +814,7 @@ void TPipenuAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 int TPipenuAnaModule::Event(int ientry) {
 
-  TDiskCalorimeter::GeomData_t disk_geom;
+  //  TDiskCalorimeter::GeomData_t disk_geom;
 
   fTrackBlock->GetEntry(ientry);
   fTrackSeedBlock->GetEntry(ientry);
@@ -906,7 +851,7 @@ int TPipenuAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
-// figure teh MC truth
+// figure the MC truth
 // pi+ --> e+ nu case : determine the event weight
 //-----------------------------------------------------------------------------
   for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
@@ -969,31 +914,11 @@ int TPipenuAnaModule::Event(int ientry) {
       }
     }
   }
-
-  if (fDiskCalorimeter->Initialized() == 0) {
-    disk_geom.fNDisks = fCalDataBlock->NDisks();
-
-    for (int i=0; i<disk_geom.fNDisks; i++) {
-      disk_geom.fRMin[i]      = fCalDataBlock->fRMin[i];
-      disk_geom.fRMax[i]      = fCalDataBlock->fRMax[i];
-      disk_geom.fZ0  [i]      = fCalDataBlock->fZ0  [i];
-    }
-
-    disk_geom.fHexSize          = fCalDataBlock->CrystalSize()*2;
-    // kludge , so far
-    disk_geom.fMinFraction      = 1.; // fCalDataBlock->MinFraction();
-    disk_geom.fWrapperThickness = fCalDataBlock->WrapperThickness();
-    disk_geom.fShellThickness   = fCalDataBlock->ShellThickness();
-
-    fDiskCalorimeter->Init(&disk_geom);
-  }
 //-----------------------------------------------------------------------------
 // init calorimeter
 //-----------------------------------------------------------------------------
   fNClusters  = fClusterBlock->NClusters();
   fNCalHits   = fCalDataBlock->NHits();
-
-  fDiskCalorimeter->InitEvent(fCalDataBlock);
 //-----------------------------------------------------------------------------
 // init calorimeter clusters - remember, the first one not necessarily is the 
 // most energetic
@@ -1023,14 +948,8 @@ int TPipenuAnaModule::Event(int ientry) {
   int ntrk = fTrackBlock->NTracks();
   fNCalPatRec = 0;
   for (int itrk=0; itrk<ntrk; itrk++) {
-    TStnTrack*   trk = fTrackBlock->Track(itrk);
+    //    TStnTrack*   trk = fTrackBlock->Track(itrk);
     TrackPar_t* tp   = fTrackPar+itrk;
-
-    tp->fDioLOWt     = fEvtPar.fDioLOWt;
-    tp->fDioLLWt     = fEvtPar.fDioLLWt;
-
-    int alg_mask = trk->AlgMask();
-    if (alg_mask & 0x2) fNCalPatRec += 1;
 
     tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
     tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
@@ -1040,6 +959,7 @@ int TPipenuAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // additional initializations - helices and time clusters
 //-----------------------------------------------------------------------------
+  fN300 = 0;
   for (int itrk=0; itrk<ntrk; itrk++) {
     TStnTrack*   trk = fTrackBlock->Track(itrk);
     TrackPar_t*  tp  = fTrackPar+itrk;
@@ -1051,6 +971,8 @@ int TPipenuAnaModule::Event(int ientry) {
     if (ih < fEvtPar.fNHelices) {
       tp->fHelix = fHelixBlock->Helix(ih);
     }
+
+    if ((tp->fP > 60) and (trk->T0() > 300)) fN300++;
 //-----------------------------------------------------------------------------
 // currently, at least in the KK case, an TStnHelix doesn't have a helix index stored
 // find a time cluster closest to teh track in time
@@ -1067,7 +989,7 @@ int TPipenuAnaModule::Event(int ientry) {
     }
 
     tp->fTimeCluster = closest_tc;
-    tp->fDtTc        = min_dt;
+    tp->fDtTrackTc   = min_dt;
   }
 
   fEventPassedSelections = 0;
@@ -1111,6 +1033,18 @@ void TPipenuAnaModule::Debug() {
         if ((tp->fP > 70) and (trk->fT0 > 300)) {
 	  GetHeaderBlock()->Print(Form("large P: %f",tp->fP));
 	}
+      }
+    }
+//-----------------------------------------------------------------------------
+// bit 4: good events with 65 < P < 67.5 , T0 > 300
+//-----------------------------------------------------------------------------
+    if (GetDebugBit(4) == 1) {
+      if (tp->fIDWord[fBestID] == 0) {
+        if ((tp->fDnTrackTc <= fDnMax) and (fabs(tp->fDtTcTc) > 100)) {
+          if ((tp->fP > 65) and (tp->fP < 67.5) and (trk->fT0 > 300)) {
+            GetHeaderBlock()->Print(Form(":bit_04: candidate: %10.3f",tp->fP));
+          }
+        }
       }
     }
   }

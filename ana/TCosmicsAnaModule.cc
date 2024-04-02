@@ -522,7 +522,8 @@ void TCosmicsAnaModule::FillHistograms() {
 // Simp histograms
 //-----------------------------------------------------------------------------
   if (fSimPar.fParticle) {
-    FillSimpHistograms(fHist.fSimp[0],fSimPar.fParticle);
+    SimpData_t sd;
+    FillSimpHistograms(fHist.fSimp[0],fSimPar.fParticle,&sd);
   }
 //-----------------------------------------------------------------------------
 // track histograms, fill them only for the downstream e- hypothesis

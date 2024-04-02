@@ -31,6 +31,7 @@
 #include "murat/ana/HistBase_t.h"
 #include "murat/ana/TrackPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
+#include "murat/ana/SimpData_t.hh"
 
 #include "murat/ana/TAnaModule.hh"
 

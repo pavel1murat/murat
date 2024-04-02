@@ -35,6 +35,7 @@
 
 #include "murat/ana/EventPar_t.hh"
 #include "murat/ana/SimPar_t.hh"
+#include "murat/ana/SimpData_t.hh"
 #include "murat/ana/HelixPar_t.hh"
 #include "murat/ana/TrackPar_t.hh"
 
@@ -118,10 +119,16 @@ public:
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
-  void               SetMinT0        (double T0  ) { fMinT0         = T0   ; }
-  void               SetPDGCode      (int    Code) { fPDGCode       = Code ; }
-  void               SetMCProcessCode(int    Code) { fMCProcessCode = Code ; }
-  void               SetApplyCorr    (int    Flag) { fApplyCorr     = Flag ; }
+  void               SetMinT0         (double T0  ) { fMinT0         = T0   ; }
+  void               SetPDGCode       (int    Code) { fPDGCode       = Code ; }
+  void               SetMCProcessCode (int    Code) { fMCProcessCode = Code ; }
+
+  void               SetSignalParticle(int PDGCode, int MCProcessCode) { 
+    fPDGCode       = PDGCode; 
+    fMCProcessCode = MCProcessCode; 
+  }
+
+  void               SetApplyCorr     (int    Flag) { fApplyCorr     = Flag ; }
 //-----------------------------------------------------------------------------
 // TRQ MVA Training Codes: 
 //
@@ -151,7 +158,7 @@ public:
   virtual void    BookGenpHistograms      (GenpHist_t*          Hist, const char* Folder);
   virtual void    BookEventHistograms     (HistBase_t*          Hist, const char* Folder);
   virtual void    BookHelixHistograms     (HistBase_t*          Hist, const char* Folder);
-  virtual void    BookSimpHistograms      (SimpHist_t*          Hist, const char* Folder);
+  virtual void    BookSimpHistograms      (HistBase_t*          Hist, const char* Folder);
   virtual void    BookTrackHistograms     (TrackHist_t*         Hist, const char* Folder);
   virtual void    BookTrackIDHistograms   (TStnTrackID::Hist_t* Hist, const char* Folder);
   virtual void    BookTrackSeedHistograms (HistBase_t*          Hist, const char* Folder);
@@ -166,14 +173,14 @@ public:
 
   virtual void    FillHelixHistograms     (HistBase_t*  Hist, TStnHelix* Hel, HelixPar_t* Help, double Weight = 1);
 
-  virtual void    FillSimpHistograms      (SimpHist_t*   Hist, TSimParticle* Simp    , double Weight = 1.);
-  virtual void    FillTrackSeedHistograms (HistBase_t*  HistR, TStnTrackSeed* TrkSeed, double Weight = 1);
+  virtual void    FillSimpHistograms      (HistBase_t*  Hist, TSimParticle*  Simp   , SimpData_t* Sd, double Weight = 1.);
+  virtual void    FillTrackSeedHistograms (HistBase_t*  Hist, TStnTrackSeed* TrkSeed, double Weight = 1);
 
   virtual void    FillTrackHistograms     (TrackHist_t* Hist, 
-				   TStnTrack*          Trk, 
-				   TrackPar_t*         Tp, 
-				   SimPar_t*           SimPar,
-				   double              Weight = 1.);
+                                           TStnTrack*   Trk, 
+                                           TrackPar_t*  Tp, 
+                                           SimPar_t*    SimPar,
+                                           double       Weight = 1.);
 
   virtual int     InitTrackPar(TStnTrackBlock*    TrackBlock  , 
 		       TStnClusterBlock*  ClusterBlock, 

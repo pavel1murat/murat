@@ -42,7 +42,7 @@ ClassImp(murat::TSpmcAnaModule)
 namespace murat { 
 //-----------------------------------------------------------------------------
 TSpmcAnaModule::TSpmcAnaModule(const char* name, const char* title):
-  TStnModule(name,title)
+  TAnaModule(name,title)
 {
   // fPdgCode       = 11;
   // fGeneratorCode = 28;
@@ -94,53 +94,6 @@ int TSpmcAnaModule::BeginJob() {
   InitVirtualDetectors(fVDet,&fNVDet);
 
   return 0;
-}
-
-
-//-----------------------------------------------------------------------------
-void TSpmcAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
-  //  char name [200];
-  //  char title[200];
-  EventHist_t* hist = (EventHist_t*) Hist;
-
-  HBook1F(hist->fEventNumber,"evtnum",Form("%s: Event Number"     ,Folder), 1000, 0,  1e4,Folder);
-  HBook1F(hist->fRunNumber  ,"runnum",Form("%s: Run   Number"     ,Folder), 1000, 0,  1e6,Folder);
-  HBook1F(hist->fNSimp      ,"nsimp" ,Form("%s: N(sim particles)" ,Folder),  200, 0,  200,Folder);
-  HBook1F(hist->fTMaxSimp[0],"tsim_0",Form("%s: TMaxSimp(ns )[0]" ,Folder), 1000, 0, 2000,Folder);
-  HBook1F(hist->fTMaxSimp[1],"tsim_1",Form("%s: TMaxSimp(sec)[1]" ,Folder), 1000, 0,  1e5,Folder);
-  HBook1F(hist->fTMaxSpmc   ,"tspmc" ,Form("%s: TMaxStep(ns )   " ,Folder), 1000, 0, 2000,Folder);
-}
-
-//-----------------------------------------------------------------------------
-void TSpmcAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
-  SimpHist_t* hist = (SimpHist_t*) Hist;
-
-  HBook1F(hist->fVolumeID    ,"vol_id"   ,Form("%s: Volume ID"   ,Folder),1000,  2500, 3500,Folder);
-  HBook1F(hist->fStage       ,"stage"    ,Form("%s: Stage"       ,Folder),  10,     0,   10,Folder);
-  HBook1F(hist->fGeneratorID ,"gen_id"   ,Form("%s: Generator ID",Folder), 200,   -10,  190,Folder);
-  HBook1F(hist->fTime        ,"time"     ,Form("%s: Stop Time"   ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fStageDt     ,"sdt"      ,Form("%s: Stage T1-T0" ,Folder), 400,     0, 2000,Folder);
-  HBook1F(hist->fParentMom   ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fParentPDG   ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
-
-  HBook1F(hist->fStartMom[0] ,"mom"      ,Form("%s: start Mom[0]"  ,Folder), 500,     0,  500,Folder);
-  HBook1F(hist->fStartMom[1] ,"mom_1"    ,Form("%s: start Mom[1]"  ,Folder), 500,     0, 5000,Folder);
-
-  HBook1F(hist->fNStrawHits  ,"nsh"      ,Form("%s: N(straw hits)" ,Folder), 100,     0,  100,Folder);
-
-  HBook2F(hist->fYVsX        ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fXEndVsZEnd  ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
-  HBook2F(hist->fYcVsZEnd    ,"yc_vs_ze"   ,Form("%s: yc vs zend "   ,Folder), 250,  -5000, 20000, 200,   -200, 200,Folder);
-  HBook2F(hist->fPVD9VsZEnd  ,"pvd9_vs_ze" ,Form("%s: pvd9 vs zend " ,Folder), 250,  -5000, 20000, 200,      0, 200,Folder);
-
-  HBook2F(hist->fYVsX_2480   ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fYVsX_2513   ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
-
-
-  HBook2F(hist->fCosThVsMom[0] ,"cth_vs_mom"  ,Form("%s: Cos(Th) vs Mom[0]",Folder), 250,   0, 5000,100,-1,1,Folder);
-  HBook2F(hist->fCosThVsMom[1] ,"cth_vs_mom_1",Form("%s: Cos(Th) vs Mom[1]",Folder), 250,   0,  250,100,-1,1,Folder);
-
-  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -712,23 +665,23 @@ void TSpmcAnaModule::BookHistograms() {
   }
 }
 
-//-----------------------------------------------------------------------------
-void TSpmcAnaModule::FillEventHistograms(HistBase_t* Hist) {
-//   double            cos_th, xv, yv, rv, zv, p;
-//   TLorentzVector    mom;
+// //-----------------------------------------------------------------------------
+// void TSpmcAnaModule::FillEventHistograms(HistBase_t* Hist) {
+// //   double            cos_th, xv, yv, rv, zv, p;
+// //   TLorentzVector    mom;
 
-  EventHist_t* hist = (EventHist_t*) Hist;
+//   EventHist_t* hist = (EventHist_t*) Hist;
 
-  int event_number = GetHeaderBlock()->EventNumber();
-  int run_number   = GetHeaderBlock()->RunNumber();
+//   int event_number = GetHeaderBlock()->EventNumber();
+//   int run_number   = GetHeaderBlock()->RunNumber();
 
-  hist->fEventNumber->Fill(event_number);
-  hist->fRunNumber->Fill(run_number);
-  hist->fNSimp->Fill(fNSimp);
-  hist->fTMaxSimp[0]->Fill(fTMaxSimp);
-  hist->fTMaxSimp[1]->Fill(fTMaxSimp);
-  hist->fTMaxSpmc->Fill(fTMaxSpmc);
-}
+//   hist->fEventNumber->Fill(event_number);
+//   hist->fRunNumber->Fill(run_number);
+//   hist->fNSimp->Fill(fNSimp);
+//   hist->fTMaxSimp[0]->Fill(fTMaxSimp);
+//   hist->fTMaxSimp[1]->Fill(fTMaxSimp);
+//   hist->fTMaxSpmc->Fill(fTMaxSpmc);
+// }
 
 
 
@@ -800,53 +753,6 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
   }
                                         // do this to calculate the exponential just once
   SpmcData->fSurvivalProb = Step->SurvivalProb();
-}
-
-//-----------------------------------------------------------------------------
-void TSpmcAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpData_t* Sd, double Weight) {
-
-  SimpHist_t* hist = (SimpHist_t*) Hist;
-
-  int stage  = Simp->SimStage();
-  
-  hist->fVolumeID->Fill(Simp->fEndVolumeIndex,Weight);
-  hist->fStage->Fill(stage,Weight);
-  hist->fGeneratorID->Fill(Simp->fGeneratorID,Weight);
-  
-  float xe = Simp->EndPos()->X()+3904.;
-  float ye = Simp->EndPos()->Y();
-  float ze = Simp->EndPos()->Z();
-  float te = Simp->EndPos()->T();
-
-  hist->fTime->Fill(te,Weight);
-
-  float dt = (Simp->EndProperTime()-Simp->StartProperTime())*Sd->fTau;
-  hist->fStageDt->Fill(dt,Weight);
-
-  // hist->fParentMom->Fill(fParent->StartMom()->P());
-  // hist->fParentPDG->Fill(fParent->PDGCode());
-
-  float p = Simp->StartMom()->P();
-  hist->fStartMom[0]->Fill(p,Weight);
-  hist->fStartMom[1]->Fill(p,Weight);
-
-  hist->fNStrawHits->Fill(Simp->NStrawHits(),Weight);
-
-  hist->fYVsX->Fill(xe,ye,Weight);
-  hist->fXEndVsZEnd->Fill(ze,xe,Weight);
-  hist->fYcVsZEnd->Fill(ze,Sd->fY0,Weight);
-  hist->fPVD9VsZEnd->Fill(ze,Sd->fPVD9,Weight);
-//-----------------------------------------------------------------------------
-// looks like something to do with the stopping target - but this is still 34 foils..
-//-----------------------------------------------------------------------------
-  if (Simp->fEndVolumeIndex == 2480) hist->fYVsX_2480->Fill(xe,ye,Weight);
-  if (Simp->fEndVolumeIndex == 2513) hist->fYVsX_2513->Fill(xe,ye,Weight);
-
-  float cos_th = Simp->StartMom()->Pz()/p;
-  hist->fCosThVsMom[0]->Fill(p,cos_th,Weight);
-  hist->fCosThVsMom[1]->Fill(p,cos_th,Weight);
-
-  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
 
 //-----------------------------------------------------------------------------
@@ -945,7 +851,7 @@ void TSpmcAnaModule::FillHistograms() {
 //
 // EVT_0: all events
 //-----------------------------------------------------------------------------
-  FillEventHistograms(fHist.fEvent[0]);
+  FillEventHistograms(fHist.fEvent[0],&fEvtPar);
 //-----------------------------------------------------------------------------
 // SIM_PARTICLE histograms
 //-----------------------------------------------------------------------------
@@ -954,7 +860,7 @@ void TSpmcAnaModule::FillHistograms() {
 
   int pbar_stopped_in_st = 0;
 
-  for (int i=0; i<fNSimp; i++) {
+  for (int i=0; i<fEvtPar.fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
     int    pdg_code    = simp->PDGCode();
     int    simp_id     = simp->GetUniqueID();
@@ -978,7 +884,7 @@ void TSpmcAnaModule::FillHistograms() {
                        (simp->EndMom()->P()     >  0)    );
 
     sd->fEle = nullptr;
-    if (sd->fMuonDecay and (i<fNSimp-1)) {
+    if (sd->fMuonDecay and (i<fEvtPar.fNSimp-1)) {
       TSimParticle* d = fSimpBlock->Particle(i+1);
       if (abs(d->PDGCode()) == 11) {
         sd->fEle = d;
@@ -1687,13 +1593,32 @@ int TSpmcAnaModule::Event(int ientry) {
   fSimpBlock->GetEntry(ientry);
   fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
+// at some point, the TVdetBlock class got obsolete, and now the virtual detector 
+// hits are stored in TStepPointMCBlock 
+// dont' try to read it as that would fail
+//-----------------------------------------------------------------------------
+  fEvtPar.fDioLOWt          = 1.;
+  fEvtPar.fDioLLWt          = 1.;
+  fEvtPar.fNCrvClusters     = -1;
+  fEvtPar.fNCrvPulses       = -1;
+  fEvtPar.fNCrvCoincidences = -1;
+  fEvtPar.fNStrawHits       = GetHeaderBlock()->NStrawHits();
+  fEvtPar.fNComboHits       = GetHeaderBlock()->NComboHits();
+  fEvtPar.fNGenp            = fGenpBlock->NParticles();
+  fEvtPar.fNSimp            = fSimpBlock->NParticles();
+  fEvtPar.fSimp             = nullptr;
+  fEvtPar.fPartE            = -1.;
+  fEvtPar.fPionSurvProb     = 1.;
+  fEvtPar.fNHelices         = 0;
+  fEvtPar.fNTimeClusters    = 0;
+//-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 // if there are several hits, use the first one
 //-----------------------------------------------------------------------------
   fNVDetHits = fVDetBlock->NStepPoints();
 
-  fNSimp = fSimpBlock->NParticles();
+  fEvtPar.fNSimp = fSimpBlock->NParticles();
 
   fPbarCosThPV = -2.;
   fPbarMomPV   = -1.;
@@ -1702,24 +1627,34 @@ int TSpmcAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
   fWeight     = fGenpBlock->Weight();
   fTMaxSimp   = -1;
-  if (fNSimp > 0) {
+  if (fEvtPar.fNSimp > 0) {
 //-----------------------------------------------------------------------------
+// figure the MC truth
 // using the first antiproton in the list should work for old Bobs's dataset as well 
 // as for the current ones
+// pi+ --> e+ nu case : determine the event weight
 //-----------------------------------------------------------------------------
-    for (int i=0; i<fNSimp; i++) {
-      TSimParticle* sp0 = fSimpBlock->Particle(i);
-      double t0 = sp0->StartPos()->T();
+    for (int i=0; i<fEvtPar.fNSimp; i++) {
+      TSimParticle* simp = fSimpBlock->Particle(i);
+      int pdg_code       = simp->PDGCode();
+      int generator_id   = simp->GeneratorID();         // MC process code
+
+      if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
+        fEvtPar.fSimp  = simp;
+        fEvtPar.fPartE = simp->StartMom()->Energy();
+      }
+
+      double        t0  = simp->StartPos()->T();
       if (t0 > fTMaxSimp) fTMaxSimp = t0;
 
-      if (sp0->PDGCode() == -2212) {
+      if (simp->PDGCode() == -2212) {
 //-----------------------------------------------------------------------------
 // pbar production, assume Bob
 // assuming parent particle exists, determine the production cross-section weight
 // pbeam, nx, nz: the beam momentum and direction; beam ny = 0
 //-----------------------------------------------------------------------------
 	double pbeam(8.9), nx(-0.24192190), nz(-0.97029573);
-	const TLorentzVector* sm = sp0->StartMom();
+	const TLorentzVector* sm = simp->StartMom();
 	double px    = sm->Px();
 	double pz    = sm->Pz();
 	double p     = sm->P();              // momentum in lab frame, MeV/c
@@ -1753,12 +1688,12 @@ int TSpmcAnaModule::Event(int ientry) {
 // determine simulation stage by looking at the last particle
 //-----------------------------------------------------------------------------
   fStage = -1;
-  if (fNSimp > 0) {
-    TSimParticle* simp = fSimpBlock->Particle(fNSimp-1);
+  if (fEvtPar.fNSimp > 0) {
+    TSimParticle* simp = fSimpBlock->Particle(fEvtPar.fNSimp-1);
     fStage = simp->SimStage();
   }
 
-  for (int i=0; i<fNSimp; i++) {
+  for (int i=0; i<fEvtPar.fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
     // int pdg_code = simp->PDGCode();
     // int simp_id  = simp->GetUniqueID();
@@ -1788,7 +1723,7 @@ int TSpmcAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 void TSpmcAnaModule::Debug() {
 
-  for (int i=0; i<fNSimp; i++) {
+  for (int i=0; i<fEvtPar.fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
     int pdg_code = simp->PDGCode();
     int simp_id  = simp->GetUniqueID();
@@ -1869,7 +1804,7 @@ void TSpmcAnaModule::Debug() {
 // bit:9  events with pi- at stage4
 //-----------------------------------------------------------------------------
   if (GetDebugBit(9) == 1) {
-    for (int i=0; i<fNSimp; i++) {
+    for (int i=0; i<fEvtPar.fNSimp; i++) {
       TSimParticle* simp = fSimpBlock->Particle(i);
       int pdg_code = simp->PDGCode();
       int simp_id  = simp->GetUniqueID();

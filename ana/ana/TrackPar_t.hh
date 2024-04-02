@@ -82,7 +82,10 @@ public:
   double           fSInt;
 
   double           fTMean;			// mean time over the track hits
-  double           fDtTc;                       // dT between the track and the closest TC
+
+  int              fDnTrackTc;                  // N(TC hits) - N(active)
+  double           fDtTrackTc;                  // dT between the track and the closest TC
+  double           fDtTcTc;                     // dt between the track time cluster and the closest other 
 
   double           fDtCRV;			// minimal time residual (CRV)
   double           fZCRV;                       // Z-coordinate of the closest in time CRV stub candidate

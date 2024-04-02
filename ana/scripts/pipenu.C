@@ -14,6 +14,8 @@ void  murat_pipenu_ana(int DebugBit = -1) {
 //-----------------------------------------------------------------------------
   murat::m_pipenu = (murat::TPipenuAnaModule*) g.x->AddModule("murat::TPipenuAnaModule",0);  
 
+  murat::m_pipenu->SetSignalParticle(-11,14);
+
   printf("DebugBit:%i\n",DebugBit);
   if (DebugBit >= 0) murat::m_pipenu->SetDebugBit(DebugBit,1);
 }

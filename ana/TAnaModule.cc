@@ -367,21 +367,51 @@ void TAnaModule::BookHelixHistograms(HistBase_t* Hist, const char* Folder) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::BookSimpHistograms(SimpHist_t* Hist, const char* Folder) {
+void TAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   //  char name [200];
   //  char title[200];
 
-  HBook1F(Hist->fPdgCode[0]     ,"pdg_0"       ,Form("%s: PDG code[0]"             ,Folder), 200,-100, 100,Folder);
-  HBook1F(Hist->fPdgCode[1]     ,"pdg_1"       ,Form("%s: PDG code[1]"             ,Folder),1000,-500, 500,Folder);
-  HBook1F(Hist->fNStrawHits     ,"nsth"        ,Form("%s: n straw hits"            ,Folder), 200,   0, 200,Folder);
-  HBook1F(Hist->fMomTargetEnd   ,"ptarg"       ,Form("%s: mom after ST"            ,Folder), 400,   0, 200,Folder);
-  HBook1F(Hist->fMomTrackerFront,"pfront"      ,Form("%s: mom at the Tracker Front",Folder), 400,   0, 200,Folder);
-  HBook1F(Hist->fTime           ,"time"        ,Form("%s: production time"         ,Folder), 200,   0,2000,Folder);
-  HBook1F(Hist->fCosTh          ,"costh"       ,Form("%s: cos(theta)"              ,Folder), 200,  -1,   1,Folder);
-  HBook1F(Hist->fStartVolumeID  ,"vid0"        ,Form("%s: start volume ID"         ,Folder), 200,2900,3100,Folder);
-  HBook1F(Hist->fEndVolumeID    ,"vid1"        ,Form("%s: end volume ID"           ,Folder), 200,2900,3100,Folder);
+  SimpHist_t* hist = (SimpHist_t*) Hist;
 
-  HBook2F(Hist->fNshVsCosTh     ,"nsh_vs_costh",Form("%s: nsh vs costh"            ,Folder), 20 ,-1,1,40,0,200,Folder);
+  HBook1F(hist->fStage          ,"stage"       ,Form("%s: Stage"                   ,Folder),  10,     0,   10,Folder);
+
+  HBook1F(hist->fPdgCode[0]     ,"pdg_0"       ,Form("%s: PDG code[0]"             ,Folder), 200,-100, 100,Folder);
+  HBook1F(hist->fPdgCode[1]     ,"pdg_1"       ,Form("%s: PDG code[1]"             ,Folder),1000,-500, 500,Folder);
+  HBook1F(hist->fParentMom      ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
+  HBook1F(hist->fParentPDG      ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
+
+  HBook1F(hist->fGeneratorID    ,"gen_id"      ,Form("%s: Generator ID"            ,Folder), 200,   -10,  190,Folder);
+
+  HBook1F(hist->fStartVolumeID  ,"vid0"        ,Form("%s: start volume ID"         ,Folder), 200,2900,3100,Folder);
+  HBook1F(hist->fEndVolumeID    ,"vid1"        ,Form("%s: end volume ID"           ,Folder), 200,2900,3100,Folder);
+
+  HBook1F(hist->fStartTime      ,"stime"       ,Form("%s: start time"              ,Folder), 200,   0,2000,Folder);
+  HBook1F(hist->fEndTime        ,"etime"       ,Form("%s: end time"                ,Folder), 200,   0,2000,Folder);
+  HBook1F(hist->fStageDt        ,"sdt"         ,Form("%s: Stage T1-T0"             ,Folder), 400,   0,2000,Folder);
+
+  HBook1F(hist->fStartMom[0]    ,"mom"         ,Form("%s: start Mom[0]"            ,Folder), 500,     0,  500,Folder);
+  HBook1F(hist->fStartMom[1]    ,"mom_1"       ,Form("%s: start Mom[1]"            ,Folder), 500,     0, 5000,Folder);
+
+  HBook1F(hist->fNStrawHits     ,"nsh"      ,Form("%s: N(straw hits)" ,Folder), 100,     0,  100,Folder);
+
+  HBook1F(hist->fMomTargetEnd   ,"ptarg"       ,Form("%s: mom after ST"            ,Folder), 400,   0, 200,Folder);
+  HBook1F(hist->fMomTrackerFront,"pfront"      ,Form("%s: mom at the Tracker Front",Folder), 400,   0, 200,Folder);
+  HBook1F(hist->fCosTh          ,"costh"       ,Form("%s: cos(theta)"              ,Folder), 200,  -1,   1,Folder);
+
+  HBook2F(hist->fNshVsCosTh     ,"nsh_vs_costh",Form("%s: nsh vs costh"            ,Folder), 20 ,-1,1,40,0,200,Folder);
+
+  HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fXEndVsZEnd     ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
+  HBook2F(hist->fYcVsZEnd       ,"yc_vs_ze"   ,Form("%s: yc vs zend "   ,Folder), 250,  -5000, 20000, 200,   -200, 200,Folder);
+  HBook2F(hist->fPVD9VsZEnd     ,"pvd9_vs_ze" ,Form("%s: pvd9 vs zend " ,Folder), 250,  -5000, 20000, 200,      0, 200,Folder);
+
+  HBook2F(hist->fYVsX_2480      ,"y_vs_x_2480",Form("%s: Y vs X [2480]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fYVsX_2513      ,"y_vs_x_2513",Form("%s: Y vs X [2513]" ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+
+  HBook2F(hist->fCosThVsMom[0]  ,"cth_vs_mom"  ,Form("%s: Cos(Th) vs Mom[0]",Folder), 250,   0, 5000,100,-1,1,Folder);
+  HBook2F(hist->fCosThVsMom[1]  ,"cth_vs_mom_1",Form("%s: Cos(Th) vs Mom[1]",Folder), 250,   0,  250,100,-1,1,Folder);
+
+  HBook2F(hist->fCosThVsMomPV   ,"cth_vs_mom_pv",Form("%s: Cos(Th):Mom PV" ,Folder), 250,   0,  5000,100,-1,1,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -455,7 +485,7 @@ void TAnaModule::BookTrackHistograms(TrackHist_t* Hist, const char* Folder) {
 
   HBook1F(Hist->fT0         ,"t0"       ,Form("%s: track T0"          ,Folder), 200,    0, 2000,Folder);
   HBook1F(Hist->fT0Err      ,"t0err"    ,Form("%s: track T0Err"       ,Folder), 100,    0,   10,Folder);
-  HBook1F(Hist->fDtTc       ,"dttc"     ,Form("%s: T(trk)-T(TC)"      ,Folder), 100, -100,  100,Folder);
+  HBook1F(Hist->fDtTc       ,"dttc"     ,Form("%s: T(trk)-T(TC)"      ,Folder), 100,  -50,   50,Folder);
 
   HBook1F(Hist->fQ          ,"q"        ,Form("%s: track Q"           ,Folder),   4,-2,   2,Folder);
   HBook1F(Hist->fFitCons[0] ,"fcon"     ,Form("%s: track fit cons [0]",Folder), 200, 0,   1,Folder);
@@ -745,25 +775,64 @@ void TAnaModule::FillGenpHistograms(GenpHist_t* Hist, TGenParticle* Genp) {
 }
 
 //-----------------------------------------------------------------------------
-void TAnaModule::FillSimpHistograms(SimpHist_t* Hist, TSimParticle* Simp, double Weight) {
+void TAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpData_t* Sd, double Weight) {
+  SimpHist_t* hist = (SimpHist_t*) Hist;
 
-  Hist->fPdgCode[0]->Fill(Simp->fPdgCode,Weight);
-  Hist->fPdgCode[1]->Fill(Simp->fPdgCode,Weight);
-  Hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd,Weight);
-  Hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront,Weight);
+  int stage  = Simp->SimStage();
+
+  hist->fStage->Fill(stage,Weight);
+
+  hist->fPdgCode[0]->Fill(Simp->fPdgCode,Weight);
+  hist->fPdgCode[1]->Fill(Simp->fPdgCode,Weight);
+
+  // hist->fParentMom->Fill(fParent->StartMom()->P());
+  // hist->fParentPDG->Fill(fParent->PDGCode());
+
+  hist->fGeneratorID->Fill(Simp->fGeneratorID,Weight);
+
+  hist->fStartVolumeID->Fill(Simp->fStartVolumeIndex,Weight);
+  hist->fEndVolumeID->Fill(Simp->fEndVolumeIndex,Weight);
+
+  float xe = Simp->EndPos()->X()+3904.;
+  float ye = Simp->EndPos()->Y();
+  float ze = Simp->EndPos()->Z();
+  float te = Simp->EndPos()->T();
+
+  hist->fStartTime->Fill(Simp->StartPos()->T(),Weight);
+  hist->fEndTime->Fill(te,Weight);
+  float dt = (Simp->EndProperTime()-Simp->StartProperTime())*Sd->fTau;
+  hist->fStageDt->Fill(dt,Weight);
+
+  float p = Simp->StartMom()->P();
+  hist->fStartMom[0]->Fill(p,Weight);
+  hist->fStartMom[1]->Fill(p,Weight);
 
   int nsh = Simp->NStrawHits();
-  Hist->fNStrawHits->Fill(nsh,Weight);
+  hist->fNStrawHits->Fill(nsh,Weight);
 
-  Hist->fTime->Fill(Simp->StartPos()->T(),Weight);
+  hist->fMomTargetEnd->Fill(Simp->fMomTargetEnd,Weight);
+  hist->fMomTrackerFront->Fill(Simp->fMomTrackerFront,Weight);
 
   double costh = Simp->StartMom()->Z()/Simp->StartMom()->P();
-  Hist->fCosTh->Fill(costh,Weight);
+  hist->fCosTh->Fill(costh,Weight);
 
-  Hist->fStartVolumeID->Fill(Simp->fStartVolumeIndex,Weight);
-  Hist->fEndVolumeID->Fill(Simp->fEndVolumeIndex,Weight);
+  hist->fNshVsCosTh->Fill(costh,nsh,Weight);
 
-  Hist->fNshVsCosTh->Fill(costh,nsh,Weight);
+  hist->fYVsX->Fill(xe,ye,Weight);
+  hist->fXEndVsZEnd->Fill(ze,xe,Weight);
+  hist->fYcVsZEnd->Fill(ze,Sd->fY0,Weight);
+  hist->fPVD9VsZEnd->Fill(ze,Sd->fPVD9,Weight);
+//-----------------------------------------------------------------------------
+// looks like something to do with the stopping target - but this is still 34 foils..
+//-----------------------------------------------------------------------------
+  if (Simp->fEndVolumeIndex == 2480) hist->fYVsX_2480->Fill(xe,ye,Weight);
+  if (Simp->fEndVolumeIndex == 2513) hist->fYVsX_2513->Fill(xe,ye,Weight);
+
+  float cos_th = Simp->StartMom()->Pz()/p;
+  hist->fCosThVsMom[0]->Fill(p,cos_th,Weight);
+  hist->fCosThVsMom[1]->Fill(p,cos_th,Weight);
+
+  //  hist->fCosThVsMomPV->Fill(fPbarMomPV,fPbarCosThPV,Weight);
 }
 
 
@@ -813,7 +882,7 @@ void TAnaModule::FillTrackHistograms(TrackHist_t* Hist, TStnTrack* Track,
 
   if (Tp->fTimeCluster != nullptr) Hist->fNtch->Fill(Tp->fTimeCluster->NHits(),Weight);
   else                             Hist->fNtch->Fill(-1,Weight);
-  Hist->fDtTc->Fill(Tp->fDtTc,Weight);
+  Hist->fDtTc->Fill(Tp->fDtTrackTc,Weight);
 
   Hist->fNWrong->Fill(Track->NWrong(), Weight);
 

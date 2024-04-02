@@ -25,6 +25,7 @@
 // TrackHist_t etc
 //-----------------------------------------------------------------------------
 #include "murat/ana/TAnaModule.hh"
+#include "murat/ana/SimpData_t.hh"
 
 namespace murat {
 class TTrackAnaModule: public murat::TAnaModule {

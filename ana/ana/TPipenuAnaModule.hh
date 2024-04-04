@@ -15,6 +15,8 @@
 #include "Stntuple/obj/TGenpBlock.hh"
 #include "Stntuple/obj/TSimpBlock.hh"
 
+#include "Stntuple/alg/TStnTrackID.hh"
+
 #include "Stntuple/base/TStnArrayI.hh"
 
 #include "Stntuple/geom/TDiskCalorimeter.hh"
@@ -33,20 +35,6 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  struct CaloHist_t {
-    TH1F*    fDiskID;                  // per crystal hit
-    TH1F*    fEnergy  [kNDisks];
-    TH1F*    fTime    [kNDisks];
-    TH1F*    fNHits   [kNDisks];
-    TH1F*    fRadius  [kNDisks];
-    TH1F*    fRadiusWE[kNDisks];
-    TH1F*    fE700    [kNDisks];
-    TH1F*    fT700    [kNDisks];
-    TH1F*    fN700    [kNDisks];
-    TH1F*    fR700    [kNDisks];
-    TH1F*    fRWE700  [kNDisks];
-  };
-
   struct TimeClusterHist_t {
     TH1F*    fNsh;
     TH1F*    fNch;
@@ -73,10 +61,9 @@ public:
   enum { kNSimpHistSets          = 100 };
   enum { kNTimeClusterHistSets   =  10 };
   enum { kNPipenuHistSets        = 400 };
+  enum { kNTrackIDHistSets       =  10 };
 
   struct Hist_t {
-    TH1F*                  fCrystalR   [2];                  // crystal radius
-    CaloHist_t*            fCalo       [kNCaloHistSets   ];
     ClusterHist_t*         fCluster    [kNClusterHistSets];
     EventHist_t*           fEvent      [kNEventHistSets  ];
     GenpHist_t*            fGenp       [kNGenpHistSets   ];
@@ -85,6 +72,7 @@ public:
     TimeClusterHist_t*     fTimeCluster[kNTimeClusterHistSets];
     TrackHist_t*           fTrack      [kNTrackHistSets  ];
     PipenuHist_t*          fPipenu     [kNPipenuHistSets ];
+    TStnTrackID::Hist_t*   fTrackID    [kNTrackIDHistSets];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -174,11 +162,11 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms       (CaloHist_t*        Hist, const char* Folder);
+  // void    BookCaloHistograms       (CaloHist_t*        Hist, const char* Folder);
   void    BookTimeClusterHistograms(TimeClusterHist_t* Hist, const char* Folder);
   void    BookPipenuHistograms     (PipenuHist_t*      Hist, const char* Folder);
 
-  void    FillCaloHistograms       (CaloHist_t*        Hist, TStnCrystal*     Crystal);
+  // void    FillCaloHistograms       (CaloHist_t*        Hist, TStnCrystal*     Crystal);
   void    FillTimeClusterHistograms(TimeClusterHist_t* Hist, TStnTimeCluster* Tc     , double Weight = 1.);
 
   void    FillPipenuHistograms    (PipenuHist_t*  Hist, 

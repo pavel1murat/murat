@@ -1,0 +1,59 @@
+# -*- mode:tcl -*- 
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+  INPUT_MODULE  @protect_ignore: RootInput
+  TRIGGER_PATHS @protect_ignore: [ p1 ]
+END_PROLOG
+
+#include "Stntuple/fcl/stntuple_external_prologs.fcl"
+#include "Stntuple/fcl/prolog.fcl"
+#include "murat/fcl/prolog.fcl"
+
+#include "Stntuple/fcl/stntuple_services.fcl"
+#include "Stntuple/fcl/stntuple_outputs.fcl"
+#------------------------------------------------------------------------------
+# here come table definitions
+#------------------------------------------------------------------------------
+#include "Stntuple/fcl/stntuple_table.fcl"
+
+process_name : emoe
+
+services.SeedService.baseSeed: 8
+#------------------------------------------------------------------------------
+# geometry and the magnetic field
+#------------------------------------------------------------------------------
+services.GeometryService.inputFile  : "pipenu/datasets/bpip0b0/geom_pipenu_bpip0b0.txt"
+services.GeometryService.bFieldFile : "pipenu/common/bfgeom_DS70_v01.txt"
+services.TFileService.fileName      : "trackFilter.hist"
+#------------------------------------------------------------------------------
+# Enable these commands not to have the printout for each event in the log file
+#------------------------------------------------------------------------------
+services.message.destinations.log.categories.ArtReport.reportEvery : 50
+services.message.destinations.log.categories.ArtReport.limit       : 5
+services.message.destinations.log.categories.ArtReport.timespan    : 1000
+
+
+source : { module_type : @local::INPUT_MODULE
+    # reportFrequency : 1
+    #    fileNames : ["dsStopsToHitsConversion.root"]
+    #    maxEvents   : -1
+}
+
+physics : {
+    filters       : { @table::murat.filters   } 
+    analyzers     : { @table::murat.analyzers } 
+
+    p1            : [ TrackFilter   ]
+    e1            : [ defaultOutput ]
+
+    trigger_paths : [ @sequence::TRIGGER_PATHS ]
+    end_paths     : [ e1 ] 
+}
+
+outputs.defaultOutput.fileName: "mcs.mu2e.bmup0b0s61r0100.pipenu.001210_00000000.art"
+
+physics.filters.TrackFilter.trkCollTag : "KKDeMHPar"
+physics.filters.TrackFilter.pMin       : 60.
+

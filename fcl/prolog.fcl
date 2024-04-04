@@ -95,6 +95,56 @@ murat : {
 #
 # track reco validation
 #------------------------------------------------------------------------------
+    CaloClusterCheck : { module_type:CaloClusterCheck
+	caloClusterCollTag           : CaloClusterFromProtoCluster
+	fastCaloClusterCollTag       : CaloClusterFast
+	debugBits                    : { } # {bit1:1 }
+    }
+
+    DumpEventNumber : { module_type:DumpEventNumber
+    }
+
+#------------------------------------------------------------------------------
+# by default, doesn't print anything
+#------------------------------------------------------------------------------
+    DumpGeometry : { module_type:DumpGeometry
+        dumpVirtualDetectors  : 0
+        dumpTrackerNumerology : 0
+        dumpCRVNumerology     : 0
+        dumpCaloGeometry      : 0
+    }
+
+    DumpTrackerNumerology : { module_type:DumpTrackerNumerology
+        diagLevel : 0
+    }
+
+    DumpMCTrajectories : { module_type:DumpMCTrajectories
+	simpCollTag  : "compressDigiMCs"
+	mctrCollTag  : "compressDigiMCs"
+    }
+
+    GenpHist      : { module_type:GenpHist
+        @table::StntupleTModuleFclDefaults
+        genpCollTag : "generate"
+        sgsCollTag  : "compressDetStepMCs"
+        sdmcCollTag : "compressDidiMCs"
+    }
+
+    ReadGenParticles : { module_type:ReadGenParticles
+	inputModuleLabel    : StoppedParticleReactionGun
+	inputInstanceName   : ""
+    }
+
+    StrawChargeDeposition : {  module_type:StrawChargeDeposition 
+	spmcCollTag                  : "g4run:tracker"
+	debugBit                     : -1
+    }
+
+    TrackFilter : { module_type:TrackFilter
+	trkCollTag    : KKDeMHPar
+        pMin          : 60           ## MeV/c
+    }
+
     TrackerMCCheck                   : { module_type:TrackerMCCheck # the class name
 
 	g4ModuleLabel                : g4run
@@ -120,54 +170,9 @@ murat : {
 	}
     }
 
-    CaloClusterCheck : { module_type:CaloClusterCheck
-	caloClusterCollTag           : CaloClusterFromProtoCluster
-	fastCaloClusterCollTag       : CaloClusterFast
-	debugBits                    : { } # {bit1:1 }
-    }
-
-    StrawChargeDeposition : {  module_type:StrawChargeDeposition 
-	spmcCollTag                  : "g4run:tracker"
-	debugBit                     : -1
-    }
-
     TTrackRecoAna : { module_type:TTrackRecoAna
 	diagLevel           : 0
 	trkPatRecLabel      : TrkPatRecDownstreameMinus
-    }
-
-    DumpEventNumber : { module_type:DumpEventNumber
-    }
-
-#------------------------------------------------------------------------------
-# by default, doesn't print anything
-#------------------------------------------------------------------------------
-    DumpGeometry : { module_type:DumpGeometry
-        dumpVirtualDetectors  : 0
-        dumpTrackerNumerology : 0
-        dumpCRVNumerology     : 0
-        dumpCaloGeometry      : 0
-    }
-
-    DumpTrackerNumerology : { module_type:DumpTrackerNumerology
-        diagLevel : 0
-    }
-
-    DumpMCTrajectories : { module_type:DumpMCTrajectories
-	simpCollTag  : "compressDigiMCs"
-	mctrCollTag  : "compressDigiMCs"
-    }
-
-    ReadGenParticles : { module_type:ReadGenParticles
-	inputModuleLabel    : StoppedParticleReactionGun
-	inputInstanceName   : ""
-    }
-
-    GenpHist      : { module_type:GenpHist
-        @table::StntupleTModuleFclDefaults
-        genpCollTag : "generate"
-        sgsCollTag  : "compressDetStepMCs"
-        sdmcCollTag : "compressDidiMCs"
     }
 }
 #------------------------------------------------------------------------------
@@ -178,6 +183,7 @@ murat : { @table::murat
     }
 
     filters : {
+	TrackFilter      : { @table::murat.TrackFilter      }
 	TrackerMCCheck   : { @table::murat.TrackerMCCheck   }
 	TrackRecoCheck   : { @table::murat.TrackRecoCheck   }
 	CaloClusterCheck : { @table::murat.CaloClusterCheck }

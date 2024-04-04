@@ -67,9 +67,8 @@ physics : {
 
     analyzers : { @table::murat.analyzers    } 
 
-#    p1 : [ TargetStopResampler, generate, genCounter ]
-#    p1 : [ generate, genCounter ]
     p1 : [ ]
+    p2 : [ @sequence::TrkHitReco.PrepareHits ]
     e1 : [ GenpHist ]
 
     trigger_paths : [ p1 ]

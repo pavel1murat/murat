@@ -57,22 +57,52 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
 // 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
 // what about number of hits ? - 3: no cuts on the number of hits
 //-----------------------------------------------------------------------------
-  fNID             = 1;
+  fNID             = 2;
 
-  fTrackID[0]      = TAnaModule::fTrackID_BOX;
+  fTrackID[0]      = new TStnTrackID();
 
-  int mask = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit ;
+  int mask0 = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit ;
   fTrackID[0]->SetMaxChi2Dof(3.0 );
   fTrackID[0]->SetMinNActive(25  );
-  fTrackID[0]->SetMaxMomErr (0.5 );
+  fTrackID[0]->SetMaxMomErr (0.25);
 
-  mask    |= TStnTrackID::kTanDipBit;
+  mask0    |= TStnTrackID::kTanDipBit;
   fTrackID[0]->SetMinTanDip (0.6);
-  fTrackID[0]->SetMaxTanDip (1.2 );
+  fTrackID[0]->SetMaxTanDip (1.0);
 
-  fTrackID[0]->SetUseMask(mask);
+  mask0    |= TStnTrackID::kD0Bit;
+  fTrackID[0]->SetMinD0 (-100);         // mm
+  fTrackID[0]->SetMaxD0 ( 100);
+
+  fTrackID[0]->SetUseMask(mask0);
+//-----------------------------------------------------------------------------
+// tight ID
+//-----------------------------------------------------------------------------
+  fTrackID[1]      = new TStnTrackID();
+
+  int mask1 = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit ;
+  fTrackID[1]->SetMaxChi2Dof(3.0 );
+  fTrackID[1]->SetMinNActive(30  );     // cut tighter on the number of hits
+  fTrackID[1]->SetMaxMomErr (0.25);
+
+  mask1    |= TStnTrackID::kTanDipBit;
+  fTrackID[1]->SetMinTanDip (0.65);
+  fTrackID[1]->SetMaxTanDip (1.20);
+
+  mask1    |= TStnTrackID::kD0Bit;
+  fTrackID[1]->SetMinD0 ( -50);         // mm
+  fTrackID[1]->SetMaxD0 ( 100);
+
+  fTrackID[1]->SetUseMask(mask1);
 
   fBestID           = 0;
+
+  for (int i=0; i<20; i++) {
+    TrackPar_t* tp  = fTrackPar+i;
+    tp->fTrackID[0] = TAnaModule::fTrackID[0];
+    tp->fTrackID[1] = TAnaModule::fTrackID[1];
+  }
+
 //-----------------------------------------------------------------------------
 // MC truth: define which MC particle to consider as signal
 // 2:conversionGun, 28:StoppedParticleReactionGun - see 
@@ -257,26 +287,64 @@ void TPipenuAnaModule::BookHistograms() {
   for (int i=0; i<kNTrackHistSets; i++) book_track_histset[i] = 0;
 
   book_track_histset[  0] = 1;		// all tracks
-  book_track_histset[  1] = 1;		// good (IDWord == 0) tracks
-  book_track_histset[ 50] = 1;          // all tracks weighted by the pion survival prob
-  book_track_histset[ 51] = 1;          // tracks IDWord == 0, weighted by the pion survival prob
+
+  book_track_histset[  1] = 1;		// fIDWord[0]=0 tracks
+  book_track_histset[ 21] = 1;		// fIDWord[1]=0 tracks
+
+  book_track_histset[ 50] = 1;          // all         tracks wt=pionSurvProb
+
+  book_track_histset[ 51] = 1;          // IDWord[0]=0 tracks wt=pionSurvProb
+  book_track_histset[ 71] = 1;          // IDWord[1]=0 tracks wt=pionSurvProb
   
   book_track_histset[100] = 1;		// all  tracks Q=1
-  book_track_histset[101] = 1;		// good (IDWord == 0) tracks Q=1
-  book_track_histset[102] = 1;		// good (IDWord == 0) tracks Q=1 pass_event_level_cuts
-  book_track_histset[103] = 1;		// good (IDWord == 0) tracks Q=1 pass_event_level_cuts T>300
-  book_track_histset[104] = 1;		// good (IDWord == 0) tracks Q=1 pass_event_level_cuts T>300  p>60
 
-  book_track_histset[150] = 1;          // all tracks weighted by the pion survival prob Q=1
-  book_track_histset[151] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1
-  book_track_histset[152] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1 pass_event_level_cuts 
-  book_track_histset[153] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1 pass_event_level_cuts T>300
-  book_track_histset[154] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=1 pass_event_level_cuts T>300 p>60
+  book_track_histset[101] = 1;		// IDWord[0]=0 tracks Q=1
+  book_track_histset[102] = 1;		// IDWord[0]=0 tracks Q=1 p>60 
+  book_track_histset[103] = 1;		// IDWord[0]=0 tracks Q=1 p>60 T>300 
+  book_track_histset[104] = 1;		// IDWord[0]=0 tracks Q=1 p>60 T>300 DnTrackTc 
+  book_track_histset[105] = 1;		// IDWord[0]=0 tracks Q=1 p>60 T>300 DnTrackTc DtTcTc
+  book_track_histset[106] = 1;		// IDWord[0]=0 tracks Q=1 T>300 
+  book_track_histset[107] = 1;		// IDWord[0]=0 tracks Q=1 T>300 DnTrackTc 
+  book_track_histset[108] = 1;		// IDWord[0]=0 tracks Q=1 T>300 DnTrackTc DtTcTc
+
+  book_track_histset[121] = 1;		// IDWord[1]=0 tracks Q=1
+  book_track_histset[122] = 1;		// IDWord[1]=0 tracks Q=1 p>60 
+  book_track_histset[123] = 1;		// IDWord[1]=0 tracks Q=1 p>60 T>300 
+  book_track_histset[124] = 1;		// IDWord[1]=0 tracks Q=1 p>60 T>300 DnTrackTc 
+  book_track_histset[125] = 1;		// IDWord[1]=0 tracks Q=1 p>60 T>300 DnTrackTc DtTcTc
+  book_track_histset[126] = 1;		// IDWord[1]=0 tracks Q=1 T>300 
+  book_track_histset[127] = 1;		// IDWord[1]=0 tracks Q=1 T>300 DnTrackTc 
+  book_track_histset[128] = 1;		// IDWord[1]=0 tracks Q=1 T>300 DnTrackTc DtTcTc
+
+  book_track_histset[150] = 1;          // all         tracks          wt=pionSurvProb Q=1
+
+  book_track_histset[151] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1
+  book_track_histset[152] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 p>60 
+  book_track_histset[153] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 p>60 T>300
+  book_track_histset[154] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 p>60 T>300 DnTrackTC 
+  book_track_histset[155] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 p>60 T>300 DnTrackTC DtTcTc
+  book_track_histset[156] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 T>300
+  book_track_histset[157] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 T>300 DnTrackTC 
+  book_track_histset[158] = 1;          // IDWord[0]=0 tracks, wt=pionSurvProb Q=1 T>300 DnTrackTC DtTcTc
+  
+  book_track_histset[171] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1
+  book_track_histset[172] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 p>60 
+  book_track_histset[173] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 p>60 T>300
+  book_track_histset[174] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 p>60 T>300 DnTrackTC 
+  book_track_histset[175] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 p>60 T>300 DnTrackTC DtTcTc
+  book_track_histset[176] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 T>300
+  book_track_histset[177] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 T>300 DnTrackTC 
+  book_track_histset[178] = 1;          // IDWord[1]=0 tracks, wt=pionSurvProb Q=1 T>300 DnTrackTC DtTcTc
   
   book_track_histset[200] = 1;		// all  tracks Q=-1
-  book_track_histset[201] = 1;		// good (IDWord == 0) tracks Q=-1
-  book_track_histset[250] = 1;          // all tracks weighted by the pion survival prob Q=-1
-  book_track_histset[251] = 1;          // tracks IDWord == 0, weighted by the pion survival prob Q=-1
+  book_track_histset[201] = 1;		// IDWord[0]=0 tracks Q=-1
+
+  book_track_histset[221] = 1;		// IDWord[1]=0 tracks Q=-1
+
+  book_track_histset[250] = 1;          // all         tracks wt=pionSurvPro Q=-1
+  book_track_histset[251] = 1;          // IDWord[0]=0 tracks wt=pionSurvPro Q=-1
+
+  book_track_histset[271] = 1;		// IDWord[1]=0 tracks wt=pionSurvPro Q=-1
 
   for (int i=0; i<kNTrackHistSets; i++) {
     if (book_track_histset[i] != 0) {
@@ -319,50 +387,6 @@ void TPipenuAnaModule::BookHistograms() {
     fHist.fTimeCluster[i] = new TimeClusterHist_t;
     BookTimeClusterHistograms(fHist.fTimeCluster[i],Form("Hist/%s",folder_name));
   }
-// //-----------------------------------------------------------------------------
-// // book calorimeter cluster histograms
-// //-----------------------------------------------------------------------------
-//   int book_cluster_histset[kNClusterHistSets];
-//   for (int i=0; i<kNClusterHistSets; i++) book_cluster_histset[i] = 0;
-
-//   book_cluster_histset[0] = 1;		// all clusters
-//   book_cluster_histset[1] = 1;		// clusters in events with the reconstructed e-
-//   book_cluster_histset[2] = 1;		// clusters in events with the track passing SetC cuts
-//   book_cluster_histset[3] = 1;		// clusters in events w/track passing SetC cuts and |dt|<2.5ns 
-//   book_cluster_histset[4] = 1;		// clusters > 10 MeV
-//   book_cluster_histset[5] = 1;		// clusters > 60 MeV
-//   book_cluster_histset[6] = 1;		// clusters disk#0
-//   book_cluster_histset[7] = 1;		// clusters disk#1
-
-//   for (int i=0; i<kNClusterHistSets; i++) {
-//     if (book_cluster_histset[i] != 0) {
-//       sprintf(folder_name,"cls_%i",i);
-//       fol = (TFolder*) hist_folder->FindObject(folder_name);
-//       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-//       fHist.fCluster[i] = new ClusterHist_t;
-//       BookClusterHistograms(fHist.fCluster[i],Form("Hist/%s",folder_name));
-//     }
-//   }
-// //-----------------------------------------------------------------------------
-// // book calorimeter histograms
-// //-----------------------------------------------------------------------------
-//   int book_calo_histset[kNCaloHistSets];
-//   for (int i=0; i<kNCaloHistSets; i++) book_calo_histset[i] = 0;
-
-//   book_calo_histset[0] = 1;		// all crystals
-//   book_calo_histset[1] = 1;		// all crystals, e > 0
-//   book_calo_histset[2] = 1;		// all crystals, e > 0.1
-//   book_calo_histset[3] = 1;		// all crystals, e > 1.0
-
-//   for (int i=0; i<kNCaloHistSets; i++) {
-//     if (book_calo_histset[i] != 0) {
-//       sprintf(folder_name,"cal_%i",i);
-//       fol = (TFolder*) hist_folder->FindObject(folder_name);
-//       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-//       fHist.fCalo[i] = new CaloHist_t;
-//       BookCaloHistograms(fHist.fCalo[i],Form("Hist/%s",folder_name));
-//     }
-//   }
 //-----------------------------------------------------------------------------
 // book Genp histograms
 //-----------------------------------------------------------------------------
@@ -387,25 +411,64 @@ void TPipenuAnaModule::BookHistograms() {
   for (int i=0; i<kNPipenuHistSets; i++) book_pipenu_histset[i] = 0;
 
   book_pipenu_histset[  0] = 1;		// all  tracks
-  book_pipenu_histset[  1] = 1;		// good tracks
+
+  book_pipenu_histset[  1] = 1;		// IDWord[0]=0 tracks
+  book_pipenu_histset[ 21] = 1;		// IDWord[1]=0 tracks
+
   book_pipenu_histset[ 50] = 1;		// all  tracks, wt = pion surv prob
-  book_pipenu_histset[ 51] = 1;		// good tracks, wt = pion surv prob
+
+  book_pipenu_histset[ 51] = 1;		// IDWord[0]=0 tracks, wt=pionSurvProb
+  book_pipenu_histset[ 71] = 1;		// IDWord[1]=0 tracks, wt=pionSurvProb
 
   book_pipenu_histset[100] = 1;		// all  tracks Q>0
-  book_pipenu_histset[101] = 1;		// good tracks Q>0
-  book_pipenu_histset[102] = 1;		// good tracks Q>0
-  book_pipenu_histset[103] = 1;		// good tracks Q>0 T>300
-  book_pipenu_histset[104] = 1;		// good tracks Q>0 T>300 p>60
-  book_pipenu_histset[150] = 1;		// all  tracks, wt = pion surv prob Q>0
-  book_pipenu_histset[151] = 1;		// good tracks, wt = pion surv prob Q>0
-  book_pipenu_histset[152] = 1;		// good tracks, wt = pion surv prob Q>0
-  book_pipenu_histset[153] = 1;		// good tracks, wt = pion surv prob Q>0 T>300
-  book_pipenu_histset[154] = 1;		// good tracks, wt = pion surv prob Q>0 T>300 p>60
 
-  book_pipenu_histset[200] = 1;		// all  tracks Q<0
-  book_pipenu_histset[201] = 1;		// good tracks Q<0
+  book_pipenu_histset[101] = 1;		// IDWord[0]=0 tracks Q>0
+  book_pipenu_histset[102] = 1;		// IDWord[0]=0 tracks Q>0 p>60
+  book_pipenu_histset[103] = 1;		// IDWord[0]=0 tracks Q>0 p>60 T>300
+  book_pipenu_histset[104] = 1;		// IDWord[0]=0 tracks Q>0 p>60 T>300 DnTrackTc
+  book_pipenu_histset[105] = 1;		// IDWord[0]=0 tracks Q>0 p>60 T>300 DnTrackTc DtTcTc
+  book_pipenu_histset[106] = 1;		// IDWord[0]=0 tracks Q>0 T>300
+  book_pipenu_histset[107] = 1;		// IDWord[0]=0 tracks Q>0 T>300 DnTrackTc
+  book_pipenu_histset[108] = 1;		// IDWord[0]=0 tracks Q>0 T>300 DnTrackTc DtTcTc
+
+  book_pipenu_histset[121] = 1;		// IDWord[1]=0 tracks Q>0
+  book_pipenu_histset[122] = 1;		// IDWord[1]=0 tracks Q>0 p>60
+  book_pipenu_histset[123] = 1;		// IDWord[1]=0 tracks Q>0 p>60 T>300
+  book_pipenu_histset[124] = 1;		// IDWord[1]=0 tracks Q>0 p>60 T>300 DnTrackTc
+  book_pipenu_histset[125] = 1;		// IDWord[1]=0 tracks Q>0 p>60 T>300 DnTrackTc DtTcTc
+  book_pipenu_histset[126] = 1;		// IDWord[1]=0 tracks Q>0 T>300
+  book_pipenu_histset[127] = 1;		// IDWord[1]=0 tracks Q>0 T>300 DnTrackTc
+  book_pipenu_histset[128] = 1;		// IDWord[1]=0 tracks Q>0 T>300 DnTrackTc DtTcTc
+
+  book_pipenu_histset[150] = 1;		// all  tracks, wt = pionSurvProb Q>0
+
+  book_pipenu_histset[151] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0
+  book_pipenu_histset[152] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 p>60
+  book_pipenu_histset[153] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 p>60 T>300
+  book_pipenu_histset[154] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 p>60 T>300 DnTrackTc
+  book_pipenu_histset[155] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 p>60 T>300 DnTrackTc DtTcTc
+  book_pipenu_histset[156] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 T>300
+  book_pipenu_histset[157] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 T>300 DnTrackTc
+  book_pipenu_histset[158] = 1;		// IDWord[0]=0 tracks, wt = pionSurvProb Q>0 T>300 DnTrackTc DtTcTc
+
+  book_pipenu_histset[171] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0
+  book_pipenu_histset[172] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 p>60
+  book_pipenu_histset[173] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 p>60 T>300
+  book_pipenu_histset[174] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 p>60 T>300 DnTrackTc
+  book_pipenu_histset[175] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 p>60 T>300 DnTrackTc DtTcTc
+  book_pipenu_histset[176] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 T>300
+  book_pipenu_histset[177] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 T>300 DnTrackTc
+  book_pipenu_histset[178] = 1;		// IDWord[1]=0 tracks, wt = pionSurvProb Q>0 T>300 DnTrackTc DtTcTc
+
+  book_pipenu_histset[200] = 1;		// all         tracks Q<0
+
+  book_pipenu_histset[201] = 1;		// IDWord[0]=0 tracks Q<0
+  book_pipenu_histset[221] = 1;		// IDWord[1]=0 tracks Q<0
+
   book_pipenu_histset[250] = 1;		// all  tracks, wt = pion surv prob Q<0
-  book_pipenu_histset[251] = 1;		// good tracks, wt = pion surv prob Q<0
+
+  book_pipenu_histset[251] = 1;		// IDWord[0]=0 tracks, wt = pion surv prob Q<0
+  book_pipenu_histset[271] = 1;		// IDWord[1]=0 tracks, wt = pion surv prob Q<0
 
   for (int i=0; i<kNPipenuHistSets; i++) {
     if (book_pipenu_histset[i] == 0)                        continue;
@@ -423,8 +486,8 @@ void TPipenuAnaModule::BookHistograms() {
 // pitch = 1./tan(dip)
 //-----------------------------------------------------------------------------
 void TPipenuAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock, 
-					       TStnTrackID*     TrackID   , 
-					       int              HistSet   ) {
+                                                TStnTrackID*     TrackID   , 
+                                                int              HistSet   ) {
   // having MC truth is a must for calculating efficiency!
   if (fEvtPar.fSimp == nullptr) return;
 
@@ -663,17 +726,41 @@ void TPipenuAnaModule::FillHistograms() {
 // at this point, apply the analysis-specific cuts
 // 1. require the number of track hits to be consistent with the number of hits 
 // 2. require no close time clusters
+// TRK_102: P>60
+// TRK_103: P>60 T>300
+// TRK_104: P>60 T>300 dNTrackTC < fDnMax
+// TRK_105: P>60 T>300 dNTrackTC < fDnMax abs(fDtTcTc) > 100
 //-----------------------------------------------------------------------------
-        if ((tp->fDnTrackTc <= fDnMax) and (fabs(tp->fDtTcTc) > 100)) {
-          fEventPassedSelections = 1;
+        if (tp->fP > 60) {
           FillTrackHistograms (fHist.fTrack [102],trk,tp,&fSimPar);
           FillPipenuHistograms(fHist.fPipenu[102],trk,tp,&fSimPar);
           if (trk->T0() > 300) {
             FillTrackHistograms (fHist.fTrack [103],trk,tp,&fSimPar);
             FillPipenuHistograms(fHist.fPipenu[103],trk,tp,&fSimPar);
-            if (tp->fP > 60) {
+            if (tp->fDnTrackTc <= fDnMax) { 
               FillTrackHistograms (fHist.fTrack [104],trk,tp,&fSimPar);
               FillPipenuHistograms(fHist.fPipenu[104],trk,tp,&fSimPar);
+              if (fabs(tp->fDtTcTc) > 100) {
+                fEventPassedSelections = 1;
+                FillTrackHistograms (fHist.fTrack [105],trk,tp,&fSimPar);
+                FillPipenuHistograms(fHist.fPipenu[105],trk,tp,&fSimPar);
+              }
+            }
+          }
+        }
+//-----------------------------------------------------------------------------
+// the same, but w/o p>60 MeV/c cut
+//-----------------------------------------------------------------------------
+        if (trk->T0() > 300) {
+          FillTrackHistograms (fHist.fTrack [106],trk,tp,&fSimPar);
+          FillPipenuHistograms(fHist.fPipenu[106],trk,tp,&fSimPar);
+          if (tp->fDnTrackTc <= fDnMax) { 
+            FillTrackHistograms (fHist.fTrack [107],trk,tp,&fSimPar);
+            FillPipenuHistograms(fHist.fPipenu[107],trk,tp,&fSimPar);
+            if (fabs(tp->fDtTcTc) > 100) {
+              fEventPassedSelections = 1;
+              FillTrackHistograms (fHist.fTrack [108],trk,tp,&fSimPar);
+              FillPipenuHistograms(fHist.fPipenu[108],trk,tp,&fSimPar);
             }
           }
         }
@@ -681,6 +768,65 @@ void TPipenuAnaModule::FillHistograms() {
       else {
         FillTrackHistograms (fHist.fTrack [201],trk,tp,&fSimPar);
         FillPipenuHistograms(fHist.fPipenu[201],trk,tp,&fSimPar);
+      }
+    }
+//-----------------------------------------------------------------------------
+// tight ID
+//-----------------------------------------------------------------------------
+    if (tp->fIDWord[1] == 0) {
+					// track passes the quality selection
+
+      FillTrackHistograms (fHist.fTrack [ 21],trk,tp,&fSimPar);
+      FillPipenuHistograms(fHist.fPipenu[ 21],trk,tp,&fSimPar);
+      if (trk->Charge() > 0) {
+        FillTrackHistograms (fHist.fTrack [121],trk,tp,&fSimPar);
+        FillPipenuHistograms(fHist.fPipenu[121],trk,tp,&fSimPar);
+//-----------------------------------------------------------------------------
+// at this point, apply the analysis-specific cuts
+// 1. require the number of track hits to be consistent with the number of hits 
+// 2. require no close time clusters
+// TRK_102: P>60
+// TRK_103: P>60 T>300
+// TRK_104: P>60 T>300 dNTrackTC < fDnMax
+// TRK_105: P>60 T>300 dNTrackTC < fDnMax abs(fDtTcTc) > 100
+//-----------------------------------------------------------------------------
+        if (tp->fP > 60) {
+          FillTrackHistograms (fHist.fTrack [122],trk,tp,&fSimPar);
+          FillPipenuHistograms(fHist.fPipenu[122],trk,tp,&fSimPar);
+          if (trk->T0() > 300) {
+            FillTrackHistograms (fHist.fTrack [123],trk,tp,&fSimPar);
+            FillPipenuHistograms(fHist.fPipenu[123],trk,tp,&fSimPar);
+            if (tp->fDnTrackTc <= fDnMax) { 
+              FillTrackHistograms (fHist.fTrack [124],trk,tp,&fSimPar);
+              FillPipenuHistograms(fHist.fPipenu[124],trk,tp,&fSimPar);
+              if (fabs(tp->fDtTcTc) > 100) {
+                fEventPassedSelections = 1;
+                FillTrackHistograms (fHist.fTrack [125],trk,tp,&fSimPar);
+                FillPipenuHistograms(fHist.fPipenu[125],trk,tp,&fSimPar);
+              }
+            }
+          }
+        }
+//-----------------------------------------------------------------------------
+// the same, but w/o p>60 MeV/c cut
+//-----------------------------------------------------------------------------
+        if (trk->T0() > 300) {
+          FillTrackHistograms (fHist.fTrack [126],trk,tp,&fSimPar);
+          FillPipenuHistograms(fHist.fPipenu[126],trk,tp,&fSimPar);
+          if (tp->fDnTrackTc <= fDnMax) { 
+            FillTrackHistograms (fHist.fTrack [127],trk,tp,&fSimPar);
+            FillPipenuHistograms(fHist.fPipenu[127],trk,tp,&fSimPar);
+            if (fabs(tp->fDtTcTc) > 100) {
+              fEventPassedSelections = 1;
+              FillTrackHistograms (fHist.fTrack [128],trk,tp,&fSimPar);
+              FillPipenuHistograms(fHist.fPipenu[128],trk,tp,&fSimPar);
+            }
+          }
+        }
+      }
+      else {
+        FillTrackHistograms (fHist.fTrack [221],trk,tp,&fSimPar);
+        FillPipenuHistograms(fHist.fPipenu[221],trk,tp,&fSimPar);
       }
     }
 //-----------------------------------------------------------------------------
@@ -708,20 +854,39 @@ void TPipenuAnaModule::FillHistograms() {
         if (trk->Charge() > 0) {
           FillTrackHistograms (fHist.fTrack [151],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
           FillPipenuHistograms(fHist.fPipenu[151],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
-//-----------------------------------------------------------------------------
-// at this point, apply the analysis-specific cuts
-// 1. require the number of track hits to be consistent with the number of hits 
-// 2. require no close time clusters
-//-----------------------------------------------------------------------------
-          if ((tp->fDnTrackTc <= fDnMax) and (fabs(tp->fDtTcTc) > 100)) {
+          if (tp->fP > 60) {
             FillTrackHistograms (fHist.fTrack [152],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
             FillPipenuHistograms(fHist.fPipenu[152],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
             if (trk->T0() > 300) {
               FillTrackHistograms (fHist.fTrack [153],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
               FillPipenuHistograms(fHist.fPipenu[153],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
-              if (tp->fP > 60) {
+//-----------------------------------------------------------------------------
+// at this point, apply the analysis-specific cuts
+// 1. require the number of track hits to be consistent with the number of hits 
+// 2. require no close time clusters
+//-----------------------------------------------------------------------------
+              if (tp->fDnTrackTc <= fDnMax) {
                 FillTrackHistograms (fHist.fTrack [154],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
                 FillPipenuHistograms(fHist.fPipenu[154],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                if (fabs(tp->fDtTcTc) > 100) {
+                  FillTrackHistograms (fHist.fTrack [155],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                  FillPipenuHistograms(fHist.fPipenu[155],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                }
+              }
+            }
+          }
+//-----------------------------------------------------------------------------
+// the same but w/o p>60 MeV/c cut
+//-----------------------------------------------------------------------------
+          if (trk->T0() > 300) {
+            FillTrackHistograms (fHist.fTrack [156],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            FillPipenuHistograms(fHist.fPipenu[156],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            if (tp->fDnTrackTc <= fDnMax) {
+              FillTrackHistograms (fHist.fTrack [157],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              FillPipenuHistograms(fHist.fPipenu[157],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              if (fabs(tp->fDtTcTc) > 100) {
+                FillTrackHistograms (fHist.fTrack [158],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                FillPipenuHistograms(fHist.fPipenu[158],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
               }
             }
           }
@@ -729,6 +894,57 @@ void TPipenuAnaModule::FillHistograms() {
         else {
           FillTrackHistograms (fHist.fTrack [251],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
           FillPipenuHistograms(fHist.fPipenu[251],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        }
+      }
+//-----------------------------------------------------------------------------
+// tight ID
+//-----------------------------------------------------------------------------
+      if (tp->fIDWord[1] == 0) {
+        FillTrackHistograms (fHist.fTrack [ 71],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        FillPipenuHistograms(fHist.fPipenu[ 71],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+        if (trk->Charge() > 0) {
+          FillTrackHistograms (fHist.fTrack [171],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+          FillPipenuHistograms(fHist.fPipenu[171],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+          if (tp->fP > 60) {
+            FillTrackHistograms (fHist.fTrack [172],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            FillPipenuHistograms(fHist.fPipenu[172],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            if (trk->T0() > 300) {
+              FillTrackHistograms (fHist.fTrack [173],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              FillPipenuHistograms(fHist.fPipenu[173],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+//-----------------------------------------------------------------------------
+// at this point, apply the analysis-specific cuts
+// 1. require the number of track hits to be consistent with the number of hits 
+// 2. require no close time clusters
+//-----------------------------------------------------------------------------
+              if (tp->fDnTrackTc <= fDnMax) {
+                FillTrackHistograms (fHist.fTrack [174],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                FillPipenuHistograms(fHist.fPipenu[174],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                if (fabs(tp->fDtTcTc) > 100) {
+                  FillTrackHistograms (fHist.fTrack [175],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                  FillPipenuHistograms(fHist.fPipenu[175],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                }
+              }
+            }
+          }
+//-----------------------------------------------------------------------------
+// the same but w/o p>60 MeV/c cut
+//-----------------------------------------------------------------------------
+          if (trk->T0() > 300) {
+            FillTrackHistograms (fHist.fTrack [176],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            FillPipenuHistograms(fHist.fPipenu[176],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+            if (tp->fDnTrackTc <= fDnMax) {
+              FillTrackHistograms (fHist.fTrack [177],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              FillPipenuHistograms(fHist.fPipenu[177],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              if (fabs(tp->fDtTcTc) > 100) {
+                FillTrackHistograms (fHist.fTrack [178],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+                FillPipenuHistograms(fHist.fPipenu[178],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+              }
+            }
+          }
+        }
+        else {
+          FillTrackHistograms (fHist.fTrack [271],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
+          FillPipenuHistograms(fHist.fPipenu[271],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
         }
       }
     }
@@ -871,9 +1087,6 @@ int TPipenuAnaModule::Event(int ientry) {
 // loop over tracks and calculate needed parameters
 //-----------------------------------------------------------------------------
   fNStrawHits          = GetHeaderBlock()->fNStrawHits;
-  fNHyp                = -1;
-  fBestHyp[0]          = -1;
-  fBestHyp[1]          = -1;
 
   fEvtPar.fNTracks[0]  = fTrackBlock->NTracks();
   if (fEvtPar.fNTracks[0] == 0) fTrack = 0;
@@ -887,13 +1100,6 @@ int TPipenuAnaModule::Event(int ientry) {
 // tracks has been created by MergePatRec
 //-----------------------------------------------------------------------------
   int ntrk = fTrackBlock->NTracks();
-  for (int itrk=0; itrk<ntrk; itrk++) {
-    //    TStnTrack*   trk = fTrackBlock->Track(itrk);
-    TrackPar_t* tp   = fTrackPar+itrk;
-
-    tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
-    tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
-  }
 
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);
 //-----------------------------------------------------------------------------

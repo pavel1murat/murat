@@ -92,7 +92,7 @@ TAnaModule::TAnaModule(const char* name, const char* title):
   int mask = TStnTrackID::kTrkQualBit | TStnTrackID::kD0Bit | TStnTrackID::kTanDipBit | TStnTrackID::kT0Bit ;
   fTrackID_MVA->SetUseMask(mask);
 
-  fNID           = 2;  			// BOX and MVA
+  fNID           = 2;  			// default: BOX and MVA
 //-----------------------------------------------------------------------------
 // particle ID
 //-----------------------------------------------------------------------------

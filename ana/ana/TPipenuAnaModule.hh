@@ -100,10 +100,8 @@ public:
                                         // histograms filled
   Hist_t               fHist;
 
-  //  TGenParticle*        fParticle;       // electron or muon
   int                  fDirection;         // 1:downstream, -1:upstream  [direction of the particle]
 
-  //  TSimParticle*        fSimp;
   double               fEleE;           // electron energy
 
   int                  fCalorimeterType;
@@ -115,8 +113,6 @@ public:
   int                  fNCalHits;
   int                  fNGenp;          // N(generated particles)
 
-  int                  fNHyp;
-  int                  fBestHyp[10];
                                         // fTrackNumber[i]: track number, 
                                         // corresponding to OBSP particle #i
                                         // or -1

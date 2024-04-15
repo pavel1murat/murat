@@ -34,7 +34,8 @@ namespace mu2e {
       using Comment = fhicl::Comment;
 
       fhicl::Atom<art::InputTag> trkCollTag{Name("trkCollTag"), Comment("Track Collection Tag")};
-      fhicl::Atom<double>        pMin      {Name("pMin")      , Comment("pMin, MeV/c"         )};
+      fhicl::Atom<double>        pMin      {Name("pMin"   )   , Comment("pMin, MeV/c"         )};
+      fhicl::Atom<double>        nTrkMin   {Name("ntrkMin")   , Comment("min N(trk)"          )};
     };
 
     using Parameters = art::EDFilter::Table<Config>;
@@ -88,6 +89,7 @@ namespace mu2e {
     void     fillHistograms();
 
     art::InputTag                  _trkCollTag;
+    int                            _nTrkMin;
     float                          _pMin;
 
     const mu2e::KalSeedCollection* _ksColl;
@@ -100,7 +102,8 @@ namespace mu2e {
   TrackFilter::TrackFilter(const Parameters& conf): 
     art::EDFilter{conf}
     , _trkCollTag(conf().trkCollTag())
-    , _pMin      (conf().pMin())
+    , _nTrkMin   (conf().nTrkMin()   )
+    , _pMin      (conf().pMin()      )
     {
     }
 
@@ -234,10 +237,10 @@ namespace mu2e {
       _data.tp[i].p    = p;
       _data.tp[i].kseg = kseg;
 
-      if (p > _pMin) _data.ntrk_good++;
+      if (p >= _pMin) _data.ntrk_good++;
     }
 
-    _passed = (_data.ntrk_good > 0);
+    _passed = (_data.ntrk_good >= _nTrkMin);
     fillHistograms();
 
     return _passed;

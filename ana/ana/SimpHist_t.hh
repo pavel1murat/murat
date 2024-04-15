@@ -20,11 +20,14 @@ namespace murat {
    TH1F*    fStageDt;
 
    TH1F*    fStartMom[2];
+   TH1F*    fEndMom  [2];
    TH1F*    fNStrawHits;
 
    TH1F*    fMomTargetEnd;
    TH1F*    fMomTrackerFront;
    TH1F*    fCosTh;
+   TH1F*    fZStart;
+   TH1F*    fZEnd;
 
    TH2F*    fNshVsCosTh;
    

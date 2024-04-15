@@ -16,6 +16,7 @@ int load_stnana_scripts_murat() {
     "genp.C"        ,  "PWD",
     "helix.C"       ,  "PWD",
     "hits.C"        ,  "PWD",
+    "momscale.C"    ,  "PWD",
     "mustop.C"      ,  "PWD",
     "pid.C"         ,  "PWD",
     "pipenu.C"      ,  "PWD",

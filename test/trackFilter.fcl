@@ -55,5 +55,5 @@ physics : {
 outputs.defaultOutput.fileName: "mcs.mu2e.bmup0b0s61r0100.pipenu.001210_00000000.art"
 
 physics.filters.TrackFilter.trkCollTag : "KKDeMHPar"
-physics.filters.TrackFilter.pMin       : 60.
+physics.filters.TrackFilter.pMin       : -1. # 60.
 

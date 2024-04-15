@@ -377,8 +377,8 @@ void TAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
 
   HBook1F(hist->fPdgCode[0]     ,"pdg_0"       ,Form("%s: PDG code[0]"             ,Folder), 200,-100, 100,Folder);
   HBook1F(hist->fPdgCode[1]     ,"pdg_1"       ,Form("%s: PDG code[1]"             ,Folder),1000,-500, 500,Folder);
-  HBook1F(hist->fParentMom      ,"pmom"     ,Form("%s: Parent Mom"  ,Folder), 200,     0, 2000,Folder);
-  HBook1F(hist->fParentPDG      ,"ppdg"     ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
+  HBook1F(hist->fParentMom      ,"pmom"        ,Form("%s: Parent Mom"  ,Folder), 250,     0, 500,Folder);
+  HBook1F(hist->fParentPDG      ,"ppdg"        ,Form("%s: Parent PDG"  ,Folder), 200, -1000, 1000,Folder);
 
   HBook1F(hist->fGeneratorID    ,"gen_id"      ,Form("%s: Generator ID"            ,Folder), 200,   -10,  190,Folder);
 
@@ -392,11 +392,16 @@ void TAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fStartMom[0]    ,"mom"         ,Form("%s: start Mom[0]"            ,Folder), 500,     0,  500,Folder);
   HBook1F(hist->fStartMom[1]    ,"mom_1"       ,Form("%s: start Mom[1]"            ,Folder), 500,     0, 5000,Folder);
 
+  HBook1F(hist->fEndMom[0]      ,"emom"        ,Form("%s: end Mom[0]"              ,Folder), 500,     0,  500,Folder);
+  HBook1F(hist->fEndMom[1]      ,"emom_1"      ,Form("%s: end Mom[1]"              ,Folder), 500,     0, 5000,Folder);
+
   HBook1F(hist->fNStrawHits     ,"nsh"      ,Form("%s: N(straw hits)" ,Folder), 100,     0,  100,Folder);
 
   HBook1F(hist->fMomTargetEnd   ,"ptarg"       ,Form("%s: mom after ST"            ,Folder), 400,   0, 200,Folder);
   HBook1F(hist->fMomTrackerFront,"pfront"      ,Form("%s: mom at the Tracker Front",Folder), 400,   0, 200,Folder);
   HBook1F(hist->fCosTh          ,"costh"       ,Form("%s: cos(theta)"              ,Folder), 200,  -1,   1,Folder);
+  HBook1F(hist->fZStart         ,"zstart"      ,Form("%s: ZStart"                  ,Folder), 250,  -5000,20000,Folder);
+  HBook1F(hist->fZEnd           ,"zend"        ,Form("%s: ZEnd"                    ,Folder), 250,  -5000,20000,Folder);
 
   HBook2F(hist->fNshVsCosTh     ,"nsh_vs_costh",Form("%s: nsh vs costh"            ,Folder), 20 ,-1,1,40,0,200,Folder);
 
@@ -785,9 +790,10 @@ void TAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpDa
   hist->fPdgCode[0]->Fill(Simp->fPdgCode,Weight);
   hist->fPdgCode[1]->Fill(Simp->fPdgCode,Weight);
 
-  // hist->fParentMom->Fill(fParent->StartMom()->P());
-  // hist->fParentPDG->Fill(fParent->PDGCode());
-
+  if (Sd->fParent) {
+    hist->fParentMom->Fill(Sd->fParent->EndMom()->P(),Weight);
+    hist->fParentPDG->Fill(Sd->fParent->PDGCode(),Weight);
+  }
   hist->fGeneratorID->Fill(Simp->fGeneratorID,Weight);
 
   hist->fStartVolumeID->Fill(Simp->fStartVolumeIndex,Weight);
@@ -807,6 +813,10 @@ void TAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpDa
   hist->fStartMom[0]->Fill(p,Weight);
   hist->fStartMom[1]->Fill(p,Weight);
 
+  float pe = Simp->EndMom()->P();
+  hist->fEndMom[0]->Fill(pe,Weight);
+  hist->fEndMom[1]->Fill(pe,Weight);
+
   int nsh = Simp->NStrawHits();
   hist->fNStrawHits->Fill(nsh,Weight);
 
@@ -815,6 +825,8 @@ void TAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpDa
 
   double costh = Simp->StartMom()->Z()/Simp->StartMom()->P();
   hist->fCosTh->Fill(costh,Weight);
+  hist->fZStart->Fill(Simp->StartPos()->Z(),Weight);
+  hist->fZEnd->Fill(ze,Weight);
 
   hist->fNshVsCosTh->Fill(costh,nsh,Weight);
 
@@ -1063,7 +1075,8 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 //-----------------------------------------------------------------------------
     tp->fNHPl = n1;
     tp->fNEPl = n2;
-    tp->fNDPl = ndiff;
+    tp->fNDPl        = ndiff;
+    tp->fTimeCluster = nullptr;
 //-----------------------------------------------------------------------------
 // in this scheme correction is set right before the call
 //-----------------------------------------------------------------------------
@@ -1104,11 +1117,11 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
 
     tp->fCluster   = nullptr;
 
-    tp->fEcl       = -1.e6;
+    tp->fEcl       = track->fClusterE;
     tp->fSeedFr    = -1.e6;
     tp->fNCrystals = -1.e6;
     tp->fDiskID    = -1;
-    tp->fEp        = -1.e6;
+    tp->fEp        = tp->fEcl/tp->fP;
     tp->fDrDzCal   = -1.e6;
     tp->fDtClZ0    = -1.e6;
 
@@ -1168,7 +1181,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
       }
     }
 
-    if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 1.e-6)) {
+    if ((tp->fEp > 0) && (track->fEp > 0) && (fabs(tp->fEp-track->fEp) > 5.e-6)) {
       GetHeaderBlock()->Print(Form(" TAnaModule ERROR: tp->fEp = %10.5f  track->fEp = %10.5f\n ",tp->fEp,track->fEp));
     }
 //-----------------------------------------------------------------------------

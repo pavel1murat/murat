@@ -22,6 +22,7 @@
 // bit:14 : events with p>100 MeV/c, cos_th < 1/sqrt(2) . electrons in SPMC block used to select events
 // bit:15 : VD5 Yc > 200 mm
 // bit:21 : events with muon decays in flight
+// bit:22 : DIF timing tail
 ///////////////////////////////////////////////////////////////////////////////
 #include "TF1.h"
 #include "TCanvas.h"
@@ -293,19 +294,27 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[204] = 1;		// mu+
   book_simp_histset[205] = 1;		// pi-
   book_simp_histset[206] = 1;		// pi+
+  book_simp_histset[211] = 1;		// e- from muon decays in flight
+  book_simp_histset[212] = 1;		// e+ from muon decays in flight
   book_simp_histset[213] = 1;		// mu- decays in flight
   book_simp_histset[214] = 1;		// mu+ decays in flight
   book_simp_histset[215] = 1;		// pi- with the weight of the survival prob
   book_simp_histset[216] = 1;		// pi+ with the weight of the survival prob
   book_simp_histset[221] = 1;		// pbars
+  book_simp_histset[222] = 1;		// e+ from mu+ decays in flight, p_ele > 50
   book_simp_histset[223] = 1;		// mu- decays in flight, p_ele > 50
   book_simp_histset[224] = 1;		// mu+ decays in flight, p_ele > 50
+  book_simp_histset[232] = 1;		// e+ from mu+ decays in flight, p_ele > 60
   book_simp_histset[233] = 1;		// mu- decays in flight, p_ele > 60
   book_simp_histset[234] = 1;		// mu+ decays in flight, p_ele > 60
+  book_simp_histset[242] = 1;		// e+ from mu+ decays in flight, p_ele > 50, nsh>0
   book_simp_histset[243] = 1;		// mu- decays in flight, p_ele > 50, nsh > 0
   book_simp_histset[244] = 1;		// mu+ decays in flight, p_ele > 50, nsh > 0
+  book_simp_histset[252] = 1;		// e+ from mu+ decays in flight, p_ele > 60, nsh > 0
   book_simp_histset[253] = 1;		// mu- decays in flight, p_ele > 60, nsh > 0
   book_simp_histset[254] = 1;		// mu+ decays in flight, p_ele > 60, nsh > 0
+  book_simp_histset[262] = 1;		// mu+ decays in flight, positrons produced at t>400
+  book_simp_histset[264] = 1;		// mu+ decays in flight, muons producing positrons at t>400 
 
   book_simp_histset[300] = 1;		// stage=2
   book_simp_histset[301] = 1;		// e-
@@ -665,26 +674,6 @@ void TSpmcAnaModule::BookHistograms() {
   }
 }
 
-// //-----------------------------------------------------------------------------
-// void TSpmcAnaModule::FillEventHistograms(HistBase_t* Hist) {
-// //   double            cos_th, xv, yv, rv, zv, p;
-// //   TLorentzVector    mom;
-
-//   EventHist_t* hist = (EventHist_t*) Hist;
-
-//   int event_number = GetHeaderBlock()->EventNumber();
-//   int run_number   = GetHeaderBlock()->RunNumber();
-
-//   hist->fEventNumber->Fill(event_number);
-//   hist->fRunNumber->Fill(run_number);
-//   hist->fNSimp->Fill(fNSimp);
-//   hist->fTMaxSimp[0]->Fill(fTMaxSimp);
-//   hist->fTMaxSimp[1]->Fill(fTMaxSimp);
-//   hist->fTMaxSpmc->Fill(fTMaxSpmc);
-// }
-
-
-
 //-----------------------------------------------------------------------------
 // to save time, calculate a number of variables just once per step
 //-----------------------------------------------------------------------------
@@ -871,6 +860,11 @@ void TSpmcAnaModule::FillHistograms() {
     // double zend        = simp->EndPos()->Z();
     double srv_prob    = exp(-simp->EndProperTime());
 
+    fPrintFlag[22] = 0;
+
+    sd->fParent   = nullptr;
+    if (parent_id >= 0) sd->fParent = fSimpBlock->Particle(parent_id);
+
     sd->fStepVD9  = nullptr;
     sd->fPVD9     = -1;
     sd->fY0       = -1.e6;
@@ -882,6 +876,11 @@ void TSpmcAnaModule::FillHistograms() {
     sd->fMuonDecay  = ((abs(pdg_code)          == 13) and 
                        (simp->fTerminationCode == 14) and 
                        (simp->EndMom()->P()     >  0)    );
+
+    sd->fEleFromMuonDecay  = ((abs(pdg_code)       == 11) and 
+                              (simp->fCreationCode == 14) and 
+                              (sd->fParent         != nullptr) and 
+                              (abs(sd->fParent->PDGCode()) == 13));
 
     sd->fEle = nullptr;
     if (sd->fMuonDecay and (i<fEvtPar.fNSimp-1)) {
@@ -925,8 +924,30 @@ void TSpmcAnaModule::FillHistograms() {
     }
     else if (simp->SimStage() == 1) {
       FillSimpHistograms(fHist.fSimp[200],simp,sd);
-      if (pdg_code ==    11) FillSimpHistograms(fHist.fSimp[201],simp,sd);
-      if (pdg_code ==   -11) FillSimpHistograms(fHist.fSimp[202],simp,sd);
+      if (pdg_code ==    11) {
+        FillSimpHistograms(fHist.fSimp[201],simp,sd);
+        if (sd->fEleFromMuonDecay) FillSimpHistograms(fHist.fSimp[211],simp,sd);
+      }
+      if (pdg_code ==   -11) {
+        FillSimpHistograms(fHist.fSimp[202],simp,sd);
+        if (sd->fEleFromMuonDecay) { 
+          FillSimpHistograms(fHist.fSimp[212],simp,sd);
+          double pele = simp->StartMom()->P();
+          if (pele > 55) FillSimpHistograms(fHist.fSimp[222],simp,sd);   
+          if (pele > 60) FillSimpHistograms(fHist.fSimp[232],simp,sd);  
+          if ((simp->StartPos()->T() > 400) and (pele > 55)) {
+            fPrintFlag[22] = 1;
+          }
+          if (simp->NStrawHits() > 0) {
+            if (pele > 50) FillSimpHistograms(fHist.fSimp[242],simp,sd);   
+            if (pele > 60) FillSimpHistograms(fHist.fSimp[252],simp,sd);  
+          }
+          if (simp->StartPos()->T() > 400) {
+                                                                     // "late" positrons
+            FillSimpHistograms(fHist.fSimp[262],simp,sd);
+          }
+        }
+      }
       if (pdg_code ==    13) { 
         FillSimpHistograms(fHist.fSimp[203],simp,sd);
         if (sd->fMuonDecay) {
@@ -941,7 +962,7 @@ void TSpmcAnaModule::FillHistograms() {
             }
           }
           else {
-            printf("ERROR: in TSpmcAnaModule 001: sd->fEle null\n");
+            GetHeaderBlock()->Print("ERROR: in TSpmcAnaModule 001: sd->fEle null\n");
           }
         }
       }
@@ -961,6 +982,11 @@ void TSpmcAnaModule::FillHistograms() {
               if (pele > 50) FillSimpHistograms(fHist.fSimp[244],simp,sd);   
               if (pele > 60) FillSimpHistograms(fHist.fSimp[254],simp,sd);  
             }
+                                                                      // muons producing "late" positrons
+            if (sd->fEle->StartPos()->T() > 400) {
+              FillSimpHistograms(fHist.fSimp[264],simp,sd);
+            }
+
           }
           else {
             printf("ERROR: in TSpmcAnaModule 002: sd->fEle null\n");
@@ -1908,10 +1934,16 @@ void TSpmcAnaModule::Debug() {
 	}
       }
     }
-
-    if (found == 1) {
-      GetHeaderBlock()->Print(Form("bit:13: event with a particle PDG=11 P>100"));
+    if (found) {
+      GetHeaderBlock()->Print(Form("bit:14: p> 100 MeV/c"));
     }
+  }
+
+//-----------------------------------------------------------------------------
+// bit:21  timing tail of the DIF
+//-----------------------------------------------------------------------------
+  if ((GetDebugBit(22) == 1) and (fPrintFlag[22] == 1)) {
+    GetHeaderBlock()->Print(Form("bit:22: event with a particle PDG=-11 timing tail"));
   }
 }
 

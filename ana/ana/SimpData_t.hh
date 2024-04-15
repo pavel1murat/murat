@@ -12,6 +12,7 @@ namespace murat {
     double        fWeight;
     double        fTau;                 // lifetime , in ns
     bool          fMuonDecay;
+    bool          fEleFromMuonDecay;
     TSimParticle* fEle;
   };
 }

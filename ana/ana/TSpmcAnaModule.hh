@@ -37,15 +37,6 @@ public:
 //-----------------------------------------------------------------------------
 //  histograms
 //-----------------------------------------------------------------------------
-  // struct EventHist_t : public HistBase_t {
-  //   TH1F*      fRunNumber;
-  //   TH1F*      fEventNumber;
-  //   TH1F*      fNSimp;
-  //   TH1F*      fTMaxSimp[2];
-  //   TH1F*      fTMaxSpmc;
-  //   TH1F*      fLogWeight;
-  // };
-
   struct StepPointMCHist_t : public HistBase_t {
     TH1F*      fVolumeID;		       //
     TH1F*      fGenIndex;		       //
@@ -171,6 +162,8 @@ public:
 					 // antiproton-specific : in the production vertex
   double                fPbarCosThPV;
   double                fPbarMomPV;
+
+  int                   fPrintFlag[100];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -200,12 +193,9 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  // void    BookEventHistograms        (HistBase_t* Hist, const char* Folder);
-  //  void    BookSimpHistograms         (HistBase_t* Hist, const char* Folder);
   void    BookStepPointMCHistograms  (HistBase_t* Hist, const char* Folder);
   void    BookVDetHistograms         (HistBase_t* Hist, const char* Folder);
 
-  //  void    FillEventHistograms        (HistBase_t* Hist);
   void    FillStepPointMCHistograms  (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
   void    FillVDetHistograms         (HistBase_t* Hist, TStepPointMC* Step, SpmcData_t* SpmcData, double Weight = 1.);
 

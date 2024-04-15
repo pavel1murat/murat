@@ -142,7 +142,8 @@ murat : {
 
     TrackFilter : { module_type:TrackFilter
 	trkCollTag    : KKDeMHPar
-        pMin          : 60           ## MeV/c
+        nTrkMin       :  1           ## by default, require at least one track
+        pMin          : -1           ## MeV/c
     }
 
     TrackerMCCheck                   : { module_type:TrackerMCCheck # the class name

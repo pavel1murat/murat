@@ -35,11 +35,43 @@ TFilterModule::TFilterModule(const char* name, const char* title):
   TAnaModule(name,title) { 
   fTrackBlockName  = "TrackBlock";
   fMinNTracks      = 1;
+//-----------------------------------------------------------------------------
+// initialize Track ID
+// 0: SetC  1: TrkQual>0.1 2:TrkQual>0.4
+// what about number of hits ? - 3: no cuts on the number of hits
+//-----------------------------------------------------------------------------
+  fNID             = 1;
+
+  fTrackID[0]      = new TStnTrackID();
+
+  int mask0 = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit;
+  fTrackID[0]->SetMaxChi2Dof(3.0 );
+  fTrackID[0]->SetMinNActive(25  );
+  fTrackID[0]->SetMaxMomErr (0.25);
+
+  mask0    |= TStnTrackID::kTanDipBit;
+  fTrackID[0]->SetMinTanDip (0.6);
+  fTrackID[0]->SetMaxTanDip (1.0);
+
+  mask0    |= TStnTrackID::kD0Bit;
+  fTrackID[0]->SetMinD0 (-100);         // mm
+  fTrackID[0]->SetMaxD0 ( 100);
+
+  mask0    |= TStnTrackID::kT0Bit;
+  fTrackID[0]->SetMinT0 ( 250);         // mm
+  fTrackID[0]->SetMaxT0 (1700);
+
+  fTrackID[0]->SetUseMask(mask0);
+
+  for (int i=0; i<20; i++) {
+    TrackPar_t* tp  = fTrackPar+i;
+    tp->fTrackID[0] = TAnaModule::fTrackID[0];
+  }
 }
 
 //-----------------------------------------------------------------------------
 TFilterModule::~TFilterModule() {
-  //  for (int i=0; i<fNID; i++) delete fTrackID[i];
+  for (int i=0; i<fNID; i++) delete fTrackID[i];
 }
 
 
@@ -54,7 +86,7 @@ int TFilterModule::BeginJob() {
   // RegisterDataBlock("HelixBlock"      ,"TStnHelixBlock"      ,&fHelixBlock      );
   // RegisterDataBlock("TimeClusterBlock","TStnTimeClusterBlock",&fTimeClusterBlock);
 
-  // RegisterDataBlock("ClusterBlock" ,"TStnClusterBlock" ,&fClusterBlock );
+  RegisterDataBlock("ClusterBlock" ,"TStnClusterBlock" ,&fClusterBlock );
   // RegisterDataBlock("CalDataBlock" ,"TCalDataBlock"    ,&fCalDataBlock );
   // RegisterDataBlock("GenpBlock"    ,"TGenpBlock"       ,&fGenpBlock    );
   // RegisterDataBlock("SimpBlock"    ,"TSimpBlock"       ,&fSimpBlock    );
@@ -134,20 +166,48 @@ int TFilterModule::Event(int ientry) {
   //  TDiskCalorimeter::GeomData_t disk_geom;
 
   fTrackBlock->GetEntry(ientry);
+  fClusterBlock->GetEntry(ientry);
   // fTrackSeedBlock->GetEntry(ientry);
   // fHelixBlock->GetEntry(ientry);
   // fTimeClusterBlock->GetEntry(ientry);
   //  fTrackStrawHitBlock->GetEntry(ientry);
-  // fClusterBlock->GetEntry(ientry);
   // fStrawHitBlock->GetEntry(ientry);
   // fCalDataBlock->GetEntry(ientry);
   // fGenpBlock->GetEntry(ientry);
   // fSimpBlock->GetEntry(ientry);
   // fVDetBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
-  fEvtPar.fNTracks[0] = fTrackBlock->NTracks();
+//-----------------------------------------------------------------------------
+// may want to revisit the definition of fSimp in the future
+//-----------------------------------------------------------------------------
+  fSimPar.fParticle = NULL;
+  fSimPar.fTFront   = NULL;
+  fSimPar.fTMid     = NULL;
+  fSimPar.fTBack    = NULL;
+//-----------------------------------------------------------------------------
+// process virtual detectors - for fSimp need parameters at tracker entrance
+// use the first fit
+//-----------------------------------------------------------------------------
+  fSimPar.fTFront   = NULL;
+  fSimPar.fTMid     = NULL;
+  fSimPar.fTBack    = NULL;
 
-  fEventPassedSelections = (fEvtPar.fNTracks[0] > 0);
+  int ntrk = fTrackBlock->NTracks();
+
+  InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);
+
+  fEvtPar.fNTracks[0] = ntrk;
+
+  int n_good_trk = 0;
+  for (int itrk=0; itrk<ntrk; itrk++) {
+    // TStnTrack*   trk = fTrackBlock->Track(itrk);
+    TrackPar_t*  tp  = fTrackPar+itrk;
+
+    int id_word = tp->fIDWord[0];
+    if (id_word == 0) n_good_trk++;
+  }
+
+  fEventPassedSelections = (n_good_trk > 0);
 
   SetPassed(fEventPassedSelections);
 

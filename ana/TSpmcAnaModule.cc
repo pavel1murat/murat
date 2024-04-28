@@ -295,13 +295,13 @@ void TSpmcAnaModule::BookHistograms() {
   book_simp_histset[205] = 1;		// pi-
   book_simp_histset[206] = 1;		// pi+
   book_simp_histset[211] = 1;		// e- from muon decays in flight
-  book_simp_histset[212] = 1;		// e+ from muon decays in flight
+  book_simp_histset[212] = 1;		// e+ from muon decays in flight, all momenta
   book_simp_histset[213] = 1;		// mu- decays in flight
   book_simp_histset[214] = 1;		// mu+ decays in flight
   book_simp_histset[215] = 1;		// pi- with the weight of the survival prob
   book_simp_histset[216] = 1;		// pi+ with the weight of the survival prob
   book_simp_histset[221] = 1;		// pbars
-  book_simp_histset[222] = 1;		// e+ from mu+ decays in flight, p_ele > 50
+  book_simp_histset[222] = 1;		// e+ from mu+ decays in flight, p_ele > 55
   book_simp_histset[223] = 1;		// mu- decays in flight, p_ele > 50
   book_simp_histset[224] = 1;		// mu+ decays in flight, p_ele > 50
   book_simp_histset[232] = 1;		// e+ from mu+ decays in flight, p_ele > 60

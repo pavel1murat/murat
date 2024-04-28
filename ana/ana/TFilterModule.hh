@@ -60,6 +60,9 @@ public:
                                         // or -1
   TStnTrack*           fTrack;
 
+  TrackPar_t           fTrackPar[20];
+  SimPar_t             fSimPar;
+
   int                  fMinNTracks;
   int                  fEventPassedSelections;
 //-----------------------------------------------------------------------------

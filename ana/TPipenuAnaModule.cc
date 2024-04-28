@@ -648,6 +648,8 @@ void TPipenuAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   if (fEvtPar.fSimp) {
     SimpData_t sd;
+    sd.fParent  = nullptr;
+    sd.fStepVD9 = nullptr;
 
     TSimParticle* mom = fSimpBlock->Particle(fEvtPar.fSimp->ParentID());
 

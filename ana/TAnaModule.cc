@@ -1121,7 +1121,7 @@ int TAnaModule::InitTrackPar(TStnTrackBlock*     TrackBlock  ,
     tp->fSeedFr    = -1.e6;
     tp->fNCrystals = -1.e6;
     tp->fDiskID    = -1;
-    tp->fEp        = tp->fEcl/tp->fP;
+    tp->fEp        = tp->fEcl/track->fP2;   // compare momentum on exit to the cluster energy
     tp->fDrDzCal   = -1.e6;
     tp->fDtClZ0    = -1.e6;
 

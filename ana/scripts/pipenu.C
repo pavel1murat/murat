@@ -21,13 +21,16 @@ void  murat_pipenu_ana(int DebugBit = -1) {
 }
 
 //-----------------------------------------------------------------------------
-void  murat_strip_tracks(const char* Project, const char* ODsid) {
+void  murat_strip_tracks(const char* Project, const char* ODsid, int Fileset = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module *g.x" is the TStnAna thing
 //-----------------------------------------------------------------------------
   murat::m_filter = (murat::TFilterModule*) g.x->AddModule("murat::TFilterModule",0);  
   murat::m_filter->SetFilteringMode(1);   // 0: disabled (default), 1: filter, 2: veto
 
-  TStnOutputModule* m = new TStnOutputModule(Form("nts.mu2e.%s.%s.000000_00000000.stn",ODsid,Project));
+  TString fn           = Form("nts.mu2e.%s.%s.001210_00001000.stn",ODsid,Project);
+  if (Fileset >= 0) fn = Form("nts.mu2e.%s.%s.001210_%08i.stn"    ,ODsid,Project,Fileset);
+
+  TStnOutputModule* m = new TStnOutputModule(fn.Data());
   g.x->SetOutputModule(m);
 }

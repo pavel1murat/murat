@@ -82,7 +82,7 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
 
   int mask1 = TStnTrackID::kNActiveBit | TStnTrackID::kChi2DofBit | TStnTrackID::kMomErrBit ;
   fTrackID[1]->SetMaxChi2Dof(3.0 );
-  fTrackID[1]->SetMinNActive(30  );     // cut tighter on the number of hits
+  fTrackID[1]->SetMinNActive(30  );     // 30 ... cut tighter on the number of hits
   fTrackID[1]->SetMaxMomErr (0.25);
 
   mask1    |= TStnTrackID::kTanDipBit;

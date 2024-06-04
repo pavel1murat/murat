@@ -58,7 +58,7 @@ TFilterModule::TFilterModule(const char* name, const char* title):
   fTrackID[0]->SetMaxD0 ( 100);
 
   mask0    |= TStnTrackID::kT0Bit;
-  fTrackID[0]->SetMinT0 ( 250);         // mm
+  fTrackID[0]->SetMinT0 ( 250);         // ns
   fTrackID[0]->SetMaxT0 (1700);
 
   fTrackID[0]->SetUseMask(mask0);

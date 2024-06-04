@@ -86,7 +86,7 @@ TPipenuAnaModule::TPipenuAnaModule(const char* name, const char* title):
   fTrackID[1]->SetMaxMomErr (0.25);
 
   mask1    |= TStnTrackID::kTanDipBit;
-  fTrackID[1]->SetMinTanDip (0.65);
+  fTrackID[1]->SetMinTanDip (0.70);     // prev: 0.65 
   fTrackID[1]->SetMaxTanDip (1.20);
 
   mask1    |= TStnTrackID::kD0Bit;

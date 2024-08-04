@@ -12,6 +12,7 @@ export    DATASET_FCL="undefined"
 export        EXEFILE=`which mu2e`
 export        FCLFILE="undefined"
 export       FCLINPUT=""
+export    FIRST_EVENT="undefined"
 export   GRID_CLUSTER="local"   # local submission  by default
 export     INPUT_FILE="undefined"
 export  INPUT_DATASET="undefined"
@@ -45,7 +46,7 @@ usage() {
 }
 
 export OPTIND=1
-while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
+while getopts :c:d:e:E:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
 
     case $OPT in
         c)                                          # dataset ID
@@ -65,6 +66,10 @@ while getopts :c:d:e:f:F:g:j:n:N:o:r:s:S:vx: OPT; do
             if [ $VERBOSE != "no" ] ; then echo DSID=$DSID ; fi
             ;;
         e)                                          # dataset ID
+            export FIRST_EVENT=${OPTARG}
+            if [ $VERBOSE != "no" ] ; then echo FIRST_EVENT=$FIRST_EVENT ; fi
+            ;;
+        E)                                          # dataset ID
             export EXEFILE=${OPTARG}
             if [ $VERBOSE != "no" ] ; then echo EXEFILE=$EXEFILE ; fi
             ;;
@@ -269,7 +274,8 @@ if [ $DATASET != "undefined" ] ; then
 elif [ $INPUT_FILE != "undefined" ] ; then
     cmd=$cmd" -s $INPUT_FILE" ; 
 fi
-if [ $NEVENTS     != "-1"    ] ; then cmd=$cmd" -n $NEVENTS" ; fi
+if [ $NEVENTS     != "-1"        ] ; then cmd=$cmd" -n $NEVENTS" ; fi
+if [ $FIRST_EVENT != "undefined" ] ; then cmd=$cmd" -e $FIRST_EVENT" ; fi
 
 if [ $VERBOSE != "no" ] ; then 
     echo [submit_mu2e_job:$LINENO]: cmd=$cmd ; 

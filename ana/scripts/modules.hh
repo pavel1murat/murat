@@ -107,7 +107,7 @@ namespace murat {
   TMomscaleAnaModule*      m_moms   = NULL;
   TPidAnaModule*           m_pid    = NULL;
   TPipenuAnaModule*        m_pipenu = NULL;
-  TSimpAnaModule*          m_sim    = NULL;
+  TSimpAnaModule*          m_simp   = NULL;
   TSpmcAnaModule*          m_spmc   = NULL;
   TTrackAnaModule*         m_trk    = NULL;
   TTrackCompModule*        m_tcm    = NULL;

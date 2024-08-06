@@ -48,6 +48,8 @@ public:
   TGenParticle*     fParticle;		// electron or muon
 
   int               fNElectrons;
+  int               fNEle40;
+  int               fNPos40;
   int               fNMuons[2];         // [0]: total, [1]: 'trigger', P > 90
   int               fMinNStrawHits;
 //-----------------------------------------------------------------------------

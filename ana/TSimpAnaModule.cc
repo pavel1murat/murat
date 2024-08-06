@@ -7,27 +7,9 @@
 //  0  : all events
 //  1  : passed events
 //  2  : rejected events
+//
+//  3  : events with NElePos > 1
 // 
-//  3  : events with set C tracks and 70mm < |dx|  < 90 mm
-//  4  : events with DpF > 1 MeV : obviously, misreconstructed ones
-//  5  : events with N(tracks) > 1
-//  6  : events trk_41 with 0.8< E/P < 1.1 - tracks missed by CalPatRec
-//  7  : events (muo) with LogLHRCal >   20
-//  8  : events (ele) with LogLHRCal < - 20
-//  9  : events (muo) with 0.42 < E/P < 0.46
-// 10  : events (muo) with Set C track with ECL > 80 MeV
-// 28  : Set C DEM tracks with E/P > 1.1
-// 29  : TRK_19 (Set C DEM tracks with a cluster) and LLHR(cal) < 0
-// 31  : EVT_6 events with ce_costh > 0.8 
-// 32  : TRK_1 events with chi2tcm > 100. 
-// 33  : DU < -80mm - study edge effects
-// 34  : EVT_7: events with E_CL > 60 and no CalPatRec tracks 
-// 35  : TRK_1: events with P > 106 MeV/c - misreconstruction
-// 36  : TRK_23 events with P < 80: odd misidentified muons - turned out to be DIO electrons
-// 37  : TRK_26 LLHR_CAL > 5
-// 38  : EVT_7: events with E_CL > 60 and no CalPatRec tracks and TrkPatRec
-// 39  : trk_1: events with |SIN_TC| > 0.6
-// 40  : EVT_7: events with E_CL > 60 and no tracks at all
 //
 // 3 different ID : 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,7 +85,8 @@ void TSimpAnaModule::BookHistograms() {
 
   book_event_histset[ 0] = 1;		// all events
   book_event_histset[ 1] = 1;		// events with N(electrons) > 0
-  book_event_histset[ 2] = 1;		// events with N(muons)     > 1
+  book_event_histset[ 2] = 1;		// events with N(muons)     > 0
+  book_event_histset[ 3] = 1;		// events with N(e+ + e-)   > 1
 
   for (int i=0; i<kNEventHistSets; i++) {
     if (book_event_histset[i] != 0) {
@@ -166,12 +149,15 @@ void TSimpAnaModule::FillHistograms() {
 
   if (fNElectrons >= 1) FillEventHistograms(fHist.fEvent[1],&fEvtPar);
   if ((fNMuons[1] >= 1) and (fNMuons[0] >= 2)) FillEventHistograms(fHist.fEvent[2],&fEvtPar);
+  if ((fNEle40 > 1    ) and (fNPos40 > 0    )) FillEventHistograms(fHist.fEvent[3],&fEvtPar);
 //-----------------------------------------------------------------------------
 // Simp histograms
 //-----------------------------------------------------------------------------
   TSimParticle* simp;
   SimpData_t    sd;
 
+  sd.fParent = nullptr;
+  
   for (int i=0; i<fEvtPar.fNSimp; i++) {
     simp = fSimpBlock->Particle(i);
     FillSimpHistograms(fHist.fSimp[0],simp,&sd);
@@ -225,7 +211,7 @@ int TSimpAnaModule::Event(int ientry) {
   fEvtPar.fNCrvPulses       = -1;
   fEvtPar.fNCrvCoincidences = -1;
   fEvtPar.fNGenp            = fGenpBlock->NParticles();
-  // fEvtPar.fParticle         = NULL;
+  fEvtPar.fSimp             = nullptr;
   fEvtPar.fPartE            = -1.;
   fEvtPar.fNSimp            = fSimpBlock->NParticles();
   fEvtPar.fPionSurvProb     = 1.;
@@ -277,6 +263,8 @@ int TSimpAnaModule::Event(int ientry) {
   fNMuons[0]  = 0;
   fNMuons[1]  = 0;
   fNElectrons = 0;
+  fNEle40     = 0;
+  fNPos40     = 0;
 
   for (int i=0; i<fEvtPar.fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
@@ -298,6 +286,11 @@ int TSimpAnaModule::Event(int ientry) {
 	}
       }
     }
+
+    if (mom > 40) {
+      if (pdg_code ==  11) fNEle40 += 1;
+      if (pdg_code == -11) fNPos40 += 1;
+    }
   }
 
   FillHistograms();
@@ -309,6 +302,10 @@ int TSimpAnaModule::Event(int ientry) {
 
 //-----------------------------------------------------------------------------
 void TSimpAnaModule::Debug() {
+
+  if (GetDebugBit(3) == 1) {
+    if ((fNEle40 > 0) and (fNPos40 > 0)) GetHeaderBlock()->Print(Form("fNEle40, fNPos40 = %i %i",fNEle40,fNPos40));
+  }
 
   // TStnTrack* trk;
   // TrackPar_t* tp;

@@ -308,8 +308,13 @@ void TAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
   HBook1F(hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
   //  HBook1F(hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
-  HBook1F(hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),100,0,100,Folder);
-  HBook1F(hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),100,0,100,Folder);
+
+  HBook1F(hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),10,0,10,Folder);
+  HBook1F(hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),10,0,10,Folder);
+
+  HBook1F(hist->fNGoodTracks[0] ,"ngtrk_0"     ,Form("%s: Number of good Reconstructed Tracks[0]"  ,Folder),10,0,10,Folder);
+  HBook1F(hist->fNGoodTracks[1] ,"ngtrk_1"     ,Form("%s: Number of good Reconstructed Tracks[1]"  ,Folder),10,0,10,Folder);
+
   HBook1F(hist->fNShTot[0],"nsh_0" ,Form("%s: Number of Straw Hits [0]"        ,Folder),250,0,250,Folder);
   HBook1F(hist->fNShTot[1],"nsh_1" ,Form("%s: Number of Straw Hits [1]"        ,Folder),500,0,10000,Folder);
   HBook1F(hist->fNGoodSH   ,"nsh50"    ,Form("%s: N(SH) +/-50"                     ,Folder),300,0,1500,Folder);
@@ -700,6 +705,10 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
   // hist->fNClusters->Fill(fNClusters);
   hist->fNTracks[0]->Fill  (Evp->fNTracks[0]);
   hist->fNTracks[1]->Fill  (Evp->fNTracks[1]);
+  
+  hist->fNGoodTracks[0]->Fill  (Evp->fNGoodTracks[0]);
+  hist->fNGoodTracks[1]->Fill  (Evp->fNGoodTracks[1]);
+
   hist->fNShTot[0]->Fill(Evp->fNStrawHits);
   hist->fNShTot[1]->Fill(Evp->fNStrawHits);
 

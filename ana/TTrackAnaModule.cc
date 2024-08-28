@@ -331,6 +331,10 @@ void TTrackAnaModule::BookHistograms() {
   book_track_histset[ 86] = 1;
                                         // pi+ --> e+ nu
   book_track_histset[101] = 1;          // all tracks weighted by the pion survival prob
+
+  book_track_histset[204] = 1;          // hit flagging... CE 
+  book_track_histset[207] = 1;          // hit flagging... muons
+  book_track_histset[208] = 1;          // hit flagging... pions
   
 
   for (int i=0; i<kNTrackHistSets; i++) {
@@ -552,22 +556,22 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   FillEventHistograms(fHist.fEvent[0],&fEvtPar);
 
-  if (fNTracks[0]> 0) FillEventHistograms(fHist.fEvent[1],&fEvtPar);
-  else                FillEventHistograms(fHist.fEvent[2],&fEvtPar);
+  if (fEvtPar.fNTracks[0]> 0) FillEventHistograms(fHist.fEvent[1],&fEvtPar);
+  else                        FillEventHistograms(fHist.fEvent[2],&fEvtPar);
 
   if (fNClusters > 0) FillEventHistograms(fHist.fEvent[3],&fEvtPar);
   else                FillEventHistograms(fHist.fEvent[4],&fEvtPar);
 
-  if ((fNTracks[0] == 0) && (fabs(cos_th) < 0.4)) {
+  if ((fEvtPar.fNTracks[0] == 0) && (fabs(cos_th) < 0.4)) {
     FillEventHistograms(fHist.fEvent[5],&fEvtPar); 
   }
 
-  if (fNGoodTracks > 0) {
+  if (fEvtPar.fNGoodTracks[0] > 0) {
     FillEventHistograms(fHist.fEvent[6],&fEvtPar); 
 
     TLorentzVector    mom(1.,0.,0.,0);
     
-    if (fParticle) fParticle->Momentum(mom);
+    if (fSimPar.fParticle) mom = *fSimPar.fParticle->StartMom();
 
     double p, cos_th;
 
@@ -576,7 +580,7 @@ void TTrackAnaModule::FillHistograms() {
 
     if (GetDebugBit(31) && (cos_th > 0.8)) {
       GetHeaderBlock()->Print(Form(" bit:031 cos_th = %10.3f p = %10.3f ntrk = %5i",
-				   cos_th, p, fNTracks[0]));
+				   cos_th, p, fEvtPar.fNTracks[0]));
     }
   }
 
@@ -590,7 +594,7 @@ void TTrackAnaModule::FillHistograms() {
     }
 
     if (GetDebugBit(38)) {
-      if ((fNCalPatRec <= 0) && (fNTracks[0] > 0)) {
+      if ((fNCalPatRec <= 0) && (fEvtPar.fNTracks[0] > 0)) {
 	GetHeaderBlock()->Print(Form(" bit:038 cl_e = %10.3f, cl_time = %10.3f fNCalPatRec = 0",cl_e,cl0->Time()));
       }
     }
@@ -601,7 +605,7 @@ void TTrackAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // EVT_10: events with SetC tracks 103.5 < p < 105.0
 //-----------------------------------------------------------------------------
-  if (fNGoodTracks > 0) {
+  if (fEvtPar.fNGoodTracks[0] > 0) {
     TStnTrack* trk = fTrackBlock->Track(0);
     if ((103.5 < trk->fP) && (trk->fP < 105.)) {
       FillEventHistograms(fHist.fEvent[10],&fEvtPar);
@@ -617,14 +621,14 @@ void TTrackAnaModule::FillHistograms() {
     TStnHelix*  hel = fHelixBlock->Helix(i);
     HelixPar_t* hp  = fHelixPar+i;
     FillHelixHistograms(fHist.fHelix[0],hel,hp);
-    if (fNTracks[0] > 0) FillHelixHistograms(fHist.fHelix[1],hel,hp);
+    if (fEvtPar.fNTracks[0] > 0) FillHelixHistograms(fHist.fHelix[1],hel,hp);
     if (hel->fTrackSeedIndex >= 0) FillHelixHistograms(fHist.fHelix[2],hel,hp);
   }
 //-----------------------------------------------------------------------------
 // Simp histograms
 //-----------------------------------------------------------------------------
   if (fSimp) {
-    SimpData_t sd;
+    SimpData_t sd; sd.fParent = nullptr;
     FillSimpHistograms(fHist.fSimp[0],fSimp,&sd);
   }
 //-----------------------------------------------------------------------------
@@ -633,7 +637,7 @@ void TTrackAnaModule::FillHistograms() {
   TStnTrack*   trk;
   TrackPar_t*  tp;
 
-  for (int i=0; i<fNTracks[0]; ++i ) {
+  for (int i=0; i<fEvtPar.fNTracks[0]; ++i ) {
     trk = fTrackBlock->Track(i);
     tp  = fTrackPar+i;
 
@@ -935,7 +939,32 @@ void TTrackAnaModule::FillHistograms() {
     if (fEvtPar.fPionSurvProb > 0) {
       FillTrackHistograms(fHist.fTrack[101],trk,tp,&fSimPar,fEvtPar.fPionSurvProb);
     }
-  }
+    
+//-----------------------------------------------------------------------------
+// TRK_204: all tracks CE 
+//-----------------------------------------------------------------------------
+    int pdg_code = trk->PDGCode();
+    int sim_id   = trk->SimID();
+    
+    int gen_id(-1);
+    if (sim_id >= 0) {
+      TSimParticle* simp = fSimpBlock->FindParticle(sim_id);
+      if (simp) gen_id = simp->GeneratorID();
+    }
+    
+    if ((pdg_code == 11) and (gen_id == 167)) {
+      FillTrackHistograms(fHist.fTrack[204],trk,tp,&fSimPar);
+    }
+    
+    if (abs(pdg_code) == 13) {
+      FillTrackHistograms(fHist.fTrack[207],trk,tp,&fSimPar);
+    }
+    
+    if (abs(pdg_code) == 211) {
+      FillTrackHistograms(fHist.fTrack[208],trk,tp,&fSimPar);
+    }
+    
+ }
 
 //-----------------------------------------------------------------------------
 // cluster histograms 
@@ -947,11 +976,11 @@ void TTrackAnaModule::FillHistograms() {
     id = cl->DiskID();
     FillClusterHistograms(fHist.fCluster[0],cl);
 
-    if (fNTracks[0]     >  0 ) FillClusterHistograms(fHist.fCluster[1],cl);
-    if (fNGoodTracks    >  0 ) FillClusterHistograms(fHist.fCluster[2],cl);
-    if (fNMatchedTracks >  0 ) FillClusterHistograms(fHist.fCluster[3],cl);
-    if (cl->Energy()    > 10.) FillClusterHistograms(fHist.fCluster[4],cl);
-    if (cl->Energy()    > 60.) FillClusterHistograms(fHist.fCluster[5],cl);
+    if (fEvtPar.fNTracks[0]     >  0 ) FillClusterHistograms(fHist.fCluster[1],cl);
+    if (fEvtPar.fNGoodTracks[0] >  0 ) FillClusterHistograms(fHist.fCluster[2],cl);
+    if (fNMatchedTracks         >  0 ) FillClusterHistograms(fHist.fCluster[3],cl);
+    if (cl->Energy()            > 10.) FillClusterHistograms(fHist.fCluster[4],cl);
+    if (cl->Energy()            > 60.) FillClusterHistograms(fHist.fCluster[5],cl);
 
     if      (id == 0         ) FillClusterHistograms(fHist.fCluster[6],cl);
     else if (id == 1         ) FillClusterHistograms(fHist.fCluster[7],cl);
@@ -1147,8 +1176,8 @@ int TTrackAnaModule::Event(int ientry) {
     fDiskCalorimeter->Init(&disk_geom);
   }
 
-  fNTracks[0] = fTrackBlock->NTracks();
-  if (fNTracks[0] == 0) fTrack = 0;
+  fEvtPar.fNTracks[0] = fTrackBlock->NTracks();
+  if (fEvtPar.fNTracks[0] == 0) fTrack = 0;
   else                  fTrack = fTrackBlock->Track(0);
 
   fNClusters  = fClusterBlock->NClusters();
@@ -1163,7 +1192,7 @@ int TTrackAnaModule::Event(int ientry) {
   fBestHyp[0]     = -1;
   fBestHyp[1]     = -1;
 
-  fNGoodTracks    = 0;
+  fEvtPar.fNGoodTracks[0]    = 0;
   fNMatchedTracks = 0;
 //-----------------------------------------------------------------------------
 // determine the number of CalPatRec tracks - this assumes that the list of 
@@ -1183,6 +1212,11 @@ int TTrackAnaModule::Event(int ientry) {
 
     tp->fTrackID[0] = TAnaModule::fTrackID_BOX;
     tp->fTrackID[1] = TAnaModule::fTrackID_MVA;
+
+    // simplified definition of a good track
+    if ((trk->NActive() >= 20) and (tp->fP > 80)) {
+      fEvtPar.fNGoodTracks[0] += 1;
+    }
   }
 
   InitTrackPar(fTrackBlock,fClusterBlock,fTrackPar,&fSimPar);

@@ -102,6 +102,7 @@ namespace murat {
   TCalAnaModule*           m_cal    = NULL;
   TCosmicsAnaModule*       m_cos    = NULL;
   TClusterAnaModule*       m_cls    = NULL;
+  TDegraderRpcAnaModule*   m_drpc   = NULL;
   TEmuAnaModule*           m_emu    = NULL;
   TFilterModule*           m_filter = NULL;
   TMomscaleAnaModule*      m_moms   = NULL;

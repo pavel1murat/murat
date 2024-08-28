@@ -23,6 +23,7 @@ namespace murat {
     TH1F*    fMcCosTh;
     TH1F*    fNHelices;
     TH1F*    fNTracks[2];
+    TH1F*    fNGoodTracks[2];
     TH1F*    fNShTot [2];
     TH1F*    fNGoodSH;
     TH1F*    fNChTot [2];

@@ -12,6 +12,7 @@ int load_stnana_scripts_murat() {
     "cosmics.C"     ,  "PWD",
     "dio_calib.C"   ,  "PWD",
     "dose.C"        ,  "PWD",
+    "drpc.C"        ,  "PWD",
     "g4val.C"       ,  "PWD",
     "genp.C"        ,  "PWD",
     "helix.C"       ,  "PWD",

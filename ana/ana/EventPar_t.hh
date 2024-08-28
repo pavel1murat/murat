@@ -16,6 +16,8 @@ namespace murat {
     int           fNStrawHits;
     int           fNComboHits;
 
+    int           fNGoodParticles;
+
     int           fNClusters;               // calorimeter clusters
     int           fNHelices;
     int           fNTimeClusters;           // time clusters

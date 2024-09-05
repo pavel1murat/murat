@@ -111,7 +111,7 @@ TDegraderRpcAnaModule::TDegraderRpcAnaModule(const char* name, const char* title
 
   fDnMax            = 15;
 //-----------------------------------------------------------------------------
-// this is redefiend by the dataset catalog anyway
+// this is redefined by the dataset catalog anyway
 //-----------------------------------------------------------------------------
   fPDGCode          = 22;
   fMCProcessCode    = 178;   // mu2e::ProcessCode::mu2eExternalRPC;
@@ -159,6 +159,9 @@ void TDegraderRpcAnaModule::BookDRpcHistograms(DRpcHist_t* Hist, const char* Fol
   HBook1F(Hist->fSMomVD13  ,"smvd13",Form("%s: sum mom VD13"  ,Folder), 200, 50, 150,Folder);
 
   HBook2F(Hist->fSMomVD13VsSinTh,"smvd13_vs_sinth",Form("%s: sum mom VD13 vs sinth",Folder), 100,-0.1,0.1,200,50.,150.,Folder);
+
+  HBook1F(Hist->fCPath           ,"cpath",Form("%s: cpath"  ,Folder), 200,  0,  2,Folder);
+  HBook2F(Hist->fSMomVD13VsCPath ,"smvd13_vs_cpath",Form("%s: smvd13 vs conv path"  ,Folder), 200,  0,  2,200,50,150,Folder);
 }
 
 //-----------------------------------------------------------------------------
@@ -329,9 +332,13 @@ void    TDegraderRpcAnaModule::FillDRpcHistograms    (DRpcHist_t*    Hist,
   Hist->fNHitsVD13->Fill(fNHitsVD13,Weight);
   Hist->fSMomVD13->Fill(fSMomVD13,Weight);
 
+  Hist->fCPath->Fill(fCPath,Weight);
+  
   if (fEvtPar.fSimp != nullptr) {
     float sinth = fEvtPar.fSimp->StartMom()->Pz()/(fEvtPar.fSimp->StartMom()->P()+1.e-12);
     Hist->fSMomVD13VsSinTh->Fill(sinth,fSMomVD13,Weight);
+
+    Hist->fSMomVD13VsCPath->Fill(fCPath,fSMomVD13,Weight);
   }
 }
 
@@ -393,8 +400,12 @@ void TDegraderRpcAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
   if (fQVD13 == 0) {
     FillDRpcHistograms(fHist.fDRpc[0]);
-    if (fNHitsVD10 == 2) FillDRpcHistograms(fHist.fDRpc[1]);
-    if (fNHitsVD13 == 2) FillDRpcHistograms(fHist.fDRpc[2]);
+    if (fNHitsVD10 == 2) {
+      FillDRpcHistograms(fHist.fDRpc[1]);
+    }
+    if (fNHitsVD13 == 2) {
+      FillDRpcHistograms(fHist.fDRpc[2]);
+    }
   }
 }
 
@@ -446,6 +457,7 @@ int TDegraderRpcAnaModule::Event(int ientry) {
 // figure the MC truth
 // pi+ --> e+ nu case : determine the event weight
 //-----------------------------------------------------------------------------
+  fCPath = -1;
   for (int i=0; i<fEvtPar.fNSimp; i++) {
     TSimParticle* simp = fSimpBlock->Particle(i);
     int pdg_code       = simp->PDGCode();
@@ -454,6 +466,13 @@ int TDegraderRpcAnaModule::Event(int ientry) {
     if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
       fEvtPar.fSimp  = simp;
       fEvtPar.fPartE = simp->StartMom()->Energy();
+//-----------------------------------------------------------------------------
+// also calculate the path
+//-----------------------------------------------------------------------------
+      double x  = simp->EndPos()->X()+3904.;
+      double y  = simp->EndPos()->Y();
+      double dr = 250-sqrt(x*x+y*y);
+      fCPath    = dr*simp->StartMom()->P()/simp->StartMom()->Pt();
     }
 
     if ((abs(pdg_code) == 211) && (simp->GeneratorID() == 56)) {
@@ -645,8 +664,8 @@ void TDegraderRpcAnaModule::Debug() {
   }
 
   if (GetDebugBit(4) == 1) {
-    if ((fNHitsVD13 > 0) and (fQVD13 == 0) and (fSMomVD13 < 85)) {
-      GetHeaderBlock()->Print(Form("fSMomVD10: %f fSMomVD13: %f",fSMomVD10,fSMomVD13));
+    if ((fNHitsVD13 == 2) and (fQVD13 == 0)) {
+      GetHeaderBlock()->Print(Form("fSMomVD10: %10.3f fSMomVD13: %10.3f fCPath: %10.3f",fSMomVD10,fSMomVD13,fCPath));
     }
   }
 }

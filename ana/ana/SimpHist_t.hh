@@ -32,6 +32,7 @@ namespace murat {
    TH2F*    fNshVsCosTh;
    
    TH2F*    fYVsX;
+   TH2F*    fYeVsP;
    TH2F*    fXEndVsZEnd;
    TH2F*    fYcVsZEnd;
    TH2F*    fPVD9VsZEnd;

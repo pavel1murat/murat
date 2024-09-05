@@ -53,6 +53,8 @@ public:
     TH1F*    fNHitsVD13;
     TH1F*    fSMomVD13;                    //
     TH2F*    fSMomVD13VsSinTh;             //
+    TH1F*    fCPath;
+    TH2F*    fSMomVD13VsCPath;
   };
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets         = 100 };
@@ -143,6 +145,8 @@ public:
   int                  fNHitsVD13;
   float                fSMomVD13;
   int                  fQVD13;
+
+  double               fCPath;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

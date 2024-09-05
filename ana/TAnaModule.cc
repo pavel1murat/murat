@@ -410,7 +410,8 @@ void TAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
 
   HBook2F(hist->fNshVsCosTh     ,"nsh_vs_costh",Form("%s: nsh vs costh"            ,Folder), 20 ,-1,1,40,0,200,Folder);
 
-  HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,  -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fYVsX           ,"y_vs_x"     ,Form("%s: yend vs Xend " ,Folder), 250,   -250,   250, 250,  -250,  250,Folder);
+  HBook2F(hist->fYeVsP          ,"ye_vs_p"    ,Form("%s: yend vs P "    ,Folder), 250,      0,   250, 250,  -250,  250,Folder);
   HBook2F(hist->fXEndVsZEnd     ,"xe_vs_ze"   ,Form("%s: xend vs zend " ,Folder), 250,  -5000, 20000, 100, -5000, 5000,Folder);
   HBook2F(hist->fYcVsZEnd       ,"yc_vs_ze"   ,Form("%s: yc vs zend "   ,Folder), 250,  -5000, 20000, 200,   -200, 200,Folder);
   HBook2F(hist->fPVD9VsZEnd     ,"pvd9_vs_ze" ,Form("%s: pvd9 vs zend " ,Folder), 250,  -5000, 20000, 200,      0, 200,Folder);
@@ -840,6 +841,7 @@ void TAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpDa
   hist->fNshVsCosTh->Fill(costh,nsh,Weight);
 
   hist->fYVsX->Fill(xe,ye,Weight);
+  hist->fYeVsP->Fill(p,ye,Weight);
   hist->fXEndVsZEnd->Fill(ze,xe,Weight);
   hist->fYcVsZEnd->Fill(ze,Sd->fY0,Weight);
   hist->fPVD9VsZEnd->Fill(ze,Sd->fPVD9,Weight);

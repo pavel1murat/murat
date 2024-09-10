@@ -19,8 +19,8 @@ namespace murat {
    TH1F*    fEndTime;
    TH1F*    fStageDt;
 
-   TH1F*    fStartMom[2];
-   TH1F*    fEndMom  [2];
+   TH1F*    fStartMom[3];
+   TH1F*    fEndMom  [3];
    TH1F*    fNStrawHits;
 
    TH1F*    fMomTargetEnd;

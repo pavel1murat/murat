@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// cb4: pseudo Crystall Ball function : Landau core with power-law tails on both sides
+// parameterization by Shihua Huang: Landau core with the power law tails on both sides
 // make it a C++ class to simplify fitting multiple functions
 //
 // usage:
@@ -17,20 +17,44 @@
 // scan a range of momenta with 
 // 
 // cbx->GetFunc()->Eval(104.5) 
+// Minimizer is Minuit2 / Migrad
+// Chi2                      =      121.367
+// NDf                       =           67
+// Edm                       =  9.73605e-05
+// NCalls                    =           85
+// anorm                     =      290.015   +/-   0           
+// x0                        =      104.398   +/-   0           
+// a                         =     0.666853   +/-   0           
+// b                         =      3.08502   +/-   0           
+// alp1                      =      1.27325   +/-   0           
+// n1                        =       7.7983   +/-   0           
+// alp2                      =        7.132   +/-   0           
+// n2                        =            4   +/-   0           
+//
+// bpip4b0:  x3->init_parameters(860,69.05,0.45,3.3,2.16,6.8,0.9,2.1)
+// cpos1b0:  x2->init_parameters(200,92.3,0.67,3.1,1.3,8,7,4)
+// rpc04b0:  x3->init_parameters(1280,128.64,0.158,11.2,5,2,1.3,2.)
+
 ///////////////////////////////////////////////////////////////////////////////
 #include "TMath.h"
 #include "TNamed.h"
 #include "TF1.h"
 
+#include "Stntuple/val/stntuple_val_functions.hh"
+
 //-----------------------------------------------------------------------------
 class cb4: public TNamed { 
 public:
 
+  static int fgDebug;
+
   TH1F* fHist;    // not owned by the fitter
-  TH1F* fHGaus;   // owned by the fitter
+  TH1F* fHCore;   // owned by the fitter
 
   TF1*  fFunc;
-  TF1*  fGaus;
+  TF1*  fCore;
+
+  TString  fFitOpt;
 
   cb4(const char* Name = "x");
   ~cb4();
@@ -40,18 +64,16 @@ public:
   static double  f_cb4 (double* X, double* P);    // Landau core + power tails
 
   void           init_parameters    (double P0, double P1, double P2, double P3, 
-				     double P4, double P5);
+				     double P4, double P5, double P6, double P7);
 
-  void           fit_histogram      (double XMin, double XMax);
+  void           fit_histogram      (TH1F* Hist, double XMin, double XMax);
 //-----------------------------------------------------------------------------
 // two functions doing the same, but with different interfaces
 //-----------------------------------------------------------------------------
-  void           fit(TH1* Hist, double X0, double XMin, double XMax, 
-		     double SigmaL = -1.);
+  void           fit(double XMin, double XMax);
 
   void           fit(const char* File, const char* Module, const char* Hist, 
-		     double X0, double XMin, double XMax, 
-		     double SigmaL=-1.);
+		     double XMin, double XMax);
 
   TF1* GetFunc() { return fFunc; }
   TH1* GetHist() { return (TH1*) fHist; }
@@ -59,27 +81,28 @@ public:
 };
 
 
+int cb4::fgDebug (0);
+
 //-----------------------------------------------------------------------------
 cb4::cb4(const char* Name): TNamed(Name,Name) {
   fHist  = nullptr;
-  fHGaus = nullptr;
+  fHCore = nullptr;
+
+  fFitOpt = "";
   
-  fFunc = new TF1(Form("%s_f_cb4"  ,GetName()),cb4::f_cb4 ,-1,1,6);
+  fFunc = new TF1(Form("%s_f_cb4"  ,GetName()),cb4::f_cb4 ,-1,1,8);
   fFunc->SetParName(0,"anorm");
   fFunc->SetParName(1,"x0");
-  fFunc->SetParName(2,"sigm");
-  fFunc->SetParName(3,"a");
-  fFunc->SetParName(4,"beta1");
-  fFunc->SetParName(5,"beta2");
-
-  // fFunc->SetParLimits(2,0.,1.);
-  // fFunc->SetParLimits(3,0.,1.);
-  //  F->SetParLimits(5,0.,5.);
-  //  F->SetParLimits(6,0.,5.);
+  fFunc->SetParName(2,"a");
+  fFunc->SetParName(3,"b");
+  fFunc->SetParName(4,"alp1");
+  fFunc->SetParName(5,"n1");
+  fFunc->SetParName(6,"alp2");
+  fFunc->SetParName(7,"n2");
 
   fFunc->SetLineWidth(1);
 
-  //  fGaus = new TF1(Form("%s_f_agaus",GetName()),cb4::agauss,-1,1,4);
+  fCore = new TF1(Form("%s_f_core",GetName()),cb4::core,-1,1,4);
 }
 
 //-----------------------------------------------------------------------------
@@ -96,99 +119,144 @@ cb4::~cb4() {
 double cb4::core(double* X, double* P) {
   double x0, f(0), sig, xdx;
 
-  double dx  = (X[0]-P[3])/P[2];
+  double dx  = (X[0]-P[1]);
 
-  f = P[0]*TMath::Exp(P[1]*(dx-TMath::Exp(dx)));
+  f = P[0]*TMath::Exp(P[2]*(P[3]*dx-TMath::Exp(P[3]*dx)));
   
   return f;
 }
 
 //-----------------------------------------------------------------------------
 double cb4::f_cb4(double* X, double* P) {
-  double x0, abs_dx0, x1, f, sigm, beta1, abs_beta1, beta2, abs_beta2, n1, n2, a, b, dx0, dx1, xdx;
+  double x0, dx, abs_dx0, x1, f, sigm, beta1, abs_beta1, beta2, abs_beta2;
+  double n1, n2, a, b, A1, B1, alp1, alp2;
 
   x0         = P[1];
-  sigm       = P[2];
-  a          = P[3];
-  beta1      = P[4];   // x1/sigm
-  beta2      = P[5];   // x2/sigm
+  a          = P[2];
+  b          = P[3];
+  alp1       = P[4];
+  n1         = P[5];
+  alp2       = P[6];
+  n2         = P[7];
 
-  dx0        = (X[0]-x0)/sigm;
-  abs_dx0    = fabs(dx0);
-					// in units of sigma
-  abs_beta1  = fabs(beta1);
-  abs_beta2  = fabs(beta2);
-
-  if (xdx < -abs_beta1) {
-    n1 = abs_beta1*a*(1+exp(-abs_beta1));
-    b  = exp((a*(abs_dx0-exp(-abs_dx0))))/pow(beta1,n1);
-    f  = P[0]*b*pow(dx0,n1);
+  if (cb4::fgDebug > 0) {
+    printf("P[0]=%10.3e x0=%10.3e a=%10.3e b=%10.3e alp1=%10.3e n1=%10.3e alp1=%10.3e n1=%10.3e\n",
+           P[0],x0,a,b,alp1,n1,alp2,n2);
   }
-  else if (xdx < abs_beta2) { 
+
+  dx        = X[0]-x0;
+
+  if (dx < -alp1) {
+    double B1 = alp1+n1/(a*b*(1-exp(-b*alp1)));
+    double A1 = P[0]*exp(a*(-b*alp1-exp(-b*alp1)))*pow(B1+alp1,n1);
+
+    f  = A1/pow(B1-dx,n1);
+
+    if (cb4::fgDebug > 0) {
+      printf("[1] : A1,B1,f : %10.3e %10.3e %10.3e \n", A1,B1,f );
+    }
+  }
+  else if (dx < alp2) { 
 					// gauss
-    f = P[0]*exp(a*(dx0-exp(-dx0)));
+    f = P[0]*exp(a*(b*dx-exp(b*dx)));
+
+    if (cb4::fgDebug > 0) {
+      printf("[2] : f : %10.3e\n", f );
+    }
   }
   else {
-    n2 = beta2*a*(1+exp(-beta2));
-    b  = exp((a*(dx0-exp(-dx0))))/pow(beta2,n2);
-    f  = P[0]*b*pow(dx0,n2);
+    double B2 = -alp2+n2/(a*b*(exp(b*alp2)-1));
+    double A2 = P[0]*exp(a*(b*alp2-exp(b*alp2)))*pow(B2+alp2,n2);
+
+    f  = A2/pow(B2+dx,n2);
+    
+    if (cb4::fgDebug > 0) {
+      printf("[3] : A2,B2,f : %10.3e %10.3e %10.3e \n", A2,B2,f );
+    }
   }
   
   return f;
 }
 
 //-----------------------------------------------------------------------------
-void cb4::fit_histogram(double XMin, double XMax) {
-  fHist->GetXaxis()->SetRangeUser(XMin,XMax);
-  fHist->Fit(fFunc,"L","",XMin,XMax);
-}
-
-//-----------------------------------------------------------------------------
 void cb4::init_parameters(double P0, double P1, double P2, double P3, 
-			  double P4, double P5) {
+			  double P4, double P5, double P6, double P7) {
+
   fFunc->SetParameter(0,P0);
   fFunc->SetParameter(1,P1);
+  fFunc->SetParError (1,0.1);
   fFunc->SetParameter(2,P2);
   fFunc->SetParameter(3,P3);
-  fFunc->SetParameter(4,P4);
-  fFunc->SetParameter(5,P5);
+  
+  fFunc->SetParameter(4,P4);            // alp1
+  fFunc->SetParLimits(4,0,100);
+  fFunc->SetParError (4,0.1);
+
+  fFunc->SetParameter(5,P5);            // n1
+  fFunc->SetParLimits(5,0,100);
+  fFunc->SetParError (5,0.1);
+
+  fFunc->SetParameter(6,P6);            // alp2
+  fFunc->SetParLimits(6,0,100);
+  fFunc->SetParError (6,0.1);
+
+  fFunc->SetParameter(7,P7);            // n2
+  fFunc->SetParLimits(7,0,100);
+  fFunc->SetParError (7,0.1);
 }
 
 //-----------------------------------------------------------------------------
-void cb4::fit(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1) {
+void cb4::fit_histogram(TH1F* Hist, double XMin, double XMax) {
+  fHist->GetXaxis()->SetRangeUser(XMin,XMax);
+  fHist->Fit(fFunc,fFitOpt.Data(),"",XMin,XMax);
+}
 
-  fHist      = (TH1F*) Hist->Clone("h_fit_cb4");
-  double anorm = fHist->GetEntries()/50;
+//-----------------------------------------------------------------------------
+void cb4::fit(const char* File, const char* Module, const char* Hist, 
+	      double XMin, double XMax) {
 
-  printf("anorm = %12.5e\n",anorm);
+  TH1F* h = (TH1F*) gh1(File,Module,Hist);
+  fHist  = (TH1F*) h->Clone("h_fit_cb4");
 
-  init_parameters(anorm,X0, 0.180,1., 1.,1.);
+  this->fit_histogram(h,XMin,XMax);
+}
 
-  fit_histogram(XMin,XMax);
-  // 					// gaussian component of the fit, to display
-  // fGaus->SetMinimum(XMin);
-  // fGaus->SetMaximum(XMax);
-  // fGaus->SetParameter(0,fFunc->GetParameter(0));
-  // fGaus->SetParameter(1,fFunc->GetParameter(1));
-  // fGaus->SetParameter(2,fFunc->GetParameter(2));
-  // fGaus->SetParameter(3,fFunc->GetParameter(3));
+//-----------------------------------------------------------------------------
+// assume init_parameters is a separate step
+//-----------------------------------------------------------------------------
+void cb4::fit(double XMin, double XMax) {
 
-  // fHGaus = (TH1F*) fHist->Clone(Form("%s_h_agaus",GetName()));
+  fit_histogram(fHist,XMin,XMax);
+//-----------------------------------------------------------------------------
+// core  component of the fit, to display
+//-----------------------------------------------------------------------------
+  fCore->SetMinimum(XMin);
+  fCore->SetMaximum(XMax);
+  fCore->SetParameter(0,fFunc->GetParameter(0));
+  fCore->SetParameter(1,fFunc->GetParameter(1));
+  fCore->SetParameter(2,fFunc->GetParameter(2));
+  fCore->SetParameter(3,fFunc->GetParameter(3));
 
-  // fHGaus->Reset();
+  fHCore = (TH1F*) fHist->Clone(Form("%s_h_core",GetName()));
 
-  // for (int i=1; i<fHist->GetNbinsX(); i++) {
-  //   float x = fHist->GetBinCenter(i);
-  //   float y = fGaus->Eval(x);
-  //   fHGaus->SetBinContent(i,y);
-  //   fHGaus->SetBinError  (i,0);
-  // }
+  fHCore->Reset();
+
+  for (int i=1; i<fHist->GetNbinsX(); i++) {
+    float x = fHist->GetBinCenter(i);
+    float y = fCore->Eval(x);
+    fHCore->SetBinContent(i,y);
+    fHCore->SetBinError  (i,0);
+  }
   
-  // fHGaus->SetLineColor(kBlue+3);
-  // fHGaus->SetFillColor(kBlue+3);
-  // fHGaus->SetFillStyle(3003);
+  fHCore->SetLineColor(kBlue+3);
+  fHCore->SetFillColor(kBlue+3);
+  fHCore->SetFillStyle(3003);
   
-  // fHGaus->Draw("same");
+  //  fHCore->Draw("same");
+  fCore->SetLineColor(kBlue+3);
+  fCore->SetFillColor(kBlue+3);
+  fCore->SetFillStyle(3003);
+  fCore->Draw("same");
 //-----------------------------------------------------------------------------
 // calculate the background fraction: high-momentum side , above the gaussian
 // use region from alpha2 to XMax
@@ -207,13 +275,3 @@ void cb4::fit(TH1* Hist, double X0, double XMin, double XMax, double Sigma = -1)
 
   // printf("total = %12.5f, HTail = %12.5f, htail/total : %12.5e\n",total,htail,htail/total);
 }
-
-//-----------------------------------------------------------------------------
-void cb4::fit(const char* File, const char* Module, const char* Hist, 
-	      double X0, double XMin, double XMax, double Sigma = -1) {
-
-  TH1* h = (TH1F*) gh1(File,Module,Hist);
-
-  this->fit(h,X0,XMin,XMax,Sigma);
-}
-

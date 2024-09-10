@@ -48,10 +48,12 @@ public:
   };
 
   struct DRpcHist_t {
+    TH1F*    fNHitsVD09;
+    TH1F*    fSMomVD09[2];                    //
     TH1F*    fNHitsVD10;
-    TH1F*    fSMomVD10;                    //
+    TH1F*    fSMomVD10[2];                    //
     TH1F*    fNHitsVD13;
-    TH1F*    fSMomVD13;                    //
+    TH1F*    fSMomVD13[2];                    //
     TH2F*    fSMomVD13VsSinTh;             //
     TH1F*    fCPath;
     TH2F*    fSMomVD13VsCPath;
@@ -135,6 +137,11 @@ public:
   int                  fEventPassedSelections; // 1: event passed analysis selections; 0: event didn't pass
   int                  fDnMax;
   int                  fN300;
+
+  TStepPointMC*        fHitVD09[100];
+  int                  fNHitsVD09;
+  float                fSMomVD09;
+  int                  fQVD09;
 
   TStepPointMC*        fHitVD10[100];
   int                  fNHitsVD10;

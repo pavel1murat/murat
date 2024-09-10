@@ -396,9 +396,11 @@ void TAnaModule::BookSimpHistograms(HistBase_t* Hist, const char* Folder) {
 
   HBook1F(hist->fStartMom[0]    ,"mom"         ,Form("%s: start Mom[0]"            ,Folder), 500,     0,  500,Folder);
   HBook1F(hist->fStartMom[1]    ,"mom_1"       ,Form("%s: start Mom[1]"            ,Folder), 500,     0, 5000,Folder);
+  HBook1F(hist->fStartMom[2]    ,"mom_2"       ,Form("%s: start Mom[2]"            ,Folder),1100,     0,  110,Folder);
 
   HBook1F(hist->fEndMom[0]      ,"emom"        ,Form("%s: end Mom[0]"              ,Folder), 500,     0,  500,Folder);
   HBook1F(hist->fEndMom[1]      ,"emom_1"      ,Form("%s: end Mom[1]"              ,Folder), 500,     0, 5000,Folder);
+  HBook1F(hist->fEndMom[2]      ,"emom_2"      ,Form("%s: end Mom[2]"              ,Folder),1100,     0,  110,Folder);
 
   HBook1F(hist->fNStrawHits     ,"nsh"      ,Form("%s: N(straw hits)" ,Folder), 100,     0,  100,Folder);
 
@@ -822,10 +824,12 @@ void TAnaModule::FillSimpHistograms(HistBase_t* Hist, TSimParticle* Simp, SimpDa
   float p = Simp->StartMom()->P();
   hist->fStartMom[0]->Fill(p,Weight);
   hist->fStartMom[1]->Fill(p,Weight);
+  hist->fStartMom[2]->Fill(p,Weight);
 
   float pe = Simp->EndMom()->P();
   hist->fEndMom[0]->Fill(pe,Weight);
   hist->fEndMom[1]->Fill(pe,Weight);
+  hist->fEndMom[2]->Fill(pe,Weight);
 
   int nsh = Simp->NStrawHits();
   hist->fNStrawHits->Fill(nsh,Weight);

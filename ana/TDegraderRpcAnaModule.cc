@@ -153,10 +153,15 @@ int TDegraderRpcAnaModule::BeginJob() {
 
 //-----------------------------------------------------------------------------
 void TDegraderRpcAnaModule::BookDRpcHistograms(DRpcHist_t* Hist, const char* Folder) {
+  HBook1F(Hist->fNHitsVD09 ,"nvd09"   ,Form("%s: N(hits) VD09"  ,Folder),  20, 0,   20,Folder);
+  HBook1F(Hist->fSMomVD09[0]  ,"smvd09_0",Form("%s: sum mom VD09[0]"  ,Folder), 200, 50, 150,Folder);
+  HBook1F(Hist->fSMomVD09[1]  ,"smvd09_1",Form("%s: sum mom VD09[1]"  ,Folder), 500, 90, 140,Folder);
   HBook1F(Hist->fNHitsVD10 ,"nvd10" ,Form("%s: N(hits) VD10"  ,Folder),  20, 0,   20,Folder);
-  HBook1F(Hist->fSMomVD10  ,"smvd10",Form("%s: sum mom VD10"  ,Folder), 200, 50, 150,Folder);
+  HBook1F(Hist->fSMomVD10[0]  ,"smvd10_0",Form("%s: sum mom VD10[0]"  ,Folder), 200, 50, 150,Folder);
+  HBook1F(Hist->fSMomVD10[1]  ,"smvd10_1",Form("%s: sum mom VD10[1]"  ,Folder), 500, 90, 140,Folder);
   HBook1F(Hist->fNHitsVD13 ,"nvd13" ,Form("%s: N(hits) VD13"  ,Folder),  20, 0,   20,Folder);
-  HBook1F(Hist->fSMomVD13  ,"smvd13",Form("%s: sum mom VD13"  ,Folder), 200, 50, 150,Folder);
+  HBook1F(Hist->fSMomVD13[0]  ,"smvd13_0",Form("%s: sum mom VD13[0]"  ,Folder), 200, 50, 150,Folder);
+  HBook1F(Hist->fSMomVD13[1]  ,"smvd13_1",Form("%s: sum mom VD13[1]"  ,Folder), 500, 90, 140,Folder);
 
   HBook2F(Hist->fSMomVD13VsSinTh,"smvd13_vs_sinth",Form("%s: sum mom VD13 vs sinth",Folder), 100,-0.1,0.1,200,50.,150.,Folder);
 
@@ -326,11 +331,17 @@ void TDegraderRpcAnaModule::BookHistograms() {
 //-----------------------------------------------------------------------------
 void    TDegraderRpcAnaModule::FillDRpcHistograms    (DRpcHist_t*    Hist, 
                                                       double         Weight) {
+  Hist->fNHitsVD09->Fill(fNHitsVD09,Weight);
+  Hist->fSMomVD09[0]->Fill(fSMomVD09,Weight);
+  Hist->fSMomVD09[1]->Fill(fSMomVD09,Weight);
+
   Hist->fNHitsVD10->Fill(fNHitsVD10,Weight);
-  Hist->fSMomVD10->Fill(fSMomVD10,Weight);
+  Hist->fSMomVD10[0]->Fill(fSMomVD10,Weight);
+  Hist->fSMomVD10[1]->Fill(fSMomVD10,Weight);
 
   Hist->fNHitsVD13->Fill(fNHitsVD13,Weight);
-  Hist->fSMomVD13->Fill(fSMomVD13,Weight);
+  Hist->fSMomVD13[0]->Fill(fSMomVD13,Weight);
+  Hist->fSMomVD13[1]->Fill(fSMomVD13,Weight);
 
   Hist->fCPath->Fill(fCPath,Weight);
   
@@ -408,7 +419,6 @@ void TDegraderRpcAnaModule::FillHistograms() {
     }
   }
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -505,6 +515,10 @@ int TDegraderRpcAnaModule::Event(int ientry) {
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
 
+  fQVD09      = 0;
+  fNHitsVD09  = 0;
+  fSMomVD09   = 0;
+
   fQVD10      = 0;
   fNHitsVD10  = 0;
   fSMomVD10   = 0;
@@ -524,8 +538,18 @@ int TDegraderRpcAnaModule::Event(int ientry) {
     float mom = vdhit->Mom()->Mag();
     
     if ((abs(pdg_id) == 11) and (simp->NStrawHits() >= 20) and (mom > 30)) {
-      if (vdhit->VolumeID() == 10) {
-                                        // look at the step points at VD10
+      if (vdhit->VolumeID() ==  9) {
+//-----------------------------------------------------------------------------
+// count step pointMCs at VD09
+//-----------------------------------------------------------------------------
+        if (vdhit->Mom()->Pz() > 0) {
+          fHitVD09[fNHitsVD09] = vdhit;
+          fNHitsVD09          += 1;
+          fSMomVD09           += mom;
+          fQVD09              += pdg_id;
+        }
+      }
+      else if (vdhit->VolumeID() == 10) {
 //-----------------------------------------------------------------------------
 // count step pointMCs at VD10
 //-----------------------------------------------------------------------------
@@ -539,7 +563,7 @@ int TDegraderRpcAnaModule::Event(int ientry) {
       else if (vdhit->VolumeID() == 13) {
         if (vdhit->Mom()->Pz() > 0) {
 //-----------------------------------------------------------------------------
-// count step pointMCs in front of the tracker
+// count step pointMCs in front of the tracker (VD13)
 //-----------------------------------------------------------------------------
           fHitVD13[fNHitsVD13] = vdhit;
           fNHitsVD13          += 1;

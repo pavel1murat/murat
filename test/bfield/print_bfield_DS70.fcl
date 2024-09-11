@@ -1,0 +1,29 @@
+# -*- mode:tcl -*- 
+#------------------------------------------------------------------------------
+# run my PrintBField module to print B-field on the Mu2e magnetic channel axis
+# for a given set of the field maps
+#------------------------------------------------------------------------------
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
+
+process_name: PrintBfield
+
+source: { module_type: EmptyEvent  
+    maxEvents: 1 
+}
+
+services : { @table::Services.SimAndReco } 
+services.SeedService.baseSeed         : 8
+services.SeedService.maxUniqueEngines : 100
+
+services.GeometryService.bFieldFile   : "pipenu/common/bfgeom_DS70_v01.txt"
+
+physics: {
+    analyzers: {
+        printBF: { module_type: PrintBField }
+    }
+
+    e1       : [ printBF ]
+    end_paths: [ e1      ]
+}

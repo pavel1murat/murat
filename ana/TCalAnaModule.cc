@@ -408,18 +408,18 @@ void TCalAnaModule::FillCalHitHistograms(CalHitHist_t* Hist, TCalHitData* Hit) {
 // 
 //-----------------------------------------------------------------------------
 void TCalAnaModule::FillEventHistograms(EventHist_t* Hist, double EMin, double TMin) {
-  double            cos_th, xv, yv, rv, zv, p;
-  TLorentzVector    mom;
+  double            cos_th, xv, yv, rv, zv, p(1);
+  TLorentzVector    mom(0.,0.,1.,1);
 
-  fElectron->Momentum(mom);
+  //  fElectron->Momentum(mom);
 
   p      = mom.P();
   cos_th = mom.Pz()/p;
 
-  xv     = fElectron->Vx()+3904.;
-  yv     = fElectron->Vy();
+  xv     = 0; // fElectron->Vx()+3904.;
+  yv     = 0; // fElectron->Vy();
   rv     = sqrt(xv*xv+yv*yv);
-  zv     = fElectron->Vz();
+  zv     = 0; ; // fElectron->Vz();
 
   Hist->fEleCosTh->Fill(cos_th);
   Hist->fRv->Fill(rv);
@@ -583,7 +583,7 @@ int TCalAnaModule::BeginJob() {
   RegisterDataBlock("ClusterBlock"  ,"TStnClusterBlock" ,&fClusterBlock);
   RegisterDataBlock("CalDataBlock"  ,"TCalDataBlock"    ,&fCalDataBlock);
   RegisterDataBlock("GenpBlock"     ,"TGenpBlock"       ,&fGenpBlock);
-//   RegisterDataBlock("SimpBlock"     ,"TSimpBlock"       ,&fSimpBlock);
+  RegisterDataBlock("SimpBlock"     ,"TSimpBlock"       ,&fSimpBlock);
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -742,16 +742,16 @@ int TCalAnaModule::Event(int ientry) {
   fClusterBlock->GetEntry(ientry);
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
-  //  fSimpBlock->GetEntry(ientry);
+  fSimpBlock->GetEntry(ientry);
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed
 //-----------------------------------------------------------------------------
   fNGenp    = fGenpBlock->NParticles();
-  fElectron = fGenpBlock->Particle(0);
-  //  fSimp     = fSimpBlock->Particle(0);
+  // fElectron = fGenpBlock->Particle(0);
+  fSimp     = fSimpBlock->Particle(0);
 
-  fElectron->Momentum(mom);
+  // fElectron->Momentum(mom);
 					// this is a kludge, to be removed at the next 
 					// ntupling 
   //  fEleE     = fElectron->Energy();

@@ -58,9 +58,22 @@ public:
     TH1F*    fCPath;
     TH2F*    fSMomVD13VsCPath;
   };
+
+  struct T2Par_t {
+    int    fItrk1;
+    int    fItrk2;
+    float  fSMom;
+    float  fQ;
+  };
+  
+  struct T2Hist_t {
+    TH1F*    fSMom[2];                     //
+    TH1F*    fQ;                        //
+  };
+
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets         = 100 };
-  enum { kNTrackHistSets         = 400 };
+  enum { kNTrackHistSets         = 100 };
   enum { kNHelixHistSets         = 100 };
   enum { kNTrackStrawHitHistSets =  10 };
   enum { kNClusterHistSets       = 100 };
@@ -70,6 +83,7 @@ public:
   enum { kNTimeClusterHistSets   =  10 };
   enum { kNDRpcHistSets          = 400 };
   enum { kNTrackIDHistSets       =  10 };
+  enum { kNT2HistSets            =  10 };
 
   struct Hist_t {
     ClusterHist_t*         fCluster    [kNClusterHistSets];
@@ -81,6 +95,7 @@ public:
     TrackHist_t*           fTrack      [kNTrackHistSets  ];
     DRpcHist_t*            fDRpc       [kNDRpcHistSets   ];
     TStnTrackID::Hist_t*   fTrackID    [kNTrackIDHistSets];
+    T2Hist_t*              fT2         [kNT2HistSets  ];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -103,6 +118,7 @@ public:
                                         // additional parameters (assume nhelices/ntracks < 20)
   HelixPar_t           fHelixPar[20];
   TrackPar_t           fTrackPar[20];
+  T2Par_t              fT2Par  [100];
 
   SimPar_t             fSimPar;
                                         // histograms filled
@@ -120,6 +136,7 @@ public:
   int                  fNStrawHits;
   int                  fNCalHits;
   int                  fNGenp;          // N(generated particles)
+  int                  fNT2Par;
 
                                         // fTrackNumber[i]: track number, 
                                         // corresponding to OBSP particle #i
@@ -158,7 +175,7 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TDegraderRpcAnaModule(const char* name="DegraderRpcAna", const char* title="DegraderRpcAna");
+  TDegraderRpcAnaModule(const char* name="murat_DrpcAna", const char* title="DegraderRpcAna");
   ~TDegraderRpcAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
@@ -185,6 +202,7 @@ public:
 //-----------------------------------------------------------------------------
   // void    BookCaloHistograms       (CaloHist_t*        Hist, const char* Folder);
   void    BookTimeClusterHistograms(TimeClusterHist_t* Hist, const char* Folder);
+  void    BookT2Histograms(T2Hist_t* Hist, const char* Folder);
   void    BookDRpcHistograms(DRpcHist_t*      Hist, const char* Folder);
 
   // void    FillCaloHistograms       (CaloHist_t*        Hist, TStnCrystal*     Crystal);
@@ -192,6 +210,7 @@ public:
 
   void    FillDRpcHistograms    (DRpcHist_t*    Hist, 
                                  double         Weight = 1.);
+  void    FillT2Histograms      (T2Hist_t*      Hist, T2Par_t* T2Par, double Weight = 1.);
 
   void    BookHistograms();
   void    FillHistograms();

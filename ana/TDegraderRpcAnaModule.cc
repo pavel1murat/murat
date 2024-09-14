@@ -177,6 +177,13 @@ void TDegraderRpcAnaModule::BookTimeClusterHistograms(TimeClusterHist_t* Hist, c
   HBook1F(Hist->fT0Err,"t0err",Form("%s: T0Err"               ,Folder), 200, 0, 2000,Folder);
 }
 
+//-----------------------------------------------------------------------------
+void TDegraderRpcAnaModule::BookT2Histograms(T2Hist_t* Hist, const char* Folder) {
+  HBook1F(Hist->fSMom[0] ,"smom_0",Form("%s: P1+P2"                ,Folder), 500,   0,  500,Folder);
+  HBook1F(Hist->fSMom[1] ,"smom_1",Form("%s: P1+P2"                ,Folder), 500, 100,  150,Folder);
+  HBook1F(Hist->fQ    ,"q"   ,Form("%s: Q1+Q2"                ,Folder),  10, -5,   5,Folder);
+}
+
 //_____________________________________________________________________________
 void TDegraderRpcAnaModule::BookHistograms() {
 
@@ -276,6 +283,23 @@ void TDegraderRpcAnaModule::BookHistograms() {
     BookTrackIDHistograms(fHist.fTrackID[i],Form("Hist/%s",folder_name));
   }
 //-----------------------------------------------------------------------------
+// book two-track histograms
+//-----------------------------------------------------------------------------
+  int book_t2_histset[kNT2HistSets];
+  for (int i=0; i<kNT2HistSets; i++) book_t2_histset[i] = 0;
+
+  book_t2_histset[  0] = 1;		// all 2-track combinations
+  book_t2_histset[  1] = 1;		// Q = 0
+
+  for (int i=0; i<kNT2HistSets; i++) {
+    if (book_t2_histset[i] == 0)                      continue;
+    sprintf(folder_name,"t2_%i",i);
+    fol = (TFolder*) hist_folder->FindObject(folder_name);
+    if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
+    fHist.fT2[i] = new T2Hist_t;
+    BookT2Histograms(fHist.fT2[i],Form("Hist/%s",folder_name));
+  }
+//-----------------------------------------------------------------------------
 // book time cluster histograms
 //-----------------------------------------------------------------------------
   int book_tc_histset[kNTimeClusterHistSets];
@@ -354,6 +378,13 @@ void    TDegraderRpcAnaModule::FillDRpcHistograms    (DRpcHist_t*    Hist,
 }
 
 //-----------------------------------------------------------------------------
+void    TDegraderRpcAnaModule::FillT2Histograms(T2Hist_t* Hist, T2Par_t* T2Par, double Weight) {
+  Hist->fSMom[0]->Fill(T2Par->fSMom,Weight);
+  Hist->fSMom[1]->Fill(T2Par->fSMom,Weight);
+  Hist->fQ->Fill   (T2Par->fQ   ,Weight);
+}
+
+//-----------------------------------------------------------------------------
 void    TDegraderRpcAnaModule::FillTimeClusterHistograms(TimeClusterHist_t* Hist  , 
                                                     TStnTimeCluster*   Tc    ,
                                                     double             Weight) {
@@ -417,6 +448,14 @@ void TDegraderRpcAnaModule::FillHistograms() {
     if (fNHitsVD13 == 2) {
       FillDRpcHistograms(fHist.fDRpc[2]);
     }
+  }
+//-----------------------------------------------------------------------------
+// fill two-track histograms
+//-----------------------------------------------------------------------------
+  for (int i=0; i<fNT2Par; i++) {
+    T2Par_t* t2par = &fT2Par[i];
+    FillT2Histograms(fHist.fT2[0],t2par);
+    if (t2par->fQ == 0) FillT2Histograms(fHist.fT2[1],t2par);
   }
 }
 
@@ -644,6 +683,25 @@ int TDegraderRpcAnaModule::Event(int ientry) {
     tp->fDtTrackTc   = min_dt;
   }
 
+  fNT2Par                   = 0;
+  for (int it1=0; it1<ntrk-1; it1++) {
+    TStnTrack*   t1  = fTrackBlock->Track(it1);
+    TrackPar_t*  tp1 = fTrackPar+it1;
+
+    for (int it2=it1+1; it2<ntrk; it2++) {
+      TStnTrack*   t2  = fTrackBlock->Track(it2);
+      TrackPar_t*  tp2 = fTrackPar+it2;
+
+      T2Par_t* t2par = &fT2Par[fNT2Par];
+      t2par->fItrk1  = it1;
+      t2par->fItrk2  = it2;
+      t2par->fSMom   = tp1->fP+tp2->fP;
+      t2par->fQ      = t1->Charge()+t2->Charge();
+      fNT2Par++;
+    }
+  }
+
+
   fEventPassedSelections = 0;
 
   FillHistograms();
@@ -690,6 +748,15 @@ void TDegraderRpcAnaModule::Debug() {
   if (GetDebugBit(4) == 1) {
     if ((fNHitsVD13 == 2) and (fQVD13 == 0)) {
       GetHeaderBlock()->Print(Form("fSMomVD10: %10.3f fSMomVD13: %10.3f fCPath: %10.3f",fSMomVD10,fSMomVD13,fCPath));
+    }
+  }
+
+  if (GetDebugBit(5) == 1) {
+    for (int i=0; i<fNT2Par; i++) {
+      T2Par_t* t2par = &fT2Par[i];
+      if ((t2par->fSMom >= 89) and (t2par->fSMom < 91)) {
+        GetHeaderBlock()->Print(Form("t2par->fSMom, t2par->fQ: %10.3f %10.3f",t2par->fSMom,t2par->fQ));
+      }
     }
   }
 }

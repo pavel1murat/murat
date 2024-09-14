@@ -142,11 +142,11 @@ public:
   TStnClusterBlock* fClusterBlock;
   TCalDataBlock*    fCalDataBlock;
   TGenpBlock*       fGenpBlock;
-//   TSimpBlock*       fSimpBlock;
+  TSimpBlock*       fSimpBlock;
 					// histograms filled
   Hist_t            fHist;
 
-  TGenParticle*     fElectron;
+  // TGenParticle*     fElectron;
   TSimParticle*     fSimp;
   double            fEleE;		// electron energy
 

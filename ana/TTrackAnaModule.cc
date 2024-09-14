@@ -28,6 +28,7 @@
 // 38  : EVT_7: events with E_CL > 60 and no CalPatRec tracks and TrkPatRec
 // 39  : trk_1: events with |SIN_TC| > 0.6
 // 40  : trk_0: events with P > 60 MeV/c
+// 41  : events with ntrk > 1
 //
 // 3 different ID : 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1319,6 +1320,12 @@ void TTrackAnaModule::Debug() {
     int ntrk = fTrackBlock->NTracks();
     if (ntrk > 1) {
       GetHeaderBlock()->Print(Form("NTracks = %5i",ntrk));
+    }
+  }
+  
+  if (GetDebugBit(41) == 1) {
+    if (ntrk > 1) {
+      GetHeaderBlock()->Print(Form("bit_041: ntrk = %i",ntrk));
     }
   }
 }

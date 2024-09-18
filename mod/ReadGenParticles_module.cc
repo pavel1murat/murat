@@ -1,11 +1,7 @@
-// Reads out all GenParticles in a collection.
-//
-// $Id: ReadGenParticles_module.cc,v 1.2 2013/10/21 20:44:04 genser Exp $
-// $Author: genser $
-// $Date: 2013/10/21 20:44:04 $
-//
-// Original author Andrei Gaponenko
-//
+///////////////////////////////////////////////////////////////////////////////
+// a simple template
+// GenParticle's are no longer of much interest
+///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 #include <string>

@@ -175,6 +175,12 @@ murat : {
 	diagLevel           : 0
 	trkPatRecLabel      : TrkPatRecDownstreameMinus
     }
+
+    DetStepAna : { module_type:DetStepAna
+        sgsCollTags         : [ "StrawGasStepMaker"   ]
+        cssCollTags         : [ "CaloShowerStepMaker" ]
+        crvCollTags         : [ ]                       ## dont filter on CRV since that can't trigger
+    }
 }
 #------------------------------------------------------------------------------
 # final definition of the table 'murat'
@@ -197,6 +203,7 @@ murat : { @table::murat
         StrawHitRecoAna    : { @table::murat.StrawHitRecoAna    }
         DumpGeometry       : { @table::murat.DumpGeometry       }
         GenpHist           : { @table::murat.GenpHist           }
+        DetStepAna         : { @table::murat.DetStepAna         }
     }
 }
 END_PROLOG

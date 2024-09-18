@@ -1,0 +1,38 @@
+# -*- mode:tcl -*-
+#------------------------------------------------------------------------------
+# S5 stntupling
+#------------------------------------------------------------------------------
+BEGIN_PROLOG
+  TRIGGER_PATHS                   : [ p1 ]
+END_PROLOG
+
+#include "Stntuple/fcl/stntuple_prologs.fcl"
+#include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/stntuple_templates.fcl"
+
+process_name : S5Stn
+#------------------------------------------------------------------------------
+services.GeometryService.inputFile    : "pipenu/datasets/neut1b0/geom_pipenu_neut1b0.txt"
+services.GeometryService.bFieldFile   : "pipenu/common/bfgeom_DS70_v01.txt"
+services.TFileService.fileName        : "detstepana.hist"
+
+source       : { module_type : RootInput fileNames : ["undefined", "undefined"] }
+
+physics : { 
+    analyzers  : {
+        DetStepAna : { @table::murat.analyzers.DetStepAna
+            sgsCollTags         : [ "compressDetStepMCs" ] ## StrawGasStepMaker"   ]
+            cssCollTags         : [ "compressDetStepMCs" ] ## CaloShowerStepMaker" ]
+            crvCollTags         : [ "compressDetStepMCs" ] ## dont filter on CRV since that can't trigger
+        }
+    }
+
+    trigger_paths : [ ]
+    out           : [ ]                                  # [defaultOutput]/[]
+    e1            : [ DetStepAna ]
+    end_paths     : [ e1 ]
+}
+
+#------------------------------------------------------------------------------
+physics.analyzers.InitStntuple.histFileName : "nts.mu2e.neut1b0s51r0100.pipenu.001210_00000000.stn"
+# outputs.defaultOutput.fileName              : "sim.mu2e.neut1b0s51r0100.pipenu.001210_00000000.art"

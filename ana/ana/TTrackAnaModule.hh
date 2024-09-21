@@ -52,6 +52,14 @@ public:
     TH1F*    fPtMc;                     // denominator
     TH1F*    fPtReco;                   // numerator
   };
+
+  struct FunHist_t {
+    TH1F*    fTofVD13;
+    TH2F*    fTofVD13VsCosth;
+    TH2F*    fTofVD13VsZ0;
+    TH2F*    fTofVD13VsPhi;
+  };
+  
 //-----------------------------------------------------------------------------
   enum { kNEventHistSets         = 100 };
   enum { kNTrackHistSets         = 400 };
@@ -61,6 +69,7 @@ public:
   enum { kNCaloHistSets          = 100 };
   enum { kNGenpHistSets          = 100 };
   enum { kNSimpHistSets          = 100 };
+  enum { kNFunHistSets           = 100 };
 
   struct Hist_t {
     TH1F*                  fCrystalR[2];                  // crystal radius
@@ -71,6 +80,7 @@ public:
     HelixHist_t*           fHelix  [kNHelixHistSets  ];
     SimpHist_t*            fSimp   [kNSimpHistSets   ];
     TrackHist_t*           fTrack  [kNTrackHistSets  ];
+    FunHist_t*             fFun    [kNFunHistSets    ];
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -144,12 +154,6 @@ public:
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  // Hist_t*            GetHist        () { return &fHist;        }
-  // TStnTrackBlock*    GetTrackBlock  () { return fTrackBlock;   }
-  // TStnClusterBlock*  GetClusterBlock() { return fClusterBlock; }
-
-  // TStnTrackID*       GetTrackID(int I) { return fTrackID[I];   }
-  // TEmuLogLH*         GetLogLH       () { return fLogLH;        }
 //-----------------------------------------------------------------------------
 // modifiers
 //-----------------------------------------------------------------------------
@@ -169,10 +173,12 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
-  void    BookCaloHistograms      (CaloHist_t*    Hist, const char* Folder);
-  void    FillCaloHistograms      (CaloHist_t*    Hist, TStnCrystal*  Crystal);
+  void    BookFunHistograms       (FunHist_t*     Hist, const char*  Folder);
+  void    BookCaloHistograms      (CaloHist_t*    Hist, const char*  Folder);
+  void    FillCaloHistograms      (CaloHist_t*    Hist, TStnCrystal* Crystal);
 
   void    FillEfficiencyHistograms(TStnTrackBlock* TrackBlock, TStnTrackID* TrackID, int HistSet);
+  void    FillFunHistograms       (FunHist_t* Hist);
 
   void    BookHistograms();
   void    FillHistograms();

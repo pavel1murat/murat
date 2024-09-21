@@ -37,6 +37,7 @@ namespace murat {
     double        fDioLOWt;
     double        fDioLLWt;
     double        fPionSurvProb;            // defaults to 1
+    double        fTofVD13;                 // time of flight to VD13
   };
 }
 #endif

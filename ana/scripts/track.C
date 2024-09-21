@@ -25,13 +25,17 @@ def_name murat_track_0120 ("murat_rmc_ana");
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
-void  murat_trk_ana(const char* TrackBlockName = "TrackBlock", int DebugBit = -1) {
+void  murat_trk_ana(const char* TrackBlockName = "TrackBlock", int PDGCode = 11, int MCProcessCode = 167, int DebugBit = -1) {
 //-----------------------------------------------------------------------------
 // configure analysis module
+// 167: mu2eCeMinusEndpoint
+// 168: mu2eCeMinusLeadingLog
 //-----------------------------------------------------------------------------
   murat::m_trk = (murat::TTrackAnaModule*) g.x->AddModule("murat::TTrackAnaModule",0);  
 
   murat::m_trk->SetTrackBlockName(TrackBlockName);
+  murat::m_trk->SetPDGCode(PDGCode);
+  murat::m_trk->SetMCProcessCode(MCProcessCode);
   
   printf("DebugBit:%i\n",DebugBit);
   if (DebugBit >= 0) murat::m_trk->SetDebugBit(DebugBit,1);

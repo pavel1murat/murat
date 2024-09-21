@@ -50,7 +50,6 @@
 //------------------------------------------------------------------------------
 // Mu2e offline includes
 //-----------------------------------------------------------------------------
-
 #include "murat/ana/TTrackAnaModule.hh"
 
 ClassImp(murat::TTrackAnaModule)
@@ -114,7 +113,7 @@ int TTrackAnaModule::BeginJob() {
   RegisterDataBlock("StrawHitBlock","TStrawHitBlock"   ,&fStrawHitBlock);
   RegisterDataBlock("GenpBlock"    ,"TGenpBlock"       ,&fGenpBlock    );
   RegisterDataBlock("SimpBlock"    ,"TSimpBlock"       ,&fSimpBlock    );
-  RegisterDataBlock("SpmcBlockVDet","TStepPointMCBlock",&fVDetBlock    );
+  RegisterDataBlock("SpmcBlock"    ,"TStepPointMCBlock",&fVDetBlock    );
 //-----------------------------------------------------------------------------
 // book histograms
 //-----------------------------------------------------------------------------
@@ -148,6 +147,19 @@ void TTrackAnaModule::BookCaloHistograms(CaloHist_t* Hist, const char* Folder) {
     HBook1F(Hist->fRWE700[i],Form("rwe700_%i",i),Form("%s: Radius*E(T>700)[%i]",Folder,i),100, 0,1000,Folder);
   }
 }
+
+//-----------------------------------------------------------------------------
+  void TTrackAnaModule::BookFunHistograms(FunHist_t* Hist, const char* Folder) {
+  //     char name [200];
+  //     char title[200];
+  //-----------------------------------------------------------------------------
+  //  
+  //-----------------------------------------------------------------------------
+    HBook1F(Hist->fTofVD13        ,"tof_vd13",Form("%s: TOF to VD13"       ,Folder), 200, 0,  100,Folder);
+    HBook2F(Hist->fTofVD13VsCosth ,"tvd13_vs_costh",Form("%s: TOF to VD13 vs Cos(TH)",Folder), 100,  -1,   1,200, 0,  100,Folder);
+    HBook2F(Hist->fTofVD13VsZ0    ,"tvd13_vs_z0"   ,Form("%s: TOF to VD13 vs Z0"     ,Folder), 120,5100,6300,200, 0,  100,Folder);
+    HBook2F(Hist->fTofVD13VsPhi   ,"tvd13_vs_phi"  ,Form("%s: TOF to VD13 vs Phi"    ,Folder), 126,   0, 6.3,200, 0,  100,Folder);
+  }
 
 //_____________________________________________________________________________
 void TTrackAnaModule::BookHistograms() {
@@ -392,20 +404,22 @@ void TTrackAnaModule::BookHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// book Genp histograms
+// book fun (temporary, module specific) histograms
 //-----------------------------------------------------------------------------
-  int book_genp_histset[kNGenpHistSets];
-  for (int i=0; i<kNGenpHistSets; i++) book_genp_histset[i] = 0;
+  int book_fun_histset[kNFunHistSets];
+  for (int i=0; i<kNFunHistSets; i++) book_fun_histset[i] = 0;
 
-  book_genp_histset[0] = 1;		// all particles
+  book_fun_histset[0] = 1;		// all particles
+  book_fun_histset[1] = 1;		// Pz > 0 particles
+  book_fun_histset[2] = 1;		// Pz < 0 particles
 
-  for (int i=0; i<kNGenpHistSets; i++) {
-    if (book_genp_histset[i] != 0) {
-      sprintf(folder_name,"gen_%i",i);
+  for (int i=0; i<kNFunHistSets; i++) {
+    if (book_fun_histset[i] != 0) {
+      sprintf(folder_name,"fun_%i",i);
       fol = (TFolder*) hist_folder->FindObject(folder_name);
       if (! fol) fol = hist_folder->AddFolder(folder_name,folder_name);
-      fHist.fGenp[i] = new GenpHist_t;
-      BookGenpHistograms(fHist.fGenp[i],Form("Hist/%s",folder_name));
+      fHist.fFun[i] = new FunHist_t;
+      BookFunHistograms(fHist.fFun[i],Form("Hist/%s",folder_name));
     }
   }
 }
@@ -536,6 +550,16 @@ void TTrackAnaModule::FillEfficiencyHistograms(TStnTrackBlock*  TrackBlock,
       }
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+void TTrackAnaModule::FillFunHistograms(FunHist_t* Hist) {
+  Hist->fTofVD13->Fill(fEvtPar.fTofVD13);
+  double costh  = fEvtPar.fSimp->StartMom()->Pz()/fEvtPar.fSimp->StartMom()->P();
+  Hist->fTofVD13VsCosth->Fill(costh,fEvtPar.fTofVD13);
+  Hist->fTofVD13VsZ0->Fill   (fEvtPar.fSimp->StartPos()->Z(),fEvtPar.fTofVD13);
+  double phi    = atan2(fEvtPar.fSimp->StartMom()->Py(),fEvtPar.fSimp->StartMom()->Px())+M_PI;
+  Hist->fTofVD13VsPhi->Fill  (phi,fEvtPar.fTofVD13);
 }
 
 //_____________________________________________________________________________
@@ -983,8 +1007,8 @@ void TTrackAnaModule::FillHistograms() {
     if (cl->Energy()            > 10.) FillClusterHistograms(fHist.fCluster[4],cl);
     if (cl->Energy()            > 60.) FillClusterHistograms(fHist.fCluster[5],cl);
 
-    if      (id == 0         ) FillClusterHistograms(fHist.fCluster[6],cl);
-    else if (id == 1         ) FillClusterHistograms(fHist.fCluster[7],cl);
+    if      (id == 0                 ) FillClusterHistograms(fHist.fCluster[6],cl);
+    else if (id == 1                 ) FillClusterHistograms(fHist.fCluster[7],cl);
   }
 //-----------------------------------------------------------------------------
 // calorimeter histograms
@@ -1035,16 +1059,13 @@ void TTrackAnaModule::FillHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
-// fill GENP histograms
-// GEN_0: all particles
+// fill fun histograms
+// fun_0: all particles
 //-----------------------------------------------------------------------------
-  TGenParticle* genp;
-  for (int i=0; i<fNGenp; i++) {
-    genp = fGenpBlock->Particle(i);
-    FillGenpHistograms(fHist.fGenp[0],genp);
-  }
+  FillFunHistograms(fHist.fFun[0]);
+  if (fEvtPar.fSimp->StartMom()->Pz() > 0) FillFunHistograms(fHist.fFun[1]);
+  else                                     FillFunHistograms(fHist.fFun[2]);
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -1064,7 +1085,7 @@ int TTrackAnaModule::Event(int ientry) {
   fCalDataBlock->GetEntry(ientry);
   fGenpBlock->GetEntry(ientry);
   fSimpBlock->GetEntry(ientry);
-  fVDetBlock->GetEntry(ientry);
+  fVDetBlock->GetEntry(ientry);     int nvdhits = fVDetBlock->NStepPoints();
 //-----------------------------------------------------------------------------
 // at some point, the TVdetBlock class got obsolete, and now the virtual detector 
 // hits are stored in TStepPointMCBlock 
@@ -1081,13 +1102,14 @@ int TTrackAnaModule::Event(int ientry) {
   fEvtPar.fNSimp            = fSimpBlock->NParticles();
   fEvtPar.fSimp             = NULL;
   fEvtPar.fPartE            = -1.;
-  fEvtPar.fPionSurvProb     = 1.;
+  fEvtPar.fPionSurvProb     =  1.;
+  fEvtPar.fTofVD13          = -1.;
 //-----------------------------------------------------------------------------
 // luminosity weight
 //-----------------------------------------------------------------------------
   fLumWt = GetHeaderBlock()->LumWeight();
 //-----------------------------------------------------------------------------
-// figure MC truth
+// figure out the MC truth
 //-----------------------------------------------------------------------------
   for (int i=fEvtPar.fNSimp-1; i>=0; i--) {
     TSimParticle* simp = fSimpBlock->Particle(i);
@@ -1097,8 +1119,14 @@ int TTrackAnaModule::Event(int ientry) {
     if ((pdg_code == fPDGCode) and (generator_id == fMCProcessCode)) {
       fEvtPar.fSimp  = simp;
       fEvtPar.fPartE = simp->StartMom()->Energy();
+      for (int iv=0; iv<nvdhits; iv++) {
+        TStepPointMC* vdh = fVDetBlock->StepPointMC(iv);
+        if ((vdh->SimID() == (int) simp->GetUniqueID()) and (vdh->VolumeID() == 13)) {
+          fEvtPar.fTofVD13 = vdh->Time()-simp->StartPos()->T();
+        }
+      }
+      break;
     }
-    break;
   }
 //-----------------------------------------------------------------------------
 // pi+ --> e+ nu case : determine the event weight
@@ -1124,7 +1152,7 @@ int TTrackAnaModule::Event(int ientry) {
 //-----------------------------------------------------------------------------
 // may want to revisit the definition of fSimp in the future
 //-----------------------------------------------------------------------------
-  fSimp             = fSimpBlock->Particle(0);
+  fSimp             = fEvtPar.fSimp;
   fSimPar.fParticle = fSimp;
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
@@ -1137,10 +1165,12 @@ int TTrackAnaModule::Event(int ientry) {
   fSimPar.fTFront   = NULL;
   fSimPar.fTMid     = NULL;
   fSimPar.fTBack    = NULL;
-  int nvdhits = fVDetBlock->NStepPoints();
   for (int i=0; i<nvdhits; i++) {
     TStepPointMC* vdhit = fVDetBlock->StepPointMC(i);
-    if (vdhit->PDGCode() == fSimp->fPdgCode) {
+    if (vdhit->SimID() == (int) fEvtPar.fSimp->GetUniqueID()) {
+//-----------------------------------------------------------------------------
+// 'signal' particle'
+//-----------------------------------------------------------------------------
       if ((vdhit->VolumeID() == 13) || (vdhit->VolumeID() == 14)) {
 	if (fDirection*vdhit->Mom()->Z() > 0) {
 	  if (fSimPar.fTFront == 0) fSimPar.fTFront = vdhit;
@@ -1193,8 +1223,8 @@ int TTrackAnaModule::Event(int ientry) {
   fBestHyp[0]     = -1;
   fBestHyp[1]     = -1;
 
-  fEvtPar.fNGoodTracks[0]    = 0;
-  fNMatchedTracks = 0;
+  fEvtPar.fNGoodTracks[0] = 0;
+  fNMatchedTracks         = 0;
 //-----------------------------------------------------------------------------
 // determine the number of CalPatRec tracks - this assumes that the list of 
 // tracks has been created by MergePatRec

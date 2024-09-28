@@ -302,12 +302,12 @@ void TAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fBatchWeight[0],"batchweight_0" ,Form("%s: Log10(One Batch Weight)" ,Folder), 100, -20., 2.,Folder);
   HBook1F(hist->fBatchWeight[1],"batchweight_1" ,Form("%s: Log10(Two Batch Weight)" ,Folder), 100, -20., 2.,Folder);
 
-  HBook1F(hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"  ,Folder),100,-1,1,Folder);
-  HBook1F(hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"    ,Folder),1000,  0,200,Folder);
-  HBook1D(hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                    ,Folder),1000, 50,150,Folder);
-  HBook1F(hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                       ,Folder), 100, 0, 1000,Folder);
-  HBook1F(hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                       ,Folder), 300, 0,15000,Folder);
-  //  HBook1F(hist->fNClusters ,"ncl"      ,Form("%s: Number of Reconstructed Clusters",Folder),200,0,200,Folder);
+  HBook1F(hist->fMcCosTh   ,"mc_costh" ,Form("%s: Conversion Electron Cos(Theta)"   ,Folder),100,-1,1,Folder);
+  HBook1F(hist->fMcMom     ,"mc_mom"   ,Form("%s: Conversion Electron Momentum"     ,Folder),1000,  0,200,Folder);
+  HBook1D(hist->fDioMom    ,"dio_mom"  ,Form("%s: DIO momentum"                     ,Folder),1000, 50,150,Folder);
+  HBook1F(hist->fRv        ,"rv"      ,Form("%s: R(Vertex)"                         ,Folder), 100, 0, 1000,Folder);
+  HBook1F(hist->fZv        ,"zv"      ,Form("%s: Z(Vertex)"                         ,Folder), 300, 0,15000,Folder);
+  HBook1F(hist->fFoil      ,"foil"    ,Form("%s: ST foil number"                    ,Folder), 200,2999.5,3199.5,Folder);
 
   HBook1F(hist->fNTracks[0] ,"ntrk_0"     ,Form("%s: Number of Reconstructed Tracks[0]"  ,Folder),10,0,10,Folder);
   HBook1F(hist->fNTracks[1] ,"ntrk_1"     ,Form("%s: Number of Reconstructed Tracks[1]"  ,Folder),10,0,10,Folder);
@@ -327,7 +327,6 @@ void TAnaModule::BookEventHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fNHyp      ,"nhyp"     ,Form("%s: N(fit hypotheses)"               ,Folder),5,0,5,Folder);
   HBook1F(hist->fBestHyp[0],"bfh0"     ,Form("%s: Best Fit Hyp[0](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
   HBook1F(hist->fBestHyp[1],"bfh1"     ,Form("%s: Best Fit Hyp[1](e-,e+,mu-,mu+)"  ,Folder),5,0,5,Folder);
-  HBook1F(hist->fNGenp     ,"ngenp"    ,Form("%s: N(Gen Particles)"                ,Folder),500,0,500,Folder);
 
   HBook1F(hist->fNCrvClusters    ,"ncrvcl"  ,Form("%s: N(CRV Clusters)"                 ,Folder),100,0,  100,Folder);
   HBook1F(hist->fNCrvCoincidences[0],"ncrvco_0"  ,Form("%s: N(CRV coincidences)[0]"     ,Folder),200,0, 1000,Folder);
@@ -671,6 +670,7 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
     double            cos_th(-2), xv(-1.e6), yv(-1.e6), rv(-1.e6), zv(-1.e6), p(-1.), dio_wt(-1.);
   //  double            e, m, r;
   TLorentzVector    mom;
+  int foil = 0;
 
   if (Evp->fSimp) {
     mom = *Evp->fSimp->StartMom();
@@ -681,6 +681,7 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
     rv     = sqrt(xv*xv+yv*yv);
     zv     = Evp->fSimp->StartPos()->Z();
     dio_wt = TStntuple::DioWeightAl(p);
+    foil   = Evp->fSimp->StartVolumeIndex();
   }
 
   hist->fEventWeight[0]->Fill(fEventWeight);
@@ -704,6 +705,7 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
   hist->fMcCosTh->Fill(cos_th);
   hist->fRv->Fill(rv);
   hist->fZv->Fill(zv);
+  hist->fFoil->Fill(foil);
 
   // hist->fNClusters->Fill(fNClusters);
   hist->fNTracks[0]->Fill  (Evp->fNTracks[0]);
@@ -723,11 +725,6 @@ void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pul
 
   hist->fDtClT->Fill(dt);
   hist->fEClMax->Fill(emax);
-
-  // hist->fNHyp->Fill(fNHyp);
-  // hist->fBestHyp[0]->Fill(fBestHyp[0]);
-  // hist->fBestHyp[1]->Fill(fBestHyp[1]);
-  hist->fNGenp->Fill(Evp->fNGenp);
 
   hist->fNCrvClusters->Fill(Evp->fNCrvClusters);
   hist->fNCrvCoincidences[0]->Fill(Evp->fNCrvCoincidences);

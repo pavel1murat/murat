@@ -12,6 +12,7 @@ namespace murat {
     TH1F*    fLumWeight;                // luminosity-related event weight (PM)
     TH1F*    fRv;			// MC truth information
     TH1F*    fZv;
+    TH1F*    fFoil;                     // Foil number
 
     TH1F*    fPdgCode;
     TH1F*    fMomTargetEnd;
@@ -32,7 +33,6 @@ namespace murat {
     TH1F*    fSHTime;
     TH1F*    fNHyp;
     TH1F*    fBestHyp[2];		// [0]: by chi2, [1]: by fit consistency
-    TH1F*    fNGenp;                    // N(particles in GENP block)
 
     TH1F*    fNClusters;
     TH1F*    fEClMax;			// energy of the first (highest) reconstructed cluster

@@ -14,6 +14,7 @@ int load_stnana_scripts_murat() {
     "dose.C"        ,  "PWD",
     "drpc.C"        ,  "PWD",
     "g4val.C"       ,  "PWD",
+    "fun.C"         ,  "PWD",
     "genp.C"        ,  "PWD",
     "helix.C"       ,  "PWD",
     "hits.C"        ,  "PWD",

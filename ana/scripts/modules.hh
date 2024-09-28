@@ -12,6 +12,7 @@
 #include "murat/ana/TDoseAnaModule.hh"
 #include "murat/ana/TEmuAnaModule.hh"
 #include "murat/ana/TFilterModule.hh"
+#include "murat/ana/TFunAnaModule.hh"
 #include "murat/ana/TG4ValidationModule.hh"
 #include "murat/ana/THelixAnaModule.hh"
 #include "murat/ana/TMomscaleAnaModule.hh"
@@ -106,6 +107,7 @@ namespace murat {
   TDegraderRpcAnaModule*   m_drpc   = NULL;
   TEmuAnaModule*           m_emu    = NULL;
   TFilterModule*           m_filter = NULL;
+  TFunAnaModule*           m_fun    = NULL;
   TMomscaleAnaModule*      m_moms   = NULL;
   TPidAnaModule*           m_pid    = NULL;
   TPipenuAnaModule*        m_pipenu = NULL;

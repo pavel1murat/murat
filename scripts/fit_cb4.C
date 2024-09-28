@@ -6,12 +6,17 @@
 // ------
 // .L murat/scripts/fit_cb4.C
 // cbx = new cb4("x");
-// cbx->fit(file,....)
+// cbx->init_parameters(...)
+//
+// and then either
+//
+// cbx->fit(file,module,....)
 //
 // or
 //
-// TH1F*hist = ...
-// cbx->fit(...)
+// TH1F* hist = ... 
+// cbx->fHist = (TH1F*) hist->Clone("cbx_fhist")
+// cbx->fit_histogram(hist,xmin,xmax)
 //
 // to find the momentum value corresponding to the half-maximum,
 // scan a range of momenta with 

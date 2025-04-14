@@ -7,9 +7,10 @@ def_name murat_spmc_002("murat_spmc_ana");
 def_name murat_spmc_003("murat_spmc_ana_old");
 
 //-----------------------------------------------------------------------------
-void  murat_spmc_ana(int DebugBit = -1) {
+void  murat_spmc_ana(int DebugBit = -1, const char* VDetBlockName = "SpmcBlockVDet") {
   murat::m_spmc = (murat::TSpmcAnaModule*) g.x->AddModule("murat::TSpmcAnaModule",0);  
-  // murat::m_spmc->SetSpmcBlockName("SpmcBlockVDet");
+  murat::m_spmc->SetVDetBlockName(VDetBlockName);
+  //  murat::m_spmc->SetSpmcBlockName("SpmcBlockVDet");
   if (DebugBit >= 0) murat::m_spmc->SetDebugBit(DebugBit,1);
 }
 

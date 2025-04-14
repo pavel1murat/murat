@@ -227,8 +227,8 @@ namespace mu2e {
       cal  = dc.operator->();
 
       for (int i=0; i<2; i++) {
-	rin[i]  = cal->disk(i).innerRadius();
-	rout[i] = cal->disk(i).outerRadius();
+	rin[i]  = cal->disk(i).geomInfo().innerEnvelopeR();
+	rout[i] = cal->disk(i).geomInfo().outerEnvelopeR();
       }
     }
     else {

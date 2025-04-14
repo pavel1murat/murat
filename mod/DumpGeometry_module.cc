@@ -281,7 +281,7 @@ namespace mu2e {
 
     const CaloInfo&     ci = cal->caloInfo();
 
-    int ndisks = cal->nDisk();
+    int ndisks = cal->nDisks();
 
     printf("Calorimeter N(disks): %i\n", ndisks);
 
@@ -294,11 +294,10 @@ namespace mu2e {
       const Disk& disk = cal->disk(i);
 
       int ncrystals = disk.nCrystals();
+      const DiskGeomInfo& gi = disk.geomInfo();
 
       printf(" -- id, ncrystals, Rin, Rout: %i, %3i, %10.4f, %10.4f",
-	     disk.id(),ncrystals,disk.innerRadius(),disk.outerRadius());
-
-      const DiskGeomInfo& gi = disk.geomInfo();
+	     disk.id(),ncrystals,gi.innerEnvelopeR(),gi.outerEnvelopeR());
 
       printf(" center: %12.3f %12.3f %12.3f\n",gi.origin().x(),gi.origin().y(),gi.origin().z());
 

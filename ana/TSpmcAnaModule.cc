@@ -145,7 +145,9 @@ void TSpmcAnaModule::BookVDetHistograms(HistBase_t* Hist, const char* Folder) {
   HBook1F(hist->fTime    ,"time"    ,Form("%s: Hit Time  "    ,Folder), 200, 0,2000,Folder);
   HBook1F(hist->fPTime   ,"ptime"   ,Form("%s: Hit properTime",Folder), 500, 0,500,Folder);
   HBook2F(hist->fYVsX    ,"y_vs_x"  ,Form("%s: Y vs X (all)"  ,Folder), 250, -250, 250, 250, -250, 250,Folder);
-  HBook2F(hist->fYcVsXc  ,"yc_vs_xc",Form("%s: Yc vs Xc (all)",Folder), 250, -250, 250, 250, -250, 250,Folder);
+  HBook2F(hist->fDxDzVsX ,"dxdz_vs_x",Form("%s:DxDz vs X"     ,Folder), 250, -250, 250, 250, -2.5, 2.5,Folder);
+  HBook2F(hist->fDyDzVsY ,"dydz_vs_y",Form("%s:DyDz vs Y"     ,Folder), 250, -250, 250, 250, -2.5, 2.5,Folder);
+  HBook2F(hist->fYcVsXc  ,"yc_vs_xc",Form("%s: Yc vs Xc "     ,Folder), 250, -250, 250, 250, -250, 250,Folder);
   HBook2F(hist->fYcVsP   ,"yc_vs_p" ,Form("%s: Yc vs P"       ,Folder), 250,    0, 250, 250, -250, 250,Folder);
   HBook1F(hist->fPt      ,"pt"      ,Form("%s: Pt"            ,Folder), 200, 0, 200,Folder);
   HBook1F(hist->fPp      ,"pp"      ,Form("%s: P(parallel)"   ,Folder), 200, 0, 200,Folder);
@@ -721,10 +723,10 @@ void TSpmcAnaModule::InitSpmcData(TStepPointMC* Step, SpmcData_t* SpmcData) {
   SpmcData->fCosTh = SpmcData->fPzLoc/SpmcData->fP;
   SpmcData->fTanTh = SpmcData->fPtLoc/SpmcData->fPzLoc;
 
-  // calculate local X and local Z
+  // coordinates and slopes in hte local VD coordinate ssytem
 
-  double dx   = Step->Pos()->X()-vdd->fX;
-  double dz   = Step->Pos()->Z()-vdd->fZ;
+  double dx  = Step->Pos()->X()-vdd->fX;
+  double dz  = Step->Pos()->Z()-vdd->fZ;
 
   SpmcData->fXLoc = dx*cos_phi - dz*sin_phi;
   SpmcData->fYLoc =  Step->Pos()->Y(); // dx*sin_phi + dz*cos_phi;
@@ -811,9 +813,17 @@ void TSpmcAnaModule::FillStepPointMCHistograms(HistBase_t* Hist, TStepPointMC* S
   hist->fTime    ->Fill(Step->Time (),Weight);
   hist->fPTime   ->Fill(Step->ProperTime(),Weight);
 
-  hist->fYVsX    ->Fill(SpmcData->fXLoc,SpmcData->fYLoc,Weight);
-  hist->fYcVsXc  ->Fill(SpmcData->fX0  ,SpmcData->fY0  ,Weight);
-  hist->fYcVsP   ->Fill(SpmcData->fP   ,SpmcData->fY0  ,Weight);
+  hist->fYVsX    ->Fill(SpmcData->fXLoc,SpmcData->fYLoc   ,Weight);
+  hist->fYcVsXc  ->Fill(SpmcData->fX0  ,SpmcData->fY0     ,Weight);
+
+  float dxdz_loc = SpmcData->fPxLoc/SpmcData->fPzLoc;
+  float dydz_loc = SpmcData->fPyLoc/SpmcData->fPzLoc;
+  
+  hist->fDxDzVsX ->Fill(SpmcData->fXLoc,dxdz_loc,Weight);
+  hist->fDyDzVsY ->Fill(SpmcData->fYLoc,dydz_loc,Weight);
+
+
+  hist->fYcVsP   ->Fill(SpmcData->fP   ,SpmcData->fY0     ,Weight);
 
   hist->fPt   ->Fill(SpmcData->fPtLoc,Weight);
   hist->fPp   ->Fill(SpmcData->fPzLoc,Weight);

@@ -72,6 +72,8 @@ public:
     TH2F*      fYVsX    ;                // local coordinates
     TH2F*      fYcVsXc  ;                // trajectory axis
     TH2F*      fYcVsP   ;                // Yc vs P
+    TH2F*      fDxDzVsX ;                // local coordinates
+    TH2F*      fDyDzVsY ;                // local coordinates
     TH1F*      fPt      ;                // transverse mom
     TH1F*      fPp      ;                // momentum component parallel to the solenoid axis
     TH1F*      fTanTh   ;		       // tan (pitch angle)

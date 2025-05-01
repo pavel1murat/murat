@@ -6,6 +6,8 @@
 // Date:      
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace murat {
+  
 class TLsqSums4 {
 
 protected:
@@ -75,5 +77,5 @@ public:
   //  ClassDef(TLsqSums4,0)
 
 };
-
+};
 #endif

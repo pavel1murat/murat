@@ -5,7 +5,7 @@
 #include <math.h>
 #include "alg/TLsqSums4.hh"
 
-
+namespace murat {
 TLsqSums4::TLsqSums4() {
   clear();
 }
@@ -185,4 +185,5 @@ double TLsqSums4::chi2rphiDofCircle() {
 //   printf("[LsqSum4::chi2rphiDofCircle] chi2 = %5.3e chi2_new = %5.3e\n", chi2 , chi2_new);
   
   return chi2;
+}
 }

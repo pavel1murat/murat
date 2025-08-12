@@ -57,5 +57,6 @@ include(BuildPlugins)
 # Code
 add_subdirectory(ana)
 add_subdirectory(alg)
+add_subdirectory(mod)
 
 cet_cmake_config()

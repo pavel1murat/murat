@@ -124,7 +124,9 @@ murat : {
     }
 
     GenpHist      : { module_type:GenpHist
-        @table::StntupleTModuleFclDefaults
+        THistModule          : {          ## defaults of the base class
+            @table::StntupleTHistModule
+        }
         genpCollTag : "generate"
         sgsCollTag  : "compressDetStepMCs"
         sdmcCollTag : "compressDidiMCs"

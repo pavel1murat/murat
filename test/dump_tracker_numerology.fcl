@@ -2,8 +2,9 @@
 ###############################################################################
 # Print TTracker geometry / numerology
 ###############################################################################
+#include "Stntuple/fcl/stntuple_prologs.fcl"
 #include "murat/fcl/prolog.fcl"
-#include "Stntuple/fcl/stntuple.fcl"
+#include "Stntuple/fcl/stntuple_templates.fcl"
 
 process_name  : DumpTrackerNumerology
 

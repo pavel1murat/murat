@@ -152,7 +152,7 @@ double cb4::f_cb4(double* X, double* P) {
   dx        = X[0]-x0;
 
   if (dx < -alp1) {
-    double B1 = alp1+n1/(a*b*(1-exp(-b*alp1)));
+    double B1 = -alp1+n1/(a*b*(1-exp(-b*alp1)));
     double A1 = P[0]*exp(a*(-b*alp1-exp(-b*alp1)))*pow(B1+alp1,n1);
 
     f  = A1/pow(B1-dx,n1);

@@ -68,11 +68,11 @@ namespace mu2e {
 
       if (_diagLevel == 0) {
         printf("---------------------------------------------------------------");
-        printf("-----------------------------------------------------------------------\n");
+        printf("--------------------------------------------------------------------------------\n");
         printf("Station Plane Face Panel Layer Straw StrawID R(straw)  X(straw)");
-        printf("   Y(straw)   Z(straw)  Rho(straw)     L/2       phi    wireNx   wireNy\n"); 
+        printf("   Y(straw)   Z(straw)  Rho(straw)     L/2       phi    wireNx   wireNy   wireNz\n"); 
         printf("---------------------------------------------------------------");
-        printf("-----------------------------------------------------------------------\n");
+        printf("--------------------------------------------------------------------------------\n");
       }
 
       const Plane* plane = &tracker->getPlane(ipl);
@@ -87,7 +87,7 @@ namespace mu2e {
           printf("---------------------------------------------------------------");
           printf("-----------------------------------------------------------------------\n");
           printf("Station Plane Face Panel Layer Straw StrawID R(straw)  X(straw)");
-          printf("   Y(straw)   Z(straw)  Rho(straw)     L/2       phi    wireNx   wireNy\n"); 
+          printf("   Y(straw)   Z(straw)  Rho(straw)     L/2       phi    wireNx   wireNy   wireNz\n"); 
           printf("---------------------------------------------------------------");
           printf("-----------------------------------------------------------------------\n");
         }

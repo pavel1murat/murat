@@ -703,7 +703,7 @@ int TCosmicsAnaModule::Event(int ientry) {
 
   fEvtPar.fNCrvClusters     = fCrvClusterBlock->NClusters();
   fEvtPar.fNCrvPulses       = fCrvPulseBlock->NPulses();
-  fEvtPar.fNCrvCoincidences = fCrvPulseBlock->NCoincidences();
+  fEvtPar.fNCrvCoincidences = -1.; // OBSOLETE // fCrvPulseBlock->NCoincidences();
 //-----------------------------------------------------------------------------
 // assume electron in the first particle, otherwise the logic will need to 
 // be changed

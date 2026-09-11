@@ -2,8 +2,9 @@
 ###############################################################################
 # Print key numbers describing the Mu2e calorimeter geometry
 ###############################################################################
+#include "Stntuple/fcl/stntuple_prologs.fcl"
 #include "murat/fcl/prolog.fcl"
-#include "Stntuple/fcl/stntuple.fcl"
+#include "Stntuple/fcl/stntuple_templates.fcl"
 
 process_name : DumpCaloGeometry
 
@@ -16,3 +17,4 @@ physics : {
 }
 #------------------------------------------------------------------------------
 physics.analyzers.DumpGeometry.dumpCaloGeometry : 1
+services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common_extracted.txt"

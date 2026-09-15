@@ -27,6 +27,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <format>
 
 using namespace std;
 
@@ -209,8 +210,8 @@ namespace mu2e {
 
       int nmodules = modules->size();
       
-      printf( "sector %2i name : %-10s nmodules: %3i nlayers: %3lu nbars: %3lu ",
-	      is,shield->getName().data(),
+      printf( "sector %2i name : %-10s type: %2d nmodules: %3i nlayers: %3lu nbars: %3lu ",
+	      is,shield->getSectorType(),shield->getName().data(),
 	      nmodules,
 	      m0->getLayers().size(),
 	      l0->getBars().size());
@@ -288,9 +289,9 @@ namespace mu2e {
     printf("crystal halfLength     : %10.3f\n",ci.get<double>("crystalZLength")/2.);
     printf("crystal halfTrans      : %10.3f\n",ci.get<double>("crystalXYLength")/2.);
     printf("crystal wrap thickness : %10.3f\n",ci.get<double>("wrapperThickness"));
-    printf("crystal case thickness : %10.3f\n",ci.get<double>("crystalFrameThickness"));
+    //    printf("crystal case thickness : %10.3f\n",ci.get<double>("crystalFrameThickness"));
 
-    for ( int i=0; i<ndisks; i++) {
+    for (int i=0; i<ndisks; i++) {
       const Disk& disk = cal->disk(i);
 
       int ncrystals = disk.nCrystals();
@@ -299,11 +300,21 @@ namespace mu2e {
       printf(" -- id, ncrystals, Rin, Rout: %i, %3i, %10.4f, %10.4f",
 	     disk.id(),ncrystals,gi.innerEnvelopeR(),gi.outerEnvelopeR());
 
-      printf(" center: %12.3f %12.3f %12.3f\n",gi.origin().x(),gi.origin().y(),gi.origin().z());
+      printf(" center: %10.3f %10.3f %10.3f\n",gi.origin().x(),gi.origin().y(),gi.origin().z());
 
       const Crystal cr0 = disk.crystal(0);
 
-      printf ("crystal Z : %12.4f\n",cr0.position().z());
+      std::cout << std::format("crystal Z : {:10.3f} size:{:8.3f} {:8.3f} {:8.3f}\n",
+                               (float) cr0.position().z(), cr0.size().x(),cr0.size().y(),cr0.size().z());
+
+      std::cout << std::format("   i      X       Y     Z\n");
+      for (int j=0; j<ncrystals; j++) {
+        const Crystal& cr = disk.crystal(j);
+        std::cout << std::format("{{ i:{:5} x:{:10.3f} y:{:10.3f} z:{:10.3f} }}\n",
+                                 j, cr.localPosition().x(), cr.localPosition().y(), cr.localPosition().z());
+        
+        
+      }
     }
   }
 

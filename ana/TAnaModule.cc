@@ -628,7 +628,7 @@ void TAnaModule::FillCrvClusterHistograms(CrvClusterHist_t* Hist, TCrvCoincidenc
 
   Hist->fSectorType->Fill(CrvCluster->SectorType());
   Hist->fNPulses->Fill(CrvCluster->NPulses());
-  Hist->fNPe->Fill(CrvCluster->NPe());
+  Hist->fNPe->Fill(CrvCluster->Pes());
   Hist->fStartTime->Fill(CrvCluster->StartTime());
   Hist->fEndTime->Fill(CrvCluster->EndTime());
 
@@ -646,14 +646,14 @@ void TAnaModule::FillCrvClusterHistograms(CrvClusterHist_t* Hist, TCrvCoincidenc
 //-----------------------------------------------------------------------------
 void TAnaModule::FillCrvPulseHistograms(CrvPulseHist_t* Hist, TCrvRecoPulse* Pulse) {
 
-  Hist->fNPe->Fill(Pulse->NPe());
-  Hist->fNPeHeight->Fill(Pulse->NPeHeight());
-  Hist->fNDigis->Fill(Pulse->NDigis());
-  Hist->fBar->Fill(Pulse->Bar());
+  Hist->fNPe->Fill(Pulse->Pes());
+  Hist->fNPeHeight->Fill(Pulse->PesPh());
+  //  Hist->fNDigis->Fill(Pulse->NDigis());
+  Hist->fBar->Fill(Pulse->Sbid());
   Hist->fSipm->Fill(Pulse->Sipm());
   Hist->fTime->Fill(Pulse->Time());
-  Hist->fHeight->Fill(Pulse->Height());
-  Hist->fWidth->Fill(Pulse->Width());
+  //  Hist->fHeight->Fill(Pulse->Height());
+  Hist->fWidth->Fill(Pulse->Beta());
   Hist->fChi2->Fill(Pulse->Chi2());
   Hist->fLeTime->Fill(Pulse->LeTime());
 

@@ -57,7 +57,7 @@ namespace mu2e {
     printf("crystal halfLength     : %10.3f\n",ci.getDouble("crystalZLength")/2.);
     printf("crystal halfTrans      : %10.3f\n",ci.getDouble("crystalXYLength")/2.);
     printf("crystal wrap thickness : %10.3f\n",ci.getDouble("wrapperThickness"));
-    printf("crystal case thickness : %10.3f\n",ci.getDouble("crystalFrameThickness"));
+    //    printf("crystal case thickness : %10.3f\n",ci.getDouble("crystalFrameThickness"));
 
     for ( int i=0; i<ndisks; i++) {
       const Disk& disk = cal->disk(i);

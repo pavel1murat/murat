@@ -18,13 +18,9 @@
 #include "TGTextBuffer.h"
 #include "TGLabel.h"
 
-// #include "Stntuple/gui/TEvdMainFrame.hh"
-
-#include "Stntuple/gui/TStnFrame.hh"
+#include "Stntuple/gui/TEvdFrame.hh"
 
 #include "murat/gui/TEvdManager.hh"
-
-// ClassImp(TEvdManager)
 
 //-----------------------------------------------------------------------------
 TEvdManager::TEvdManager(const char* Name, const char* Title): TVisManager(Name, Title) {
@@ -321,7 +317,7 @@ void TEvdManager::OpenView(const char* View) {
 
 //-----------------------------------------------------------------------------
 TCanvas* TEvdManager::NewCanvas(const char* Name, const char* Title, int SizeX, int SizeY) {
-  TStnFrame* win = new TStnFrame(Name, Title, this, 0, SizeX, SizeY);
+  TEvdFrame* win = new TEvdFrame(Name, Title, this, 0, SizeX, SizeY);
   TCanvas*c = win->GetCanvas();
   DeclareCanvas(c);
   return c;
@@ -339,7 +335,7 @@ Int_t TEvdManager::OpenTrkXYView() {
   sprintf(name, "xy_view_%i", n);
   sprintf(title, "XY view number %i", n);
 
-  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kXY, 740, 760);
+  TEvdFrame* win = new TEvdFrame(name, title, this, TEvdManager::kXY, 740, 760);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 
@@ -381,7 +377,7 @@ Int_t TEvdManager::OpenTrkXYView(TStnView* mother, Axis_t x1, Axis_t y1, Axis_t 
   xsize = 540;
   ysize = (Int_t) (xsize*TMath::Abs((y2 - y1) / (x2 - x1)) + 20);
 
-  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kXY, xsize, ysize);
+  TEvdFrame* win = new TEvdFrame(name, title, this, TEvdManager::kXY, xsize, ysize);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 
@@ -414,7 +410,7 @@ Int_t TEvdManager::OpenTrkTZView() {
   sprintf(name,  "zt_view_%i", n);
   sprintf(title, "ZT view number %i", n);
 
-  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kXY, 1240, 760);
+  TEvdFrame* win = new TEvdFrame(name, title, this, TEvdManager::kXY, 1240, 760);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 
@@ -456,7 +452,7 @@ Int_t TEvdManager::OpenTrkTZView(TStnView* Mother, Axis_t Z1, Axis_t T1, Axis_t 
   xsize = 540;
   ysize = (Int_t) (xsize*TMath::Abs((T2 - T1) / (Z2 - Z1)) + 20);
 
-  TStnFrame* win = new TStnFrame(name, title, this, TEvdManager::kTZ, xsize, ysize);
+  TEvdFrame* win = new TEvdFrame(name, title, this, TEvdManager::kTZ, xsize, ysize);
   TCanvas* c = win->GetCanvas();
   fListOfCanvases->Add(c);
 

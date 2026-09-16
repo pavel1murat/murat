@@ -27,9 +27,9 @@
 
 // Mu2e includes.
 #include "Offline/ProditionsService/inc/ProditionsHandle.hh"
-#include "Offline/ConditionsService/inc/ConditionsHandle.hh"
+// #include "Offline/ConditionsService/inc/ConditionsHandle.hh"
 // #include "ConditionsService/inc/TrackerCalibrations.hh"
-#include "Offline/TrackerConditions/inc/Mu2eDetector.hh"
+// #include "Offline/TrackerConditions/inc/Mu2eDetector.hh"
 
 // #include "BTrkHelper/inc/BTrkHelper.hh"
 #include "Offline/GeometryService/inc/GeometryService.hh"
@@ -44,16 +44,16 @@
 #include "Offline/MCDataProducts/inc/SimParticle.hh"
 #include "Offline/MCDataProducts/inc/StepPointMC.hh"
 
-#include "BTrk/TrkBase/HelixParams.hh"
-#include "BTrk/KalmanTrack/KalHit.hh"
+// #include "BTrk/TrkBase/HelixParams.hh"
+// #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 #include "Offline/RecoDataProducts/inc/StrawHit.hh"
 #include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 
-#include "Offline/BTrkData/inc/TrkStrawHit.hh"
-#include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
+// #include "Offline/BTrkData/inc/TrkStrawHit.hh"
+// #include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
 
 #include "Stntuple/mod/StntupleModule.hh"
 

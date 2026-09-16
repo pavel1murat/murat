@@ -10,18 +10,12 @@
 
 // Mu2e includes.
 // #include "CLHEP/Geometry/HepPoint.h"
-#include "BTrk/BbrGeom/HepPoint.h"
+// #include "BTrk/BbrGeom/HepPoint.h"
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Matrix/SymMatrix.h"
 #include "CLHEP/Matrix/Vector.h"
 
-#include "BTrk/TrkBase/TrkHelixUtils.hh"
-#include "BTrk/TrkBase/HelixParams.hh"
-#include "BTrk/KalmanTrack/KalHit.hh"
-#include "BTrk/ProbTools/ChisqConsistency.hh"
-#include "BTrk/BbrGeom/BbrVectorErr.hh"
-
-#include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
+// #include "Offline/RecoDataProducts/inc/KalRepPtrCollection.hh"
 // storable objects (data products)
 #include "Offline/RecoDataProducts/inc/StrawHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"

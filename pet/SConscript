@@ -148,7 +148,7 @@ def murat_pet():
 # and then a library per module
 #------------------------------------------------------------------------------
     for f in Glob('*.cc', strings=True):
-        obj = '#/tmp/src/'+libname+'-shared/'+re.sub('\.cc?','.o',f)
+        obj = '#/tmp/src/'+libname+'-shared/'+re.sub(r'\.cc?','.o',f)
     #    print ">>> obj_file: "+obj
         if ((string.find(obj,'_module.o') < 0) and (string.find(obj,'_service.o') < 0)):
             list_of_obj_files.append(obj);

@@ -211,7 +211,7 @@ namespace mu2e {
       int nmodules = modules->size();
       
       printf( "sector %2i name : %-10s type: %2d nmodules: %3i nlayers: %3lu nbars: %3lu ",
-	      is,shield->getSectorType(),shield->getName().data(),
+	      is,shield->getName().data(),shield->getSectorType(),
 	      nmodules,
 	      m0->getLayers().size(),
 	      l0->getBars().size());

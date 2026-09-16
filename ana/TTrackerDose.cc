@@ -1,4 +1,6 @@
 #define TTrackerDose_cxx
+
+#include <cmath>
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>

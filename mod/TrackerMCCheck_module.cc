@@ -43,8 +43,8 @@
 #include "Offline/MCDataProducts/inc/StepPointMC.hh"
 #include "Offline/DataProducts/inc/VirtualDetectorId.hh"
 
-#include "BTrk/TrkBase/HelixParams.hh"
-#include "BTrk/KalmanTrack/KalHit.hh"
+// #include "BTrk/TrkBase/HelixParams.hh"
+// #include "BTrk/KalmanTrack/KalHit.hh"
 
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"

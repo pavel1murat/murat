@@ -23,6 +23,7 @@
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
 //-----------------------------------------------------------------------------
+#include <cmath>
 #include "ana/rpc_timing.hh"
 #include <TH2.h>
 #include <TStyle.h>

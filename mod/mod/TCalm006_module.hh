@@ -13,7 +13,7 @@
 
 // Mu2e includes.
 // #include "CLHEP/Geometry/HepPoint.h"
-#include "BTrk/BbrGeom/HepPoint.h"
+// #include "BTrk/BbrGeom/HepPoint.h"
 
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Matrix/SymMatrix.h"

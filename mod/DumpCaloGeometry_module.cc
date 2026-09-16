@@ -48,15 +48,15 @@ namespace mu2e {
     GeomHandle<DiskCalorimeter> ch;
     const DiskCalorimeter* cal = ch.get();
 
-    const CaloInfo&     ci = cal->caloInfo();
+    const CaloG4Info&     ci = cal->G4Info();
 
     int ndisks = cal->nDisks();
 
     printf("Calorimeter N(disks): %i\n", ndisks);
 
-    printf("crystal halfLength     : %10.3f\n",ci.getDouble("crystalZLength")/2.);
-    printf("crystal halfTrans      : %10.3f\n",ci.getDouble("crystalXYLength")/2.);
-    printf("crystal wrap thickness : %10.3f\n",ci.getDouble("wrapperThickness"));
+    printf("crystal halfLength     : %10.3f\n",ci.get<double>("crystalZLength")/2.);
+    printf("crystal halfTrans      : %10.3f\n",ci.get<double>("crystalXYLength")/2.);
+    printf("crystal wrap thickness : %10.3f\n",ci.get<double>("wrapperThickness"));
     //    printf("crystal case thickness : %10.3f\n",ci.getDouble("crystalFrameThickness"));
 
     for ( int i=0; i<ndisks; i++) {
@@ -64,7 +64,7 @@ namespace mu2e {
 
       int ncrystals = disk.nCrystals();
 
-      const DiskGeomInfo& gi = disk.geomInfo();
+      const DiskInfo& gi = disk.diskInfo();
 
       printf(" -- id, ncrystals, Rin, Rout: %i, %3i, %10.4f, %10.4f",
 	     disk.id(),ncrystals,gi.innerEnvelopeR(),gi.outerEnvelopeR());

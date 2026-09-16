@@ -18,7 +18,9 @@ ROOT_GENERATE_DICTIONARY(${dict}
   CrvHist_t.hh lhr_rejection.hh mva_data.hh poisson_fluct.hh prob_dist.hh rpc_timing.hh
   TAnaModule.hh TBeamFlashAnaModule.hh TCalAnaModule.hh TCaloDose.hh TCaloTimeRes.hh
   TClusterAnaModule.hh TColl1DoseAnaModule.hh TColl3DoseAnaModule.hh TCosmicsAnaModule.hh
-  TDegraderRpcAnaModule.hh TDioCalib.hh TDioCalibModule.hh TDoseAnaModule.hh TEmuAnaModule.hh
+  TDegraderRpcAnaModule.hh
+  TDetTimeAnaModule.hh
+  TDioCalib.hh TDioCalibModule.hh TDoseAnaModule.hh TEmuAnaModule.hh
   TFilterModule.hh TFitDioRcSpectrum.hh TFunAnaModule.hh TG4ValidationModule.hh TGenAnaModule.hh
   THelixAnaModule.hh TMomscaleAnaModule.hh TMuonStopAnaModule.hh TPidAnaModule.hh TPipenuAnaModule.hh
   TPolFitSpectrum.hh TrackHist_t.hh TSimpAnaModule.hh TSpmcAnaModule.hh TStrawHitAnaModule.hh
@@ -36,7 +38,10 @@ add_library(${lib} SHARED
   TTrackAnaModule.cc TSpmcAnaModule.cc TStrawHitAnaModule.cc TPolFitSpectrum.cc TSimpAnaModule.cc
   TMomscaleAnaModule.cc TMuonStopAnaModule.cc TPidAnaModule.cc TPipenuAnaModule.cc TG4ValidationModule.cc
   TGenAnaModule.cc THelixAnaModule.cc TEmuAnaModule.cc TFilterModule.cc TFitDioRcSpectrum.cc
-  TFunAnaModule.cc TDegraderRpcAnaModule.cc TDioCalib.cc TDioCalibModule.cc TDoseAnaModule.cc
+  TFunAnaModule.cc
+  TDegraderRpcAnaModule.cc
+  TDetTimeAnaModule.cc
+  TDioCalib.cc TDioCalibModule.cc TDoseAnaModule.cc
   TColl1DoseAnaModule.cc TColl3DoseAnaModule.cc TCosmicsAnaModule.cc TCalAnaModule.cc TCaloDose.cc
   TCaloTimeRes.cc TClusterAnaModule.cc TBeamFlashAnaModule.cc SConscript TAnaModule.cc
   InitVirtualDetectors.cc

@@ -7,6 +7,7 @@
 #include "murat/ana/TColl1DoseAnaModule.hh"
 #include "murat/ana/TColl3DoseAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
+#include "murat/ana/TDetTimeAnaModule.hh"
 #include "murat/ana/TDegraderRpcAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
 #include "murat/ana/TDoseAnaModule.hh"
@@ -105,6 +106,7 @@ namespace murat {
   TCosmicsAnaModule*       m_cos    = NULL;
   TClusterAnaModule*       m_cls    = NULL;
   TDegraderRpcAnaModule*   m_drpc   = NULL;
+  TDetTimeAnaModule*       m_det    = NULL;
   TEmuAnaModule*           m_emu    = NULL;
   TFilterModule*           m_filter = NULL;
   TFunAnaModule*           m_fun    = NULL;

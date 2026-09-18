@@ -93,10 +93,12 @@ public:
     int                       intime_calc;
     int                       intime_crvc;
     float                     dtmin_tc;           // from the closest TC
-    TStnCluster*              calc;               // closest
-    float                     dtmin_calc;         // from the closest CALC
-    float                     dx_calc;
-    float                     dy_calc;
+    float                     x_disk[2];
+    float                     y_disk[2];
+    TStnCluster*              calc[2];            // closest, for each disk
+    float                     dtmin_calc[2];      // from the closest CALC
+    float                     dx_calc[2];
+    float                     dy_calc[2];
     TStnTimeCluster*          tc;
     float                     dtmin_crvc;         // from the closest CRVC
     TCrvCoincidenceCluster*   crvc;
@@ -130,17 +132,20 @@ public:
     TH1F*         h_nhits;
     TH1F*         h_chi2d;
     TH1F*         h_t0;
-    TH1F*         h_dt_crvc;
-    TH1F*         h_dt_calc;
-    TH1F*         h_dt_tc;
-    TH1F*         h_dx_calc;
-    TH1F*         h_dy_calc;
-    TH2F*         h_dx_calc_vs_dxdz;
-    TH2F*         h_dy_calc_vs_dydz;
     TH1F*         h_dxdz;
     TH1F*         h_dydz;
+
+    TH1F*         h_dt_tc;
+    
+    TH1F*         h_dt_calc[2];
+    TH1F*         h_dx_calc[2];
+    TH1F*         h_dy_calc[2];
+    TH2F*         h_dx_calc_vs_dxdz[2];
+    TH2F*         h_dy_calc_vs_dydz[2];
+    
     TH1F*         h_xcrv;
     TH1F*         h_zcrv;
+    TH1F*         h_dt_crvc;
     TH1F*         h_dx_crvc;
     TH1F*         h_dz_crvc;
     TH2F*         h_dx_crvc_vs_dxdy;
@@ -252,6 +257,8 @@ public:
   //  int              PrintTimeCorrections();
 
   void             Debug();
+  
+  int              PrintTracks();
 
   ClassDefOverride(murat::TDetTimeAnaModule,0)
 };

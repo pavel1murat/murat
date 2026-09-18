@@ -1,7 +1,7 @@
 # -*- mode: tcl -*-
 ###############################################################################
 # use DumpGeometry - common module for all subdetectors
-# Print positions of the CRV bars
+# 2026-09-17: dump the CRV geometry in extracted position
 ###############################################################################
 #include "Stntuple/fcl/stntuple_prologs.fcl"
 #include "murat/fcl/prolog.fcl"

@@ -83,7 +83,10 @@ def local_build():
 
     helper.build_libs(list_of_cc_files,skip_list,libs);
 
-    skip_module_list      = [ 'TCalm001_module.cc', 'TrackRecoCheck_module.cc', 'TTrackRecoAna_module.cc' ]
+    skip_module_list      = [ 'TCalm001_module.cc',
+                              'TrackRecoCheck_module.cc',
+                              'TTrackRecoAna_module.cc' 
+                             ]
     skip_module_dict_list = []
     helper.build_modules(list_of_modules+list_of_plugins,skip_module_list,skip_module_dict_list,libs)
 #------------------------------------------------------------------------------

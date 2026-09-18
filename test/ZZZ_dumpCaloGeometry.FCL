@@ -1,11 +1,8 @@
 # -*- mode: tcl -*-
-#
+# 2026-09-17: obsolete
 # Print some information about the TTracker.
 #
 #
-# $Id: dumpTrackerGeometry.fcl,v 1.2 2015/01/23 22:11:31 murat Exp $
-# $Author: murat $
-# $Date: 2015/01/23 22:11:31 $
 
 #include "fcl/minimalMessageService.fcl"
 #include "fcl/standardProducers.fcl"

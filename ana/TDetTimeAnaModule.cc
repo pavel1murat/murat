@@ -112,34 +112,6 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
   title = std::format("{} : t0",prefix);
   fBookHist->HBook1F(Hist->h_t0,name.data(),title.data(),500,0,2.5e6,Folder);   // in ns...
 
-  name  = "dt_tc";
-  title = std::format("{} : dt TC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_tc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
-
-  name  = "dt_calc";
-  title = std::format("{} : dt CALC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_calc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
-
-  name  = "dt_crvc";
-  title = std::format("{} : dt CRVC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_crvc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
-
-  name  = "dx_calc";
-  title = std::format("{} : dx_calc = x(trk)-x(calc)",prefix);
-  fBookHist->HBook1F(Hist->h_dx_calc,name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
-
-  name  = "dy_calc";
-  title = std::format("{} : dy_calc = y(trk)-y(calc)",prefix);
-  fBookHist->HBook1F(Hist->h_dy_calc,name.data(),title.data(),100,-2500,2500,Folder);   // in ns...
-
-  name  = "dx_calc_vs_dxdz";
-  title = std::format("{} : dx_calc vs dxdz",prefix);
-  fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz,name.data(),title.data(),200,-1,1,200,-1000,1000,Folder);
-
-  name  = "dy_calc_vs_dydz";
-  title = std::format("{} : dy_calc vs dydz",prefix);
-  fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz,name.data(),title.data(),100,-2.5,2.5,200,-1000,1000,Folder);
-
   name  = "dxdz";
   title = std::format("{} : dxdz",prefix);
   fBookHist->HBook1F(Hist->h_dxdz,name.data(),title.data(),200,-10,10,Folder);   // in ns...
@@ -148,6 +120,32 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
   title = std::format("{} : dydz",prefix);
   fBookHist->HBook1F(Hist->h_dydz,name.data(),title.data(),200,-10,10,Folder);   // in ns...
 
+  name  = "dt_tc";
+  title = std::format("{} : dt TC",prefix);
+  fBookHist->HBook1F(Hist->h_dt_tc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
+
+  for (int k=0; k<2; k++) {
+    name  = std::format("dt_calc_{}",k);
+    title = std::format("{} : dt CALC disk:{}",prefix,k);
+    fBookHist->HBook1F(Hist->h_dt_calc[k],name.data(),title.data(),400,-100,100,Folder);   // in ns...
+
+    name  = std::format("dx_calc_{}",k);
+    title = std::format("{} : dx_calc = x(trk)-x(calc) disk:{}",prefix,k);
+    fBookHist->HBook1F(Hist->h_dx_calc[k],name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
+
+    name  = std::format("dy_calc_{}",k);
+    title = std::format("{} : dy_calc = y(trk)-y(calc) disk:{}",prefix,k);
+    fBookHist->HBook1F(Hist->h_dy_calc[k],name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
+
+    name  = std::format("dx_calc_vs_dxdz_{}",k);
+    title = std::format("{} : dx_calc vs dxdz disk:{}",prefix,k);
+    fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz[k],name.data(),title.data(),200,-1,1,200,-1000,1000,Folder);
+
+    name  = std::format("dy_calc_vs_dydz_{}",k);
+    title = std::format("{} : dy_calc vs dydz disk:{}",prefix,k);
+    fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz[k],name.data(),title.data(),200,-1.0,1.0,200,-1000,1000,Folder);
+  }
+  
   name  = "xcrv";
   title = std::format("{} : xcrv",prefix);
   fBookHist->HBook1F(Hist->h_xcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
@@ -155,6 +153,10 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
   name  = "zcrv";
   title = std::format("{} : zcrv",prefix);
   fBookHist->HBook1F(Hist->h_zcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
+
+  name  = "dt_crvc";
+  title = std::format("{} : dt CRVC",prefix);
+  fBookHist->HBook1F(Hist->h_dt_crvc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
 
   name  = "dx_crvc";
   title = std::format("{} : dx_crvc",prefix);
@@ -274,16 +276,16 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   book_trk_histset[0] = 1;             // all
   
   book_trk_histset[1] = 1;             // in-time tracks
-  book_trk_histset[2] = 1;             // in-time tracks DISK0
-  book_trk_histset[3] = 1;             // in-time tracks DISK1
+  // book_trk_histset[2] = 1;             // in-time tracks DISK0
+  // book_trk_histset[3] = 1;             // in-time tracks DISK1
 
   book_trk_histset[4] = 1;             // in-time CAL
-  book_trk_histset[5] = 1;             // in-time CAL DISK0
-  book_trk_histset[6] = 1;             // in-time CAL DISK1
+  // book_trk_histset[5] = 1;             // in-time CAL DISK0
+  // book_trk_histset[6] = 1;             // in-time CAL DISK1
 
   book_trk_histset[7] = 1;             // in-time trk_nhits>10 CAL
-  book_trk_histset[8] = 1;             // in-time trk_nhits>10 CAL DISK0
-  book_trk_histset[9] = 1;             // in-time trk_nhits>10 CAL DISK1
+  // book_trk_histset[8] = 1;             // in-time trk_nhits>10 CAL DISK0
+  // book_trk_histset[9] = 1;             // in-time trk_nhits>10 CAL DISK1
 
   book_trk_histset[10] = 1;             // in-time CRVC trk_nhits>10
   
@@ -334,31 +336,35 @@ int TDetTimeAnaModule::FillDiskHistograms(DiskHist_t* Hist, TCaloRecoDigi* Calrd
 int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_param_t* Tp) {
   // filling histograms: plot time differences between
   
+  float dxdz = Trk->fNx/Trk->fNz;
+  float dydz = Trk->fNy/Trk->fNz;
+  
+  float dxdy = dxdz/dydz;
+  float dzdy = 1./dydz;
+  
   Hist->h_nhits->Fill(Trk->fNHits);
   Hist->h_chi2d->Fill(Trk->fChi2/Trk->fNDof);
   Hist->h_t0->Fill(Trk->fT0);
   Hist->h_dt_tc->Fill(Tp->dtmin_tc);
 
-  Hist->h_dt_calc->Fill(Tp->dtmin_calc);
-  Hist->h_dt_crvc->Fill(Tp->dtmin_crvc);
-
-  Hist->h_dx_calc->Fill(Tp->dx_calc);
-  Hist->h_dy_calc->Fill(Tp->dy_calc);
-
-  float dxdz = Trk->fNx/Trk->fNz;
-  float dydz = Trk->fNy/Trk->fNz;
-  
-  Hist->h_dx_calc_vs_dxdz->Fill(dxdz,Tp->dx_calc);
-  Hist->h_dy_calc_vs_dydz->Fill(dydz,Tp->dy_calc);
-
-  float dxdy = dxdz/dydz;
-  float dzdy = 1./dydz;
-
   Hist->h_dxdz->Fill(dxdz);
   Hist->h_dydz->Fill(dydz);
-  
+
+  for (int k=0; k<2; k++) {
+    if (Tp->calc[k]) {
+      Hist->h_dt_calc[k]->Fill(Tp->dtmin_calc[k]);
+      Hist->h_dx_calc[k]->Fill(Tp->dx_calc[k]);
+      Hist->h_dy_calc[k]->Fill(Tp->dy_calc[k]);
+
+      Hist->h_dx_calc_vs_dxdz[k]->Fill(dxdz,Tp->dx_calc[k]);
+      Hist->h_dy_calc_vs_dydz[k]->Fill(dydz,Tp->dy_calc[k]);
+    }
+  }
+
   Hist->h_xcrv->Fill(Tp->xcrv);
   Hist->h_zcrv->Fill(Tp->zcrv);
+
+  Hist->h_dt_crvc->Fill(Tp->dtmin_crvc);
 
   Hist->h_dx_crvc->Fill(Tp->dx_crvc);
   Hist->h_dz_crvc->Fill(Tp->dz_crvc);
@@ -453,34 +459,34 @@ int TDetTimeAnaModule::FillHistograms() {
     if (tp->intime) {
       
       FillTrkHistograms(fHist->trk[1],trk,tp);
-      if (tp->calc->DiskID() == 0) {
-        GetHeaderBlock()->Print("in-time disk0");
-        FillTrkHistograms(fHist->trk[2],trk,tp);
-      }
-      else {
-        GetHeaderBlock()->Print("in-time disk1");
-        FillTrkHistograms(fHist->trk[3],trk,tp);
-      }
+      // if (tp->calc->DiskID() == 0) {
+      //   GetHeaderBlock()->Print("in-time disk0");
+      //   FillTrkHistograms(fHist->trk[2],trk,tp);
+      // }
+      // else {
+      //   GetHeaderBlock()->Print("in-time disk1");
+      //   FillTrkHistograms(fHist->trk[3],trk,tp);
+      // }
     }
     
     if (tp->intime_calc) {
       FillTrkHistograms(fHist->trk[4],trk,tp);
-      if (tp->calc->DiskID() == 0) {
-        FillTrkHistograms(fHist->trk[5],trk,tp);
-      }
-      else if (tp->calc->DiskID() == 1) {
-        FillTrkHistograms(fHist->trk[6],trk,tp);
-      }
+      // if (tp->calc->DiskID() == 0) {
+      //   FillTrkHistograms(fHist->trk[5],trk,tp);
+      // }
+      // else if (tp->calc->DiskID() == 1) {
+      //   FillTrkHistograms(fHist->trk[6],trk,tp);
+      // }
     }
 
     if ((trk->NHits() > 10) and (tp->intime_calc)) {
       FillTrkHistograms(fHist->trk[7],trk,tp);
-      if (tp->calc->DiskID() == 0) {
-        FillTrkHistograms(fHist->trk[8],trk,tp);
-      }
-      else if (tp->calc->DiskID() == 1) {
-        FillTrkHistograms(fHist->trk[9],trk,tp);
-      }
+      // if (tp->calc->DiskID() == 0) {
+      //   FillTrkHistograms(fHist->trk[8],trk,tp);
+      // }
+      // else if (tp->calc->DiskID() == 1) {
+      //   FillTrkHistograms(fHist->trk[9],trk,tp);
+      // }
     }
 
     if ((trk->NHits() > 10) and (tp->intime_crvc)) {
@@ -502,6 +508,26 @@ int TDetTimeAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
+// global positioning constants
+//-----------------------------------------------------------------------------
+    float crv_time_offset = 0.; // 21; // today
+
+    double crv_off[3] = {    0., -145.0, 0.0 };
+      
+    double trk_pos[3] = {-3904., 0., 24171.0 }; // nominal
+    //    double trk_off[3] = {    0., 0., -1171.0 }; // offset to be added
+    double trk_off[3] = {    0., 0., -1235.0 }; // offset to be added
+
+    double calo_pos[2][3] = {           // nominal
+      -3904., 0., 23000.0+2383.-64.,        // 25842;
+      -3904., 0., 23000.0+3517.-64.
+    };
+    
+    double calo_off[2][3] = {           // offset to be added
+      0.    , 0.,     0.,
+      0.    , 0.,     0.
+    };
+//-----------------------------------------------------------------------------
 // extra track parameters
 //-----------------------------------------------------------------------------
   for (int i1=0; i1<fNTrk; i1++) {
@@ -511,16 +537,22 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 // initialize parameter record
 //-----------------------------------------------------------------------------
     tp->dtmin_tc    = 1.e6;
-    tp->dtmin_crvc  = 1.e6;
-    tp->dtmin_calc  = 1.e6;
     tp->tc          = nullptr;
-    tp->calc        = nullptr;
+    for (int k=0; k<2; k++) {
+      float dz          = calo_pos[k][2]+calo_off[k][2]-(trk->fZ0+trk_pos[2]+trk_off[2]);
+
+      tp->dtmin_calc[k] = 1.e6;
+      tp->x_disk[k]     = trk->fX0     + (trk_pos [0]+trk_off [0]) + (trk->fNx/trk->fNz)*dz;
+      tp->y_disk[k]     = trk->fY0     + (trk_pos [1]+trk_off [1]) + (trk->fNy/trk->fNz)*dz;
+      tp->calc[k]       = nullptr;
+      tp->dx_calc[k]    = 1.e6;
+      tp->dy_calc[k]    = 1.e6;
+    }
     tp->crvc        = nullptr;
+    tp->dtmin_crvc  = 1.e6;
     tp->intime      = 0;
     tp->intime_calc = 0;
     tp->intime_crvc = 0;
-    tp->dx_calc     = 1.e6;
-    tp->dy_calc     = 1.e6;
     tp->xcrv        = 1.e6;
     tp->zcrv        = 1.e6;
     tp->dx_crvc     = 1.e6;
@@ -540,23 +572,6 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 // determine the closest CRV coincidence
 // as the calibration used time clusters, look at the time cluster T0
 //-----------------------------------------------------------------------------
-    float crv_time_offset = 0.; // 21; // today
-
-    double crv_off[3] = {    0., -145.0, 0.0 };
-      
-    double trk_pos[3] = {-3904., 0., 24171.0 }; // nominal
-    //    double trk_off[3] = {    0., 0., -1171.0 }; // offset to be added
-    double trk_off[3] = {    0., 0., -1235.0 }; // offset to be added
-
-    double calo_pos[2][3] = {           // nominal
-      -3904., 0., 23000.0+2383.-64.,        // 25842;
-      -3904., 0., 23000.0+3517.-64.
-    };
-    
-    double calo_off[2][3] = {           // offset to be added
-      0.    , 0.,     0.,
-      0.    , 0.,     0.
-    };
     
     for (int i2=0; i2<fNCrvc; i2++) {
       TCrvCoincidenceCluster* crvc = fCrvcBlock->Cluster(i2);
@@ -595,44 +610,39 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
     for (int i2=0; i2<fNCaloClusters; i2++) {
       TStnCluster* calc = fCaloClusterBlock->Cluster(i2);
+      int disk = calc->DiskID();
 
       float dt = tp->tc->T0()-calc->Time();
-      if (fabs(dt) < fabs(tp->dtmin_calc)) {
-        tp->dtmin_calc = dt;
-        tp->calc       = calc;
+      
+      if (fabs(dt) < fabs(tp->dtmin_calc[disk])) {
+        tp->dtmin_calc[disk] = dt;
+        tp->calc[disk]       = calc;
       }
     }
 //-----------------------------------------------------------------------------
-// extrapolate track to the closest cluster
+// track-cluster residuals, for each disk separately
 //-----------------------------------------------------------------------------
-    if (tp->calc) {
-      // double zc = 2383.; // 3560.; // guesswork for the disk0 position , not sure it is correct
-      // if (tp->calc->DiskID() == 1) {
-      //   zc = 3517;
-      // }
-      int disk = tp->calc->DiskID();
+    for (int disk=0; disk<2; disk++) {
+      TStnCluster* cl = tp->calc[disk];
+      if (cl) {
+     
+        float x_cal = cl->fX + (calo_pos[disk][0]+calo_off[disk][0]);
+        float y_cal = cl->fY + (calo_pos[disk][1]+calo_off[disk][1]);
       
-      float dz    = calo_pos[disk][2]+calo_off[disk][2]-(trk->fZ0+trk_pos[2]+trk_off[2]);
-      
-      float x_trk = trk->fX0     + (trk_pos [0]+trk_off [0]) + trk->fNx/trk->fNz*dz;
-      float y_trk = trk->fY0     + (trk_pos [1]+trk_off [1]) + trk->fNy/trk->fNz*dz;
-      float x_cal = tp->calc->fX + (calo_pos[disk][0]+calo_off[disk][0]);
-      float y_cal = tp->calc->fY + (calo_pos[disk][1]+calo_off[disk][1]);
-      
-      tp->dx_calc = x_trk-x_cal;
-      tp->dy_calc = y_trk-y_cal;
-    }
+        tp->dx_calc[disk] = tp->x_disk[disk]-x_cal;
+        tp->dy_calc[disk] = tp->y_disk[disk]-y_cal;
+      }
 
-    if (fabs(tp->dtmin_calc) <  30) {
-      tp->intime_calc = 1;
+      if (fabs(tp->dtmin_calc[disk]) <  30) {
+        tp->intime_calc = 1;
+      }
     }
     
     if ((fabs(tp->dtmin_tc  ) <  30) and
-        (fabs(tp->dtmin_calc) <  30) and
+        ((tp->calc[0] and (tp->calc[0]->Energy() >= 20) and (fabs(tp->dtmin_calc[0]) < 30)) or 
+         (tp->calc[1] and (tp->calc[1]->Energy() >= 20) and (fabs(tp->dtmin_calc[1]) <  30))   ) and 
         (fabs(tp->dtmin_crvc) <  30) and
-        (tp->calc->Energy()   >= 20) and
-        (trk->fNHits          >= 10)
-        ) {
+        (trk->fNHits          >= 10)     ) {
       tp->intime = 1;
     }
   }
@@ -816,8 +826,8 @@ void TDetTimeAnaModule::Debug() {
         if (nh >= 20) {
           GetHeaderBlock()->Print(Form("NCcDisk[0]:%2i fNCcDisk[1]:%2i N_trk_hits = %3d",
                                        fNCcDisk[0],fNCcDisk[1],nh));
+          fCaloClusterBlock->Print();
         }
-        fCaloClusterBlock->Print();
       }
     }
   }
@@ -873,4 +883,20 @@ int TDetTimeAnaModule::FitCaloTimeOffsets(float TMin, float TMax) {
   return 0;
 }
 
+//-----------------------------------------------------------------------------
+int TDetTimeAnaModule::PrintTracks() {
+  std::cout << std::format(" i      T0         Z0       Nx     Ny    Nz    Chi2D     Xc[0]      Yc[0]      Xc[1]      Yc[1]    DxCal[0]    DyCal[0]    DxCal[1]   DyCal[1]\n");
+  for (int i=0; i<fNTrk; i++) {
+    TStrTrack*   trk = fTrackBlock->Track(i);
+    trk_param_t* tp  = &fListOfTrkParam.at(i);
+    std::cout << std::format("{:2d} {:10.3f} {:10.3f} {:6.3f} {:6.3f} {:6.3f} {:7.2f}",
+                             i,trk->fT0,trk->fZ0,trk->fNx,trk->fNy,trk->fNz,trk->fChi2/trk->fNDof);
+    
+    std::cout << std::format(" {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f}\n",
+                             tp->x_disk [0],tp->y_disk [0],tp->x_disk[1],tp->y_disk[1],
+                             tp->dx_calc[0],tp->dy_calc[0],tp->dx_calc[1],tp->dy_calc[1]);
+  }
+  return 0;
+}
+  
 }

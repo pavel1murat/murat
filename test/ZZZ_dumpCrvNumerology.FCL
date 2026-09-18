@@ -1,5 +1,7 @@
 # -*- mode: tcl -*-
 #
+# 2026-09-17: obsolete
+#
 # Print CRV geometry
 #
 BEGIN_PROLOG

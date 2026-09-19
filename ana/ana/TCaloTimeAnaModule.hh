@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef __murat_ana_TDetTimeAnaModule_hh__
-#define __murat_ana_TDetTimeAnaModule_hh__
+#ifndef __murat_ana_TCaloTimeAnaModule_hh__
+#define __murat_ana_TCaloTimeAnaModule_hh__
 
 #include "TH1.h"
 #include "TH2.h"
@@ -27,7 +27,7 @@
 #include "Stntuple/geom/TrkPanelMap.hh"
 
 namespace murat {
-class TDetTimeAnaModule: public TStnModule {
+class TCaloTimeAnaModule: public TStnModule {
   
 public:
   
@@ -42,37 +42,12 @@ public:
 
   enum {
     kNEventHistSets      = 100,
-    kNCrvdHistSets       = 100,
-    kNCrvcHistSets       = 100,
-    kNCrvpHistSets       = 100,
-    kNRocHistSets        =  20,
     kNCalhHistSets       = 100,
     kNCalcHistSets       = 100,
-    kNTrkHistSets        = 100,
   };
 //-----------------------------------------------------------------------------
 // indices
 //-----------------------------------------------------------------------------
-  struct TrkIndex_t {
-    int sel;
-    int slot;                 // 0-17
-    int plane;                // offline
-    int panel;                // offline
-    int pnl12;                // panel index within the station (0-11)
-    int mnid;
-    int ch;
-  };
-  
-  struct CrvIndex_t {
-    int sel  {-1};
-    int sbid {-1};
-    int sipm {-1};
-    int och  {-1};                           // offline channel - 4*sbid+sipm
-    int roc  {-1};                           // 1-18 ??? 
-    int feb  {-1};                           // 1-24 in offline domain
-    int ch   {-1};                           // channel within the FEB (0-63)
-  };
-  
   struct CaloIndex_t {
     int sel   {-1};
     int crate {-1};
@@ -84,36 +59,13 @@ public:
     float                     dtmin_tc;           // from the closest TC
     TStnTimeCluster*          tc;
     float                     dtmin_crvc;     // from the closest CRVC
-    TCrvCoincidenceCluster*   crvc;
     float                     dtmin_trk;                // from the closest track
-    TStrTrack*                trk;                      // closest track
   };
                                                   // for now, a placeholder
-  struct trk_param_t {
-    int                       intime;
-    int                       intime_calc;
-    int                       intime_crvc;
-    float                     dtmin_tc;           // from the closest TC
-    float                     x_disk[2];
-    float                     y_disk[2];
-    TStnCluster*              calc[2];            // closest, for each disk
-    float                     dtmin_calc[2];      // from the closest CALC
-    float                     dx_calc[2];
-    float                     dy_calc[2];
-    TStnTimeCluster*          tc;
-    float                     dtmin_crvc;         // from the closest CRVC
-    TCrvCoincidenceCluster*   crvc;
-    float                     dxdz;
-    float                     dydz;
-    float                     xcrv;
-    float                     zcrv;
-    float                     dx_crvc;
-    float                     dz_crvc;
-  };
-
   struct crystal_t {
     int fCid;
-    std::vector<TCaloHit*> fHits;
+    std::vector<TCaloHit*>      fHits;
+    std::vector<TCaloRecoDigi*> fCrd[2];
     
     int       Cid     () { return fCid; }
     int       NHits   () { return (int) fHits.size(); }
@@ -131,11 +83,6 @@ public:
     TH1F* h_dt;
   };
 
-  struct ChannelHist_t {
-    TH1F* h_ch;
-    TH1F* h_dt;
-  };
-
   struct CalcHist_t {
     TH1F*         h_edep;
     TH1F*         h_dt_tc;
@@ -143,32 +90,7 @@ public:
     TH2F*         h_dt_crvc_vs_dt_tc;
   };
 
-  struct TrkHist_t {
-    TH1F*         h_nhits;
-    TH1F*         h_chi2d;
-    TH1F*         h_t0;
-    TH1F*         h_dxdz;
-    TH1F*         h_dydz;
-
-    TH1F*         h_dt_tc;
-    
-    TH1F*         h_dt_calc[2];
-    TH1F*         h_dx_calc[2];
-    TH1F*         h_dy_calc[2];
-    TH2F*         h_dx_calc_vs_dxdz[2];
-    TH2F*         h_dy_calc_vs_dydz[2];
-    
-    TH1F*         h_xcrv;
-    TH1F*         h_zcrv;
-    TH1F*         h_dt_crvc;
-    TH1F*         h_dx_crvc;
-    TH1F*         h_dz_crvc;
-    TH2F*         h_dx_crvc_vs_dxdy;
-    TH2F*         h_dz_crvc_vs_dzdy;
-  };
-
   struct DiskHist_t {
-    // BoardHist_t*  board[30];
     TH1F*         h_ch;
     TH2F*         h_board_vs_dt;
   };
@@ -176,13 +98,13 @@ public:
   struct Hist_t {
     DiskHist_t* disk[2];                // 2 disks
     TH2F*       h_dt_vs_sipmid;
+    TH2F*       h_dt10_vs_crystal;
     TH2F*       h_nsipms_vs_cid;
     TH1F*       h_sipmid;               // occupancy offline channel
     TH2F*       h_n2_vs_n1;
     TH1F*       h_ntrk[2];
     CalhHist_t* calh   [kNCalhHistSets];
     CalcHist_t* calc   [kNCalcHistSets];
-    TrkHist_t*  trk    [kNTrkHistSets ];
   };
 
 //-----------------------------------------------------------------------------
@@ -200,9 +122,9 @@ public:
   TCaloHitBlock*            fCaloHitBlock;
   TCaloRecoDigiBlock*       fCaloRecoDigiBlock;
 
-  TrkPanelMap*              fTpm;
+  //  TrkPanelMap*              fTpm;
   TCaloChannelMap*          fCaloChannelMap;
-  TCrvChannelMap*           fCrvChannelMap;
+  // TCrvChannelMap*           fCrvChannelMap;
   
   int                       fRunNumber;
 
@@ -212,19 +134,13 @@ public:
   Hist_t*                   fHist;       // histograms to be filled
 
   int                       fNCalh10[2]; // N(hits above 10 MeV)
-  int                       fNTrk;
   int                       fNCalh;
-  int                       fNCalrd;
+  int                       fNCalord;
   int                       fNCaloClusters;
-  int                       fNTc;
-  int                       fNCrvc;
-  int                       fNCrvp;
-  int                       fNCrvd;
 
   int                       fNCcDisk[2];
 
   std::vector<calc_param_t> fListOfCalcParam;
-  std::vector<trk_param_t>  fListOfTrkParam;
 
   fit_result_t              fFr[kNCaloChannels];
   fit_result_t*             fFrRef;
@@ -234,8 +150,8 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TDetTimeAnaModule(const char* name="DetTimeAna", const char* title="Stntuple DetTimeAna");
-  ~TDetTimeAnaModule();
+  TCaloTimeAnaModule(const char* name="CaloTimeAna", const char* title="murat::CaloTimeAna");
+  ~TCaloTimeAnaModule();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -259,15 +175,12 @@ public:
   int              BookCalcHistograms (CalcHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookCalhHistograms (CalhHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookDiskHistograms (DiskHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
-  int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
   int              CalculateMissingParameters   ();
-  int              CalculateMissingTrkParameters();
   
   int              FillCalcHistograms (CalcHist_t* Hist, TStnCluster*   Calc, calc_param_t* Cp);
   int              FillDiskHistograms (DiskHist_t* Hist, TCaloRecoDigi* Calrd);
-  int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*     Trk , trk_param_t* Tp);
   int              FillHistograms     ();
 
   int              FitCaloTimeOffsets (float TMin = 1., float TMax = -1.);
@@ -277,7 +190,7 @@ public:
   
   int              PrintTracks();
 
-  ClassDefOverride(murat::TDetTimeAnaModule,0)
+  ClassDefOverride(murat::TCaloTimeAnaModule,0)
 };
 }
 #endif

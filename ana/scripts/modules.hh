@@ -3,6 +3,7 @@
 
 #include "murat/ana/TBeamFlashAnaModule.hh"
 #include "murat/ana/TCalAnaModule.hh"
+#include "murat/ana/TCaloTimeAnaModule.hh"
 #include "murat/ana/TClusterAnaModule.hh"
 #include "murat/ana/TColl1DoseAnaModule.hh"
 #include "murat/ana/TColl3DoseAnaModule.hh"
@@ -103,6 +104,7 @@ TVDetAnaModule*            m_vdt   = NULL;
 //-----------------------------------------------------------------------------
 namespace murat {
   TCalAnaModule*           m_cal    = NULL;
+  TCaloTimeAnaModule*      m_calt   = NULL;
   TCosmicsAnaModule*       m_cos    = NULL;
   TClusterAnaModule*       m_cls    = NULL;
   TDegraderRpcAnaModule*   m_drpc   = NULL;

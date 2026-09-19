@@ -46,6 +46,18 @@ TDetTimeAnaModule::TDetTimeAnaModule(const char* name, const char* title):
   
   fFrRef          = nullptr;
   fHist           = new Hist_t;
+  
+  // for now, no division by the disk...
+  fCrystals.resize(kNCrystals);
+  for (int i=0; i<kNCrystals; i++) {
+    crystal_t* cr = &fCrystals[i];
+    cr->fCid      = i;
+  }
+  
+  fHitCrystals.clear();
+
+  fListOfTrkParam.reserve(100);
+  fListOfTrkParam.resize (100);
 }
 
 //-----------------------------------------------------------------------------
@@ -189,12 +201,16 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   std::string name, title;
 
   name  = "dt_vs_sipmid";
-  title = std::format("{} : dt vs crystal ID",prefix);
-  fBookHist->HBook2F(Hist->h_dt_vs_sipmid,name.data(),title.data(),3000,0,3000,1000,-1000,1000,Folder);
+  title = std::format("{} : dt vs SIPM ID",prefix);
+  fBookHist->HBook2F(Hist->h_dt_vs_sipmid,name.data(),title.data(),2800,0,2800,1000,-1000,1000,Folder);
+
+  name  = "nsipms_vs_cid";
+  title = std::format("{} : nsipms vs crystal ID",prefix);
+  fBookHist->HBook2F(Hist->h_nsipms_vs_cid,name.data(),title.data(),1400,0,1400,3,0,3,Folder);
 
   name  = "sipmid";
   title = std::format("{} : Sipm ID",prefix);
-  fBookHist->HBook1F(Hist->h_sipmid,name.data(),title.data(),3000,0,3000,Folder);
+  fBookHist->HBook1F(Hist->h_sipmid,name.data(),title.data(),2800,0,2800,Folder);
 
   name  = "n2_vs_n1";
   title = std::format("{} : N1:N1 calh E>10",prefix);
@@ -392,6 +408,10 @@ int TDetTimeAnaModule::FillHistograms() {
 
   //  Index_t index;
   
+  for (int i=0; i<fNCalh; i++) {
+    TCaloHit*  calh = fCaloHitBlock->Hit(i);
+    fHist->h_nsipms_vs_cid->Fill(calh->Cid(),calh->NSipms());
+  }
 //-----------------------------------------------------------------------------
 // double-nested loops start here
 //-----------------------------------------------------------------------------
@@ -659,18 +679,40 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
   fListOfCalcParam.clear();
   if (fNCaloClusters > 0) fListOfCalcParam.resize(fNCaloClusters);
   
-  fListOfTrkParam.clear();
-  if (fNTrk > 0) fListOfTrkParam.resize(fNTrk);
+  // fListOfTrkParam.clear();
+  // if (fNTrk > 0) fListOfTrkParam.resize(fNTrk);
+//-----------------------------------------------------------------------------
+// calorimeter hits
+// 1. clear hit channels
+//-----------------------------------------------------------------------------
+  int nhc = fHitCrystals.size();
+  for (int i=0; i<nhc; ++i) {
+    crystal_t* cr = fHitCrystals[i];
+    cr->fHits.clear();
+  }
+  fHitCrystals.clear();
+  fMaxHitsPerCrystal = 0;
   
   for (int i1=0; i1<fNCalh; i1++) {
     TCaloHit*  calh = fCaloHitBlock->Hit(i1);
+    crystal_t* cr   = &fCrystals[calh->fCid];
 
+    cr->fHits.push_back(calh);
+    int nh = cr->NHits();
+    if (nh == 1) {
+      // first hit: add crystal to the list of crystals with hits
+      fHitCrystals.push_back(cr);
+    }
+    
+    if (nh > fMaxHitsPerCrystal) {
+      fMaxHitsPerCrystal = nh;
+    }
+       
     if (calh->fEDep > 10) {
       int disk = calh->Disk();
       fNCalh10[disk] += 1;
     }
   }
- 
 //-----------------------------------------------------------------------------
 // extra parameters of the calorimeter clusters
 //-----------------------------------------------------------------------------
@@ -798,6 +840,7 @@ int TDetTimeAnaModule::Event(int IEntry) {
   fNTc           = fTcBlock->NTimeClusters();
   fNCaloClusters = fCaloClusterBlock->NClusters();
   fNTrk          = fTrackBlock->NTracks();
+  fNCalh         = fCaloHitBlock->NHits();
 
   CalculateMissingParameters();
   
@@ -828,6 +871,33 @@ void TDetTimeAnaModule::Debug() {
                                        fNCcDisk[0],fNCcDisk[1],nh));
           fCaloClusterBlock->Print();
         }
+      }
+    }
+  }
+
+  if (GetDebugBit(5) == 1) {
+    if (fMaxHitsPerCrystal > 1) {
+      int n2plus = 0;
+      int n_hit_crystals = fHitCrystals.size();
+      for (int i=0; i<n_hit_crystals; i++) {
+        crystal_t* cr = fHitCrystals.at(i);
+        // figure the number of good hits in the crystal
+        int nh = cr->NHits();
+        int n_good_hits = 0;
+        for (int ih=0; ih<nh; ih++) {
+          TCaloHit* calh = cr->Hit(ih);
+          if ((calh->fNSipms == 2) and (calh->fEDep > 10.)) {
+            n_good_hits += 1;
+          }
+        }
+        if (n_good_hits >= 2) {
+          n2plus += 1;
+          GetHeaderBlock()->Print(Form("CID:%4i n_good_hits:%2i fNtrk:%d",
+                                       cr->Cid(),n_good_hits,fNTrk));
+        }
+      }
+      if (n2plus > 0) {
+          fCaloHitBlock->Print();
       }
     }
   }

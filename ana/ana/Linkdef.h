@@ -26,6 +26,7 @@
 #pragma link C++ class TBeamFlashAnaModule;
 
 #pragma link C++ class murat::TCalAnaModule;
+#pragma link C++ class murat::TCaloTimeAnaModule;
 
 #pragma link C++ class TCaloDose;
 #pragma link C++ class TCaloDose::Hist_t;

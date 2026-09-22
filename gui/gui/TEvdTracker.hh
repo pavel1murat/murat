@@ -2,16 +2,16 @@
 #ifndef __murat_gui_TEvdTracker__
 #define __murat_gui_TEvdTracker__
 
-#include "TEveElement.h"
-
-#include "murat/gui/TEvdNumerology.hh"
-#include "murat/gui/TEvdPlane.hh"
+#include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "murat/gui/TEvdStation.hh"
+#include "murat/gui/TEvdSubdetector.hh"
 
 namespace murat {
 //-----------------------------------------------------------------------------  
-class TEvdTracker: public TEveElementList {
+class TEvdTracker: public TEvdSubdetector {
 public:
+  std::unique_ptr<mu2e::Tracker> fTrkPtr;
+  
   TEvdStation*    fStation[kNStations];
 
   TEvdTracker();

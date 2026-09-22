@@ -24,7 +24,13 @@ def local_build():
     skip_list = []
 
     stntuple_libs = [ 'Stntuple_val', 'Stntuple_gui' , 'Stntuple_alg', 'Stntuple_loop',
-                      'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base'
+                      'Stntuple_obj', 'Stntuple_geom', 'Stntuple_base',
+                      'mu2e_GeometryService',
+                      'mu2e_CalorimeterGeom',
+                      'mu2e_TrackerGeom',
+                      'mu2e_CosmicRayShieldGeom',
+                      'mu2e_ConfigTools',
+                      'CLHEP'
                   ];
 
     libs          = stntuple_libs + [ rootlibs ];

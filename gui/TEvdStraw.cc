@@ -10,7 +10,7 @@ ClassImp(murat::TEvdStraw)
 
 namespace murat {
 //-----------------------------------------------------------------------------
-TEvdStraw::TEvdStraw(int I): TEveGeoShape("a") {
+TEvdStraw::TEvdStraw(int I): TEvdSubdetector() {
   fNumber = I;
 }
 
@@ -33,8 +33,8 @@ void TEvdStraw::Init(int ID, int Plane, int Panel, int Layer, double Rho, double
   fNy         = ny;
   fHalfLength = HalfLength;
 
-  TGeoTube* tube = new TGeoTube(2.45,2.5,fHalfLength);
-  SetShape(tube);
+  // TGeoTube* tube = new TGeoTube(2.45,2.5,fHalfLength);
+  // SetShape(tube);
 }
 
 //-----------------------------------------------------------------------------

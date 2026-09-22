@@ -3,5 +3,6 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class    HtmlSummary;
+#pragma link C++ class murat::TEvdManagerA;
+
 #endif

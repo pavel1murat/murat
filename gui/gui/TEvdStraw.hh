@@ -2,14 +2,14 @@
 #ifndef __murat_gui_TEvdStraw__
 #define __murat_gui_TEvdStraw__
 
-#include "TEveGeoShape.h"
-
+#include "Offline/DataProducts/inc/StrawId.hh"
 #include "murat/gui/TEvdNumerology.hh"
+#include "murat/gui/TEvdSubdetector.hh"
 
 namespace murat {
 class TEvdPanel;
 
-class TEvdStraw : public TEveGeoShape {
+class TEvdStraw : public TEvdSubdetector {
 public:
   int        fNumber;
   int        fID;       // straw index - channel ID

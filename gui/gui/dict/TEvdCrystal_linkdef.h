@@ -3,5 +3,6 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ function run_eve_mu2e;
+#pragma link C++ class murat::TEvdCrystal;
+
 #endif

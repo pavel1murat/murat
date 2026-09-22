@@ -5,19 +5,18 @@
 #include "murat/gui/TEvdPanel.hh"
 #include "murat/gui/TEvdTracker.hh"
 #include "TGeoXtru.h"
-#include "TEveTrans.h"
 
 ClassImp(murat::TEvdPanel)
 
 namespace murat {
 //-----------------------------------------------------------------------------
-TEvdPanel::TEvdPanel(int I): TEveGeoShape() {
+TEvdPanel::TEvdPanel(int I): TEvdSubdetector() {
   fNumber = I;
-  SetElementName(Form("panel_%03i",I));
-  for (int i=0; i<kNStraws; i++) {
-    fStraw[i] = new TEvdStraw(i);
-    AddElement(fStraw[i]);
-  }
+  // SetElementName(Form("panel_%03i",I));
+  // for (int i=0; i<kNStraws; i++) {
+  //   fStraw[i] = new TEvdStraw(i);
+  //   AddElement(fStraw[i]);
+  // }
 
   //-----------------------------------------------------------------------------
   // define dimensions
@@ -50,7 +49,7 @@ TEvdPanel::TEvdPanel(int I): TEveGeoShape() {
   xtru->DefineSection(0,-10.,0,0,1.);
   xtru->DefineSection(1, 10.,0,0,1.);
 
-  SetShape(xtru);
+  //  SetShape(xtru);
 }
 
 
@@ -58,32 +57,33 @@ TEvdPanel::TEvdPanel(int I): TEveGeoShape() {
 // needs to be called after  TEvemanager has been initialized
 // at this point the wire coordinates are already known
 //-----------------------------------------------------------------------------
-void TEvdPanel::InitGeometry() {
+int TEvdPanel::InitGeometry(const char* Fn) {
 
-  double zpanel = (fStraw[0]->Z() + fStraw[1]->Z())/2;
-  this->RefMainTrans().SetPos(0,0,zpanel);
-  this->RefMainTrans().RotatePF(1,2,fPhi);
+  // double zpanel = (fStraw[0]->Z() + fStraw[1]->Z())/2;
+  // this->RefMainTrans().SetPos(0,0,zpanel);
+  // this->RefMainTrans().RotatePF(1,2,fPhi);
 
-  SetMainTransparency(95);
-  SetMainColor(kGray+1);
-  //-----------------------------------------------------------------------------
-  // by default, straws are drawn along the Z axis
-  // panels are orthogonal to the Z axis, synchronize
-  //-----------------------------------------------------------------------------
-  for (int i=0; i<kNStraws; i++) {
-    TEvdStraw* s = fStraw[i];
+  // SetMainTransparency(95);
+  // SetMainColor(kGray+1);
+  // //-----------------------------------------------------------------------------
+  // // by default, straws are drawn along the Z axis
+  // // panels are orthogonal to the Z axis, synchronize
+  // //-----------------------------------------------------------------------------
+  // for (int i=0; i<kNStraws; i++) {
+  //   TEvdStraw* s = fStraw[i];
    
-    double dz = s->Z()-zpanel;
-    s->RefMainTrans().SetPos(s->Rho(),0,dz);
+  //   double dz = s->Z()-zpanel;
+  //   s->RefMainTrans().SetPos(s->Rho(),0,dz);
     
-    s->RefMainTrans().RotateLF(2,3,TMath::Pi()/2);
-    s->RefMainTrans().RotatePF(1,2,TMath::Pi()/2);
+  //   s->RefMainTrans().RotateLF(2,3,TMath::Pi()/2);
+  //   s->RefMainTrans().RotatePF(1,2,TMath::Pi()/2);
 
-    s->SetMainTransparency(80);
-    s->SetMainColor(kRed-9);
-  }
+  //   s->SetMainTransparency(80);
+  //   s->SetMainColor(kRed-9);
+  // }
 
-  SetRnrSelfChildren(true,false);
+  // SetRnrSelfChildren(true,false);
+  return 0;
 }
 
 

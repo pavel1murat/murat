@@ -1,0 +1,6 @@
+//
+#include "Offline/Mu2eG4/geom/geom_common_extracted.txt"
+
+// specifying "simple" allows to avoid dealing with GeometryService creation
+string trackerSupport.model            = "simple";
+double trackerSupport.channel.zOffset  = 11.2124;

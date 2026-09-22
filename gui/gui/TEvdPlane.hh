@@ -2,14 +2,13 @@
 #ifndef __murat_gui_TEvdPlane__
 #define __murat_gui_TEvdPlane__
 
-#include "TEveElement.h"
-
 #include "murat/gui/TEvdNumerology.hh"
 #include "murat/gui/TEvdPanel.hh"
+#include "murat/gui/TEvdSubdetector.hh"
 
 namespace murat {
 //-----------------------------------------------------------------------------
-class TEvdPlane : public TEveElementList {
+class TEvdPlane : public TEvdSubdetector {
 public:
   int         fNumber;
   TEvdPanel*  fPanel[6];
@@ -17,8 +16,7 @@ public:
   TEvdPlane(int I = -1);
 
   TEvdPanel*  Panel(int I)   { return fPanel[I]; }
-
-  int         Number() const { return fNumber; }
+  int         Number() const { return fNumber;   }
 
   ClassDef(TEvdPlane,0);
 };

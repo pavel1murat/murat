@@ -3,5 +3,6 @@
 #pragma link off all   classes;
 #pragma link off all   functions;
 
-#pragma link C++ class    SplitGLView;
+#pragma link C++ class murat::TEvdCrvSector;
+
 #endif

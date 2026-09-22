@@ -98,7 +98,8 @@ public:
   struct Hist_t {
     DiskHist_t* disk[2];                // 2 disks
     TH2F*       h_dt_vs_sipmid;
-    TH2F*       h_dt10_vs_crystal;
+    TH2F*       h_dt10_vs_cid;
+    TH1F*       h_dtpp[2];
     TH2F*       h_nsipms_vs_cid;
     TH1F*       h_sipmid;               // occupancy offline channel
     TH2F*       h_n2_vs_n1;

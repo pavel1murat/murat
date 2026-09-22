@@ -109,7 +109,15 @@ int TCaloTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 
   name  = "dt10_vs_crystal";
   title = std::format("{} : dt10 vs crystal ID",prefix);
-  fBookHist->HBook2F(Hist->h_dt10_vs_crystal,name.data(),title.data(),1400,0,1400,1000,-500,500,Folder);
+  fBookHist->HBook2F(Hist->h_dt10_vs_cid,name.data(),title.data(),1400,0,1400,2000,-2000,2000,Folder);
+
+  name  = "dtpp_0";
+  title = std::format("{} : deltaT(pulse-pulse)[0], ns",prefix);
+  fBookHist->HBook1F(Hist->h_dtpp[0],name.data(),title.data(),100,0,30000,Folder);
+
+  name  = "dtpp_1";
+  title = std::format("{} : deltaT(pulse-pulse)[1], ns",prefix);
+  fBookHist->HBook1F(Hist->h_dtpp[1],name.data(),title.data(),200,0,1000,Folder);
 
   name  = "nsipms_vs_cid";
   title = std::format("{} : nsipms vs crystal ID",prefix);
@@ -223,7 +231,7 @@ int TCaloTimeAnaModule::FillHistograms() {
         }
       }
       // now histogram
-      fHist->h_dt10_vs_crystal->Fill(cr->Cid(),min_dt);
+      fHist->h_dt10_vs_cid->Fill(cr->Cid(),min_dt);
     }
   }
   
@@ -231,6 +239,26 @@ int TCaloTimeAnaModule::FillHistograms() {
     TCaloHit*  calh = fCaloHitBlock->Hit(i);
     fHist->h_nsipms_vs_cid->Fill(calh->Cid(),calh->NSipms());
   }
+
+  // delta T between pulses in the same crystal
+  
+  int nhc = fHitCrystals.size();
+  for (int i=0; i<nhc; ++i) {
+    crystal_t* cr = fHitCrystals[i];
+    int nh = cr->NHits();
+    for (int ih=1; ih<nh; ih++) {
+      TCaloHit* h1 = cr->Hit(ih);
+      TCaloHit* h2 = cr->Hit(ih-1);
+      if ((h1->NSipms() == 2) and (h2->NSipms() == 2)) {
+        if ((h1->EDep() > 10.) and (h2->EDep() > 10)) {
+          float dt = h1->Time()-h2->Time();
+          fHist->h_dtpp[0]->Fill(dt);
+          fHist->h_dtpp[1]->Fill(dt);
+        }
+      }
+    }
+  }
+  
 //-----------------------------------------------------------------------------
 // double-nested loops start here
 //-----------------------------------------------------------------------------
@@ -280,7 +308,10 @@ int TCaloTimeAnaModule::CalculateMissingParameters() {
     int sipmid         = crd->SipmID();
     int cid            = sipmid / 2;
     int sipm           = sipmid % 2;
-
+    if ((cid<0) or (cid > kNCrystals)) {
+      std::cout << std::format("ERROR: cid={:}, skip reco digi\n",cid);
+      continue;
+    }
     crystal_t* cr      = &fCrystals[cid];
     cr->fCrd[sipm].push_back(crd);
   }

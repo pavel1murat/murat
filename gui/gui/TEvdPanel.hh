@@ -3,16 +3,14 @@
 #define __murat_gui_TEvdPanel__
 
 #include "murat/gui/TEvdNumerology.hh"
-#include "TEveGeoShape.h"
-
 #include "murat/gui/TEvdStraw.hh"
-
+#include "murat/gui/TEvdSubdetector.hh"
 
 namespace murat {
 
 class TEvdPlane;
 
-class TEvdPanel : public TEveGeoShape {
+class TEvdPanel : public TEvdSubdetector {
 public:
   int         fNumber;
   murat::TEvdPlane*  fPlane; // backward pointer to the mother plane
@@ -26,7 +24,8 @@ public:
 
   TEvdStraw*  Straw(int I) { return fStraw[I]; }
 
-  void        InitGeometry();
+  virtual int  InitGeometry(const char* Fn) override;
+  
   void        InitStraw(int straw, int StrawID, int Plane, int Panel, int Layer,
 			double rho, double z,
 			double nx, double ny, double half_length);
@@ -36,9 +35,9 @@ public:
   double      Phi() { return fPhi; }
   double      Z  () const { return (fStraw[0]->Z()+fStraw[1]->Z())/2.; }
 
-  void        Print(Option_t* Opt) const;   // *MENU* 
+  void        Print(Option_t* Opt = "") const override;   // *MENU* 
 
-  ClassDef(murat::TEvdPanel,0)
+  ClassDefOverride(murat::TEvdPanel,0)
 };
 }
 #endif

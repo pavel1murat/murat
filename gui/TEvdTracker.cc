@@ -1,15 +1,65 @@
 ///////////////////////////////////////////////////////////////////////////////
+#include <iostream>
+#include <format>
 
+#include "TGeoManager.h"
+#include "TGeoMatrix.h"
 #include "TGeoTube.h"
 #include "murat/gui/TEvdTracker.hh"
 
+#include "Offline/TrackerGeom/inc/Plane.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "Offline/ConfigTools/inc/SimpleConfig.hh"
 #include "Offline/GeometryService/inc/TrackerMaker.hh"
 
+#include "murat/gui/TEvdSubdetector.hh"
+
 ClassImp(murat::TEvdTracker)
 
+namespace {
+
+TGeoMedium* trackerStrawMedium() {
+  auto* gm = gGeoManager;
+
+  if (auto* medium = gm->GetMedium("TrackerStraw")) {
+    return medium;
+  }
+
+  // Display-only material.
+  auto* material = new TGeoMaterial("TrackerStrawMaterial",
+                                    1.0,    // density
+                                    6.0,    // effective Z
+                                    1.0);   // radiation length placeholder
+
+  return new TGeoMedium("TrackerStraw", 200, material);
+}
+
+  //-----------------------------------------------------------------------------
+std::unique_ptr<TGeoCombiTrans> strawTransform(const mu2e::Straw& straw) {
+  const auto& p = straw.origin();
+  const auto  d = straw.direction().unit();
+
+  // TGeoTube is oriented along its local z axis.  Construct a rotation
+  // which maps local z onto the straw direction.
+  const double theta = std::acos(
+      std::max(-1.0, std::min(1.0, d.z())));
+
+  const double phi = std::atan2(d.y(), d.x());
+
+  auto* rotation = new TGeoRotation;
+  rotation->RotateY(theta * 180.0 / M_PI);
+  rotation->RotateZ(phi   * 180.0 / M_PI);
+
+  return std::make_unique<TGeoCombiTrans>(
+      p.x(), p.y(), p.z(), rotation);
+}
+
+} // namespace
+
+
+
 namespace murat {
+
 //-----------------------------------------------------------------------------
 TEvdTracker::TEvdTracker(): TEvdSubdetector() {
   for (int i=0; i<kNStations; i++) {
@@ -18,86 +68,164 @@ TEvdTracker::TEvdTracker(): TEvdSubdetector() {
 }
 
 //-----------------------------------------------------------------------------
-// sample file: "trackerNumerology.txt" on murat06
-// need TEveManager initialized before this call
+TEvdTracker::TEvdTracker(const char* Fn): TEvdSubdetector("Tracker") {
+  // for (int i=0; i<kNStations; i++) {
+  //   fStation[i] = new TEvdStation(i);
+  // }
+
+  InitGeometry(Fn);
+}
+
+
+
 //-----------------------------------------------------------------------------
-int TEvdTracker::InitGeometry(const char* Fn) {
-  mu2e::SimpleConfig config(Fn);
-  
-  mu2e::TrackerMaker*  trk_maker = new mu2e::TrackerMaker(config);
-  fTrkPtr     = trk_maker->getTrackerPtr();
+int TEvdTracker::InitGeometry(const char* geomFile) {
+  std::cout << std::format("-- START: TEvdTracker::InitGeometry\n");
+  if (!gGeoManager) {
+    std::cerr << "TEvdTracker::InitGeometry: "
+              << "no current TGeoManager\n";
+    return 1;
+  }
 
-//   FILE* f = fopen(FileName,"r");
-  
-//   if (f == NULL) {
-//     printf("ERROR: TTracker::InitGeometry can\'t open %s, BAIL OUT\n",FileName);
-//     return -1;
-//   }
+  if (fTrkPtr) {
+    return 0;                         // already initialized
+  }
 
-//   // read input file
-//   char   c[1000];
+  // Build the Mu2e tracker data geometry.
+  mu2e::SimpleConfig config(geomFile);
+  mu2e::TrackerMaker maker(config);
 
-//   int    station, plane, face, panel, layer, straw, straw_id;
-//   float  r, x, y, z, rho, half_length, phi, nx, ny;
-  
-//   while ((c[0]=getc(f)) != EOF) {
-// 					// check if it is a comment line
-//     if (c[0] != '#') {
-//       ungetc(c[0],f);
-//       // read channel number
-//       fscanf(f,"%i" ,&station   );
-//       fscanf(f,"%i" ,&plane    );
-//       fscanf(f,"%i" ,&face );
-//       fscanf(f,"%i" ,&panel );
-//       fscanf(f,"%i" ,&layer );
-//       fscanf(f,"%i" ,&straw );
-//       fscanf(f,"%i" ,&straw_id );
-//       fscanf(f,"%f" ,&r );
-//       fscanf(f,"%f" ,&x );
-//       fscanf(f,"%f" ,&y );
-//       fscanf(f,"%f" ,&z );
-//       fscanf(f,"%f" ,&rho );
-//       fscanf(f,"%f" ,&half_length );
-//       fscanf(f,"%f" ,&phi );
-//       fscanf(f,"%f" ,&nx );
-//       fscanf(f,"%f" ,&ny );
+  fTrkPtr = maker.getTrackerPtr();
 
-// //      printf("  %3i %6i %5i %4i %5i %5i %10i %8.3f %10.3f %10.3f %10.3f %10.3f %10.3f %8.2f %8.4f %8.4f\n",
-// //	     station,plane,face, panel,
-// //	     layer,straw, straw_index,r,x,y,z,rho, half_length,phi,nx,ny);
-//       //-----------------------------------------------------------------------------
-//       // initialize the corresponding object
-//       //-----------------------------------------------------------------------------
-//       TEvdStation* s       = fStation[station];
-//       int ip               = plane % 2;
-//       TEvdPlane* pln       = s->fPlane[ip];
-//       TEvdPanel* evd_panel = pln->fPanel[panel];
+  auto tg4 = fTrkPtr->g4Tracker();
 
-//       if (straw == 0) {
-// 	evd_panel->fNx = nx;
-// 	evd_panel->fNy = ny;
-// 	evd_panel->fPhi = atan2(ny,nx)-TMath::Pi();
-// 	if (evd_panel->fPhi < -TMath::Pi()) evd_panel->fPhi += 2*TMath::Pi();
-//       }
-      
-//       evd_panel->InitStraw(straw,straw_id,plane,panel,layer,rho,z,nx,ny,half_length);
-//     }
-//     fgets(c,1000,f);
-//   }
-//   fclose(f);
+  if (!fTrkPtr) {
+    std::cerr << "TEvdTracker::InitGeometry: "
+              << "tracker geometry is null\n";
+    return 1;
+  }
 
-//   // position and rotate panels
-//   //-----------------------------------------------------------------------------
-//   for (int is=0; is<kNStations; is++) {
-//     TEvdStation* station = fStation[is];
-//     for (int ipln=0; ipln<2; ipln++) {
-//       TEvdPlane* pln = station->Plane(ipln);
-//       for (int ip=0; ip<kNPanels; ip++) {
-// 	TEvdPanel* p = pln->Panel(ip);
-// 	p->InitGeometry();
-//       }
-//     }
-//   }
+  auto* medium = trackerStrawMedium();
+
+  /*
+   * TEvdTracker itself should have been constructed as a logical
+   * TEvdSubdetector volume, for example:
+   *
+   *   TEvdTracker::TEvdTracker()
+   *     : TEvdSubdetector("Tracker") {}
+   *
+   * Therefore all tracker children are attached directly to this object.
+   */
+  fTopVolume = this;
+  fCopyNumber = 1;
+
+  const auto& planes = fTrkPtr->planes();
+
+  for (std::size_t ip = 0; ip < planes.size(); ++ip) {
+    const mu2e::Plane& plane = planes.at(ip);
+
+    const std::string planeName = std::format("TrackerPlane_{}", ip);
+
+    const CLHEP::Hep3Vector& plane_origin  = plane.origin();
+
+    double plane_radius = 700.;
+    double plane_dz2    = 10.;
+    
+    auto* sd_plane = new TEvdSubdetector(planeName.c_str(),
+                                         new TGeoTube(0,plane_radius,plane_dz2),medium,kAzure+1,50);
+
+    const mu2e::Panel* panel = &plane.getPanel(0);
+    
+    double z0 = panel->getStraw(0).getMidPoint().z();
+    double z1 = panel->getStraw(1).getMidPoint().z();
+    double zmin = z0-0.5;
+    double zmax = z1+0.5;
+    if (z1 < z0) {
+      zmin = z1 - 0.5;
+      zmax = z0 - 0.5;
+    }
+
+    const mu2e::Panel* p1 = &plane.getPanel(1);
+    
+    double z01 = p1->getStraw(0).getMidPoint().z();
+    double z11 = p1->getStraw(1).getMidPoint().z();
+    double zmin1 = z01-0.5;
+    double zmax1 = z11+0.5;
+    if (z11 < z01) {
+      zmin1 = z11 - 0.5;
+      zmax1 = z01 - 0.5;
+    }
+
+    if (zmax1 > zmax) {
+      zmax = zmax1;
+    }
+    else {
+      zmin = zmin1;
+    }
+
+    // const auto& panels = plane.panels();
+
+    // for (std::size_t ipa = 0; ipa < panels.size(); ++ipa) {
+    //   const auto* panel = panels.at(ipa);
+
+    //   if (!panel) {
+    //     continue;
+    //   }
+
+    //   const std::string panelName = std::format("TrackerPlane_{}_Panel_{}", ip, ipa);
+
+    //   auto* panelVolume = new TEvdSubdetector(panelName.c_str());
+
+    //   panelVolume->SetLineColor(kGreen + 1);
+    //   panelVolume->SetFillColor(kGreen + 1);
+    //   panelVolume->SetTransparency(40);
+
+    //   // const auto& straws = panel->straws();
+
+    //   // for (std::size_t ist = 0; ist < straws.size(); ++ist) {
+    //   //   const auto* straw = straws.at(ist);
+
+    //   //   if (!straw) {
+    //   //     continue;
+    //   //   }
+
+    //   //   const auto& props = fTrkPtr->strawProperties();
+
+    //   //   const std::string strawName = std::format("TrackerStraw_{}_{}_{}",ip, ipa, ist);
+
+    //   //   auto* strawShape = new TGeoTube(strawName.c_str(),
+    //   //                                   props.strawInnerRadius(),
+    //   //                                   props.strawOuterRadius(),
+    //   //                                   straw->halfLength());
+
+    //   //   auto* strawVolume = new TEvdSubdetector(strawName.c_str(), strawShape, medium);
+
+    //   //   strawVolume->SetLineColor(kGray + 1);
+    //   //   strawVolume->SetFillColor(kGray + 1);
+    //   //   strawVolume->SetTransparency(0);
+
+    //   //   auto transform = strawTransform(*straw);
+
+    //   //   panelVolume->AddNode(
+    //   //     strawVolume,
+    //   //     static_cast<int>(ist) + 1,
+    //   //     transform.release());
+    //   // }
+
+    //   // panelVolume->AddSubdetectorChildrenToListIfNeeded();
+    //   planeVolume->AddNode(panelVolume, static_cast<int>(ipa) + 1, new TGeoTranslation());
+
+    //   fListOfSubdetectors->Add(panelVolume);
+    // }
+
+    //planeVolume->AddSubdetectorChildrenToListIfNeeded();
+    AddNode(sd_plane, static_cast<int>(ip) + 1, new TGeoTranslation(-3904.,0,tg4->z0()+(zmin+zmax)/2.));
+
+    fListOfSubdetectors->Add(sd_plane);
+  }
+
+  std::cout << std::format("-- END: TEvdTracker::InitGeometry\n");
   return 0;
 }
+
 }

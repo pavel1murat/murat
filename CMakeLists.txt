@@ -58,6 +58,6 @@ include(BuildPlugins)
 add_subdirectory(ana)
 add_subdirectory(alg)
 add_subdirectory(mod)
-# add_subdirectory(gui)  not ready yet
+add_subdirectory(gui)
 
 cet_cmake_config()

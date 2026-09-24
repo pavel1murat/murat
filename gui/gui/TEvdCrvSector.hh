@@ -23,7 +23,7 @@ public:
 
   virtual void Print(Option_t* Opt="") const override;
 
-  ClassDef(murat::TEvdCrvSector,0)
+  ClassDefOverride(murat::TEvdCrvSector,0)
 };
 }
 #endif

@@ -22,6 +22,7 @@ TEvdCalorimeter::TEvdCalorimeter(): TEvdSubdetector() {
 
 //-----------------------------------------------------------------------------
 TEvdCalorimeter::TEvdCalorimeter(const char* Fn): TEvdSubdetector() {
+  InitGeometry(Fn);
 }
 
 //-----------------------------------------------------------------------------
@@ -124,7 +125,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 
     // Disk copy number is idisk + 1.
     gm->GetTopNode()->GetVolume()->AddNode(disk, idisk + 1,diskTransform);
-
+    
     int nPlaced = 0;
     int ncr     = mu2e_disk.nCrystals();
     
@@ -140,10 +141,10 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
       crystal->SetLineColor(kOrange + 1);
       crystal->SetFillColor(kOrange + 1);
       crystal->SetTransparency(0);
-      /*
-       * Crystal::localPosition() is the front-face position - how do we know that?
-       * TGeoBBox is centered on its local origin, so shift by +z/2.
-       */
+      
+       // Crystal::localPosition() is the front-face position - how do we know that?
+       // TGeoBBox is centered on its local origin, so shift by +z/2.
+       //
       
       const double x = mu2e_cr_i->localPosition().x();
       const double y = mu2e_cr_i->localPosition().y();
@@ -159,6 +160,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
       ++nPlaced;
     }
     std::cout << std::format("idisk:{} nPlaced:{:4d}\n",idisk,nPlaced);
+
   }
   return rc;
 }

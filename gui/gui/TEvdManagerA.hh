@@ -1,6 +1,8 @@
 #ifndef __draw_calo_geometry__
 #define __draw_calo_geometry__
 
+#include <string>
+
 #include "TObject.h"
 #include "TGeoVolume.h"
 #include "TGeoManager.h"
@@ -12,12 +14,13 @@ namespace murat {
 //-----------------------------------------------------------------------------  
 class TEvdManagerA : public TNamed {
 public:
-  TGeoVolume*                            fTop;
+  TGeoVolume*  fTop;
 
   TGeoManager* fGeoManager;
   TObjArray    fListOfViews;                // multiple views
   TObjArray    fListOfSubdetectors;         // each     view
 
+  std::string  fGeometryFile;
   int          fDisplayCalorimeter;
   int          fDisplayCrv;
   int          fDisplayTracker;
@@ -31,6 +34,8 @@ public:
   TGeoManager* GetGeoManager() { return fGeoManager; }
  
   void AddSubdetector(TEvdSubdetector* Sd) ;
+
+  int InitGeometry();
 
   virtual void Draw(Option_t* Opt = "") override;
   

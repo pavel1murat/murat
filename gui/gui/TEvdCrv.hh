@@ -20,21 +20,21 @@ public:
   // a sector is a subdetector
 
   int        fNSectors;
-  TObjArray* fListOfSectors;
-  
+ 
   TEvdCrv();
   TEvdCrv(const char* GeomFn);
   ~TEvdCrv();
 
   int NSectors() { return fNSectors; }
-  
-  TEvdCrvSector* Sector(int I) { return (TEvdCrvSector*) fListOfSectors->At(I); }
+
+  // CRV 'subdetectors' are sectors
+  TEvdCrvSector* Sector(int I) { return (TEvdCrvSector*) fListOfSubdetectors->At(I); }
 
   virtual int InitGeometry(const char* Fn) override;
 
   virtual void Print(Option_t* Opt = "") const override ;
 
-  ClassDef(murat::TEvdCrv,0)
+  ClassDefOverride(murat::TEvdCrv,0)
 };
 }
 #endif

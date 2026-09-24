@@ -16,6 +16,8 @@ public:
 
   TEvdTracker();
 
+  TEvdTracker(const char* Fn);
+
   TEvdPanel* Panel(int Station, int Plane, int Panel) {
     return fStation[Station]->fPlane[Plane]->fPanel[Panel];
   }

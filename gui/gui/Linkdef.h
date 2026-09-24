@@ -21,6 +21,7 @@
 #pragma link C++ class murat::TEvdCalorimeter;
 #pragma link C++ class murat::TEvdDisk;
 #pragma link C++ class murat::TEvdManagerA;
+#pragma link C++ class murat::TEvdSubdetector;
 // #pragma link C++ class stntuple::TEvdHelixSeed;
 // #pragma link C++ class TEvdHelixVisNode;
 // #pragma link C++ class TEvdMainFrame;

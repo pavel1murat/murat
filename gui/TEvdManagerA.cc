@@ -1,6 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // calorimeter has its mother and places two disks into it
 //-----------------------------------------------------------------------------
+#include "cetlib/filepath_maker.h"
+#include "fhiclcpp/ParameterSet.h"
+
 #include "Offline/GeometryService/inc/CosmicRayShieldMaker.hh"
 #include "Offline/GeometryService/inc/TrackerMaker.hh"
 
@@ -85,32 +88,55 @@ TEvdManagerA::TEvdManagerA(const char* Fn) {
 
   //  auto gm = TGeoManagerA::Instance(); // defines its own TOP
 
+  cet::filepath_lookup policy("FHICL_FILE_PATH");
+
+  auto const pset    = fhicl::ParameterSet::make("murat/fcl/evd_config.fcl",policy);
+
+  auto evd_config = pset.get<fhicl::ParameterSet>("evd_config");
+
+  fGeometryFile       = evd_config.get<std::string>("geometryFile");
+  fDisplayCalorimeter = evd_config.get<bool>       ("displayCalorimeter");
+  fDisplayCrv         = evd_config.get<bool>       ("displayCrv");
+  fDisplayTracker     = evd_config.get<bool>       ("displayTracker");
+  fGeoManager         = nullptr;
+}
+
+
+//-----------------------------------------------------------------------------
+int TEvdManagerA::InitGeometry() {
+
   fGeoManager          = new TGeoManager("mu2e_calo", "Mu2e Geometry");
 
   auto vacuum_material = new TGeoMaterial("Vacuum", 0.0, 0.0, 0.0);
 
-  fGeoManager->AddMaterial(vacuum_material);
-  //  fGeoManager->AddMedium  (vacuumMedium);
+  // fGeoManager->AddMaterial(vacuum_material);
+  //  fGeoManager->AddMedium  (vacuumMedium); // cant add a medium...
 // --------------------------------------------------------------------------
 // World
 // --------------------------------------------------------------------------
-  auto vacuum_medium = new TGeoMedium  ("Vacuum", 1, vacuum_material);
-  TGeoVolume* top = fGeoManager->MakeBox("TOP",vacuum_medium,30000.,30000.,30000);
-  fGeoManager->SetTopVolume(top);
-
+  auto *vacuum_medium = new TGeoMedium  ("Vacuum", 1, vacuum_material);
+  auto *world_shape   = new TGeoBBox("WorldShape",30000.,30000.,30000);
+  TGeoVolume *world   = new TGeoVolume("World", world_shape, vacuum_medium);
+  
+  fGeoManager->SetTopVolume(world);
+  
   if (fDisplayCalorimeter) {
-    auto calo = new TEvdCalorimeter("murat/fcl/geom_extracted.txt"); // includes geometry initialization
+    auto calo = new TEvdCalorimeter(fGeometryFile.data()); // includes geometry initialization
     AddSubdetector(calo);
   }
   if (fDisplayCrv) {
-    auto crv = new TEvdCrv("murat/fcl/geom_extracted.txt");
+    auto crv = new TEvdCrv(fGeometryFile.data());
     AddSubdetector(crv);
+  }
+  if (fDisplayTracker) {
+    auto trk = new TEvdTracker(fGeometryFile.data());
+    AddSubdetector(trk);
   }
 // --------------------------------------------------------------------------
 // Close geometry, ready to display
 // --------------------------------------------------------------------------
   fGeoManager->CloseGeometry();
-  //  return rc;
+  return 0;
 }
 
 //-----------------------------------------------------------------------------

@@ -8,17 +8,25 @@
 
 namespace murat {
 //-----------------------------------------------------------------------------
-class TEvdSubdetector : public TGeoVolume {
+class TEvdSubdetector : public TGeoVolumeAssembly {
 public:
-  int         fCopyNumber;                    // for a bar 
-  TGeoVolume* fTopVolume = {nullptr}; // if null, add this to the geo tree
+  int         fCopyNumber;                 // for a bar 
+  TGeoVolume* fTopVolume = {nullptr};      // if null, add 'this' to the geo tree
 
-  TObjArray* fListOfHits;  // if null pointer, then no hits
+  TObjArray*  fListOfHits;                 // if null pointer, then no hits
+
+  TObjArray*  fListOfSubdetectors;   
 
   TEvdSubdetector();
-  TEvdSubdetector(const char* Name,  TGeoShape* Shape, TGeoMedium* Medium);
+  TEvdSubdetector(const char* Name);
+  
+  TEvdSubdetector(const char* Name,  TGeoShape* Shape, TGeoMedium* Medium,
+                  int Color = kGreen+2, int Transparency = 0);
+  
   ~TEvdSubdetector();
-
+  
+  void AddSubdetector(TEvdSubdetector* sd);
+  
                                         // to hide the inheritance
   TGeoVolume* GetVolume() { return this; }
 
@@ -30,7 +38,7 @@ public:
 
   TGeoVolume* TopVolume() { return fTopVolume; }
   
-  ClassDef(TEvdSubdetector,0);
+  ClassDefOverride(TEvdSubdetector,0);
 };
 }
 #endif

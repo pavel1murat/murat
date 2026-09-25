@@ -7,12 +7,14 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TCanvas.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
 #include "Stntuple/obj/TComboHitBlock.hh"
 
 #include "Stntuple/obj/TCaloHitBlock.hh"
+#include "Stntuple/obj/TCaloDigiBlock.hh"
 #include "Stntuple/obj/TCaloRecoDigiBlock.hh"
 #include "Stntuple/obj/TStnClusterBlock.hh"
 
@@ -103,7 +105,8 @@ public:
     TH2F*       h_nsipms_vs_cid;
     TH1F*       h_sipmid;               // occupancy offline channel
     TH2F*       h_n2_vs_n1;
-    TH1F*       h_ntrk[2];
+    TH1F*       h_max_nwfm;
+    TH1F*       h_nwf2;
     CalhHist_t* calh   [kNCalhHistSets];
     CalcHist_t* calc   [kNCalcHistSets];
   };
@@ -121,6 +124,7 @@ public:
   TStrTrackBlock*           fTrackBlock;
   TStnClusterBlock*         fCaloClusterBlock;
   TCaloHitBlock*            fCaloHitBlock;
+  TCaloDigiBlock*           fCaloDigiBlock;
   TCaloRecoDigiBlock*       fCaloRecoDigiBlock;
 
   //  TrkPanelMap*              fTpm;
@@ -136,15 +140,22 @@ public:
 
   int                       fNCalh10[2]; // N(hits above 10 MeV)
   int                       fNCalh;
+  int                       fNCalod;
   int                       fNCalord;
   int                       fNCaloClusters;
 
   int                       fNCcDisk[2];
 
+  std::vector<int>          fNWfMaxima;
+  int                       fMaxNWfMaxima; // look for waveforms with 2+ maxima
+  int                       fNWf2;         // number of waveforsm with 2 maxima
+
   std::vector<calc_param_t> fListOfCalcParam;
 
   fit_result_t              fFr[kNCaloChannels];
   fit_result_t*             fFrRef;
+
+  TCanvas*                  fCanvasWf;
 
   //  calorimeter_t             fCalo;
 //-----------------------------------------------------------------------------
@@ -178,7 +189,10 @@ public:
   int              BookDiskHistograms (DiskHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
-  int              CalculateMissingParameters   ();
+  int              AnalyzeWaveforms          ();
+  int              CalculateMissingParameters();
+  // by defaut open new canvas
+  void             PlotWaveform(int SipmID, bool NewCanvas = true);
   
   int              FillCalcHistograms (CalcHist_t* Hist, TStnCluster*   Calc, calc_param_t* Cp);
   int              FillDiskHistograms (DiskHist_t* Hist, TCaloRecoDigi* Calrd);

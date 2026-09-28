@@ -102,11 +102,15 @@ public:
     TH2F*       h_dt_vs_sipmid;
     TH2F*       h_dt10_vs_cid;
     TH1F*       h_dtpp[2];
+    TH1F*       h_pp_e[2];              // for each disk separately
     TH2F*       h_nsipms_vs_cid;
     TH1F*       h_sipmid;               // occupancy offline channel
     TH2F*       h_n2_vs_n1;
     TH1F*       h_max_nwfm;
     TH1F*       h_nwf2;
+    TH1F*       h_cl2_rho[2];          // for each disk separately
+    TH1F*       h_cl2_dt [2];          // for each disk separately
+    TH1F*       h_cl2_e  [2];          // for each disk separately
     CalhHist_t* calh   [kNCalhHistSets];
     CalcHist_t* calc   [kNCalcHistSets];
   };
@@ -203,7 +207,7 @@ public:
 
   void             Debug();
   
-  int              PrintTracks();
+  void             PrintCaloDigiBlock();
 
   ClassDefOverride(murat::TCaloTimeAnaModule,0)
 };

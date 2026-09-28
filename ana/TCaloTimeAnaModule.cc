@@ -125,6 +125,12 @@ int TCaloTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   title = std::format("{} : deltaT(pulse-pulse)[1], ns",prefix);
   fBookHist->HBook1F(Hist->h_dtpp[1],name.data(),title.data(),200,0,1000,Folder);
 
+  for (int i=0; i<2; i++) {
+    name  = std::format("pp_e_%d",i);
+    title = std::format("{} : pp energy; disk {}",prefix,i);
+    fBookHist->HBook1F(Hist->h_pp_e[i],name.data(),title.data(),100,0,100,Folder);
+  }
+
   name  = "nsipms_vs_cid";
   title = std::format("{} : nsipms vs crystal ID",prefix);
   fBookHist->HBook2F(Hist->h_nsipms_vs_cid,name.data(),title.data(),1400,0,1400,3,0,3,Folder);
@@ -140,6 +146,20 @@ int TCaloTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   name  = "nwf2";
   title = std::format("{} : n(waveforms) with 2 maxima",prefix);
   fBookHist->HBook1F(Hist->h_nwf2,name.data(),title.data(),10,0,10,Folder);
+
+  for (int i=0; i<2; i++) {
+    name  = std::format("cl2_rho_%d",i);
+    title = std::format("{} : CL-CL rho disk {}",prefix,i);
+    fBookHist->HBook1F(Hist->h_cl2_rho[i],name.data(),title.data(),200,0,1000,Folder);
+
+    name  = std::format("cl2_dt_%d",i);
+    title = std::format("{} : CL-CL DT, ns ; disk {}",prefix,i);
+    fBookHist->HBook1F(Hist->h_cl2_dt[i],name.data(),title.data(),500,0,25000,Folder);
+
+    name  = std::format("cl2_e_%d",i);
+    title = std::format("{} : CL_2 energy; disk {}",prefix,i);
+    fBookHist->HBook1F(Hist->h_cl2_e[i],name.data(),title.data(),100,0,100,Folder);
+  }
 
   name  = "n2_vs_n1";
   title = std::format("{} : N1:N1 calh E>10",prefix);
@@ -272,6 +292,35 @@ int TCaloTimeAnaModule::FillHistograms() {
           fHist->h_dtpp[0]->Fill(dt);
           fHist->h_dtpp[1]->Fill(dt);
 
+          if (dt > 500) {
+            // find cluster which has this crystal in it and plot the cluster energy
+            TStnCluster* found_cluster = nullptr;
+            
+            for (int icl=0; icl<fNCaloClusters; icl++) {
+              TStnCluster* cl = fCaloClusterBlock->Cluster(icl);
+              float dt_cl_hit = cl->Time()-h1->Time();
+              // 20 ns is ok for now
+              if (fabs(dt_cl_hit) < 20) {
+                // check the identity
+                TStnLinkBlock* link_list = fCaloClusterBlock->ListOfHitLinks();
+                int nl = link_list->NLinks(icl);
+                for (int j=0; j<nl; j++) {
+                  int ihit = link_list->Index(icl,j);
+                  TCaloHit* cl_hit = fCaloHitBlock->Hit(ihit);
+                  if (cl_hit == h1) {
+                    found_cluster = cl;
+                  }
+                }
+              }
+              if (found_cluster != nullptr) break;
+            }
+            
+            if (found_cluster != nullptr) {
+              int idisk = found_cluster->DiskID();
+              fHist->h_pp_e[idisk]->Fill(found_cluster->Energy());
+            }
+          }
+
           if ((GetDebugBit(6) == 1) and (dt < 100)) {
             GetHeaderBlock()->Print(Form("bit_006: dt:%10.2f",dt));
             fCaloHitBlock->Print();
@@ -307,6 +356,30 @@ int TCaloTimeAnaModule::FillHistograms() {
     else                     FillCalcHistograms(fHist->calc[2],calc,calc_par);
   }
   
+  for (int i1=1; i1<fNCaloClusters; i1++) {
+    TStnCluster* c1   = fCaloClusterBlock->Cluster(i1);
+    // calc_param_t* cp1 = &fListOfCalcParam[i1];
+    for (int i2=0; i2<i1; i2++) {
+      TStnCluster* c2   = fCaloClusterBlock->Cluster(i2);
+      // calc_param_t* cp2 = &fListOfCalcParam[i2];
+      if (c1->DiskID() != c2->DiskID())  continue;
+      int idisk = c1->DiskID();
+      // two clusters are on the same disk, plot XY distance between them
+      float dx  = c1->fX-c2->fX;
+      float dy  = c1->fY-c2->fY;
+      float rho = sqrt(dx*dx+dy*dy);
+      fHist->h_cl2_rho[idisk]->Fill(rho);
+      if (rho < 50) {
+        float dt = c2->Time()-c1->Time();
+        TStnCluster* cle = c2;
+        if (dt < 0) cle = c1;
+        fHist->h_cl2_dt[idisk]->Fill(fabs(dt));
+        fHist->h_cl2_e[idisk]->Fill(cle->Energy());
+      }
+      
+    }
+  }
+  
   return 0;
 }
 
@@ -322,37 +395,33 @@ int TCaloTimeAnaModule::AnalyzeWaveforms() {
     int ns = digi->Ns();
     // count number of local maxima on the waveform
 
-    int nmax     = 0;
-    int adc_prev = -1;
-    int dir     = 1;
-    // skip first few samples
-    for (int is=8; is<ns; ++is) {
+    int nmax     = 0;             // N extra maxima
+    // int adc_prev = -1;
+    // int dir     = 1;
+    // skip first few samples (baseline)
+    int ppos = digi->PPos();
+    for (int is=ppos+1; is<ns-3; ++is) {
       int adc = digi->fWf[is];
-      if (adc >= adc_prev) {
-        if (dir == 1) {
-          adc_prev = adc;
-        }
-        else {
-          // started increasing
-          dir   = 1;
-        }
+      if (adc == 4095) {
+        // mark and skip overflows
+        digi->SetMask(TCaloDigi::kOverflowBit);
+        continue;
       }
-      else {
-        // adc < adc_prv -
-        if (dir == 2) {
-          adc_prev = adc;
-        }
-        else {
-          // -1 doesn't mean anything
-          if (adc < adc_prev-4) {
-            nmax += 1;
-            dir = 2;
-          }
-        }
+      // continue searching 
+      int adc_p1 = digi->fWf[is+1];
+      int adc_p2 = digi->fWf[is+2];
+      int adc_p3 = digi->fWf[is+3];
+      int adc_m1 = digi->fWf[is-1];
+      int adc_m2 = digi->fWf[is-2];
+      //      int adc_m3 = digi->fWf[is-3];
+      if ((adc > adc_m1) and (adc_m1 > adc_m2) and 
+          (adc >= adc_p1) and (adc_p1 > adc_p2) and (adc_p2 > adc_p3)     ) {
+        // new maximum candidate
+        nmax += 1;
       }
     }
     fNWfMaxima.push_back(nmax);
-    if (nmax == 2) fNWf2++;
+    if (nmax == 1) fNWf2++;
     
     if (fMaxNWfMaxima < nmax) {
       fMaxNWfMaxima = nmax;
@@ -385,7 +454,7 @@ int TCaloTimeAnaModule::CalculateMissingParameters() {
     int cid            = sipmid / 2;
     int sipm           = sipmid % 2;
     if ((cid<0) or (cid > kNCrystals)) {
-      std::cout << std::format("ERROR: cid={:}, skip reco digi\n",cid);
+      GetHeaderBlock()->Print(Form("ERROR: sipmid=0x%08x, skip reco digi",sipmid));
       continue;
     }
     crystal_t* cr      = &fCrystals[cid];
@@ -553,14 +622,14 @@ void TCaloTimeAnaModule::Debug() {
   }
 
   if (GetDebugBit(8) == 1) {
-    if (fMaxNWfMaxima == 2) {
+    if (fMaxNWfMaxima == 1) {
       GetHeaderBlock()->Print(Form("bit_008: NWfMaxima:%i",fMaxNWfMaxima));
       
       for (int i=0; i<fNCalod; i++) {
         TCaloDigi* d = fCaloDigiBlock->CaloDigi(i);
         int ns = d->Ns();
-        printf("wf:%3i sipmid:%4i ns:%3i n(maxima):%3i\n",i,d->fSipmID,ns,fNWfMaxima[i]);
-        if (fNWfMaxima[i] == 2) {
+        printf("wf:%3i sipmid:%4i ns:%3i n(maxima):%3i\n",i,d->SipmID(),ns,fNWfMaxima[i]);
+        if (fNWfMaxima[i] == 1) {
           int pos = 0;
           for (int is=0; is<ns; is++) {
             printf(" %4i",d->fWf[is]);
@@ -580,7 +649,7 @@ void TCaloTimeAnaModule::Debug() {
   
   if (GetDebugBit(9) == 1) {
     // events with two waveforms with two maxima
-    if (fNWf2 == 2) {
+    if (fNWf2 > 0) {
       GetHeaderBlock()->Print(Form("NWf2:%i",fNWf2));
     }
   }
@@ -657,11 +726,16 @@ void TCaloTimeAnaModule::PlotWaveform(int SipmID, bool NewCanvas) {
 
   for (int i=0; i<nd; i++) {
     TCaloDigi* digi = fCaloDigiBlock->CaloDigi(i);
-    if (digi->fSipmID == SipmID) {
+    if (digi->SipmID() == SipmID) {
       nwf++;
       int ns = digi->Ns();
       // assume that a single waveform is shorter than 1 us
-      TH1F* hist = new TH1F(Form("h_wf_%04i",SipmID),Form("waveform sipmid=_%04i",SipmID),200,0,200);
+      TH1F* hist = new TH1F(Form("h_wf_%04i",SipmID),
+                            Form("event: %d:%d:%d waveform sipmid=_%04i",
+                                 GetHeaderBlock()->RunNumber   (),
+                                 GetHeaderBlock()->SubrunNumber(),
+                                 GetHeaderBlock()->EventNumber (),
+                                 SipmID),200,0,200);
       hist->SetMinimum(2000);
       hist->SetMaximum(4200);
 
@@ -675,7 +749,7 @@ void TCaloTimeAnaModule::PlotWaveform(int SipmID, bool NewCanvas) {
         hist->Draw("hist");
       }
       else {
-        hist->Draw("hist,same");
+        hist->Draw("hist,sames");
       }
     }
   }
@@ -686,20 +760,21 @@ void TCaloTimeAnaModule::PlotWaveform(int SipmID, bool NewCanvas) {
   std::cout << std::format("plotted {} waveforms\n",nwf);
 }
 
-// //-----------------------------------------------------------------------------
-// int TCaloTimeAnaModule::PrintTracks() {
-//   std::cout << std::format(" i      T0         Z0       Nx     Ny    Nz    Chi2D     Xc[0]      Yc[0]      Xc[1]      Yc[1]    DxCal[0]    DyCal[0]    DxCal[1]   DyCal[1]\n");
-//   for (int i=0; i<fNTrk; i++) {
-//     TStrTrack*   trk = fTrackBlock->Track(i);
-//     trk_param_t* tp  = &fListOfTrkParam.at(i);
-//     std::cout << std::format("{:2d} {:10.3f} {:10.3f} {:6.3f} {:6.3f} {:6.3f} {:7.2f}",
-//                              i,trk->fT0,trk->fZ0,trk->fNx,trk->fNy,trk->fNz,trk->fChi2/trk->fNDof);
-    
-//     std::cout << std::format(" {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f}\n",
-//                              tp->x_disk [0],tp->y_disk [0],tp->x_disk[1],tp->y_disk[1],
-//                              tp->dx_calc[0],tp->dy_calc[0],tp->dx_calc[1],tp->dy_calc[1]);
-//   }
-//   return 0;
-// }
+//-----------------------------------------------------------------------------
+void TCaloTimeAnaModule::PrintCaloDigiBlock() {
+  int nd = fCaloDigiBlock->NDigis();
+  
+  printf("---------------------------------------------------------\n");
+  printf("   ID SipmID NWfM Mask   T0      Ns  PPos              \n");
+  printf("---------------------------------------------------------\n");
+
+  for (int i=0; i<nd; i++) {
+    TCaloDigi* digi = fCaloDigiBlock->CaloDigi(i);
+    std::cout << Form("%5d %5d %4d 0x%04x %6d %6d %6d\n",
+                      digi->GetUniqueID(),digi->SipmID(),fNWfMaxima[i],
+                      digi->Mask(),digi->T0(),digi->Ns(),digi->PPos());
+
+  }
+}
   
 }

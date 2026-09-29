@@ -277,6 +277,8 @@ public:
   
   int              PrintTracks();
 
+  int              InitEvd();
+
   ClassDefOverride(murat::TDetTimeAnaModule,0)
 };
 }

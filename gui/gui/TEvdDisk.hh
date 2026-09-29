@@ -14,7 +14,6 @@ namespace murat {
 class TEvdDisk: public TEvdSubdetector {
 public:
   mu2e::Disk*  fMu2eDisk;
-
   TObjArray*   fListOfCrystals;
 
   TEvdDisk();
@@ -25,6 +24,8 @@ public:
   void         AddCrystal(TEvdCrystal* Crystal);
 
   TObjArray*   ListOfCrystals() { return fListOfCrystals; }
+
+  int NCrystals() { return fListOfCrystals->GetEntriesFast(); }
 
   TEvdCrystal* Crystal(int I) { return (TEvdCrystal*) fListOfCrystals->At(I); }
 

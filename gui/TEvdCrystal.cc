@@ -10,6 +10,14 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TEvdCrystal::TEvdCrystal(const char* Name, TGeoShape* Shape, TGeoMedium* Medium):
   TGeoVolume(Name,Shape,Medium) {
+  fListOfHits = new TObjArray();
+  fEDep = 0;
+}
+
+//-----------------------------------------------------------------------------
+void TEvdCrystal::Clear(Option_t* Opt) {
+  fListOfHits->Clear();
+  fEDep = 0;
 }
 
 //-----------------------------------------------------------------------------

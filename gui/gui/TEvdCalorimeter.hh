@@ -13,7 +13,6 @@ namespace murat {
 //-----------------------------------------------------------------------------
 class TEvdCalorimeter: public TEvdSubdetector {
 public:
-  mu2e::Disk*  fMu2eDisk;
   
   std::unique_ptr<mu2e::DiskCalorimeter> fCaloPtr;
   TEvdDisk*                              fDisk[2];
@@ -22,8 +21,10 @@ public:
   
   TEvdCalorimeter(const char* Fn = "murat/fcl/geom_common_extracted_v04.txt");
 
-  virtual int InitEvent() override;
-  virtual int InitGeometry(const char* Fn) override;
+  TEvdDisk*    Disk(int I) { return fDisk[I]; }
+
+  virtual int  InitEvent() override;
+  virtual int  InitGeometry(const char* Fn) override;
   
   virtual void Print (Option_t* Opt = "") const override;  // *MENU*
   

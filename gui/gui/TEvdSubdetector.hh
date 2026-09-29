@@ -10,6 +10,7 @@ namespace murat {
 //-----------------------------------------------------------------------------
 class TEvdSubdetector : public TGeoVolumeAssembly {
 public:
+  TString     fName;
   int         fCopyNumber;                 // for a bar 
   TGeoVolume* fTopVolume = {nullptr};      // if null, add 'this' to the geo tree
 
@@ -28,6 +29,8 @@ public:
   void AddSubdetector(TEvdSubdetector* sd);
   
                                         // to hide the inheritance
+  
+  const char* GetName() const { return fName.Data(); }
   TGeoVolume* GetVolume() { return this; }
 
   int         CopyNumber() { return fCopyNumber; }

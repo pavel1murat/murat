@@ -5,7 +5,7 @@
 #include "Offline/CalorimeterGeom/inc/DiskInfo.hh"
 #include "Offline/CalorimeterGeom/inc/Crystal.hh"
 
-#include "murat/gui/TEvdManagerA.hh"
+#include "murat/gui/TEvdManager.hh"
 #include "murat/gui/TEvdCalorimeter.hh"
 #include "TGeoBBox.h"
 #include "TGeoTube.h"
@@ -18,10 +18,15 @@ ClassImp(murat::TEvdCalorimeter)
 namespace murat {
 //-----------------------------------------------------------------------------
 TEvdCalorimeter::TEvdCalorimeter(): TEvdSubdetector() {
+  // do not need the calorimeter mother volume
+  fTopVolume = new TGeoVolumeAssembly("CALO");
+  fName      = "CALO";
 }
 
 //-----------------------------------------------------------------------------
 TEvdCalorimeter::TEvdCalorimeter(const char* Fn): TEvdSubdetector() {
+  fTopVolume = new TGeoVolumeAssembly("CALO");
+  fName      = "CALO";
   InitGeometry(Fn);
 }
 
@@ -29,7 +34,7 @@ TEvdCalorimeter::TEvdCalorimeter(const char* Fn): TEvdSubdetector() {
 int TEvdCalorimeter::InitGeometry(const char* Fn) {
   int rc(0);
   
-  auto vm = TEvdManagerA::Instance();
+  //  auto vm = TEvdManager::Instance();
 // --------------------------------------------------------------------------
 // offline calorimeter
 // --------------------------------------------------------------------------
@@ -57,7 +62,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 // --------------------------------------------------------------------------
 // ROOT materials and media
 // --------------------------------------------------------------------------
-  auto gm     = vm->GetGeoManager();
+//  auto gm     = vm->GetGeoManager();
   //   auto vacuum = gm->GetMedium("Vacuum");
 
   auto diskMaterial    = new TGeoMaterial("DiskMaterial", 26.98, 13.0, 2.70);
@@ -94,11 +99,11 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
                                   halfThickness
                                   );
 
-    auto disk = new TEvdDisk(Form("Disk_%u", idisk),diskShape,diskMedium);
+    fDisk[idisk] = new TEvdDisk(Form("Disk_%u", idisk),diskShape,diskMedium);
     
-    disk->GetVolume()->SetLineColor(kAzure + 2);
-    disk->GetVolume()->SetFillColor(kAzure + 2);
-    disk->GetVolume()->SetTransparency(50);
+    fDisk[idisk]->GetVolume()->SetLineColor(kAzure + 2);
+    fDisk[idisk]->GetVolume()->SetFillColor(kAzure + 2);
+    fDisk[idisk]->GetVolume()->SetTransparency(50);
 //----------------------------------------------------------------------------------------
 //  * DiskInfo::toGlobal(local) is:
 //
@@ -124,7 +129,8 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
                                             geoRotation);
 
     // Disk copy number is idisk + 1.
-    gm->GetTopNode()->GetVolume()->AddNode(disk, idisk + 1,diskTransform);
+    
+    fTopVolume->AddNode(fDisk[idisk], idisk + 1,diskTransform);
     
     int nPlaced = 0;
     int ncr     = mu2e_disk.nCrystals();
@@ -155,13 +161,13 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 // Copy number is local crystal ID + 1.  This is decoded by the right-click callback.
 // crystal inherits from TGeoVolume
 //-----------------------------------------------------------------------------
-      disk->GetVolume()->AddNode(crystal,i+1,new TGeoTranslation(x,y,z));
-      disk->AddCrystal(crystal);
+      fDisk[idisk]->GetVolume()->AddNode(crystal,i+1,new TGeoTranslation(x,y,z));
+      fDisk[idisk]->AddCrystal(crystal);
       ++nPlaced;
     }
     std::cout << std::format("idisk:{} nPlaced:{:4d}\n",idisk,nPlaced);
-
   }
+
   return rc;
 }
 

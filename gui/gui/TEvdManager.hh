@@ -1,169 +1,64 @@
-#ifndef TEvdManager_hh
-#define TEvdManager_hh
+#ifndef __draw_calo_geometry__
+#define __draw_calo_geometry__
 
-#include "TObjArray.h"
-#include "Stntuple/base/TVisManager.hh"
+#include <string>
 
-#include "TGDoubleSlider.h"
-#include "TGButton.h"
-#include "TGTextEntry.h"
-#include "TGTextBuffer.h"
+#include "TObject.h"
+#include "TGeoVolume.h"
+#include "TGeoManager.h"
 
-class TControlBar;
-class TGMenuBar;
-class TGPopupMenu;
-class TGLayoutHints;
-class TGMainFrame;
+#include "murat/gui/TEvdVisNode.hh"
+#include "murat/gui/TEvdView.hh"
+#include "murat/gui/TEvdSubdetector.hh"
 
-class TTrkTZView;
-class TSubdetector;
-class TExtrapolator;
+namespace murat {
 
-class TEvdManager : public TVisManager {
+//-----------------------------------------------------------------------------  
+class TEvdManager : public TNamed {
 public:
-					// different view types
-  enum {
-    kUndefined = -1,
-    kXY        =  1,
-    kRZ        =  2,
-    kTZ        =  3,
-    kCal       =  4,
-    kCrv       =  5,
-    kVST       =  6			// VST view
-  };
+  TGeoVolume*  fTop;
 
-//-----------------------------------------------------------------------------
-// command codes
-//-----------------------------------------------------------------------------
-  enum CommandIdentifiers {
-    M_TRACKER_XY,
-    M_TRACKER_RZ,
-    M_TRACKER_ZT,
-    M_CALORIMETER_XY,
-    M_CRV_XY,
-    M_EXIT,
+  TGeoManager* fGeoManager;
+  TObjArray*   fListOfViews;                // multiple views
+  TObjArray*   fListOfNodes;                // multiple nodes
+  
+  TObjArray*   fListOfSubdetectors;         // each     view
 
-    M_OPTION_EVENT_STATUS,
+  std::string  fGeometryFile;
+  int          fDisplayCalorimeter;
+  int          fDisplayCrv;
+  int          fDisplayTracker;
 
-    M_HELP_CONTENTS,
-    M_HELP_SEARCH,
-    M_HELP_ABOUT
-  };
-
-  enum WidgetIdentities{
-    TIMESLIDER_ID = 10,
-    TIMELOW_DISP  = 11,
-    TIMEHIGH_DISP = 12,
-    UPDATER_BTN   = 13
-  };
-
-//-----------------------------------------------------------------------------
-//  data members
-//-----------------------------------------------------------------------------
-protected:
-  TGMainFrame*         fMain;
-  TGMenuBar           *fMenuBar;	    // !
-  TGPopupMenu         *fMenu;               // !
-  TGPopupMenu         *fMenuHelp;	    // !
-
-  TGLayoutHints       *fMenuBarLayout;	    // !
-  TGLayoutHints       *fMenuBarItemLayout;  // !
-  TGLayoutHints       *fMenuBarHelpLayout;  // !
-
-  TGTextButton        *trkrBtnXY, *trkrBtnTZ;
-  TGTextButton*        updaterBtn;
-  TGDoubleHSlider     *timeWindowSlider;
-  TGTextBuffer        *timeWindowLowBuff, *timeWindowHighBuff;
-  TGTextEntry         *timeWindowLowDisp, *timeWindowHighDisp;
-//-----------------------------------------------------------------------------
-// vis. manager also holds a list of objects to be displayed.
-// The list has to be the same for all the views
-//-----------------------------------------------------------------------------
-  TObjArray*          fListOfDetectors;
-  TSubdetector*       fClosestSubdetector;
-
-  TTrkTZView*         fTrkTZView;
-
-  TExtrapolator*      fExtrapolator;
-
-  //  const art::Event*   fEvent;
-
-  int                 fMinStation;
-  int                 fMaxStation;
-  int                 fDebugLevel;
-
-  float               fTMin;
-  float               fTMax;
-//-----------------------------------------------------------------------------
-//  functions
-//-----------------------------------------------------------------------------
+private:
+  TEvdManager(const char* Fcl);        // configuration file name
+  
 public:
+  static TEvdManager* Instance(const char* Fcl = "");
 
-  TEvdManager(const char* name = "EvdManager",	const char* title = "EvdManager");
+  TGeoManager* GetGeoManager() { return fGeoManager; }
 
-  virtual ~TEvdManager();
+  TEvdSubdetector* GetSubdetector(int I) { return (TEvdSubdetector*) fListOfSubdetectors->At(I); }
 
-  static  TEvdManager* Instance();
-
-  //Interface Handlers
-
-  virtual int InitGui(const char* Title);
-  //  virtual int InitViews();
-
-  void HandleButtons();
-  void HandleSlider();
-  void HandleText(); //char * text);
+  int GetNNodes() { return fListOfNodes->GetEntriesFast(); }
+  int GetNViews() { return fListOfViews->GetEntriesFast(); }
   
-  TSubdetector*  GetClosestSubdetector() { return fClosestSubdetector; }
-  TExtrapolator* GetExtrapolator() { return fExtrapolator; }
+  TEvdVisNode* GetNode(int I) { return (TEvdVisNode*) fListOfNodes->At(I); }
+  TEvdView*    GetView(int I) { return (TEvdView*   ) fListOfViews->At(I); }
+ 
+  void  AddSubdetector(TEvdSubdetector* Sd) ;
+
+  TEvdSubdetector* FindSubdetector(const char* Name);
+
+  int   AddView(TEvdView*    View);
+  int   AddNode(TEvdVisNode* Node);
+
+  int   InitGeometry();
+
+  int   InitEvent();
   
-  TObjArray*     GetListOfDetectors() { return fListOfDetectors; }
-
-  void          AddDetector(TObject* det) { fListOfDetectors->Add(det); }
-
-  //  const art::Event* Event() { return fEvent; }
-  
-  int    MinStation() { return fMinStation; }
-  int    MaxStation() { return fMaxStation; }
-
-  double TMin() { return fTMin; }
-  double TMax() { return fTMax; }
-  
-  void   GetTimeWindow(double& TMin, double& TMax) {
-    TMin = fTMin;
-    TMax = fTMax;
-  }
-//-----------------------------------------------------------------------------
-// modifiers
-//-----------------------------------------------------------------------------
-  // void SetEvent(art::Event& Evt) { fEvent = &Evt; }
-
-  void SetClosestSubdetector(TSubdetector* det) { fClosestSubdetector = det; }
-  void SetExtrapolator(TExtrapolator*  x) { fExtrapolator = x; }
-
-  void UpdateViews();
-
-//-----------------------------------------------------------------------------
-// different views
-//-----------------------------------------------------------------------------
-  virtual TCanvas*  NewCanvas(const char* Name,
-			      const char* Title,
-			      Int_t       SizeX,
-			      Int_t       SizeY) override;
-
-  virtual int   GetViewID(const char* View) override;
-
-  virtual void  OpenView(const char* View) override;
-  virtual void  OpenView(TStnView* Mother, int Px1, int Py, int Px2, int Py2) override;
-
-  Int_t   OpenTrkXYView();
-  Int_t   OpenTrkXYView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);
-  
-  Int_t   OpenTrkTZView();
-  Int_t   OpenTrkTZView(TStnView* Mother, Axis_t x1, Axis_t y1, Axis_t x2, Axis_t y2);
-  
-  void    CloseWindow();
-
-  //  ClassDef(TEvdManager, 0)
+  //  ClassDefOverride(murat::TEvdManager,0)
 };
+  
+}
 #endif
+

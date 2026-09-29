@@ -25,8 +25,11 @@
 #include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
-// Mu2e offline includes
+// 
 //-----------------------------------------------------------------------------
+#include "murat/gui/TEvdCaloView.hh"
+#include "murat/gui/TEvdCaloVisNode.hh"
+#include "murat/gui/TEvdManager.hh"
 #include "murat/ana/TDetTimeAnaModule.hh"
 
 
@@ -529,14 +532,16 @@ int TDetTimeAnaModule::FillHistograms() {
 int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
 // global positioning constants
+// tracker.z0: 22935.0
+// tracker.
 //-----------------------------------------------------------------------------
     float crv_time_offset = 0.; // 21; // today
 
     double crv_off[3] = {    0., -145.0, 0.0 };
       
-    double trk_pos[3] = {-3904., 0., 24171.0 }; // nominal
+    double trk_pos[3] = {-3904., 0., 22935.0 }; // nominal
     //    double trk_off[3] = {    0., 0., -1171.0 }; // offset to be added
-    double trk_off[3] = {    0., 0., -1235.0 }; // offset to be added
+    double trk_off[3] = {    0., 0.,     0.0 }; // offset to be added
 
     double calo_pos[2][3] = {           // nominal
       -3904., 0., 23000.0+2383.-64.,        // 25842;
@@ -968,5 +973,25 @@ int TDetTimeAnaModule::PrintTracks() {
   }
   return 0;
 }
+
+//-----------------------------------------------------------------------------
+  int TDetTimeAnaModule::InitEvd() {
+    int rc(0);
+
+    auto vm = TEvdManager::Instance();
+    vm->InitGeometry(); // if not initialized
+    
+    // new view
+
+    TEvdCaloVisNode* node = new TEvdCaloVisNode();
+    node->SetCaloHitBlock(fCaloHitBlock);
+
+    TEvdCaloView* view = new TEvdCaloView();
+    view->AddNode(node);
+
+    vm->AddView(view);
+
+    return rc;
+  }
   
 }

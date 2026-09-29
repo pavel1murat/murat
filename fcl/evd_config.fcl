@@ -4,4 +4,15 @@ evd_config : {
     displayTracker     : true
     displayCalorimeter : true
     displayCrv         : true
+    views              :
+    [
+     {
+         name  : "A1"
+         type  : "XXX"
+         nodes : [ "CRV", "calorimeter", "tracker" ]
+     },
+     {
+         name : "A2"
+     }
+    ]
 }

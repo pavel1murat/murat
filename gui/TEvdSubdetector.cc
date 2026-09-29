@@ -13,6 +13,7 @@ namespace murat {
   //-----------------------------------------------------------------------------
   TEvdSubdetector::TEvdSubdetector(const char* Name)
     : TGeoVolumeAssembly(Name),
+      fName(Name),
       fListOfSubdetectors(new TObjArray())
   {
   }

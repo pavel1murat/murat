@@ -34,7 +34,7 @@ TGeoMedium* trackerStrawMedium() {
   return new TGeoMedium("TrackerStraw", 200, material);
 }
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::unique_ptr<TGeoCombiTrans> strawTransform(const mu2e::Straw& straw) {
   const auto& p = straw.origin();
   const auto  d = straw.direction().unit();
@@ -61,18 +61,23 @@ std::unique_ptr<TGeoCombiTrans> strawTransform(const mu2e::Straw& straw) {
 namespace murat {
 
 //-----------------------------------------------------------------------------
-TEvdTracker::TEvdTracker(): TEvdSubdetector() {
+TEvdTracker::TEvdTracker(): TEvdSubdetector("TRACKER") {
+  fName       = "TRACKER";
+  fTopVolume  = this;
+  fCopyNumber = 1;
   for (int i=0; i<kNStations; i++) {
     fStation[i] = new TEvdStation(i);
   }
 }
 
 //-----------------------------------------------------------------------------
-TEvdTracker::TEvdTracker(const char* Fn): TEvdSubdetector("Tracker") {
+TEvdTracker::TEvdTracker(const char* Fn): TEvdSubdetector("TRACKER") {
   // for (int i=0; i<kNStations; i++) {
   //   fStation[i] = new TEvdStation(i);
   // }
-
+  fTopVolume  = this;
+  fCopyNumber = 1;
+  fName = "TRACKER";
   InitGeometry(Fn);
 }
 
@@ -116,8 +121,6 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
    *
    * Therefore all tracker children are attached directly to this object.
    */
-  fTopVolume = this;
-  fCopyNumber = 1;
 
   const auto& planes = fTrkPtr->planes();
 

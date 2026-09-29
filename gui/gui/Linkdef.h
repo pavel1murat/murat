@@ -19,9 +19,10 @@
 
 #pragma link C++ class murat::TEvdCrystal;
 #pragma link C++ class murat::TEvdCalorimeter;
+#pragma link C++ class murat::TEvdCaloVisNode;
+#pragma link C++ class murat::TEvdCaloView;
 #pragma link C++ class murat::TEvdDisk;
-#pragma link C++ class murat::TEvdManagerA;
-#pragma link C++ class murat::TEvdSubdetector;
+#pragma link C++ class murat::TEvdManager;
 // #pragma link C++ class stntuple::TEvdHelixSeed;
 // #pragma link C++ class TEvdHelixVisNode;
 // #pragma link C++ class TEvdMainFrame;
@@ -32,8 +33,10 @@
 #pragma link C++ class murat::TEvdStation;
 // #pragma link C++ class stntuple::TEvdStrawHit;
 #pragma link C++ class murat::TEvdStraw;
+#pragma link C++ class murat::TEvdSubdetector;/
 #pragma link C++ class murat::TEvdTracker;
-// #pragma link C++ class stntuple::TEvdTimeCluster;
+#pragma link C++ class murat::TEvdView;
+#pragma link C++ class murat::TEvdVisNode;
 // #pragma link C++ class TEvdTimeClusterVisNode;
 // #pragma link C++ class stntuple::TEvdTrack;
 // #pragma link C++ class stntuple::TEvdTrkStrawHit;

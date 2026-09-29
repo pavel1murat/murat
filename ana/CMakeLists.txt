@@ -51,8 +51,9 @@ add_library(${lib} SHARED
 )
 
 target_link_libraries(${lib}
+  murat_gui 
   Stntuple_val Stntuple_loop Stntuple_alg Stntuple_geom Stntuple_obj Stntuple_base
-  ROOT::TMVA ROOT::EG ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Gpad)
+  ROOT::TMVA ROOT::EG ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Gpad ROOT::RGL)
 
 cet_add_compiler_flags(-g -O0)
 

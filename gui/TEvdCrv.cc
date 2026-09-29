@@ -11,7 +11,7 @@
 
 #include "Offline/GeometryService/inc/CosmicRayShieldMaker.hh"
 
-#include "murat/gui/TEvdManagerA.hh"
+#include "murat/gui/TEvdManager.hh"
 
 ClassImp(murat::TEvdCrv)
 
@@ -40,10 +40,16 @@ namespace {
 namespace murat {
   //-----------------------------------------------------------------------------
   TEvdCrv::TEvdCrv(): TEvdSubdetector() {
+    // The assembly is the top volume owned by TEvdCrv.
+    fTopVolume = new TGeoVolumeAssembly("CRV");
+    fName = "CRV";
   }
 
   //-----------------------------------------------------------------------------
   TEvdCrv::TEvdCrv(const char* Fn): TEvdSubdetector() {
+    // The assembly is the top volume owned by TEvdCrv.
+    fTopVolume = new TGeoVolumeAssembly("CRV");
+    fName = "CRV";
     InitGeometry(Fn);
   }
   
@@ -62,7 +68,7 @@ namespace murat {
   
 //   // and initialize the sectors
 
-//   auto vm = TEvdManagerA::Instance(); // a
+//   auto vm = TEvdManager::Instance(); // a
 
 //   for (int i=0; i<fNSectors; i++) {
 //     TEvdCrvSector* sector = Sector(i);
@@ -96,9 +102,6 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
 
   const auto& shields = fCrvPtr->getCRSScintillatorShields();
   fNSectors = static_cast<int>(shields.size());
-
-  // The assembly is the top volume owned by TEvdCrv.
-  fTopVolume = new TGeoVolumeAssembly("CRV");
 
   for (int is = 0; is < fNSectors; ++is) {
     auto* sector = new TEvdCrvSector;

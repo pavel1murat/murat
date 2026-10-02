@@ -404,7 +404,7 @@ int TCaloTimeAnaModule::AnalyzeWaveforms() {
       int adc = digi->fWf[is];
       if (adc == 4095) {
         // mark and skip overflows
-        digi->SetMask(TCaloDigi::kOverflowBit);
+        digi->SetMask(TCaloDigi::kOverflowFlag);
         continue;
       }
       // continue searching 

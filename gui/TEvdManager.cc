@@ -22,7 +22,8 @@
 #include <TStyle.h>
 #include <TVirtualPad.h>
 #include <Buttons.h>
-#include <TString.h>
+#include "TString.h"
+#include "TEnv.h"
 
 #include <format>
 #include <cstdlib>
@@ -61,15 +62,12 @@ namespace murat {
 void TEvdManager::AddSubdetector(TEvdSubdetector* Sd) {
   // at this point internal subdetector tree of Sd is already built
   
-  fListOfSubdetectors->Add(Sd);
+  auto top = fGeoManager->GetTopNode();
+  // all detectors are different ... this place needs work
+  // the subdetector is positioned in a global reference frame
+  top->GetVolume()->AddNode(Sd,Sd->CopyNumber(),new TGeoTranslation());
 
-  TGeoVolume* vol = Sd->TopVolume();
-  if (vol) {
-    auto top = fGeoManager->GetTopNode();
-    // all detectors are different ... this place needs work
-    // the subdetector is positioned in a global reference frame
-    top->GetVolume()->AddNode(vol,Sd->CopyNumber(),new TGeoTranslation());
-  }
+  fListOfSubdetectors->Add(Sd);
 
 }
 
@@ -83,14 +81,15 @@ void TEvdManager::AddSubdetector(TEvdSubdetector* Sd) {
 
 //-----------------------------------------------------------------------------
 // initial configuration - in FCL
+// the name of the config file - in .rootrc (EvdManager.ConfigFile)
 //-----------------------------------------------------------------------------
-TEvdManager::TEvdManager(const char* Fn) {
+TEvdManager::TEvdManager() {
 
-  //  auto gm = TGeoManagerA::Instance(); // defines its own TOP
+  std::string config_fn = gEnv->GetValue("EvdManager.ConfigFcl","murat/fcl/evd_config.fcl");
 
   cet::filepath_lookup policy("FHICL_FILE_PATH");
 
-  auto const pset    = fhicl::ParameterSet::make("murat/fcl/evd_config.fcl",policy);
+  auto const pset    = fhicl::ParameterSet::make(config_fn,policy);
 
   auto evd_config = pset.get<fhicl::ParameterSet>("evd_config");
 
@@ -102,6 +101,9 @@ TEvdManager::TEvdManager(const char* Fn) {
   fListOfViews        = new TObjArray();
   fListOfNodes        = new TObjArray();
   fListOfSubdetectors = new TObjArray();
+  fListOfDataBlocks   = new TMap();
+  fListOfDataBlocks->SetOwnerKeyValue(kTRUE, kFALSE);   // owns only keys, not values
+  
   fGeoManager         = new TGeoManager("mu2e_geo", "Mu2e Geometry");
   
   auto vacuum_material = new TGeoMaterial("Vacuum", 0.0, 0.0, 0.0);
@@ -184,6 +186,32 @@ int TEvdManager::AddView(TEvdView* View) {
   
   return rc;
 }
+  
+//-----------------------------------------------------------------------------
+// views are unique, make sure not adding a view the second time
+//-----------------------------------------------------------------------------
+int TEvdManager::DisplayEvent() {
+  int rc(0);
+  
+  // 1. update all nodes with the current event data
+  int nnodes = GetNNodes();
+  for (int i=0; i<nnodes; i++) {
+    TEvdVisNode* node = GetNode(i);
+    node->InitEvent();
+  }
+
+  // 2. redraw all currently open views
+
+  int nviews = GetNViews();
+  for (int i=0; i<nviews; i++) {
+    TEvdView* view = GetView(i);
+    if (view->IsOpen()) {
+      view->Update();
+    }
+  }
+  
+  return rc;
+}
 
 //-----------------------------------------------------------------------------
 // nodes have unique names, each of them could be a non-trivial object
@@ -208,11 +236,12 @@ TEvdSubdetector* TEvdManager::FindSubdetector(const char* Name) {
 //-----------------------------------------------------------------------------
 // each view has enough information to initialize itself
 //-----------------------------------------------------------------------------
-int TEvdManager::InitEvent() {
+  int TEvdManager::InitEvent() {
   int rc(0);
   int nn = GetNNodes();
   for (int i=0; i<nn; i++) {
     TEvdVisNode* node = GetNode(i);
+    //    if (node->Initialized()) continue;
     node->InitEvent();
   }
   return rc;
@@ -224,16 +253,19 @@ int TEvdManager::InitEvent() {
 int TEvdManager::InitGeometry() {
 
   if (fDisplayCalorimeter) {
-    auto calo = new TEvdCalorimeter(fGeometryFile.data()); // includes geometry initialization
+    auto calo = new TEvdCalorimeter();
+    calo->InitGeometry(fGeometryFile.data()); // includes geometry initialization
     AddSubdetector(calo);
   }
   if (fDisplayCrv) {
-    auto crv = new TEvdCrv(fGeometryFile.data());
+    auto crv = new TEvdCrv();
+    crv->InitGeometry(fGeometryFile.data());
     AddSubdetector(crv);
   }
   if (fDisplayTracker) {
-    auto trk = new TEvdTracker(fGeometryFile.data());
-    AddSubdetector(trk);
+    auto tracker = new TEvdTracker();
+    tracker->InitGeometry(fGeometryFile.data());
+    AddSubdetector(tracker);
   }
 // --------------------------------------------------------------------------
 // Close geometry, ready to display
@@ -243,10 +275,10 @@ int TEvdManager::InitGeometry() {
 }
 
 //-----------------------------------------------------------------------------
-TEvdManager* TEvdManager::Instance(const char* Fcl) {
+TEvdManager* TEvdManager::Instance() {
   static TEvdManager* instance(nullptr);
   if (instance == nullptr) {
-    instance = new TEvdManager(Fcl);
+    instance = new TEvdManager();
   }
   return instance;
 }

@@ -7,11 +7,15 @@
 
 #include "Offline/ConfigTools/inc/SimpleConfig.hh"
 
+#include "murat/gui/TEvdCrvCounter.hh"
+#include "murat/gui/TEvdCrvSector.hh"
 #include "murat/gui/TEvdCrv.hh"
 
 #include "Offline/GeometryService/inc/CosmicRayShieldMaker.hh"
 
 #include "murat/gui/TEvdManager.hh"
+
+#include "Stntuple/obj/TCrvPulseBlock.hh"
 
 ClassImp(murat::TEvdCrv)
 
@@ -39,20 +43,12 @@ namespace {
 
 namespace murat {
   //-----------------------------------------------------------------------------
-  TEvdCrv::TEvdCrv(): TEvdSubdetector() {
+  TEvdCrv::TEvdCrv(): TEvdSubdetector("CRV") {
     // The assembly is the top volume owned by TEvdCrv.
-    fTopVolume = new TGeoVolumeAssembly("CRV");
+    // fTopVolume = new TGeoVolumeAssembly("CRV");
     fName = "CRV";
   }
 
-  //-----------------------------------------------------------------------------
-  TEvdCrv::TEvdCrv(const char* Fn): TEvdSubdetector() {
-    // The assembly is the top volume owned by TEvdCrv.
-    fTopVolume = new TGeoVolumeAssembly("CRV");
-    fName = "CRV";
-    InitGeometry(Fn);
-  }
-  
   //-----------------------------------------------------------------------------
   TEvdCrv::~TEvdCrv() {
   }
@@ -76,6 +72,57 @@ namespace murat {
 //   }
   
 //   return 0;
+// }
+
+
+//------------------------------------------------------------------------------
+  int TEvdCrv::GetCounterLocation(int               Sbid   ,
+                                   TEvdCrvSector*&  Sector ,
+                                   TEvdCrvModule*&  Module ,
+                                   TEvdCrvLayer*&   Layer  ,
+                                   TEvdCrvCounter*& Counter) {
+    Sector  = nullptr;
+    Module  = nullptr;
+    Layer   = nullptr;
+    Counter = nullptr;
+
+    int found = 0;
+    for (int is=0; is<fNSectors; is++) {
+      TEvdCrvSector* sec = GetSector(is);
+      int offset_sec = Sbid-sec->FirstCounter();
+      if ((offset_sec >= 0) and (offset_sec < sec->GetNCounters())) {
+        Sector = sec;
+        int nm = sec->GetNModules();
+        for (int im=0; im<nm; im++) {
+          TEvdCrvModule* mod = sec->GetModule(im);
+          int offset_mod = Sbid-mod->FirstCounter();
+          if ((offset_mod >= 0) and (offset_mod < mod->GetNCounters())) {
+            Module = mod;
+            int nl = mod->GetNLayers();
+            for (int il=0; il<nl; il++) {
+              TEvdCrvLayer* lay = mod->GetLayer(il);
+              int offset_lay = Sbid-lay->FirstCounter();
+              if ((offset_lay >= 0) and (offset_lay < lay->GetNCounters())) {
+                Layer   = lay;
+                Counter = lay->GetCounter(offset_lay);
+                found = 1;
+                return found;
+              }
+            }
+          }
+        }
+      }
+    }
+    return found;
+  }
+
+// //-----------------------------------------------------------------------------
+// void TEvdCrv::Draw(Option_t* Opt) {
+//   int ns = GetNSectors();
+//   for (int is=0; is<ns; is++) {
+//     TEvdCrvSector* sector = GetSector(is);
+//     sector->Draw(Opt);
+//   }
 // }
 
 //-----------------------------------------------------------------------------
@@ -103,20 +150,32 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
   const auto& shields = fCrvPtr->getCRSScintillatorShields();
   fNSectors = static_cast<int>(shields.size());
 
+  int first_counter = 0;
   for (int is = 0; is < fNSectors; ++is) {
-    auto* sector = new TEvdCrvSector;
-
-    const auto& shield = shields.at(is);
     
+    const auto&       shield     = shields.at(is);
     const std::string sectorName = shield.getName();
-
-    auto* sectorAssembly = new TGeoVolumeAssembly(sectorName.c_str());
+//-----------------------------------------------------------------------------
+// TEvdCrvSector is just a set of counters plust TGeoVolumeAssembly
+//-----------------------------------------------------------------------------
+    int copy_number = is+1;             // start from one
+    auto* sector    = new TEvdCrvSector(sectorName.c_str(),copy_number);
+    sector->fFirstCounter = first_counter;
 
     // Add all scintillator bars.  Positions in the Mu2e geometry are global,
     // so the sector assembly is placed at the origin.
-    for (const auto& module : shield.getCRSScintillatorModules()) {
-      for (const auto& layer : module.getLayers()) {
-        for (const auto& barPtr : layer.getBars()) {
+    int imod = 0;
+    for (const auto& crv_module : shield.getCRSScintillatorModules()) {
+      std::string module_name = std::format("module_{}_{}",is+1,imod+1);
+      auto module = new TEvdCrvModule(module_name.c_str(),1);
+      module->fFirstCounter = first_counter;
+      int ilay = 0;
+      for (const auto& crv_layer : crv_module.getLayers()) {
+        std::string layer_name = std::format("layer_{}_{}_{}",is+1,imod+1,ilay+1);
+        auto layer = new TEvdCrvLayer(layer_name.c_str(),1);
+        layer->fFirstCounter = first_counter;
+        
+        for (const auto& barPtr : crv_layer.getBars()) {
           const auto& bar = *barPtr;
 
           const auto& h = bar.getHalfLengths();
@@ -132,23 +191,28 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
                                                   bar.id().getLayerNumber (),
                                                   bar.id().getBarNumber   ());
 
-          auto* shape   = new TGeoBBox       (barName.c_str(),h[0],h[1],h[2]);
-          auto* counter = new TEvdSubdetector(barName.c_str(), shape, medium);
-
-          // teh bar color will depend on whether the bar has hits
-          counter->SetLineColor(kCyan + 1);
-          counter->SetFillColor(kCyan + 1);
-          counter->SetTransparency(0);
+          auto* shape   = new TGeoBBox      (barName.c_str(),h[0],h[1],h[2]);
+          auto* counter = new TEvdCrvCounter(barName.c_str(), shape, medium);
 
           const auto& p = bar.getPosition();
 
           // CRSScintillatorBar::getHalfLengths() is in world x/y/z order,
           // hence no rotation is needed here.
-          sectorAssembly->AddNode(counter,
-                                  bar.id().getBarNumber() + 1,
-                                  new TGeoTranslation(p.x(), p.y(), p.z()));
+          // bars do not show up as subdetectors.....
+          counter->SetCopyNumber(bar.id().getBarNumber() + 1);
+          // layer->AddNode(counter,counter->CopyNumber(),new TGeoTranslation(p.x(), p.y(), p.z()));
+          layer->AddCounter(counter);
+          sector->AddNode(counter,counter->CopyNumber(),new TGeoTranslation(p.x(), p.y(), p.z()));
+          first_counter++;
         }
+        layer->SetCopyNumber(1);
+        module->AddLayer(layer);
+        ilay++;
       }
+      module->fNCounters = first_counter-module->fFirstCounter;
+      module->SetCopyNumber(1);
+      sector->AddModule(module);
+      imod++;
     }
 
     // // Optional mechanical components.
@@ -187,11 +251,10 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
     //       new TGeoTranslation(p.x(), p.y(), p.z()));
     //   }
     // }
-    
-    fTopVolume->AddNode(sectorAssembly, is + 1, new TGeoTranslation);
-
-    // Keep the wrapper object alive through the CRV object.
-    fListOfSubdetectors->Add(sector);
+    // sector->fMNodules  = imod;
+    sector->fNCounters = first_counter-sector->fFirstCounter;
+    sector->SetCopyNumber(is);
+    AddSubdetector(sector);
   }
 
   fCopyNumber = 1;
@@ -199,6 +262,49 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
   return 0;
 }
 
+//-----------------------------------------------------------------------------
+  int TEvdCrv::InitEvent() {
+    int rc(0);
+    
+    auto vm = TEvdManager::Instance();  // has to be initialized at this point
+
+    TEvdCrv* crv = (TEvdCrv*) vm->FindSubdetector("CRV");
+
+    int nsectors = crv->GetNSectors();
+
+    for (int i=0; i<nsectors; i++) {
+      TEvdCrvSector* sector = crv->GetSector(i);
+      sector->Clear();
+    }
+
+    TCrvPulseBlock* crvp = (TCrvPulseBlock*) vm->GetDataBlock("CrvpBlock");
+    
+    int npulses = crvp->NPulses();
+    for (int i=0; i<npulses; i++) {
+      TCrvRecoPulse* pulse = crvp->Pulse(i);
+      int sbid = pulse->Sbid();
+
+      TEvdCrvSector*  sector(nullptr);
+      TEvdCrvModule*  module(nullptr);
+      TEvdCrvLayer*   layer (nullptr);
+      TEvdCrvCounter* counter(nullptr);
+
+      int found = crv->GetCounterLocation(sbid,sector,module,layer,counter);
+
+      if (found) {
+        counter->AddRecoPulse(pulse);
+      
+        layer->IncrementNHits ();
+        module->IncrementNHits();
+        sector->IncrementNHits();
+      }
+      else {
+        printf("ERROR: scintillation counter %i not found\n",sbid);
+      }
+    }
+    
+    return rc;
+  }
 
 //-----------------------------------------------------------------------------
 void TEvdCrv::Print(Option_t* Opt) const {

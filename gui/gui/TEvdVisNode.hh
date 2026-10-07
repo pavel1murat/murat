@@ -13,6 +13,11 @@ protected:
   int        fDist;
 
   int        fDebugLevel;
+  
+  int        f_RunNumber{-1};
+  int        f_EventNumber{-1};
+  int        f_SubrunNumber{-1};
+
 public:
 					// ****** constructors and destructor
   TEvdVisNode(const char* name = "TVisNode");
@@ -30,9 +35,13 @@ public:
 
   // virtual void        NodePrint(const void* Object, const char* ClassName) ;
 
-				// called by TEvdManager::DisplayEvent. a must to overload
-
+//-----------------------------------------------------------------------------
+// called by TEvdManager::DisplayEvent. a must to overload
+// has to set f_RunNumber etc
+//-----------------------------------------------------------------------------
   virtual int         InitEvent() = 0;
+
+  virtual bool        Initialized() = 0;
 
   void                SetDebugLevel(int Level) { fDebugLevel = Level; }
 

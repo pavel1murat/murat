@@ -1,0 +1,5 @@
+#+startup:fold
+
+
+* GeometryService/src/TrackerMakercc patch :
+- need to position wires properly in the event display w/o initializing the GeometryService

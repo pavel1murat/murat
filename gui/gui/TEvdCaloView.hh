@@ -17,9 +17,9 @@ namespace murat {
 class TEvdCaloView: public TEvdView {
 
 public:
-  TEvdCaloView(int Type = -1, int Index = -1); 
+  TEvdCaloView(const char* Name, int Type = -1, int Index = -1); 
 
-  TEvdCaloView(int Type, int Index, const char* Name, const char* Title);
+  TEvdCaloView(const char* Name, int Type, int Index, const char* Title);
 
   virtual ~TEvdCaloView();
 //-----------------------------------------------------------------------------

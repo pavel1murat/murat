@@ -10,11 +10,15 @@
 namespace murat {
 
 //-----------------------------------------------------------------------------
-  TEvdCaloView::TEvdCaloView(int Type, int Index) {
+  TEvdCaloView::TEvdCaloView(const char* Name, int Type, int Index):
+    TEvdView(Name,Type,Index)
+  {
   }
 
 //-----------------------------------------------------------------------------  
-  TEvdCaloView::TEvdCaloView(int Type, int Index, const char* Name, const char* Title) {
+  TEvdCaloView::TEvdCaloView(const char* Name, int Type, int Index, const char* Title):
+    TEvdView(Name,Type,Index,Title)
+  {
   }
 
 //-----------------------------------------------------------------------------
@@ -24,7 +28,7 @@ namespace murat {
   }
 
 //-----------------------------------------------------------------------------
-// 
+// XY projection
 //-----------------------------------------------------------------------------
   void TEvdCaloView::Draw(Option_t* Opt) {
 
@@ -33,12 +37,16 @@ namespace murat {
       TEvdVisNode* node = GetNode(i);
       node->Draw(Opt);
     }
-
+                                        // do it only once
+    if (fCanvas == nullptr) {
+      fCanvas = GetCurrentOpenGLCanvas();
+    }
+                                        // set XY projection
+    
     auto viewer = (TGLSAViewer*) gPad->GetViewer3D();
     viewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);  // XY projection
     viewer->ResetCurrentCamera();
     viewer->RequestDraw();
-
   }
 
 

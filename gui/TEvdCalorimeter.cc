@@ -11,23 +11,19 @@
 #include "TGeoTube.h"
 #include "root/TGeoMatrix.h"
 
+#include "Stntuple/obj/TStnHeaderBlock.hh"
+#include "Stntuple/obj/TCaloHitBlock.hh"
+
 #include <format>
 
 ClassImp(murat::TEvdCalorimeter)
 
 namespace murat {
 //-----------------------------------------------------------------------------
-TEvdCalorimeter::TEvdCalorimeter(): TEvdSubdetector() {
+TEvdCalorimeter::TEvdCalorimeter(): TEvdSubdetector("CALO") {
   // do not need the calorimeter mother volume
-  fTopVolume = new TGeoVolumeAssembly("CALO");
+  // fTopVolume = new TGeoVolumeAssembly("CALO");
   fName      = "CALO";
-}
-
-//-----------------------------------------------------------------------------
-TEvdCalorimeter::TEvdCalorimeter(const char* Fn): TEvdSubdetector() {
-  fTopVolume = new TGeoVolumeAssembly("CALO");
-  fName      = "CALO";
-  InitGeometry(Fn);
 }
 
 //-----------------------------------------------------------------------------
@@ -130,7 +126,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 
     // Disk copy number is idisk + 1.
     
-    fTopVolume->AddNode(fDisk[idisk], idisk + 1,diskTransform);
+    AddNode(fDisk[idisk], idisk + 1,diskTransform);
     
     int nPlaced = 0;
     int ncr     = mu2e_disk.nCrystals();
@@ -156,7 +152,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
       const double y = mu2e_cr_i->localPosition().y();
       const double z = mu2e_cr_i->localPosition().z() + 0.5 * mu2e_cr_i->size().z();
 
-      std::cout << std::format("crystal i:{:4d} x:{:10.3f} y:{:10.3f} z:{:10.3f}\n",i,x,y,z);
+      // std::cout << std::format("crystal i:{:4d} x:{:10.3f} y:{:10.3f} z:{:10.3f}\n",i,x,y,z);
 //-----------------------------------------------------------------------------
 // Copy number is local crystal ID + 1.  This is decoded by the right-click callback.
 // crystal inherits from TGeoVolume
@@ -173,7 +169,56 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 
 //-----------------------------------------------------------------------------
 int TEvdCalorimeter::InitEvent() {
-  std::cout << std::format("%s emoe AAAAAAA\n",__func__);
+
+  auto vm = TEvdManager::Instance();
+
+  TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->GetDataBlock("HeaderBlock");
+
+  int evn = hb->EventNumber ();
+  int srn = hb->SubrunNumber();
+  int run = hb->RunNumber   ();
+  
+  if ((f_EventNumber == evn) and (f_SubrunNumber == srn) and (f_RunNumber == run)) {
+    // already initialized for this event
+    return 0;
+  }
+
+  // reset colors
+  for (int i=0; i<2; i++) {
+    TEvdDisk* disk = Disk(i);
+    int ncr = disk->NCrystals();
+    for (int icr=0; icr<ncr; icr++) {
+      TEvdCrystal* cr = disk->Crystal(icr);
+      cr->ListOfHits()->Clear();
+      cr->fEDep = 0;
+        
+      // crystal color will depend on whether the crystal has hits
+      cr->SetLineColor(kOrange + 1);
+      cr->SetFillColor(kOrange + 1);
+      cr->SetTransparency(0);
+
+    }
+  }
+    
+  TCaloHitBlock* chb = (TCaloHitBlock*) vm->GetDataBlock("CaloHitBlock");
+    
+  int nhits = chb->NHits();
+  for (int i=0; i<nhits; i++) {
+    TCaloHit* hit = chb->Hit(i);
+    int idisk = hit->Disk();
+    int icr   = hit->Cid() % 674; // 674 crystals per disk
+    TEvdCrystal* cr = Disk(idisk)->Crystal(icr);
+
+    cr->AddHit(hit);
+      
+    cr->SetLineColor(kRed + 1);
+    cr->SetFillColor(kRed + 1);
+  }
+
+  f_RunNumber    = run;
+  f_SubrunNumber = srn;
+  f_EventNumber  = evn;
+  
   return 0;
 }
 
@@ -184,7 +229,10 @@ void TEvdCalorimeter::Draw(Option_t* Opt) {
 
 //-----------------------------------------------------------------------------
 void TEvdCalorimeter::Print(Option_t* Opt) const {
-  std::cout << std::format("emoe AAAAAAA\n");
+  std::string opt(Opt);
+  if (opt == "") {
+    std::cout << std::format("TEvdCalorimeter::Print\n");
+  }
 }
 
 }

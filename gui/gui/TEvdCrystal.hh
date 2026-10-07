@@ -19,11 +19,7 @@ public:
 
   TObjArray* ListOfHits() { return fListOfHits; }
 
-  void AddHit(TCaloHit* Hit) {
-    fListOfHits->Add(Hit);
-    fEDep += Hit->EDep();
-  }
-
+  void         AddHit(TCaloHit* Hit);
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------

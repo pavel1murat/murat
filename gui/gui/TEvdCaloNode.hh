@@ -1,5 +1,5 @@
-#ifndef __murat_gui_TEvdCaloVisNode_hh__
-#define __murat_gui_TEvdCaloVisNode_hh__
+#ifndef __murat_gui_TEvdCaloNode_hh__
+#define __murat_gui_TEvdCaloNode_hh__
 
 #include "TObject.h"
 #include "TString.h"
@@ -10,7 +10,7 @@
 
 namespace murat {
   
-class TEvdCaloVisNode: public TEvdVisNode {
+class TEvdCaloNode: public TEvdVisNode {
   
 protected:
   TCaloHitBlock*      fCaloHitBlock;    // ==NOT OWNED==
@@ -18,8 +18,8 @@ protected:
   
 public:
 					// ****** constructors and destructor
-  TEvdCaloVisNode(const char* name = "TEvdCaloVisNode");
-  virtual ~TEvdCaloVisNode();
+  TEvdCaloNode(const char* name = "CaloNode");
+  virtual ~TEvdCaloNode();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
@@ -31,9 +31,12 @@ public:
 
 				// called by TEvdManager::DisplayEvent. a must to overload
 
-  virtual int         InitEvent();
-
-  virtual void        Draw(Option_t* Opt = "");
+  virtual int         InitEvent  () override;
+  virtual bool        Initialized() override;
+//-----------------------------------------------------------------------------
+// overloaded functions of TObject
+//-----------------------------------------------------------------------------
+  virtual void        Draw(Option_t* Opt = "") override;
 
   //  ClassDefOverride(TVisNode,0)
 };

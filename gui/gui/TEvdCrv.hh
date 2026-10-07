@@ -22,17 +22,24 @@ public:
   int        fNSectors;
  
   TEvdCrv();
-  TEvdCrv(const char* GeomFn);
   ~TEvdCrv();
 
-  int NSectors() { return fNSectors; }
+  int GetNSectors() { return fNSectors; }
+
+  int GetCounterLocation(int               Sbid   ,
+                          TEvdCrvSector*&  Sector ,
+                          TEvdCrvModule*&  Module ,
+                          TEvdCrvLayer*&   Layer  ,
+                          TEvdCrvCounter*& Counter);
 
   // CRV 'subdetectors' are sectors
-  TEvdCrvSector* Sector(int I) { return (TEvdCrvSector*) fListOfSubdetectors->At(I); }
+  TEvdCrvSector* GetSector(int I) { return (TEvdCrvSector*) fListOfSubdetectors->At(I); }
 
-  virtual int InitGeometry(const char* Fn) override;
+  virtual int    InitGeometry(const char* Fn) override;
+  virtual int    InitEvent() override;
 
-  virtual void Print(Option_t* Opt = "") const override ;
+  // virtual void   Draw (Option_t* Opt = "") override ;
+  virtual void   Print(Option_t* Opt = "") const override ;
 
   ClassDefOverride(murat::TEvdCrv,0)
 };

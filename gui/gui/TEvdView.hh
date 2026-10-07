@@ -9,6 +9,7 @@
 #include "TObjArray.h"
 #include "TGaxis.h"
 #include "TVector3.h"
+#include "TCanvas.h"
 
 #include "murat/gui/TEvdVisNode.hh"
 
@@ -19,6 +20,7 @@ protected:
   int                 fType;            // view type
   int                 fIndex;           // for calorimeter - 2 views, for example
   void*               fMother;          // non-null. if in the local ref system of some object
+  TCanvas*            fCanvas;          // each view is displayed in its canvas ==NOT OWNED==
 
   static int          fgDebugLevel;
   
@@ -31,9 +33,9 @@ protected:
   float     fTMax;
 
 public:
-  TEvdView(int Type = -1, int Index = -1); 
+  TEvdView(const char* Name, int Type = -1, int Index = -1); 
 
-  TEvdView(int Type, int Index, const char* Name, const char* Title);
+  TEvdView(const char* Name, int Type, int Index, const char* Title);
 
   virtual ~TEvdView();
 //-----------------------------------------------------------------------------
@@ -46,8 +48,17 @@ public:
   int           GetNNodes()      { return fListOfNodes->GetEntriesFast(); }
   TEvdVisNode*  GetNode  (int I) { return (TEvdVisNode*) fListOfNodes->UncheckedAt(I);   }
   TObjArray*    GetListOfNodes() { return fListOfNodes; }
+  
+  TCanvas*      GetCurrentOpenGLCanvas();
 
   void          AddNode(TEvdVisNode* Node) { fListOfNodes->Add(Node); }
+
+  bool          IsOpen() { return (fCanvas != nullptr); }
+
+  void          Update() {
+    fCanvas->Modified();
+    // fCanvas->Update();   // don't seem to need this one
+  }
 //-----------------------------------------------------------------------------
 // setters
 //-----------------------------------------------------------------------------
@@ -60,6 +71,7 @@ public:
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------
+  virtual void  Draw(Option_t* Opt = "") override;
   // virtual void  Paint               (Option_t* option = "") override;
   // virtual void  Print               (Option_t* option = "") const override;  // *MENU* 
 

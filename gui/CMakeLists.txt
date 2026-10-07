@@ -16,8 +16,9 @@ include_directories(
 
 ROOT_GENERATE_DICTIONARY(${dict}
   TEvdCalorimeter.hh TEvdDisk.hh TEvdCrystal.hh
-  TEvdCaloVisNode.hh TEvdCaloView.hh
-  TEvdCrv.hh TEvdCrvSector.hh
+  TEvdCaloNode.hh TEvdCaloView.hh
+  TEvdCrv.hh TEvdCrvSector.hh TEvdCrvModule.hh TEvdCrvLayer.hh TEvdCrvCounter.hh
+  TEvdDetNode.hh
   TEvdTracker.hh TEvdStation.hh TEvdPlane.hh TEvdPanel.hh TEvdStraw.hh
   TEvdManager.hh TEvdSubdetector.hh
   TEvdView.hh TEvdVisNode.hh
@@ -27,8 +28,9 @@ set_property(SOURCE ${dict}.cxx PROPERTY generated)
 
 add_library(${lib} SHARED
   TEvdCalorimeter.cc TEvdDisk.cc TEvdCrystal.cc
-  TEvdCaloVisNode.cc TEvdCaloView.cc
-  TEvdCrv.cc TEvdCrvSector.cc
+  TEvdCaloNode.cc TEvdCaloView.cc
+  TEvdCrv.cc TEvdCrvSector.cc  TEvdCrvModule.cc TEvdCrvLayer.cc TEvdCrvCounter.cc
+  TEvdDetNode.cc
   TEvdTracker.cc TEvdStation.cc TEvdPlane.cc TEvdPanel.cc TEvdStraw.cc
   TEvdManager.cc TEvdSubdetector.cc
   TEvdView.cc TEvdVisNode.cc

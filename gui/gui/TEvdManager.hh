@@ -4,12 +4,16 @@
 #include <string>
 
 #include "TObject.h"
+#include "TObjString.h"
 #include "TGeoVolume.h"
 #include "TGeoManager.h"
+#include "TMap.h"
 
 #include "murat/gui/TEvdVisNode.hh"
 #include "murat/gui/TEvdView.hh"
 #include "murat/gui/TEvdSubdetector.hh"
+
+class TStnDataBlock;
 
 namespace murat {
 
@@ -21,6 +25,7 @@ public:
   TGeoManager* fGeoManager;
   TObjArray*   fListOfViews;                // multiple views
   TObjArray*   fListOfNodes;                // multiple nodes
+  TMap*        fListOfDataBlocks;           // data blocks are named
   
   TObjArray*   fListOfSubdetectors;         // each     view
 
@@ -30,17 +35,18 @@ public:
   int          fDisplayTracker;
 
 private:
-  TEvdManager(const char* Fcl);        // configuration file name
+  TEvdManager();        // configuration FCL - in .rootrc (EvdManager.ConfigFcl)
   
 public:
-  static TEvdManager* Instance(const char* Fcl = "");
+  static TEvdManager* Instance();
 
   TGeoManager* GetGeoManager() { return fGeoManager; }
 
   TEvdSubdetector* GetSubdetector(int I) { return (TEvdSubdetector*) fListOfSubdetectors->At(I); }
 
-  int GetNNodes() { return fListOfNodes->GetEntriesFast(); }
-  int GetNViews() { return fListOfViews->GetEntriesFast(); }
+  int GetNNodes       () { return fListOfNodes->GetEntriesFast(); }
+  int GetNViews       () { return fListOfViews->GetEntriesFast(); }
+  int GetNSubdetectors() { return fListOfSubdetectors->GetEntriesFast(); }
   
   TEvdVisNode* GetNode(int I) { return (TEvdVisNode*) fListOfNodes->At(I); }
   TEvdView*    GetView(int I) { return (TEvdView*   ) fListOfViews->At(I); }
@@ -52,6 +58,18 @@ public:
   int   AddView(TEvdView*    View);
   int   AddNode(TEvdVisNode* Node);
 
+  void  AddDataBlock(const char* Name, TObject* Block) {
+    fListOfDataBlocks->Add(new TObjString(Name),Block);
+  }
+
+  TObject* GetDataBlock(const char* Name) {
+    TObjString key(Name);
+    TObject* v = fListOfDataBlocks->GetValue(&key);
+    return v;
+  }
+
+  int   DisplayEvent();
+  
   int   InitGeometry();
 
   int   InitEvent();

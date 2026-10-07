@@ -15,7 +15,7 @@ public:
   
   virtual const char* GetName() const override;
 
-  virtual void Print(Option_t* Opt = "") const cverride;
+  virtual void Print(Option_t* Opt = "") const override;
 
   ClassDefOverride(TEvdTrack,0)
 };

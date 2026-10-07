@@ -7,10 +7,13 @@
 // ClassImp(TEvdVisNode)
 
 namespace murat {
-  
-  TEvdVisNode::TEvdVisNode(const char* Name) {
-  }
 
+//-----------------------------------------------------------------------------
+  TEvdVisNode::TEvdVisNode(const char* Name):
+    fName(Name) {
+  }
+  
+//-----------------------------------------------------------------------------
   TEvdVisNode::~TEvdVisNode() {
   }
 

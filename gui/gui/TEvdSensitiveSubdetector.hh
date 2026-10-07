@@ -1,14 +1,16 @@
 //-----------------------------------------------------------------------------
-#ifndef __murat_gui_TEvdSubdetector__
-#define __murat_gui_TEvdSubdetector__
+#ifndef __murat_gui_TEvdSensitiveSubdetector__
+#define __murat_gui_TEvdSensitiveSubdetector__
 
 #include "TGeoVolume.h"
 #include "TGeoShape.h"
 #include "TGeoMedium.h"
 
+#include "murat/gui/TEvdSensitiveSubdetector.hh"
+
 namespace murat {
 //-----------------------------------------------------------------------------
-class TEvdSubdetector : public TGeoVolumeAssembly {
+class TEvdSensitiveSubdetector : public TGeoVolume {
 public:
   TString     fName;
   int         fCopyNumber;                 // for a bar
@@ -19,17 +21,15 @@ public:
 
   TObjArray*  fListOfHits;                 // if null pointer, then no hits
 
-  TObjArray*  fListOfSubdetectors;   
-
-  TEvdSubdetector();
-  TEvdSubdetector(const char* Name, int CopyNumber = 1);
+  TEvdSensitiveSubdetector();
+  TEvdSensitiveSubdetector(const char* Name, int CopyNumber = 1);
   
-  TEvdSubdetector(const char* Name,  TGeoShape* Shape, TGeoMedium* Medium,
+  TEvdSensitiveSubdetector(const char* Name,  TGeoShape* Shape, TGeoMedium* Medium,
                   int Color = kGreen+2, int Transparency = 0);
   
-  ~TEvdSubdetector();
+  ~TEvdSensitiveSubdetector();
   
-  void        AddSubdetector(TEvdSubdetector* sd, TGeoMatrix* Matrix = nullptr);
+  void        AddSubdetector(TEvdSensitiveSubdetector* sd, TGeoMatrix* Matrix = nullptr);
    
   TGeoVolume* GetVolume () { return this; }
 
@@ -52,7 +52,7 @@ public:
   const char* GetName() const override { return fName.Data(); }
   
   
-  ClassDefOverride(TEvdSubdetector,0);
+  ClassDefOverride(TEvdSensitiveSubdetector,0);
 };
 }
 #endif

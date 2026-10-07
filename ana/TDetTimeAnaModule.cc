@@ -28,8 +28,10 @@
 // 
 //-----------------------------------------------------------------------------
 #include "murat/gui/TEvdCaloView.hh"
-#include "murat/gui/TEvdCaloVisNode.hh"
+#include "murat/gui/TEvdCaloNode.hh"
+#include "murat/gui/TEvdDetNode.hh"
 #include "murat/gui/TEvdManager.hh"
+
 #include "murat/ana/TDetTimeAnaModule.hh"
 
 
@@ -981,15 +983,39 @@ int TDetTimeAnaModule::PrintTracks() {
     auto vm = TEvdManager::Instance();
     vm->InitGeometry(); // if not initialized
     
-    // new view
+    vm->AddDataBlock("HeaderBlock"      ,GetHeaderBlock());
+    vm->AddDataBlock("CaloHitBlock"     ,fCaloHitBlock);
+    vm->AddDataBlock("CaloRecoDigiBlock",fCaloRecoDigiBlock);
+    vm->AddDataBlock("CaloCLusterBlock" ,fCaloClusterBlock);
+    
+    vm->AddDataBlock("CrvpBlock"        ,fCrvpBlock);
+    vm->AddDataBlock("CrvcBlock"        ,fCrvcBlock);
 
-    TEvdCaloVisNode* node = new TEvdCaloVisNode();
-    node->SetCaloHitBlock(fCaloHitBlock);
-
-    TEvdCaloView* view = new TEvdCaloView();
+    vm->AddDataBlock("TrackBlock"       ,fTrackBlock);
+//-----------------------------------------------------------------------------
+// calorimeter view
+//-----------------------------------------------------------------------------
+    TEvdCaloNode* node = new TEvdCaloNode("calo_node");
+    TEvdCaloView*    view = new TEvdCaloView("calo_view");
     view->AddNode(node);
-
     vm->AddView(view);
+//-----------------------------------------------------------------------------
+// 3D detector view
+//-----------------------------------------------------------------------------
+    TEvdDetNode* det_node = new TEvdDetNode("det_node");
+    TEvdView* det_view       = new TEvdView("det_view");
+    det_view->AddNode(det_node);
+    vm->AddView(det_view);
+
+    return rc;
+  }
+  
+//-----------------------------------------------------------------------------
+  int TDetTimeAnaModule::DisplayEvent() {
+    int rc(0);
+    auto vm = TEvdManager::Instance();
+
+    vm->DisplayEvent();
 
     return rc;
   }

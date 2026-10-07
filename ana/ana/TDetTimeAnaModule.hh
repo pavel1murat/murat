@@ -274,10 +274,11 @@ public:
   //  int              PrintTimeCorrections();
 
   void             Debug();
-  
-  int              PrintTracks();
-
+  int              DisplayEvent();
+ 
   int              InitEvd();
+
+  int              PrintTracks();
 
   ClassDefOverride(murat::TDetTimeAnaModule,0)
 };

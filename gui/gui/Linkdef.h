@@ -6,23 +6,26 @@
 #pragma link C++ nestedclasses;
 #pragma link C++ nestedtypedefs;
 
-#pragma link C++ class murat::TEvdCalorimeter;
 // #pragma link C++ class TCrvView;
 // #pragma link C++ class TCrvVisNode;
 // #pragma link C++ class TEvdCalSection;
 // #pragma link C++ class TEvdCluster;
-// #pragma link C++ class stntuple::TEvdComboHit;
-// #pragma link C++ class TEvdCrvBar;
 
+#pragma link C++ class murat::TEvdCrvCounter;
+#pragma link C++ class murat::TEvdCrvLayer;
+#pragma link C++ class murat::TEvdCrvModule;
 #pragma link C++ class murat::TEvdCrvSector;
 #pragma link C++ class murat::TEvdCrv;
 
 #pragma link C++ class murat::TEvdCrystal;
 #pragma link C++ class murat::TEvdCalorimeter;
-#pragma link C++ class murat::TEvdCaloVisNode;
 #pragma link C++ class murat::TEvdCaloView;
 #pragma link C++ class murat::TEvdDisk;
 #pragma link C++ class murat::TEvdManager;
+
+#pragma link C++ class murat::TEvdCaloNode;
+#pragma link C++ class murat::TEvdDetNode;
+
 // #pragma link C++ class stntuple::TEvdHelixSeed;
 // #pragma link C++ class TEvdHelixVisNode;
 // #pragma link C++ class TEvdMainFrame;
@@ -33,7 +36,7 @@
 #pragma link C++ class murat::TEvdStation;
 // #pragma link C++ class stntuple::TEvdStrawHit;
 #pragma link C++ class murat::TEvdStraw;
-#pragma link C++ class murat::TEvdSubdetector;/
+#pragma link C++ class murat::TEvdSubdetector;
 #pragma link C++ class murat::TEvdTracker;
 #pragma link C++ class murat::TEvdView;
 #pragma link C++ class murat::TEvdVisNode;

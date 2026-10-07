@@ -63,24 +63,9 @@ namespace murat {
 //-----------------------------------------------------------------------------
 TEvdTracker::TEvdTracker(): TEvdSubdetector("TRACKER") {
   fName       = "TRACKER";
-  fTopVolume  = this;
+  // fTopVolume  = this;
   fCopyNumber = 1;
-  for (int i=0; i<kNStations; i++) {
-    fStation[i] = new TEvdStation(i);
-  }
 }
-
-//-----------------------------------------------------------------------------
-TEvdTracker::TEvdTracker(const char* Fn): TEvdSubdetector("TRACKER") {
-  // for (int i=0; i<kNStations; i++) {
-  //   fStation[i] = new TEvdStation(i);
-  // }
-  fTopVolume  = this;
-  fCopyNumber = 1;
-  fName = "TRACKER";
-  InitGeometry(Fn);
-}
-
 
 
 //-----------------------------------------------------------------------------
@@ -231,4 +216,11 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
   return 0;
 }
 
+  //-----------------------------------------------------------------------------
+  void TEvdTracker::Print(Option_t* Opt) const {
+    std::string opt(Opt);
+    if (opt == "") {
+      std::cout << std::format("TEvdTracker::Print\n");
+    }
+  }
 }

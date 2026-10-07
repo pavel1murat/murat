@@ -19,12 +19,10 @@ public:
 
   TEvdCalorimeter();
   
-  TEvdCalorimeter(const char* Fn = "murat/fcl/geom_common_extracted_v04.txt");
-
   TEvdDisk*    Disk(int I) { return fDisk[I]; }
 
   virtual int  InitEvent() override;
-  virtual int  InitGeometry(const char* Fn) override;
+  virtual int  InitGeometry(const char* Fn);
   
   virtual void Print (Option_t* Opt = "") const override;  // *MENU*
   

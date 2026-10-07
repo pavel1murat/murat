@@ -3,7 +3,7 @@ evd_config : {
     geometryFile       : "murat/fcl/geom_extracted.txt"
     displayTracker     : true
     displayCalorimeter : true
-    displayCrv         : true
+    displayCrv         : true ## false ## true
     views              :
     [
      {

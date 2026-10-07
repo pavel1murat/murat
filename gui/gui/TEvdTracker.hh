@@ -16,13 +16,15 @@ public:
 
   TEvdTracker();
 
-  TEvdTracker(const char* Fn);
-
   TEvdPanel* Panel(int Station, int Plane, int Panel) {
     return fStation[Station]->fPlane[Plane]->fPanel[Panel];
   }
 
   int InitGeometry(const char* Fn);
+//-----------------------------------------------------------------------------
+// overloaded methods of TObject
+//-----------------------------------------------------------------------------
+  virtual void Print(Option_t* Opt = "") const override;
 
   ClassDef(murat::TEvdTracker,0)
 };

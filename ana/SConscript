@@ -29,7 +29,7 @@ def local_build():
 
     if (os.getenv("STNTUPLE_MC_GEN") != None): mc_libs = ["mc_photos", "mc_base"];
 
-    libs          = stntuple_libs + mc_libs + [
+    libs          = ['murat_gui', 'murat_alg'] + stntuple_libs + mc_libs + [
         rootlibs
     ];
 

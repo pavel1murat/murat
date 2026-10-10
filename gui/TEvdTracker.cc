@@ -33,7 +33,7 @@ TGeoMedium* trackerStrawMedium() {
 
   return new TGeoMedium("TrackerStraw", 200, material);
 }
-
+  /*
 //-----------------------------------------------------------------------------
 std::unique_ptr<TGeoCombiTrans> strawTransform(const mu2e::Straw& straw) {
   const auto& p = straw.origin();
@@ -53,7 +53,7 @@ std::unique_ptr<TGeoCombiTrans> strawTransform(const mu2e::Straw& straw) {
   return std::make_unique<TGeoCombiTrans>(
       p.x(), p.y(), p.z(), rotation);
 }
-
+  */
 } // namespace
 
 
@@ -114,7 +114,7 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
 
     const std::string planeName = std::format("TrackerPlane_{}", ip);
 
-    const CLHEP::Hep3Vector& plane_origin  = plane.origin();
+    // const CLHEP::Hep3Vector& plane_origin  = plane.origin();
 
     double plane_radius = 700.;
     double plane_dz2    = 10.;

@@ -44,7 +44,7 @@ namespace murat {
   bool TEvdCaloNode::Initialized() {
     bool initialized(false);
 
-    auto vm = TEvdManager::Instance();
+    // auto vm = TEvdManager::Instance();
     
     
     if ((fCaloHitBlock->EventNumber ()  == f_EventNumber) and

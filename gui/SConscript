@@ -30,7 +30,8 @@ def local_build():
                       'mu2e_TrackerGeom',
                       'mu2e_CosmicRayShieldGeom',
                       'mu2e_ConfigTools',
-                      'CLHEP'
+                      'CLHEP',
+                      'fhiclcpp', 'cetlib'
                   ];
 
     libs          = stntuple_libs + [ rootlibs ];

@@ -9,6 +9,8 @@
 
 #include "murat/gui/TEvdSubdetector.hh"
 
+class TCrvRecoPulse;
+
 namespace murat {
 
 //-----------------------------------------------------------------------------  
@@ -23,6 +25,8 @@ public:
  
   TEvdCrv();
   ~TEvdCrv();
+
+  void AddRecoPulse(TCrvRecoPulse* Pulse);
 
   int GetNSectors() { return fNSectors; }
 

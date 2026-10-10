@@ -44,19 +44,19 @@ TComboHitData::TComboHitData(float X, float Y, float Z, float T, float EDep, int
 
 //-----------------------------------------------------------------------------
 void TComboHitData::Paint(Option_t* Option) {
-  const char oname[] = "TComboHitData::Paint";
+  // const char oname[] = "TComboHitData::Paint";
 
-  //  int   iv;
+  // //  int   iv;
 
-  TEvdManager* vm = TEvdManager::Instance();
+  // auto* vm = murat::TEvdManager::Instance();
 
-  int view = vm->GetCurrentView()->Type();
+  // int view = vm->GetCurrentView()->Type();
 
-  if      (view == vm->GetViewID("xy")) PaintXY (Option);
-  else if (view == vm->GetViewID("tz")) PaintTZ (Option);
-  else {
-    printf("[%s] >>> ERROR: unknown view: %i, DO NOTHING\n",oname,view);
-  }
+  // if      (view == vm->GetViewID("xy")) PaintXY (Option);
+  // else if (view == vm->GetViewID("tz")) PaintTZ (Option);
+  // else {
+  //   printf("[%s] >>> ERROR: unknown view: %i, DO NOTHING\n",oname,view);
+  // }
 
   gPad->Modified();
 }

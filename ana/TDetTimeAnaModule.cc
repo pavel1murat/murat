@@ -387,18 +387,17 @@ int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
 
   Hist->h_dt_crvc->Fill(Tp->dtmin_crvc);
 
-  Hist->h_dx_crvc->Fill(Tp->dx_crvc);
-  Hist->h_dz_crvc->Fill(Tp->dz_crvc);
-
   if (Tp->crvc) {
     int s_type = Tp->crvc->SectorType();
     if ((s_type == 1) or (s_type == 3)) {
       // EX or T2: long side of bars along X axis, measuring Z
       Hist->h_dz_crvc_vs_dzdy->Fill(dzdy,Tp->dz_crvc);
+      Hist->h_dz_crvc->Fill(Tp->dz_crvc);
     }
     else {
       // T1 or M1-M8 : long side of bars along Z axis, the bars tell X
       Hist->h_dx_crvc_vs_dxdy->Fill(dxdy,Tp->dx_crvc);
+      Hist->h_dx_crvc->Fill(Tp->dx_crvc);
     }
   }
   
@@ -482,36 +481,15 @@ int TDetTimeAnaModule::FillHistograms() {
     trk_param_t* tp = &fListOfTrkParam[i];
     FillTrkHistograms(fHist->trk[0],trk,tp);
     if (tp->intime) {
-      
       FillTrkHistograms(fHist->trk[1],trk,tp);
-      // if (tp->calc->DiskID() == 0) {
-      //   GetHeaderBlock()->Print("in-time disk0");
-      //   FillTrkHistograms(fHist->trk[2],trk,tp);
-      // }
-      // else {
-      //   GetHeaderBlock()->Print("in-time disk1");
-      //   FillTrkHistograms(fHist->trk[3],trk,tp);
-      // }
     }
     
     if (tp->intime_calc) {
       FillTrkHistograms(fHist->trk[4],trk,tp);
-      // if (tp->calc->DiskID() == 0) {
-      //   FillTrkHistograms(fHist->trk[5],trk,tp);
-      // }
-      // else if (tp->calc->DiskID() == 1) {
-      //   FillTrkHistograms(fHist->trk[6],trk,tp);
-      // }
     }
 
     if ((trk->NHits() > 10) and (tp->intime_calc)) {
       FillTrkHistograms(fHist->trk[7],trk,tp);
-      // if (tp->calc->DiskID() == 0) {
-      //   FillTrkHistograms(fHist->trk[8],trk,tp);
-      // }
-      // else if (tp->calc->DiskID() == 1) {
-      //   FillTrkHistograms(fHist->trk[9],trk,tp);
-      // }
     }
 
     if ((trk->NHits() > 10) and (tp->intime_crvc)) {
@@ -539,21 +517,21 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
     float crv_time_offset = 0.; // 21; // today
 
-    double crv_off[3] = {    0., -145.0, 0.0 };
+    // double crv_off[3] = {    0., -145.0, 0.0 };
       
-    double trk_pos[3] = {-3904., 0., 22935.0 }; // nominal
-    //    double trk_off[3] = {    0., 0., -1171.0 }; // offset to be added
-    double trk_off[3] = {    0., 0.,     0.0 }; // offset to be added
+    // double trk_pos[3] = {-3904., 0., 22935.0 }; // nominal
+    // //    double trk_off[3] = {    0., 0., -1171.0 }; // offset to be added
+    // double trk_off[3] = {    0., 0.,     0.0 }; // offset to be added
 
-    double calo_pos[2][3] = {           // nominal
-      -3904., 0., 23000.0+2383.-64.,        // 25842;
-      -3904., 0., 23000.0+3517.-64.
-    };
+    // double calo_pos[2][3] = {           // nominal
+    //   -3904., 0., 23000.0+2383.-64.,        // 25842;
+    //   -3904., 0., 23000.0+3517.-64.
+    // };
     
-    double calo_off[2][3] = {           // offset to be added
-      0.    , 0.,     0.,
-      0.    , 0.,     0.
-    };
+    // double calo_off[2][3] = {           // offset to be added
+    //   0.    , 0.,     0.,
+    //   0.    , 0.,     0.
+    // };
 //-----------------------------------------------------------------------------
 // extra track parameters
 //-----------------------------------------------------------------------------
@@ -566,11 +544,11 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
     tp->dtmin_tc    = 1.e6;
     tp->tc          = nullptr;
     for (int k=0; k<2; k++) {
-      float dz          = calo_pos[k][2]+calo_off[k][2]-(trk->fZ0+trk_pos[2]+trk_off[2]);
+      float dz          = fDetPos.calo_pos[k][2]+ fDetPos.calo_off[k][2]-(trk->fZ0+ fDetPos.trk_pos[2]+ fDetPos.trk_off[2]);
 
       tp->dtmin_calc[k] = 1.e6;
-      tp->x_disk[k]     = trk->fX0     + (trk_pos [0]+trk_off [0]) + (trk->fNx/trk->fNz)*dz;
-      tp->y_disk[k]     = trk->fY0     + (trk_pos [1]+trk_off [1]) + (trk->fNy/trk->fNz)*dz;
+      tp->x_disk[k]     = trk->fX0     + (fDetPos.trk_pos [0]+ fDetPos.trk_off [0]) + (trk->fNx/trk->fNz)*dz;
+      tp->y_disk[k]     = trk->fY0     + (fDetPos.trk_pos [1]+ fDetPos.trk_off [1]) + (trk->fNy/trk->fNz)*dz;
       tp->calc[k]       = nullptr;
       tp->dx_calc[k]    = 1.e6;
       tp->dy_calc[k]    = 1.e6;
@@ -617,7 +595,7 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 // transform track coordinates to global coordinate system
 // constants from Offline/Mu2eG4/geom/geom_common_extracted_v04.txt
 //-----------------------------------------------------------------------------
-      float y_crvc = tp->crvc->Position()->Y() + crv_off[1];  // -80.;//-4280; // for kicks
+      float y_crvc = tp->crvc->Position()->Y() + fDetPos.crv_off[1];  // -80.;//-4280; // for kicks
       float dy     = y_crvc-trk->fY0;
 
       tp->xcrv     = trk->fX0+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
@@ -626,10 +604,10 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
       // X(CRVC) is defined in the global coordinate system, transform that
       // to the local reference frame of the tracker
 
-      float x_crvc = tp->crvc->Position()->X()-(trk_pos[0]+trk_off[0]);
+      float x_crvc = tp->crvc->Position()->X()-(fDetPos.trk_pos[0]+fDetPos.trk_off[0]);
       tp->dx_crvc  = tp->xcrv-x_crvc;
 
-      float z_crvc = tp->crvc->Position()->Z()-(trk_pos[2]+trk_off[2]);
+      float z_crvc = tp->crvc->Position()->Z()-(fDetPos.trk_pos[2]+fDetPos.trk_off[2]);
       tp->dz_crvc  = tp->zcrv-z_crvc;
     }
 //------------------------------;-----------------------------------------------
@@ -653,8 +631,8 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
       TStnCluster* cl = tp->calc[disk];
       if (cl) {
      
-        float x_cal = cl->fX + (calo_pos[disk][0]+calo_off[disk][0]);
-        float y_cal = cl->fY + (calo_pos[disk][1]+calo_off[disk][1]);
+        float x_cal = cl->fX + (fDetPos.calo_pos[disk][0]+fDetPos.calo_off[disk][0]);
+        float y_cal = cl->fY + (fDetPos.calo_pos[disk][1]+fDetPos.calo_off[disk][1]);
       
         tp->dx_calc[disk] = tp->x_disk[disk]-x_cal;
         tp->dy_calc[disk] = tp->y_disk[disk]-y_cal;
@@ -813,6 +791,9 @@ int TDetTimeAnaModule::BeginRun() {
 // to re-book them for every new run
 // don't do that by default
 //-----------------------------------------------------------------------------
+  // relative positions of subdetectors wrt each other
+  int print_level(0);
+  fDetPos.GetFromRunDb(fRunNumber,print_level);
   
   BookHistograms(fHist,fFolder);
   return 0;

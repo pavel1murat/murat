@@ -6,6 +6,7 @@
 #pragma link C++ nestedclasses;
 #pragma link C++ nestedtypedefs;
 
+#pragma link C++ class murat::DetPos_t;
 #pragma link C++ class murat::TLsqSums4;
 
 #endif

@@ -14,6 +14,7 @@ class TEvdCrvCounter: public TGeoVolume {
 public:
   int        fCopyNumber;
   TObjArray* fListOfHits;           // pointers to TCrvRecoPulses ==NOT OWNED==
+  TGeoNode*  fGeoMatrix;           // ==NOT OWNED==
 
   TEvdCrvCounter(const char* Name, TGeoShape* Shape, TGeoMedium* Medium);
 
@@ -24,6 +25,8 @@ public:
   void AddRecoPulse(TCrvRecoPulse* Hit);
 
   int GetNRecoPulses() { return fListOfHits->GetEntriesFast(); }
+
+  TGeoMatrix*  GetGeoMatrix() { return fGeoMatrix; }
 
   void SetCopyNumber(int N) { fCopyNumber = N; }
 

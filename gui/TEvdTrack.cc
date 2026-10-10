@@ -1,4 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
+#include <iostream>
+#include <format>
 
 #include "murat/gui/TEvdTrack.hh"
 
@@ -19,4 +21,9 @@ TPolyLine3D(),
 //-----------------------------------------------------------------------------
 const char* TEvdTrack::GetName() const {
   return fName.Data();
+}
+
+//-----------------------------------------------------------------------------
+void TEvdTrack::Print(Option_t* Opt) const {
+  std::cout << std::format("TEvdTrack::Print to be written\n");
 }

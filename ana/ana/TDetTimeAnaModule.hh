@@ -26,6 +26,9 @@
 #include "Stntuple/geom/TCaloChannelMap.hh"
 #include "Stntuple/geom/TrkPanelMap.hh"
 
+// subdetector-level alignment table
+#include "murat/alg/DetPos_t.hh"
+
 namespace murat {
 class TDetTimeAnaModule: public TStnModule {
   
@@ -229,7 +232,7 @@ public:
   fit_result_t              fFr[kNCaloChannels];
   fit_result_t*             fFrRef;
 
-  //  calorimeter_t             fCalo;
+  DetPos_t                  fDetPos;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------

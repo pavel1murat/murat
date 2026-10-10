@@ -53,6 +53,27 @@ namespace murat {
   TEvdCrv::~TEvdCrv() {
   }
 
+  //-----------------------------------------------------------------------------
+  void TEvdCrv::AddRecoPulse(TCrvRecoPulse* Pulse) {
+    TEvdCrvSector*  sector;
+    TEvdCrvModule*  module;
+    TEvdCrvLayer*   layer ;
+    TEvdCrvCounter* counter;
+
+    int sbid = Pulse->Sbid();
+    
+    int found = GetCounterLocation(sbid,sector,module,layer,counter);
+    if (found != 0) {
+      counter->AddRecoPulse(Pulse);
+      layer->IncrementNHits();
+      module->IncrementNHits();
+      sector->IncrementNHits();
+    }
+    else {
+      std::cout << std::format("TEvdCrv::AddRecoPulse ERROR: counter sbid:{} NOT FOUND\n",sbid);
+    }
+  }
+
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -202,7 +223,10 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
           counter->SetCopyNumber(bar.id().getBarNumber() + 1);
           // layer->AddNode(counter,counter->CopyNumber(),new TGeoTranslation(p.x(), p.y(), p.z()));
           layer->AddCounter(counter);
-          sector->AddNode(counter,counter->CopyNumber(),new TGeoTranslation(p.x(), p.y(), p.z()));
+          // for the counter to retrive its position
+          TGeoNode* node = sector->AddNode(counter,counter->CopyNumber(),
+                                           new TGeoTranslation(p.x(), p.y(), p.z()));
+          counter->fGeoMatrix = node->GetMatrix();
           first_counter++;
         }
         layer->SetCopyNumber(1);
@@ -282,25 +306,7 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
     int npulses = crvp->NPulses();
     for (int i=0; i<npulses; i++) {
       TCrvRecoPulse* pulse = crvp->Pulse(i);
-      int sbid = pulse->Sbid();
-
-      TEvdCrvSector*  sector(nullptr);
-      TEvdCrvModule*  module(nullptr);
-      TEvdCrvLayer*   layer (nullptr);
-      TEvdCrvCounter* counter(nullptr);
-
-      int found = crv->GetCounterLocation(sbid,sector,module,layer,counter);
-
-      if (found) {
-        counter->AddRecoPulse(pulse);
-      
-        layer->IncrementNHits ();
-        module->IncrementNHits();
-        sector->IncrementNHits();
-      }
-      else {
-        printf("ERROR: scintillation counter %i not found\n",sbid);
-      }
+      AddRecoPulse(pulse);
     }
     
     return rc;

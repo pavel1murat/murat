@@ -41,10 +41,10 @@ combo_hits::combo_hits(const char* Name, const char* Fn) : TNamed(Name,Name), fC
   printf("in the combo_hits constructor\n");
   fNode->Print();
 
-  TStnView* view  = new TStnView(TEvdManager::kTZ,-1,"TZView","TZView") ;
-  view->AddNode(fNode);
+  // TStnView* view  = new TStnView(TEvdManager::kTZ,-1,"TZView","TZView") ;
+  // view->AddNode(fNode);
 
-  TEvdManager::Instance()->AddView(view);
+  // TEvdManager::Instance()->AddView(view);
 
   Init(tree);
 }
@@ -129,7 +129,7 @@ void combo_hits::Loop(int Flag, float EMin, float TMin, float TMax) {
   printf("--- right after InitEvent()\n");
   fNode->Print();
 
-  TEvdManager::Instance()->OpenTrkTZView();
+  // TEvdManager::Instance()->OpenTrkTZView();
   // PlotTZ(Flag);
 }
 

@@ -20,7 +20,7 @@ def local_build():
 
     skip_list        = []
     stntuple_libs    = [ 'Stntuple_alg' ]
-    libs             = stntuple_libs + rootlibs;
+    libs             = stntuple_libs + ['fhiclcpp', 'cetlib'] + rootlibs;
     list_of_cc_files = Glob('*.cc',strings=True);
     helper.build_libs(list_of_cc_files,skip_list,libs);
 # ------------------------------------------------------------------------------

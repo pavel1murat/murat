@@ -16,16 +16,18 @@ include_directories(
 
 ROOT_GENERATE_DICTIONARY(${dict}
   TLsqSums4.hh
+  DetPos_t.hh
   LINKDEF ${subpkg}/Linkdef.h)
 
 set_property(SOURCE ${dict}.cxx PROPERTY generated)
 
 add_library(${lib} SHARED
   TLsqSums4.cc
+  DetPos_t.cc
   ${dict}.cxx
 )
 
-target_link_libraries(${lib} ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Gpad)
+target_link_libraries(${lib} Stntuple_alg fhiclcpp::fhiclcpp cetlib::cetlib ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Gpad)
 
 cet_add_compiler_flags(-g -O0)
 

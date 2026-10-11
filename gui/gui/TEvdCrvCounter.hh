@@ -12,9 +12,9 @@ namespace murat {
 //-----------------------------------------------------------------------------
 class TEvdCrvCounter: public TGeoVolume {
 public:
-  int        fCopyNumber;
-  TObjArray* fListOfHits;           // pointers to TCrvRecoPulses ==NOT OWNED==
-  TGeoNode*  fGeoMatrix;           // ==NOT OWNED==
+  int         fCopyNumber;
+  TObjArray*  fListOfHits;           // pointers to TCrvRecoPulses ==NOT OWNED==
+  TGeoMatrix* fGeoMatrix;           // ==NOT OWNED==
 
   TEvdCrvCounter(const char* Name, TGeoShape* Shape, TGeoMedium* Medium);
 

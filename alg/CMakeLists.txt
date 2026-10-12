@@ -7,12 +7,15 @@ set (dict "${CMAKE_PROJECT_NAME}_${subpkg}_dict")
 set (lib  "${CMAKE_PROJECT_NAME}_${subpkg}")
 
 include_directories(
-  $ENV{ROOTSYS}/include/root
+  # $ENV{ROOTSYS}/include/root
+  ${Stntuple_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/${subpkg}
 )
 
-# link_directories($ENV{ROOTSYS}/lib)
+link_directories(
+  ${Stntuple_LIBRARY_DIR}
+)
 
 ROOT_GENERATE_DICTIONARY(${dict}
   TLsqSums4.hh
@@ -27,7 +30,7 @@ add_library(${lib} SHARED
   ${dict}.cxx
 )
 
-target_link_libraries(${lib} Stntuple_alg fhiclcpp::fhiclcpp cetlib::cetlib ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Gpad)
+target_link_libraries(${lib} Stntuple_alg Stntuple_base fhiclcpp::fhiclcpp cetlib::cetlib ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Gpad)
 
 cet_add_compiler_flags(-g -O0)
 

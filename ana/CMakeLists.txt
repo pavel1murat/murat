@@ -7,12 +7,14 @@ set (dict "${CMAKE_PROJECT_NAME}_${subpkg}_dict")
 set (lib  "${CMAKE_PROJECT_NAME}_${subpkg}")
 
 include_directories(
-  $ENV{ROOTSYS}/include/root
+  ${Stntuple_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/${subpkg}
 )
 
-# link_directories($ENV{ROOTSYS}/lib)
+link_directories(
+  ${Stntuple_LIBRARY_DIR}
+)
 
 ROOT_GENERATE_DICTIONARY(${dict}
   CrvHist_t.hh lhr_rejection.hh mva_data.hh poisson_fluct.hh prob_dist.hh rpc_timing.hh

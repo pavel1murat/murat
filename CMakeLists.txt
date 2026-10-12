@@ -24,11 +24,11 @@ find_package(Stntuple          25.04.01 REQUIRED)
 
 message("---------- murat: PRINT CMAKE VARIABLES " )
 # 
-# get_cmake_property(_variableNames VARIABLES)
-# list (SORT _variableNames)
-# foreach (_variableName ${_variableNames})
-#   message(STATUS "${_variableName}=${${_variableName}}")
-# endforeach()
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+  message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
   
 # if (DEFINED ENV{MIDASSYS})
 #    message(-- P.Murat: otsdaq-mu2e-tracker: MIDASSYS=.$ENV{MIDASSYS}. )

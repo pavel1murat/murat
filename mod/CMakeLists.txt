@@ -7,18 +7,15 @@ set (lib    "murat_${subpkg}"     )
 # set (MuHitDisplayDict   "Stntuple_MuHitDisplay_module_dict" )
 
 include_directories(
-  $ENV{ROOTSYS}/include/root
+  ${Stntuple_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/${subpkg}
 )
 
-# link_directories($ENV{ROOTSYS}/lib)
+link_directories(
+  ${Stntuple_LIBRARY_DIR}
+)
 
-# set (include_files
-#   THistModule.hh TModule.hh
-#   TAnaRint.hh
-# )
-# 
 # ROOT_GENERATE_DICTIONARY(${MuHitDisplayDict} MuHitDisplay_module.hh
 #   LINKDEF ${subpkg}/MuHitDisplay_module_Linkdef.h
 #   OPTIONS -D__CLING__

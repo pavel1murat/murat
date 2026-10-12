@@ -7,12 +7,14 @@ set (dict "${CMAKE_PROJECT_NAME}_${subpkg}_dict")
 set (lib  "${CMAKE_PROJECT_NAME}_${subpkg}")
 
 include_directories(
-  $ENV{ROOTSYS}/include/root
+  ${Stntuple_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/${subpkg}
 )
 
-# link_directories($ENV{ROOTSYS}/lib)
+link_directories(
+  ${Stntuple_LIBRARY_DIR}
+)
 
 ROOT_GENERATE_DICTIONARY(${dict}
   TEvdCalorimeter.hh TEvdDisk.hh TEvdCrystal.hh
@@ -38,10 +40,11 @@ add_library(${lib} SHARED
 )
 
 target_link_libraries(${lib}
+  murat_alg
   Stntuple_alg Stntuple_geom Stntuple_obj Stntuple_base
-  ConfigTools
-  GeometryService
-  fhiclcpp  cetlib
+  Offline::ConfigTools
+  Offline::GeometryService
+  fhiclcpp::fhiclcpp  cetlib::cetlib
   ROOT::EG ROOT::Core ROOT::Matrix ROOT::Tree ROOT::Graf ROOT::Geom ROOT::Gpad ROOT::RGL)
 
 cet_add_compiler_flags(-g -O0)

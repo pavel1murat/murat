@@ -107,6 +107,7 @@ namespace murat {
   TCaloTimeAnaModule*      m_calt   = NULL;
   TCosmicsAnaModule*       m_cos    = NULL;
   TClusterAnaModule*       m_cls    = NULL;
+  TCrvTimeAnaModule*       m_crvt   = NULL;
   TDegraderRpcAnaModule*   m_drpc   = NULL;
   TDetTimeAnaModule*       m_det    = NULL;
   TEmuAnaModule*           m_emu    = NULL;

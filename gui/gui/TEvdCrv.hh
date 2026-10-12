@@ -22,6 +22,8 @@ public:
   // a sector is a subdetector
 
   int        fNSectors;
+
+  TObjArray* fListOfHitCounters;
  
   TEvdCrv();
   ~TEvdCrv();
@@ -29,6 +31,12 @@ public:
   void AddRecoPulse(TCrvRecoPulse* Pulse);
 
   int GetNSectors() { return fNSectors; }
+
+  TObjArray* GetListOfHitCounters() { return fListOfHitCounters; }
+
+  TEvdCrvCounter* GetHitCounter(int I) { return (TEvdCrvCounter*) fListOfHitCounters->At(I); }
+
+  int GetNHitCounters() { return fListOfHitCounters->GetEntriesFast(); }
 
   int GetCounterLocation(int               Sbid   ,
                           TEvdCrvSector*&  Sector ,

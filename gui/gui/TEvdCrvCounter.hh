@@ -13,6 +13,9 @@ namespace murat {
 class TEvdCrvCounter: public TGeoVolume {
 public:
   int         fCopyNumber;
+  int         fSectorType;
+  int         fSectorNumber;
+  int         fSbid;
   TObjArray*  fListOfHits;           // pointers to TCrvRecoPulses ==NOT OWNED==
   TGeoMatrix* fGeoMatrix;           // ==NOT OWNED==
 
@@ -21,6 +24,10 @@ public:
   TObjArray* ListOfHits() { return fListOfHits; }
 
   int CopyNumber() { return fCopyNumber; }
+
+  int GetSectorType  () { return fSectorType;   }
+  int GetSectorNumber() { return fSectorNumber; }
+  int GetSbid        () { return fSbid; }
 
   void AddRecoPulse(TCrvRecoPulse* Hit);
 

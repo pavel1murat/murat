@@ -73,6 +73,27 @@ TCrvTimeAnaModule::~TCrvTimeAnaModule() {
 }
 
 //-----------------------------------------------------------------------------
+int TCrvTimeAnaModule::BookCrvsHistograms(CrvsHist_t* Hist, CrvIndex_t* Index, TFolder* Folder) {
+
+  std::string prefix = std::format("run:{:06d} sel:{} sector:{}",fRunNumber,Index->sel,Index->sector);
+  std::string name, title;
+
+  name  = "dt";
+  title = std::format("{} : dt",prefix);
+  fBookHist->HBook1F(Hist->h_dt,name.data(),title.data(),100,-100,100,Folder);   // ns
+
+  name  = "dx";
+  title = std::format("{} : dx",prefix);
+  fBookHist->HBook1F(Hist->h_dx,name.data(),title.data(),200,-1000,1000,Folder);   // mm
+
+  name  = "dz";
+  title = std::format("{} : dz",prefix);
+  fBookHist->HBook1F(Hist->h_dz,name.data(),title.data(),200,-1000,1000,Folder);   // mm
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 int TCrvTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFolder* Folder) {
 
   std::string prefix = std::format("run:{:06d} sel:{}",fRunNumber,Index->sel);
@@ -102,28 +123,6 @@ int TCrvTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
   title = std::format("{} : dt TC",prefix);
   fBookHist->HBook1F(Hist->h_dt_tc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
 
-  // for (int k=0; k<2; k++) {
-  //   name  = std::format("dt_calc_{}",k);
-  //   title = std::format("{} : dt CALC disk:{}",prefix,k);
-  //   fBookHist->HBook1F(Hist->h_dt_calc[k],name.data(),title.data(),400,-100,100,Folder);   // in ns...
-
-  //   name  = std::format("dx_calc_{}",k);
-  //   title = std::format("{} : dx_calc = x(trk)-x(calc) disk:{}",prefix,k);
-  //   fBookHist->HBook1F(Hist->h_dx_calc[k],name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
-
-  //   name  = std::format("dy_calc_{}",k);
-  //   title = std::format("{} : dy_calc = y(trk)-y(calc) disk:{}",prefix,k);
-  //   fBookHist->HBook1F(Hist->h_dy_calc[k],name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
-
-  //   name  = std::format("dx_calc_vs_dxdz_{}",k);
-  //   title = std::format("{} : dx_calc vs dxdz disk:{}",prefix,k);
-  //   fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz[k],name.data(),title.data(),200,-1,1,200,-1000,1000,Folder);
-
-  //   name  = std::format("dy_calc_vs_dydz_{}",k);
-  //   title = std::format("{} : dy_calc vs dydz disk:{}",prefix,k);
-  //   fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz[k],name.data(),title.data(),200,-1.0,1.0,200,-1000,1000,Folder);
-  // }
-  
   name  = "xcrv";
   title = std::format("{} : xcrv",prefix);
   fBookHist->HBook1F(Hist->h_xcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
@@ -166,30 +165,6 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   std::string prefix = std::format("run:{:06d}",fRunNumber);
   std::string name, title;
 
-  // name  = "dt_vs_sipmid";
-  // title = std::format("{} : dt vs SIPM ID",prefix);
-  // fBookHist->HBook2F(Hist->h_dt_vs_sipmid,name.data(),title.data(),2800,0,2800,1000,-1000,1000,Folder);
-
-  // name  = "nsipms_vs_cid";
-  // title = std::format("{} : nsipms vs crystal ID",prefix);
-  // fBookHist->HBook2F(Hist->h_nsipms_vs_cid,name.data(),title.data(),1400,0,1400,3,0,3,Folder);
-
-  // name  = "sipmid";
-  // title = std::format("{} : Sipm ID",prefix);
-  // fBookHist->HBook1F(Hist->h_sipmid,name.data(),title.data(),2800,0,2800,Folder);
-
-  // name  = "n2_vs_n1";
-  // title = std::format("{} : N1:N1 calh E>10",prefix);
-  // fBookHist->HBook2F(Hist->h_n2_vs_n1,name.data(),title.data(),20,0,20,20,0,20,Folder);
-
-  // name  = "ntrk_0";
-  // title = std::format("{} : ntrk[0]",prefix);
-  // fBookHist->HBook1F(Hist->h_ntrk[0],name.data(),title.data(),10,0,10,Folder);
-
-  // name  = "ntrk_1";
-  // title = std::format("{} : ntrk[1]",prefix);
-  // fBookHist->HBook1F(Hist->h_ntrk[1],name.data(),title.data(),10,0,10,Folder);
-
   // CRV: assume already pre-calibrated
   name  = "dt20_vs_sbid";
   title = std::format("{} : dt20 vs SBID",prefix);
@@ -199,13 +174,10 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   title = std::format("{} : dt31 vs SBID",prefix);
   fBookHist->HBook2F(Hist->h_dt31_vs_sbid,name.data(),title.data(),1000,0,800,200,-50,50,Folder);
   
-//-----------------------------------------------------------------------------
-// CALC: calorimeter clusters 
-//-----------------------------------------------------------------------------
-  // int book_calc_histset[kNCalcHistSets];
-  // for (int i=0; i<kNCalcHistSets; i++) { book_calc_histset[i] = 0; }
-
-  // book_calc_histset[0] = 1;             // all
+  name  = "ntrk";
+  title = std::format("{} : ntrk",prefix);
+  fBookHist->HBook1F(Hist->h_ntrk,name.data(),title.data(),20,0,20,Folder);
+  
 //-----------------------------------------------------------------------------
 // Trk: tracks 
 //-----------------------------------------------------------------------------
@@ -245,9 +217,45 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
     BookTrkHistograms(Hist->trk[i],&trk_index,fol);
   }
 
+//-----------------------------------------------------------------------------
+// CRV
+//-----------------------------------------------------------------------------
+  CrvIndex_t crv_index;
+
+  int book_crv_histset[kNTrkHistSets];
+
+  for (int i=0; i<kNCrvHistSets; i++) { book_crv_histset[i] = 0; }
+
+  book_crv_histset[0] = 1;             // all
+  
+  for (int i=0; i<kNCrvHistSets; i++) {
+    if (book_crv_histset[i] == 0) continue;
+    std::string folder_name = std::format("crv_{:02d}",i);
+    TFolder* crv_fol = (TFolder*) Folder->FindObject(folder_name.data());
+    if (! crv_fol) crv_fol = Folder->AddFolder(folder_name.data(),folder_name.data());
+    Hist->crv[i]   = new CrvHist_t();
+    crv_index.sel  = i;
+    for (int is=0; is<11; is++) {
+      // by sector
+      std::string sec_folder_name = std::format("sec_{:02d}",i);
+      TFolder* sec_fol = crv_fol->AddFolder(sec_folder_name.data(),sec_folder_name.data());
+      crv_index.sector = is;
+      BookCrvsHistograms(&Hist->crv[i]->sector[is],&crv_index,sec_fol);
+    }
+  }
+
   return 0;
 }
 
+//-----------------------------------------------------------------------------
+  int TCrvTimeAnaModule::FillCrvsHistograms(CrvsHist_t* Hist, TEvdCrvCounter* Crvb, crvb_param_t* Crvbp) {
+  // filling histograms: plot time differences between
+    Hist->h_dt->Fill(Crvbp->dt); //
+    Hist->h_dx->Fill(Crvbp->dx); //
+    Hist->h_dz->Fill(Crvbp->dz); //
+    return 0;
+  }
+  
 //-----------------------------------------------------------------------------
 int TCrvTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_param_t* Tp) {
   // filling histograms: plot time differences between
@@ -309,9 +317,9 @@ int TCrvTimeAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 // fill track histograms
 //-----------------------------------------------------------------------------
-  fHist->h_ntrk[0]->Fill(fNTrk);
+  fHist->h_ntrk->Fill(fNTracks);
 
-  for (int i=0; i<fNTrk; i++) {
+  for (int i=0; i<fNTracks; i++) {
     TStrTrack* trk = fTrackBlock->Track(i);
     trk_param_t* tp = &fListOfTrkParam[i];
     FillTrkHistograms(fHist->trk[0],trk,tp);
@@ -334,79 +342,23 @@ int TCrvTimeAnaModule::FillHistograms() {
     if (trk->NHits() >= 20) {
       FillTrkHistograms(fHist->trk[20],trk,tp);
     }    
-
-    // if ((fNCcDisk[0] >= 1) and (fNCcDisk[1] >= 1) and (trk->NHits() >= 20)) {
-    //   FillTrkHistograms(fHist->trk[21],trk,tp);
-    // }    
   }
-  
 //-----------------------------------------------------------------------------
 // fill CRV DT20 and DT31 histograms
 //-----------------------------------------------------------------------------
-  int ns = fEvdCrv->GetNSectors();
+  int nhc = fEvdCrv->GetNHitCounters();
+  for (int ihc=0; ihc<nhc; ihc++) {
+    TEvdCrvCounter* counter = fEvdCrv->GetHitCounter(ihc);
+    int sbid = counter->GetSbid();
+    // each counter has a parameter record
+    crvb_param_t* crvbp = &fListOfCrvbParam[ihc];
+    // need the sector
+    int is = crvbp->is;
 
-  for (int is=0; is<ns; is++) {
-    TEvdCrvSector* sector = fEvdCrv->GetSector(is);
-    if (sector->GetNHits() == 0) continue;
-    int nm = sector->GetNModules();
-    for (int im=0; im<nm; im++) {
-      TEvdCrvModule* module = sector->GetModule(im);
-      if (module->GetNHits() == 0) continue;
-      int nl = module->GetNLayers();
-      for (int il=0; il<nl; il++) {
-        TEvdCrvLayer* layer = module->GetLayer(il);
-        if (layer->GetNHits() == 0) continue;
-        int nc = layer->GetNCounters();
-        for (int ic=0; ic<nc; ic++) {
-          TEvdCrvCounter* counter = layer->GetCounter(ic);
-          int nh = counter->GetNRecoPulses();
-          if (nh == 0) continue;
-
-          
-          // hits in the counter - plot dt_20 and dt_31
-          std::vector<TCrvRecoPulse*> hits[4];
-          
-          for (int ih=0; ih<nh; ih++) {
-            TCrvRecoPulse* p = counter->GetRecoPulse(ih);
-            int sipm = p->Sipm();
-            hits[sipm].push_back(p);
-          }
-
-          int nhh[4];
-          for (int i=0; i<4; i++) {
-            nhh[i] = hits[i].size();
-          }
-          // 0-2 side
-          if ((nhh[0] > 0) and (nhh[2] > 0)) {
-            for (int i0=0; i0<nhh[0]; i0++) {
-              TCrvRecoPulse* p0 = hits[0][i0];
-              int sbid = p0->Sbid();
-              if (p0->Pes() < 10) continue;
-              for (int i2=0; i2<nhh[2]; i2++) {
-                TCrvRecoPulse* p2 = hits[2][i2];
-                if (p2->Pes() < 10) continue;
-                float dt = p2->Time()-p0->Time();
-                fHist->h_dt20_vs_sbid->Fill(sbid,dt);
-              }
-            }
-          }
-          // 1-3 side
-          if ((nhh[1] > 0) and (nhh[3] > 0)) {
-            for (int i1=0; i1<nhh[1]; i1++) {
-              TCrvRecoPulse* p1 = hits[1][i1];
-              int sbid = p1->Sbid();
-              if (p1->Pes() < 10) continue;
-              for (int i3=0; i3<nhh[3]; i3++) {
-                TCrvRecoPulse* p3 = hits[3][i3];
-                if (p3->Pes() < 10) continue;
-                float dt = p3->Time()-p1->Time();
-                fHist->h_dt31_vs_sbid->Fill(sbid,dt);
-              }
-            }
-          }
-        }
-      }
-    }
+    fHist->h_dt20_vs_sbid->Fill(sbid,crvbp->dt20);
+    fHist->h_dt31_vs_sbid->Fill(sbid,crvbp->dt31);
+    
+    FillCrvsHistograms(&fHist->crv[0]->sector[is],counter,crvbp);
   }
 
   return 0;
@@ -439,7 +391,7 @@ int TCrvTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
 // extra track parameters
 //-----------------------------------------------------------------------------
-  for (int i1=0; i1<fNTrk; i1++) {
+  for (int i1=0; i1<fNTracks; i1++) {
     TStrTrack*  trk = fTrackBlock->Track(i1);
     trk_param_t* tp = &fListOfTrkParam[i1];
 //-----------------------------------------------------------------------------
@@ -544,34 +496,66 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
 
   for (int it=0; it<fNTracks; it++) {
     TStrTrack*   trk = fTrackBlock->Track(it);
-    trk_param_t* tp  = &fListOfTrkParam[it];
+    // trk_param_t* tp  = &fListOfTrkParam[it];
     
     int nhc = fEvdCrv->GetNHitCounters();
     for (int ihc=0; ihc<nhc; ihc++) {
-      TEvdCrvCounter*    counter = fEvdCrv->GetHitCounter(ihc);
-      crv_counter_par_t* crvbp   = &fListOfCrvbParam[ihc];
+      TEvdCrvCounter* counter = fEvdCrv->GetHitCounter(ihc);
+      crvb_param_t* crvbp     = &fListOfCrvbParam[ihc];
+      crvbp->is               = counter->GetSectorNumber();
+      crvbp->sector_type      = counter->GetSectorType();
       // extrapolate track
-      double* pos = counter->GetTranslation();
-      float dy     = p[1]-trk->fY0;
+      const double* pos = counter->GetGeoMatrix()->GetTranslation();
+      float dy     = pos[1]-trk->fY0;
 
-      crvbp->xtrk = trk->fX0+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
-      crvbp->ztrk = trk->fZ0+(trk->fNz/trk->fNy)*dy;
+      crvbp->trk_x = trk->fX0+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
+      crvbp->trk_z = trk->fZ0+(trk->fNz/trk->fNy)*dy;
 
-      if ((s_type == 1) or (s_type == 3)) {
+      if ((crvbp->sector_type == 1) or (crvbp->sector_type == 3)) {
         // EX or T2: long side of bars along X axis, measuring Z
-        crvbp->dz = pos[2]-crvbp->ztrk;
+        crvbp->dz = pos[2]-crvbp->trk_z;
         // for dx, need to do the time/charge division (assuming two-sided readout)
       }
       else {
         // T1 or M1-M8 : long side of bars along Z axis, the bars tell X
-        crvbp->dx = pos[0]-crvbp->xtrk;
+        crvbp->dx = pos[0]-crvbp->trk_x;
         // for dx, need to do the time/charge division (assuming two-sided readout)
       }
 
+      // assume all cosmic particls come from the top - not necessarily true
+      crvbp->trk_t = trk->fT0-dy/2.997e2; // dy is in mm, so need speed of lignt in mm/ns
+
+      TCrvRecoPulse* pp[4] = {};
+      crvbp->t = 0;
       int nh = counter->GetNRecoPulses();
-      // two types of counter orientation - along Z and along X
-      crvbp->d
-    
+      int nap(0);
+      for (int ih=0; ih<nh; ih++) {
+        TCrvRecoPulse* p = counter->GetRecoPulse(ih);
+        if (fabs(p->Time()-crvbp->trk_t) > 80.) continue;
+        crvbp->t += p->Time();
+        nap      += 1;
+        int sipm = p->Sipm();
+        // if there is more than one pulse, use the highest one
+        if (pp[sipm] == nullptr) {
+          pp[sipm] = p;
+        }
+        else {
+          if (p->Pes() > pp[sipm]->Pes()) {
+            pp[sipm] = p;
+          }
+        }
+      }
+
+      crvbp->t   /= (nap + 1.e-12);
+      crvbp->dt   = crvbp->t-crvbp->trk_t;
+
+      crvbp->dt20 = 1.e6;
+      crvbp->dt31 = 1.e6;
+
+      if ((pp[2] != nullptr) and (pp[0] != nullptr)) crvbp->dt20 = pp[2]->Time()-pp[0]->Time();
+      if ((pp[3] != nullptr) and (pp[1] != nullptr)) crvbp->dt31 = pp[3]->Time()-pp[1]->Time();
+      
+    }
   }
   return 0;
 }
@@ -630,7 +614,7 @@ int TCrvTimeAnaModule::Event(int IEntry) {
   fNCrvp         = fCrvpBlock->NPulses();
   fNTc           = fTcBlock->NTimeClusters();
   //  fNCaloClusters = fCaloClusterBlock->NClusters();
-  fNTrk          = fTrackBlock->NTracks();
+  fNTracks          = fTrackBlock->NTracks();
   //  fNCalh         = fCaloHitBlock->NHits();
 
   CalculateMissingParameters();
@@ -655,7 +639,7 @@ void TCrvTimeAnaModule::Debug() {
 
   // if (GetDebugBit(4) == 1) {
   //   if ((fNCcDisk[0] > 0) and (fNCcDisk[1] > 0)) {
-  //     if (fNTrk >= 1) {
+  //     if (fNTracks >= 1) {
   //       int nh = fTrackBlock->Track(0)->NHits();
   //       if (nh >= 20) {
   //         GetHeaderBlock()->Print(Form("NCcDisk[0]:%2i fNCcDisk[1]:%2i N_trk_hits = %3d",
@@ -720,7 +704,7 @@ int TCrvTimeAnaModule::FitCaloTimeOffsets(float TMin, float TMax) {
 //-----------------------------------------------------------------------------
 int TCrvTimeAnaModule::PrintTracks() {
   std::cout << std::format(" i      T0         Z0       Nx     Ny    Nz    Chi2D     Xc[0]      Yc[0]      Xc[1]      Yc[1]    DxCal[0]    DyCal[0]    DxCal[1]   DyCal[1]\n");
-  for (int i=0; i<fNTrk; i++) {
+  for (int i=0; i<fNTracks; i++) {
     TStrTrack*   trk = fTrackBlock->Track(i);
     trk_param_t* tp  = &fListOfTrkParam.at(i);
     std::cout << std::format("{:2d} {:10.3f} {:10.3f} {:6.3f} {:6.3f} {:6.3f} {:7.2f}",

@@ -47,6 +47,7 @@ namespace murat {
     // The assembly is the top volume owned by TEvdCrv.
     // fTopVolume = new TGeoVolumeAssembly("CRV");
     fName = "CRV";
+    fListOfHitCounters = new TObjArray();
   }
 
   //-----------------------------------------------------------------------------
@@ -173,9 +174,9 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
 
   int first_counter = 0;
   for (int is = 0; is < fNSectors; ++is) {
-    
-    const auto&       shield     = shields.at(is);
-    const std::string sectorName = shield.getName();
+    // 'shield' is a synonym of a sector
+    const auto*       shield     = &shields.at(is);
+    const std::string sectorName = shield->getName();
 //-----------------------------------------------------------------------------
 // TEvdCrvSector is just a set of counters plust TGeoVolumeAssembly
 //-----------------------------------------------------------------------------
@@ -186,7 +187,7 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
     // Add all scintillator bars.  Positions in the Mu2e geometry are global,
     // so the sector assembly is placed at the origin.
     int imod = 0;
-    for (const auto& crv_module : shield.getCRSScintillatorModules()) {
+    for (const auto& crv_module : shield->getCRSScintillatorModules()) {
       std::string module_name = std::format("module_{}_{}",is+1,imod+1);
       auto module = new TEvdCrvModule(module_name.c_str(),1);
       module->fFirstCounter = first_counter;
@@ -214,6 +215,10 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
 
           auto* shape   = new TGeoBBox      (barName.c_str(),h[0],h[1],h[2]);
           auto* counter = new TEvdCrvCounter(barName.c_str(), shape, medium);
+
+          counter->fSectorNumber = is;
+          counter->fSectorType   = shield->getSectorType();
+          counter->fSbid         = bar.index().asInt(); // does it start from zero or one?
 
           const auto& p = bar.getPosition();
 

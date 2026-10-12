@@ -44,6 +44,7 @@ public:
 
   enum {
     kNEventHistSets      = 100,
+    kNCrvHistSets        = 100,
     kNCrvdHistSets       = 100,
     kNCrvcHistSets       = 100,
     kNCrvpHistSets       = 100,
@@ -66,13 +67,16 @@ public:
   };
   
   struct CrvIndex_t {
-    int sel  {-1};
-    int sbid {-1};
-    int sipm {-1};
-    int och  {-1};                           // offline channel - 4*sbid+sipm
-    int roc  {-1};                           // 1-18 ??? 
-    int feb  {-1};                           // 1-24 in offline domain
-    int ch   {-1};                           // channel within the FEB (0-63)
+    int sel   {-1};
+    int sbid  {-1};
+    int sipm  {-1};
+    int och   {-1};                           // offline channel - 4*sbid+sipm
+    int roc   {-1};                           // 1-18 ??? 
+    int feb   {-1};                           // 1-24 in offline domain
+    int ch    {-1};                           // channel within the FEB (0-63)
+    int sector{-1};
+    int module{-1};
+    int layer {-1};
   };
   
   struct CaloIndex_t {
@@ -82,17 +86,22 @@ public:
     int cid   {-1};                   //
   };
 
-  struct crv_counter_par_t {
+  struct crvb_param_t {
     int   intime;
-    float dt10;
+    int   is;                           // sector number (for now, 0..10)
+    int   sector_type;
+    // float dt10;
     float dt32;
     float dt20;                         // resolution
     float dt31;                         // resolution
 
-    float x_trk;
-    float z_trk;
-    float dx_trk;
-    float dz_trk;
+    float t;                            // estimated pulse time
+    float trk_t;
+    float trk_x;
+    float trk_z;
+    float dt;
+    float dx;
+    float dz;
     
     TEvdCrvCounter* counter;
   };
@@ -164,6 +173,16 @@ public:
 //-----------------------------------------------------------------------------
 // histogram structures
 //-----------------------------------------------------------------------------
+  struct CrvsHist_t {
+    TH1F* h_dz;
+    TH1F* h_dx;
+    TH1F* h_dt;
+  };
+    
+  struct CrvHist_t {
+    CrvsHist_t sector[11];
+  };
+  
   struct TrkHist_t {
     TH1F*         h_nhits;
     TH1F*         h_chi2d;
@@ -183,10 +202,11 @@ public:
   };
 
   struct Hist_t {
-    TH1F*       h_ntrk[2];
+    TH1F*       h_ntrk;
     TH2F*       h_dt20_vs_sbid;         // CRV
     TH2F*       h_dt31_vs_sbid;         // CRV
-    TrkHist_t*  trk    [kNTrkHistSets ];
+    TrkHist_t*  trk[kNTrkHistSets];
+    CrvHist_t*  crv[kNCrvHistSets];
   };
 
 //-----------------------------------------------------------------------------
@@ -215,14 +235,14 @@ public:
  					
   Hist_t*                   fHist;       // histograms to be filled
 
-  int                       fNTrk;
+  int                       fNTracks;
   int                       fNTc;
   int                       fNCrvc;
   int                       fNCrvp;
   int                       fNCrvd;
 
-  std::vector<trk_param_t>       fListOfTrkParam;
-  std::vector<crv_counter_par_t> fListOfCrvbParam;
+  std::vector<trk_param_t>  fListOfTrkParam;
+  std::vector<crvb_param_t> fListOfCrvbParam;
 
   fit_result_t              fFr[kNCaloChannels];
   fit_result_t*             fFrRef;
@@ -256,13 +276,15 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
+  int              BookCrvsHistograms (CrvsHist_t*   Hist, CrvIndex_t*  Index, TFolder* Folder);
   int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
   int              CalculateMissingParameters   ();
   int              CalculateMissingTrkParameters();
   
-  int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*     Trk , trk_param_t* Tp);
+  int              FillCrvsHistograms (CrvsHist_t* Hist, TEvdCrvCounter* Crvb, crvb_param_t* Crvbp);
+  int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*      Trk , trk_param_t*  Tp   );
   int              FillHistograms     ();
 
   int              FitCaloTimeOffsets (float TMin = 1., float TMax = -1.);

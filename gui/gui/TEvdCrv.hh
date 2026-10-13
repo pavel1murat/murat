@@ -51,6 +51,7 @@ public:
   virtual int    InitEvent() override;
 
   // virtual void   Draw (Option_t* Opt = "") override ;
+  virtual void   Clear(Option_t* Opt = "") override ;
   virtual void   Print(Option_t* Opt = "") const override ;
 
   ClassDefOverride(murat::TEvdCrv,0)

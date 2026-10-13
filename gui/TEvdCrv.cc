@@ -56,25 +56,40 @@ namespace murat {
 
   //-----------------------------------------------------------------------------
   void TEvdCrv::AddRecoPulse(TCrvRecoPulse* Pulse) {
-    TEvdCrvSector*  sector;
-    TEvdCrvModule*  module;
-    TEvdCrvLayer*   layer ;
-    TEvdCrvCounter* counter;
+    TEvdCrvSector*  sector (nullptr);
+    TEvdCrvModule*  module (nullptr);
+    TEvdCrvLayer*   layer  (nullptr);
+    TEvdCrvCounter* counter(nullptr);
 
+    int found(0);
     int sbid = Pulse->Sbid();
     
-    int found = GetCounterLocation(sbid,sector,module,layer,counter);
-    if (found != 0) {
-      counter->AddRecoPulse(Pulse);
-      layer->IncrementNHits();
-      module->IncrementNHits();
-      sector->IncrementNHits();
+    int nhc = GetNHitCounters();
+    for (int ihc=0; ihc<nhc; ihc++) {
+      TEvdCrvCounter* c = GetHitCounter(ihc);
+      if (c->GetSbid() == sbid) {
+        found = 1;
+        break;
+      }
     }
-    else {
-      std::cout << std::format("TEvdCrv::AddRecoPulse ERROR: counter sbid:{} NOT FOUND\n",sbid);
+
+    GetCounterLocation(sbid,sector,module,layer,counter);
+    counter->AddRecoPulse(Pulse);
+    layer->IncrementNHits ();
+    module->IncrementNHits();
+    sector->IncrementNHits();
+
+    int lay = counter->fLayerID;
+
+    if (found == 0) {
+      fListOfHitCounters->Add(counter);
+      sector->fNHitCountersTot++;
+      sector->fNHitCounters[lay] += 1;
+      if (sector->fNHitCounters[lay] == 1) {
+        sector->fNHitLayers++;
+      }
     }
   }
-
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -216,7 +231,9 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
           auto* shape   = new TGeoBBox      (barName.c_str(),h[0],h[1],h[2]);
           auto* counter = new TEvdCrvCounter(barName.c_str(), shape, medium);
 
-          counter->fSectorNumber = is;
+          counter->fSectorID     = bar.id().getBarNumber(); // probably correct
+          counter->fModuleID     = bar.id().getModuleNumber();
+          counter->fLayerID      = bar.id().getLayerNumber();
           counter->fSectorType   = shield->getSectorType();
           counter->fSbid         = bar.index().asInt(); // does it start from zero or one?
 
@@ -316,6 +333,17 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
     
     return rc;
   }
+
+//-----------------------------------------------------------------------------
+void TEvdCrv::Clear(Option_t* Opt) {
+  for (int is=0; is < fNSectors; is++) {
+    TEvdCrvSector* sector = GetSector(is);
+    if (sector->GetNHits() > 0) {
+      sector->Clear(Opt);
+    }
+  }
+  fListOfHitCounters->Clear();
+}
 
 //-----------------------------------------------------------------------------
 void TEvdCrv::Print(Option_t* Opt) const {

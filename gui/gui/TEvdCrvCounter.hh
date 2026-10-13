@@ -14,7 +14,9 @@ class TEvdCrvCounter: public TGeoVolume {
 public:
   int         fCopyNumber;
   int         fSectorType;
-  int         fSectorNumber;
+  int         fSectorID;
+  int         fModuleID;
+  int         fLayerID;
   int         fSbid;
   TObjArray*  fListOfHits;           // pointers to TCrvRecoPulses ==NOT OWNED==
   TGeoMatrix* fGeoMatrix;           // ==NOT OWNED==
@@ -25,9 +27,11 @@ public:
 
   int CopyNumber() { return fCopyNumber; }
 
-  int GetSectorType  () { return fSectorType;   }
-  int GetSectorNumber() { return fSectorNumber; }
-  int GetSbid        () { return fSbid; }
+  int GetSectorType() { return fSectorType;   }
+  int GetSectorID  () { return fSectorID; }
+  int GetModuleID  () { return fModuleID; }
+  int GetLayerID   () { return fLayerID;  }
+  int GetSbid      () { return fSbid; }
 
   void AddRecoPulse(TCrvRecoPulse* Hit);
 

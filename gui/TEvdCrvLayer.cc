@@ -23,7 +23,9 @@ void TEvdCrvLayer::Clear(Option_t* Opt) {
   int n = GetNCounters();
   for (int i=0; i<n; i++) {
     TEvdCrvCounter* counter = GetCounter(i);
-    counter->Clear(Opt);
+    if (counter->GetNRecoPulses() > 0) {
+      counter->Clear(Opt);
+    }
   }
   fNHits = 0;
 }

@@ -23,7 +23,9 @@ void TEvdCrvModule::Clear(Option_t* Opt) {
   int n = GetNLayers();
   for (int i=0; i<n; i++) {
     TEvdCrvLayer* layer = GetLayer(i);
-    layer->Clear(Opt);
+    if (layer->GetNHits() > 0) {
+      layer->Clear(Opt);
+    }
   }
   fNHits = 0;
 }

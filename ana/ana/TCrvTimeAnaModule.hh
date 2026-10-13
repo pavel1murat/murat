@@ -28,6 +28,9 @@
 
 #include "murat/gui/TEvdCrv.hh"
 
+// subdetector-level alignment table
+#include "murat/alg/DetPos_t.hh"
+
 namespace murat {
 class TCrvTimeAnaModule: public TStnModule {
   
@@ -88,12 +91,8 @@ public:
 
   struct crvb_param_t {
     int   intime;
-    int   is;                           // sector number (for now, 0..10)
+    int   sector_id;                    // sector ID (for now, 0..10)
     int   sector_type;
-    // float dt10;
-    float dt32;
-    float dt20;                         // resolution
-    float dt31;                         // resolution
 
     float t;                            // estimated pulse time
     float trk_t;
@@ -102,12 +101,15 @@ public:
     float dt;
     float dx;
     float dz;
+    float dt10;                        // one     fiber
+    float dt32;                        // another fiber
     
     TEvdCrvCounter* counter;
   };
   
   struct trk_param_t {
     int                       intime;
+    int                       good_track;
     int                       intime_calc;
     int                       intime_crvc;
     float                     dtmin_tc;           // from the closest TC
@@ -174,13 +176,19 @@ public:
 // histogram structures
 //-----------------------------------------------------------------------------
   struct CrvsHist_t {
-    TH1F* h_dz;
-    TH1F* h_dx;
-    TH1F* h_dt;
+    TH1F*  h_dz;
+    TH1F*  h_dx;
+    TH1F*  h_dt;
+    TH2F*  h_dt_vs_module;
+    TH2F*  h_dt10_vs_bar;
+    TH2F*  h_dt32_vs_bar;
   };
     
   struct CrvHist_t {
     CrvsHist_t sector[11];
+    TH1F*      h_sector;
+    TH2F*      h_dt20_vs_sbid;         // CRV
+    TH2F*      h_dt31_vs_sbid;         // CRV
   };
   
   struct TrkHist_t {
@@ -203,8 +211,6 @@ public:
 
   struct Hist_t {
     TH1F*       h_ntrk;
-    TH2F*       h_dt20_vs_sbid;         // CRV
-    TH2F*       h_dt31_vs_sbid;         // CRV
     TrkHist_t*  trk[kNTrkHistSets];
     CrvHist_t*  crv[kNCrvHistSets];
   };
@@ -236,6 +242,7 @@ public:
   Hist_t*                   fHist;       // histograms to be filled
 
   int                       fNTracks;
+  int                       fNGoodTracks; // assume 0 or 1
   int                       fNTc;
   int                       fNCrvc;
   int                       fNCrvp;
@@ -249,7 +256,7 @@ public:
 
   murat::TEvdCrv*           fEvdCrv;
 
-  //  calorimeter_t             fCalo;
+  DetPos_t                  fDetPos;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -276,6 +283,7 @@ public:
 //-----------------------------------------------------------------------------
 // other methods
 //-----------------------------------------------------------------------------
+  int              BookCrvHistograms  (CrvHist_t*    Hist, CrvIndex_t*  Index, TFolder* Folder);
   int              BookCrvsHistograms (CrvsHist_t*   Hist, CrvIndex_t*  Index, TFolder* Folder);
   int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
@@ -283,6 +291,7 @@ public:
   int              CalculateMissingParameters   ();
   int              CalculateMissingTrkParameters();
   
+  int              FillCrvHistograms  (CrvHist_t*  Hist);
   int              FillCrvsHistograms (CrvsHist_t* Hist, TEvdCrvCounter* Crvb, crvb_param_t* Crvbp);
   int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*      Trk , trk_param_t*  Tp   );
   int              FillHistograms     ();

@@ -16,9 +16,12 @@ public:
   
   TObjArray* fListOfModules;
   int        fNHits;
-  //  int        fNModules;
   int        fNCounters;
   int        fFirstCounter;
+  int        fNHitCounters[4];
+  int        fNHitCountersTot;
+  int        fNLayers;
+  int        fNHitLayers;
   
   TEvdCrvSector (const char* Name, int CopyNumber = 1);
   ~TEvdCrvSector();

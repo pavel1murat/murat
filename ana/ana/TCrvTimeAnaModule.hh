@@ -92,19 +92,27 @@ public:
   struct crvb_param_t {
     int   intime;
     int   sector_id;                    // sector ID (for now, 0..10)
+    int   hist_sid;                     // assigned sector ID (for grouping the histograms)
     int   sector_type;
 
+    float xloc;                         // based on time division
+    int   nxm;                          // n measurements, one or two
     float t;                            // estimated pulse time
     float trk_t;
     float trk_x;
     float trk_z;
-    float dt;
-    float dx;
-    float dz;
-    float dt10;                        // one     fiber
-    float dt32;                        // another fiber
+    float dt;                           // dt = T(bar)-T(trk)
+    float trk_xc;                       // track coord wrt the counter center
+    float trk_zc;                       // the same
+    float dt10;                         // one     fiber
+    float dt32;                         // another fiber
     
     TEvdCrvCounter* counter;
+    TCrvRecoPulse*  pulse[4];           // 4 pulses max
+  };
+
+  struct crvs_param_t {
+    TEvdCrvCounter* counter[4];  // 4 layers is a given, no need to be smart
   };
   
   struct trk_param_t {
@@ -128,6 +136,7 @@ public:
     float                     zcrv;
     float                     dx_crvc;
     float                     dz_crvc;
+    crvs_param_t              crvs_data[20];
   };
 
   struct crystal_t {
@@ -176,19 +185,26 @@ public:
 // histogram structures
 //-----------------------------------------------------------------------------
   struct CrvsHist_t {
-    TH1F*  h_dz;
-    TH1F*  h_dx;
+    TH1F*  h_zc;
+    TH1F*  h_xc;
     TH1F*  h_dt;
-    TH2F*  h_dt_vs_module;
-    TH2F*  h_dt10_vs_bar;
-    TH2F*  h_dt32_vs_bar;
+    TH1F*  h_dxc[2];                 // dxc = xc(bar) - xc(trk)
+    TH2F*  h_sbid_vs_dxc;            // by channel id
+    TH2F*  h_dt_vs_sbid;             // FEB-based group of 64 channels
+    TH2F*  h_dxloc_vs_dt10;          // coordinate along the bar is X
+    TH2F*  h_dxloc_vs_dt32;
   };
     
   struct CrvHist_t {
-    CrvsHist_t sector[11];
+    CrvsHist_t sector[20];              // use 0-3, 10:13
+    TH1F*      h_chid;
+    TH1F*      h_sbid;
     TH1F*      h_sector;
-    TH2F*      h_dt20_vs_sbid;         // CRV
-    TH2F*      h_dt31_vs_sbid;         // CRV
+    TH1F*      h_nhc;                   // total number of counters with hits
+    TH2F*      h_dt20_vs_sbid;          // CRV
+    TH2F*      h_dt31_vs_sbid;          // CRV
+    TH2F*      h_dt1234_vs_sbid;        // CRV
+    TH2F*      h_pes_vs_chid;
   };
   
   struct TrkHist_t {
@@ -211,6 +227,9 @@ public:
 
   struct Hist_t {
     TH1F*       h_ntrk;
+    TH1F*       h_ngtrk;
+    TH1F*       h_ntrk15;
+    TH1F*       h_ncc;                  // N(close counters);
     TrkHist_t*  trk[kNTrkHistSets];
     CrvHist_t*  crv[kNCrvHistSets];
   };
@@ -243,10 +262,13 @@ public:
 
   int                       fNTracks;
   int                       fNGoodTracks; // assume 0 or 1
+  int                       fNTrk15;      // N(tracks) with N(hits) >= 15
   int                       fNTc;
   int                       fNCrvc;
   int                       fNCrvp;
   int                       fNCrvd;
+
+  int                       fNCloseCounters;
 
   std::vector<trk_param_t>  fListOfTrkParam;
   std::vector<crvb_param_t> fListOfCrvbParam;

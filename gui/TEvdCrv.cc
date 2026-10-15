@@ -231,7 +231,7 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
           auto* shape   = new TGeoBBox      (barName.c_str(),h[0],h[1],h[2]);
           auto* counter = new TEvdCrvCounter(barName.c_str(), shape, medium);
 
-          counter->fSectorID     = bar.id().getBarNumber(); // probably correct
+          counter->fSectorID     = bar.id().getShieldNumber(); // probably correct
           counter->fModuleID     = bar.id().getModuleNumber();
           counter->fLayerID      = bar.id().getLayerNumber();
           counter->fSectorType   = shield->getSectorType();

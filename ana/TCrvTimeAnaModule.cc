@@ -85,25 +85,37 @@ int TCrvTimeAnaModule::BookCrvsHistograms(CrvsHist_t* Hist, CrvIndex_t* Index, T
   title = std::format("{} : dt",prefix);
   fBookHist->HBook1F(Hist->h_dt,name.data(),title.data(),100,-100,100,Folder);   // ns
 
-  name  = "dt_vs_module";
-  title = std::format("{} : dt vs module",prefix);
-  fBookHist->HBook2F(Hist->h_dt_vs_module,name.data(),title.data(),100,-100,100,20,0,20,Folder);   // ns
+  name  = "dt_vs_sbid";
+  title = std::format("{} : dt vs SBID within the sector",prefix);
+  fBookHist->HBook2F(Hist->h_dt_vs_sbid,name.data(),title.data(),100,-100,100,256,0,256,Folder);   // ns
 
-  name  = "dx";
-  title = std::format("{} : dx",prefix);
-  fBookHist->HBook1F(Hist->h_dx,name.data(),title.data(),200,-1000,1000,Folder);   // mm
+  name  = "xc";
+  title = std::format("{} : xc",prefix);
+  fBookHist->HBook1F(Hist->h_xc,name.data(),title.data(),100,-10000,10000,Folder);   // mm
 
-  name  = "dz";
-  title = std::format("{} : dz",prefix);
-  fBookHist->HBook1F(Hist->h_dz,name.data(),title.data(),200,-1000,1000,Folder);   // mm
+  name  = "dxc_0";
+  title = std::format("{} : dxc[0], 1 fiber",prefix);
+  fBookHist->HBook1F(Hist->h_dxc[0],name.data(),title.data(),100,-10000,10000,Folder);   // mm
 
-  name  = "dt10_vs_bar";
-  title = std::format("{} : dt10 vs bar length",prefix);
-  fBookHist->HBook2F(Hist->h_dt10_vs_bar,name.data(),title.data(),100,-10000,0000,100,-50,50,Folder);   // mm
+  name  = "dxc_1";
+  title = std::format("{} : dxc[1], both fibers",prefix);
+  fBookHist->HBook1F(Hist->h_dxc[1],name.data(),title.data(),100,-10000,10000,Folder);   // mm
 
-  name  = "dt32_vs_bar";
-  title = std::format("{} : dt32 vs bar length",prefix);
-  fBookHist->HBook2F(Hist->h_dt32_vs_bar,name.data(),title.data(),100,-10000,0000,100,-50,50,Folder);   // mm
+  name  = "sbid_vs_dxc";
+  title = std::format("{} : SBID vs dxc within the sector",prefix);
+  fBookHist->HBook2F(Hist->h_sbid_vs_dxc,name.data(),title.data(),100,-10000,10000,256,0,256,Folder);   // ns
+
+  name  = "zc";
+  title = std::format("{} : zc",prefix);
+  fBookHist->HBook1F(Hist->h_zc,name.data(),title.data(),200,-10000,10000,Folder);   // mm
+
+  name  = "dxloc_vs_dt10";
+  title = std::format("{} : dxloc vs dt10",prefix);
+  fBookHist->HBook2F(Hist->h_dxloc_vs_dt10,name.data(),title.data(),100,-50,50,100,-5000,5000,Folder);   // mm
+
+  name  = "dxloc_vs_dt32";
+  title = std::format("{} : dxloc vs dt32",prefix);
+  fBookHist->HBook2F(Hist->h_dxloc_vs_dt32,name.data(),title.data(),100,-50,50,100,-5000,5000,Folder);   // mm
 
   return 0;
 }
@@ -114,6 +126,14 @@ int TCrvTimeAnaModule::BookCrvHistograms(CrvHist_t* Hist, CrvIndex_t* Index, TFo
   std::string prefix = std::format("run:{:06d} sel:{}",fRunNumber,Index->sel,Index->sector);
   std::string name, title;
 
+  name  = "sbid";
+  title = std::format("{} : sbid",prefix);
+  fBookHist->HBook1F(Hist->h_sbid,name.data(),title.data(),800,0,800,Folder);   // ns
+
+  name  = "chid";
+  title = std::format("{} : chid",prefix);
+  fBookHist->HBook1F(Hist->h_chid,name.data(),title.data(),3200,0,3200,Folder);   // ns
+
   name  = "sector";
   title = std::format("{} : sector",prefix);
   fBookHist->HBook1F(Hist->h_sector,name.data(),title.data(),30,0,30,Folder);   // ns
@@ -121,18 +141,31 @@ int TCrvTimeAnaModule::BookCrvHistograms(CrvHist_t* Hist, CrvIndex_t* Index, TFo
   // CRV: assume already pre-calibrated
   name  = "dt20_vs_sbid";
   title = std::format("{} : dt20 vs SBID",prefix);
-  fBookHist->HBook2F(Hist->h_dt20_vs_sbid,name.data(),title.data(),1000,0,800,200,-50,50,Folder);
+  fBookHist->HBook2F(Hist->h_dt20_vs_sbid,name.data(),title.data(),600,0,600,200,-50,50,Folder);
   
   // the other side
   name  = "dt31_vs_sbid";
   title = std::format("{} : dt31 vs SBID",prefix);
-  fBookHist->HBook2F(Hist->h_dt31_vs_sbid,name.data(),title.data(),1000,0,800,200,-50,50,Folder);
+  fBookHist->HBook2F(Hist->h_dt31_vs_sbid,name.data(),title.data(),600,0,600,200,-50,50,Folder);
   
-  for (int is=0; is<11; is++) {
+  // the other side
+  name  = "dt1234_vs_sbid";
+  title = std::format("{} : dt1234 vs SBID",prefix);
+  fBookHist->HBook2F(Hist->h_dt1234_vs_sbid,name.data(),title.data(),600,0,600,100,-50,50,Folder);
+
+  // charge vs chid
+  name  = "pes_vs_chid";
+  title = std::format("{} : PES vs ChID",prefix);
+  fBookHist->HBook2F(Hist->h_pes_vs_chid,name.data(),title.data(),2400,0,2400,100,0,200,Folder);
+
+  //  0-3  : Trk nhits >= 10
+  // 10-13 : Trk nhits >= 15
+  
+  for (int is=0; is<20; is++) {
     // by sector
     std::string fname = std::format("sec_{:02d}",is);
     TFolder*    fol   = Folder->AddFolder(fname.data(),fname.data());
-    Index->sector     = is;
+    Index->sector     = is % 10;
     BookCrvsHistograms(&Hist->sector[is],Index,fol);
   }
   return 0;
@@ -212,6 +245,18 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 //-----------------------------------------------------------------------------
 // Trk: tracks 
 //-----------------------------------------------------------------------------
+  name  = "ngtrk";
+  title = std::format("{} : ngtrk",prefix);
+  fBookHist->HBook1F(Hist->h_ngtrk,name.data(),title.data(),10,0,10,Folder);
+  
+  name  = "ntrk";
+  title = std::format("{} : ntrk",prefix);
+  fBookHist->HBook1F(Hist->h_ntrk,name.data(),title.data(),10,0,10,Folder);
+  
+  name  = "ntrk15";
+  title = std::format("{} : ntrk 15",prefix);
+  fBookHist->HBook1F(Hist->h_ntrk15,name.data(),title.data(),10,0,10,Folder);
+  
   TrkIndex_t trk_index;
 
   // std::string prefix = std::format("run:{:06d}",fRunNumber);
@@ -252,9 +297,9 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 //-----------------------------------------------------------------------------
   CrvIndex_t crv_index;
 
-  name  = "ntrk";
-  title = std::format("{} : ntrk",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk,name.data(),title.data(),20,0,20,Folder);
+  name  = "ncc";
+  title = std::format("{} : N(close counters)",prefix);
+  fBookHist->HBook1F(Hist->h_ncc,name.data(),title.data(),100,0,100,Folder);
   
   int book_crv_histset[kNTrkHistSets];
 
@@ -279,23 +324,43 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   int TCrvTimeAnaModule::FillCrvsHistograms(CrvsHist_t* Hist, TEvdCrvCounter* Crvb, crvb_param_t* Crvbp) {
     // filling histograms: plot time differences between
     Hist->h_dt->Fill(Crvbp->dt); //}
-    Hist->h_dx->Fill(Crvbp->dx); //
-    Hist->h_dz->Fill(Crvbp->dz); //
+    Hist->h_xc->Fill(Crvbp->trk_xc); //
+    Hist->h_zc->Fill(Crvbp->trk_zc); //
 
-    int module_id   = Crvb->GetModuleID();
+    float dxc = Crvbp->xloc-Crvbp->trk_xc;
+
+    //    int module_id   = Crvb->GetModuleID();
+    int sector_id   = Crvb->GetSectorID();
     int sector_type = Crvb->GetSectorType();
 
-    Hist->h_dt_vs_module->Fill(Crvbp->dt,module_id);
+    int first       = fEvdCrv->GetSector(Crvbp->hist_sid)->FirstCounter();
+    int igr         = (Crvb->GetSbid()-first) / 32;
+    
+    if     (Crvbp->nxm == 1) {
+      Hist->h_dxc[0]->Fill(dxc);
+    }
+    else if(Crvbp->nxm == 2) {
+      Hist->h_dxc[1]->Fill(dxc);
+      Hist->h_sbid_vs_dxc->Fill(dxc,Crvb->GetSbid()-first);
+    }
+
+
+    if ((sector_id > 0) and (igr > 3)) {
+      GetHeaderBlock()->Print(Form("ERROR: sector_id:%i igr:%i should not be happening",
+                                   sector_id,igr));
+    }
+    Hist->h_dt_vs_sbid->Fill(Crvbp->dt,Crvb->GetSbid()-first);
     
     if ((sector_type == 1) or (sector_type == 3)) {
       // EX or T2: long side of bars along X axis, the bars tell Z, time division - X
-      Hist->h_dt10_vs_bar->Fill(Crvbp->trk_x,Crvbp->dt10);
-      Hist->h_dt32_vs_bar->Fill(Crvbp->trk_x,Crvbp->dt32);
+      Hist->h_dxloc_vs_dt10->Fill(Crvbp->dt10,dxc);
+      Hist->h_dxloc_vs_dt32->Fill(Crvbp->dt32,dxc);
     }
     else {
       // T1 or M1-M8 : long side of bars along Z axis, the bars tell X, time division - Z
-      Hist->h_dt10_vs_bar->Fill(Crvbp->trk_z,Crvbp->dt10);
-      Hist->h_dt32_vs_bar->Fill(Crvbp->trk_z,Crvbp->dt32);
+      // don't need these histograms, as the counters have one-sided readout
+      Hist->h_dxloc_vs_dt10->Fill(Crvbp->trk_zc,Crvbp->dt10);
+      Hist->h_dxloc_vs_dt32->Fill(Crvbp->trk_zc,Crvbp->dt32);
     }
 
     return 0;
@@ -308,36 +373,62 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 
     for (int ihc=0; ihc<nhc; ihc++) {
       TEvdCrvCounter* counter = fEvdCrv->GetHitCounter(ihc);
+      // each counter has a parameter record
+      crvb_param_t* crvbp = &fListOfCrvbParam[ihc];
+       
       int sbid = counter->GetSbid();
+      Hist->h_sbid->Fill(sbid);
 
       int sector_id = counter->GetSectorID();
       Hist->h_sector->Fill(sector_id);
       
+      float dt20(1.e6), dt31(1.e6);
       int np = counter->GetNRecoPulses();
       for (int ip=0; ip<np; ip++) {
         TCrvRecoPulse* p = counter->GetRecoPulse(ip);
         int sipm = p->Sipm();
+        int chid = 4*sbid+sipm;
+        Hist->h_chid->Fill(chid);
+        
+        // sipms on the same size
         if (sipm < 2) {
           for (int ip2=0; ip2<np; ip2++) {
             TCrvRecoPulse* p2 = counter->GetRecoPulse(ip2);
             int sipm2 = p2->Sipm();
             if (sipm2 == sipm+2) {
               float dt = p2->Time()-p->Time();
-              if (sipm == 0) Hist->h_dt20_vs_sbid->Fill(sbid,dt);
-              else           Hist->h_dt31_vs_sbid->Fill(sbid,dt);
+              if (sipm == 0) {
+                Hist->h_dt20_vs_sbid->Fill(sbid,dt);
+                dt20 = dt;
+              }
+              else {
+                Hist->h_dt31_vs_sbid->Fill(sbid,dt);
+                dt31 = dt;
+              }
             }
           }
         }
-        
-        // each counter has a parameter record
-        crvb_param_t* crvbp = &fListOfCrvbParam[ihc];
-       
-        // need the sector
-        if (sector_id > 2) sector_id = 3; // 0,1,2,3 (all M's together)
-        
-        if (fNGoodTracks > 0) {
-          FillCrvsHistograms(&Hist->sector[sector_id],counter,crvbp);
+      }
+      // here pulses are ordered by sipm
+      for (int sipm=0; sipm<4; sipm++) {
+        TCrvRecoPulse* p = crvbp->pulse[sipm]; 
+        if (p != nullptr) {
+          int chid = sbid*4+sipm;
+          Hist->h_pes_vs_chid->Fill(chid,p->Pes());
         }
+      }
+      
+      // it is a per-counter histogram
+      if ((dt20 < 1.e6) and (dt31 < 1.e6)) {
+        float dt1234 = dt31-dt20;
+        Hist->h_dt1234_vs_sbid->Fill(sbid,dt1234);
+      }
+      
+      if ((fNTracks == 1) and (fNGoodTracks == 1)) {
+        FillCrvsHistograms(&Hist->sector[crvbp->hist_sid],counter,crvbp);
+      }
+      if ((fNTracks == 1) and (fNTrk15 == 1)) {
+        FillCrvsHistograms(&Hist->sector[crvbp->hist_sid+10],counter,crvbp);
       }
     }
     return 0;
@@ -388,12 +479,14 @@ int TCrvTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
 // need to optimize the filling time
 //-----------------------------------------------------------------------------
 int TCrvTimeAnaModule::FillHistograms() {
-  // filling histograms: plot time differences between
-
 //-----------------------------------------------------------------------------
-// fill track histograms
+// 1. fill track histograms
 //-----------------------------------------------------------------------------
   fHist->h_ntrk->Fill(fNTracks);
+  fHist->h_ngtrk->Fill(fNGoodTracks);
+  fHist->h_ntrk15->Fill(fNTrk15);
+
+  fHist->h_ncc->Fill(fNCloseCounters);
 
   for (int i=0; i<fNTracks; i++) {
     TStrTrack* trk = fTrackBlock->Track(i);
@@ -430,31 +523,10 @@ int TCrvTimeAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
 int TCrvTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
-// global positioning constants
-// tracker.z0: 22935.0
-// tracker.
-//-----------------------------------------------------------------------------
-  // float crv_time_offset = 0.; // 21; // today
-
-    // double crv_off[3] = {    0., -145.0, 0.0 };
-      
-    //    double trk_pos[3] = {-3904., 0., 22935.0 }; // nominal
-    //    double trk_off[3] = {    0., 0., -1171.0 }; // offset to be added
-    //    double trk_off[3] = {    0., 0.,     0.0 }; // offset to be added
-
-    // double calo_pos[2][3] = {           // nominal
-    //   -3904., 0., 23000.0+2383.-64.,        // 25842;
-    //   -3904., 0., 23000.0+3517.-64.
-    // };
-    
-    // double calo_off[2][3] = {           // offset to be added
-    //   0.    , 0.,     0.,
-    //   0.    , 0.,     0.
-    // };
-//-----------------------------------------------------------------------------
 // extra track parameters
 //-----------------------------------------------------------------------------
   fNGoodTracks = 0;
+  fNTrk15      = 0;
   for (int i1=0; i1<fNTracks; i1++) {
     TStrTrack*  trk = fTrackBlock->Track(i1);
     trk_param_t* tp = &fListOfTrkParam[i1];
@@ -462,6 +534,9 @@ int TCrvTimeAnaModule::CalculateMissingTrkParameters() {
     if (trk->fNHits >= 10) {
       tp->good_track = 1;
       fNGoodTracks++;
+      if (trk->fNHits >= 15) {
+        fNTrk15++;
+      }
     }
 //-----------------------------------------------------------------------------
 // initialize parameter record
@@ -553,6 +628,8 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
 //-----------------------------------------------------------------------------
 // deal with the CRV
 //-----------------------------------------------------------------------------
+  float dxdt_prop[4] = {72., 0, 78., 0};
+  
   fEvdCrv->Clear();
   fListOfCrvbParam.resize(fNCrvp);
 
@@ -561,6 +638,7 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
     fEvdCrv->AddRecoPulse(p);
   }
 
+  fNCloseCounters = 0;
   int nhc = fEvdCrv->GetNHitCounters();
   // for each bar, extrapolate track to its Y
 
@@ -569,12 +647,20 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
     crvb_param_t* crvbp     = &fListOfCrvbParam[ihc];
     crvbp->sector_id        = counter->GetSectorID();
     crvbp->sector_type      = counter->GetSectorType();
+    crvbp->hist_sid         = crvbp->sector_id; // default
+    if (crvbp->sector_id > 2) {                // all M's go into group 3
+      crvbp->hist_sid = 3;
+    }
     crvbp->t                = 1.e6;
     crvbp->dt               = 1.e6;
-    crvbp->dx               = 1.e6;
-    crvbp->dz               = 1.e6;
+    crvbp->trk_xc           = 1.e6;
+    crvbp->trk_zc           = 1.e6;
     crvbp->dt10             = 1.e6;
     crvbp->dt32             = 1.e6;
+    
+    for (int sipm=0; sipm<4; sipm++) {
+      crvbp->pulse[sipm] = nullptr;
+    }
 
     const double* pos = counter->GetGeoMatrix()->GetTranslation();
     float crv_y  = pos[1]+fDetPos.crv_off[1];
@@ -596,19 +682,12 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
       // track time on the counter assume all cosmic particls come from the top - not necessarily true
       crvbp->trk_t = trk->fT0-dy/2.997e2; // dy is in mm, so need speed of lignt in mm/ns
 
-      crvbp->trk_x = trk->fX0+fDetPos.trk_pos[0]+fDetPos.trk_off[0]+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
+      // track coordinates in global RS at Y_CRVC
+      crvbp->trk_x = trk->fX0+fDetPos.trk_pos[0]+fDetPos.trk_off[0]+(trk->fNx/trk->fNy)*dy;
       crvbp->trk_z = trk->fZ0+fDetPos.trk_pos[2]+fDetPos.trk_off[2]+(trk->fNz/trk->fNy)*dy;
 
-      if ((crvbp->sector_type == 1) or (crvbp->sector_type == 3)) {
-        // EX or T2: long side of bars along X axis, measuring Z
-        crvbp->dz = pos[2]+fDetPos.crv_off[2]-crvbp->trk_z;
-        // for dx, need to do the time/charge division (assuming two-sided readout)
-      }
-      else {
-        // T1 or M1-M8 : long side of bars along Z axis, the bars tell X
-        crvbp->dx = pos[0]+fDetPos.crv_off[0]-crvbp->trk_x;
-        // for dx, need to do the time/charge division (assuming two-sided readout)
-      }
+      crvbp->trk_xc = crvbp->trk_x-(pos[0]+fDetPos.crv_off[0]);
+      crvbp->trk_zc = crvbp->trk_z-(pos[2]+fDetPos.crv_off[2]);
 //-----------------------------------------------------------------------------
 // timing: figure out the time closest to the track
 //-----------------------------------------------------------------------------
@@ -630,8 +709,9 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
       }
 
       float t(0);
-      int nap(0);
+      int nap(0);                       // number of "active" (or good) pulses
       for (int sipm=0; sipm<4; sipm++) {
+        crvbp->pulse[sipm] = pp[sipm];
         if (pp[sipm]) {
           t   += pp[sipm]->Time();
           nap += 1;
@@ -642,9 +722,31 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
         crvbp->t  = t/nap;
         crvbp->dt = crvbp->t-crvbp->trk_t;
       }
+//-----------------------------------------------------------------------------
+// calculate coordinate along the counter
+//-----------------------------------------------------------------------------
+      float xloc = 0;
+      crvbp->nxm = 0;
+ 
+      float vprop    = dxdt_prop[crvbp->sector_id];
+      if (pp[0] and pp[1]) {
+        crvbp->dt10 = pp[1]->Time()-pp[0]->Time();
+        xloc += vprop*crvbp->dt10;  // 79 = 75+3
+        crvbp->nxm++;
+      }
+      if (pp[2] and pp[3]) {
+        crvbp->dt32 = pp[3]->Time()-pp[2]->Time();
+        xloc += vprop*crvbp->dt32;
+        crvbp->nxm++;
+      }
+                                        // swap the sign
+      if (crvbp->nxm > 0) {
+        crvbp->xloc = -xloc/crvbp->nxm;
+      }
 
-      if (pp[0] and pp[1]) crvbp->dt10 = pp[1]->Time()-pp[0]->Time();
-      if (pp[2] and pp[3]) crvbp->dt32 = pp[3]->Time()-pp[2]->Time();
+      if (nap == 4) {
+        fNCloseCounters++;
+      }
     }
   }
   
@@ -756,7 +858,7 @@ int TCrvTimeAnaModule::EndJob() {
    1    2           530.498         2.150
 */
 int TCrvTimeAnaModule::FitCaloTimeOffsets(float TMin, float TMax) {
-
+  /*
   TH2F* h2 = nullptr; // fHist->h_dt_vs_sipmid;
 
   int nch = kNCaloChannels;
@@ -787,7 +889,7 @@ int TCrvTimeAnaModule::FitCaloTimeOffsets(float TMin, float TMax) {
     os << std::format("{:5}   {:8.3f}  {:8.3f}  {:8.3f}\n",i,dt,fFr[i].p[2],fFr[i].chi2dof);
   }
   os.close();
-  
+  */
   return 0;
 }
 

@@ -8,6 +8,7 @@
 #include "murat/ana/TColl1DoseAnaModule.hh"
 #include "murat/ana/TColl3DoseAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
+#include "murat/ana/TCrvTimeAnaModule.hh"
 #include "murat/ana/TDetTimeAnaModule.hh"
 #include "murat/ana/TDegraderRpcAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"

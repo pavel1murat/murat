@@ -42,6 +42,7 @@
 
 #pragma link C++ class murat::TCosmicsAnaModule;
 
+#pragma link C++ class murat::TCrvTimeAnaModule;
 #pragma link C++ class murat::TDetTimeAnaModule;
 
 #pragma link C++ class murat::TDegraderRpcAnaModule;

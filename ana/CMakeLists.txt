@@ -1,10 +1,10 @@
 #
-SET (CMAKE_Fortran_COMPILER  gfortran)
-ENABLE_LANGUAGE(Fortran)
-
 set (subpkg "ana")
 set (dict "${CMAKE_PROJECT_NAME}_${subpkg}_dict")
 set (lib  "${CMAKE_PROJECT_NAME}_${subpkg}")
+
+SET (CMAKE_Fortran_COMPILER  gfortran)
+ENABLE_LANGUAGE(Fortran)
 
 include_directories(
   ${Stntuple_INCLUDE_DIR}
@@ -21,6 +21,7 @@ ROOT_GENERATE_DICTIONARY(${dict}
   TAnaModule.hh TBeamFlashAnaModule.hh TCalAnaModule.hh TCaloDose.hh TCaloTimeRes.hh
   TClusterAnaModule.hh TColl1DoseAnaModule.hh TColl3DoseAnaModule.hh TCosmicsAnaModule.hh
   TCaloTimeAnaModule.hh
+  TCrvTimeAnaModule.hh
   TDegraderRpcAnaModule.hh
   TDetTimeAnaModule.hh
   TDioCalib.hh TDioCalibModule.hh TDoseAnaModule.hh TEmuAnaModule.hh
@@ -34,7 +35,7 @@ ROOT_GENERATE_DICTIONARY(${dict}
 
 set_property(SOURCE ${dict}.cxx PROPERTY generated)
 
-add_library(${lib} SHARED
+set (source_files
   poisson_fluct.cc prob_dist.cc rpc_timing.cc lhr_rejection.cc mva_data.cc TValCalPatRecModule.cc
   TVDetAnaModule.cc TTsMisalignment.cc TTrackerDose.cc TTriggerAnaModule.cc TTrackCompModule.cc
   TTrackPidAnaModule.cc TTrackRecoEffAnaModule.cc TTrackStrawHitAnaModule.cc 
@@ -42,6 +43,7 @@ add_library(${lib} SHARED
   TMomscaleAnaModule.cc TMuonStopAnaModule.cc TPidAnaModule.cc TPipenuAnaModule.cc TG4ValidationModule.cc
   TGenAnaModule.cc THelixAnaModule.cc TEmuAnaModule.cc TFilterModule.cc TFitDioRcSpectrum.cc
   TCaloTimeAnaModule.cc
+  TCrvTimeAnaModule.cc
   TDegraderRpcAnaModule.cc
   TDetTimeAnaModule.cc
   TDioCalib.cc TDioCalibModule.cc TDoseAnaModule.cc
@@ -49,8 +51,9 @@ add_library(${lib} SHARED
   TColl1DoseAnaModule.cc TColl3DoseAnaModule.cc TCosmicsAnaModule.cc TCalAnaModule.cc TCaloDose.cc
   TCaloTimeRes.cc TClusterAnaModule.cc TBeamFlashAnaModule.cc SConscript TAnaModule.cc
   InitVirtualDetectors.cc
-  ${dict}.cxx
 )
+
+add_library(${lib} SHARED ${source_files}  ${dict}.cxx)
 
 target_link_libraries(${lib}
   murat_gui murat_alg

@@ -1,10 +1,10 @@
 #
-SET (CMAKE_Fortran_COMPILER  gfortran)
-ENABLE_LANGUAGE(Fortran)
-
 set (subpkg "gui")
 set (dict "${CMAKE_PROJECT_NAME}_${subpkg}_dict")
 set (lib  "${CMAKE_PROJECT_NAME}_${subpkg}")
+
+# SET (CMAKE_Fortran_COMPILER  gfortran)
+# ENABLE_LANGUAGE(Fortran)
 
 include_directories(
   ${Stntuple_INCLUDE_DIR}

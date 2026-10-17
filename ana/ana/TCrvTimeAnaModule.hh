@@ -7,6 +7,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TCanvas.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
@@ -18,6 +19,7 @@
 
 #include "Stntuple/obj/TCrvClusterBlock.hh"
 #include "Stntuple/obj/TCrvPulseBlock.hh"
+#include "Stntuple/obj/TCrvDigiBlock.hh"
 
 #include "Stntuple/obj/TStnTimeClusterBlock.hh"
 #include "Stntuple/obj/TStrTrackBlock.hh"
@@ -51,6 +53,7 @@ public:
     kNCrvdHistSets       = 100,
     kNCrvcHistSets       = 100,
     kNCrvpHistSets       = 100,
+    kNCrvsHistSets       = 100,         // by CRV sector
     kNRocHistSets        =  20,
     kNCalhHistSets       = 100,
     kNCalcHistSets       = 100,
@@ -94,6 +97,7 @@ public:
     int   sector_id;                    // sector ID (for now, 0..10)
     int   hist_sid;                     // assigned sector ID (for grouping the histograms)
     int   sector_type;
+    int   ro_group;                     // readout group
 
     float xloc;                         // based on time division
     int   nxm;                          // n measurements, one or two
@@ -119,6 +123,7 @@ public:
     int                       intime;
     int                       good_track;
     int                       intime_calc;
+    int                       ncrvc30;
     int                       intime_crvc;
     float                     dtmin_tc;           // from the closest TC
     float                     x_disk[2];
@@ -140,7 +145,7 @@ public:
   };
 
   struct crystal_t {
-    int fCid;
+    int                    fCid;
     std::vector<TCaloHit*> fHits;
     
     int       Cid     () { return fCid; }
@@ -196,15 +201,17 @@ public:
   };
     
   struct CrvHist_t {
-    CrvsHist_t sector[20];              // use 0-3, 10:13
-    TH1F*      h_chid;
-    TH1F*      h_sbid;
-    TH1F*      h_sector;
-    TH1F*      h_nhc;                   // total number of counters with hits
-    TH2F*      h_dt20_vs_sbid;          // CRV
-    TH2F*      h_dt31_vs_sbid;          // CRV
-    TH2F*      h_dt1234_vs_sbid;        // CRV
-    TH2F*      h_pes_vs_chid;
+    CrvsHist_t* sector[kNCrvsHistSets];              // used: 0-3, 10:13, 34,37
+    TH1F*       h_chid;
+    TH1F*       h_sbid;
+    TH1F*       h_sector;
+    TH1F*       h_nhc;                   // total number of counters with hits
+    TH1F*       h_ncrvc;                 // N(muon stub candidates)
+    TH1F*       h_crvc_mask;             // clusters: sector mask : 0xf = stun 
+    TH2F*       h_dt20_vs_sbid;          // CRV
+    TH2F*       h_dt31_vs_sbid;          // CRV
+    TH2F*       h_dt1234_vs_sbid;        // CRV
+    TH2F*       h_pes_vs_chid;
   };
   
   struct TrkHist_t {
@@ -215,6 +222,8 @@ public:
     TH1F*         h_dydz;
 
     TH1F*         h_dt_tc;
+
+    TH1F*         h_ncrvc30;
     
     TH1F*         h_xcrv;
     TH1F*         h_zcrv;
@@ -243,6 +252,7 @@ public:
   TStnTimeClusterBlock*     fTcBlock;
   TCrvClusterBlock*         fCrvcBlock;
   TCrvPulseBlock*           fCrvpBlock;
+  TCrvDigiBlock*            fCrvdBlock;
   TComboHitBlock*           fChBlock;
   TStrTrackBlock*           fTrackBlock;
   TStnClusterBlock*         fCaloClusterBlock;
@@ -268,6 +278,8 @@ public:
   int                       fNCrvp;
   int                       fNCrvd;
 
+  int                       fCrvcMask;
+
   int                       fNCloseCounters;
 
   std::vector<trk_param_t>  fListOfTrkParam;
@@ -279,6 +291,8 @@ public:
   murat::TEvdCrv*           fEvdCrv;
 
   DetPos_t                  fDetPos;
+
+  TCanvas*                  fCanvasWf;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -322,12 +336,16 @@ public:
   //  int              PrintTimeCorrections();
 
   void             Debug();
+
   int              DisplayEvent();
- 
   int              InitEvd();
 
   int              PrintTracks();
   int              PrintCrvBars();
+  
+  // by defaut open new canvas
+  // if there are several waveforms, plot all of them
+  void             PlotWaveform(int ChannelID, bool NewCanvas = true);
 
   ClassDefOverride(murat::TCrvTimeAnaModule,0)
 };

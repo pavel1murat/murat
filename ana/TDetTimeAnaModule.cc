@@ -967,7 +967,7 @@ int TDetTimeAnaModule::PrintTracks() {
     vm->AddDataBlock("HeaderBlock"      ,GetHeaderBlock());
     vm->AddDataBlock("CaloHitBlock"     ,fCaloHitBlock);
     vm->AddDataBlock("CaloRecoDigiBlock",fCaloRecoDigiBlock);
-    vm->AddDataBlock("CaloCLusterBlock" ,fCaloClusterBlock);
+    vm->AddDataBlock("CaloClusterBlock" ,fCaloClusterBlock);
     
     vm->AddDataBlock("CrvpBlock"        ,fCrvpBlock);
     vm->AddDataBlock("CrvcBlock"        ,fCrvcBlock);

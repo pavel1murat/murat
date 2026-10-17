@@ -202,18 +202,20 @@ int TEvdCalorimeter::InitEvent() {
   }
     
   TCaloHitBlock* chb = (TCaloHitBlock*) vm->GetDataBlock("CaloHitBlock");
-    
-  int nhits = chb->NHits();
-  for (int i=0; i<nhits; i++) {
-    TCaloHit* hit = chb->Hit(i);
-    int idisk = hit->Disk();
-    int icr   = hit->Cid() % 674; // 674 crystals per disk
-    TEvdCrystal* cr = Disk(idisk)->Crystal(icr);
 
-    cr->AddHit(hit);
+  if (chb) {
+    int nhits = chb->NHits();
+    for (int i=0; i<nhits; i++) {
+      TCaloHit* hit = chb->Hit(i);
+      int idisk = hit->Disk();
+      int icr   = hit->Cid() % 674; // 674 crystals per disk
+      TEvdCrystal* cr = Disk(idisk)->Crystal(icr);
+
+      cr->AddHit(hit);
       
-    cr->SetLineColor(kRed + 1);
-    cr->SetFillColor(kRed + 1);
+      cr->SetLineColor(kRed + 1);
+      cr->SetFillColor(kRed + 1);
+    }
   }
 
   f_RunNumber    = run;

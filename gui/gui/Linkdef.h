@@ -19,11 +19,15 @@
 
 #pragma link C++ class murat::TEvdCrystal;
 #pragma link C++ class murat::TEvdCalorimeter;
+
+#pragma link C++ class murat::TEvdCaloNode;
 #pragma link C++ class murat::TEvdCaloView;
 #pragma link C++ class murat::TEvdDisk;
 #pragma link C++ class murat::TEvdManager;
 
-#pragma link C++ class murat::TEvdCaloNode;
+#pragma link C++ class murat::TEvdCrvNode;
+#pragma link C++ class murat::TEvdCrvView;
+
 #pragma link C++ class murat::TEvdDetNode;
 
 // #pragma link C++ class stntuple::TEvdHelixSeed;

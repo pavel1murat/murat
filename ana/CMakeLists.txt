@@ -16,7 +16,7 @@ link_directories(
   ${Stntuple_LIBRARY_DIR}
 )
 
-ROOT_GENERATE_DICTIONARY(${dict}
+set (include_files
   CrvHist_t.hh lhr_rejection.hh mva_data.hh poisson_fluct.hh prob_dist.hh rpc_timing.hh
   TAnaModule.hh TBeamFlashAnaModule.hh TCalAnaModule.hh TCaloDose.hh TCaloTimeRes.hh
   TClusterAnaModule.hh TColl1DoseAnaModule.hh TColl3DoseAnaModule.hh TCosmicsAnaModule.hh
@@ -26,12 +26,16 @@ ROOT_GENERATE_DICTIONARY(${dict}
   TDetTimeAnaModule.hh
   TDioCalib.hh TDioCalibModule.hh TDoseAnaModule.hh TEmuAnaModule.hh
   TFilterModule.hh TFitDioRcSpectrum.hh TFunAnaModule.hh TG4ValidationModule.hh TGenAnaModule.hh
-  THelixAnaModule.hh TMomscaleAnaModule.hh TMuonStopAnaModule.hh TPidAnaModule.hh TPipenuAnaModule.hh
-  TPolFitSpectrum.hh TrackHist_t.hh TSimpAnaModule.hh TSpmcAnaModule.hh TStrawHitAnaModule.hh
+  THelixAnaModule.hh TMomscaleAnaModule.hh TMuonStopAnaModule.hh
+  TPanelDtAnaModule.hh
+  TPidAnaModule.hh TPipenuAnaModule.hh TPolFitSpectrum.hh
+  TrackHist_t.hh TSimpAnaModule.hh TSpmcAnaModule.hh TStrawHitAnaModule.hh
   TTrackAnaModule.hh TTrackCompModule.hh TTrackerDose.hh TTrackPidAnaModule.hh TTrackRecoEffAnaModule.hh
   TTrackStrawHitAnaModule.hh TTriggerAnaModule.hh TTsMisalignment.hh TValCalPatRecModule.hh
   TVDetAnaModule.hh VDetData_t.hh
-  LINKDEF ${subpkg}/Linkdef.h)
+)
+
+ROOT_GENERATE_DICTIONARY(${dict} ${include_files} LINKDEF ${subpkg}/Linkdef.h)
 
 set_property(SOURCE ${dict}.cxx PROPERTY generated)
 
@@ -40,7 +44,9 @@ set (source_files
   TVDetAnaModule.cc TTsMisalignment.cc TTrackerDose.cc TTriggerAnaModule.cc TTrackCompModule.cc
   TTrackPidAnaModule.cc TTrackRecoEffAnaModule.cc TTrackStrawHitAnaModule.cc 
   TTrackAnaModule.cc TSpmcAnaModule.cc TStrawHitAnaModule.cc TPolFitSpectrum.cc TSimpAnaModule.cc
-  TMomscaleAnaModule.cc TMuonStopAnaModule.cc TPidAnaModule.cc TPipenuAnaModule.cc TG4ValidationModule.cc
+  TMomscaleAnaModule.cc TMuonStopAnaModule.cc
+  TPanelDtAnaModule.cc
+  TPidAnaModule.cc TPipenuAnaModule.cc TG4ValidationModule.cc
   TGenAnaModule.cc THelixAnaModule.cc TEmuAnaModule.cc TFilterModule.cc TFitDioRcSpectrum.cc
   TCaloTimeAnaModule.cc
   TCrvTimeAnaModule.cc

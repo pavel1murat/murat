@@ -7,6 +7,7 @@
 def_name murat_det_001("murat_calo_time_ana");
 def_name murat_det_002("murat_crv_time_ana");
 def_name murat_det_003("murat_det_time_ana");
+def_name murat_det_004("murat_panel_dt_ana");
 
 //-----------------------------------------------------------------------------
 void  murat_calo_time_ana(int DebugBit = -1) {
@@ -27,4 +28,11 @@ void  murat_crv_time_ana(int DebugBit = -1) {
   murat::m_crvt = (murat::TCrvTimeAnaModule*) g.x->AddModule("murat::TCrvTimeAnaModule",0);  
 
   if (DebugBit >= 0) murat::m_crvt->SetDebugBit(DebugBit,1);
+}
+
+//-----------------------------------------------------------------------------
+void  murat_panel_dt_ana(int DebugBit = -1) {
+  murat::m_pdt = (murat::TPanelDtAnaModule*) g.x->AddModule("murat::TPanelDtAnaModule",0);  
+
+  if (DebugBit >= 0) murat::m_pdt->SetDebugBit(DebugBit,1);
 }

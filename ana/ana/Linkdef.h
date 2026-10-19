@@ -64,6 +64,8 @@
 #pragma link C++ class murat::TMomscaleAnaModule;
 #pragma link C++ class TMuonStopAnaModule;
 
+#pragma link C++ class murat::TPanelDtAnaModule;
+
 #pragma link C++ class murat::TPidAnaModule;
 #pragma link C++ class murat::TPipenuAnaModule;
 #pragma link C++ class TPolFitSpectrum;

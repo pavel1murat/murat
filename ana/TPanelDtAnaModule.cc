@@ -267,7 +267,7 @@ int TPanelDtAnaModule::BookTcHistograms(TcHist_t* Hist, TrkIndex_t* Index, TFold
     if (! fol) fol = Folder->AddFolder(folder_name.data(),folder_name.data());
     Hist->tc[i]  = new TcHist_t;
     index.sel   =  i;
-    BookSelHistograms(Hist->sel[i],&index,fol);
+    BookTcHistograms(Hist->tc[i],&index,fol);
   }
   return 0;
 }
@@ -437,7 +437,8 @@ int TPanelDtAnaModule::CalculateMissingParameters() {
     for (int ih=0; ih<nch; ih++) {
       // index of the combohit in the combohit block
       int ind   = ch_links->Index(itc,ih);
-      TComboHit* ch = fChBlock->Hit(ind);
+      
+      TComboHit* ch = fChBlock->GetHitByID(ind);
 
       int plane = ch->Sid().plane();
       int stn   = plane / 2;

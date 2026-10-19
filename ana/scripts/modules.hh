@@ -20,6 +20,7 @@
 #include "murat/ana/THelixAnaModule.hh"
 #include "murat/ana/TMomscaleAnaModule.hh"
 #include "murat/ana/TMuonStopAnaModule.hh"
+#include "murat/ana/TPanelDtAnaModule.hh"
 #include "murat/ana/TPidAnaModule.hh"
 // #include "murat/ana/TRMCAnaModule.hh"
 #include "murat/ana/TGenAnaModule.hh"
@@ -115,6 +116,7 @@ namespace murat {
   TFilterModule*           m_filter = NULL;
   TFunAnaModule*           m_fun    = NULL;
   TMomscaleAnaModule*      m_moms   = NULL;
+  TPanelDtAnaModule*       m_pdt    = NULL;
   TPidAnaModule*           m_pid    = NULL;
   TPipenuAnaModule*        m_pipenu = NULL;
   TSimpAnaModule*          m_simp   = NULL;

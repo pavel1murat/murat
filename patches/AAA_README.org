@@ -1,5 +1,8 @@
 #+startup:fold
 
-
-* GeometryService/src/TrackerMakercc patch :
+* GeometryService/src/TrackerMaker_cc patch :
 - need to position wires properly in the event display w/o initializing the GeometryService
+* CosmicsReco/src/SImpleTimeCluster_module_cc:.patch
+- reduce junk by requiring 2 hits above 0.5 keV in the time cluster
+* CosmicReco/fcl/prolog.fcl
+- set defaults

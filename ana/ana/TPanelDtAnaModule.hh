@@ -35,6 +35,7 @@ public:
 
   enum {
     kNHistSets         = 100,
+    kNEventHistSets    = 100,
     kNSelHistSets      = 100,
     kNTcHistSets       = 100,
   };
@@ -67,26 +68,44 @@ public:
   
   struct SlotHist_t {
     PanelHist_t* panel[12];
-    TH1F*        h_edep;                // 
+    TH1F*        h_edep;                //
   };
 
   struct SelHist_t {
     TH1F*        h_occup;               // occupancy per panel, offline indexing
+    TH1F*        h_mnid;                // 
     TH2F*        h_occup_2d;            // occupancy
-    TH1F*        h_dt05[36];
+    // TH1F*        h_dt05[36];
     SlotHist_t*  slot[18];
   };
 
   struct TcHist_t {
     TH1F*        h_nch;                 // same as nsh
+    TH1F*        h_ngh;                 // good ones
+    TH1F*        h_nplanes;
+    TH1F*        h_npanels;
+    TH1F*        h_max_nh_panel;
+    TH1F*        h_max_nh_plane;
     TH2F*        h_edep_vs_pnl;
     TH1F*        h_dt_pln[36][36];
     TH2F*        h_dt_vs_pnl;             // offline index : plane*6+pln6
   };
   
+  struct EventHist_t {
+    TH1F*        h_nch;
+    TH1F*        h_nsh;
+    TH1F*        h_ntc;
+    TH1F*        h_ntrk;
+  };
+
   struct Hist_t {
-    SelHist_t* sel[kNSelHistSets];      // select straw hits
-    TcHist_t*  tc [kNTcHistSets ];
+    EventHist_t* event[kNEventHistSets];      // select straw hits
+    SelHist_t*   sel  [kNSelHistSets  ];      // stc
+                                              // elect straw hits
+    TcHist_t*    tc   [kNTcHistSets   ];
+                                        // fits
+    TH1F*        h_dt_vs_panel_fit;
+    TH1F*        h_pdt;                 // fits, 1D 
   };
 //-----------------------------------------------------------------------------
 //  data members
@@ -140,10 +159,7 @@ public:
 
   std::vector<tc_param_t>   fListOfTcParam;
 
-  float           dt05[36];            // ???
-  float           t05 [36];
-  float           dtpl[36];
-  int             n05 [36];
+  TStnModule::fit_result_t   fPanelFr[216];
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -164,6 +180,7 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   int              BookChannelHistograms(ChannelHist_t* Hist, TrkIndex_t* Index, TFolder* Folder);
+  int              BookEventHistograms  (EventHist_t*   Hist, TrkIndex_t* Index, TFolder* Folder);
   int              BookPanelHistograms  (PanelHist_t*   Hist, TrkIndex_t* Index, TFolder* Folder);
   int              BookSlotHistograms   (SlotHist_t*    Hist, TrkIndex_t* Index, TFolder* Folder);
   int              BookSelHistograms    (SelHist_t*     Hist, TrkIndex_t* Index, TFolder* Folder);
@@ -171,6 +188,7 @@ public:
   int              BookHistograms       (Hist_t*        Hist, TFolder* Folder);
 
   int              FillChannelHistograms(ChannelHist_t* Hist, TrkIndex_t* Index, TStrawHit* Sh);
+  int              FillEventHistograms  (EventHist_t*   Hist, TrkIndex_t* Index);
   int              FillPanelHistograms  (PanelHist_t*   Hist, TrkIndex_t* Index, TStrawHit* Sh);
   int              FillSlotHistograms   (SlotHist_t*    Hist, TrkIndex_t* Index, TStrawHit* Sh);
   int              FillSelHistograms    (SelHist_t*     Hist, TrkIndex_t* Index, TStrawHit* Sh);
@@ -188,10 +206,13 @@ public:
   int              InitEvd();
 
   //  int              PrintTracks();
-  
+
+  void             PrintComboHits    ();
   int              PrintHistograms   (int ISet);
   int              PrintNoisyChannels(float Percentage = 0.01);
-
+  int              FitPlaneTimeOffsets(float TMin, float TMax, int DebugLevel = 0);
+  void             FitPanelTimeOffsets(TH2F* H_DtVsPanel, float Dt  , int PrintLevel);
+ 
   ClassDefOverride(murat::TPanelDtAnaModule,0)
 };
 }

@@ -5,8 +5,8 @@
 //  0  : all events
 //  1  : passed events
 //  2  : rejected events
-//  3  : N(events with 4+ CRVC around a track)
-//  4  : 
+//  3  : print additional parameters of the time cluster
+//  4  : for max_n_hits_panel >= 6, print time cluster with hits
 // 
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream>
@@ -32,6 +32,7 @@
 #include "murat/gui/TEvdDetNode.hh"
 #include "murat/gui/TEvdManager.hh"
 
+#include "Stntuple/loop/TStnInputModule.hh"
 #include "murat/ana/TPanelDtAnaModule.hh"
 
 using namespace murat;
@@ -57,6 +58,9 @@ TPanelDtAnaModule::TPanelDtAnaModule(const char* name, const char* title):
 
   auto vm = TEvdManager::Instance();
   vm->InitGeometry(); // if not initialized
+
+  fNEvents  = -1;
+  fMaxEvent = -1;
 
   // fCanvasWf = nullptr;
   //   fEvdCrv->InitGeometry("Offline/Mu2eG4/geom/geom_common_extracted.txt");
@@ -96,6 +100,31 @@ int TPanelDtAnaModule::BookChannelHistograms(ChannelHist_t* Hist, TrkIndex_t* In
   name  = "edep";
   title = std::format("{} : edep, keV",prefix);
   fBookHist->HBook1F(Hist->h_edep,name.data(),title.data(),200,-0.001,0.009,Folder);
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+int TPanelDtAnaModule::BookEventHistograms(EventHist_t* Hist, TrkIndex_t* Index, TFolder* Folder) {
+
+  std::string prefix = std::format("run:{:06d}",fRunNumber);
+  std::string name, title;
+
+  name  = "nch";
+  title = std::format("{} : nch",prefix);
+  fBookHist->HBook1F(Hist->h_nch,name.data(),title.data(),200,0,2000,Folder);
+
+  name  = "nsh";
+  title = std::format("{} : nsh",prefix);
+  fBookHist->HBook1F(Hist->h_nsh,name.data(),title.data(),200,0,2000,Folder);
+
+  name  = "ntc";
+  title = std::format("{} : ntc",prefix);
+  fBookHist->HBook1F(Hist->h_ntc,name.data(),title.data(),100,0,100,Folder);
+
+  name  = "ntrk";
+  title = std::format("{} : ntrk",prefix);
+  fBookHist->HBook1F(Hist->h_ntrk,name.data(),title.data(),10,0,10,Folder);
 
   return 0;
 }
@@ -173,11 +202,11 @@ int TPanelDtAnaModule::BookSelHistograms(SelHist_t* Hist, TrkIndex_t* Index, TFo
 
   TrkIndex_t index;
 
-  for (int i=0; i<36; i++) {
-    name  = std::format("dt05_%{}",i);
-    title = std::format("{} : dt05 ({:02} - {:02})",prefix,i,i-1);
-    fBookHist->HBook1F(Hist->h_dt05[i],name.data(),title.data(),1000,-5000,5000,Folder);
-  }
+  // for (int i=0; i<36; i++) {
+  //   name  = std::format("dt05_%{}",i);
+  //   title = std::format("{} : dt05 ({:02} - {:02})",prefix,i,i-1);
+  //   fBookHist->HBook1F(Hist->h_dt05[i],name.data(),title.data(),1000,-5000,5000,Folder);
+  // }
   
   for (int i=0; i<18; i++) {
     std::string folder_name = std::format("slot_{:02d}",i);
@@ -203,19 +232,39 @@ int TPanelDtAnaModule::BookTcHistograms(TcHist_t* Hist, TrkIndex_t* Index, TFold
   title = std::format("{} : N(combo hits)",prefix);
   fBookHist->HBook1F(Hist->h_nch,name.data(),title.data(),200,0,200,Folder);
 
+  name  = "ngh";
+  title = std::format("{} : N(good hits)",prefix);
+  fBookHist->HBook1F(Hist->h_ngh,name.data(),title.data(),200,0,200,Folder);
+
+  name  = "nplanes";
+  title = std::format("{} : N(planes)",prefix);
+  fBookHist->HBook1F(Hist->h_nplanes,name.data(),title.data(),36,0,36,Folder);
+
+  name  = "npanels";
+  title = std::format("{} : N(panels)",prefix);
+  fBookHist->HBook1F(Hist->h_npanels,name.data(),title.data(),250,0,250,Folder);
+
+  name  = "max_nh_plane";
+  title = std::format("{} : Max NH per plane)",prefix);
+  fBookHist->HBook1F(Hist->h_max_nh_plane,name.data(),title.data(),250,0,250,Folder);
+
+  name  = "max_nh_panel";
+  title = std::format("{} : Max NH per panel)",prefix);
+  fBookHist->HBook1F(Hist->h_max_nh_panel,name.data(),title.data(),100,0,100,Folder);
+
   name  = "edep_vs_pnl";
   title = std::format("{} : EDep vs panel",prefix);
   fBookHist->HBook2F(Hist->h_edep_vs_pnl,name.data(),title.data(),216,0,216,200,-0.1e-3,9.9e-3,Folder);
 
   name  = "dt_vs_pnl";
   title = std::format("{} : T(panel)-T0(TC) vs panel, ns",prefix);
-  fBookHist->HBook2F(Hist->h_dt_vs_pnl,name.data(),title.data(),216,0,216,200,-50,50,Folder);
+  fBookHist->HBook2F(Hist->h_dt_vs_pnl,name.data(),title.data(),216,0,216,400,-100,100,Folder);
 
   for (int i1=0; i1<36; i1++) {
     for (int i2=i1+1; i2<36; i2++) {
       name  = std::format("dt_pln_{:02}{:02}",i2,i1);
       title = std::format("{}: time cluster  T[{:02}]-T[{:02}]",prefix,i2,i1);
-      fBookHist->HBook1F(Hist->h_dt_pln[i2][i1],name.data(),title.data(),200,0,200,Folder);
+      fBookHist->HBook1F(Hist->h_dt_pln[i2][i1],name.data(),title.data(),1000,-500,500,Folder);
     }
   }
 
@@ -230,7 +279,24 @@ int TPanelDtAnaModule::BookTcHistograms(TcHist_t* Hist, TrkIndex_t* Index, TFold
 
   TrkIndex_t index;
 //-----------------------------------------------------------------------------
-// straw hits
+// events
+//-----------------------------------------------------------------------------
+  int book_event_histset[kNEventHistSets];
+  for (int i=0; i<kNEventHistSets; i++) { book_event_histset[i] = 0; }
+
+  book_event_histset[0] = 1;                  // all events
+
+  for (int i=0; i<kNEventHistSets; i++) {
+    if (book_event_histset[i] == 0) continue;
+    std::string folder_name = std::format("evt_{:02d}",i);
+    TFolder* fol = (TFolder*) Folder->FindObject(folder_name.data());
+    if (! fol) fol = Folder->AddFolder(folder_name.data(),folder_name.data());
+    Hist->event[i] = new EventHist_t;
+    index.sel   =  i;
+    BookEventHistograms(Hist->event[i],&index,fol);
+  }
+//-----------------------------------------------------------------------------
+// straw hits , two selections
 //-----------------------------------------------------------------------------
   int book_sel_histset[kNSelHistSets];
   for (int i=0; i<kNSelHistSets; i++) { book_sel_histset[i] = 0; }
@@ -257,8 +323,8 @@ int TPanelDtAnaModule::BookTcHistograms(TcHist_t* Hist, TrkIndex_t* Index, TFold
   int book_tc_histset[kNTcHistSets];
   for (int i=0; i<kNTcHistSets; i++) { book_tc_histset[i] = 0; }
 
-  book_tc_histset[0] = 1;                  // all events
-  book_tc_histset[1] = 0;                  // 
+  book_tc_histset[0] = 1;                  // all 
+  book_tc_histset[1] = 1;                  // N(hits) >= 8 , ngh >= 2
 
   for (int i=0; i<kNTcHistSets; i++) {
     if (book_tc_histset[i] == 0) continue;
@@ -285,6 +351,15 @@ int TPanelDtAnaModule::FillChannelHistograms(ChannelHist_t* Hist, TrkIndex_t* In
 
   Hist->h_edep->Fill(Sh->EDep());
                                         // no edep for the moment
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+int TPanelDtAnaModule::FillEventHistograms(EventHist_t* Hist, TrkIndex_t* Index) {
+  Hist->h_nsh->Fill(fNSh);
+  Hist->h_nch->Fill(fNCh);
+  Hist->h_ntc->Fill(fNTc);
+  Hist->h_ntrk->Fill(fNTracks);
   return 0;
 }
 
@@ -326,6 +401,14 @@ int TPanelDtAnaModule::FillSelHistograms(SelHist_t* Hist, TrkIndex_t* Index, TSt
                                           TrkIndex_t*      Index,
                                           TStnTimeCluster* Tc   ,
                                           tc_param_t*      Tcp  ) {
+
+    Hist->h_nch->Fill(Tc->NComboHits());
+    Hist->h_ngh->Fill(Tcp->ngh);
+    Hist->h_nplanes->Fill(Tcp->nplanes);
+    Hist->h_npanels->Fill(Tcp->npanels);
+    Hist->h_max_nh_panel->Fill(Tcp->max_nh_panel);
+    Hist->h_max_nh_plane->Fill(Tcp->max_nh_plane);
+    
     for (int pln1=0; pln1<36; pln1++) {
       if (Tcp->nh_plane[pln1] < 2) continue;
       for (int pln2=pln1+1; pln2<36; pln2++) {
@@ -358,7 +441,13 @@ int TPanelDtAnaModule::FillSelHistograms(SelHist_t* Hist, TrkIndex_t* Index, TSt
 //-----------------------------------------------------------------------------
 int TPanelDtAnaModule::FillHistograms() {
   TrkIndex_t index;
-  
+//-----------------------------------------------------------------------------
+// event
+//-----------------------------------------------------------------------------
+  FillEventHistograms(fHist->event[0],&index);
+//-----------------------------------------------------------------------------
+// straw hit selections
+//-----------------------------------------------------------------------------
   for (int i=0; i<fNSh; i++) {
     TStrawHit*  sh = fShBlock->Hit(i);
     // std::cout << std::format("i:{:5d} sd_mnid[i]:{:03d}\n",i,sd->mnid);
@@ -386,6 +475,10 @@ int TPanelDtAnaModule::FillHistograms() {
     tc_param_t*      tcp = &fListOfTcParam[i];
     index.sel = 0;
     FillTcHistograms(fHist->tc[0],&index,tc,tcp);
+    if ((tc->NComboHits() >= 8) and (tcp->ngh >= 2)) {
+      index.sel = 1;
+      FillTcHistograms(fHist->tc[1],&index,tc,tcp);
+    }
   }
   return 0;
 }
@@ -436,9 +529,13 @@ int TPanelDtAnaModule::CalculateMissingParameters() {
     int nch = tc->NComboHits();
     for (int ih=0; ih<nch; ih++) {
       // index of the combohit in the combohit block
-      int ind   = ch_links->Index(itc,ih);
+      int hit_id = ch_links->Index(itc,ih);
       
-      TComboHit* ch = fChBlock->GetHitByID(ind);
+      TComboHit* ch = fChBlock->GetHitByID(hit_id);
+      if (ch == nullptr) {
+        GetHeaderBlock()->Print(Form("ERROR: CH id=%i is missing. SKIP",hit_id));
+        continue;
+      }
 
       int plane = ch->Sid().plane();
       int stn   = plane / 2;
@@ -528,7 +625,8 @@ int TPanelDtAnaModule::BeginJob() {
   RegisterDataBlock("ComboHitBlock"    ,"TComboHitBlock"      ,&fChBlock          );
   RegisterDataBlock("StrawHitBlock"    ,"TStrawHitBlock"      ,&fShBlock          );
   RegisterDataBlock("TrackBlock"       ,"TStrTrackBlock"      ,&fTrackBlock       );
- 
+
+  fNEvents = GetAna()->GetInputModule()->GetEntries();
   return 0;
 }
 
@@ -550,7 +648,6 @@ int TPanelDtAnaModule::BeginRun() {
   return 0;
 }
 
-
 //-----------------------------------------------------------------------------
 // 2026-09-09
 //-----------------------------------------------------------------------------
@@ -569,6 +666,11 @@ int TPanelDtAnaModule::Event(int IEntry) {
   fNCh           = fChBlock->NHits();
   fNSh           = fShBlock->NHits();
 
+  int evn = GetHeaderBlock()->EventNumber();
+  if (evn > fMaxEvent) {
+    fMaxEvent = evn;
+  }
+
   CalculateMissingParameters();
   
   FillHistograms();
@@ -576,6 +678,40 @@ int TPanelDtAnaModule::Event(int IEntry) {
   Debug();
 
   return 0;		       
+}
+
+//-----------------------------------------------------------------------------
+void TPanelDtAnaModule::PrintComboHits() {
+  for (int i=0; i<fNTc; i++) {
+    TStnTimeCluster* tc  = fTcBlock->TimeCluster(i);
+    tc_param_t*      tcp = &fListOfTcParam[i];
+      
+    bool banner_printed(false);
+    if (tcp->max_nh_panel >= 6) {
+        
+      if (not banner_printed) {
+        tc->Print("banner");
+      }
+      tc->Print("data");
+
+      int nch = tc->NComboHits();
+
+      bool ch_banner_printed(false);
+      for (int ich=0; ich<nch; ich++) {
+        int hit_id = fTcBlock->ListOfChLinks()->Index(i,ich);
+        TComboHit* ch = fChBlock->GetHitByID(hit_id);
+        if (ch == nullptr) {
+          std::cout << std::format("ERROR: Time cluster CH id={:4} is missing. SKIP\n",hit_id);
+          continue;
+        }
+        if (not ch_banner_printed) {
+          ch->Print("banner");
+          ch_banner_printed = true;
+        }
+        ch->Print("data");
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -600,6 +736,12 @@ void TPanelDtAnaModule::Debug() {
              tcp->tmax);
     }
   }
+
+  if (GetDebugBit(4) == 1) {
+    // additional time cluster parameters 
+    GetHeaderBlock()->Print("bit_004:");
+    PrintComboHits();
+  }
 }
 
 //_____________________________________________________________________________
@@ -609,48 +751,132 @@ int TPanelDtAnaModule::EndJob() {
 
 
 //-----------------------------------------------------------------------------
-// do that for all ROCs and all FEBs
-//-----------------------------------------------------------------------------
-/*
-# roc  feb   fit(crvp.time-tc.t0)  chi2dof
-   1    1           530.724         3.004
-   1    2           530.498         2.150
-*/
-  /*
-int TPanelDtAnaModule::FitCaloTimeOffsets(float TMin, float TMax) {
-  TH2F* h2 = nullptr; // fHist->h_dt_vs_sipmid;
+  int TPanelDtAnaModule::FitPlaneTimeOffsets(float TMin, float TMax, int DebugLevel) {
+  
+  TStnModule::fit_result_t frr[35];
 
-  int nch = kNCaloChannels;
-  for (int i=0; i<nch; i++) {
+  frr[0].p[1]    = 0;
+  frr[0].e[1]    = 0;
+  frr[0].p[2]    = 0;
+  frr[0].e[2]    = 0;
+  frr[0].chi2dof = -1.;
+  
+  for (int i=1; i<36; i++) {
+    int i2=i-1;
+    // run 124155: station 7 (planes 14 and 15) was off
+    // if (i == 16) i2 = 13;
+    TH1F* h = fHist->tc[0]->h_dt_pln[i][i2];
     
-    std::string hpname = std::format("hpx_{:04d}",i);
-    TH1D* hp = h2->ProjectionY(hpname.data(),i+1,i+1);
-    fit_result_t* fr = &fFr[i];
-    FitHistogram(hp,fr,TMin,TMax,10);
+    fit_result_t* fr = &frr[i];
+    fr->chi2dof = -1;
+    FitHistogram(h,fr,10, TMin,TMax,DebugLevel);
   }
   
-  // done fitting, write results
+  // done fitting, print results
 
-  std::ofstream os("CaloTimeCalib_corr.txt");
+  // std::ofstream os("CaloTimeCalib_corr.txt");
 
-  os << std::format("TABLE CalTimeCalib {}\n",fRunNumber);
-  os << std::format("# corrections to  CalTimeCalib cid= XXX, to be subtracted \n");
-  os << std::format("# sipmid     dT      sigma      chi2 \n");
+  // os << std::format("TABLE CalTimeCalib {}\n",fRunNumber);
+  // os << std::format("# corrections to  CalTimeCalib cid= XXX, to be subtracted \n");
+  // os << std::format("# sipmid     dT      sigma      chi2 \n");
   
-  for (int i=0; i<nch; i++) {
-    
-    // to do no harm if no fit, dt should be initialized to zero 
-    float dt{0}; 
-    if (fFr[i].chi2dof > 0) {
-      dt = fFr[i].p[1];
+  std::cout << std::format("|   i  | correction |   Mean |  sig(mean) |  width | sig(width) |  chi2d |  \n");
+
+  float vsum = 0;
+  for (int i=0; i<36; i++) {
+    vsum += frr[i].p[1];
+    for (int j=0; j<6; j++) {
+      int pnl = 6*i+j;
+      // for plane-level corrections, the correction is the same for all panels in a given plane
+      std::cout << std::format("|{:4} | {:10.3f} | {:10.3f} | {:10.3f} | {:10.3} | {:10.3f} |  {:10.3f} |\n",
+                               pnl,vsum,frr[i].p[1],frr[i].e[1],frr[i].p[2],frr[i].e[2],frr[i].chi2dof);
     }
-
-    os << std::format("{:5}   {:8.3f}  {:8.3f}  {:8.3f}\n",i,dt,fFr[i].p[2],fFr[i].chi2dof);
   }
-  os.close();
+  // plot histogram
+  TH1F* h_m = new TH1F("h_m","Plane #Dt fit summary: mean values",36,0,36);
+  for (int i=0; i<36; i++) {
+    h_m->SetBinContent(i+1,frr[i].p[1]);
+    h_m->SetBinError  (i+1,frr[i].e[1]);
+  }
+
+  TH1F* h_w = new TH1F("h_w","Plane #Dt fit summary: widths",36,0,36);
+  for (int i=0; i<36; i++) {
+    h_w->SetBinContent(i+1,frr[i].p[2]);
+    h_w->SetBinError  (i+1,frr[i].e[2]);
+  }
+
+  TCanvas* c2 = new TCanvas("c2","c2",1200,600);
+  c2->Divide(2,1);
+  c2->Draw();
+  c2->cd(1);
+  h_m->Draw();
+  c2->cd(2);
+  h_w->Draw();
+  
   return 0;
 }
-  */
+
+//-----------------------------------------------------------------------------
+// one occupancy canvas per station
+//-----------------------------------------------------------------------------
+void TPanelDtAnaModule::FitPanelTimeOffsets(TH2F* H_DtVsPanel, float Dt, int PrintLevel) {
+
+  // gROOT->SetBatch(kTRUE);   // no GUI windows
+
+  // std::string fn = std::format("run_{:6d}_n002_tc.pdf",fRunNumber);
+
+  TH2F* h2 =  H_DtVsPanel;
+  if (h2 == nullptr) {
+    h2 = fHist->tc[0]->h_dt_vs_pnl;
+  }
+  
+  gStyle->SetStatW(0.30);   // wider (NDC)
+
+  std::string prefix = std::format("run {:6d}",fRunNumber);
+  std::string name, title;
+
+  name  = "dt_vs_panel_fit";
+  title = std::format("{} : dt vs panel fit",prefix);
+  fHist->h_dt_vs_panel_fit = new TH1F(name.data(),title.data(),216,0,216);
+  
+  name  = "pdt";
+  title = std::format("{} : panel Dt",prefix);
+  fHist->h_pdt             = new TH1F(name.data(),title.data(),500,-50,50);
+  
+  for (int ip=0; ip<216; ip++) {
+    int binx = ip+1;
+    TH1* hpy = h2->ProjectionY("py",binx,binx);
+    FitHistogram(hpy,&fPanelFr[ip],ip,0);
+    fit_result_t* fr = &fPanelFr[ip];
+    // finx maximum, fit within +/- Dt from it
+    FitHistogram(hpy,fr,Dt, 1,-1,PrintLevel);
+
+    float y  = fPanelFr[ip].p[1];
+    float ey = fPanelFr[ip].e[1];
+    fHist->h_dt_vs_panel_fit->SetBinContent(ip+1,y );
+    fHist->h_dt_vs_panel_fit->SetBinError  (ip+1,ey);
+    if (fPanelFr[ip].chi2dof > 0) {
+      fHist->h_pdt->Fill(y);
+    }
+  }
+
+  fHist->h_dt_vs_panel_fit->Draw();
+
+  // finally, print the resulting table
+  // not sure yet how to name the file
+
+  std::cout << std::format("# i    correction      err      fit_chi2\n");
+  for (int ip=0; ip<216; ip++) {
+    //    corr[ip] = -1;
+    fit_result_t* fr = &fPanelFr[ip];
+
+    // inverse signs of the step and total offsets (to add to calibrations)
+    std::cout  << std::format(" {:3d} {:10.4f} {:10.4f} {:10.4f} \n",ip,fr->p[1],fr->e[1],fr->chi2dof);
+  }
+  
+  return;
+}
+
 
 // //-----------------------------------------------------------------------------
 // int TPanelDtAnaModule::PrintTracks() {
@@ -718,7 +944,7 @@ int TPanelDtAnaModule::PrintHistograms(int ISet) {
       float hmax = (int(fMaxEvent/1.e6)+1)*1e6;
       // normalization to the rate :
 
-      float input_rate = 1.e4;   // 10 kHz
+      float input_rate = 1.e4;   // 10 kHz 
       float scale = input_rate/(fNEvents+1.e-12);
       h->Scale(scale);
       h->SetMaximum(hmax);

@@ -62,6 +62,10 @@ public:
 //-----------------------------------------------------------------------------
 // indices
 //-----------------------------------------------------------------------------
+  struct EvtIndex_t {
+    int sel;
+  };
+  
   struct TrkIndex_t {
     int sel;
     int slot;                 // 0-17
@@ -101,7 +105,9 @@ public:
 
     float xloc;                         // based on time division
     int   nxm;                          // n measurements, one or two
-    float t;                            // estimated pulse time
+    int   nrp;                          // N(pulses)
+    int   nsides;                       // N(sides) with pulses
+    float t;                            // estimated bar hit time
     float trk_t;
     float trk_x;
     float trk_z;
@@ -115,6 +121,10 @@ public:
     TCrvRecoPulse*  pulse[4];           // 4 pulses max
   };
 
+  struct crvc_param_t {
+    TStrTrack*  trk;                    // track, closest in time
+  };
+  
   struct crvs_param_t {
     TEvdCrvCounter* counter[4];  // 4 layers is a given, no need to be smart
   };
@@ -189,6 +199,10 @@ public:
 //-----------------------------------------------------------------------------
 // histogram structures
 //-----------------------------------------------------------------------------
+  struct CrvcHist_t {
+    TH1F*  h_pes;
+  };
+  
   struct CrvsHist_t {
     TH1F*  h_zc;
     TH1F*  h_xc;
@@ -196,10 +210,10 @@ public:
     TH1F*  h_dxc[2];                 // dxc = xc(bar) - xc(trk)
     TH2F*  h_sbid_vs_dxc;            // by channel id
     TH2F*  h_dt_vs_sbid;             // FEB-based group of 64 channels
-    TH2F*  h_dxloc_vs_dt10;          // coordinate along the bar is X
-    TH2F*  h_dxloc_vs_dt32;
+    TH2F*  h_dxc_vs_dt10;            // coordinate along the bar is X
+    TH2F*  h_dxc_vs_dt32;
   };
-    
+
   struct CrvHist_t {
     CrvsHist_t* sector[kNCrvsHistSets];              // used: 0-3, 10:13, 34,37
     TH1F*       h_chid;
@@ -212,6 +226,13 @@ public:
     TH2F*       h_dt31_vs_sbid;          // CRV
     TH2F*       h_dt1234_vs_sbid;        // CRV
     TH2F*       h_pes_vs_chid;
+    TH2F*       h_ped_vs_chid;
+  };
+
+  struct EventHist_t {
+    TH1F*        h_ntrk;
+    TH1F*        h_ngtrk;
+    TH1F*        h_ntrk15;
   };
   
   struct TrkHist_t {
@@ -220,6 +241,8 @@ public:
     TH1F*         h_t0;
     TH1F*         h_dxdz;
     TH1F*         h_dydz;
+
+    TH1F*         h_ncc;                  // N(close counters), not sure what it is
 
     TH1F*         h_dt_tc;
 
@@ -235,12 +258,10 @@ public:
   };
 
   struct Hist_t {
-    TH1F*       h_ntrk;
-    TH1F*       h_ngtrk;
-    TH1F*       h_ntrk15;
-    TH1F*       h_ncc;                  // N(close counters);
-    TrkHist_t*  trk[kNTrkHistSets];
-    CrvHist_t*  crv[kNCrvHistSets];
+    EventHist_t* event[kNEventHistSets];
+    TrkHist_t*   trk  [kNTrkHistSets ];
+    CrvcHist_t*  crvc [kNCrvcHistSets];
+    CrvHist_t*   crv  [kNCrvHistSets ];
   };
 
 //-----------------------------------------------------------------------------
@@ -284,6 +305,7 @@ public:
 
   std::vector<trk_param_t>  fListOfTrkParam;
   std::vector<crvb_param_t> fListOfCrvbParam;
+  std::vector<crvc_param_t> fListOfCrvcParam;
 
   fit_result_t              fFr[kNCaloChannels];
   fit_result_t*             fFrRef;
@@ -320,16 +342,20 @@ public:
 // other methods
 //-----------------------------------------------------------------------------
   int              BookCrvHistograms  (CrvHist_t*    Hist, CrvIndex_t*  Index, TFolder* Folder);
+  int              BookCrvcHistograms (CrvcHist_t*   Hist, CrvIndex_t*  Index, TFolder* Folder);
   int              BookCrvsHistograms (CrvsHist_t*   Hist, CrvIndex_t*  Index, TFolder* Folder);
+  int              BookEventHistograms(EventHist_t*  Hist, EvtIndex_t*  Index, TFolder* Folder);
   int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
   int              CalculateMissingParameters   ();
   int              CalculateMissingTrkParameters();
   
-  int              FillCrvHistograms  (CrvHist_t*  Hist);
-  int              FillCrvsHistograms (CrvsHist_t* Hist, TEvdCrvCounter* Crvb, crvb_param_t* Crvbp);
-  int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*      Trk , trk_param_t*  Tp   );
+  int              FillCrvHistograms  (CrvHist_t*   Hist);
+  int              FillCrvcHistograms (CrvcHist_t*  Hist, TCrvCoincidenceCluster* Crvc, crvc_param_t* Crvcp);
+  int              FillCrvsHistograms (CrvsHist_t*  Hist, TEvdCrvCounter*         Crvb, crvb_param_t* Crvbp);
+  int              FillEventHistograms(EventHist_t* Hist);
+  int              FillTrkHistograms  (TrkHist_t*   Hist, TStrTrack*              Trk , trk_param_t*  Tp   );
   int              FillHistograms     ();
 
   int              FitCaloTimeOffsets (float TMin = 1., float TMax = -1.);

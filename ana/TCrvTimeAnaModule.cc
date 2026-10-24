@@ -95,6 +95,10 @@ int TCrvTimeAnaModule::BookCrvcHistograms(CrvcHist_t* Hist, CrvIndex_t* Index, T
   name  = "pes";
   title = std::format("{} : PES",prefix);
   fBookHist->HBook1F(Hist->h_pes,name.data(),title.data(),100,0,200,Folder);   // ns
+
+  name  = "min_tc_dt";
+  title = std::format("{} : min dt=|T(TC)-T(CRVC)|",prefix);
+  fBookHist->HBook1F(Hist->h_min_tc_crvc_dt,name.data(),title.data(),200,-1000,1000,Folder);   // ns
   return 0;
 }
   
@@ -160,10 +164,6 @@ int TCrvTimeAnaModule::BookCrvHistograms(CrvHist_t* Hist, CrvIndex_t* Index, TFo
   name  = "sector";
   title = std::format("{} : sector",prefix);
   fBookHist->HBook1F(Hist->h_sector,name.data(),title.data(),30,0,30,Folder);   // ns
-
-  name  = "ncrvc";
-  title = std::format("{} : N(crvc)",prefix);
-  fBookHist->HBook1F(Hist->h_ncrvc,name.data(),title.data(),100,0,100,Folder);   // ns
 
   name  = "crvc_mask";
   title = std::format("{} : crvc sector mask",prefix);
@@ -246,15 +246,27 @@ int TCrvTimeAnaModule::BookCrvHistograms(CrvHist_t* Hist, CrvIndex_t* Index, TFo
   
   name  = "ngtrk";
   title = std::format("{} : ngtrk",prefix);
-  fBookHist->HBook1F(Hist->h_ngtrk,name.data(),title.data(),10,0,10,Folder);
+  fBookHist->HBook1F(Hist->h_ngtrk,name,title,10,0,10,Folder);
   
   name  = "ntrk";
   title = std::format("{} : ntrk",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk,name.data(),title.data(),10,0,10,Folder);
+  fBookHist->HBook1F(Hist->h_ntrk,name,title,10,0,10,Folder);
   
   name  = "ntrk15";
   title = std::format("{} : ntrk 15",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk15,name.data(),title.data(),10,0,10,Folder);
+  fBookHist->HBook1F(Hist->h_ntrk15,name,title,10,0,10,Folder);
+  
+  name  = "ncrvc";
+  title = std::format("{} : N(crvc)",prefix);
+  fBookHist->HBook1F(Hist->h_ncrvc,name,title,100,0,100,Folder);   // ns
+
+  name  = "ntc";
+  title = std::format("{} : n(TC)",prefix);
+  fBookHist->HBook1F(Hist->h_ntc,name,title,10,0,10,Folder);
+  
+  name  = "ntc20";
+  title = std::format("{} : n(TC with nch>=20)",prefix);
+  fBookHist->HBook1F(Hist->h_ntc20,name,title,10,0,10,Folder);
   
   return 0;
 }
@@ -267,59 +279,59 @@ int TCrvTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
 
   name  = "nhits";
   title = std::format("{} : nhits",prefix);
-  fBookHist->HBook1F(Hist->h_nhits,name.data(),title.data(),100,0,100,Folder);   // in MeV
+  fBookHist->HBook1F(Hist->h_nhits,name,title,100,0,100,Folder);   // in MeV
 
   name  = "chi2d";
   title = std::format("{} : chi2/ndof",prefix);
-  fBookHist->HBook1F(Hist->h_chi2d,name.data(),title.data(),100,0,20,Folder);   //
+  fBookHist->HBook1F(Hist->h_chi2d,name,title,100,0,20,Folder);   //
 
   name  = "t0";
   title = std::format("{} : t0",prefix);
-  fBookHist->HBook1F(Hist->h_t0,name.data(),title.data(),500,0,2.5e6,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_t0,name,title,500,0,2.5e6,Folder);   // in ns...
 
   name  = "dxdz";
   title = std::format("{} : dxdz",prefix);
-  fBookHist->HBook1F(Hist->h_dxdz,name.data(),title.data(),200,-10,10,Folder);   //
+  fBookHist->HBook1F(Hist->h_dxdz,name,title,200,-10,10,Folder);   //
 
   name  = "dydz";
   title = std::format("{} : dydz",prefix);
-  fBookHist->HBook1F(Hist->h_dydz,name.data(),title.data(),200,-10,10,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dydz,name,title,200,-10,10,Folder);   // in ns...
 
   name  = "dt_tc";
   title = std::format("{} : dt TC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_tc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_tc,name,title,400,-100,100,Folder);   // in ns...
 
   name  = "ncrvc30";
   title = std::format("{} : n(CRVC) within 30 ns",prefix);
-  fBookHist->HBook1F(Hist->h_ncrvc30,name.data(),title.data(),50,0,50,Folder);   // in MeV
+  fBookHist->HBook1F(Hist->h_ncrvc30,name,title,50,0,50,Folder);   // in MeV
 
   name  = "xcrv";
   title = std::format("{} : xcrv",prefix);
-  fBookHist->HBook1F(Hist->h_xcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_xcrv,name,title,200,-10000,10000,Folder);   // in ns...
 
   name  = "zcrv";
   title = std::format("{} : track z(crv) wrt the center of the counter",prefix);
-  fBookHist->HBook1F(Hist->h_zcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_zcrv,name,title,200,-10000,10000,Folder);   // in ns...
 
   name  = "dt_crvc";
   title = std::format("{} : dt CRVC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_crvc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_crvc,name,title,400,-100,100,Folder);   // in ns...
 
   name  = "dx_crvc";
   title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dx_crvc,name.data(),title.data(),200,-10000,10000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-10000,10000,Folder);   //
 
   name  = "dz_crvc";
   title = std::format("{} : dz_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dz_crvc,name.data(),title.data(),200,-1000,1000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dz_crvc,name,title,200,-1000,1000,Folder);   //
 
   name  = "dx_crvc_vs_dxdy";
   title = std::format("{} : dx_crvc vs dxdy",prefix);
-  fBookHist->HBook2F(Hist->h_dx_crvc_vs_dxdy,name.data(),title.data(),100,-2,2,200,-1000,1000,Folder);
+  fBookHist->HBook2F(Hist->h_dx_crvc_vs_dxdy,name,title,100,-2,2,200,-1000,1000,Folder);
 
   name  = "dz_crvc_vs_dzdy";
   title = std::format("{} : dz_crvc vs dzdy",prefix);
-  fBookHist->HBook2F(Hist->h_dz_crvc_vs_dzdy,name.data(),title.data(),100,-2,2,200,-1000,1000,Folder);
+  fBookHist->HBook2F(Hist->h_dz_crvc_vs_dzdy,name,title,100,-2,2,200,-1000,1000,Folder);
 
   return 0;
 }
@@ -334,6 +346,28 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 
   std::string prefix = std::format("run:{:06d}",fRunNumber);
   std::string name, title;
+//-----------------------------------------------------------------------------
+// Event histograms
+//-----------------------------------------------------------------------------
+  EvtIndex_t evt_index;
+
+  int book_event_histset[kNEventHistSets];
+  for (int i=0; i<kNEventHistSets; i++) { book_event_histset[i] = 0; }
+
+  book_event_histset[0] = 1;             // all
+  book_event_histset[1] = 1;             // events with ntrk15 > 0
+  book_event_histset[2] = 1;             // events with ntc20  > 0
+
+  for (int i=0; i<kNEventHistSets; i++) {
+    if (book_event_histset[i] == 0) continue;
+    std::string folder_name = std::format("evt_{:02d}",i);
+    TFolder* fol = (TFolder*) Folder->FindObject(folder_name.data());
+    if (! fol) fol = Folder->AddFolder(folder_name.data(),folder_name.data());
+    Hist->event[i]   = new EventHist_t();
+    evt_index.sel  = i;
+    BookEventHistograms(Hist->event[i],&evt_index,fol);
+  }
+
 //-----------------------------------------------------------------------------
 // Trk: tracks 
 //-----------------------------------------------------------------------------
@@ -392,6 +426,24 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
     crv_index.sel = i;
     BookCrvHistograms(Hist->crv[i],&crv_index,crv_fol);
   }
+//-----------------------------------------------------------------------------
+// CRVC
+//-----------------------------------------------------------------------------
+  int book_crvc_histset[kNCrvcHistSets];
+
+  for (int i=0; i<kNCrvcHistSets; i++) { book_crvc_histset[i] = 0; }
+
+  book_crvc_histset[0] = 1;             // all
+  
+  for (int i=0; i<kNCrvcHistSets; i++) {
+    if (book_crvc_histset[i] == 0) continue;
+    std::string folder_name = std::format("crvc_{:02d}",i);
+    TFolder* fol = (TFolder*) Folder->FindObject(folder_name.data());
+    if (! fol) fol = Folder->AddFolder(folder_name.data(),folder_name.data());
+    Hist->crvc[i] = new CrvcHist_t();
+    crv_index.sel = i;
+    BookCrvcHistograms(Hist->crvc[i],&crv_index,fol);
+  }
 
   return 0;
 }
@@ -400,6 +452,8 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   int TCrvTimeAnaModule::FillCrvcHistograms(CrvcHist_t* Hist, TCrvCoincidenceCluster* Crvc, crvc_param_t* Crvcp) {
     // filling histograms: plot time differences between
     Hist->h_pes->Fill(Crvc->Pes()); //}
+
+    Hist->h_min_tc_crvc_dt->Fill(Crvcp->min_tc_crvc_dt);
     return 0; 
   }
 
@@ -452,7 +506,6 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 //-----------------------------------------------------------------------------
   int TCrvTimeAnaModule::FillCrvHistograms(CrvHist_t* Hist) {
 
-    Hist->h_ncrvc->Fill(fNCrvc);
     Hist->h_crvc_mask->Fill(fCrvcMask);
     
     int nhc = fEvdCrv->GetNHitCounters();
@@ -542,9 +595,13 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 
 //-----------------------------------------------------------------------------
   int TCrvTimeAnaModule::FillEventHistograms(EventHist_t* Hist) {
+
     Hist->h_ntrk->Fill(fNTracks);
     Hist->h_ngtrk->Fill(fNGoodTracks);
     Hist->h_ntrk15->Fill(fNTrk15);
+    Hist->h_ncrvc->Fill(fNCrvc);
+    Hist->h_ntc->Fill(fNTc);
+    Hist->h_ntc20->Fill(fNTc20);
 
     return 0;
   }
@@ -598,6 +655,12 @@ int TCrvTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
 //-----------------------------------------------------------------------------
 int TCrvTimeAnaModule::FillHistograms() {
 //-----------------------------------------------------------------------------
+// 0. fill event histograms
+//-----------------------------------------------------------------------------
+  FillEventHistograms(fHist->event[0]);
+  if (fNTrk15 > 0)  FillEventHistograms(fHist->event[1]);
+  if (fNTc20  > 0)  FillEventHistograms(fHist->event[2]);
+//-----------------------------------------------------------------------------
 // 1. fill track histograms
 //-----------------------------------------------------------------------------
   for (int i=0; i<fNTracks; i++) {
@@ -628,6 +691,15 @@ int TCrvTimeAnaModule::FillHistograms() {
 // fill CRV DT20 and DT31 histograms
 //-----------------------------------------------------------------------------
   FillCrvHistograms(fHist->crv[0]);
+
+//-----------------------------------------------------------------------------
+// fill CRVC histograms
+//-----------------------------------------------------------------------------
+  for (int i=0; i<fNCrvc; i++) {
+    TCrvCoincidenceCluster* crvc  = fCrvcBlock->Cluster(i);
+    crvc_param_t*           crvcp = &fListOfCrvcParam[i];
+    FillCrvcHistograms(fHist->crvc[0],crvc,crvcp);
+  }
 
   return 0;
 }
@@ -753,13 +825,22 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
 
   CalculateMissingTrkParameters();
 
+  fNTc20      = 0;
+  for (int i=0; i<fNTc; i++) {
+    TStnTimeCluster*  tc = fTcBlock->TimeCluster(i);
+    if (tc->NHits() >= 20) {
+      fNTc20++;
+    }
+  }
 //-----------------------------------------------------------------------------
 // deal with the CRV
 //-----------------------------------------------------------------------------
   float dxdt_prop[4] = {72., 0, 78., 0};
   
   fEvdCrv->Clear();
+
   fListOfCrvbParam.resize(fNCrvp);
+  fListOfCrvcParam.resize(fNCrvc);
 
   for (int i=0; i<fNCrvp; i++) {
     TCrvRecoPulse* p = fCrvpBlock->Pulse(i);
@@ -768,11 +849,25 @@ int TCrvTimeAnaModule::CalculateMissingParameters() {
 
   fCrvcMask = 0;
   for (int i=0; i<fNCrvc; i++) {
-    // TCrvCoincidenceCluster* crvc = fCrvcBlock->Cluster(i);
+    TCrvCoincidenceCluster* crvc  = fCrvcBlock->Cluster(i);
+    crvc_param_t*           crvcp = &fListOfCrvcParam[i];
+    crvcp->trk = nullptr;
+    crvcp->tc  = nullptr;
+    crvcp->min_tc_crvc_dt = 1.e12;
+
     int ind = fCrvcBlock->ClusterPulseIndex(i,0);
     TCrvRecoPulse* p = fCrvpBlock->Pulse(ind);            // each cluster chould have at least one
     int sector = TCrvNumerology::Instance()->GetSector(p->Sbid());
     fCrvcMask |= (1<<sector);
+
+    for (int itc=0; itc<fNTc; itc++) {
+      TStnTimeCluster* tc = fTcBlock->TimeCluster(itc);
+      float dt = tc->T0()-crvc->StartTime();
+      if (fabs(dt) < fabs(crvcp->min_tc_crvc_dt)) {
+        crvcp->min_tc_crvc_dt = dt;
+        crvcp->tc             = tc;
+      }
+    }
   }
 
   fNCloseCounters = 0;

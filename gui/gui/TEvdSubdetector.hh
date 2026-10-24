@@ -27,7 +27,7 @@ public:
   TEvdSubdetector(const char* Name,  TGeoShape* Shape, TGeoMedium* Medium,
                   int Color = kGreen+2, int Transparency = 0);
   
-  ~TEvdSubdetector();
+  ~TEvdSubdetector() override;
   
   void        AddSubdetector(TEvdSubdetector* sd, TGeoMatrix* Matrix = nullptr);
    

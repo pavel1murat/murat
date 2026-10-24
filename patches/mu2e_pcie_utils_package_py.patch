@@ -1,0 +1,13 @@
+diff --git a/spack_repo/mu2e_spack/packages/mu2e_pcie_utils/package.py b/spack_repo/mu2e_spack/packages/mu2e_pcie_utils/package.py
+index 9d197a4..f37cf78 100644
+--- a/spack_repo/mu2e_spack/packages/mu2e_pcie_utils/package.py
++++ b/spack_repo/mu2e_spack/packages/mu2e_pcie_utils/package.py
+@@ -88,7 +88,7 @@ class Mu2ePcieUtils(CMakePackage):
+     depends_on("canvas-root-io", when="+root")
+     depends_on("swig", when="+python")
+     depends_on("python", when="+python")
+-    depends_on("artdaq-suite")
++#    depends_on("artdaq-suite")
+ 
+     def cmake_args(self):
+         args = [

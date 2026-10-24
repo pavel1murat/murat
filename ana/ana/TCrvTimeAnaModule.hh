@@ -122,7 +122,9 @@ public:
   };
 
   struct crvc_param_t {
-    TStrTrack*  trk;                    // track, closest in time
+    TStrTrack*       trk;               // track, closest in time
+    TStnTimeCluster* tc;                // closest (in time) time cluster
+    float            min_tc_crvc_dt;
   };
   
   struct crvs_param_t {
@@ -201,6 +203,7 @@ public:
 //-----------------------------------------------------------------------------
   struct CrvcHist_t {
     TH1F*  h_pes;
+    TH1F*  h_min_tc_crvc_dt;         // to closest time cluster, ns
   };
   
   struct CrvsHist_t {
@@ -220,7 +223,6 @@ public:
     TH1F*       h_sbid;
     TH1F*       h_sector;
     TH1F*       h_nhc;                   // total number of counters with hits
-    TH1F*       h_ncrvc;                 // N(muon stub candidates)
     TH1F*       h_crvc_mask;             // clusters: sector mask : 0xf = stun 
     TH2F*       h_dt20_vs_sbid;          // CRV
     TH2F*       h_dt31_vs_sbid;          // CRV
@@ -233,6 +235,9 @@ public:
     TH1F*        h_ntrk;
     TH1F*        h_ngtrk;
     TH1F*        h_ntrk15;
+    TH1F*        h_ncrvc;                 // N(muon stub candidates)
+    TH1F*        h_ntc;
+    TH1F*        h_ntc20;
   };
   
   struct TrkHist_t {
@@ -295,6 +300,7 @@ public:
   int                       fNGoodTracks; // assume 0 or 1
   int                       fNTrk15;      // N(tracks) with N(hits) >= 15
   int                       fNTc;
+  int                       fNTc20;
   int                       fNCrvc;
   int                       fNCrvp;
   int                       fNCrvd;

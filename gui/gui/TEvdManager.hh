@@ -36,6 +36,7 @@ public:
 
 private:
   TEvdManager();        // configuration FCL - in .rootrc (EvdManager.ConfigFcl)
+  ~TEvdManager();
   
 public:
   static TEvdManager* Instance();
@@ -51,12 +52,11 @@ public:
   TEvdVisNode* GetNode(int I) { return (TEvdVisNode*) fListOfNodes->At(I); }
   TEvdView*    GetView(int I) { return (TEvdView*   ) fListOfViews->At(I); }
  
-  void  AddSubdetector(TEvdSubdetector* Sd) ;
-
   TEvdSubdetector* FindSubdetector(const char* Name);
 
-  int   AddView(TEvdView*    View);
-  int   AddNode(TEvdVisNode* Node);
+  int   AddNode       (TEvdVisNode*     Node);
+  int   AddView       (TEvdView*        View);
+  void  AddSubdetector(TEvdSubdetector* Sd) ;
 
   void  AddDataBlock(const char* Name, TObject* Block) {
     fListOfDataBlocks->Add(new TObjString(Name),Block);

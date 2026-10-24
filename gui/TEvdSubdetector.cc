@@ -19,6 +19,7 @@ namespace murat {
       fCopyNumber(CopyNumber),
       fListOfSubdetectors(new TObjArray())
   {
+    fListOfSubdetectors->SetOwner(kFALSE);
   }
 
   //-----------------------------------------------------------------------------
@@ -36,8 +37,8 @@ namespace murat {
 
   //-----------------------------------------------------------------------------
   TEvdSubdetector::~TEvdSubdetector() {
-    fListOfSubdetectors->Delete();
-    delete fListOfSubdetectors;
+    //    fListOfSubdetectors->Delete();
+    // delete fListOfSubdetectors;
   }
 
   //-----------------------------------------------------------------------------

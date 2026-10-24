@@ -55,22 +55,6 @@ ClassImp(murat::TEvdManager)
 // ============================================================================
 namespace murat {
 
-// ============================================================================
-// Main entry point
-// The DiskCalorimeter must already be initialized.
-// ============================================================================
-void TEvdManager::AddSubdetector(TEvdSubdetector* Sd) {
-  // at this point internal subdetector tree of Sd is already built
-  
-  auto top = fGeoManager->GetTopNode();
-  // all detectors are different ... this place needs work
-  // the subdetector is positioned in a global reference frame
-  top->GetVolume()->AddNode(Sd,Sd->CopyNumber(),new TGeoTranslation());
-
-  fListOfSubdetectors->Add(Sd);
-
-}
-
 // //-----------------------------------------------------------------------------
 // void TEvdManager::Draw(Option_t* Opt) {
 //   auto top = fGeoManager->GetTopNode();  // minimize geometry knowledge by Vis manger 
@@ -119,6 +103,10 @@ TEvdManager::TEvdManager() {
   
   fGeoManager->SetTopVolume(world);
 }
+
+//-----------------------------------------------------------------------------
+  TEvdManager::~TEvdManager() {
+  }
   
 //-----------------------------------------------------------------------------
 // nodes have unique names, each of them could be a non-trivial object
@@ -142,6 +130,18 @@ int TEvdManager::AddNode(TEvdVisNode* Node) {
   
   return rc;
 }
+
+  //-----------------------------------------------------------------------------
+  void TEvdManager::AddSubdetector(TEvdSubdetector* Sd) {
+  // at this point internal subdetector tree of Sd is already built
+  
+    auto top = fGeoManager->GetTopNode();
+    // all detectors are different ... this place needs work
+    // the subdetector is positioned in a global reference frame
+    top->GetVolume()->AddNode(Sd,Sd->CopyNumber(),new TGeoTranslation());
+    
+    fListOfSubdetectors->Add(Sd);
+  }
 
 //-----------------------------------------------------------------------------
 // views are unique, make sure not adding a view the second time

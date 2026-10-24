@@ -1,0 +1,25 @@
+diff --git a/spack_repo/mu2e_spack/packages/offline/package.py b/spack_repo/mu2e_spack/packages/offline/package.py
+index ef2c227..399e230 100644
+--- a/spack_repo/mu2e_spack/packages/offline/package.py
++++ b/spack_repo/mu2e_spack/packages/offline/package.py
+@@ -75,7 +75,8 @@ class Offline(CMakePackage):
+     depends_on("artdaq-core-mu2e@v4_00_00:,develop", when="@12.00.00:,develop")
+     depends_on("art-root-io")
+     depends_on("kinkal")
+-    depends_on("root@6.38:", when="@13.38:,main,develop")
++#    depends_on("root@6.38:", when="@13.38:,main,develop")
++    depends_on("root@6.36:", when="@13.38:,main,develop")
+ 
+     depends_on("kinkal@3:", when="@11.01.00:")
+     depends_on("kinkal@3.0.1", when="@11.02.00")
+@@ -89,8 +90,8 @@ class Offline(CMakePackage):
+     depends_on("kinkal@3.7.0,develop", when="@develop")  # UPDATE AS NEEDED
+     depends_on("kinkal@3.7.0,main", when="@main")  # UPDATE AS NEEDED
+ 
+-    depends_on("btrk", when="@:13.00.09")
+-    depends_on("gallery")
++    # depends_on("btrk", when="@:13.00.09")
++    # depends_on("gallery")
+     depends_on("cry", when="+g4")
+     depends_on("swig", type="build")
+     depends_on("gsl")

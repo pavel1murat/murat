@@ -1,8 +1,11 @@
 #+startup:fold
-
-* GeometryService/src/TrackerMaker_cc patch :
+> known patches
+* directory: file:./
+* GeometryService/src/TrackerMaker_cc         : patch: file:./GeometryService_src_TrackerMaker_cc.patch
 - need to position wires properly in the event display w/o initializing the GeometryService
-* CosmicsReco/src/SImpleTimeCluster_module_cc:.patch
+* CosmicsReco/src/SimpleTimeCluster_module.cc : patch: file:./CosmicReco_src_SimpleTimeCluster_module_cc.patch
 - reduce junk by requiring 2 hits above 0.5 keV in the time cluster
-* CosmicReco/fcl/prolog.fcl
+* CosmicReco/fcl/prolog.fcl                   : patch: file:./CosmicReco_fcl_prolog_fcl.patch            
 - set defaults
+* mu2e_pcie_utils_package_py.patch            : patch: file:./mu2e_pcie_utils_package_py.patch
+* offline/package.py                          : patch: file:./offline_package_py.patch

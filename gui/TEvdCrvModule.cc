@@ -10,11 +10,11 @@ namespace murat {
   TEvdCrvModule::TEvdCrvModule(const char* Name, int CopyNumber): TEvdSubdetector(Name,CopyNumber) {
     fNHits        = 0;
     fListOfLayers = new TObjArray();
+    fListOfLayers->SetOwner(kFALSE);
   }
 
 //-----------------------------------------------------------------------------
   TEvdCrvModule::~TEvdCrvModule() {
-    fListOfLayers->Delete();
     delete fListOfLayers;
   }
 

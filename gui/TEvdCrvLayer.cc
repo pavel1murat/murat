@@ -7,14 +7,16 @@ ClassImp(murat::TEvdCrvLayer)
 
 namespace murat {
 //-----------------------------------------------------------------------------
+// counters are TGeoVolumeAssemblies and are registered with and deleted by TGeoManager
+//-----------------------------------------------------------------------------
   TEvdCrvLayer::TEvdCrvLayer(const char* Name, int CopyNumber): TEvdSubdetector(Name,CopyNumber) {
   fNHits = 0;
   fListOfCounters = new TObjArray();
+  fListOfCounters->SetOwner(kFALSE);
 }
 
 //-----------------------------------------------------------------------------
 TEvdCrvLayer::~TEvdCrvLayer() {
-  fListOfCounters->Delete();
   delete fListOfCounters;
 }
 

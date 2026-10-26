@@ -39,8 +39,8 @@ public:
 
 				// called by TEvdManager::DisplayEvent. a must to overload
 
+  bool                Initialized() override;
   virtual int         InitEvent  () override;
-  virtual bool        Initialized() override;
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------

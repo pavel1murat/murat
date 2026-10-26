@@ -15,6 +15,7 @@
 
 #include "murat/gui/TEvdManager.hh"
 
+#include "Stntuple/obj/TCrvDigiBlock.hh"
 #include "Stntuple/obj/TCrvPulseBlock.hh"
 
 ClassImp(murat::TEvdCrv)
@@ -80,6 +81,41 @@ namespace murat {
     sector->IncrementNHits();
 
     int lay = counter->fLayerID;
+
+    if (found == 0) {
+      fListOfHitCounters->Add(counter);
+      sector->fNHitCountersTot++;
+      sector->fNHitCounters[lay] += 1;
+      if (sector->fNHitCounters[lay] == 1) {
+        sector->fNHitLayers++;
+      }
+    }
+  }
+
+
+  //-----------------------------------------------------------------------------
+  void TEvdCrv::AddDigi(TCrvDigi* Digi) {
+    TEvdCrvSector*  sector (nullptr);
+    TEvdCrvModule*  module (nullptr);
+    TEvdCrvLayer*   layer  (nullptr);
+    TEvdCrvCounter* counter(nullptr);
+
+    int found(0);
+    int sbid = Digi->Sbid();
+    
+    int nhc = GetNHitCounters();
+    for (int ihc=0; ihc<nhc; ihc++) {
+      TEvdCrvCounter* c = GetHitCounter(ihc);
+      if (c->GetSbid() == sbid) {
+        found = 1;
+        break;
+      }
+    }
+
+    GetCounterLocation(sbid,sector,module,layer,counter);
+    counter->AddDigi(Digi);
+
+    int lay = counter->GetLayerID();
 
     if (found == 0) {
       fListOfHitCounters->Add(counter);
@@ -311,8 +347,10 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
 //-----------------------------------------------------------------------------
   int TEvdCrv::InitEvent() {
     int rc(0);
-    
-    auto vm = TEvdManager::Instance();  // has to be initialized at this point
+
+    if (Initialized()) return 0;
+
+    auto vm = TEvdManager::Instance();
 
     TEvdCrv* crv = (TEvdCrv*) vm->FindSubdetector("CRV");
 
@@ -331,6 +369,16 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
       AddRecoPulse(pulse);
     }
     
+    TCrvDigiBlock* crvd = (TCrvDigiBlock*) vm->GetDataBlock("CrvdBlock");
+    
+    int ndigis = crvd->NDigis();
+    for (int i=0; i<ndigis; i++) {
+      TCrvDigi* digi = crvd->Digi(i);
+      AddDigi(digi);
+    }
+
+    SetInitialized();
+  
     return rc;
   }
 

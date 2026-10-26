@@ -11,54 +11,59 @@
 #include "TVector3.h"
 #include "TCanvas.h"
 
+#include "TGLViewer.h"
+
 #include "murat/gui/TEvdVisNode.hh"
 
 namespace murat {
   
 class TEvdView: public TNamed {
-protected:
-  int                 fType;            // view type
-  int                 fIndex;           // for calorimeter - 2 views, for example
-  void*               fMother;          // non-null. if in the local ref system of some object
-  TCanvas*            fCanvas;          // each view is displayed in its canvas ==NOT OWNED==
+  //protected:
+public:
+  //  int                    fType;         // view type
+  int                    fIndex;        // for calorimeter - 2 views, for example
+  int                    fOpen;         // 1 if the window is open
+  void*                  fMother;       // non-null. if in the local ref system of some object
 
-  static int          fgDebugLevel;
-  
-  TMarker*            fCenter;
+  static int             fgDebugLevel;
+   
+  TMarker*               fCenter;
 
-  TObjArray*          fListOfNodes;	// list of TEvdVisNode's
+  TObjArray*             fListOfNodes;	// list of TEvdVisNode's
+  TCanvas*               fCanvas;       // each view has a pad corresponging to it [NOT OWNED]
+
+  TGLViewer::ECameraType fCameraType;
+  TGLViewer*             fViewer;
 
 protected:
   float     fTMin;
   float     fTMax;
 
 public:
-  TEvdView(const char* Name, int Type = -1, int Index = -1); 
+  TEvdView(const char* Name, TGLViewer::ECameraType Type, int Index = -1); 
 
-  TEvdView(const char* Name, int Type, int Index, const char* Title);
+  TEvdView(const char* Name, TGLViewer::ECameraType Type, int Index, const char* Title);
 
   virtual ~TEvdView();
 //-----------------------------------------------------------------------------
 // accessors
 //-----------------------------------------------------------------------------
-  int           Type () { return fType;  }
+  // int           Type () { return fType;  }
   int           Index() { return fIndex; }
 
   void*         GetMother()      { return fMother; }
   int           GetNNodes()      { return fListOfNodes->GetEntriesFast(); }
   TEvdVisNode*  GetNode  (int I) { return (TEvdVisNode*) fListOfNodes->UncheckedAt(I);   }
   TObjArray*    GetListOfNodes() { return fListOfNodes; }
+  TGLViewer*    GetViewer()      { return fViewer; }
   
-  TCanvas*      GetCurrentOpenGLCanvas();
-
   void          AddNode(TEvdVisNode* Node) { fListOfNodes->Add(Node); }
 
   bool          IsOpen() { return (fCanvas != nullptr); }
 
-  void          Update() {
-    fCanvas->Modified();
-    // fCanvas->Update();   // don't seem to need this one
-  }
+  int           Open();
+
+  void          Update();
 //-----------------------------------------------------------------------------
 // setters
 //-----------------------------------------------------------------------------
@@ -67,7 +72,7 @@ public:
 
   void          SetMother     (void* Mother) { fMother = Mother; };
   void          SetTimeWindow (float TMin, float TMax);  // *MENU* 
-  void          SetType       (int Type ) { fType  = Type;  } 
+  //  void          SetType       (int Type ) { fType  = Type;  } 
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------

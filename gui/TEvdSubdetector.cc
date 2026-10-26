@@ -83,4 +83,17 @@ namespace murat {
       GetVolume()->AddNode(sd, sd->CopyNumber(), Matrix);
     }
   }
+
+
+  //-----------------------------------------------------------------------------
+  void TEvdSubdetector::SetInitialized() {
+
+    auto vm = TEvdManager::Instance();
+    
+    TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->GetDataBlock("HeaderBlock");
+    f_EventNumber  = hb->EventNumber ();
+    f_RunNumber    = hb->SubrunNumber();
+    f_SubrunNumber = hb->RunNumber   ();
+  }
+
 }

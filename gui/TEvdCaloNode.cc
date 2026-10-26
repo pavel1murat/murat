@@ -11,7 +11,7 @@
 namespace murat {
 
 //-----------------------------------------------------------------------------
-  TEvdCaloNode::TEvdCaloNode(const char* Name) {
+  TEvdCaloNode::TEvdCaloNode(const char* Name) :TEvdVisNode(Name) {
     
     auto vm = TEvdManager::Instance();  // has to be initialized at this point
     
@@ -47,7 +47,7 @@ namespace murat {
     // auto vm = TEvdManager::Instance();
     
     
-    if ((fCaloHitBlock->EventNumber ()  == f_EventNumber) and
+    if ((fCaloHitBlock->EventNumber () == f_EventNumber) and
         (fCaloHitBlock->SubrunNumber() == f_SubrunNumber) and
         (fCaloHitBlock->RunNumber   () == f_RunNumber   )     ) {
       initialized = true;

@@ -13,6 +13,7 @@
 #include "Offline/GeometryService/inc/TrackerMaker.hh"
 
 #include "murat/gui/TEvdSubdetector.hh"
+#include "murat/gui/TEvdManager.hh"
 
 ClassImp(murat::TEvdTracker)
 
@@ -215,6 +216,18 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
   std::cout << std::format("-- END: TEvdTracker::InitGeometry\n");
   return 0;
 }
+
+
+  //-----------------------------------------------------------------------------
+  int TEvdTracker::InitEvent() {
+    auto vm = TEvdManager::Instance();
+
+    if (Initialized()) return 0;
+
+    SetInitialized();
+  
+    return 0;
+  }
 
   //-----------------------------------------------------------------------------
   void TEvdTracker::Print(Option_t* Opt) const {

@@ -21,7 +21,7 @@
 namespace murat {
 
 //-----------------------------------------------------------------------------
-  TEvdDetNode::TEvdDetNode(const char* Name) : TEvdVisNode() {
+  TEvdDetNode::TEvdDetNode(const char* Name) : TEvdVisNode(Name) {
     
     auto vm = TEvdManager::Instance();  // has to be initialized at this point
     

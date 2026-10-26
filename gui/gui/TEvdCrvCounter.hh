@@ -2,8 +2,10 @@
 #ifndef __murat_gui_TEvdCrvCounter__
 #define __murat_gui_TEvdCrvCounter__
 
+#include "TCanvas.h"
 #include "TGeoVolume.h"
 #include "Stntuple/obj/TCrvRecoPulse.hh"
+#include "Stntuple/obj/TCrvDigi.hh"
 
 namespace murat {
 //-----------------------------------------------------------------------------
@@ -19,7 +21,11 @@ public:
   int         fLayerID;
   int         fSbid;
   TObjArray*  fListOfHits;           // pointers to TCrvRecoPulses ==NOT OWNED==
-  TGeoMatrix* fGeoMatrix;           // ==NOT OWNED==
+  TObjArray*  fListOfDigis;          // pointers to TCrvDigi's     ==NOT OWNED==
+  TGeoMatrix* fGeoMatrix;            //                            ==NOT OWNED==
+
+  TObjArray*  fListOfHistograms;     // if waveforms are displayed ==OWNED==
+  static TCanvas* fgCanvasWf;        // canvas for displaying the waveforms
 
   TEvdCrvCounter(const char* Name, TGeoShape* Shape, TGeoMedium* Medium);
 
@@ -33,7 +39,8 @@ public:
   int GetLayerID   () { return fLayerID;  }
   int GetSbid      () { return fSbid; }
 
-  void AddRecoPulse(TCrvRecoPulse* Hit);
+  void AddRecoPulse(TCrvRecoPulse* Hit );
+  void AddDigi     (TCrvDigi*      Digi);
 
   int GetNRecoPulses() { return fListOfHits->GetEntriesFast(); }
 
@@ -48,7 +55,8 @@ public:
   virtual void Clear (Option_t* Opt = "") override;
   virtual void Print (Option_t* Opt = "") const override;  // *MENU*
 
-  virtual void PrintA()                   const ;          // *MENU*
+  virtual void PrintRecoPulses() ;                         // *MENU*
+  void         PlotWaveforms();                            // *MENU*
 
   ClassDefOverride(murat::TEvdCrvCounter,0)
 };

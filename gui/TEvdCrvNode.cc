@@ -10,18 +10,17 @@
 namespace murat {
 
 //-----------------------------------------------------------------------------
-  TEvdCrvNode::TEvdCrvNode(const char* Name) {
+  TEvdCrvNode::TEvdCrvNode(const char* Name) : TEvdVisNode(Name) {
     
     auto vm = TEvdManager::Instance();  // has to be initialized at this point
     
     TEvdCrv* crv = (TEvdCrv*) vm->FindSubdetector("CRV");
 
-    // prepare flat view of the two disks
     fAssembly = new TGeoVolumeAssembly("crv");
     int ns = crv->GetNSectors();
     
     for (int i=0; i<ns; i++) {
-      // need to figure the transformation so all bars woudl be visible
+      // need to figure the transformation so all bars would be visible
       fAssembly->AddNode(crv->GetSector(i),1, new TGeoTranslation(-800, 0, 0));
     }
   }
@@ -49,7 +48,8 @@ namespace murat {
 
     // auto vm = TEvdManager::Instance();
     
-    if ((fCrvpBlock->EventNumber () == f_EventNumber ) and
+    
+    if ((fCrvpBlock->EventNumber () == f_EventNumber) and
         (fCrvpBlock->SubrunNumber() == f_SubrunNumber) and
         (fCrvpBlock->RunNumber   () == f_RunNumber   )     ) {
       initialized = true;

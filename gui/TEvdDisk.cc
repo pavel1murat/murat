@@ -9,20 +9,20 @@ ClassImp(murat::TEvdDisk)
 namespace murat {
 
 TEvdDisk::TEvdDisk() : TEvdSubdetector() {
-  fMu2eDisk = nullptr;
+  fMu2eDisk       = nullptr;
   fListOfCrystals = nullptr;
 }
 //-----------------------------------------------------------------------------
 TEvdDisk::TEvdDisk(const char* Name, TGeoShape* Shape, TGeoMedium* Medium):
   TEvdSubdetector(Name,Shape,Medium) {
-  fMu2eDisk = nullptr;
+  fMu2eDisk       = nullptr;
   fListOfCrystals = new TObjArray();
+  fListOfCrystals->SetOwner(kFALSE);
 }
 
 //-----------------------------------------------------------------------------
 TEvdDisk::~TEvdDisk() {
   if (fListOfCrystals) {
-    fListOfCrystals->Delete();
     delete fListOfCrystals;
   }
 }

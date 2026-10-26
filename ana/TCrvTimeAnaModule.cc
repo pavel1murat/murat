@@ -18,6 +18,7 @@
 #include "TPad.h"
 #include "TEnv.h"
 #include "TSystem.h"
+#include "TGLViewer.h"
 
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
@@ -1250,16 +1251,20 @@ int TCrvTimeAnaModule::PrintTracks() {
 // CRV-only view
 //-----------------------------------------------------------------------------
     TEvdCrvNode* node = new TEvdCrvNode("crv_node");
-    TEvdCrvView* view = new TEvdCrvView("crv_view");
+    TEvdCrvView* view = new TEvdCrvView("crv_zy_view",TGLViewer::kCameraOrthoZOY);
+    view->AddNode(node);
+    vm->AddView(view);
+
+    view = new TEvdCrvView("crv_xy_view",TGLViewer::kCameraOrthoXOY);
     view->AddNode(node);
     vm->AddView(view);
 //-----------------------------------------------------------------------------
 // 3D detector view
 //-----------------------------------------------------------------------------
-    TEvdDetNode* det_node = new TEvdDetNode("det_node");
-    TEvdView*    det_view = new TEvdView   ("det_view");
-    det_view->AddNode(det_node);
-    vm->AddView(det_view);
+    // TEvdDetNode* det_node = new TEvdDetNode("det_node");
+    // TEvdView*    det_view = new TEvdView   ("det_3D_view",TGLViewer::kCameraPerspXOY);
+    // det_view->AddNode(det_node);
+    // vm->AddView(det_view);
 
     return rc;
   }

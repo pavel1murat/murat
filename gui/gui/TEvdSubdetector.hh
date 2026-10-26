@@ -13,9 +13,9 @@ public:
   TString     fName;
   int         fCopyNumber;                 // for a bar
 
-  int         f_EventNumber{-1};
+  int         f_EventNumber {-1};
   int         f_SubrunNumber{-1};
-  int         f_RunNumber{-1};
+  int         f_RunNumber   {-1};
 
   TObjArray*  fListOfHits;                 // if null pointer, then no hits
 
@@ -43,6 +43,7 @@ public:
   virtual int InitEvent(); // maybe .. there could be multiple ways of initializing
 
   void        SetCopyNumber(int N) { fCopyNumber = N; }
+  void        SetInitialized();
 
   //  TGeoVolume* TopVolume() { return fTopVolume; }
 //-----------------------------------------------------------------------------

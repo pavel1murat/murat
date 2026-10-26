@@ -234,6 +234,24 @@ TEvdSubdetector* TEvdManager::FindSubdetector(const char* Name) {
 }
 
 //-----------------------------------------------------------------------------
+// nodes have unique names, each of them could be a non-trivial object
+//-----------------------------------------------------------------------------
+TEvdView* TEvdManager::FindView(const char* Name) {
+
+  TEvdView* found(nullptr);
+
+  TIter next(fListOfViews);
+  while (TEvdView* view = (TEvdView*) next()) {
+    if (strcmp(view->GetName(),Name) == 0) {
+      found = view;
+      break;
+    }
+  }
+
+  return found;
+}
+
+//-----------------------------------------------------------------------------
 // each view has enough information to initialize itself
 //-----------------------------------------------------------------------------
   int TEvdManager::InitEvent() {
@@ -241,12 +259,10 @@ TEvdSubdetector* TEvdManager::FindSubdetector(const char* Name) {
   int nn = GetNNodes();
   for (int i=0; i<nn; i++) {
     TEvdVisNode* node = GetNode(i);
-    //    if (node->Initialized()) continue;
     node->InitEvent();
   }
   return rc;
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -273,6 +289,16 @@ int TEvdManager::InitGeometry() {
   fGeoManager->CloseGeometry();
   return 0;
 }
+
+//-----------------------------------------------------------------------------
+  int TEvdManager::Update() {
+    int rc(0);
+    TIter next(fListOfViews);
+    while (TEvdView* view = (TEvdView*) next()) {
+      view->Update();
+    }
+    return rc;
+  }
 
 //-----------------------------------------------------------------------------
 TEvdManager* TEvdManager::Instance() {

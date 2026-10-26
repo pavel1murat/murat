@@ -21,6 +21,7 @@
 #include "TPad.h"
 #include "TEnv.h"
 #include "TSystem.h"
+#include "TGLViewer.h"
 
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
@@ -907,7 +908,7 @@ void TPanelDtAnaModule::FitPanelTimeOffsets(TH2F* H_DtVsPanel, float Dt, int Pri
 // 3D detector view
 //-----------------------------------------------------------------------------
     TEvdDetNode* det_node = new TEvdDetNode("det_node");
-    TEvdView*    det_view = new TEvdView   ("det_view");
+    TEvdView*    det_view = new TEvdView   ("det_view",TGLViewer::kCameraPerspXOY);
     det_view->AddNode(det_node);
     vm->AddView(det_view);
 

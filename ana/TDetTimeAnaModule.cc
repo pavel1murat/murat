@@ -18,6 +18,7 @@
 #include "TPad.h"
 #include "TEnv.h"
 #include "TSystem.h"
+#include "TGLViewer.h"
 
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
@@ -977,14 +978,14 @@ int TDetTimeAnaModule::PrintTracks() {
 // calorimeter view
 //-----------------------------------------------------------------------------
     TEvdCaloNode* node = new TEvdCaloNode("calo_node");
-    TEvdCaloView*    view = new TEvdCaloView("calo_view");
+    TEvdCaloView*    view = new TEvdCaloView("calo_view",TGLViewer::kCameraOrthoXOY);
     view->AddNode(node);
     vm->AddView(view);
 //-----------------------------------------------------------------------------
 // 3D detector view
 //-----------------------------------------------------------------------------
     TEvdDetNode* det_node = new TEvdDetNode("det_node");
-    TEvdView* det_view       = new TEvdView("det_view");
+    TEvdView*    det_view = new TEvdView   ("det_view",TGLViewer::kCameraPerspXOY);
     det_view->AddNode(det_node);
     vm->AddView(det_view);
 

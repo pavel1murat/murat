@@ -53,6 +53,7 @@ public:
   TEvdView*    GetView(int I) { return (TEvdView*   ) fListOfViews->At(I); }
  
   TEvdSubdetector* FindSubdetector(const char* Name);
+  TEvdView*        FindView       (const char* Name);
 
   int   AddNode       (TEvdVisNode*     Node);
   int   AddView       (TEvdView*        View);
@@ -69,6 +70,7 @@ public:
   }
 
   int   DisplayEvent();
+  int   Update();                       // draw next event..
   
   int   InitGeometry();
 

@@ -13,13 +13,13 @@
 #include "murat/gui/TEvdView.hh"
 
 namespace murat {
-  
+
 class TEvdCrvView: public TEvdView {
 
 public:
-  TEvdCrvView(const char* Name, int Type = -1, int Index = -1); 
+  TEvdCrvView(const char* Name, TGLViewer::ECameraType Type, int Index = -1); 
 
-  TEvdCrvView(const char* Name, int Type, int Index, const char* Title);
+  TEvdCrvView(const char* Name, TGLViewer::ECameraType Type, int Index, const char* Title);
 
   virtual ~TEvdCrvView();
 //-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@ public:
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------
-  virtual void Draw(Option_t* Opt = "") override;
+//  virtual void Draw(Option_t* Opt = "") override;
   
   // virtual void  Paint               (Option_t* option = "") override;
   // virtual void  Print               (Option_t* option = "") const override;  // *MENU* 

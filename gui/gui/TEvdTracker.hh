@@ -20,7 +20,8 @@ public:
     return fStation[Station]->fPlane[Plane]->fPanel[Panel];
   }
 
-  int InitGeometry(const char* Fn);
+  virtual int  InitEvent   ()               override;
+  virtual int  InitGeometry(const char* Fn) override;
 //-----------------------------------------------------------------------------
 // overloaded methods of TObject
 //-----------------------------------------------------------------------------

@@ -171,18 +171,9 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 //-----------------------------------------------------------------------------
 int TEvdCalorimeter::InitEvent() {
 
+  if (Initialized()) return 0;
+
   auto vm = TEvdManager::Instance();
-
-  TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->GetDataBlock("HeaderBlock");
-
-  int evn = hb->EventNumber ();
-  int srn = hb->SubrunNumber();
-  int run = hb->RunNumber   ();
-  
-  if ((f_EventNumber == evn) and (f_SubrunNumber == srn) and (f_RunNumber == run)) {
-    // already initialized for this event
-    return 0;
-  }
 
   // reset colors
   for (int i=0; i<2; i++) {
@@ -218,9 +209,7 @@ int TEvdCalorimeter::InitEvent() {
     }
   }
 
-  f_RunNumber    = run;
-  f_SubrunNumber = srn;
-  f_EventNumber  = evn;
+  SetInitialized();
   
   return 0;
 }

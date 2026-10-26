@@ -10,6 +10,7 @@
 #include "murat/gui/TEvdSubdetector.hh"
 
 class TCrvRecoPulse;
+class TCrvDigi;
 
 namespace murat {
 
@@ -29,6 +30,7 @@ public:
   ~TEvdCrv();
 
   void AddRecoPulse(TCrvRecoPulse* Pulse);
+  void AddDigi     (TCrvDigi*      Digi);
 
   int GetNSectors() { return fNSectors; }
 
@@ -47,8 +49,8 @@ public:
   // CRV 'subdetectors' are sectors
   TEvdCrvSector* GetSector(int I) { return (TEvdCrvSector*) fListOfSubdetectors->At(I); }
 
+  virtual int    InitEvent()                  override;
   virtual int    InitGeometry(const char* Fn) override;
-  virtual int    InitEvent() override;
 
   // virtual void   Draw (Option_t* Opt = "") override ;
   virtual void   Clear(Option_t* Opt = "") override ;

@@ -8,12 +8,14 @@
 #include "murat/ana/TColl1DoseAnaModule.hh"
 #include "murat/ana/TColl3DoseAnaModule.hh"
 #include "murat/ana/TCosmicsAnaModule.hh"
+#include "murat/ana/TCrvTcAnaModule.hh"
 #include "murat/ana/TCrvTimeAnaModule.hh"
 #include "murat/ana/TDetTimeAnaModule.hh"
 #include "murat/ana/TDegraderRpcAnaModule.hh"
 #include "murat/ana/TDioCalibModule.hh"
 #include "murat/ana/TDoseAnaModule.hh"
 #include "murat/ana/TEmuAnaModule.hh"
+#include "murat/ana/TEventDumpModule.hh"
 #include "murat/ana/TFilterModule.hh"
 #include "murat/ana/TFunAnaModule.hh"
 #include "murat/ana/TG4ValidationModule.hh"
@@ -109,9 +111,11 @@ namespace murat {
   TCaloTimeAnaModule*      m_calt   = NULL;
   TCosmicsAnaModule*       m_cos    = NULL;
   TClusterAnaModule*       m_cls    = NULL;
+  TCrvTcAnaModule*         m_ctc    = NULL;
   TCrvTimeAnaModule*       m_crvt   = NULL;
   TDegraderRpcAnaModule*   m_drpc   = NULL;
   TDetTimeAnaModule*       m_det    = NULL;
+  TEventDumpModule*        m_dump   = NULL;
   TEmuAnaModule*           m_emu    = NULL;
   TFilterModule*           m_filter = NULL;
   TFunAnaModule*           m_fun    = NULL;

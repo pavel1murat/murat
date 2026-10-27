@@ -229,6 +229,7 @@ public:
     TH2F*       h_dt1234_vs_sbid;        // CRV
     TH2F*       h_pes_vs_chid;
     TH2F*       h_ped_vs_chid;
+    TH2F*       h_fs_vs_chid;
   };
 
   struct EventHist_t {

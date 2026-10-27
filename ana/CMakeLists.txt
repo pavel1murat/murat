@@ -21,10 +21,12 @@ set (include_files
   TAnaModule.hh TBeamFlashAnaModule.hh TCalAnaModule.hh TCaloDose.hh TCaloTimeRes.hh
   TClusterAnaModule.hh TColl1DoseAnaModule.hh TColl3DoseAnaModule.hh TCosmicsAnaModule.hh
   TCaloTimeAnaModule.hh
-  TCrvTimeAnaModule.hh
+  TCrvTimeAnaModule.hh TCrvTcAnaModule.hh
   TDegraderRpcAnaModule.hh
   TDetTimeAnaModule.hh
-  TDioCalib.hh TDioCalibModule.hh TDoseAnaModule.hh TEmuAnaModule.hh
+  TDioCalib.hh TDioCalibModule.hh TDoseAnaModule.hh
+  TEmuAnaModule.hh
+  TEventDumpModule.hh
   TFilterModule.hh TFitDioRcSpectrum.hh TFunAnaModule.hh TG4ValidationModule.hh TGenAnaModule.hh
   THelixAnaModule.hh TMomscaleAnaModule.hh TMuonStopAnaModule.hh
   TPanelDtAnaModule.hh
@@ -44,18 +46,22 @@ set (source_files
   TVDetAnaModule.cc TTsMisalignment.cc TTrackerDose.cc TTriggerAnaModule.cc TTrackCompModule.cc
   TTrackPidAnaModule.cc TTrackRecoEffAnaModule.cc TTrackStrawHitAnaModule.cc 
   TTrackAnaModule.cc TSpmcAnaModule.cc TStrawHitAnaModule.cc TPolFitSpectrum.cc TSimpAnaModule.cc
-  TMomscaleAnaModule.cc TMuonStopAnaModule.cc
   TPanelDtAnaModule.cc
   TPidAnaModule.cc TPipenuAnaModule.cc TG4ValidationModule.cc
-  TGenAnaModule.cc THelixAnaModule.cc TEmuAnaModule.cc TFilterModule.cc TFitDioRcSpectrum.cc
+  TGenAnaModule.cc THelixAnaModule.cc
+  TFitDioRcSpectrum.cc
   TCaloTimeAnaModule.cc
-  TCrvTimeAnaModule.cc
+  TCrvTimeAnaModule.cc  TCrvTcAnaModule.cc
   TDegraderRpcAnaModule.cc
   TDetTimeAnaModule.cc
   TDioCalib.cc TDioCalibModule.cc TDoseAnaModule.cc
+  TEmuAnaModule.cc
+  TEventDumpModule.cc
+  TFilterModule.cc
   TFunAnaModule.cc
   TColl1DoseAnaModule.cc TColl3DoseAnaModule.cc TCosmicsAnaModule.cc TCalAnaModule.cc TCaloDose.cc
   TCaloTimeRes.cc TClusterAnaModule.cc TBeamFlashAnaModule.cc SConscript TAnaModule.cc
+  TMomscaleAnaModule.cc TMuonStopAnaModule.cc
   InitVirtualDetectors.cc
 )
 

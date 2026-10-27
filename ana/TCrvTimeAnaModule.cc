@@ -195,6 +195,11 @@ int TCrvTimeAnaModule::BookCrvHistograms(CrvHist_t* Hist, CrvIndex_t* Index, TFo
   title = std::format("{} : PEdestal vs ChID",prefix);
   fBookHist->HBook2F(Hist->h_ped_vs_chid,name.data(),title.data(),2400,0,2400,400,1600,2400,Folder);
 
+  // first waveform sample vs chid
+  name  = "fc_vs_chid";
+  title = std::format("{} : first WF sample vs ChID",prefix);
+  fBookHist->HBook2F(Hist->h_fs_vs_chid,name.data(),title.data(),2400,0,2400,500,1800,2300,Folder);
+
 //-----------------------------------------------------------------------------
 // CRV histogram sets
 //-----------------------------------------------------------------------------
@@ -508,6 +513,12 @@ int TCrvTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   int TCrvTimeAnaModule::FillCrvHistograms(CrvHist_t* Hist) {
 
     Hist->h_crvc_mask->Fill(fCrvcMask);
+
+    for (int i=0; i<fNCrvd; i++) {
+      TCrvDigi* crvd = fCrvdBlock->Digi(i);
+      int adc0 = crvd->Adc()[0];
+      Hist->h_fs_vs_chid->Fill(crvd->Chid(),adc0);
+    }
     
     int nhc = fEvdCrv->GetNHitCounters();
 
@@ -1066,6 +1077,7 @@ int TCrvTimeAnaModule::Event(int IEntry) {
 // 
 //-----------------------------------------------------------------------------
   fNCrvc         = fCrvcBlock->NClusters();
+  fNCrvd         = fCrvdBlock->NDigis();
   fNCrvp         = fCrvpBlock->NPulses();
   fNTc           = fTcBlock->NTimeClusters();
   //  fNCaloClusters = fCaloClusterBlock->NClusters();

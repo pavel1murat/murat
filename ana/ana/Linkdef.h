@@ -42,7 +42,9 @@
 
 #pragma link C++ class murat::TCosmicsAnaModule;
 
+#pragma link C++ class murat::TCrvTcAnaModule;
 #pragma link C++ class murat::TCrvTimeAnaModule;
+
 #pragma link C++ class murat::TDetTimeAnaModule;
 
 #pragma link C++ class murat::TDegraderRpcAnaModule;
@@ -52,7 +54,11 @@
 #pragma link C++ class TDioCalibModule::TrackPar_t;
 
 #pragma link C++ class TDoseAnaModule;
+
 #pragma link C++ class murat::TEmuAnaModule;
+
+#pragma link C++ class murat::TEventDumpModule;
+
 #pragma link C++ class murat::TFilterModule;
 #pragma link C++ class TFitDioRcSpectrum;
 

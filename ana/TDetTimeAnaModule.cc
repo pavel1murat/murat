@@ -7,7 +7,8 @@
 //  2  : rejected events
 //  3  : N(Calc  disk 0 ) > 0 and N(calc disk1 > 0)
 //  4  : N(Calc  disk 0 ) > 0 and N(calc disk1 > 0) and a track with N>=20 hits
-// 
+//  5  : used for something
+//  6  : fNCalh > 0
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include <fstream>
@@ -79,19 +80,19 @@ int TDetTimeAnaModule::BookCalcHistograms(CalcHist_t* Hist, CaloIndex_t* Index, 
 
   name  = "edep";
   title = std::format("{} : edep",prefix);
-  fBookHist->HBook1F(Hist->h_edep,name.data(),title.data(),100,0,1000,Folder);   // in MeV
+  fBookHist->HBook1F(Hist->h_edep,name,title,100,0,1000,Folder);   // in MeV
 
   name  = "dt_tc";
   title = std::format("{} : dt TC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_tc,name.data(),title.data(),100,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_tc,name,title,100,-100,100,Folder);   // in ns...
 
   name  = "dt_crvc";
   title = std::format("{} : dt CRVC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_crvc,name.data(),title.data(),100,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_crvc,name,title,100,-100,100,Folder);   // in ns...
 
   name  = "dt_crvc_vs_dt_tc";
   title = std::format("{} : dt CRVC vs dt TC",prefix);
-  fBookHist->HBook2F(Hist->h_dt_crvc_vs_dt_tc,name.data(),title.data(),100,-100,100,100,-100,100,Folder);   // in ns...
+  fBookHist->HBook2F(Hist->h_dt_crvc_vs_dt_tc,name,title,100,-100,100,100,-100,100,Folder);   // in ns...
 
   return 0;
 }
@@ -105,7 +106,7 @@ int TDetTimeAnaModule::BookCalhHistograms(CalhHist_t* Hist, CaloIndex_t* Index, 
 
   // name  = "ph";
   // title = std::format("{} : ph",prefix);
-  // fBookHist->HBook1F(Hist->h_ph,name.data(),title.data(),100,0,1000,Folder);   // in us...
+  // fBookHist->HBook1F(Hist->h_ph,name,title,100,0,1000,Folder);   // in us...
 
 
 
@@ -120,77 +121,77 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
 
   name  = "nhits";
   title = std::format("{} : nhits",prefix);
-  fBookHist->HBook1F(Hist->h_nhits,name.data(),title.data(),100,0,100,Folder);   // in MeV
+  fBookHist->HBook1F(Hist->h_nhits,name,title,100,0,100,Folder);   // in MeV
 
   name  = "chi2d";
   title = std::format("{} : chi2/ndod",prefix);
-  fBookHist->HBook1F(Hist->h_chi2d,name.data(),title.data(),100,0,20,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_chi2d,name,title,100,0,20,Folder);   // in ns...
 
   name  = "t0";
   title = std::format("{} : t0",prefix);
-  fBookHist->HBook1F(Hist->h_t0,name.data(),title.data(),500,0,2.5e6,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_t0,name,title,500,0,2.5e6,Folder);   // in ns...
 
   name  = "dxdz";
   title = std::format("{} : dxdz",prefix);
-  fBookHist->HBook1F(Hist->h_dxdz,name.data(),title.data(),200,-10,10,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dxdz,name,title,200,-10,10,Folder);   // in ns...
 
   name  = "dydz";
   title = std::format("{} : dydz",prefix);
-  fBookHist->HBook1F(Hist->h_dydz,name.data(),title.data(),200,-10,10,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dydz,name,title,200,-10,10,Folder);   // in ns...
 
   name  = "dt_tc";
   title = std::format("{} : dt TC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_tc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_tc,name,title,400,-100,100,Folder);   // in ns...
 
   for (int k=0; k<2; k++) {
     name  = std::format("dt_calc_{}",k);
     title = std::format("{} : dt CALC disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dt_calc[k],name.data(),title.data(),400,-100,100,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dt_calc[k],name,title,400,-100,100,Folder);   // in ns...
 
     name  = std::format("dx_calc_{}",k);
     title = std::format("{} : dx_calc = x(trk)-x(calc) disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dx_calc[k],name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dx_calc[k],name,title,200,-1000,1000,Folder);   // in ns...
 
     name  = std::format("dy_calc_{}",k);
     title = std::format("{} : dy_calc = y(trk)-y(calc) disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dy_calc[k],name.data(),title.data(),200,-1000,1000,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dy_calc[k],name,title,200,-1000,1000,Folder);   // in ns...
 
     name  = std::format("dx_calc_vs_dxdz_{}",k);
     title = std::format("{} : dx_calc vs dxdz disk:{}",prefix,k);
-    fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz[k],name.data(),title.data(),200,-1,1,200,-1000,1000,Folder);
+    fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz[k],name,title,200,-1,1,200,-1000,1000,Folder);
 
     name  = std::format("dy_calc_vs_dydz_{}",k);
     title = std::format("{} : dy_calc vs dydz disk:{}",prefix,k);
-    fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz[k],name.data(),title.data(),200,-1.0,1.0,200,-1000,1000,Folder);
+    fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz[k],name,title,200,-1.0,1.0,200,-1000,1000,Folder);
   }
   
   name  = "xcrv";
   title = std::format("{} : xcrv",prefix);
-  fBookHist->HBook1F(Hist->h_xcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_xcrv,name,title,200,-10000,10000,Folder);   // in ns...
 
   name  = "zcrv";
   title = std::format("{} : zcrv",prefix);
-  fBookHist->HBook1F(Hist->h_zcrv,name.data(),title.data(),200,-10000,10000,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_zcrv,name,title,200,-10000,10000,Folder);   // in ns...
 
   name  = "dt_crvc";
   title = std::format("{} : dt CRVC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_crvc,name.data(),title.data(),400,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_crvc,name,title,400,-100,100,Folder);   // in ns...
 
   name  = "dx_crvc";
   title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dx_crvc,name.data(),title.data(),200,-10000,10000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-10000,10000,Folder);   //
 
   name  = "dz_crvc";
   title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dz_crvc,name.data(),title.data(),200,-10000,10000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dz_crvc,name,title,200,-10000,10000,Folder);   //
 
   name  = "dx_crvc_vs_dxdy";
   title = std::format("{} : dx_crvc vs dxdy",prefix);
-  fBookHist->HBook2F(Hist->h_dx_crvc_vs_dxdy,name.data(),title.data(),100,-2,2,200,-1000,1000,Folder);
+  fBookHist->HBook2F(Hist->h_dx_crvc_vs_dxdy,name,title,100,-2,2,200,-1000,1000,Folder);
 
   name  = "dz_crvc_vs_dzdy";
   title = std::format("{} : dz_crvc vs dzdy",prefix);
-  fBookHist->HBook2F(Hist->h_dz_crvc_vs_dzdy,name.data(),title.data(),100,-2,2,200,-1000,1000,Folder);
+  fBookHist->HBook2F(Hist->h_dz_crvc_vs_dzdy,name,title,100,-2,2,200,-1000,1000,Folder);
 
   return 0;
 }
@@ -208,27 +209,27 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 
   name  = "dt_vs_sipmid";
   title = std::format("{} : dt vs SIPM ID",prefix);
-  fBookHist->HBook2F(Hist->h_dt_vs_sipmid,name.data(),title.data(),2800,0,2800,1000,-1000,1000,Folder);
+  fBookHist->HBook2F(Hist->h_dt_vs_sipmid,name,title,2800,0,2800,1000,-1000,1000,Folder);
 
   name  = "nsipms_vs_cid";
   title = std::format("{} : nsipms vs crystal ID",prefix);
-  fBookHist->HBook2F(Hist->h_nsipms_vs_cid,name.data(),title.data(),1400,0,1400,3,0,3,Folder);
+  fBookHist->HBook2F(Hist->h_nsipms_vs_cid,name,title,1400,0,1400,3,0,3,Folder);
 
   name  = "sipmid";
   title = std::format("{} : Sipm ID",prefix);
-  fBookHist->HBook1F(Hist->h_sipmid,name.data(),title.data(),2800,0,2800,Folder);
+  fBookHist->HBook1F(Hist->h_sipmid,name,title,2800,0,2800,Folder);
 
   name  = "n2_vs_n1";
   title = std::format("{} : N1:N1 calh E>10",prefix);
-  fBookHist->HBook2F(Hist->h_n2_vs_n1,name.data(),title.data(),20,0,20,20,0,20,Folder);
+  fBookHist->HBook2F(Hist->h_n2_vs_n1,name,title,20,0,20,20,0,20,Folder);
 
   name  = "ntrk_0";
   title = std::format("{} : ntrk[0]",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk[0],name.data(),title.data(),10,0,10,Folder);
+  fBookHist->HBook1F(Hist->h_ntrk[0],name,title,10,0,10,Folder);
 
   name  = "ntrk_1";
   title = std::format("{} : ntrk[1]",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk[1],name.data(),title.data(),10,0,10,Folder);
+  fBookHist->HBook1F(Hist->h_ntrk[1],name,title,10,0,10,Folder);
 //-----------------------------------------------------------------------------
 // calorimeter hits 
 //-----------------------------------------------------------------------------
@@ -890,6 +891,14 @@ void TDetTimeAnaModule::Debug() {
       }
     }
   }
+
+  // something in the calorimeter
+  if (GetDebugBit(6) == 1) {
+    if (fNCalh > 0) {
+      GetHeaderBlock()->Print(Form("bit_006: fNCalh:%d",fNCalh));
+    }
+  }
+
 }
 
 //_____________________________________________________________________________

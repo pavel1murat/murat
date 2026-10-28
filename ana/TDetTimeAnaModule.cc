@@ -87,11 +87,11 @@ int TDetTimeAnaModule::BookCalcHistograms(CalcHist_t* Hist, CaloIndex_t* Index, 
 
   name  = "dt_tc";
   title = std::format("{} : dt TC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_tc,name,title,100,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_tc,name,title,1000,-1000,1000,Folder);   // in ns...
 
   name  = "dt_crvc";
   title = std::format("{} : dt CRVC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_crvc,name,title,100,-100,100,Folder);   // in ns...
+  fBookHist->HBook1F(Hist->h_dt_crvc,name,title,1000,-1000,1000,Folder);   // in ns...
 
   name  = "dt_crvc_vs_dt_tc";
   title = std::format("{} : dt CRVC vs dt TC",prefix);

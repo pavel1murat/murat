@@ -36,6 +36,9 @@
 
 #include "murat/ana/TDetTimeAnaModule.hh"
 
+#include "TRACE/trace.h"
+
+#define TRACE_NAME "TDetTimeAnaModule"
 
 ClassImp(murat::TDetTimeAnaModule)
 
@@ -109,6 +112,31 @@ int TDetTimeAnaModule::BookCalhHistograms(CalhHist_t* Hist, CaloIndex_t* Index, 
   // fBookHist->HBook1F(Hist->h_ph,name,title,100,0,1000,Folder);   // in us...
 
 
+
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+int TDetTimeAnaModule::BookEventHistograms(EventHist_t* Hist, EvtIndex_t* Index, TFolder* Folder) {
+
+  std::string prefix = std::format("run:{:06d} sel:{}",fRunNumber,Index->sel);
+  std::string name, title;
+
+  name  = "ntrk";
+  title = std::format("{} : N(tracks)",prefix);
+  fBookHist->HBook1F(Hist->h_ntrk,name,title,10,0,10,Folder);
+
+  name  = "ncalh";
+  title = std::format("{} : N(calo hits)",prefix);
+  fBookHist->HBook1F(Hist->h_ncalh,name,title,200,0,1000,Folder);
+
+  name  = "ncalrd";
+  title = std::format("{} : N(calo reco digis)",prefix);
+  fBookHist->HBook1F(Hist->h_ncalrd,name,title,200,0,1000,Folder);
+
+  name  = "ncalc";
+  title = std::format("{} : N(calo clusters)",prefix);
+  fBookHist->HBook1F(Hist->h_ncalc,name,title,100,0,100,Folder);
 
   return 0;
 }
@@ -201,6 +229,27 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 
   // std::string prefix = std::format("");
   // std::string name, title;
+//-----------------------------------------------------------------------------
+// event histograms
+//-----------------------------------------------------------------------------
+  int book_event_histset[kNEventHistSets];
+
+  for (int i=0; i<kNEventHistSets; i++) { book_event_histset[i] = 0; }
+
+  book_event_histset[0] = 1;             // all events
+
+  EvtIndex_t evt_index;
+  
+  for (int i=0; i<kNEventHistSets; i++) {
+    if (book_event_histset[i] == 0) continue;
+    std::string folder_name = std::format("evt_{:02d}",i);
+    TFolder* fol = (TFolder*) Folder->FindObject(folder_name.data());
+    if (! fol) fol = Folder->AddFolder(folder_name.data(),folder_name.data());
+    Hist->event[i] = new EventHist_t();
+    evt_index.sel = i;
+    BookEventHistograms(Hist->event[i],&evt_index,fol);
+  }
+
 
   CaloIndex_t index;
 
@@ -218,10 +267,6 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   name  = "sipmid";
   title = std::format("{} : Sipm ID",prefix);
   fBookHist->HBook1F(Hist->h_sipmid,name,title,2800,0,2800,Folder);
-
-  name  = "n2_vs_n1";
-  title = std::format("{} : N1:N1 calh E>10",prefix);
-  fBookHist->HBook2F(Hist->h_n2_vs_n1,name,title,20,0,20,20,0,20,Folder);
 
   name  = "ntrk_0";
   title = std::format("{} : ntrk[0]",prefix);
@@ -355,6 +400,16 @@ int TDetTimeAnaModule::FillDiskHistograms(DiskHist_t* Hist, TCaloRecoDigi* Calrd
   return 0;
 }
 
+  //-----------------------------------------------------------------------------
+  int TDetTimeAnaModule::FillEventHistograms(EventHist_t* Hist) {
+    Hist->h_ntrk->Fill(fNTrk);
+    Hist->h_ncalh->Fill(fNCalh);
+    Hist->h_ncalc->Fill(fNCaloClusters);
+    Hist->h_ncalrd->Fill(fNCalrd);
+    
+    return 0;
+  }
+
 //-----------------------------------------------------------------------------
 int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_param_t* Tp) {
   // filling histograms: plot time differences between
@@ -412,6 +467,8 @@ int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
 int TDetTimeAnaModule::FillHistograms() {
   // filling histograms: plot time differences between
 
+  FillEventHistograms(fHist->event[0]);
+  
   //  Index_t index;
   
   for (int i=0; i<fNCalh; i++) {
@@ -439,9 +496,6 @@ int TDetTimeAnaModule::FillHistograms() {
     fHist->h_dt_vs_sipmid->Fill(calrd->SipmID(),dtmin);
     fHist->h_sipmid->Fill(calrd->SipmID());
   }
-  
-  fHist->h_n2_vs_n1->Fill(fNCalh10[0],fNCalh10[1]);
-
 //-----------------------------------------------------------------------------
 // fill cluster histograms
 //-----------------------------------------------------------------------------
@@ -682,6 +736,10 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
   
   for (int i1=0; i1<fNCalh; i1++) {
     TCaloHit*  calh = fCaloHitBlock->Hit(i1);
+    if (calh->fCid >= kNCrystals) {
+      TLOG(TLVL_ERROR) << std::format("hit i:{:4} cid:{}. IGNORE, CONTINUE",i1,calh->fCid);
+      continue;
+    }
     crystal_t* cr   = &fCrystals[calh->fCid];
 
     cr->fHits.push_back(calh);
@@ -827,10 +885,13 @@ int TDetTimeAnaModule::Event(int IEntry) {
 //-----------------------------------------------------------------------------
   fNCrvc         = fCrvcBlock->NClusters();
   fNCrvp         = fCrvpBlock->NPulses();
+
   fNTc           = fTcBlock->NTimeClusters();
-  fNCaloClusters = fCaloClusterBlock->NClusters();
   fNTrk          = fTrackBlock->NTracks();
+
+  fNCalrd        = fCaloRecoDigiBlock->NDigis();
   fNCalh         = fCaloHitBlock->NHits();
+  fNCaloClusters = fCaloClusterBlock->NClusters();
 
   CalculateMissingParameters();
   

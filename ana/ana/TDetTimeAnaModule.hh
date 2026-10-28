@@ -56,6 +56,10 @@ public:
 //-----------------------------------------------------------------------------
 // indices
 //-----------------------------------------------------------------------------
+  struct EvtIndex_t {
+    int sel;
+  };
+  
   struct TrkIndex_t {
     int sel;
     int slot;                 // 0-17
@@ -176,16 +180,23 @@ public:
     TH2F*         h_board_vs_dt;
   };
 
+  struct EventHist_t {
+    TH1F*         h_ntrk;
+    TH1F*         h_ncalh;
+    TH1F*         h_ncalrd;
+    TH1F*         h_ncalc;
+  };
+
   struct Hist_t {
-    DiskHist_t* disk[2];                // 2 disks
-    TH2F*       h_dt_vs_sipmid;
-    TH2F*       h_nsipms_vs_cid;
-    TH1F*       h_sipmid;               // occupancy offline channel
-    TH2F*       h_n2_vs_n1;
-    TH1F*       h_ntrk[2];
-    CalhHist_t* calh   [kNCalhHistSets];
-    CalcHist_t* calc   [kNCalcHistSets];
-    TrkHist_t*  trk    [kNTrkHistSets ];
+    DiskHist_t*  disk[2];                // 2 disks
+    TH2F*        h_dt_vs_sipmid;
+    TH2F*        h_nsipms_vs_cid;
+    TH1F*        h_sipmid;               // occupancy offline channel
+    TH1F*        h_ntrk[2];
+    CalhHist_t*  calh [kNCalhHistSets ];
+    CalcHist_t*  calc [kNCalcHistSets ];
+    EventHist_t* event[kNEventHistSets];
+    TrkHist_t*   trk  [kNTrkHistSets  ];
   };
 
 //-----------------------------------------------------------------------------
@@ -262,15 +273,17 @@ public:
   int              BookCalcHistograms (CalcHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookCalhHistograms (CalhHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookDiskHistograms (DiskHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
+  int              BookEventHistograms(EventHist_t*  Hist, EvtIndex_t*  Index, TFolder* Folder);
   int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
   int              CalculateMissingParameters   ();
   int              CalculateMissingTrkParameters();
   
-  int              FillCalcHistograms (CalcHist_t* Hist, TStnCluster*   Calc, calc_param_t* Cp);
-  int              FillDiskHistograms (DiskHist_t* Hist, TCaloRecoDigi* Calrd);
-  int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*     Trk , trk_param_t* Tp);
+  int              FillCalcHistograms (CalcHist_t*  Hist, TStnCluster*   Calc, calc_param_t* Cp);
+  int              FillDiskHistograms (DiskHist_t*  Hist, TCaloRecoDigi* Calrd);
+  int              FillEventHistograms(EventHist_t* Hist);
+  int              FillTrkHistograms  (TrkHist_t*   Hist, TStrTrack*     Trk , trk_param_t* Tp);
   int              FillHistograms     ();
 
   int              FitCaloTimeOffsets (float TMin = 1., float TMax = -1.);

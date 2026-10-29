@@ -87,6 +87,10 @@ public:
     int cid   {-1};                   //
   };
   
+  struct calh_param_t {
+    float                     dt10;           // T(1)-T(0)
+  };
+
   struct calc_param_t {
     float                     dtmin_tc;           // from the closest TC
     TStnTimeCluster*          tc;
@@ -103,8 +107,11 @@ public:
     float                     dtmin_tc;           // from the closest TC
     float                     x_disk[2];
     float                     y_disk[2];
+    float                     t_disk[2];
+    float                     path[2];
     TStnCluster*              calc[2];            // closest, for each disk
-    float                     dtmin_calc[2];      // from the closest CALC
+    float                     min_dt_tc_calc[2];  // from the closest CALC
+    float                     min_dt_calc[2];     // from the closest CALC
     float                     dx_calc[2];
     float                     dy_calc[2];
     TStnTimeCluster*          tc;
@@ -159,7 +166,9 @@ public:
 
     TH1F*         h_dt_tc;
     
-    TH1F*         h_dt_calc[2];
+    TH1F*         h_dt_calc   [2];
+    TH1F*         h_dt_tc_calc[2];
+    TH2F*         h_dt_calc_vs_dydz[2]; // 
     TH1F*         h_dx_calc[2];
     TH1F*         h_dy_calc[2];
     TH2F*         h_dx_calc_vs_dxdz[2];
@@ -190,6 +199,7 @@ public:
   struct Hist_t {
     DiskHist_t*  disk[2];                // 2 disks
     TH2F*        h_dt_vs_sipmid;
+    TH2F*        h_dt10_vs_cid;         // dt(1-0) vs crystal
     TH2F*        h_nsipms_vs_cid;
     TH1F*        h_sipmid;               // occupancy offline channel
     TH1F*        h_ntrk[2];
@@ -238,6 +248,7 @@ public:
   int                       fNCcDisk[2];
 
   std::vector<calc_param_t> fListOfCalcParam;
+  std::vector<calh_param_t> fListOfCalhParam;
   std::vector<trk_param_t>  fListOfTrkParam;
 
   fit_result_t              fFr[kNCaloChannels];

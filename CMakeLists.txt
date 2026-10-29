@@ -19,6 +19,7 @@ cet_set_compiler_flags(
 #------------------------------------------------------------------------------
 # it looks that these packages are looked for only after cet_cmake_env
 #------------------------------------------------------------------------------
+find_package(ROOT                       REQUIRED)
 find_package(Offline           10.00.00 REQUIRED)
 find_package(Stntuple          25.04.01 REQUIRED)
 
@@ -59,5 +60,6 @@ add_subdirectory(ana)
 add_subdirectory(alg)
 add_subdirectory(mod)
 add_subdirectory(gui)
+add_subdirectory(util)
 
 cet_cmake_config()

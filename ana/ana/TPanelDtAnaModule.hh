@@ -75,7 +75,6 @@ public:
     TH1F*        h_occup;               // occupancy per panel, offline indexing
     TH1F*        h_mnid;                // 
     TH2F*        h_occup_2d;            // occupancy
-    // TH1F*        h_dt05[36];
     SlotHist_t*  slot[18];
   };
 

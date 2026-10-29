@@ -24,7 +24,6 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
 // 
@@ -77,8 +76,7 @@ TDetTimeAnaModule::~TDetTimeAnaModule() {
 //-----------------------------------------------------------------------------
 int TDetTimeAnaModule::BookCalcHistograms(CalcHist_t* Hist, CaloIndex_t* Index, TFolder* Folder) {
 
-  std::string prefix = std::format("run:{:06d} sel:{} disk:{:02d} crate:{}",
-                                   fRunNumber,Index->sel, Index->disk, Index->crate);
+  std::string prefix = std::format("run:{:06d} sel:{} disk:{:02d}",fRunNumber,Index->sel,Index->disk);
   std::string name, title;
 
   name  = "edep";
@@ -86,15 +84,15 @@ int TDetTimeAnaModule::BookCalcHistograms(CalcHist_t* Hist, CaloIndex_t* Index, 
   fBookHist->HBook1F(Hist->h_edep,name,title,100,0,1000,Folder);   // in MeV
 
   name  = "dt_tc";
-  title = std::format("{} : dt TC",prefix);
+  title = std::format("{} : T(CALC)-T(TC)",prefix);
   fBookHist->HBook1F(Hist->h_dt_tc,name,title,1000,-1000,1000,Folder);   // in ns...
 
   name  = "dt_crvc";
-  title = std::format("{} : dt CRVC",prefix);
+  title = std::format("{} : T(CALC)-T(CRVC)",prefix);
   fBookHist->HBook1F(Hist->h_dt_crvc,name,title,1000,-1000,1000,Folder);   // in ns...
 
   name  = "dt_crvc_vs_dt_tc";
-  title = std::format("{} : dt CRVC vs dt TC",prefix);
+  title = std::format("{} : T(CALC)-T(CRVC) vs T(CALC)-T(TC)",prefix);
   fBookHist->HBook2F(Hist->h_dt_crvc_vs_dt_tc,name,title,100,-100,100,100,-100,100,Folder);   // in ns...
 
   return 0;
@@ -173,16 +171,24 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
 
   for (int k=0; k<2; k++) {
     name  = std::format("dt_calc_{}",k);
-    title = std::format("{} : dt CALC disk:{}",prefix,k);
+    title = std::format("{} : dT = T(TRK)-T(CALC) disk:{}",prefix,k);
     fBookHist->HBook1F(Hist->h_dt_calc[k],name,title,400,-100,100,Folder);   // in ns...
+
+    name  = std::format("dt_tc_calc_{}",k);
+    title = std::format("{} : dT = T(TC)-T(CALC) disk:{}",prefix,k);
+    fBookHist->HBook1F(Hist->h_dt_tc_calc[k],name,title,400,-100,100,Folder);   // in ns...
+
+    name  = std::format("dt_calc_vs_dydz_{}",k);
+    title = std::format("{} : dt_calc vs dydz disk:{}",prefix,k);
+    fBookHist->HBook2F(Hist->h_dt_calc_vs_dydz[k],name,title,200,-1,1,400,-100,100,Folder);
 
     name  = std::format("dx_calc_{}",k);
     title = std::format("{} : dx_calc = x(trk)-x(calc) disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dx_calc[k],name,title,200,-1000,1000,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dx_calc[k],name,title,400,-1000,1000,Folder);   // in ns...
 
     name  = std::format("dy_calc_{}",k);
     title = std::format("{} : dy_calc = y(trk)-y(calc) disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dy_calc[k],name,title,200,-1000,1000,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dy_calc[k],name,title,400,-1000,1000,Folder);   // in ns...
 
     name  = std::format("dx_calc_vs_dxdz_{}",k);
     title = std::format("{} : dx_calc vs dxdz disk:{}",prefix,k);
@@ -263,6 +269,10 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   name  = "nsipms_vs_cid";
   title = std::format("{} : nsipms vs crystal ID",prefix);
   fBookHist->HBook2F(Hist->h_nsipms_vs_cid,name,title,1400,0,1400,3,0,3,Folder);
+
+  name  = "dt10_vs_cid";
+  title = std::format("{} : sipm T(1)-T(0) vs crystal ID",prefix);
+  fBookHist->HBook2F(Hist->h_dt10_vs_cid,name,title,1400,0,1400,100,-10,10,Folder);
 
   name  = "sipmid";
   title = std::format("{} : Sipm ID",prefix);
@@ -376,13 +386,13 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
 //-----------------------------------------------------------------------------
 // need to optimize the filling time
 //-----------------------------------------------------------------------------
-int TDetTimeAnaModule::FillCalcHistograms(CalcHist_t* Hist, TStnCluster* Calc, calc_param_t* Cp) {
+int TDetTimeAnaModule::FillCalcHistograms(CalcHist_t* Hist, TStnCluster* Calc, calc_param_t* Calcp) {
   // filling histograms: plot time differences between
   
   Hist->h_edep->Fill(Calc->Energy());
-  Hist->h_dt_tc->Fill(Cp->dtmin_tc);
-  Hist->h_dt_crvc->Fill(Cp->dtmin_crvc);
-  Hist->h_dt_crvc_vs_dt_tc->Fill(Cp->dtmin_tc,Cp->dtmin_crvc);
+  Hist->h_dt_tc->Fill(Calcp->dtmin_tc);
+  Hist->h_dt_crvc->Fill(Calcp->dtmin_crvc);
+  Hist->h_dt_crvc_vs_dt_tc->Fill(Calcp->dtmin_tc,Calcp->dtmin_crvc);
 
   return 0;
 }
@@ -430,12 +440,15 @@ int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
 
   for (int k=0; k<2; k++) {
     if (Tp->calc[k]) {
-      Hist->h_dt_calc[k]->Fill(Tp->dtmin_calc[k]);
+      Hist->h_dt_calc[k]->Fill(Tp->min_dt_calc[k]);
+      Hist->h_dt_tc_calc[k]->Fill(Tp->min_dt_tc_calc[k]);
+
       Hist->h_dx_calc[k]->Fill(Tp->dx_calc[k]);
       Hist->h_dy_calc[k]->Fill(Tp->dy_calc[k]);
 
       Hist->h_dx_calc_vs_dxdz[k]->Fill(dxdz,Tp->dx_calc[k]);
       Hist->h_dy_calc_vs_dydz[k]->Fill(dydz,Tp->dy_calc[k]);
+      Hist->h_dt_calc_vs_dydz[k]->Fill(dydz,Tp->min_dt_calc[k]);
     }
   }
 
@@ -472,8 +485,10 @@ int TDetTimeAnaModule::FillHistograms() {
   //  Index_t index;
   
   for (int i=0; i<fNCalh; i++) {
-    TCaloHit*  calh = fCaloHitBlock->Hit(i);
+    TCaloHit*     calh  = fCaloHitBlock->Hit(i);
+    calh_param_t* calhp = &fListOfCalhParam[i];
     fHist->h_nsipms_vs_cid->Fill(calh->Cid(),calh->NSipms());
+    fHist->h_dt10_vs_cid->Fill(calh->Cid(),calhp->dt10);
   }
 //-----------------------------------------------------------------------------
 // double-nested loops start here
@@ -602,13 +617,19 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
     for (int k=0; k<2; k++) {
       float dz          = fDetPos.calo_pos[k][2]+ fDetPos.calo_off[k][2]-(trk->fZ0+ fDetPos.trk_pos[2]+ fDetPos.trk_off[2]);
 
-      tp->dtmin_calc[k] = 1.e6;
-      tp->x_disk[k]     = trk->fX0     + (fDetPos.trk_pos [0]+ fDetPos.trk_off [0]) + (trk->fNx/trk->fNz)*dz;
-      tp->y_disk[k]     = trk->fY0     + (fDetPos.trk_pos [1]+ fDetPos.trk_off [1]) + (trk->fNy/trk->fNz)*dz;
-      tp->calc[k]       = nullptr;
-      tp->dx_calc[k]    = 1.e6;
-      tp->dy_calc[k]    = 1.e6;
+      tp->min_dt_tc_calc[k] = 1.e6;
+      tp->min_dt_calc   [k] = 1.e6;
+      float dxdz            = trk->fNx/trk->fNz;
+      float dydz            = trk->fNy/trk->fNz;
+      tp->x_disk[k]         = trk->fX0  + (fDetPos.trk_pos [0]+ fDetPos.trk_off [0]) + dxdz*dz;
+      tp->y_disk[k]         = trk->fY0  + (fDetPos.trk_pos [1]+ fDetPos.trk_off [1]) + dydz*dz;
+      tp->path[k]           = dz*sqrt(1+dxdz*dxdz+dydz*dydz);
+      tp->t_disk[k]         = trk->fT0+tp->path[k]/2.997e2; // this assumes downstream
+      tp->calc[k]           = nullptr;
+      tp->dx_calc[k]        = 1.e6;
+      tp->dy_calc[k]        = 1.e6;
     }
+
     tp->crvc        = nullptr;
     tp->dtmin_crvc  = 1.e6;
     tp->intime      = 0;
@@ -666,18 +687,20 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
       float z_crvc = tp->crvc->Position()->Z()-(fDetPos.trk_pos[2]+fDetPos.trk_off[2]);
       tp->dz_crvc  = tp->zcrv-z_crvc;
     }
-//------------------------------;-----------------------------------------------
-// determine the closest calorimeter cluster
+//-----------------------------------------------------------------------------
+// determine the closest in time (not in position yet) calorimeter cluster
 //-----------------------------------------------------------------------------
     for (int i2=0; i2<fNCaloClusters; i2++) {
       TStnCluster* calc = fCaloClusterBlock->Cluster(i2);
       int disk = calc->DiskID();
 
-      float dt = tp->tc->T0()-calc->Time();
+      float dt_tc_calc = tp->tc->T0()-calc->Time();
+      float dt_calc    = tp->t_disk[disk]-calc->Time();
       
-      if (fabs(dt) < fabs(tp->dtmin_calc[disk])) {
-        tp->dtmin_calc[disk] = dt;
-        tp->calc[disk]       = calc;
+      if (fabs(dt_calc) < fabs(tp->min_dt_calc[disk])) {
+        tp->calc[disk]           = calc;
+        tp->min_dt_calc[disk]    = dt_calc;
+        tp->min_dt_tc_calc[disk] = dt_tc_calc;
       }
     }
 //-----------------------------------------------------------------------------
@@ -694,14 +717,14 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
         tp->dy_calc[disk] = tp->y_disk[disk]-y_cal;
       }
 
-      if (fabs(tp->dtmin_calc[disk]) <  30) {
+      if (fabs(tp->min_dt_calc[disk]) <  30) {
         tp->intime_calc = 1;
       }
     }
     
     if ((fabs(tp->dtmin_tc  ) <  30) and
-        ((tp->calc[0] and (tp->calc[0]->Energy() >= 20) and (fabs(tp->dtmin_calc[0]) < 30)) or 
-         (tp->calc[1] and (tp->calc[1]->Energy() >= 20) and (fabs(tp->dtmin_calc[1]) <  30))   ) and 
+        ((tp->calc[0] and (tp->calc[0]->Energy() >= 20) and (fabs(tp->min_dt_calc[0]) < 30)) or 
+         (tp->calc[1] and (tp->calc[1]->Energy() >= 20) and (fabs(tp->min_dt_calc[1]) <  30))   ) and 
         (fabs(tp->dtmin_crvc) <  30) and
         (trk->fNHits          >= 10)     ) {
       tp->intime = 1;
@@ -733,11 +756,15 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
   }
   fHitCrystals.clear();
   fMaxHitsPerCrystal = 0;
-  
-  for (int i1=0; i1<fNCalh; i1++) {
-    TCaloHit*  calh = fCaloHitBlock->Hit(i1);
+
+  fListOfCalhParam.resize(fNCalh);
+  for (int i=0; i<fNCalh; i++) {
+    TCaloHit*     calh  = fCaloHitBlock->Hit(i);
+    calh_param_t* calhp = &fListOfCalhParam[i];
+    calhp->dt10 = 1.e6;
+
     if (calh->fCid >= kNCrystals) {
-      TLOG(TLVL_ERROR) << std::format("hit i:{:4} cid:{}. IGNORE, CONTINUE",i1,calh->fCid);
+      TLOG(TLVL_ERROR) << std::format("hit i:{:4} cid:{}. IGNORE, CONTINUE",i,calh->fCid);
       continue;
     }
     crystal_t* cr   = &fCrystals[calh->fCid];
@@ -748,14 +775,26 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
       // first hit: add crystal to the list of crystals with hits
       fHitCrystals.push_back(cr);
     }
-    
+
     if (nh > fMaxHitsPerCrystal) {
       fMaxHitsPerCrystal = nh;
     }
-       
+
     if (calh->fEDep > 10) {
       int disk = calh->Disk();
       fNCalh10[disk] += 1;
+    }
+
+    if (calh->NSipms() == 2) {
+      // look for reco digis
+      int ind0 = calh->fCrdIndex[0];
+      int ind1 = calh->fCrdIndex[1];
+      TCaloRecoDigi* crd0 = fCaloRecoDigiBlock->CaloRecoDigi(ind0);
+      TCaloRecoDigi* crd1 = fCaloRecoDigiBlock->CaloRecoDigi(ind1);
+      // readout of one of the channels could be missing
+      if ((crd0 != nullptr) and (crd1 != nullptr)) {
+        calhp->dt10 = crd1->Time()-crd0->Time();
+      }
     }
   }
 //-----------------------------------------------------------------------------
@@ -768,50 +807,47 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
     TStnCluster*  calc = fCaloClusterBlock->Cluster(i1);
     fNCcDisk[calc->DiskID()] += 1;
 
-    calc_param_t& cp = fListOfCalcParam[i1];
+    calc_param_t& calcp = fListOfCalcParam[i1];
 //-----------------------------------------------------------------------------
 // determine the closest time cluster
 //-----------------------------------------------------------------------------
-    cp.dtmin_tc = 1.e6;
-    cp.tc       = nullptr;
+    calcp.dtmin_tc = 1.e6;    calcp.tc       = nullptr;
     // determine the closest time cluster
     for (int i2=0; i2<fNTc; i2++) {
       TStnTimeCluster* tc = fTcBlock->TimeCluster(i2);
       float dt = calc->fTime-tc->fT0;
-      if (fabs(dt) < fabs(cp.dtmin_tc)) {
-        cp.dtmin_tc = dt;
-        cp.tc       = tc;
+      if (fabs(dt) < fabs(calcp.dtmin_tc)) {
+        calcp.dtmin_tc = dt;
+        calcp.tc       = tc;
       }
     }
 //-----------------------------------------------------------------------------
 // determine the closest CRV coincidence
 //-----------------------------------------------------------------------------
-    cp.dtmin_crvc = 1.e6;
-    cp.crvc       = nullptr;
+    calcp.dtmin_crvc = 1.e6;
+    calcp.crvc       = nullptr;
 
-    float crv_time_offset = 0; // 21. // today
-    
     for (int i2=0; i2<fNCrvc; i2++) {
       TCrvCoincidenceCluster* crvc = fCrvcBlock->Cluster(i2);
-      float dt = calc->fTime-(crvc->StartTime()-crv_time_offset);
-      if (fabs(dt) < fabs(cp.dtmin_crvc)) {
-        cp.dtmin_crvc = dt;
-        cp.crvc       = crvc;
+      float dt = calc->fTime-crvc->StartTime();
+      if (fabs(dt) < fabs(calcp.dtmin_crvc)) {
+        calcp.dtmin_crvc = dt;
+        calcp.crvc       = crvc;
       }
     }
 //------------------------------;-----------------------------------------------
 // determine the closest track
 //-----------------------------------------------------------------------------
-    cp.dtmin_trk = 1.e6;
-    cp.trk       = nullptr;
+    calcp.dtmin_trk = 1.e6;
+    calcp.trk       = nullptr;
 
     for (int i2=0; i2<fNTrk; i2++) {
       TStrTrack* trk = fTrackBlock->Track(i2);
       
       float dt = calc->fTime-trk->fT0;
-      if (fabs(dt) < fabs(cp.dtmin_trk)) {
-        cp.dtmin_trk = dt;
-        cp.trk       = trk;
+      if (fabs(dt) < fabs(calcp.dtmin_trk)) {
+        calcp.dtmin_trk = dt;
+        calcp.trk       = trk;
       }
     }
   }

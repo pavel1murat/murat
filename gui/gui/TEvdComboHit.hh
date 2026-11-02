@@ -1,14 +1,23 @@
 //
-#ifndef __murat_gui_TComboHitData_hh__
-#define __murat_gui_TComboHitData_hh__
+#ifndef __murat_gui_TEvdComboHit_hh__
+#define __murat_gui_TEvdComboHit_hh__
 
 #include "TMarker.h"
 #include "TObject.h"
 
 #include "TObjArray.h"
+#include "TPolyLine3D.h"
 
+namespace mu2e {
+  class ComboHit;                       // for now, prototyping interfaces
+}
+
+class TComboHit;
+
+namespace murat {
 //-----------------------------------------------------------------------------
-class TComboHitData: public TObject {
+class TEvdComboHit: public TObject {
+
 public:
   float   fX;
   float   fY;
@@ -22,8 +31,14 @@ public:
   float   fEDep;
   float   fP;     // partcle momentum
 
+  TPolyLine3D fPolyLine;
+
   TMarker fXYMarker;
   TMarker fTZMarker;
+
+  TComboHit*   fCh;                     // backward pointer
+
+  mu2e::ComboHit* fOfflineCh;
     
   int Flag() { 
     if (fPdg == 11) {
@@ -45,19 +60,19 @@ public:
   float  Z()    { return fZ; }
   
 public:
-  TComboHitData() {}
+  TEvdComboHit() {}
+  TEvdComboHit(TComboHit* Ch, int TrackFlag = 0);
+  TEvdComboHit(float X, float Y, float Z, float T, float EDep, int Pdg, float P);
 
-  virtual ~TComboHitData() {}
+  virtual ~TEvdComboHit() {}
+//-----------------------------------------------------------------------------
+// overloaded functions of TObject
+//-----------------------------------------------------------------------------
+  virtual void  Draw         (Option_t* option = "") override;
+  virtual void  Paint        (Option_t* option = "") override;
+  void          PrintComboHit(Option_t* option = "");               // MENU* 
 
-  TComboHitData(float X, float Y, float Z, float T, float EDep, int Pdg, float P);
-
-  virtual void  Paint      (Option_t* option = "");
-  virtual void  PaintXY    (Option_t* option = "");
-  virtual void  PaintTZ    (Option_t* option = "");
-
-  virtual void  Print      (Option_t* option = "") const ;   // *MENU* 
-
-  ClassDef(TComboHitData,0)
+  ClassDefOverride(murat::TEvdComboHit,0)
 };
 
 //-----------------------------------------------------------------------------
@@ -67,8 +82,8 @@ public:
 
   StationData_t() { fHits.SetOwner(1); }
   
-  TComboHitData* GetHit  (int I) { return (TComboHitData*) fHits.UncheckedAt(I); }
-  int            GetNHits()      { return fHits.GetEntriesFast(); }
+  TEvdComboHit* GetHit  (int I) { return (TEvdComboHit*) fHits.UncheckedAt(I); }
+  int           GetNHits()      { return fHits.GetEntriesFast(); }
 };
 
 //-----------------------------------------------------------------------------
@@ -79,4 +94,5 @@ struct HitData_t {
 
 };
 
+}
 #endif

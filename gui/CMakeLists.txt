@@ -19,6 +19,7 @@ link_directories(
 ROOT_GENERATE_DICTIONARY(${dict}
   TEvdCalorimeter.hh TEvdDisk.hh TEvdCrystal.hh
   TEvdCaloNode.hh TEvdCaloView.hh
+  TEvdComboHit.hh
   TEvdCrv.hh TEvdCrvSector.hh TEvdCrvModule.hh TEvdCrvLayer.hh TEvdCrvCounter.hh
   TEvdCrvNode.hh TEvdCrvView.hh
   TEvdDetNode.hh
@@ -34,6 +35,7 @@ set_property(SOURCE ${dict}.cxx PROPERTY generated)
 add_library(${lib} SHARED
   TEvdCalorimeter.cc TEvdDisk.cc TEvdCrystal.cc
   TEvdCaloNode.cc TEvdCaloView.cc
+  TEvdComboHit.cc
   TEvdCrv.cc TEvdCrvSector.cc  TEvdCrvModule.cc TEvdCrvLayer.cc TEvdCrvCounter.cc
   TEvdCrvNode.cc TEvdCrvView.cc
   TEvdDetNode.cc

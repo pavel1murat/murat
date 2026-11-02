@@ -21,11 +21,10 @@
 #include "murat/gui/TEvdManager.hh"
 #include "murat/gui/TEvdTrajectory.hh"
 #include "murat/gui/TTrkVisNode.hh"
+#include "murat/gui/TEvdComboHit.hh"
 
 
 // ClassImp(TTrkVisNode)
-
-namespace murat {
 
 namespace {
 //-----------------------------------------------------------------------------
@@ -82,19 +81,21 @@ namespace {
 // a combo hit is drawn as a straight segment of length 2*Ures along the wire
 // direction (Ux,Uy,0), centered on the hit position
 //-----------------------------------------------------------------------------
-  TPolyLine3D* comboHitSegment(const TComboHit* Hit) {
-    float tracker_pos[3] = {-3904.,    0.0, 22935.0 };
+//   TPolyLine3D* comboHitSegment(const TComboHit* Hit) {
+//     float tracker_pos[3] = {-3904.,    0.0, 22935.0 };
 
-    double dx = Hit->Ures()*Hit->Ux();
-    double dy = Hit->Ures()*Hit->Uy();
+//     double dx = Hit->Ures()*Hit->Ux();
+//     double dy = Hit->Ures()*Hit->Uy();
 
-    TPolyLine3D* seg = new TPolyLine3D(2);
-    seg->SetPoint(0, Hit->X()+tracker_pos[0]-dx, Hit->Y()+tracker_pos[1]-dy, Hit->Z()+tracker_pos[2]);
-    seg->SetPoint(1, Hit->X()+tracker_pos[0]+dx, Hit->Y()+tracker_pos[1]+dy, Hit->Z()+tracker_pos[2]);
-    seg->SetLineWidth(2.);
-    return seg;
-  }
+//     TPolyLine3D* seg = new TPolyLine3D(2);
+//     seg->SetPoint(0, Hit->X()+tracker_pos[0]-dx, Hit->Y()+tracker_pos[1]-dy, Hit->Z()+tracker_pos[2]);
+//     seg->SetPoint(1, Hit->X()+tracker_pos[0]+dx, Hit->Y()+tracker_pos[1]+dy, Hit->Z()+tracker_pos[2]);
+//     seg->SetLineWidth(2.);
+//     return seg;
+//   }
 }
+
+namespace murat {
 
 //-----------------------------------------------------------------------------
   TTrkVisNode::TTrkVisNode(const char* Name) :TEvdVisNode(Name) {
@@ -121,7 +122,7 @@ namespace {
 //-----------------------------------------------------------------------------
   int TTrkVisNode::InitEvent() {
     int rc(0);
-    float tracker_pos[3] = {-3904.,    0.0, 22935.0 };
+    //    float tracker_pos[3] = {-3904.,    0.0, 22935.0 };
 
     auto vm = TEvdManager::Instance();  // has to be initialized at this point
 
@@ -141,7 +142,7 @@ namespace {
     fListOfClusterHits->Delete();
     fListOfTrackHits->Delete();
 
-    // combo hits are found by their original index, which is stored as the unique ID
+    // combo hits are located using their original index stored as the unique ID
     std::unordered_map<uint32_t,TComboHit*> hit_map;
     int nch = fChBlock->NHits();
     for (int i=0; i<nch; i++) {
@@ -150,7 +151,7 @@ namespace {
     }
 
 //-----------------------------------------------------------------------------
-// time cluster hits: a segment per combo hit
+// time cluster TEvdComboHits
 //-----------------------------------------------------------------------------
     TStnLinkBlock* links = fTcBlock->ListOfChLinks();
     int ntc = fTcBlock->NTimeClusters();
@@ -159,7 +160,9 @@ namespace {
       for (int j=0; j<nlinks; j++) {
         auto it = hit_map.find(links->Index(itc,j));
         if (it == hit_map.end()) continue;
-        fListOfClusterHits->Add(comboHitSegment(it->second));
+        // create evd representation of the combo hit
+        TEvdComboHit* evd_ch = new TEvdComboHit(it->second);
+        fListOfClusterHits->Add(evd_ch);
       }
     }
 
@@ -183,19 +186,9 @@ namespace {
       for (const auto& seed : *trk->fHitSeeds) {
         auto it = hit_map.find(seed.index());
         if (it == hit_map.end()) continue;
-        TComboHit* hit = it->second;
-        hit_points.emplace_back(hit->X()+tracker_pos[0],hit->Y()+tracker_pos[1],hit->Z()+tracker_pos[2]);
-      }
-
-      if (not hit_points.empty()) {
-        TPolyMarker3D* marker = new TPolyMarker3D((int) hit_points.size(), kTrackHitMarker);
-        for (std::size_t ih=0; ih<hit_points.size(); ih++) {
-          marker->SetPoint((int) ih, hit_points[ih].X()+tracker_pos[0], hit_points[ih].Y()+tracker_pos[1], hit_points[ih].Z()+tracker_pos[2]);
-          marker->SetMarkerStyle(20);
-          marker->SetMarkerSize(5.);
-          marker->SetMarkerColor(kRed);
-        }
-        fListOfTrackHits->Add(marker);
+        TComboHit* ch = it->second;
+        TEvdComboHit* evd_ch = new TEvdComboHit(ch,1);
+        fListOfTrackHits->Add(evd_ch);
       }
     }
 

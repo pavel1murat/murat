@@ -56,7 +56,8 @@
 // #pragma link C++ class TStnVisNode;
 // #pragma link C++ class TStnVisNodeA;
 // #pragma link C++ class TStrawHitVisNode;
-// #pragma link C++ class TTrkVisNode;
+#pragma link C++ class TEvdTrajectory;
+#pragma link C++ class TTrkVisNode;
 
 #endif
 

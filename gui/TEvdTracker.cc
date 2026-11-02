@@ -121,7 +121,7 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
     double plane_dz2    = 10.;
     
     auto* sd_plane = new TEvdSubdetector(planeName.c_str(),
-                                         new TGeoTube(0,plane_radius,plane_dz2),medium,kAzure+1,50);
+                                         new TGeoTube(0,plane_radius,plane_dz2),medium,kAzure+1,95);
 
     const mu2e::Panel* panel = &plane.getPanel(0);
     
@@ -220,7 +220,7 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
 
   //-----------------------------------------------------------------------------
   int TEvdTracker::InitEvent() {
-    auto vm = TEvdManager::Instance();
+    //    auto vm = TEvdManager::Instance();
 
     if (Initialized()) return 0;
 

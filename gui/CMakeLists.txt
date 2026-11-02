@@ -23,8 +23,10 @@ ROOT_GENERATE_DICTIONARY(${dict}
   TEvdCrvNode.hh TEvdCrvView.hh
   TEvdDetNode.hh
   TEvdTracker.hh TEvdStation.hh TEvdPlane.hh TEvdPanel.hh TEvdStraw.hh
+  TEvdTrajectory.hh
   TEvdManager.hh TEvdSubdetector.hh
   TEvdView.hh TEvdVisNode.hh
+  TTrkVisNode.hh
   LINKDEF ${subpkg}/Linkdef.h)
 
 set_property(SOURCE ${dict}.cxx PROPERTY generated)
@@ -36,14 +38,17 @@ add_library(${lib} SHARED
   TEvdCrvNode.cc TEvdCrvView.cc
   TEvdDetNode.cc
   TEvdTracker.cc TEvdStation.cc TEvdPlane.cc TEvdPanel.cc TEvdStraw.cc
+  TEvdTrajectory.cc
   TEvdManager.cc TEvdSubdetector.cc
   TEvdView.cc TEvdVisNode.cc
+  TTrkVisNode.cc
   ${dict}.cxx
 )
 
 target_link_libraries(${lib}
   murat_alg
   Stntuple_alg Stntuple_geom Stntuple_obj Stntuple_base
+  Offline::RecoDataProducts
   Offline::ConfigTools
   Offline::GeometryService
   fhiclcpp::fhiclcpp  cetlib::cetlib

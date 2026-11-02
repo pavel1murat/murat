@@ -140,6 +140,22 @@ int TDetTimeAnaModule::BookEventHistograms(EventHist_t* Hist, EvtIndex_t* Index,
 }
 
 //-----------------------------------------------------------------------------
+int TDetTimeAnaModule::BookTcHistograms(TcHist_t* Hist, TcIndex_t* Index, TFolder* Folder) {
+
+  std::string prefix = std::format("run:{:06d} sel:{}",fRunNumber,Index->sel);
+  std::string name, title;
+
+  name  = "nch";
+  title = std::format("{} : nch",prefix);
+  fBookHist->HBook1F(Hist->h_nch,name,title,200,0,200,Folder);   // in MeV
+
+  name  = "t0";
+  title = std::format("{} : T0, ns",prefix);
+  fBookHist->HBook1F(Hist->h_t0,name,title,1000,0,5e6,Folder);   // in MeV
+
+  return 0;
+}
+//-----------------------------------------------------------------------------
 int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFolder* Folder) {
 
   std::string prefix = std::format("run:{:06d} sel:{}",fRunNumber,Index->sel);
@@ -174,9 +190,17 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
     title = std::format("{} : dT = T(TRK)-T(CALC) disk:{}",prefix,k);
     fBookHist->HBook1F(Hist->h_dt_calc[k],name,title,400,-100,100,Folder);   // in ns...
 
+    name  = std::format("dt_calc_vs_z0_{}",k);
+    title = std::format("{} : dT = T(TRK)-T(CALC) vs trk_z0 disk:{}",prefix,k);
+    fBookHist->HBook2F(Hist->h_dt_calc_vs_z0[k],name,title,200,-2000,2000,400,-100,100,Folder);   // in ns...
+
     name  = std::format("dt_tc_calc_{}",k);
     title = std::format("{} : dT = T(TC)-T(CALC) disk:{}",prefix,k);
     fBookHist->HBook1F(Hist->h_dt_tc_calc[k],name,title,400,-100,100,Folder);   // in ns...
+
+    name  = std::format("dt_tc_calc_vs_dydz_{}",k);
+    title = std::format("{} : dt_tc_calc vs dydz disk:{}",prefix,k);
+    fBookHist->HBook2F(Hist->h_dt_tc_calc_vs_dydz[k],name,title,200,-1.0,1.0,200,-50,50,Folder);
 
     name  = std::format("dt_calc_vs_dydz_{}",k);
     title = std::format("{} : dt_calc vs dydz disk:{}",prefix,k);
@@ -184,19 +208,19 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
 
     name  = std::format("dx_calc_{}",k);
     title = std::format("{} : dx_calc = x(trk)-x(calc) disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dx_calc[k],name,title,400,-1000,1000,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dx_calc[k],name,title,400,-500,500,Folder);   // in ns...
 
     name  = std::format("dy_calc_{}",k);
     title = std::format("{} : dy_calc = y(trk)-y(calc) disk:{}",prefix,k);
-    fBookHist->HBook1F(Hist->h_dy_calc[k],name,title,400,-1000,1000,Folder);   // in ns...
+    fBookHist->HBook1F(Hist->h_dy_calc[k],name,title,400,-500,500,Folder);   // in ns...
 
     name  = std::format("dx_calc_vs_dxdz_{}",k);
     title = std::format("{} : dx_calc vs dxdz disk:{}",prefix,k);
-    fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz[k],name,title,200,-1,1,200,-1000,1000,Folder);
+    fBookHist->HBook2F(Hist->h_dx_calc_vs_dxdz[k],name,title,200,-1,1,200,-500,500,Folder);
 
     name  = std::format("dy_calc_vs_dydz_{}",k);
     title = std::format("{} : dy_calc vs dydz disk:{}",prefix,k);
-    fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz[k],name,title,200,-1.0,1.0,200,-1000,1000,Folder);
+    fBookHist->HBook2F(Hist->h_dy_calc_vs_dydz[k],name,title,200,-1.0,1.0,200,-500,500,Folder);
   }
   
   name  = "xcrv";
@@ -278,13 +302,6 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   title = std::format("{} : Sipm ID",prefix);
   fBookHist->HBook1F(Hist->h_sipmid,name,title,2800,0,2800,Folder);
 
-  name  = "ntrk_0";
-  title = std::format("{} : ntrk[0]",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk[0],name,title,10,0,10,Folder);
-
-  name  = "ntrk_1";
-  title = std::format("{} : ntrk[1]",prefix);
-  fBookHist->HBook1F(Hist->h_ntrk[1],name,title,10,0,10,Folder);
 //-----------------------------------------------------------------------------
 // calorimeter hits 
 //-----------------------------------------------------------------------------
@@ -342,6 +359,27 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
     BookCalcHistograms(Hist->calc[i],&index,fol);
   }
 //-----------------------------------------------------------------------------
+// TC: time clusters
+//-----------------------------------------------------------------------------
+  TcIndex_t tc_index;
+
+  // std::string prefix = std::format("run:{:06d}",fRunNumber);
+  int book_tc_histset[kNTcHistSets];
+
+  for (int i=0; i<kNTcHistSets; i++) { book_tc_histset[i] = 0; }
+
+  book_tc_histset[0] = 1;             // all
+  
+  for (int i=0; i<kNTcHistSets; i++) {
+    if (book_tc_histset[i] == 0) continue;
+    std::string folder_name = std::format("tc_{:02d}",i);
+    TFolder* fol = (TFolder*) Folder->FindObject(folder_name.data());
+    if (! fol) fol = Folder->AddFolder(folder_name.data(),folder_name.data());
+    Hist->tc[i]   = new TcHist_t();
+    tc_index.sel  = i;
+    BookTcHistograms(Hist->tc[i],&tc_index,fol);
+  }
+//-----------------------------------------------------------------------------
 // Trk: tracks 
 //-----------------------------------------------------------------------------
   TrkIndex_t trk_index;
@@ -365,7 +403,8 @@ int TDetTimeAnaModule::BookHistograms(Hist_t* Hist, TFolder* Folder) {
   // book_trk_histset[8] = 1;             // in-time trk_nhits>10 CAL DISK0
   // book_trk_histset[9] = 1;             // in-time trk_nhits>10 CAL DISK1
 
-  book_trk_histset[10] = 1;             // in-time CRVC trk_nhits>10
+  book_trk_histset[10] = 1;             // trk_nhits>10
+  book_trk_histset[11] = 1;             // trk_nhits>10 in-time CRVC
   
   book_trk_histset[20] = 1;             // nhits>=20
   book_trk_histset[21] = 1;             // nhits>=20, at least one cluster in each disk
@@ -421,6 +460,14 @@ int TDetTimeAnaModule::FillDiskHistograms(DiskHist_t* Hist, TCaloRecoDigi* Calrd
   }
 
 //-----------------------------------------------------------------------------
+int TDetTimeAnaModule::FillTcHistograms(TcHist_t* Hist, TStnTimeCluster* Tc, tc_param_t* Tcp) {
+  // filling histograms: plot time differences between
+  Hist->h_nch->Fill(Tc->fNComboHits);
+  Hist->h_t0->Fill(Tc->fT0);
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_param_t* Tp) {
   // filling histograms: plot time differences between
   
@@ -441,7 +488,10 @@ int TDetTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
   for (int k=0; k<2; k++) {
     if (Tp->calc[k]) {
       Hist->h_dt_calc[k]->Fill(Tp->min_dt_calc[k]);
+      Hist->h_dt_calc_vs_z0[k]->Fill(Trk->fZ0,Tp->min_dt_calc[k]);
+
       Hist->h_dt_tc_calc[k]->Fill(Tp->min_dt_tc_calc[k]);
+      Hist->h_dt_tc_calc_vs_dydz[k]->Fill(dydz,Tp->min_dt_tc_calc[k]);
 
       Hist->h_dx_calc[k]->Fill(Tp->dx_calc[k]);
       Hist->h_dy_calc[k]->Fill(Tp->dy_calc[k]);
@@ -540,13 +590,16 @@ int TDetTimeAnaModule::FillHistograms() {
     }
   }
 //-----------------------------------------------------------------------------
+// fill TC histograms
+//-----------------------------------------------------------------------------
+  for (int i=0; i<fNTc; i++) {
+    TStnTimeCluster* tc  = fTcBlock->TimeCluster(i);
+    tc_param_t*      tcp = &fListOfTcParam[i];
+    FillTcHistograms(fHist->tc[0],tc,tcp);
+  }
+//-----------------------------------------------------------------------------
 // fill track histograms
 //-----------------------------------------------------------------------------
-  fHist->h_ntrk[0]->Fill(fNTrk);
-  if (n_good_tc > 0) {
-    fHist->h_ntrk[1]->Fill(fNTrk);
-  }
-
   for (int i=0; i<fNTrk; i++) {
     TStrTrack* trk = fTrackBlock->Track(i);
     trk_param_t* tp = &fListOfTrkParam[i];
@@ -563,8 +616,9 @@ int TDetTimeAnaModule::FillHistograms() {
       FillTrkHistograms(fHist->trk[7],trk,tp);
     }
 
-    if ((trk->NHits() > 10) and (tp->intime_crvc)) {
-      FillTrkHistograms(fHist->trk[10],trk,tp);
+    if (trk->NHits() > 10) {
+                           FillTrkHistograms(fHist->trk[10],trk,tp);
+      if (tp->intime_crvc) FillTrkHistograms(fHist->trk[11],trk,tp);
     }    
 
     if (trk->NHits() >= 20) {
@@ -852,6 +906,18 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
     }
   }
 
+//-----------------------------------------------------------------------------
+// time clusters
+//-----------------------------------------------------------------------------
+  fListOfTcParam.resize(fNTc);
+  for (int i=0; i<fNTc; i++) {
+    tc_param_t* tcp = &fListOfTcParam[i];
+    tcp->dt = 1.e6;
+  }
+
+//-----------------------------------------------------------------------------
+// tracks
+//-----------------------------------------------------------------------------
   CalculateMissingTrkParameters();
 
   return 0;

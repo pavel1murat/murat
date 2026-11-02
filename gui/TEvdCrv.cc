@@ -361,7 +361,7 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
       sector->Clear();
     }
 
-    TCrvPulseBlock* crvp = (TCrvPulseBlock*) vm->GetDataBlock("CrvpBlock");
+    TCrvPulseBlock* crvp = (TCrvPulseBlock*) vm->FindDataBlock("CrvpBlock");
     
     int npulses = crvp->NPulses();
     for (int i=0; i<npulses; i++) {
@@ -369,7 +369,7 @@ int TEvdCrv::InitGeometry(const char* geomFile) {
       AddRecoPulse(pulse);
     }
     
-    TCrvDigiBlock* crvd = (TCrvDigiBlock*) vm->GetDataBlock("CrvdBlock");
+    TCrvDigiBlock* crvd = (TCrvDigiBlock*) vm->FindDataBlock("CrvdBlock");
     
     int ndigis = crvd->NDigis();
     for (int i=0; i<ndigis; i++) {

@@ -20,9 +20,8 @@ namespace murat {
 class TEvdView: public TNamed {
   //protected:
 public:
-  //  int                    fType;         // view type
   int                    fIndex;        // for calorimeter - 2 views, for example
-  int                    fOpen;         // 1 if the window is open
+  bool                   fOpen;         // true, if the window is open, false otherwise
   void*                  fMother;       // non-null. if in the local ref system of some object
 
   static int             fgDebugLevel;
@@ -71,6 +70,7 @@ public:
   void          SetIndex      (int Index) { fIndex = Index; } 
 
   void          SetMother     (void* Mother) { fMother = Mother; };
+  void          SetOpen       (bool Open   ) { fOpen   = Open; }
   void          SetTimeWindow (float TMin, float TMax);  // *MENU* 
   //  void          SetType       (int Type ) { fType  = Type;  } 
 //-----------------------------------------------------------------------------

@@ -52,7 +52,7 @@ namespace murat {
 
     auto vm = TEvdManager::Instance();
     
-    TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->GetDataBlock("HeaderBlock");
+    TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->FindDataBlock("HeaderBlock");
     int evn = hb->EventNumber ();
     int srn = hb->SubrunNumber();
     int run = hb->RunNumber   ();
@@ -90,7 +90,7 @@ namespace murat {
 
     auto vm = TEvdManager::Instance();
     
-    TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->GetDataBlock("HeaderBlock");
+    TStnHeaderBlock* hb = (TStnHeaderBlock*) vm->FindDataBlock("HeaderBlock");
     f_EventNumber  = hb->EventNumber ();
     f_RunNumber    = hb->SubrunNumber();
     f_SubrunNumber = hb->RunNumber   ();

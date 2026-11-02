@@ -192,7 +192,7 @@ int TEvdCalorimeter::InitEvent() {
     }
   }
     
-  TCaloHitBlock* chb = (TCaloHitBlock*) vm->GetDataBlock("CaloHitBlock");
+  TCaloHitBlock* chb = (TCaloHitBlock*) vm->FindDataBlock("CaloHitBlock");
 
   if (chb) {
     int nhits = chb->NHits();

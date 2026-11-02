@@ -13,14 +13,14 @@ namespace murat {
   TEvdCaloView::TEvdCaloView(const char* Name, TGLViewer::ECameraType Type, int Index):
     TEvdView(Name,Type,Index)
   {
-    fViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);  // XY projection
+    // fViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);  // XY projection
   }
 
 //-----------------------------------------------------------------------------  
   TEvdCaloView::TEvdCaloView(const char* Name, TGLViewer::ECameraType Type, int Index, const char* Title):
     TEvdView(Name,Type,Index,Title)
   {
-    fViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);  // XY projection
+    // fViewer->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);  // XY projection
   }
 
 //-----------------------------------------------------------------------------

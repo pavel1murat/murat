@@ -41,44 +41,46 @@ private:
 public:
   static TEvdManager* Instance();
 
-  TGeoManager* GetGeoManager() { return fGeoManager; }
-
-  TEvdSubdetector* GetSubdetector(int I) { return (TEvdSubdetector*) fListOfSubdetectors->At(I); }
-
-  int GetNNodes       () { return fListOfNodes->GetEntriesFast(); }
-  int GetNViews       () { return fListOfViews->GetEntriesFast(); }
-  int GetNSubdetectors() { return fListOfSubdetectors->GetEntriesFast(); }
-  
-  TEvdVisNode* GetNode(int I) { return (TEvdVisNode*) fListOfNodes->At(I); }
-  TEvdView*    GetView(int I) { return (TEvdView*   ) fListOfViews->At(I); }
- 
-  TEvdSubdetector* FindSubdetector(const char* Name);
-  TEvdView*        FindView       (const char* Name);
-
   int   AddNode       (TEvdVisNode*     Node);
   int   AddView       (TEvdView*        View);
   void  AddSubdetector(TEvdSubdetector* Sd) ;
 
+  // a data block has its own name, 'Name' could be different
   void  AddDataBlock(const char* Name, TObject* Block) {
     fListOfDataBlocks->Add(new TObjString(Name),Block);
   }
 
-  TObject* GetDataBlock(const char* Name) {
+  int          DisplayEvent();
+  
+  TGeoManager* GetGeoManager() { return fGeoManager; }
+
+  TEvdSubdetector* GetSubdetector(int I) { return (TEvdSubdetector*) fListOfSubdetectors->At(I); }
+
+  int          GetNNodes       () { return fListOfNodes->GetEntriesFast(); }
+  int          GetNViews       () { return fListOfViews->GetEntriesFast(); }
+  int          GetNSubdetectors() { return fListOfSubdetectors->GetEntriesFast(); }
+  
+  TEvdVisNode* GetNode(int I) { return (TEvdVisNode*) fListOfNodes->At(I); }
+  TEvdView*    GetView(int I) { return (TEvdView*   ) fListOfViews->At(I); }
+ 
+  TStnDataBlock*   FindDataBlock(const char* Name) {
     TObjString key(Name);
-    TObject* v = fListOfDataBlocks->GetValue(&key);
+    TStnDataBlock* v = (TStnDataBlock*) fListOfDataBlocks->GetValue(&key);
     return v;
   }
 
-  int   DisplayEvent();
-  int   Update();                       // draw next event..
-  
+  TEvdSubdetector* FindSubdetector(const char* Name);
+  TEvdView*        FindView       (const char* Name);
+
   int   InitGeometry();
 
   int   InitEvent();
+                                        // to open a view for the first time
+  int   OpenView(const char* ViewName);
   
+  int   Update();                       // draw next event..
   //  ClassDefOverride(murat::TEvdManager,0)
 };
   
 }
 #endif
-

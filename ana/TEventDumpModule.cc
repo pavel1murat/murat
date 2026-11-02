@@ -24,14 +24,16 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
-#include "Stntuple/geom/TDisk.hh"
+// 2026-10-31-PM #include "Stntuple/geom/TDisk.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
-// 
+// nodes to be visualized
 //-----------------------------------------------------------------------------
 #include "murat/gui/TEvdCaloView.hh"
 #include "murat/gui/TEvdCaloNode.hh"
 #include "murat/gui/TEvdDetNode.hh"
+#include "murat/gui/TTrkVisNode.hh"
+
 #include "murat/gui/TEvdManager.hh"
 
 #include "murat/ana/TEventDumpModule.hh"
@@ -80,7 +82,9 @@ int TEventDumpModule::BeginJob() {
   RegisterDataBlock("ComboHitBlock"    ,"TComboHitBlock"      ,&fChBlock          );
   RegisterDataBlock("TimeClusterBlock" ,"TStnTimeClusterBlock",&fTcBlock          );
   RegisterDataBlock("TrackBlock"       ,"TStrTrackBlock"      ,&fTrackBlock       );
- 
+
+  InitEvd();
+
   return 0;
 }
 
@@ -145,6 +149,9 @@ int TEventDumpModule::Event(int IEntry) {
   fNCaloClusters = fCaloClusterBlock->NClusters();
 
   Debug();
+
+  TEvdManager* vm = TEvdManager::Instance();
+  vm->InitEvent();
 
   return 0;		       
 }
@@ -242,23 +249,32 @@ int TEventDumpModule::PrintTracks() {
     vm->AddDataBlock("CaloRecoDigiBlock",fCaloRecoDigiBlock);
     vm->AddDataBlock("CaloClusterBlock" ,fCaloClusterBlock);
     
+    vm->AddDataBlock("CrvdBlock"        ,fCrvdBlock);
     vm->AddDataBlock("CrvpBlock"        ,fCrvpBlock);
     vm->AddDataBlock("CrvcBlock"        ,fCrvcBlock);
 
+    vm->AddDataBlock("ChBlock"          ,fChBlock);
+    vm->AddDataBlock("TcBlock"          ,fTcBlock);
     vm->AddDataBlock("TrackBlock"       ,fTrackBlock);
 //-----------------------------------------------------------------------------
 // calorimeter view
 //-----------------------------------------------------------------------------
     TEvdCaloNode* node = new TEvdCaloNode("calo_node");
-    TEvdCaloView*    view = new TEvdCaloView("calo_view",TGLViewer::kCameraOrthoXOY);
+    TEvdCaloView* view = new TEvdCaloView("calo_view",TGLViewer::kCameraOrthoXOY);
     view->AddNode(node);
     vm->AddView(view);
 //-----------------------------------------------------------------------------
 // 3D detector view
 //-----------------------------------------------------------------------------
+    TEvdView*    det_view = new TEvdView   ("det_view",TGLViewer::kCameraPerspXOZ);
+
+    // nodes
     TEvdDetNode* det_node = new TEvdDetNode("det_node");
-    TEvdView*    det_view = new TEvdView   ("det_view",TGLViewer::kCameraPerspXOY);
     det_view->AddNode(det_node);
+
+    TTrkVisNode* trk_node = new TTrkVisNode("trk_node");
+    det_view->AddNode(trk_node);
+
     vm->AddView(det_view);
 
     return rc;

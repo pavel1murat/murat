@@ -19,6 +19,7 @@
 #include "Stntuple/obj/TCrvClusterBlock.hh"
 #include "Stntuple/obj/TCrvPulseBlock.hh"
 
+#include "Stntuple/obj/TStnTimeCluster.hh"
 #include "Stntuple/obj/TStnTimeClusterBlock.hh"
 #include "Stntuple/obj/TStrTrackBlock.hh"
 
@@ -51,11 +52,29 @@ public:
     kNRocHistSets        =  20,
     kNCalhHistSets       = 100,
     kNCalcHistSets       = 100,
+    kNTcHistSets         = 100,
     kNTrkHistSets        = 100,
   };
 //-----------------------------------------------------------------------------
 // indices
 //-----------------------------------------------------------------------------
+  struct CaloIndex_t {
+    int sel   {-1};
+    int crate {-1};
+    int disk  {-1};
+    int cid   {-1};                   //
+  };
+  
+  struct CrvIndex_t {
+    int sel  {-1};
+    int sbid {-1};
+    int sipm {-1};
+    int och  {-1};                           // offline channel - 4*sbid+sipm
+    int roc  {-1};                           // 1-18 ??? 
+    int feb  {-1};                           // 1-24 in offline domain
+    int ch   {-1};                           // channel within the FEB (0-63)
+  };
+  
   struct EvtIndex_t {
     int sel;
   };
@@ -69,24 +88,14 @@ public:
     int mnid;
     int ch;
   };
-  
-  struct CrvIndex_t {
-    int sel  {-1};
-    int sbid {-1};
-    int sipm {-1};
-    int och  {-1};                           // offline channel - 4*sbid+sipm
-    int roc  {-1};                           // 1-18 ??? 
-    int feb  {-1};                           // 1-24 in offline domain
-    int ch   {-1};                           // channel within the FEB (0-63)
+
+  struct TcIndex_t {
+    int sel;
   };
   
-  struct CaloIndex_t {
-    int sel   {-1};
-    int crate {-1};
-    int disk  {-1};
-    int cid   {-1};                   //
-  };
-  
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
   struct calh_param_t {
     float                     dt10;           // T(1)-T(0)
   };
@@ -100,6 +109,10 @@ public:
     TStrTrack*                trk;                      // closest track
   };
                                                   // for now, a placeholder
+  struct tc_param_t {
+    float                     dt;           // T(1)-T(0)
+  };
+
   struct trk_param_t {
     int                       intime;
     int                       intime_calc;
@@ -157,6 +170,11 @@ public:
     TH2F*         h_dt_crvc_vs_dt_tc;
   };
 
+  struct TcHist_t {
+    TH1F*         h_nch;
+    TH1F*         h_t0;
+  };
+
   struct TrkHist_t {
     TH1F*         h_nhits;
     TH1F*         h_chi2d;
@@ -167,7 +185,9 @@ public:
     TH1F*         h_dt_tc;
     
     TH1F*         h_dt_calc   [2];
+    TH2F*         h_dt_calc_vs_z0[2];
     TH1F*         h_dt_tc_calc[2];
+    TH2F*         h_dt_tc_calc_vs_dydz[2];
     TH2F*         h_dt_calc_vs_dydz[2]; // 
     TH1F*         h_dx_calc[2];
     TH1F*         h_dy_calc[2];
@@ -202,10 +222,10 @@ public:
     TH2F*        h_dt10_vs_cid;         // dt(1-0) vs crystal
     TH2F*        h_nsipms_vs_cid;
     TH1F*        h_sipmid;               // occupancy offline channel
-    TH1F*        h_ntrk[2];
     CalhHist_t*  calh [kNCalhHistSets ];
     CalcHist_t*  calc [kNCalcHistSets ];
     EventHist_t* event[kNEventHistSets];
+    TcHist_t*    tc   [kNTcHistSets   ];
     TrkHist_t*   trk  [kNTrkHistSets  ];
   };
 
@@ -249,6 +269,7 @@ public:
 
   std::vector<calc_param_t> fListOfCalcParam;
   std::vector<calh_param_t> fListOfCalhParam;
+  std::vector<tc_param_t>   fListOfTcParam;
   std::vector<trk_param_t>  fListOfTrkParam;
 
   fit_result_t              fFr[kNCaloChannels];
@@ -285,6 +306,7 @@ public:
   int              BookCalhHistograms (CalhHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookDiskHistograms (DiskHist_t*   Hist, CaloIndex_t* Index, TFolder* Folder);
   int              BookEventHistograms(EventHist_t*  Hist, EvtIndex_t*  Index, TFolder* Folder);
+  int              BookTcHistograms   (TcHist_t*     Hist, TcIndex_t*   Index, TFolder* Folder);
   int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
@@ -294,7 +316,8 @@ public:
   int              FillCalcHistograms (CalcHist_t*  Hist, TStnCluster*   Calc, calc_param_t* Cp);
   int              FillDiskHistograms (DiskHist_t*  Hist, TCaloRecoDigi* Calrd);
   int              FillEventHistograms(EventHist_t* Hist);
-  int              FillTrkHistograms  (TrkHist_t*   Hist, TStrTrack*     Trk , trk_param_t* Tp);
+  int              FillTcHistograms   (TcHist_t*    Hist, TStnTimeCluster* Tc , tc_param_t*  Tcp);
+  int              FillTrkHistograms  (TrkHist_t*   Hist, TStrTrack*       Trk, trk_param_t* Tp );
   int              FillHistograms     ();
 
   int              FitCaloTimeOffsets (float TMin = 1., float TMax = -1.);

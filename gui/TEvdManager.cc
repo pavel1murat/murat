@@ -37,6 +37,9 @@
 #include "murat/gui/TEvdCalorimeter.hh"
 #include "murat/gui/TEvdTracker.hh"
 
+#include "TRACE/trace.h"
+#define  TRACE_NAME "TEvdManager"
+
 ClassImp(murat::TEvdManager)
 // ============================================================================
 // Global state used by the interactive callback
@@ -194,11 +197,7 @@ int TEvdManager::DisplayEvent() {
   int rc(0);
   
   // 1. update all nodes with the current event data
-  int nnodes = GetNNodes();
-  for (int i=0; i<nnodes; i++) {
-    TEvdVisNode* node = GetNode(i);
-    node->InitEvent();
-  }
+  InitEvent();
 
   // 2. redraw all currently open views
 
@@ -290,6 +289,27 @@ int TEvdManager::InitGeometry() {
   return 0;
 }
 
+//-----------------------------------------------------------------------------
+  int TEvdManager::OpenView(const char* Name) {
+    int rc(0);
+    TEvdView* view = FindView(Name);
+    if (view) {
+      if (view->IsOpen()) {
+                                        // already open
+        TLOG(TLVL_WARNING) << std::format("view:{} is already open, DO NOTHING.",Name);
+        rc = 1;
+      }
+      else {
+        view->Draw("ogl");
+        view->SetOpen(true);
+      }
+    }
+    else {
+                                        // view not found
+      TLOG(TLVL_ERROR) << std::format("view:{} not found, DO NOTHING.",Name);
+    }
+    return rc;
+  }
 //-----------------------------------------------------------------------------
   int TEvdManager::Update() {
     int rc(0);

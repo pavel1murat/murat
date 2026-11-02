@@ -19,7 +19,7 @@ namespace murat {
 //-----------------------------------------------------------------------------
   TEvdView::TEvdView(const char* Name, TGLViewer::ECameraType Type, int Index) :
     TNamed(Name,Name),
-    fOpen(0),
+    fOpen(false),
     fCameraType(Type)
   {
     fListOfNodes = new TObjArray();
@@ -43,7 +43,7 @@ namespace murat {
 //-----------------------------------------------------------------------------
   TEvdView::TEvdView(const char* Name, TGLViewer::ECameraType Type, int Index, const char* Title) :
     TNamed(Name,Title),
-    fOpen(0),
+    fOpen(false),
     fCameraType(Type)
   {
     fListOfNodes = new TObjArray();
@@ -92,8 +92,8 @@ namespace murat {
   int TEvdView::Open() {
 
     // do it only once, there should ba a pad associated with the view
-    if (fOpen == 1) return 0;
-    fOpen = 1;
+    if (fOpen) return 0;
+    fOpen = true;
 
     fCanvas->cd();
 

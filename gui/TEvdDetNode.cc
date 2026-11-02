@@ -61,7 +61,7 @@ namespace murat {
       }
     }
 
-    TCaloHitBlock* chb = (TCaloHitBlock*) vm->GetDataBlock("CaloHitBlock");
+    TCaloHitBlock* chb = (TCaloHitBlock*) vm->FindDataBlock("CaloHitBlock");
     int nhits = chb->NHits();
     for (int i=0; i<nhits; i++) {
       TCaloHit* hit = chb->Hit(i);
@@ -90,7 +90,7 @@ namespace murat {
       sector->Clear();
     }
 
-    TCrvPulseBlock* crvp = (TCrvPulseBlock*) vm->GetDataBlock("CrvpBlock");
+    TCrvPulseBlock* crvp = (TCrvPulseBlock*) vm->FindDataBlock("CrvpBlock");
     
     int npulses = crvp->NPulses();
     for (int i=0; i<npulses; i++) {
@@ -135,7 +135,7 @@ namespace murat {
     
     auto vm = TEvdManager::Instance();  // has to be initialized at this point
 
-    TStrTrackBlock* tb = (TStrTrackBlock*) vm->GetDataBlock("TrackBlock");
+    TStrTrackBlock* tb = (TStrTrackBlock*) vm->FindDataBlock("TrackBlock");
     int ntracks = tb->NTracks();
     for (int i=0; i<ntracks;i++) {
       

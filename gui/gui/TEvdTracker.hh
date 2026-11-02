@@ -27,7 +27,7 @@ public:
 //-----------------------------------------------------------------------------
   virtual void Print(Option_t* Opt = "") const override;
 
-  ClassDef(murat::TEvdTracker,0)
+  ClassDefOverride(murat::TEvdTracker,0)
 };
 }
 #endif

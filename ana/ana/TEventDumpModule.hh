@@ -251,7 +251,7 @@ public:
 //  functions
 //-----------------------------------------------------------------------------
 public:
-  TEventDumpModule(const char* name="DetTimeAna", const char* title="Stntuple DetTimeAna");
+  TEventDumpModule(const char* name="EventDump", const char* title="Event Dump");
   ~TEventDumpModule();
 //-----------------------------------------------------------------------------
 // accessors

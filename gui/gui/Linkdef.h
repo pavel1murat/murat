@@ -13,7 +13,7 @@
 #pragma link C++ class murat::TEvdCaloView;
 #pragma link C++ class murat::TEvdCalorimeter;
 
-#pragma link C++ class murat::TEvdComboHit;
+#pragma link C++ class murat::TComboHitEvd;
 
 #pragma link C++ class murat::TEvdCrvCounter;
 #pragma link C++ class murat::TEvdCrvLayer;

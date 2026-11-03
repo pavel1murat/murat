@@ -391,7 +391,7 @@ int TCaloTimeAnaModule::AnalyzeWaveforms() {
   fNWfMaxima.clear();
   
   for (int i=0; i<fNCalod; i++) {
-    TCaloDigi* digi = fCaloDigiBlock->CaloDigi(i);
+    TCaloDigi* digi = fCaloDigiBlock->Digi(i);
     int ns = digi->Ns();
     // count number of local maxima on the waveform
 
@@ -626,7 +626,7 @@ void TCaloTimeAnaModule::Debug() {
       GetHeaderBlock()->Print(Form("bit_008: NWfMaxima:%i",fMaxNWfMaxima));
       
       for (int i=0; i<fNCalod; i++) {
-        TCaloDigi* d = fCaloDigiBlock->CaloDigi(i);
+        TCaloDigi* d = fCaloDigiBlock->Digi(i);
         int ns = d->Ns();
         printf("wf:%3i sipmid:%4i ns:%3i n(maxima):%3i\n",i,d->SipmID(),ns,fNWfMaxima[i]);
         if (fNWfMaxima[i] == 1) {
@@ -725,7 +725,7 @@ void TCaloTimeAnaModule::PlotWaveform(int SipmID, bool NewCanvas) {
   int nwf = 0;
 
   for (int i=0; i<nd; i++) {
-    TCaloDigi* digi = fCaloDigiBlock->CaloDigi(i);
+    TCaloDigi* digi = fCaloDigiBlock->Digi(i);
     if (digi->SipmID() == SipmID) {
       nwf++;
       int ns = digi->Ns();
@@ -769,7 +769,7 @@ void TCaloTimeAnaModule::PrintCaloDigiBlock() {
   printf("---------------------------------------------------------\n");
 
   for (int i=0; i<nd; i++) {
-    TCaloDigi* digi = fCaloDigiBlock->CaloDigi(i);
+    TCaloDigi* digi = fCaloDigiBlock->Digi(i);
     std::cout << Form("%5d %5d %4d 0x%04x %6d %6d %6d\n",
                       digi->GetUniqueID(),digi->SipmID(),fNWfMaxima[i],
                       digi->Mask(),digi->T0(),digi->Ns(),digi->PPos());

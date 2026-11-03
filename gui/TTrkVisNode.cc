@@ -16,13 +16,17 @@
 #include "Stntuple/obj/TComboHit.hh"
 #include "Stntuple/obj/TComboHitBlock.hh"
 #include "Stntuple/obj/TStnTimeClusterBlock.hh"
+#include "Stntuple/obj/TStrawDigiBlock.hh"
 #include "Stntuple/obj/TStrTrackBlock.hh"
 
 #include "murat/gui/TEvdManager.hh"
 #include "murat/gui/TEvdTrajectory.hh"
-#include "murat/gui/TTrkVisNode.hh"
-#include "murat/gui/TEvdComboHit.hh"
+#include "murat/gui/TComboHitEvd.hh"
 
+#include "murat/gui/TTrkVisNode.hh"
+
+#include "TRACE/tracemf.h"
+#define TRACE_NAME "TTrkVisNode"
 
 // ClassImp(TTrkVisNode)
 
@@ -65,9 +69,10 @@ namespace {
 
     for (int i=0; i<kNSteps+1; i++) {
       float t  = t1+i*t_step;
-      // pos is returned on the local tracker reference frame
+      // pos is returned on the local tracker reference frame, translate it to the global
       Track->GetPosAtT(t,pos);
-      if ((pos[2] < -3000.) or (pos[2] > 3000.)) continue;
+      if ((pos[0] < -4000.) or (pos[2] > 4000.)) continue;
+      if ((pos[2] < -3000.) or (pos[2] > 5000.)) continue;
       X.emplace_back(pos[0]+tracker_pos[0]);
       Y.emplace_back(pos[1]+tracker_pos[1]);
       Z.emplace_back(pos[2]+tracker_pos[2]);
@@ -76,23 +81,6 @@ namespace {
 
     return npoints;
   }
-
-//-----------------------------------------------------------------------------
-// a combo hit is drawn as a straight segment of length 2*Ures along the wire
-// direction (Ux,Uy,0), centered on the hit position
-//-----------------------------------------------------------------------------
-//   TPolyLine3D* comboHitSegment(const TComboHit* Hit) {
-//     float tracker_pos[3] = {-3904.,    0.0, 22935.0 };
-
-//     double dx = Hit->Ures()*Hit->Ux();
-//     double dy = Hit->Ures()*Hit->Uy();
-
-//     TPolyLine3D* seg = new TPolyLine3D(2);
-//     seg->SetPoint(0, Hit->X()+tracker_pos[0]-dx, Hit->Y()+tracker_pos[1]-dy, Hit->Z()+tracker_pos[2]);
-//     seg->SetPoint(1, Hit->X()+tracker_pos[0]+dx, Hit->Y()+tracker_pos[1]+dy, Hit->Z()+tracker_pos[2]);
-//     seg->SetLineWidth(2.);
-//     return seg;
-//   }
 }
 
 namespace murat {
@@ -103,7 +91,7 @@ namespace murat {
     // auto vm = TEvdManager::Instance();  // has to be initialized at this point
 
     fListOfTracks      = new TObjArray();
-    fListOfClusterHits = new TObjArray();
+    fListOfTcHits = new TObjArray();
     fListOfTrackHits   = new TObjArray();
   }
 
@@ -112,8 +100,8 @@ namespace murat {
     fListOfTracks->Delete();
     delete fListOfTracks;
 
-    fListOfClusterHits->Delete();
-    delete fListOfClusterHits;
+    fListOfTcHits->Delete();
+    delete fListOfTcHits;
 
     fListOfTrackHits->Delete();
     delete fListOfTrackHits;
@@ -127,9 +115,11 @@ namespace murat {
     auto vm = TEvdManager::Instance();  // has to be initialized at this point
 
     // keep the data block names fixed
-    fChBlock    = (TComboHitBlock*)       vm->FindDataBlock("ChBlock");
-    fTcBlock    = (TStnTimeClusterBlock*) vm->FindDataBlock("TcBlock");
+    fChBlock    = (TComboHitBlock*)       vm->FindDataBlock("ChBlock"   );
+    fTcBlock    = (TStnTimeClusterBlock*) vm->FindDataBlock("TcBlock"   );
     fTrackBlock = (TStrTrackBlock*)       vm->FindDataBlock("TrackBlock");
+    fSdBlock    = (TStrawDigiBlock*)      vm->FindDataBlock("SdBlock"   );
+
     if ((fChBlock == nullptr) or (fTcBlock == nullptr) or (fTrackBlock == nullptr)) {
       return -1;
     }
@@ -139,7 +129,7 @@ namespace murat {
     f_SubrunNumber = fTrackBlock->SubrunNumber();
 
     fListOfTracks->Delete();
-    fListOfClusterHits->Delete();
+    fListOfTcHits->Delete();
     fListOfTrackHits->Delete();
 
     // combo hits are located using their original index stored as the unique ID
@@ -161,8 +151,25 @@ namespace murat {
         auto it = hit_map.find(links->Index(itc,j));
         if (it == hit_map.end()) continue;
         // create evd representation of the combo hit
-        TEvdComboHit* evd_ch = new TEvdComboHit(it->second);
-        fListOfClusterHits->Add(evd_ch);
+        TComboHit* ch = it->second;
+        TComboHitEvd* ch_evd = new TComboHitEvd(ch);
+        fListOfTcHits->Add(ch_evd);
+        if (fSdBlock) {
+          // need to find the Ch , go slow
+          int ind = fChBlock->FindHitIndex(ch);
+          if (ind < 0) {
+            TLOG(TLVL_ERROR) << std::format("TC combohit number:{} not found. CONTINUE",j);
+            continue;
+          }
+          // in most cases, a digi and a straw hit should have the same index
+          // wait for the first bug to show up
+          TStnLinkBlock* list_of_sh_indices = fChBlock->ListOfShIndices();
+          if (list_of_sh_indices) {
+            int isd = list_of_sh_indices->Index(ind,0);
+            TStrawDigi* sd = fSdBlock->StrawDigi(isd);
+            ch_evd->SetStrawDigi(sd);
+          }
+        }
       }
     }
 
@@ -181,14 +188,12 @@ namespace murat {
       TEvdTrajectory* traj = new TEvdTrajectory(name.c_str(), trk, npoints,x.data(),y.data(),z.data());
       fListOfTracks->Add(traj);
 
-      // track hits: a dot at the position of each combo hit of the track
-      std::vector<TVector3> hit_points;
       for (const auto& seed : *trk->fHitSeeds) {
         auto it = hit_map.find(seed.index());
         if (it == hit_map.end()) continue;
         TComboHit* ch = it->second;
-        TEvdComboHit* evd_ch = new TEvdComboHit(ch,1);
-        fListOfTrackHits->Add(evd_ch);
+        TComboHitEvd* ch_evd = new TComboHitEvd(ch,1);
+        fListOfTrackHits->Add(ch_evd);
       }
     }
 
@@ -216,7 +221,7 @@ namespace murat {
 
 //-----------------------------------------------------------------------------
   void TTrkVisNode::Draw(Option_t* Opt) {
-    TObjArray* lists[] = { fListOfClusterHits, fListOfTracks, fListOfTrackHits };
+    TObjArray* lists[] = { fListOfTcHits, fListOfTracks, fListOfTrackHits };
 
     for (TObjArray* list : lists) {
       int n = list->GetEntriesFast();

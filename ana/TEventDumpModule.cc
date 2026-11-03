@@ -245,6 +245,8 @@ int TEventDumpModule::PrintTracks() {
     vm->InitGeometry(); // if not initialized
     
     vm->AddDataBlock("HeaderBlock"      ,GetHeaderBlock());
+
+    vm->AddDataBlock("CaloDigiBlock"    ,fCaloDigiBlock);
     vm->AddDataBlock("CaloHitBlock"     ,fCaloHitBlock);
     vm->AddDataBlock("CaloRecoDigiBlock",fCaloRecoDigiBlock);
     vm->AddDataBlock("CaloClusterBlock" ,fCaloClusterBlock);
@@ -254,6 +256,7 @@ int TEventDumpModule::PrintTracks() {
     vm->AddDataBlock("CrvcBlock"        ,fCrvcBlock);
 
     vm->AddDataBlock("ChBlock"          ,fChBlock);
+    vm->AddDataBlock("SdBlock"          ,fSdBlock);
     vm->AddDataBlock("TcBlock"          ,fTcBlock);
     vm->AddDataBlock("TrackBlock"       ,fTrackBlock);
 //-----------------------------------------------------------------------------

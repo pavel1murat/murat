@@ -7,6 +7,7 @@
 
 #include "murat/gui/TEvdVisNode.hh"
 
+class TStrawDigiBlock;
 class TStrTrackBlock;
 class TComboHitBlock;
 class TStnTimeClusterBlock;
@@ -16,12 +17,13 @@ namespace murat {
 class TTrkVisNode: public TEvdVisNode {
 
 protected:
-  TStrTrackBlock*       fTrackBlock  {nullptr}; // ==NOT OWNED==
-  TStnTimeClusterBlock* fTcBlock     {nullptr}; // ==NOT OWNED==
-  TComboHitBlock*       fChBlock     {nullptr}; // ==NOT OWNED==
-  TObjArray*            fListOfTracks{nullptr}; // ==OWNED== TEvdTrajectory objects, one per track segment in the Y window
-  TObjArray*            fListOfClusterHits{nullptr}; // ==OWNED== TPolyLine3D objects, one per time cluster hit
-  TObjArray*            fListOfTrackHits  {nullptr}; // ==OWNED== TPolyMarker3D objects, one per track
+  TStrTrackBlock*       fTrackBlock     {nullptr}; // ==NOT OWNED==
+  TStnTimeClusterBlock* fTcBlock        {nullptr}; // ==NOT OWNED==
+  TComboHitBlock*       fChBlock        {nullptr}; // ==NOT OWNED==
+  TStrawDigiBlock*      fSdBlock        {nullptr}; // ==NOT OWNED==
+  TObjArray*            fListOfTracks   {nullptr}; // ==OWNED== TEvdTrajectory, one per track
+  TObjArray*            fListOfTcHits   {nullptr}; // ==OWNED== TPolyLine3D, one per time cluster hit
+  TObjArray*            fListOfTrackHits{nullptr}; // ==OWNED== TPolyLine3D, one per track hit
 
 public:
 					// ****** constructors and destructor

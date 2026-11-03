@@ -138,7 +138,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
 
       int index  = ncr*idisk+i;   // assume both diss to have the same number of crystals
       // every crystal has unique name - tied to readout channels
-      TEvdCrystal* crystal = new TEvdCrystal(Form("crystal_%04i",index),shape,crystalMedium);
+      TEvdCrystal* crystal = new TEvdCrystal(index,shape,crystalMedium);
 
       // crystal color will depend on whether the crystal has hits
       crystal->SetLineColor(kOrange + 1);

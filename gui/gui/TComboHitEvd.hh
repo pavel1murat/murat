@@ -1,11 +1,9 @@
 //
-#ifndef __murat_gui_TEvdComboHit_hh__
-#define __murat_gui_TEvdComboHit_hh__
+#ifndef __murat_gui_TComboHitEvd_hh__
+#define __murat_gui_TComboHitEvd_hh__
 
 #include "TMarker.h"
-#include "TObject.h"
-
-#include "TObjArray.h"
+#include "TCanvas.h"
 #include "TPolyLine3D.h"
 
 namespace mu2e {
@@ -13,10 +11,11 @@ namespace mu2e {
 }
 
 class TComboHit;
+class TStrawDigi;
 
 namespace murat {
 //-----------------------------------------------------------------------------
-class TEvdComboHit: public TObject {
+class TComboHitEvd: public TPolyLine3D{
 
 public:
   float   fX;
@@ -31,12 +30,13 @@ public:
   float   fEDep;
   float   fP;     // partcle momentum
 
-  TPolyLine3D fPolyLine;
-
   TMarker fXYMarker;
   TMarker fTZMarker;
 
-  TComboHit*   fCh;                     // backward pointer
+  TComboHit*   fCh    {nullptr};        // backward pointer
+  TStrawDigi*  fSd    {nullptr};
+  TCanvas*     fCanvas{nullptr};
+  TH1F*        fHist  {nullptr};
 
   mu2e::ComboHit* fOfflineCh;
     
@@ -60,38 +60,20 @@ public:
   float  Z()    { return fZ; }
   
 public:
-  TEvdComboHit() {}
-  TEvdComboHit(TComboHit* Ch, int TrackFlag = 0);
-  TEvdComboHit(float X, float Y, float Z, float T, float EDep, int Pdg, float P);
+  TComboHitEvd(TComboHit* Ch, int TrackFlag = 0);
+  TComboHitEvd(float X, float Y, float Z, float T, float EDep, int Pdg, float P);
 
-  virtual ~TEvdComboHit() {}
+  virtual ~TComboHitEvd() {}
+
+  void SetStrawDigi(TStrawDigi* Sd) { fSd = Sd; }
 //-----------------------------------------------------------------------------
 // overloaded functions of TObject
 //-----------------------------------------------------------------------------
-  virtual void  Draw         (Option_t* option = "") override;
-  virtual void  Paint        (Option_t* option = "") override;
-  void          PrintComboHit(Option_t* option = "");               // MENU* 
+//  virtual void  Draw         (Option_t* option = "") override;
+  void          PrintComboHit();                                      // *MENU* 
+  void          PlotWaveform ();                                      // *MENU* 
 
-  ClassDefOverride(murat::TEvdComboHit,0)
-};
-
-//-----------------------------------------------------------------------------
-struct StationData_t {
-public:
-  TObjArray fHits;
-
-  StationData_t() { fHits.SetOwner(1); }
-  
-  TEvdComboHit* GetHit  (int I) { return (TEvdComboHit*) fHits.UncheckedAt(I); }
-  int           GetNHits()      { return fHits.GetEntriesFast(); }
-};
-
-//-----------------------------------------------------------------------------
-struct HitData_t {
-   StationData_t   fStation[18];
-
-  HitData_t() { }
-
+  ClassDefOverride(murat::TComboHitEvd,0)
 };
 
 }

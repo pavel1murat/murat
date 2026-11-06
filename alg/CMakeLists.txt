@@ -20,6 +20,7 @@ link_directories(
 ROOT_GENERATE_DICTIONARY(${dict}
   TLsqSums4.hh
   DetPos_t.hh
+  RunInfo_t.hh
   LINKDEF ${subpkg}/Linkdef.h)
 
 set_property(SOURCE ${dict}.cxx PROPERTY generated)
@@ -27,6 +28,7 @@ set_property(SOURCE ${dict}.cxx PROPERTY generated)
 add_library(${lib} SHARED
   TLsqSums4.cc
   DetPos_t.cc
+  RunInfo_t.cc
   ${dict}.cxx
 )
 

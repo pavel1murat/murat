@@ -67,6 +67,8 @@ TDetTimeAnaModule::TDetTimeAnaModule(const char* name, const char* title):
 
   fListOfTrkParam.reserve(100);
   fListOfTrkParam.resize (100);
+
+  fHistogramsBooked = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -678,7 +680,12 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
       tp->x_disk[k]         = trk->fX0  + (fDetPos.trk_pos [0]+ fDetPos.trk_off [0]) + dxdz*dz;
       tp->y_disk[k]         = trk->fY0  + (fDetPos.trk_pos [1]+ fDetPos.trk_off [1]) + dydz*dz;
       tp->path[k]           = dz*sqrt(1+dxdz*dxdz+dydz*dydz);
-      tp->t_disk[k]         = trk->fT0+tp->path[k]/2.997e2; // this assumes downstream
+      if (dydz < 0) {
+        tp->t_disk[k]       = trk->fT0+tp->path[k]/2.997e2; // this assumes downstream
+      }
+      else {
+        tp->t_disk[k]       = trk->fT0-tp->path[k]/2.997e2; // this assumes downstream
+      }
       tp->calc[k]           = nullptr;
       tp->dx_calc[k]        = 1.e6;
       tp->dy_calc[k]        = 1.e6;
@@ -843,11 +850,13 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
       // look for reco digis
       int ind0 = calh->fCrdIndex[0];
       int ind1 = calh->fCrdIndex[1];
-      TCaloRecoDigi* crd0 = fCaloRecoDigiBlock->CaloRecoDigi(ind0);
-      TCaloRecoDigi* crd1 = fCaloRecoDigiBlock->CaloRecoDigi(ind1);
-      // readout of one of the channels could be missing
-      if ((crd0 != nullptr) and (crd1 != nullptr)) {
+      if ((ind0 >=0) and (ind1 >= 0)) { 
+        TCaloRecoDigi* crd0 = fCaloRecoDigiBlock->CaloRecoDigi(ind0);
+        TCaloRecoDigi* crd1 = fCaloRecoDigiBlock->CaloRecoDigi(ind1);
+        // readout of one of the channels could be missing
+        //   if ((crd0 != nullptr) and (crd1 != nullptr)) {
         calhp->dt10 = crd1->Time()-crd0->Time();
+        // }
       }
     }
   }
@@ -956,8 +965,11 @@ int TDetTimeAnaModule::BeginRun() {
   // relative positions of subdetectors wrt each other
   int print_level(0);
   fDetPos.GetFromRunDb(fRunNumber,print_level);
-  
-  BookHistograms(fHist,fFolder);
+
+  if (not fHistogramsBooked) {
+    BookHistograms(fHist,fFolder);
+    fHistogramsBooked = true;
+  }
   return 0;
 }
 

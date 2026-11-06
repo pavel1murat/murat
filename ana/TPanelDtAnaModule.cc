@@ -26,6 +26,7 @@
 #include "Stntuple/loop/TStnAna.hh"
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/alg/TStntuple.hh"
+#include "Stntuple/alg/TRunDb.hh"
 #include "Stntuple/val/stntuple_val_functions.hh"
 //------------------------------------------------------------------------------
 // 
@@ -63,7 +64,8 @@ TPanelDtAnaModule::TPanelDtAnaModule(const char* name, const char* title):
   fNEvents  = -1;
   fMaxEvent = -1;
 
-  // fCanvasWf = nullptr;
+  fCanvas   = nullptr;
+  fListOfHistograms = new TObjArray();
   //   fEvdCrv->InitGeometry("Offline/Mu2eG4/geom/geom_common_extracted.txt");
 }
 
@@ -126,6 +128,13 @@ int TPanelDtAnaModule::BookEventHistograms(EventHist_t* Hist, TrkIndex_t* Index,
   name  = "ntrk";
   title = std::format("{} : ntrk",prefix);
   fBookHist->HBook1F(Hist->h_ntrk,name.data(),title.data(),10,0,10,Folder);
+
+  name  = "nsh_vs_ewt";
+  title = std::format("{} : nsh_vs_ewt",prefix);
+  // want 10000 bins, for example
+  int nbins = 10000;
+  int bin   = fRunInfo.max_ewtag/nbins+1;
+  fBookHist->HBook1F(Hist->h_nsh_vs_ewt,name.data(),title.data(),nbins,0,bin*nbins,Folder);
 
   return 0;
 }
@@ -361,6 +370,7 @@ int TPanelDtAnaModule::FillEventHistograms(EventHist_t* Hist, TrkIndex_t* Index)
   Hist->h_nch->Fill(fNCh);
   Hist->h_ntc->Fill(fNTc);
   Hist->h_ntrk->Fill(fNTracks);
+  Hist->h_nsh_vs_ewt->Fill(fEwt,fNSh);
   return 0;
 }
 
@@ -624,6 +634,7 @@ int TPanelDtAnaModule::BeginJob() {
 //-----------------------------------------------------------------------------
   RegisterDataBlock("TimeClusterBlock" ,"TStnTimeClusterBlock",&fTcBlock          );
   RegisterDataBlock("ComboHitBlock"    ,"TComboHitBlock"      ,&fChBlock          );
+  RegisterDataBlock("StrawDigiBlock"   ,"TStrawDigiBlock"     ,&fSdBlock          );
   RegisterDataBlock("StrawHitBlock"    ,"TStrawHitBlock"      ,&fShBlock          );
   RegisterDataBlock("TrackBlock"       ,"TStrTrackBlock"      ,&fTrackBlock       );
 
@@ -636,6 +647,9 @@ int TPanelDtAnaModule::BeginRun() {
   fRunNumber = GetHeaderBlock()->RunNumber();
   TStntuple::Init(fRunNumber);
   fTpm->Init(fRunNumber);
+
+  auto* rundb = stntuple::TRunDb::Instance();
+  fRunInfo.GetFromRunDb(fRunNumber,0);
 //-----------------------------------------------------------------------------
 // book histograms at begin run, there will be a flag telling whether we need
 // to re-book them for every new run
@@ -655,6 +669,7 @@ int TPanelDtAnaModule::BeginRun() {
 int TPanelDtAnaModule::Event(int IEntry) {
 
   fChBlock->GetEntry(IEntry);
+  fSdBlock->GetEntry(IEntry);
   fShBlock->GetEntry(IEntry);
   fTcBlock->GetEntry(IEntry);
   fTrackBlock->GetEntry(IEntry);
@@ -667,9 +682,9 @@ int TPanelDtAnaModule::Event(int IEntry) {
   fNCh           = fChBlock->NHits();
   fNSh           = fShBlock->NHits();
 
-  int evn = GetHeaderBlock()->EventNumber();
-  if (evn > fMaxEvent) {
-    fMaxEvent = evn;
+  fEwt       = GetHeaderBlock()->EventNumber();
+  if (fEwt > fMaxEvent) {
+    fMaxEvent = fEwt;
   }
 
   CalculateMissingParameters();
@@ -1007,6 +1022,50 @@ int TPanelDtAnaModule::PrintNoisyChannels(float Percentage) {
 
   return 0;
 }
-  
 
+//-----------------------------------------------------------------------------
+  int TPanelDtAnaModule::PlotWaveform(int Plane, int Panel, int Straw) {
+    //    TLOG(TLVL_DEBUG) << "START";
+
+    int nsd = fSdBlock->NDigis();
+    
+    if (fCanvas == 0) {
+      std::string cname = std::format("c_wf_{:02}_{:1}_{:2}",Plane,Panel,Straw);
+      fCanvas = new TCanvas(cname.data(),cname.data(),800,600);
+    }
+    
+    fCanvas->Clear();
+    fListOfHistograms->Delete();
+
+    for (int isd=0; isd<nsd; isd++) {
+      TStrawDigi* digi = fSdBlock->StrawDigi(isd);
+      mu2e::StrawId sid(digi->fSid);
+      if ((sid.plane() != Plane) or (sid.panel() != Panel) or (sid.straw() != Straw)) continue;
+      
+      // not limited by time, can go slowly
+    
+      std::string hname = std::format("h_wf_{:02}_{:1}_{:02}_{:}",sid.plane(),sid.panel(),sid.straw(),isd);
+      int ns = digi->Ns();
+      TH1F* hist = new TH1F(hname.data(),hname.data(),ns,0,ns);
+
+      for (int is=0; is<ns; is++) {
+        int adc = digi->Adc()[is];
+        hist->SetBinContent(is+1,adc);
+        hist->SetBinError  (is+1,  0);
+      }
+
+      int nhist = fListOfHistograms->GetEntriesFast();
+      if (nhist == 0) {
+        hist->Draw("");
+      }
+      else {
+        hist->Draw("same");
+      }
+      fListOfHistograms->Add(hist);
+    }
+    
+    fCanvas->Modified();
+    fCanvas->Update();
+    return 0;
+  }
 }

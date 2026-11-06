@@ -325,7 +325,7 @@ int TCrvTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
 
   name  = "dx_crvc";
   title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-10000,10000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-2000,2000,Folder);   //
 
   name  = "dz_crvc";
   title = std::format("{} : dz_crvc",prefix);

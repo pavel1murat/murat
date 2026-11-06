@@ -7,10 +7,12 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TObjArray.h"
 #include "TCanvas.h"
 
 #include "Stntuple/loop/TStnModule.hh"
 
+#include "Stntuple/obj/TStrawDigiBlock.hh"
 #include "Stntuple/obj/TStrawHitBlock.hh"
 #include "Stntuple/obj/TComboHitBlock.hh"
 #include "Stntuple/obj/TStnTimeClusterBlock.hh"
@@ -20,6 +22,7 @@
 
 // subdetector-level alignment table
 #include "murat/alg/DetPos_t.hh"
+#include "murat/alg/RunInfo_t.hh"
 
 namespace murat {
 class TPanelDtAnaModule: public TStnModule {
@@ -95,6 +98,7 @@ public:
     TH1F*        h_nsh;
     TH1F*        h_ntc;
     TH1F*        h_ntrk;
+    TH1F*        h_nsh_vs_ewt;
   };
 
   struct Hist_t {
@@ -139,6 +143,7 @@ public:
   TStnTimeClusterBlock*     fTcBlock;
   TStrawHitBlock*           fShBlock;
   TComboHitBlock*           fChBlock;
+  TStrawDigiBlock*          fSdBlock;
   TStrTrackBlock*           fTrackBlock;
 
   TrkPanelMap*              fTpm;
@@ -146,6 +151,7 @@ public:
   // TCrvChannelMap*           fCrvChannelMap;
   
   int                       fRunNumber;
+  int                       fEwt;       // event window tag
 
   int                       fMaxEvent;   // for X-axis truncation
   int                       fNEvents;
@@ -158,7 +164,10 @@ public:
 
   std::vector<tc_param_t>   fListOfTcParam;
 
-  TStnModule::fit_result_t   fPanelFr[216];
+  TStnModule::fit_result_t  fPanelFr[216];
+  TCanvas*                  fCanvas;
+  TObjArray*                fListOfHistograms;
+  RunInfo_t                 fRunInfo;
 //-----------------------------------------------------------------------------
 //  functions
 //-----------------------------------------------------------------------------
@@ -209,6 +218,10 @@ public:
   void             PrintComboHits    ();
   int              PrintHistograms   (int ISet);
   int              PrintNoisyChannels(float Percentage = 0.01);
+  
+  // interactive: after processing a given event, plot waveform in a given channel
+  int              PlotWaveform(int Plane, int Panel, int Straw);
+  
   int              FitPlaneTimeOffsets(float TMin, float TMax, int DebugLevel = 0);
   void             FitPanelTimeOffsets(TH2F* H_DtVsPanel, float Dt  , int PrintLevel);
  

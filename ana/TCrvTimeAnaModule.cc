@@ -311,34 +311,37 @@ int TCrvTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
   title = std::format("{} : n(CRVC) within 30 ns",prefix);
   fBookHist->HBook1F(Hist->h_ncrvc30,name,title,50,0,50,Folder);   // in MeV
 
-  name  = "xcrv";
-  title = std::format("{} : xcrv",prefix);
-  fBookHist->HBook1F(Hist->h_xcrv,name,title,200,-10000,10000,Folder);   // in ns...
+  for (int sector=0; sector<4; sector++) {
+    
+    name  = std::format("xcrv_{}",sector);
+    title = std::format("{} : xcrv sector:{}",prefix,sector);
+    fBookHist->HBook1F(Hist->h_xcrv[sector],name,title,200,-10000,10000,Folder);   // in ns...
 
-  name  = "zcrv";
-  title = std::format("{} : track z(crv) wrt the center of the counter",prefix);
-  fBookHist->HBook1F(Hist->h_zcrv,name,title,200,-10000,10000,Folder);   // in ns...
+    name  = std::format("zcrv_{}",sector);
+    title = std::format("{} : track z(crv) wrt the center of the counter sector:{}",prefix,sector);
+    fBookHist->HBook1F(Hist->h_zcrv[sector],name,title,200,-10000,10000,Folder);   // in ns...
 
-  name  = "dt_crvc";
-  title = std::format("{} : dt CRVC",prefix);
-  fBookHist->HBook1F(Hist->h_dt_crvc,name,title,400,-100,100,Folder);   // in ns...
+    name  = std::format("dt_crvc_{}",sector);
+    title = std::format("{} : dt CRVC, sector:{}",prefix,sector);
+    fBookHist->HBook1F(Hist->h_dt_crvc[sector],name,title,400,-100,100,Folder);   // in ns...
+    
+    name  = std::format("dx_crvc_{}",sector);
+    title = std::format("{} : dx_crvc sector:{}",prefix,sector);
+    fBookHist->HBook1F(Hist->h_dx_crvc[sector],name,title,200,-2000,2000,Folder);   //
 
-  name  = "dx_crvc";
-  title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-2000,2000,Folder);   //
+    name  = std::format("dz_crvc_{}",sector);
+    title = std::format("{} : dz_crvc sector:{}",prefix,sector);
+    fBookHist->HBook1F(Hist->h_dz_crvc[sector],name,title,200,-1000,1000,Folder);   //
 
-  name  = "dz_crvc";
-  title = std::format("{} : dz_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dz_crvc,name,title,200,-1000,1000,Folder);   //
+    name  = std::format("dx_crvc_vs_dxdy_{}",sector);
+    title = std::format("{} : dx_crvc vs dxdy sector:{}",prefix,sector);
+    fBookHist->HBook2F(Hist->h_dx_crvc_vs_dxdy[sector],name,title,100,-2,2,200,-1000,1000,Folder);
 
-  name  = "dx_crvc_vs_dxdy";
-  title = std::format("{} : dx_crvc vs dxdy",prefix);
-  fBookHist->HBook2F(Hist->h_dx_crvc_vs_dxdy,name,title,100,-2,2,200,-1000,1000,Folder);
-
-  name  = "dz_crvc_vs_dzdy";
-  title = std::format("{} : dz_crvc vs dzdy",prefix);
-  fBookHist->HBook2F(Hist->h_dz_crvc_vs_dzdy,name,title,100,-2,2,200,-1000,1000,Folder);
-
+    name  = std::format("dz_crvc_vs_dzdy_{}",sector);
+    title = std::format("{} : dz_crvc vs dzdy sector:{}",prefix,sector);
+    fBookHist->HBook2F(Hist->h_dz_crvc_vs_dzdy[sector],name,title,100,-2,2,200,-1000,1000,Folder);
+  }
+  
   return 0;
 }
 
@@ -639,26 +642,28 @@ int TCrvTimeAnaModule::FillTrkHistograms(TrkHist_t* Hist, TStrTrack* Trk, trk_pa
   Hist->h_dydz->Fill(dydz);
 
   Hist->h_ncrvc30->Fill(Tp->ncrvc30);
-  Hist->h_xcrv->Fill(Tp->xcrv);
-  Hist->h_zcrv->Fill(Tp->zcrv);
 
-  Hist->h_dt_crvc->Fill(Tp->dtmin_crvc);
+  for (int sector=0; sector<4; sector++) {
+    Hist->h_xcrv[sector]->Fill(Tp->xcrv[sector]);
+    Hist->h_zcrv[sector]->Fill(Tp->zcrv[sector]);
 
-  Hist->h_dx_crvc->Fill(Tp->dx_crvc);
-  Hist->h_dz_crvc->Fill(Tp->dz_crvc);
+    Hist->h_dt_crvc[sector]->Fill(Tp->dtmin_crvc[sector]);
 
-  if (Tp->crvc) {
-    int sector_type = Tp->crvc->SectorType();
-    if ((sector_type == 1) or (sector_type == 3)) {
-      // EX or T2: long side of bars along X axis, measuring Z
-      Hist->h_dz_crvc_vs_dzdy->Fill(dzdy,Tp->dz_crvc);
-    }
-    else {
-      // T1 or M1-M8 : long side of bars along Z axis, the bars tell X
-      Hist->h_dx_crvc_vs_dxdy->Fill(dxdy,Tp->dx_crvc);
+    Hist->h_dx_crvc[sector]->Fill(Tp->dx_crvc[sector]);
+    Hist->h_dz_crvc[sector]->Fill(Tp->dz_crvc[sector]);
+
+    if (Tp->crvc[sector]) {
+      int sector_type = Tp->crvc[sector]->SectorType();
+      if ((sector_type == 1) or (sector_type == 3)) {
+        // EX or T2: long side of bars along X axis, measuring Z
+        Hist->h_dz_crvc_vs_dzdy[sector]->Fill(dzdy,Tp->dz_crvc[sector]);
+      }
+      else {
+        // T1 or M1-M8 : long side of bars along Z axis, the bars tell X
+        Hist->h_dx_crvc_vs_dxdy[sector]->Fill(dxdy,Tp->dx_crvc[sector]);
+      }
     }
   }
-  
   return 0;
 }
 
@@ -755,16 +760,19 @@ int TCrvTimeAnaModule::CalculateMissingTrkParameters() {
       tp->dx_calc[k]    = 1.e6;
       tp->dy_calc[k]    = 1.e6;
     }
-    tp->crvc        = nullptr;
-    tp->dtmin_crvc  = 1.e6;
+    
+    for (int k=0; k<4; k++) {
+      tp->crvc[k]       = nullptr;
+      tp->dtmin_crvc[k] = 1.e6;
+      tp->dx_crvc[k]    = 1.e6;
+      tp->dz_crvc[k]    = 1.e6;
+      tp->xcrv[k]       = 1.e6;
+      tp->zcrv[k]       = 1.e6;
+    }
     tp->intime      = 0;
     tp->ncrvc30     = 0;
     tp->intime_calc = 0;
     tp->intime_crvc = 0;
-    tp->xcrv        = 1.e6;
-    tp->zcrv        = 1.e6;
-    tp->dx_crvc     = 1.e6;
-    tp->dz_crvc     = 1.e6;
 //-----------------------------------------------------------------------------    
 // find the closest time cluster - should always be there
 //-----------------------------------------------------------------------------    
@@ -782,6 +790,8 @@ int TCrvTimeAnaModule::CalculateMissingTrkParameters() {
 //-----------------------------------------------------------------------------
     for (int i2=0; i2<fNCrvc; i2++) {
       TCrvCoincidenceCluster* crvc = fCrvcBlock->Cluster(i2);
+      int sector = crvc->Sector();
+      
       float crvc_y = crvc->Position()->Y();
       float dy     = crvc_y - trk->fY0;
       float path   = dy*sqrt(1.+trk_dxdy*trk_dxdy+trk_dzdy*trk_dzdy);
@@ -792,38 +802,44 @@ int TCrvTimeAnaModule::CalculateMissingTrkParameters() {
         tp->ncrvc30 += 1;
       }
       
-      if (fabs(dt) < fabs(tp->dtmin_crvc)) {
-        tp->dtmin_crvc = dt;
-        tp->crvc       = crvc;
+      if (fabs(dt) < fabs(tp->dtmin_crvc[sector])) {
+        tp->dtmin_crvc[sector] = dt;
+        tp->crvc[sector]       = crvc;
       }
     }
-    
-    if (tp->crvc) {
-      if (fabs(tp->dtmin_crvc) <  30) {
+//-----------------------------------------------------------------------------
+// all M's lumped together
+//-----------------------------------------------------------------------------
+    for (int sector=0; sector<4; sector++) {
+      TCrvCoincidenceCluster* crvc = tp->crvc[sector];
+      if (crvc == nullptr)      continue;
+
+      // 'intime' mans that there is at least one CRVC within 30 ns
+      if (fabs(tp->dtmin_crvc[sector]) <  30) {
         tp->intime_crvc = 1;
       }
 //-----------------------------------------------------------------------------
 // transform track coordinates to global coordinate system
 // constants from Offline/Mu2eG4/geom/geom_common_extracted_v04.txt
 //-----------------------------------------------------------------------------
-      float y_crvc = tp->crvc->Position()->Y() + fDetPos.crv_off[1];  // -80.;//-4280; // for kicks
+      float y_crvc = crvc->Position()->Y() + fDetPos.crv_off[1];  // -80.;//-4280; // for kicks
       float dy     = y_crvc-trk->fY0;
-
-      tp->xcrv     = trk->fX0+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
-      tp->zcrv     = trk->fZ0+(trk->fNz/trk->fNy)*dy;
-      
+        
+      tp->xcrv[sector]     = trk->fX0+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
+      tp->zcrv[sector]     = trk->fZ0+(trk->fNz/trk->fNy)*dy;
+        
       // X(CRVC) is defined in the global coordinate system, transform that
       // to the local reference frame of the tracker
-
-      float x_crvc = tp->crvc->Position()->X()-(fDetPos.trk_pos[0]+fDetPos.trk_off[0]);
-      tp->dx_crvc  = tp->xcrv-x_crvc;
-
-      float z_crvc = tp->crvc->Position()->Z()-(fDetPos.trk_pos[2]+fDetPos.trk_off[2]);
-      tp->dz_crvc  = tp->zcrv-z_crvc;
+        
+      float x_crvc         = crvc->Position()->X()-(fDetPos.trk_pos[0]+fDetPos.trk_off[0]);
+      tp->dx_crvc[sector]  = tp->xcrv[sector]-x_crvc;
+        
+      float z_crvc         = crvc->Position()->Z()-(fDetPos.trk_pos[2]+fDetPos.trk_off[2]);
+      tp->dz_crvc[sector]  = tp->zcrv[sector]-z_crvc;
     }
     
     if ((fabs(tp->dtmin_tc  ) <  30) and
-        (fabs(tp->dtmin_crvc) <  30) and
+        (tp->intime_crvc           ) and
         (trk->fNHits          >= 10)     ) {
       tp->intime = 1;
     }

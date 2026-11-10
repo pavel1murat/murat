@@ -28,6 +28,8 @@
 #include "Stntuple/geom/TCaloChannelMap.hh"
 #include "Stntuple/geom/TrkPanelMap.hh"
 
+#include "murat/ana/Index_t.hh"
+
 #include "murat/gui/TEvdCrv.hh"
 
 // subdetector-level alignment table
@@ -58,42 +60,6 @@ public:
     kNCalhHistSets       = 100,
     kNCalcHistSets       = 100,
     kNTrkHistSets        = 100,
-  };
-//-----------------------------------------------------------------------------
-// indices
-//-----------------------------------------------------------------------------
-  struct EvtIndex_t {
-    int sel;
-  };
-  
-  struct TrkIndex_t {
-    int sel;
-    int slot;                 // 0-17
-    int plane;                // offline
-    int panel;                // offline
-    int pnl12;                // panel index within the station (0-11)
-    int mnid;
-    int ch;
-  };
-  
-  struct CrvIndex_t {
-    int sel   {-1};
-    int sbid  {-1};
-    int sipm  {-1};
-    int och   {-1};                           // offline channel - 4*sbid+sipm
-    int roc   {-1};                           // 1-18 ??? 
-    int feb   {-1};                           // 1-24 in offline domain
-    int ch    {-1};                           // channel within the FEB (0-63)
-    int sector{-1};
-    int module{-1};
-    int layer {-1};
-  };
-  
-  struct CaloIndex_t {
-    int sel   {-1};
-    int crate {-1};
-    int disk  {-1};
-    int cid   {-1};                   //
   };
 
   struct crvb_param_t {
@@ -137,22 +103,22 @@ public:
     int                       intime_calc;
     int                       ncrvc30;
     int                       intime_crvc;
-    float                     dtmin_tc;           // from the closest TC
-    float                     x_disk[2];
-    float                     y_disk[2];
-    TStnCluster*              calc[2];            // closest, for each disk
-    float                     dtmin_calc[2];      // from the closest CALC
-    float                     dx_calc[2];
-    float                     dy_calc[2];
     TStnTimeCluster*          tc;
-    float                     dtmin_crvc;         // from the closest CRVC
-    TCrvCoincidenceCluster*   crvc;
+    float                     dtmin_tc;           // from the closest TC
+    float                     x_disk    [2];
+    float                     y_disk    [2];
+    TStnCluster*              calc      [2];            // closest, for each disk
+    float                     dtmin_calc[2];      // from the closest CALC
+    float                     dx_calc   [2];
+    float                     dy_calc   [2];
+    TCrvCoincidenceCluster*   crvc      [4];      // 4 levels in Y, can have a closest in each
+    float                     xcrv      [4];
+    float                     zcrv      [4];
+    float                     dx_crvc   [4];
+    float                     dz_crvc   [4];
+    float                     dtmin_crvc[4];      // from the closest CRVC
     float                     dxdz;
     float                     dydz;
-    float                     xcrv;
-    float                     zcrv;
-    float                     dx_crvc;
-    float                     dz_crvc;
     crvs_param_t              crvs_data[20];
   };
 
@@ -254,13 +220,13 @@ public:
 
     TH1F*         h_ncrvc30;
     
-    TH1F*         h_xcrv;
-    TH1F*         h_zcrv;
-    TH1F*         h_dt_crvc;
-    TH1F*         h_dx_crvc;
-    TH1F*         h_dz_crvc;
-    TH2F*         h_dx_crvc_vs_dxdy;
-    TH2F*         h_dz_crvc_vs_dzdy;
+    TH1F*         h_xcrv[4];
+    TH1F*         h_zcrv[4];
+    TH1F*         h_dt_crvc[4];
+    TH1F*         h_dx_crvc[4];
+    TH1F*         h_dz_crvc[4];
+    TH2F*         h_dx_crvc_vs_dxdy[4];
+    TH2F*         h_dz_crvc_vs_dzdy[4];
   };
 
   struct Hist_t {

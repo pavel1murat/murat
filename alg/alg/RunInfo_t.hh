@@ -1,6 +1,9 @@
 #ifndef __runinfo_t_hh__
 #define __runinfo_t_hh__
 
+#include <string>
+#include <vector>
+
 namespace murat {
   class RunInfo_t {
   public:
@@ -15,7 +18,7 @@ namespace murat {
     };
   
     int              run_number;        //
-    int              duration;
+    int              duration;          // run duration, seconds
     int              max_ewtag;         // max event window tag
     int              run_type;          // 1:beam 2:cosmics 3:internal_pulser
                                         // 4:pulse_injection 5:noise 100:MC
@@ -28,6 +31,7 @@ namespace murat {
     std::vector<int> plane_flag;        // should have 36 elements
 
     int    GetFromRunDb(int RunNumber, int PrintLevel);
+    static int DurationToSeconds(const std::string& Hms);   // "hh:mm:ss" -> s, -1 on error
   };
 }
 #endif

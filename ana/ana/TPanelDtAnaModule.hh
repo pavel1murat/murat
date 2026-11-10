@@ -78,6 +78,8 @@ public:
     TH1F*        h_occup;               // occupancy per panel, offline indexing
     TH1F*        h_mnid;                // 
     TH2F*        h_occup_2d;            // occupancy
+    TH2F*        h_straw_vs_pnl;
+    TH2F*        h_pnl_vs_ewt;
     SlotHist_t*  slot[18];
   };
 
@@ -91,6 +93,7 @@ public:
     TH2F*        h_edep_vs_pnl;
     TH1F*        h_dt_pln[36][36];
     TH2F*        h_dt_vs_pnl;             // offline index : plane*6+pln6
+    TH2F*        h_edep_vs_ewt_pnl[216];
   };
   
   struct EventHist_t {

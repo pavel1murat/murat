@@ -51,9 +51,18 @@ cet_build_plugin(DumpGeometry art::module LIBRARIES REG
 )
 
 
+cet_build_plugin(PanelDtAna art::module LIBRARIES REG
+  murat_alg
+  Offline::DataProducts     
+  Offline::RecoDataProducts 
+  art_root_io::TFileService_service
+  ROOT::Hist
+  ROOT::Core
+)
+
 cet_add_compiler_flags(-g -O0)
 
-install(TARGETS ${DumpGeometry})
+install(TARGETS ${DumpGeometry} ${PanelDtAna})
 
 # install_headers()
 # install_source()

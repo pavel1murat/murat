@@ -210,6 +210,17 @@ int TPanelDtAnaModule::BookSelHistograms(SelHist_t* Hist, TrkIndex_t* Index, TFo
   title = std::format("{} : per panel occupancy",prefix);
   fBookHist->HBook1F(Hist->h_occup,name.data(),title.data(),216,0,216,Folder);
 
+  name  = "straw_vs_pnl";
+  title = std::format("{} : straw vs panel occup",prefix);
+  fBookHist->HBook2F(Hist->h_straw_vs_pnl,name.data(),title.data(),216,0,216,96,0,96,Folder);
+
+  name  = "pnl_vs_ewt";
+  title = std::format("{} : pnl_vs_ewt",prefix);
+  // want 1000 bins, for example
+  int nb  = 1000;
+  int bin = fRunInfo.max_ewtag/nb+1;
+  fBookHist->HBook2F(Hist->h_pnl_vs_ewt,name.data(),title.data(),nb,0,bin*nb,216,0,216,Folder);
+
   TrkIndex_t index;
 
   // for (int i=0; i<36; i++) {
@@ -276,6 +287,14 @@ int TPanelDtAnaModule::BookTcHistograms(TcHist_t* Hist, TrkIndex_t* Index, TFold
       title = std::format("{}: time cluster  T[{:02}]-T[{:02}]",prefix,i2,i1);
       fBookHist->HBook1F(Hist->h_dt_pln[i2][i1],name.data(),title.data(),1000,-500,500,Folder);
     }
+  }
+
+  int nb  = 1000;
+  int bin = fRunInfo.max_ewtag/nb+1;
+  for (int i=0; i<216; i++) {
+    name  = std::format("edep_vs_ewt_pnl{:03d}",i);
+    title = std::format("{} : panel:{:03d} TC edep vs ewt, keV",prefix,i);
+    fBookHist->HBook2F(Hist->h_edep_vs_ewt_pnl[i],name.data(),title.data(),nb,1,bin*nb,200,-0.001,0.009,Folder);
   }
 
   return 0;
@@ -370,7 +389,13 @@ int TPanelDtAnaModule::FillEventHistograms(EventHist_t* Hist, TrkIndex_t* Index)
   Hist->h_nch->Fill(fNCh);
   Hist->h_ntc->Fill(fNTc);
   Hist->h_ntrk->Fill(fNTracks);
-  Hist->h_nsh_vs_ewt->Fill(fEwt,fNSh);
+  
+  // normalize to number of hits/sec
+  int nbx = Hist->h_nsh_vs_ewt->GetNbinsX();
+  float time_per_bin = fRunInfo.duration/nbx;
+  float wt = fNSh/time_per_bin;
+  Hist->h_nsh_vs_ewt->Fill(fEwt,wt);
+
   return 0;
 }
 
@@ -394,6 +419,10 @@ int TPanelDtAnaModule::FillSelHistograms(SelHist_t* Hist, TrkIndex_t* Index, TSt
   int offline_panel = Index->slot*12+Index->pnl12;
   Hist->h_occup->Fill(offline_panel);
   Hist->h_occup_2d->Fill(Index->ch,offline_panel);
+
+  Hist->h_straw_vs_pnl->Fill(offline_panel,Index->ch);
+
+  Hist->h_pnl_vs_ewt->Fill(fEwt,offline_panel);
   
   SlotHist_t* slot_hist_set = Hist->slot[Index->slot];
   FillSlotHistograms(slot_hist_set,Index,Sh);
@@ -433,6 +462,7 @@ int TPanelDtAnaModule::FillSelHistograms(SelHist_t* Hist, TrkIndex_t* Index, TSt
     for (int p216=0; p216<216; p216++) {
       if (Tcp->nh_panel[p216] < 2) continue;
       Hist->h_edep_vs_pnl->Fill(p216,Tcp->edep_panel[p216]);
+      Hist->h_edep_vs_ewt_pnl[p216]->Fill(fEwt,Tcp->edep_panel[p216]);
     }
 
     if (Tcp->npanels > 10) {
@@ -648,7 +678,7 @@ int TPanelDtAnaModule::BeginRun() {
   TStntuple::Init(fRunNumber);
   fTpm->Init(fRunNumber);
 
-  auto* rundb = stntuple::TRunDb::Instance();
+  //  auto* rundb = stntuple::TRunDb::Instance();
   fRunInfo.GetFromRunDb(fRunNumber,0);
 //-----------------------------------------------------------------------------
 // book histograms at begin run, there will be a flag telling whether we need
@@ -892,23 +922,6 @@ void TPanelDtAnaModule::FitPanelTimeOffsets(TH2F* H_DtVsPanel, float Dt, int Pri
   
   return;
 }
-
-
-// //-----------------------------------------------------------------------------
-// int TPanelDtAnaModule::PrintTracks() {
-//   std::cout << std::format(" i      T0         Z0       Nx     Ny    Nz    Chi2D     Xc[0]      Yc[0]      Xc[1]      Yc[1]    DxCal[0]    DyCal[0]    DxCal[1]   DyCal[1]\n");
-//   for (int i=0; i<fNTracks; i++) {
-//     TStrTrack*   trk = fTrackBlock->Track(i);
-//     trk_param_t* tp  = &fListOfTrkParam.at(i);
-//     std::cout << std::format("{:2d} {:10.3f} {:10.3f} {:6.3f} {:6.3f} {:6.3f} {:7.2f}",
-//                              i,trk->fT0,trk->fZ0,trk->fNx,trk->fNy,trk->fNz,trk->fChi2/trk->fNDof);
-    
-//     std::cout << std::format(" {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f} {:10.3f}\n",
-//                              tp->x_disk [0],tp->y_disk [0],tp->x_disk[1],tp->y_disk[1],
-//                              tp->dx_calc[0],tp->dy_calc[0],tp->dx_calc[1],tp->dy_calc[1]);
-//   }
-//   return 0;
-// }
 
 
 //-----------------------------------------------------------------------------

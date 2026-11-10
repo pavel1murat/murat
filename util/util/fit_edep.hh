@@ -37,7 +37,8 @@ public:
   fit_edep(int RunNumber = -1) { fRunNumber = RunNumber;};
 
   void fit_histogram(TH1* Hist, const char* FitOpt, double XMin, double XMax, fit_result_t* Fr);
-  int  fit_panels   (int IMin, int IMax, const char* FileName);
+  int  fit_edep_vs_panel_stn_file(int IMin, int IMax, const char* FileName);
+  int  fit_edep_vs_time_art_file (int IMin, int IMax, const char* FileName);
 
   void plot_summary_histograms();
 

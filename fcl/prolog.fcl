@@ -114,6 +114,12 @@ murat : {
         dumpCaloGeometry      : 0
     }
 
+    DetStepAna : { module_type:DetStepAna
+        sgsCollTags         : [ "StrawGasStepMaker"   ]
+        cssCollTags         : [ "CaloShowerStepMaker" ]
+        crvCollTags         : [ ]                       ## dont filter on CRV since that can't trigger
+    }
+
     DumpTrackerNumerology : { module_type:DumpTrackerNumerology
         diagLevel : 0
     }
@@ -130,6 +136,12 @@ murat : {
         genpCollTag : "generate"
         sgsCollTag  : "compressDetStepMCs"
         sdmcCollTag : "compressDidiMCs"
+    }
+
+    PanelDtAna : { module_type:PanelDtAna
+        chCollTag              : "makeSH"                # use combo hits
+        shCollTag              : "makeSH"                # assume StrawHits have been written out
+        tcCollTag              : "SimpleTimeCluster"     # assume StrawHits have been written out
     }
 
     ReadGenParticles : { module_type:ReadGenParticles
@@ -177,12 +189,6 @@ murat : {
 	diagLevel           : 0
 	trkPatRecLabel      : TrkPatRecDownstreameMinus
     }
-
-    DetStepAna : { module_type:DetStepAna
-        sgsCollTags         : [ "StrawGasStepMaker"   ]
-        cssCollTags         : [ "CaloShowerStepMaker" ]
-        crvCollTags         : [ ]                       ## dont filter on CRV since that can't trigger
-    }
 }
 #------------------------------------------------------------------------------
 # final definition of the table 'murat'
@@ -199,13 +205,14 @@ murat : { @table::murat
     }
 
     analyzers : { 
+        ComboHitSorter     : { @table::murat.ComboHitSorter     }
 	DumpEventNumber    : { @table::murat.DumpEventNumber    }
 	DumpMCTrajectories : { @table::murat.DumpMCTrajectories }
-        ComboHitSorter     : { @table::murat.ComboHitSorter     }
-        StrawHitRecoAna    : { @table::murat.StrawHitRecoAna    }
         DumpGeometry       : { @table::murat.DumpGeometry       }
-        GenpHist           : { @table::murat.GenpHist           }
         DetStepAna         : { @table::murat.DetStepAna         }
+        GenpHist           : { @table::murat.GenpHist           }
+        PanelDtAna         : { @table::murat.PanelDtAna         }
+        StrawHitRecoAna    : { @table::murat.StrawHitRecoAna    }
     }
 }
 END_PROLOG

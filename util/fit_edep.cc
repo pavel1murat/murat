@@ -80,10 +80,55 @@ void fit_edep::fit_histogram(TH1* Hist, const char* FitOpt, double XMin, double 
 }
 
 //-----------------------------------------------------------------------------
-int fit_edep::fit_panels(int IMin, int IMax, const char* FileName) {
+// using stntuple histogram files
+//-----------------------------------------------------------------------------
+int fit_edep::fit_edep_vs_panel_stn_file(int IMin, int IMax, const char* FileName) {
 
   TFile* f  = TFile::Open(FileName);
   TH2F*  h1 = (TH2F*) f->Get("//Ana/PanelDtAna/tc_01/edep_vs_pnl");
+
+  std::cout << " panel      p[0]      p[1]       p[2]       p[3]       chi2d       ndf\n";
+  std::cout << " ---------------------------------------------------------------------\n";
+  for (int i=IMin; i<IMax+1; i++) {
+    std::string hname = std::format("py_{:03d}",i);
+    fit_result_t* fr = &frr[i];
+    h_edep[i] = h1->ProjectionY(hname.data(),i+1,i+1);
+    std::string title = std::format("run {:6d}: panel {:3} eDep",fRunNumber,i);
+    h_edep[i]->SetTitle(title.data());
+
+    float qn = h_edep[i]->Integral();
+
+    if (qn > 100) {
+      fit_histogram(h_edep[i],"sql",0.0004,0.003,fr);
+      if (fr->chi2d > 0) {
+        std::cout << std::format(" {:03d} {:11.4f} {:11.4f} {:11.4f} {:11.4f} {:11.4f} {:5d}\n",
+                                 i,
+                                 fr->p[0],
+                                 fr->p[1],
+                                 fr->p[2],
+                                 fr->p[3],
+                                 // Fr->p[4],
+                                 fr->chi2d,
+                                 fr->ndf);
+      }
+      else {
+        std::cout << std::format("panel {:03d}: {}\n",i,fr->msg);
+      }
+    }
+    else {
+      std::cout << std::format("panel {:03d}: ERROR not enough sttistics: integral:{}\n",i,qn);
+    }
+  }
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+// using stntuple histogram files
+//-----------------------------------------------------------------------------
+int fit_edep::fit_edep_vs_time_art_file(int IMin, int IMax, const char* FileName) {
+
+  TFile* f  = TFile::Open(FileName);
+  TH2F*  h1 = (TH2F*) f->Get("//PanelDtAna/tc_01/edep_vs_pnl");
 
   std::cout << " panel      p[0]      p[1]       p[2]       p[3]       chi2d       ndf\n";
   std::cout << " ---------------------------------------------------------------------\n";

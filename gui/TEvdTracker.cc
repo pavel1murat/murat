@@ -2,10 +2,17 @@
 #include <iostream>
 #include <format>
 
+#include <algorithm>
+#include <array>
+#include "TMath.h"
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
 #include "TGeoTube.h"
+#include "TGeoBoolNode.h"
+#include "TGeoCompositeShape.h"
+#include "TGeoXtru.h"
 #include "murat/gui/TEvdTracker.hh"
+#include "murat/gui/TEvdPanel.hh"
 
 #include "Offline/TrackerGeom/inc/Plane.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
@@ -65,7 +72,8 @@ namespace murat {
 TEvdTracker::TEvdTracker(): TEvdSubdetector("TRACKER") {
   fName       = "TRACKER";
   // fTopVolume  = this;
-  fCopyNumber = 1;
+  fCopyNumber    = 1;
+  fDisplayPanels = 0;
 }
 
 
@@ -152,62 +160,51 @@ int TEvdTracker::InitGeometry(const char* geomFile) {
       zmin = zmin1;
     }
 
-    // const auto& panels = plane.panels();
+    // individual panel volumes: thin sections of tubes spanning 120 degrees in phi,
+    // as the tracker support parts in TrackerMaker (phiCoverage = 120)
+    if (fDisplayPanels == 1) {
+      // tracker local frame -> parent frame, as in TTrkVisNode::trackPoints
+      const double kDX = -3904.;
+      const double kDZ = 22935.;
+      const double kPanelPhi = 120.;                  // degrees
+      double rOut = fTrkPtr->strawProperties().strawOuterRadius();
 
-    // for (std::size_t ipa = 0; ipa < panels.size(); ++ipa) {
-    //   const auto* panel = panels.at(ipa);
+      for (int ipa = 0; ipa < (int) plane.nPanels(); ++ipa) {
+        const mu2e::Panel& panel = plane.getPanel(ipa);
+        if (panel.nStraws() == 0) continue;
 
-    //   if (!panel) {
-    //     continue;
-    //   }
+        // radial, z and azimuthal extent of the straws of the panel
+        double rmin = 1.e9, rmax = -1.e9, zmin = 1.e9, zmax = -1.e9;
+        double xsum = 0., ysum = 0.;
+        for (int is = 0; is < (int) panel.nStraws(); ++is) {
+          const auto& straw = panel.getStraw(is);
+          double x = straw.getMidPoint().x();
+          double y = straw.getMidPoint().y();
+          double z = straw.getMidPoint().z();
+          double r = std::hypot(x,y);
+          rmin = std::min(rmin,r);  rmax = std::max(rmax,r);
+          zmin = std::min(zmin,z);  zmax = std::max(zmax,z);
+          xsum += x; ysum += y;
+        }
 
-    //   const std::string panelName = std::format("TrackerPlane_{}_Panel_{}", ip, ipa);
+        double rout    = rmax + rOut;
+        double dz      = 0.5*(zmax-zmin) + rOut;          // thin in z
+        double zc      = 0.5*(zmax+zmin);
+        double phiC    = std::atan2(ysum,xsum)*TMath::RadToDeg();
+        double phi1    = phiC - 0.5*kPanelPhi;
+        double phi2    = phiC + 0.5*kPanelPhi;
 
-    //   auto* panelVolume = new TEvdSubdetector(panelName.c_str());
+        std::string panelName = std::format("TrackerPlane_{}_Panel_{}", ip, ipa);
+        murat::TEvdPanel* panelVolume = new murat::TEvdPanel(panelName.c_str(), rout, dz, phi1, phi2,
+                                                             medium, kGray, fPanelTransparency);
+        AddNode(panelVolume, static_cast<int>(ip*100+ipa+1), new TGeoTranslation(kDX, 0., kDZ + zc));
+        if (fDisplayStraws == 1) {
+          panelVolume->AddStraws(panel, fTrkPtr->strawProperties().strawInnerRadius(), rOut, zc, medium);
+        }
+        fListOfSubdetectors->Add(panelVolume);
+      }
+    }
 
-    //   panelVolume->SetLineColor(kGreen + 1);
-    //   panelVolume->SetFillColor(kGreen + 1);
-    //   panelVolume->SetTransparency(40);
-
-    //   // const auto& straws = panel->straws();
-
-    //   // for (std::size_t ist = 0; ist < straws.size(); ++ist) {
-    //   //   const auto* straw = straws.at(ist);
-
-    //   //   if (!straw) {
-    //   //     continue;
-    //   //   }
-
-    //   //   const auto& props = fTrkPtr->strawProperties();
-
-    //   //   const std::string strawName = std::format("TrackerStraw_{}_{}_{}",ip, ipa, ist);
-
-    //   //   auto* strawShape = new TGeoTube(strawName.c_str(),
-    //   //                                   props.strawInnerRadius(),
-    //   //                                   props.strawOuterRadius(),
-    //   //                                   straw->halfLength());
-
-    //   //   auto* strawVolume = new TEvdSubdetector(strawName.c_str(), strawShape, medium);
-
-    //   //   strawVolume->SetLineColor(kGray + 1);
-    //   //   strawVolume->SetFillColor(kGray + 1);
-    //   //   strawVolume->SetTransparency(0);
-
-    //   //   auto transform = strawTransform(*straw);
-
-    //   //   panelVolume->AddNode(
-    //   //     strawVolume,
-    //   //     static_cast<int>(ist) + 1,
-    //   //     transform.release());
-    //   // }
-
-    //   // panelVolume->AddSubdetectorChildrenToListIfNeeded();
-    //   planeVolume->AddNode(panelVolume, static_cast<int>(ipa) + 1, new TGeoTranslation());
-
-    //   fListOfSubdetectors->Add(panelVolume);
-    // }
-
-    //planeVolume->AddSubdetectorChildrenToListIfNeeded();
     AddNode(sd_plane, static_cast<int>(ip) + 1, new TGeoTranslation(-3904.,0,tg4->z0()+(zmin+zmax)/2.));
 
     fListOfSubdetectors->Add(sd_plane);

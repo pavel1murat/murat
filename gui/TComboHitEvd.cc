@@ -111,6 +111,11 @@ TComboHitEvd::TComboHitEvd(float X, float Y, float Z, float T, float EDep, int P
 //   TPolyLine3D::Paint(Option);
 // }
 
+void TComboHitEvd::ShowPanel() {
+  if (fCh == nullptr) return;
+  TEvdManager::Instance()->OpenPanelView(fCh->Sid().getPlane(), fCh->Sid().getPanel());
+}
+
 //-----------------------------------------------------------------------------
 void TComboHitEvd::PrintComboHit() {
   //const char oname[] = "TComboHitEvd::Paint";

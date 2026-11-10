@@ -72,6 +72,7 @@ public:
 //  virtual void  Draw         (Option_t* option = "") override;
   void          PrintComboHit();                                      // *MENU* 
   void          PlotWaveform ();                                      // *MENU* 
+  void          ShowPanel    ();                                      // *MENU*
 
   ClassDefOverride(murat::TComboHitEvd,0)
 };

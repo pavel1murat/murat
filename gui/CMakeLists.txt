@@ -27,7 +27,7 @@ ROOT_GENERATE_DICTIONARY(${dict}
   TEvdTrajectory.hh
   TEvdManager.hh TEvdSubdetector.hh
   TEvdView.hh TEvdVisNode.hh
-  TTrkVisNode.hh
+  TTrkVisNode.hh TPanelVisNode.hh TEvdPanelView.hh
   MODULE ${lib}
   LINKDEF ${subpkg}/Linkdef.h)
 
@@ -44,7 +44,7 @@ add_library(${lib} SHARED
   TEvdTrajectory.cc
   TEvdManager.cc TEvdSubdetector.cc
   TEvdView.cc TEvdVisNode.cc
-  TTrkVisNode.cc
+  TTrkVisNode.cc TPanelVisNode.cc TEvdPanelView.cc
   ${dict}.cxx
 )
 

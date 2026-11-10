@@ -14,6 +14,7 @@
 
 #include "Stntuple/obj/TStnHeaderBlock.hh"
 #include "Stntuple/obj/TCaloHitBlock.hh"
+#include "RtypesCore.h"
 
 #include <format>
 
@@ -100,7 +101,10 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
     
     fDisk[idisk]->GetVolume()->SetLineColor(kAzure + 2);
     fDisk[idisk]->GetVolume()->SetFillColor(kAzure + 2);
-    fDisk[idisk]->GetVolume()->SetTransparency(50);
+    // the disk solid is the volume of the first node of the assembly (see TEvdSubdetector),
+    // the transparency has to be set on it, not on the assembly
+    fDisk[idisk]->GetNode(0)->GetVolume()->SetTransparency(80);
+    fDisk[idisk]->GetVolume()->SetVisibility(kFALSE);
 //----------------------------------------------------------------------------------------
 //  * DiskInfo::toGlobal(local) is:
 //
@@ -143,7 +147,7 @@ int TEvdCalorimeter::InitGeometry(const char* Fn) {
       // crystal color will depend on whether the crystal has hits
       crystal->SetLineColor(kOrange + 1);
       crystal->SetFillColor(kOrange + 1);
-      crystal->SetTransparency(0);
+      crystal->SetTransparency(80);
       
        // Crystal::localPosition() is the front-face position - how do we know that?
        // TGeoBBox is centered on its local origin, so shift by +z/2.
@@ -184,10 +188,10 @@ int TEvdCalorimeter::InitEvent() {
       cr->ListOfHits()->Clear();
       cr->fEDep = 0;
         
-      // crystal color will depend on whether the crystal has hits
+      // crystal color and transparency (?) depends on whether the crystal has hits
       cr->SetLineColor(kOrange + 1);
       cr->SetFillColor(kOrange + 1);
-      cr->SetTransparency(0);
+      cr->SetTransparency(80);
 
     }
   }
@@ -206,6 +210,7 @@ int TEvdCalorimeter::InitEvent() {
       
       cr->SetLineColor(kRed + 1);
       cr->SetFillColor(kRed + 1);
+      cr->SetTransparency(0);
     }
   }
 

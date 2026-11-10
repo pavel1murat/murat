@@ -2,6 +2,8 @@
 evd_config : {
     geometryFile       : "murat/fcl/geom_extracted.txt"
     displayTracker     : true
+    displayTrackerPanels : true ## false   ## individual panel volumes of the tracker
+    displayTrackerStraws : false ## true    ## straw volumes inside the panels
     displayCalorimeter : true
     displayCrv         : true ## true
     views              :

@@ -13,7 +13,7 @@
 // ClassImp(TEvdView)
 
 namespace murat {
-  
+
 //-----------------------------------------------------------------------------
 // different views should have different names, rely on that
 //-----------------------------------------------------------------------------
@@ -80,7 +80,12 @@ namespace murat {
     if (fViewer == nullptr) {
       TVirtualViewer3D* v3 = gPad->GetViewer3D();
       fViewer = dynamic_cast<TGLViewer*>(v3);
+      if (fViewer == nullptr) {                   // nothing 3D was drawn: no viewer yet
+        printf("TEvdView::Draw: view %s has no GL viewer, nothing to show\n",GetName());
+        return;
+      }
       fViewer->SetCurrentCamera(fCameraType);
+      fViewer->SetResetCamerasOnUpdate(kFALSE);   // keep the camera between events
     }
 
     fViewer->RequestDraw();
@@ -97,10 +102,11 @@ namespace murat {
 
     fCanvas->cd();
 
-    if (fViewer == nullptr) { 
+    if (fViewer == nullptr) {
       auto* v3 = gPad->GetViewer3D();
       fViewer = dynamic_cast<TGLViewer*>(v3);
       fViewer->SetCurrentCamera(fCameraType);
+      fViewer->SetResetCamerasOnUpdate(kFALSE);   // keep the camera between events
     }
 
     fViewer->RequestDraw();
@@ -111,7 +117,7 @@ namespace murat {
   void TEvdView::Update() {
 
     //     if (fOpen == 0) return;
-    
+
     fCanvas->Modified();
     fCanvas->Update();
   }

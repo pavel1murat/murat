@@ -134,10 +134,12 @@ namespace murat {
 
     // combo hits are located using their original index stored as the unique ID
     std::unordered_map<uint32_t,TComboHit*> hit_map;
+    std::unordered_map<TComboHit*,int>      hit_index;   // position of the hit in the ChBlock
     int nch = fChBlock->NHits();
     for (int i=0; i<nch; i++) {
       TComboHit* hit = fChBlock->Hit(i);
       hit_map[hit->GetUniqueID()] = hit;
+      hit_index[hit]              = i;
     }
 
 //-----------------------------------------------------------------------------
@@ -155,18 +157,19 @@ namespace murat {
         TComboHitEvd* ch_evd = new TComboHitEvd(ch);
         fListOfTcHits->Add(ch_evd);
         if (fSdBlock) {
-          // need to find the Ch , go slow
-          int ind = fChBlock->FindHitIndex(ch);
-          if (ind < 0) {
-            TLOG(TLVL_ERROR) << std::format("TC combohit number:{} not found. CONTINUE",j);
+          auto ind_it = hit_index.find(ch);
+          if (ind_it == hit_index.end()) {
+            TLOG(TLVL_ERROR) << std::format("TC {} combohit with ID {} not found in the ChBlock. CONTINUE",
+                                            itc,ch->GetUniqueID());
             continue;
           }
+          int ind = ind_it->second;
           // in most cases, a digi and a straw hit should have the same index
           // wait for the first bug to show up
           TStnLinkBlock* list_of_sh_indices = fChBlock->ListOfShIndices();
           if (list_of_sh_indices) {
             int isd = list_of_sh_indices->Index(ind,0);
-            TStrawDigi* sd = fSdBlock->StrawDigi(isd);
+            TStrawDigi* sd = fSdBlock->GetDigiByID(isd);
             ch_evd->SetStrawDigi(sd);
           }
         }
@@ -188,12 +191,24 @@ namespace murat {
       TEvdTrajectory* traj = new TEvdTrajectory(name.c_str(), trk, npoints,x.data(),y.data(),z.data());
       fListOfTracks->Add(traj);
 
+      // track hits: one TPolyMarker3D per track, at the positions of the combo hits of the track
+      std::vector<TVector3> hit_points;
       for (const auto& seed : *trk->fHitSeeds) {
         auto it = hit_map.find(seed.index());
         if (it == hit_map.end()) continue;
         TComboHit* ch = it->second;
-        TComboHitEvd* ch_evd = new TComboHitEvd(ch,1);
-        fListOfTrackHits->Add(ch_evd);
+        // same tracker-frame offset as TComboHitEvd
+        hit_points.emplace_back(ch->X()-3904., ch->Y(), ch->Z()+22935.);
+      }
+
+      if (not hit_points.empty()) {
+        TPolyMarker3D* markers = new TPolyMarker3D((int) hit_points.size(), 20);
+        markers->SetMarkerSize(10);
+        markers->SetMarkerColor(kRed);
+        for (std::size_t ih=0; ih<hit_points.size(); ih++) {
+          markers->SetPoint((int) ih, hit_points[ih].X(), hit_points[ih].Y(), hit_points[ih].Z());
+        }
+        fListOfTrackHits->Add(markers);
       }
     }
 

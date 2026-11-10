@@ -13,6 +13,9 @@ public:
   std::unique_ptr<mu2e::Tracker> fTrkPtr;
   
   TEvdStation*    fStation[kNStations];
+  int             fDisplayPanels{0};       // 1: individual panel volumes
+  int             fDisplayStraws{1};       // 1: straw volumes inside the panels
+  int             fPanelTransparency{97};  // ROOT scale: 0 opaque, 100 invisible
 
   TEvdTracker();
 

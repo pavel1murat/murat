@@ -40,6 +40,7 @@ public:
     kNStations         = 18,
     kNPlanes           = 36,
     kNPanelsPerStation = 12,
+    kNPanels           = 216,
     kNCrystals         = 674*2,
     kNCaloChannels     = kNCrystals*2,   // calorimeter
   };
@@ -114,6 +115,15 @@ public:
     float                     zcrv;
     float                     dx_crvc;
     float                     dz_crvc;
+  };
+
+  struct tc_par_t {
+    int min_plane{-1};                    // most upstream plane with hits
+    int max_plane{-1};                    // most downstream plane with hits
+    int nplanes  {-1};                    // number of planes with hits
+    int npanels  {-1};                    // number of panels with hits
+    int n_hits_pln[kNPlanes]{};           // number of hits per plane
+    int n_hits_pnl[kNPanels]{};           // number of hits per panel
   };
 
   struct crystal_t {
@@ -242,6 +252,7 @@ public:
 
   std::vector<calc_param_t> fListOfCalcParam;
   std::vector<trk_param_t>  fListOfTrkParam;
+  std::vector<tc_par_t>     fListOfTcParam;
 
   fit_result_t              fFr[kNCaloChannels];
   fit_result_t*             fFrRef;
@@ -275,6 +286,8 @@ public:
   int              BookTrkHistograms  (TrkHist_t*    Hist, TrkIndex_t*  Index, TFolder* Folder);
   int              BookHistograms     (Hist_t*       Hist, TFolder*     Folder);
 
+  int              CalculateMissingTcParameters();
+
   int              FillCalcHistograms (CalcHist_t* Hist, TStnCluster*   Calc, calc_param_t* Cp);
   int              FillDiskHistograms (DiskHist_t* Hist, TCaloRecoDigi* Calrd);
   int              FillTrkHistograms  (TrkHist_t*  Hist, TStrTrack*     Trk , trk_param_t* Tp);
@@ -285,6 +298,7 @@ public:
  
   int              InitEvd();
 
+  int              PrintTimeClusters();
   int              PrintTracks();
 
   ClassDefOverride(murat::TEventDumpModule,0)

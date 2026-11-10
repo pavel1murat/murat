@@ -239,11 +239,11 @@ int TDetTimeAnaModule::BookTrkHistograms(TrkHist_t* Hist, TrkIndex_t* Index, TFo
 
   name  = "dx_crvc";
   title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-10000,10000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dx_crvc,name,title,200,-1000,1000,Folder);   //
 
   name  = "dz_crvc";
   title = std::format("{} : dx_crvc",prefix);
-  fBookHist->HBook1F(Hist->h_dz_crvc,name,title,200,-10000,10000,Folder);   //
+  fBookHist->HBook1F(Hist->h_dz_crvc,name,title,200,-1000,1000,Folder);   //
 
   name  = "dx_crvc_vs_dxdy";
   title = std::format("{} : dx_crvc vs dxdy",prefix);
@@ -642,8 +642,6 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 // tracker.z0: 22935.0
 // tracker.
 //-----------------------------------------------------------------------------
-    float crv_time_offset = 0.; // 21; // today
-
     // double crv_off[3] = {    0., -145.0, 0.0 };
       
     // double trk_pos[3] = {-3904., 0., 22935.0 }; // nominal
@@ -718,7 +716,7 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
     
     for (int i2=0; i2<fNCrvc; i2++) {
       TCrvCoincidenceCluster* crvc = fCrvcBlock->Cluster(i2);
-      float dt = tp->tc->T0()-(crvc->StartTime()-crv_time_offset);
+      float dt = tp->tc->T0()-crvc->StartTime();
       if (fabs(dt) < fabs(tp->dtmin_crvc)) {
         tp->dtmin_crvc = dt;
         tp->crvc       = crvc;
@@ -736,8 +734,13 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
       float y_crvc = tp->crvc->Position()->Y() + fDetPos.crv_off[1];  // -80.;//-4280; // for kicks
       float dy     = y_crvc-trk->fY0;
 
-      tp->xcrv     = trk->fX0+(trk->fNx/trk->fNy)*dy; // track coordinates at Y_CRVC
-      tp->zcrv     = trk->fZ0+(trk->fNz/trk->fNy)*dy;
+      float dxdy   = trk->fNx/trk->fNy;
+      float dzdy   = trk->fNz/trk->fNy;
+
+      float path   = dy*(1+dxdy*dxdy+dzdy*dzdy);
+
+      tp->xcrv     = trk->fX0+dxdy*dy; // track coordinates at Y_CRVC
+      tp->zcrv     = trk->fZ0+dzdy*dy;
       
       // X(CRVC) is defined in the global coordinate system, transform that
       // to the local reference frame of the tracker
@@ -747,6 +750,8 @@ int TDetTimeAnaModule::CalculateMissingTrkParameters() {
 
       float z_crvc = tp->crvc->Position()->Z()-(fDetPos.trk_pos[2]+fDetPos.trk_off[2]);
       tp->dz_crvc  = tp->zcrv-z_crvc;
+
+      tp->dtmin_crvc = trk->fT0-path/2.9979e2-tp->crvc->StartTime();
     }
 //-----------------------------------------------------------------------------
 // determine the closest in time (not in position yet) calorimeter cluster
@@ -850,13 +855,11 @@ int TDetTimeAnaModule::CalculateMissingParameters() {
       // look for reco digis
       int ind0 = calh->fCrdIndex[0];
       int ind1 = calh->fCrdIndex[1];
+      // readout of one of the channels could be missing
       if ((ind0 >=0) and (ind1 >= 0)) { 
         TCaloRecoDigi* crd0 = fCaloRecoDigiBlock->CaloRecoDigi(ind0);
         TCaloRecoDigi* crd1 = fCaloRecoDigiBlock->CaloRecoDigi(ind1);
-        // readout of one of the channels could be missing
-        //   if ((crd0 != nullptr) and (crd1 != nullptr)) {
         calhp->dt10 = crd1->Time()-crd0->Time();
-        // }
       }
     }
   }

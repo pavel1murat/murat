@@ -5,51 +5,50 @@
 #include "murat/gui/TEvdPanel.hh"
 #include "murat/gui/TEvdTracker.hh"
 #include "TGeoXtru.h"
+#include "TGeoTube.h"
+#include <algorithm>
+#include <format>
+#include "TGeoBoolNode.h"
+#include "TGeoMatrix.h"
+#include "Offline/TrackerGeom/inc/Panel.hh"
+#include "Offline/TrackerGeom/inc/Straw.hh"
+#include "TGeoCompositeShape.h"
+#include "TMath.h"
 
 ClassImp(murat::TEvdPanel)
 
 namespace murat {
 //-----------------------------------------------------------------------------
-TEvdPanel::TEvdPanel(int I): TEvdSubdetector() {
-  fNumber = I;
-  // SetElementName(Form("panel_%03i",I));
-  // for (int i=0; i<kNStraws; i++) {
-  //   fStraw[i] = new TEvdStraw(i);
-  //   AddElement(fStraw[i]);
-  // }
+namespace {
+//-----------------------------------------------------------------------------
+// sector of the disk minus the triangle with the origin and the two sector ends as vertices
+//-----------------------------------------------------------------------------
+TGeoShape* panelShape(const char* Name, double Rout, double Dz, double Phi1, double Phi2) {
+  std::string name(Name);
+  TGeoTubeSeg* sector = new TGeoTubeSeg((name+"_sector").c_str(), 0., Rout, Dz, Phi1, Phi2);
 
-  //-----------------------------------------------------------------------------
-  // define dimensions
-  //-----------------------------------------------------------------------------
-  const int npt(33);
+  double xv[3] = {0., Rout*std::cos(Phi1*TMath::DegToRad()), Rout*std::cos(Phi2*TMath::DegToRad())};
+  double yv[3] = {0., Rout*std::sin(Phi1*TMath::DegToRad()), Rout*std::sin(Phi2*TMath::DegToRad())};
+  TGeoXtru* triangle = new TGeoXtru(2);
+  triangle->DefinePolygon(3, xv, yv);
+  triangle->DefineSection(0, -Dz-1.);   // extended beyond the sector: no coincident faces
+  triangle->DefineSection(1,  Dz+1.);
 
-  double yy[npt] = {
-    370.000, 380.000, 390.000, 400.000, 410.000, 420.000, 430.000, 440.000, 450.000, 460.000,
-    470.000, 480.000, 490.000, 500.000, 510.000, 520.000, 530.000, 540.000, 550.000, 560.000,
-    570.000, 580.000, 590.000, 600.000, 610.000, 620.000, 630.000, 640.000, 650.000, 660.000,
-    670.000, 680.000, 690.000
-  };
+  TGeoSubtraction* sub = new TGeoSubtraction(sector, triangle, nullptr, nullptr);
+  return new TGeoCompositeShape(name.c_str(), sub);
+}
+}
 
-  double xx[npt] = {
-    605.970, 599.750, 593.296, 586.600, 579.655, 572.451, 564.978, 557.225, 549.181, 540.833,
-    532.165, 523.163, 513.809, 504.083, 493.964, 483.425, 472.440, 460.977, 448.999, 436.463,
-    423.320, 409.512, 394.968, 379.605, 363.318, 345.977, 327.414, 307.409, 285.657, 261.725,
-    234.947, 204.206, 167.332
-  };
-
-  double zx[2*npt], zy[2*npt];
-
-  for (int i=0; i<npt; i++) { zy[i]     = yy[i]      ; zx[i]     = -xx[i]; }
-  for (int i=0; i<npt; i++) { zy[npt+i] = yy[npt-i-1]; zx[npt+i] = xx[npt-i-1]; }
-
-  TGeoXtru* xtru = new TGeoXtru(2);
-
-  xtru->DefinePolygon(2*npt,zx,zy);
- 
-  xtru->DefineSection(0,-10.,0,0,1.);
-  xtru->DefineSection(1, 10.,0,0,1.);
-
-  //  SetShape(xtru);
+//-----------------------------------------------------------------------------
+TEvdPanel::TEvdPanel(const char* Name, double Rout, double Dz, double Phi1, double Phi2,
+                     TGeoMedium* Medium, int Color, int Transparency):
+  TEvdSubdetector(Name, panelShape(Name,Rout,Dz,Phi1,Phi2), Medium, Color, Transparency)
+{
+  fNumber = -1;
+  fPlane  = nullptr;
+  fNx     = 0.;
+  fNy     = 0.;
+  fPhi    = 0.;
 }
 
 
@@ -93,6 +92,31 @@ void TEvdPanel::InitStraw(int straw, int StrawID, int Plane, int Panel, int Laye
 			  double nx, double ny, double half_length)
 {
   fStraw[straw]->Init(StrawID,Plane,Panel,Layer,rho,z,nx,ny,half_length);
+}
+
+//-----------------------------------------------------------------------------
+void TEvdPanel::AddStraws(const mu2e::Panel& Panel, double StrawInnerRadius, double StrawOuterRadius,
+                          double ZCenter, TGeoMedium* Medium) {
+  std::string panelName(GetName());
+  for (int is = 0; is < (int) Panel.nStraws(); ++is) {
+    const mu2e::Straw& straw = Panel.getStraw(is);
+    std::string name = std::format("{}_straw_{}", panelName, is);
+
+    murat::TEvdStraw* evd_straw = new murat::TEvdStraw(name.c_str(), StrawInnerRadius, StrawOuterRadius,
+                                                       straw.halfLength(), Medium);
+    auto m = straw.getMidPoint();
+    auto d = straw.strawDirection();
+    const auto& sid = straw.id();
+    evd_straw->Init(sid.asUint16(), sid.getPlane(), sid.getPanel(), sid.getLayer(),
+                    std::hypot(m.x(),m.y()), m.z(), d.x(), d.y(), straw.halfLength());
+
+    // the tube axis follows the straw direction
+    double theta = std::acos(std::clamp(d.z(), -1., 1.))*TMath::RadToDeg();
+    double phi   = std::atan2(d.y(), d.x())*TMath::RadToDeg();
+    TGeoRotation* rot = new TGeoRotation(name.c_str(), phi, theta, 0.);
+
+    AddNode(evd_straw, is+1, new TGeoCombiTrans(m.x(), m.y(), m.z()-ZCenter, rot));
+  }
 }
 
 //-----------------------------------------------------------------------------

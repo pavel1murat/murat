@@ -44,7 +44,10 @@
 #pragma link C++ class murat::TEvdSubdetector;
 #pragma link C++ class murat::TEvdTracker;
 #pragma link C++ class murat::TEvdView;
+#pragma link C++ class murat::TEvdPanelView;
 #pragma link C++ class murat::TEvdVisNode;
+#pragma link C++ class murat::TPanelVisNode;
+
 // #pragma link C++ class TEvdTimeClusterVisNode;
 // #pragma link C++ class stntuple::TEvdTrack;
 // #pragma link C++ class stntuple::TEvdTrkStrawHit;

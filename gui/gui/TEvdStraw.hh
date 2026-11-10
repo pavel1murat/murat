@@ -23,6 +23,8 @@ public:
   double     fHalfLength;
 
   TEvdStraw(int I = -1);
+  // straw volume: tube of the given radii and half-length; the solid is invisible for now
+  TEvdStraw(const char* Name, double InnerRadius, double OuterRadius, double HalfLength, TGeoMedium* Medium);
   ~TEvdStraw();
   
   void Init(int Index, int Plane, int Panel, int Layer, double rho, double z, double nx, double ny, double HalfLength);

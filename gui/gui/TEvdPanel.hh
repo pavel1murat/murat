@@ -6,6 +6,8 @@
 #include "murat/gui/TEvdStraw.hh"
 #include "murat/gui/TEvdSubdetector.hh"
 
+namespace mu2e { class Panel; }
+
 namespace murat {
 
 class TEvdPlane;
@@ -19,7 +21,15 @@ public:
   double      fNy;
   double      fPhi;
 
-  TEvdPanel(int I = -1);
+  // panel volume: sector of a disk of radius Rout and half-length Dz, from Phi1 to Phi2 [deg],
+  // minus the triangle with the origin and the two sector ends as vertices (R = Rout)
+  TEvdPanel(const char* Name, double Rout, double Dz, double Phi1, double Phi2,
+            TGeoMedium* Medium, int Color, int Transparency);
+
+  // straws as daughter volumes, positioned in the panel frame (z centre ZCenter subtracted)
+  // visibility is off for now
+  void        AddStraws(const mu2e::Panel& Panel, double StrawInnerRadius, double StrawOuterRadius,
+                        double ZCenter, TGeoMedium* Medium);
   ~TEvdPanel();
 
   TEvdStraw*  Straw(int I) { return fStraw[I]; }

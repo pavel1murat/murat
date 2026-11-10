@@ -33,6 +33,8 @@ public:
   int          fDisplayCalorimeter;
   int          fDisplayCrv;
   int          fDisplayTracker;
+  int          fDisplayTrackerPanels;
+  int          fDisplayTrackerStraws;
 
 private:
   TEvdManager();        // configuration FCL - in .rootrc (EvdManager.ConfigFcl)
@@ -77,6 +79,7 @@ public:
   int   InitEvent();
                                         // to open a view for the first time
   int   OpenView(const char* ViewName);
+  int   OpenPanelView(int Plane, int Panel);   // the panel view: the panel and all its combo hits
   
   int   Update();                       // draw next event..
   //  ClassDefOverride(murat::TEvdManager,0)

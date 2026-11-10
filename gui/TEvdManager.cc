@@ -33,6 +33,7 @@
 #include "TGeoMatrix.h"
 
 #include "murat/gui/TEvdManager.hh"
+#include "murat/gui/TEvdPanelView.hh"
 #include "murat/gui/TEvdCrv.hh"
 #include "murat/gui/TEvdCalorimeter.hh"
 #include "murat/gui/TEvdTracker.hh"
@@ -84,6 +85,8 @@ TEvdManager::TEvdManager() {
   fDisplayCalorimeter = evd_config.get<bool>       ("displayCalorimeter");
   fDisplayCrv         = evd_config.get<bool>       ("displayCrv");
   fDisplayTracker     = evd_config.get<bool>       ("displayTracker");
+  fDisplayTrackerPanels = evd_config.get<bool>     ("displayTrackerPanels", false);
+  fDisplayTrackerStraws = evd_config.get<bool>     ("displayTrackerStraws", true);
 
   fListOfViews        = new TObjArray();
   fListOfNodes        = new TObjArray();
@@ -279,6 +282,8 @@ int TEvdManager::InitGeometry() {
   }
   if (fDisplayTracker) {
     auto tracker = new TEvdTracker();
+    tracker->fDisplayPanels = fDisplayTrackerPanels ? 1 : 0;
+    tracker->fDisplayStraws = fDisplayTrackerStraws ? 1 : 0;
     tracker->InitGeometry(fGeometryFile.data());
     AddSubdetector(tracker);
   }
@@ -290,6 +295,35 @@ int TEvdManager::InitGeometry() {
 }
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// the panel view: the panel of the selected combo hit and all combo hits of that panel
+// it is opened in a separate window, and updated if already open
+//-----------------------------------------------------------------------------
+  int TEvdManager::OpenPanelView(int Plane, int Panel) {
+    TEvdPanelView* view = dynamic_cast<TEvdPanelView*>(FindView("panel"));
+    if (view == nullptr) {
+      view = new TEvdPanelView("panel",TGLViewer::kCameraOrthoXOY);
+      AddView(view);
+    }
+
+    int rc = view->SetPanel(Plane,Panel);
+    if (rc != 0) {
+      TLOG(TLVL_ERROR) << std::format("invalid panel: plane:{} panel:{}, DO NOTHING.",Plane,Panel);
+      return rc;
+    }
+
+    if (view->fOpen) {
+      view->Update();
+    }
+    else {
+      // a canvas of its own in interactive mode, for the window of the panel view
+      view->fCanvas = new TCanvas("panel_window","panel view",800,800);
+      view->Draw("ogl");
+      view->SetOpen(true);
+    }
+    return 0;
+  }
+
   int TEvdManager::OpenView(const char* Name) {
     int rc(0);
     TEvdView* view = FindView(Name);

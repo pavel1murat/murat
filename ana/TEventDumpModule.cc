@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <format>
+#include <unordered_map>
 
 #include "TF1.h"
 #include "TCanvas.h"
@@ -90,6 +91,55 @@ int TEventDumpModule::BeginJob() {
 
 
 //_____________________________________________________________________________
+// plane and panel numbering starts from 0: 36 planes, 216 panels
+//_____________________________________________________________________________
+int TEventDumpModule::CalculateMissingTcParameters() {
+  fListOfTcParam.clear();
+                                        // combo hits are located using their original index stored as the unique ID
+  std::unordered_map<uint32_t,TComboHit*> hit_map;
+  for (int i=0; i<fNCh; i++) {
+    TComboHit* hit = fChBlock->Hit(i);
+    hit_map[hit->GetUniqueID()] = hit;
+  }
+
+  TStnLinkBlock* links = fTcBlock->ListOfChLinks();
+
+  for (int itc=0; itc<fNTc; itc++) {
+    tc_par_t tcp;
+
+    int nlinks = links->NLinks(itc);
+    for (int j=0; j<nlinks; j++) {
+      auto it = hit_map.find(links->Index(itc,j));
+      if (it == hit_map.end()) continue;
+
+      auto sid   = it->second->Sid();
+      int  plane = sid.getPlane();
+      int  panel = sid.uniquePanel();
+
+      if ((tcp.min_plane < 0) or (plane < tcp.min_plane)) tcp.min_plane = plane;
+      if ((tcp.max_plane < 0) or (plane > tcp.max_plane)) tcp.max_plane = plane;
+
+      tcp.n_hits_pln[plane]++;
+      tcp.n_hits_pnl[panel]++;
+    }
+
+    tcp.nplanes = 0;
+    for (int ip=0; ip<kNPlanes; ip++) {
+      if (tcp.n_hits_pln[ip] > 0) tcp.nplanes++;
+    }
+
+    tcp.npanels = 0;
+    for (int ip=0; ip<kNPanels; ip++) {
+      if (tcp.n_hits_pnl[ip] > 0) tcp.npanels++;
+    }
+
+    fListOfTcParam.push_back(tcp);
+  }
+
+  return 0;
+}
+
+//_____________________________________________________________________________
 int TEventDumpModule::BeginRun() {
   fRunNumber = GetHeaderBlock()->RunNumber();
   TStntuple::Init(fRunNumber);
@@ -147,6 +197,8 @@ int TEventDumpModule::Event(int IEntry) {
   fNCalrd        = fCaloRecoDigiBlock->NDigis();
   fNCalh         = fCaloHitBlock->NHits();
   fNCaloClusters = fCaloClusterBlock->NClusters();
+
+  CalculateMissingTcParameters();
 
   Debug();
 
@@ -223,6 +275,17 @@ int TEventDumpModule::EndJob() {
 
 
 //-----------------------------------------------------------------------------
+int TEventDumpModule::PrintTimeClusters() {
+  std::cout << std::format("  i  min_pln  max_pln  nplanes  npanels\n");
+  for (int i=0; i<fNTc; i++) {
+    tc_par_t* tcp = &fListOfTcParam.at(i);
+    std::cout << std::format("{:3d} {:8d} {:8d} {:8d} {:8d}\n",
+                             i,tcp->min_plane,tcp->max_plane,tcp->nplanes,tcp->npanels);
+  }
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 int TEventDumpModule::PrintTracks() {
   std::cout << std::format(" i      T0         Z0       Nx     Ny    Nz    Chi2D     Xc[0]      Yc[0]      Xc[1]      Yc[1]    DxCal[0]    DyCal[0]    DxCal[1]   DyCal[1]\n");
   for (int i=0; i<fNTrk; i++) {
@@ -237,6 +300,7 @@ int TEventDumpModule::PrintTracks() {
   }
   return 0;
 }
+
 //-----------------------------------------------------------------------------
   int TEventDumpModule::InitEvd() {
     int rc(0);

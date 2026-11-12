@@ -6,6 +6,7 @@
 #define __murat_gui_TEvdPanelView_hh__
 
 #include "murat/gui/TEvdView.hh"
+#include "murat/gui/TPanelVisNode.hh"
 
 namespace murat {
 
@@ -19,6 +20,7 @@ public:
 protected:
   int                    fPlane;        // plane of the panel, -1 if no panel is selected
   int                    fPanel;        // panel within the plane (0-5), -1 if no panel is selected
+  TPanelVisNode*         fPanelNode;    // ==NOT OWNED== the node drawing the panel and its hits
 
 public:
   TEvdPanelView(const char* Name, TGLViewer::ECameraType Type);
@@ -28,6 +30,7 @@ public:
 //-----------------------------------------------------------------------------
   int           GetPlane () const { return fPlane; }
   int           GetPanel () const { return fPanel; }
+  TPanelVisNode* GetPanelNode() { return fPanelNode; }
 //-----------------------------------------------------------------------------
 // select the panel to show, returns 0 if OK, -1 if the plane or the panel is out of range
 //-----------------------------------------------------------------------------
@@ -36,7 +39,7 @@ public:
 //-----------------------------------------------------------------------------
 // overloaded functions of TEvdView
 //-----------------------------------------------------------------------------
-  virtual void  Draw(Option_t* Opt = "") override;   // drawing is not implemented yet
+
 };
 }
 #endif

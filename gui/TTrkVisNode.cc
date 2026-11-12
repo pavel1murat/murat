@@ -9,6 +9,12 @@
 #include "TVector3.h"
 #include "TPolyLine3D.h"
 #include "TPolyMarker3D.h"
+#include "TGeoManager.h"
+#include "TGeoMaterial.h"
+#include "TGeoMatrix.h"
+#include "TGeoMedium.h"
+#include "TGeoVolume.h"
+#include "TMath.h"
 
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSegment.hh"
@@ -31,6 +37,21 @@
 // ClassImp(TTrkVisNode)
 
 namespace {
+//-----------------------------------------------------------------------------
+// radius of the time-cluster hit tubes, mm
+//-----------------------------------------------------------------------------
+  const double kTcHitRadius = 0.5;
+
+//-----------------------------------------------------------------------------
+// the vacuum medium of the hit volumes
+//-----------------------------------------------------------------------------
+  TGeoMedium* hitMedium() {
+    if (gGeoManager) {
+      if (TGeoMedium* medium = gGeoManager->GetMedium("Vacuum")) return medium;
+    }
+    return new TGeoMedium("Vacuum",1,new TGeoMaterial("Vacuum",0.,0.,0.));
+  }
+
 //-----------------------------------------------------------------------------
 // display window in Y, mm
 //-----------------------------------------------------------------------------
@@ -143,7 +164,7 @@ namespace murat {
     }
 
 //-----------------------------------------------------------------------------
-// time cluster TEvdComboHits
+// time cluster: TComboHitEvd's
 //-----------------------------------------------------------------------------
     TStnLinkBlock* links = fTcBlock->ListOfChLinks();
     int ntc = fTcBlock->NTimeClusters();
@@ -154,7 +175,7 @@ namespace murat {
         if (it == hit_map.end()) continue;
         // create evd representation of the combo hit
         TComboHit* ch = it->second;
-        TComboHitEvd* ch_evd = new TComboHitEvd(ch);
+        TComboHitEvd* ch_evd = new TComboHitEvd(ch,0.,kTcHitRadius,hitMedium());
         fListOfTcHits->Add(ch_evd);
         if (fSdBlock) {
           auto ind_it = hit_index.find(ch);
@@ -236,8 +257,28 @@ namespace murat {
 
 //-----------------------------------------------------------------------------
   void TTrkVisNode::Draw(Option_t* Opt) {
-    TObjArray* lists[] = { fListOfTcHits, fListOfTracks, fListOfTrackHits };
+    // the time-cluster hits: tubes along the wires, placed in the global frame
+    static int nviews = 0;
+    std::string viewName = std::format("trk_hits_{}", nviews++);
+    TGeoVolumeAssembly* view = new TGeoVolumeAssembly(viewName.c_str());
 
+    for (int i=0; i<fListOfTcHits->GetEntriesFast(); i++) {
+      TComboHitEvd* hit = (TComboHitEvd*) fListOfTcHits->UncheckedAt(i);
+      TComboHit* ch     = hit->fCh;
+      if (ch == nullptr) continue;
+
+      // tube axis (z) -> x -> the wire direction; the tracker frame offset as in trackPoints
+      TGeoRotation rot;
+      rot.RotateY(90.);
+      rot.RotateZ(std::atan2(ch->Uy(),ch->Ux())*TMath::RadToDeg());
+      view->AddNode(hit,i+1,new TGeoCombiTrans(ch->X()-3904.,ch->Y(),ch->Z()+22935.,new TGeoRotation(rot)));
+    }
+    // "same": the geometry draw of the view must not clear the pad, the detector geometry is drawn by
+    // the other nodes of the view
+    std::string geoOpt = std::string(Opt) + " same";
+    view->Draw(geoOpt.c_str());
+
+    TObjArray* lists[] = { fListOfTracks, fListOfTrackHits };
     for (TObjArray* list : lists) {
       int n = list->GetEntriesFast();
       for (int i=0; i<n; i++) {

@@ -14,6 +14,7 @@
 #include "Offline/TrackerGeom/inc/Straw.hh"
 #include "TGeoCompositeShape.h"
 #include "TMath.h"
+#include "TGeoManager.h"
 
 ClassImp(murat::TEvdPanel)
 
@@ -23,9 +24,9 @@ namespace {
 //-----------------------------------------------------------------------------
 // sector of the disk minus the triangle with the origin and the two sector ends as vertices
 //-----------------------------------------------------------------------------
-TGeoShape* panelShape(const char* Name, double Rout, double Dz, double Phi1, double Phi2) {
+TGeoShape* panelShape(const char* Name, double Rin, double Rout, double Dz, double Phi1, double Phi2) {
   std::string name(Name);
-  TGeoTubeSeg* sector = new TGeoTubeSeg((name+"_sector").c_str(), 0., Rout, Dz, Phi1, Phi2);
+  TGeoTubeSeg* sector = new TGeoTubeSeg((name+"_sector").c_str(), Rin, Rout, Dz, Phi1, Phi2);
 
   double xv[3] = {0., Rout*std::cos(Phi1*TMath::DegToRad()), Rout*std::cos(Phi2*TMath::DegToRad())};
   double yv[3] = {0., Rout*std::sin(Phi1*TMath::DegToRad()), Rout*std::sin(Phi2*TMath::DegToRad())};
@@ -37,12 +38,73 @@ TGeoShape* panelShape(const char* Name, double Rout, double Dz, double Phi1, dou
   TGeoSubtraction* sub = new TGeoSubtraction(sector, triangle, nullptr, nullptr);
   return new TGeoCompositeShape(name.c_str(), sub);
 }
+
+//-----------------------------------------------------------------------------
+std::string panelName(int Plane, int Panel) {
+  return std::format("TrackerPlane_{}_Panel_{}", Plane, Panel);
+}
+
+}
+
+
+//-----------------------------------------------------------------------------
+// geometry of the panel volume, from straws 0, 1 and 2 of the panel as TEvdTracker places them:
+// straw 0 is the innermost, longest straw, at rInnermostWire; straw 1 is the neighbour in the
+// other layer, straw 2 the next straw of layer 0; the layers are symmetric about the panel
+// centre, and all straws of a panel lie on one ray (the panel azimuth)
+//-----------------------------------------------------------------------------
+PanelGeometry panelGeometry(const TEvdTracker* Tracker, int Plane, int Panel) {
+  const double kPanelPhi = 120.;                  // degrees, as the tracker support parts
+  const double rOut      = Tracker->fTrkPtr->strawProperties().strawOuterRadius();
+
+  const mu2e::Panel& panel = Tracker->fTrkPtr->planes().at(Plane).getPanel(Panel);
+  const auto& s0 = panel.getStraw(0).getMidPoint();
+  const auto& s1 = panel.getStraw(1).getMidPoint();
+  const auto& s2 = panel.getStraw(2).getMidPoint();
+
+  double r0           = std::hypot(s0.x(),s0.y());
+  double pitch        = std::hypot(s2.x(),s2.y()) - r0;          // straw spacing within a layer
+  double shift        = std::hypot(s1.x(),s1.y()) - r0;          // offset of layer 1
+  const int nPerLayer = 96/2;                                    // 96 straws per panel
+
+  double phiC = std::atan2(s0.y(),s0.x())*TMath::RadToDeg();
+
+  PanelGeometry g;
+  g.rin  = r0 - rOut;                                              // innermost straw - straw radius
+  g.rout = r0 + (nPerLayer-1)*pitch + std::max(shift,0.) + rOut;   // outermost straw + straw radius
+  g.dz   = 0.5*std::abs(s1.z()-s0.z()) + rOut;                     // thin in z
+  g.phi1 = phiC - 0.5*kPanelPhi;
+  g.phi2 = phiC + 0.5*kPanelPhi;
+  g.zc   = 0.5*(s0.z()+s1.z());
+  return g;
 }
 
 //-----------------------------------------------------------------------------
-TEvdPanel::TEvdPanel(const char* Name, double Rout, double Dz, double Phi1, double Phi2,
-                     TGeoMedium* Medium, int Color, int Transparency):
-  TEvdSubdetector(Name, panelShape(Name,Rout,Dz,Phi1,Phi2), Medium, Color, Transparency)
+TEvdPanel::TEvdPanel(TEvdTracker* Tracker, int Plane, int Panel, bool CreateStraws):
+  TEvdPanel(panelName(Plane,Panel).c_str(), panelGeometry(Tracker,Plane,Panel),
+            gGeoManager->GetMedium("TrackerStraw"), kGray)
+{
+  // tracker local frame -> parent frame, as in TTrkVisNode::trackPoints
+  const double kDX = -3904.;
+  const double kDZ = 22935.;
+
+  const PanelGeometry g = panelGeometry(Tracker,Plane,Panel);
+  TGeoMedium* medium    = gGeoManager->GetMedium("TrackerStraw");
+  const double rOut     = Tracker->fTrkPtr->strawProperties().strawOuterRadius();
+
+  Tracker->AddNode(this,Plane*100+Panel+1,new TGeoTranslation(kDX,0.,kDZ+g.zc));
+  if (CreateStraws) {
+    const mu2e::Panel& panel = Tracker->fTrkPtr->planes().at(Plane).getPanel(Panel);
+    AddStraws(panel, Tracker->fTrkPtr->strawProperties().strawInnerRadius(), rOut, g.zc, medium);
+  }
+  Tracker->fListOfSubdetectors->Add(this);
+}
+
+//-----------------------------------------------------------------------------
+TEvdPanel::TEvdPanel(const char* Name, const PanelGeometry& Geometry,
+                     TGeoMedium* Medium, int Color):
+  TEvdSubdetector(Name, panelShape(Name,Geometry.rin,Geometry.rout,Geometry.dz,Geometry.phi1,Geometry.phi2),
+                  Medium, Color, 0)
 {
   fNumber = -1;
   fPlane  = nullptr;
@@ -51,6 +113,13 @@ TEvdPanel::TEvdPanel(const char* Name, double Rout, double Dz, double Phi1, doub
   fPhi    = 0.;
 }
 
+
+//-----------------------------------------------------------------------------
+// the transparency is set on the solid, the first node of the panel volume
+//-----------------------------------------------------------------------------
+void TEvdPanel::SetPanelTransparency(int Transparency) {
+  GetNode(0)->GetVolume()->ResetTransparency(Transparency);   // per volume: the medium is shared
+}
 
 //-----------------------------------------------------------------------------
 // needs to be called after  TEvemanager has been initialized
@@ -96,14 +165,14 @@ void TEvdPanel::InitStraw(int straw, int StrawID, int Plane, int Panel, int Laye
 
 //-----------------------------------------------------------------------------
 void TEvdPanel::AddStraws(const mu2e::Panel& Panel, double StrawInnerRadius, double StrawOuterRadius,
-                          double ZCenter, TGeoMedium* Medium) {
+                          double ZCenter, TGeoMedium* Medium, bool Visible, int Transparency) {
   std::string panelName(GetName());
   for (int is = 0; is < (int) Panel.nStraws(); ++is) {
     const mu2e::Straw& straw = Panel.getStraw(is);
     std::string name = std::format("{}_straw_{}", panelName, is);
 
     murat::TEvdStraw* evd_straw = new murat::TEvdStraw(name.c_str(), StrawInnerRadius, StrawOuterRadius,
-                                                       straw.halfLength(), Medium);
+                                                       straw.halfLength(), Medium, Visible, Transparency);
     auto m = straw.getMidPoint();
     auto d = straw.strawDirection();
     const auto& sid = straw.id();
@@ -113,7 +182,10 @@ void TEvdPanel::AddStraws(const mu2e::Panel& Panel, double StrawInnerRadius, dou
     // the tube axis follows the straw direction
     double theta = std::acos(std::clamp(d.z(), -1., 1.))*TMath::RadToDeg();
     double phi   = std::atan2(d.y(), d.x())*TMath::RadToDeg();
-    TGeoRotation* rot = new TGeoRotation(name.c_str(), phi, theta, 0.);
+    // Rz(phi)*Ry(theta) maps the tube axis (z) onto the direction (sin theta cos phi, sin theta sin phi, cos theta)
+    TGeoRotation* rot = new TGeoRotation();
+    rot->RotateY(theta);
+    rot->RotateZ(phi);
 
     AddNode(evd_straw, is+1, new TGeoCombiTrans(m.x(), m.y(), m.z()-ZCenter, rot));
   }

@@ -3,7 +3,9 @@
 #define __murat_gui_TEvdTracker__
 
 #include "Offline/TrackerGeom/inc/Tracker.hh"
+
 #include "murat/gui/TEvdStation.hh"
+#include "murat/gui/TEvdPanel.hh"
 #include "murat/gui/TEvdSubdetector.hh"
 
 namespace murat {
@@ -19,9 +21,7 @@ public:
 
   TEvdTracker();
 
-  TEvdPanel* Panel(int Station, int Plane, int Panel) {
-    return fStation[Station]->fPlane[Plane]->fPanel[Panel];
-  }
+  TEvdPanel*   Panel(int Station, int Plane, int Panel);
 
   virtual int  InitEvent   ()               override;
   virtual int  InitGeometry(const char* Fn) override;

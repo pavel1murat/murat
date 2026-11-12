@@ -2,6 +2,9 @@
 // a view showing a single tracker panel, see murat/gui/gui/TEvdPanelView.hh
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+#include <string>
+
 #include "murat/gui/TEvdPanelView.hh"
 
 namespace murat {
@@ -12,6 +15,8 @@ TEvdPanelView::TEvdPanelView(const char* Name, TGLViewer::ECameraType Type) :
   fPlane(-1),
   fPanel(-1)
 {
+  fPanelNode = new TPanelVisNode((std::string(Name)+"_node").c_str());
+  AddNode(fPanelNode);
 }
 
 //-----------------------------------------------------------------------------
@@ -25,13 +30,10 @@ int TEvdPanelView::SetPanel(int Plane, int Panel) {
 
   fPlane = Plane;
   fPanel = Panel;
+  fPanelNode->SetPanel(Plane,Panel);
   return 0;
 }
 
-//-----------------------------------------------------------------------------
-// drawing of the panel is not implemented yet
-//-----------------------------------------------------------------------------
-void TEvdPanelView::Draw(Option_t* Opt) {
-}
+
 
 }

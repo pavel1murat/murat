@@ -31,7 +31,7 @@ namespace murat {
     TGeoVolume* vol = new TGeoVolume(Name,Shape,Medium);
     vol->SetLineColor(Color);
     vol->SetFillColor(Color);
-    vol->SetTransparency(Transparency);
+    vol->ResetTransparency(Transparency);   // per volume: the medium (material) is shared
     AddNode(vol,1,new TGeoRotation());
   }
 

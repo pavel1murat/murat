@@ -4,7 +4,7 @@
 
 #include "TMarker.h"
 #include "TCanvas.h"
-#include "TPolyLine3D.h"
+#include "TGeoVolume.h"
 
 namespace mu2e {
   class ComboHit;                       // for now, prototyping interfaces
@@ -15,7 +15,7 @@ class TStrawDigi;
 
 namespace murat {
 //-----------------------------------------------------------------------------
-class TComboHitEvd: public TPolyLine3D{
+class TComboHitEvd: public TGeoVolume {
 
 public:
   float   fX;
@@ -60,8 +60,8 @@ public:
   float  Z()    { return fZ; }
   
 public:
-  TComboHitEvd(TComboHit* Ch, int TrackFlag = 0);
-  TComboHitEvd(float X, float Y, float Z, float T, float EDep, int Pdg, float P);
+  // tube along the wire of the hit: radius range [RMin,RMax], half-length the resolution along the wire
+  TComboHitEvd(TComboHit* Ch, double RMin, double RMax, TGeoMedium* Medium);
 
   virtual ~TComboHitEvd() {}
 

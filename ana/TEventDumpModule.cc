@@ -326,10 +326,10 @@ int TEventDumpModule::PrintTracks() {
 //-----------------------------------------------------------------------------
 // calorimeter view
 //-----------------------------------------------------------------------------
-    TEvdCaloNode* node = new TEvdCaloNode("calo_node");
-    TEvdCaloView* view = new TEvdCaloView("calo_view",TGLViewer::kCameraOrthoXOY);
-    view->AddNode(node);
-    vm->AddView(view);
+    // TEvdCaloNode* node = new TEvdCaloNode("calo_node");
+    // TEvdCaloView* view = new TEvdCaloView("calo_view",TGLViewer::kCameraOrthoXOY);
+    // view->AddNode(node);
+    // vm->AddView(view);
 //-----------------------------------------------------------------------------
 // 3D detector view
 //-----------------------------------------------------------------------------

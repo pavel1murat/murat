@@ -24,7 +24,9 @@ public:
 
   TEvdStraw(int I = -1);
   // straw volume: tube of the given radii and half-length; the solid is invisible for now
-  TEvdStraw(const char* Name, double InnerRadius, double OuterRadius, double HalfLength, TGeoMedium* Medium);
+  // Visible, Transparency: the tracker display hides its straws (100); other displays choose
+  TEvdStraw(const char* Name, double InnerRadius, double OuterRadius, double HalfLength, TGeoMedium* Medium,
+            bool Visible = false, int Transparency = 100);
   ~TEvdStraw();
   
   void Init(int Index, int Plane, int Panel, int Layer, double rho, double z, double nx, double ny, double HalfLength);

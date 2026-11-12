@@ -302,7 +302,8 @@ int TEvdManager::InitGeometry() {
   int TEvdManager::OpenPanelView(int Plane, int Panel) {
     TEvdPanelView* view = dynamic_cast<TEvdPanelView*>(FindView("panel"));
     if (view == nullptr) {
-      view = new TEvdPanelView("panel",TGLViewer::kCameraOrthoXOY);
+      view = new TEvdPanelView("panel",TGLViewer::kCameraOrthoZOY);   // along X: the panel frame
+      AddNode(view->GetPanelNode());    // the node is initialized with each new event
       AddView(view);
     }
 
@@ -311,14 +312,18 @@ int TEvdManager::InitGeometry() {
       TLOG(TLVL_ERROR) << std::format("invalid panel: plane:{} panel:{}, DO NOTHING.",Plane,Panel);
       return rc;
     }
+    view->GetPanelNode()->InitEvent();
 
     if (view->fOpen) {
       view->Update();
     }
     else {
-      // a canvas of its own in interactive mode, for the window of the panel view
+      // a canvas of its own for the window of the panel view: created in batch mode
+      //      gROOT->SetBatch(1);
       view->fCanvas = new TCanvas("panel_window","panel view",800,800);
-      view->Draw("ogl");
+      // gROOT->SetBatch(0);
+      //      view->Draw("ogl");
+      view->Draw("");
       view->SetOpen(true);
     }
     return 0;

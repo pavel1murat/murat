@@ -138,6 +138,10 @@ murat : {
         sdmcCollTag : "compressDidiMCs"
     }
 
+    PrintStrawStatus : { module_type:PrintStrawStatus
+        onlyFlagged            : false                 # print all straws; true: only the straws with a status flag
+    }
+
     PanelDtAna : { module_type:PanelDtAna
         chCollTag              : "makeSH"                # use combo hits
         shCollTag              : "makeSH"                # assume StrawHits have been written out
@@ -213,6 +217,7 @@ murat : { @table::murat
         GenpHist           : { @table::murat.GenpHist           }
         PanelDtAna         : { @table::murat.PanelDtAna         }
         StrawHitRecoAna    : { @table::murat.StrawHitRecoAna    }
+        PrintStrawStatus   : { @table::murat.PrintStrawStatus   }
     }
 }
 END_PROLOG

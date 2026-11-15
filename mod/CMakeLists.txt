@@ -70,3 +70,10 @@ install(TARGETS ${DumpGeometry} ${PanelDtAna})
 message( " --Stntuple/${subpkg}: CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
 
 install(DIRECTORY ${subpkg} DESTINATION include/murat)
+
+cet_build_plugin(PrintStrawStatus art::module LIBRARIES REG
+  Offline::DbService
+  Offline::DbTables
+  Offline::DataProducts
+  Offline::GeneralUtilities
+)

@@ -1,0 +1,27 @@
+# -*- mode:tcl -*- 
+#------------------------------------------------------------------------------
+# print straw status
+#------------------------------------------------------------------------------
+#include "Stntuple/fcl/stntuple_prologs.fcl"
+#include "murat/fcl/prolog.fcl"
+#include "Stntuple/fcl/stntuple_templates.fcl"
+
+#include "rundb/latest/calibration_set_v110.fcl"
+
+process_name: PrintStrawStatus
+
+source: {
+  module_type: RootInput 
+  maxEvents: 1
+}
+
+physics: {
+    analyzers: {
+        PrintStrawStatus: { @table::murat.analyzers.PrintStrawStatus
+            onlyFlagged : false
+        }
+    }
+
+    e1       : [PrintStrawStatus]
+    end_paths: [ e1   ]
+}

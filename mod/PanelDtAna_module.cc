@@ -233,7 +233,7 @@ void PanelDtAna::bookTimeCluster(TcHist& h, int selection, art::TFileDirectory& 
     }
   }
 
-  int nb  = 1000;
+  int nb   = 1000;
   int bin  = fRunInfo.max_ewtag/nb+1;
   
   for (int panel = 0; panel < nPanels; ++panel) {

@@ -20,6 +20,7 @@ namespace murat {
     int              run_number;        //
     int              duration;          // run duration, seconds
     int              max_ewtag;         // max event window tag
+    int              n_subruns;         // number of events per subrun
     int              run_type;          // 1:beam 2:cosmics 3:internal_pulser
                                         // 4:pulse_injection 5:noise 100:MC
     int              event_mode;        // on/off spill

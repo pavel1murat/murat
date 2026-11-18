@@ -2,29 +2,26 @@
 #------------------------------------------------------------------------------
 # copy , use -s or -S and -o
 #------------------------------------------------------------------------------
-#include "fcl/minimalMessageService.fcl"
-#include "fcl/standardProducers.fcl"
-#include "fcl/standardServices.fcl"
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
 
 process_name: copy
 
 source: {
     module_type: RootInput
-    fileNames: ["g4data_cb000101.04861x0000.tcalm002_051_merged.root"]
+    compactEventRanges : true
+    fileNames: [ "/data/mu2e/mu2etrk/datasets/kpp00s003r109n000/raw.mu2e.kpp00s003r109n000.filter_tc_only_r109.125472_000001.art" ]
     maxEvents: -1
 }
 
-services: {
-    message: @local::default_message
+outputs: {
 
-    scheduler: { defaultExceptions : false }
-
-    user : {
-        GeometryService        : { inputFile      : "Mu2eG4/test/geom_01_vane.txt"       }
-        ConditionsService      : { conditionsfile : "Mu2eG4/test/conditions_01.txt"      }
-        GlobalConstantsService : { inputFile      : "Mu2eG4/test/globalConstants_01.txt" }
-        G4Helper               : { }
-#        SeedService            : @local::automaticSeeds
+    outfile : {
+	module_type    : RootOutput
+	fileName       : "raw.mu2e.kpp00s003r109n000.filter_tc_only_r109.125472_000001.art"
+	fastCloning    : false
+	outputCommands : [ "keep *_*_*_*" ]
     }
 }
 
@@ -32,19 +29,9 @@ physics: {
 #------------------------------------------------------------------------------
 # paths
 #------------------------------------------------------------------------------
-    p1 : []
+    p1 : [ ]
     e1 : [ outfile ]
 
-    trigger_paths  : [p1]
-    end_paths      : [e1]
-}
-
-outputs: {
-
-    outfile : {
-	module_type    : RootOutput
-	fileName       : "g4data_cb000101.04861x0000.tcalm002_051_merged_resim.root"
-	fastCloning    : false
-	outputCommands : [ "keep *_*_*_*" ]
-    }
+    trigger_paths  : [ p1 ]
+    end_paths      : [ e1 ]
 }

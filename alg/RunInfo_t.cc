@@ -34,6 +34,7 @@ int RunInfo_t::GetFromRunDb(int RunNumber,int PrintLevel) {
 
   run_number     = pset.get<int>             ("run_number");
   max_ewtag      = pset.get<int>             ("max_ewtag");
+  n_subruns      = pset.get<int>             ("n_subruns");
 
   std::string dur_str = pset.get<std::string> ("duration");   // "hh:mm:ss" in the file
   duration       = DurationToSeconds(dur_str);                // stored in seconds

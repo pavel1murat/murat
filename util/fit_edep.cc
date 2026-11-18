@@ -20,21 +20,31 @@ auto* hp = h1->ProjectionY("py",1,1);
 
 
 //-----------------------------------------------------------------------------
-double fit_edep::fit_function(double* X, double* P) {
-    double f = 0;
-    
-    double x = X[0];
-    
-    if (x < P[1]) {
-      f = 0;
-    }
-    else {
-      f = P[0]*(1-exp(-(x-P[1])/P[2]))*exp(-(x-P[1])/P[3]);
-    }
+double fit_edep::fit_fun1(double* X, double* P) {
+  double f = 0;
   
-    return f;
+  double x = X[0];
+  
+  if (x < P[1]) {
+    f = 0;
+  }
+  else {
+    f = P[0]*(1-exp(-(x-P[1])/P[2]))*exp(-(x-P[1])/P[3]);
   }
   
+  return f;
+}
+  
+//-----------------------------------------------------------------------------
+double fit_edep::fit_fun2(double* X, double* P) {
+  double f = 0;
+  double dx1 = (X[0]-P[1])*P[2];
+  double dx2 = (X[0]-P[1])*P[3];
+  
+  double f = P[0]*TMath::Exp(-(dx1+TMath::Exp(-dx2))/2);
+  return f;
+}
+
 //-----------------------------------------------------------------------------
 // different from the caller, channel number if within the panel , 0 <= channel < 96
 // 'Panel = -1 : all panels

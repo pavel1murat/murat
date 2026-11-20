@@ -42,7 +42,8 @@ public:
 
   void plot_summary_histograms();
 
-  static double fit_function(double* X, double* P);
+  static double fit_fun1(double* X, double* P);
+  static double fit_fun2(double* X, double* P);
 };
 
 #endif

@@ -41,7 +41,7 @@ double fit_edep::fit_fun2(double* X, double* P) {
   double dx1 = (X[0]-P[1])*P[2];
   double dx2 = (X[0]-P[1])*P[3];
   
-  double f = P[0]*TMath::Exp(-(dx1+TMath::Exp(-dx2))/2);
+  f = P[0]*TMath::Exp(-(dx1+TMath::Exp(-dx2))/2);
   return f;
 }
 
@@ -51,14 +51,13 @@ double fit_edep::fit_fun2(double* X, double* P) {
 //-----------------------------------------------------------------------------
 void fit_edep::fit_histogram(TH1* Hist, const char* FitOpt, double XMin, double XMax, fit_result_t* Fr) {
 
-  f_fit = new TF1("f_fit",fit_function,0,0.01,4);
+  f_fit = new TF1("f_fit",fit_fun2,0,0.01,3);
 //-----------------------------------------------------------------------------
-// perform fit
+// perform fit with Gumbel 
 //-----------------------------------------------------------------------------
   f_fit->SetParameter(0,2500);
   f_fit->SetParameter(1,0.0002);
-  f_fit->SetParameter(2,0.0003);
-  f_fit->SetParameter(3,0.0013);
+  f_fit->SetParameter(2,5000);
 
   TFitResultPtr tfr = Hist->Fit(f_fit,FitOpt,"",XMin,XMax);
   
